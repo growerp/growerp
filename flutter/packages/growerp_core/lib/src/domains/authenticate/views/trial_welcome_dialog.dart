@@ -15,6 +15,8 @@
 import 'package:flutter/material.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import 'package:growerp_core/growerp_core.dart';
+
 /// Welcomes new tenant admins, showing company/user info and trial period.
 /// Shown once after tenant setup completes.
 class TrialWelcomeDialog extends StatelessWidget {
@@ -24,6 +26,7 @@ class TrialWelcomeDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     final userName =
         '${authenticate.user?.firstName ?? ''} ${authenticate.user?.lastName ?? ''}'
             .trim();
@@ -43,10 +46,10 @@ class TrialWelcomeDialog extends StatelessWidget {
             color: Theme.of(context).colorScheme.primary,
             size: 32,
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Welcome to GrowERP!',
+              CoreLocalizations.of(context)!.welcomeToGrowerp,
               style: Theme.of(context)
                   .textTheme
                   .headlineSmall
@@ -75,7 +78,7 @@ class TrialWelcomeDialog extends StatelessWidget {
                       Icon(Icons.business,
                           color: Theme.of(context).colorScheme.primary,
                           size: 20),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           companyName,
@@ -87,13 +90,13 @@ class TrialWelcomeDialog extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Row(
                     children: [
                       Icon(Icons.person,
                           color: Theme.of(context).colorScheme.secondary,
                           size: 20),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           userName.isNotEmpty ? userName : 'Administrator',
@@ -103,13 +106,13 @@ class TrialWelcomeDialog extends StatelessWidget {
                     ],
                   ),
                   if (userEmail.isNotEmpty) ...[
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                     Row(
                       children: [
                         Icon(Icons.email_outlined,
                             color: Theme.of(context).colorScheme.tertiary,
                             size: 20),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             userEmail,
@@ -129,7 +132,7 @@ class TrialWelcomeDialog extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             // Trial period info
             Container(
               padding: const EdgeInsets.all(16),
@@ -150,7 +153,7 @@ class TrialWelcomeDialog extends StatelessWidget {
                 children: [
                   Icon(Icons.access_time,
                       color: Theme.of(context).colorScheme.primary),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,12 +182,12 @@ class TrialWelcomeDialog extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Text(
-              'Full access to all features:',
+              CoreLocalizations.of(context)!.fullAccessToAllFeatures,
               style: Theme.of(context).textTheme.titleSmall,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             const Text(
               '✓ Manage products and inventory\n'
               '✓ Process orders and invoices\n'
@@ -192,7 +195,7 @@ class TrialWelcomeDialog extends StatelessWidget {
               '✓ Generate reports and analytics',
               style: TextStyle(height: 1.6),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Text(
               'No credit card required during trial.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -209,7 +212,7 @@ class TrialWelcomeDialog extends StatelessWidget {
           key: const Key('startTrial'),
           onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.rocket_launch),
-          label: const Text('Get Started'),
+          label: Text(CoreLocalizations.of(context)!.getStarted),
         ),
       ],
     );

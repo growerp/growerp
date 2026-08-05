@@ -17,6 +17,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../../growerp_core.dart';
 
+import 'package:growerp_core/growerp_core.dart';
+
 /// Generic Splash Screen that handles authentication state and menu loading.
 ///
 /// This widget:
@@ -75,6 +77,7 @@ class _AppSplashScreenState extends State<AppSplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, authState) {
         if (authState.status == AuthStatus.authenticated) {
@@ -117,32 +120,32 @@ class _AppSplashScreenState extends State<AppSplashScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Icon(Icons.error_outline, color: Colors.red, size: 48),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         Text(
-          'Failed to load menu configuration',
+          CoreLocalizations.of(context)!.failedToLoadMenuConfiguration,
           style: Theme.of(context).textTheme.titleLarge,
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         Text(
           menuState.message ?? 'Unknown error',
           style: const TextStyle(color: Colors.red),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24),
         ElevatedButton(
           onPressed: () {
             context.read<MenuConfigBloc>().add(
               const MenuConfigLoad(userVersion: true),
             );
           },
-          child: const Text('Retry'),
+          child: Text(CoreLocalizations.of(context)!.retry),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         TextButton(
           onPressed: () {
             context.read<AuthBloc>().add(const AuthLoggedOut());
           },
-          child: const Text('Logout'),
+          child: Text(CoreLocalizations.of(context)!.logout),
         ),
       ],
     );
@@ -153,7 +156,7 @@ class _AppSplashScreenState extends State<AppSplashScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const CircularProgressIndicator(),
-        const SizedBox(height: 24),
+        SizedBox(height: 24),
         Text(
           'Loading Menu Configuration...',
           style: Theme.of(context).textTheme.titleLarge,

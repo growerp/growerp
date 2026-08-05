@@ -21,6 +21,8 @@ import '../constant.dart';
 import 'reload_web_stub.dart'
     if (dart.library.js_interop) 'reload_web_web.dart';
 
+import 'package:growerp_core/growerp_core.dart';
+
 bool get _isLinux {
   if (kIsWeb) return false;
   try {
@@ -86,6 +88,7 @@ class ForceUpdateDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     final theme = Theme.of(context);
 
     return PopScope(
@@ -99,10 +102,10 @@ class ForceUpdateDialog extends StatelessWidget {
               color: theme.colorScheme.primary,
               size: 28,
             ),
-            const SizedBox(width: 12),
-            const Expanded(
+            SizedBox(width: 12),
+            Expanded(
               child: Text(
-                'Update Required',
+                CoreLocalizations.of(context)!.updateRequired,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
@@ -113,10 +116,10 @@ class ForceUpdateDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'A new version of the app is available.',
+              CoreLocalizations.of(context)!.aNewVersionIsAvailable,
               style: theme.textTheme.bodyLarge,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -132,7 +135,7 @@ class ForceUpdateDialog extends StatelessWidget {
                     Icons.phone_android,
                     theme,
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   _buildVersionRow(
                     'Required version:',
                     forceUpdateInfo.minVersion ?? 'Latest',
@@ -142,15 +145,15 @@ class ForceUpdateDialog extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Text(
-              'Please update to continue using the app.',
+              CoreLocalizations.of(context)!.pleaseUpdateToContinue,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
             if (_isLinux) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
@@ -164,7 +167,7 @@ class ForceUpdateDialog extends StatelessWidget {
                       size: 20,
                       color: theme.colorScheme.onPrimaryContainer,
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     Expanded(
                       child: Text.rich(
                         TextSpan(
@@ -197,7 +200,7 @@ class ForceUpdateDialog extends StatelessWidget {
               key: const Key('updateNowButton'),
               onPressed: () => _launchUpdateUrl(),
               icon: const Icon(Icons.download),
-              label: const Text('Update Now'),
+              label: Text(CoreLocalizations.of(context)!.updateNow),
             ),
         ],
       ),
@@ -213,14 +216,14 @@ class ForceUpdateDialog extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, size: 18, color: theme.colorScheme.primary),
-        const SizedBox(width: 8),
+        SizedBox(width: 8),
         Text(
           label,
           style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(width: 4),
+        SizedBox(width: 4),
         Text(
           version,
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -252,6 +255,7 @@ class ForceUpdateScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     final theme = Theme.of(context);
 
     return PopScope(
@@ -277,20 +281,20 @@ class ForceUpdateScreen extends StatelessWidget {
                         size: 64,
                         color: theme.colorScheme.primary,
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: 24),
                       Text(
-                        'Update Required',
+                        CoreLocalizations.of(context)!.updateRequired,
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       Text(
-                        'A new version of the app is available.',
+                        CoreLocalizations.of(context)!.aNewVersionIsAvailable,
                         style: theme.textTheme.bodyLarge,
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: 24),
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -305,7 +309,7 @@ class ForceUpdateScreen extends StatelessWidget {
                               Icons.phone_android,
                               theme,
                             ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: 12),
                             _buildVersionRow(
                               'Required version:',
                               forceUpdateInfo.minVersion ?? 'Latest',
@@ -315,16 +319,16 @@ class ForceUpdateScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: 24),
                       Text(
-                        'Please update to continue using the app.',
+                        CoreLocalizations.of(context)!.pleaseUpdateToContinue,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                         textAlign: TextAlign.center,
                       ),
                       if (_isLinux) ...[
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16),
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
@@ -339,7 +343,7 @@ class ForceUpdateScreen extends StatelessWidget {
                                 size: 22,
                                 color: theme.colorScheme.onPrimaryContainer,
                               ),
-                              const SizedBox(width: 8),
+                              SizedBox(width: 8),
                               Flexible(
                                 child: Text.rich(
                                   TextSpan(
@@ -367,7 +371,7 @@ class ForceUpdateScreen extends StatelessWidget {
                         ),
                       ],
                       if (kIsWeb) ...[
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16),
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
@@ -382,10 +386,10 @@ class ForceUpdateScreen extends StatelessWidget {
                                 size: 22,
                                 color: theme.colorScheme.onPrimaryContainer,
                               ),
-                              const SizedBox(width: 8),
+                              SizedBox(width: 8),
                               Flexible(
                                 child: Text(
-                                  'Press CTRL-F5 to update\nor tap the button below.',
+                                  CoreLocalizations.of(context)!.pressCtrlF5ToUpdate,
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: theme.colorScheme.onPrimaryContainer,
@@ -396,12 +400,12 @@ class ForceUpdateScreen extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16),
                         FilledButton.icon(
                           key: const Key('updateNowButton'),
                           onPressed: () => reloadPage(),
                           icon: const Icon(Icons.refresh),
-                          label: const Text('Reload Now'),
+                          label: Text(CoreLocalizations.of(context)!.reloadNow),
                           style: FilledButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 32,
@@ -410,12 +414,12 @@ class ForceUpdateScreen extends StatelessWidget {
                           ),
                         ),
                       ] else if (!_isLinux) ...[
-                        const SizedBox(height: 24),
+                        SizedBox(height: 24),
                         FilledButton.icon(
                           key: const Key('updateNowButton'),
                           onPressed: () => _launchUpdateUrl(),
                           icon: const Icon(Icons.download),
-                          label: const Text('Update Now'),
+                          label: Text(CoreLocalizations.of(context)!.updateNow),
                           style: FilledButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 32,
@@ -445,14 +449,14 @@ class ForceUpdateScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(icon, size: 20, color: theme.colorScheme.primary),
-        const SizedBox(width: 8),
+        SizedBox(width: 8),
         Text(
           label,
           style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(width: 4),
+        SizedBox(width: 4),
         Text(
           version,
           style: theme.textTheme.bodyMedium?.copyWith(

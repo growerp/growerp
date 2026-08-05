@@ -20,10 +20,11 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_core/l10n/generated/core_localizations.dart';
 
 import '../../../domains/domains.dart';
 import '../../../extensions.dart';
+
+import 'package:growerp_core/growerp_core.dart';
 
 /// Dialog for handling subscription renewal and payment
 class PaymentSubscriptionDialog extends StatefulWidget {
@@ -119,11 +120,11 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                             ? Theme.of(context).colorScheme.primary
                             : Theme.of(context).colorScheme.error,
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           daysRemaining > 0
-                              ? 'Your trial expires in $daysRemaining days'
+                              ? CoreLocalizations.of(context)!.yourTrialExpiresInDaysremainingDays(daysRemaining.toString())
                               : 'Your subscription has expired',
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
@@ -131,14 +132,14 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 30),
+                SizedBox(height: 30),
 
                 // Plan Selection
                 Text(
-                  'Select a Plan',
+                  CoreLocalizations.of(context)!.selectAPlan,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 BlocBuilder<DataFetchBloc<Products>, DataFetchState<Products>>(
                   builder: (context, state) {
                     if (state.data is! Products ||
@@ -152,7 +153,7 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                             .compareTo(b.price ?? Decimal.zero),
                       );
                     if (products.isEmpty) {
-                      return const Text('No plans available');
+                      return Text(CoreLocalizations.of(context)!.noPlansAvailable);
                     }
                     if (_selectedPlan == null) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -166,7 +167,7 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                     return Column(
                       children: [
                         for (int i = 0; i < products.length; i++) ...[
-                          if (i > 0) const SizedBox(height: 12),
+                          if (i > 0) SizedBox(height: 12),
                           _buildPlanOption(
                             products[i].productName ?? '',
                             products[i].productId,
@@ -182,7 +183,7 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                     );
                   },
                 ),
-                const SizedBox(height: 30),
+                SizedBox(height: 30),
 
                 // Payment Form
                 FormBuilder(
@@ -198,10 +199,10 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Payment Information',
+                        CoreLocalizations.of(context)!.paymentInformation,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       FormBuilderTextField(
                         key: const Key('nameOnCard'),
                         name: 'nameOnCard',
@@ -210,7 +211,7 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                         ),
                         validator: FormBuilderValidators.required(),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       FormBuilderTextField(
                         key: const Key('cardNumber'),
                         name: 'cardNumber',
@@ -222,7 +223,7 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                           FormBuilderValidators.creditCard(),
                         ]),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       Row(
                         children: [
                           Expanded(
@@ -240,7 +241,7 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                               ]),
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: 12),
                           Expanded(
                             child: FormBuilderTextField(
                               key: const Key('expireYear'),
@@ -254,7 +255,7 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                               ]),
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: 12),
                           Expanded(
                             child: FormBuilderTextField(
                               key: const Key('cvc'),
@@ -275,7 +276,7 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 30),
+                SizedBox(height: 30),
 
                 // Submit Button
                 Row(
@@ -286,23 +287,23 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                         onPressed: _isSubmitting
                             ? null
                             : () => Navigator.of(context).pop(),
-                        child: Text(localizations?.cancel ?? 'Cancel'),
+                        child: Text(CoreLocalizations.of(context)!.cancel),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    SizedBox(width: 16),
                     Expanded(
                       child: ElevatedButton(
                         key: const Key('pay'),
                         onPressed: _isSubmitting ? null : _handleSubscribe,
                         child: _isSubmitting
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 20,
                                 height: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Text('Subscribe Now'),
+                            : Text(CoreLocalizations.of(context)!.subscribeNow),
                       ),
                     ),
                   ],
@@ -350,7 +351,7 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                   ? Theme.of(context).colorScheme.primary
                   : Theme.of(context).colorScheme.onSurface,
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -363,7 +364,7 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8),
                       Text(
                         price,
                         style: Theme.of(context).textTheme.titleMedium
@@ -374,7 +375,7 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   Text(
                     description,
                     style: Theme.of(context).textTheme.bodySmall,

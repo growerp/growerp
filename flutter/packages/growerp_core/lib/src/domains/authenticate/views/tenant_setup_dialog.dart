@@ -18,9 +18,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_core/l10n/generated/core_localizations.dart';
 
 import '../../../domains/domains.dart';
+
+import 'package:growerp_core/growerp_core.dart';
 
 /// Dialog for collecting tenant setup information (company name, currency, demo data)
 /// This is shown to admin users after registration to complete tenant setup.
@@ -103,13 +104,13 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Column(
                     children: [
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20),
                       Text(
-                        'Please provide your company information to complete setup',
+                        CoreLocalizations.of(context)!.pleaseProvideYourCompanyInformationToCom,
                         style: Theme.of(context).textTheme.bodyLarge,
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 30),
+                      SizedBox(height: 30),
 
                       // Company Name
                       FormBuilderTextField(
@@ -122,15 +123,15 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
                             : kDebugMode
                             ? 'Company ${widget.authenticate.user?.email?.split('@').first ?? ''}'
                             : null,
-                        decoration: const InputDecoration(
-                          labelText: 'Company Name',
+                        decoration: InputDecoration(
+                                labelText: CoreLocalizations.of(context)!.enterCompanyName,
                         ),
                         validator: FormBuilderValidators.compose([
                           FormBuilderValidators.required(),
                           FormBuilderValidators.minLength(3),
                         ]),
                       ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20),
 
                       // Currency Selection
                       if (_isLoadingCurrencies)
@@ -170,7 +171,7 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
                             return null;
                           },
                         ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20),
 
                       // Demo Data Checkbox (only in debug mode or if explicitly shown)
                       if ((!kReleaseMode ||
@@ -182,18 +183,18 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
                           name: 'demoData',
                           initialValue: _demoData,
                           title: Text(
-                            'Load Demo Data',
+                            CoreLocalizations.of(context)!.loadDemoData,
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           subtitle: Text(
-                            'Populate your system with sample data for testing',
+                            CoreLocalizations.of(context)!.populateYourSystemWithSampleDataForTesti,
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           onChanged: (value) {
                             setState(() => _demoData = value ?? false);
                           },
                         ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20),
                     ],
                   ),
                 ),
@@ -211,23 +212,23 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
                         onPressed: _isSubmitting
                             ? null
                             : () => Navigator.of(context).pop(),
-                        child: Text(localizations?.cancel ?? 'Cancel'),
+                        child: Text(CoreLocalizations.of(context)!.cancel),
                       ),
                     ),
-                    const SizedBox(width: 20),
+                    SizedBox(width: 20),
                     Expanded(
                       child: ElevatedButton(
                         key: const Key('submit'),
                         onPressed: _isSubmitting ? null : _handleSubmit,
                         child: _isSubmitting
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 20,
                                 height: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Text('Complete Setup'),
+                            : Text(CoreLocalizations.of(context)!.completeSetup),
                       ),
                     ),
                   ],

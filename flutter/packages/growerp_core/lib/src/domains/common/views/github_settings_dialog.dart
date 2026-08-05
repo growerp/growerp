@@ -18,6 +18,8 @@ import 'package:growerp_models/growerp_models.dart';
 import '../functions/functions.dart';
 import '../widgets/widgets.dart';
 
+import 'package:growerp_core/growerp_core.dart';
+
 /// Edits the tenant's GitHub token + repository (used by the ADK GithubTool).
 /// Read-modify-write: loads the full [SystemSettings] and resends the complete
 /// payload (preserving the email/store fields, whose default-valued params would
@@ -129,6 +131,7 @@ class _GithubSettingsDialogState extends State<GithubSettingsDialog> {
 
   @override
   Widget build(BuildContext context) {
+
     return Dialog(
       key: const Key('GithubSettingsDialog'),
       insetPadding: const EdgeInsets.all(10),
@@ -157,7 +160,7 @@ class _GithubSettingsDialogState extends State<GithubSettingsDialog> {
                                 color: Theme.of(context).colorScheme.outline,
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16),
                             TextFormField(
                               key: const Key('githubToken'),
                               controller: _githubTokenCtrl,
@@ -183,7 +186,7 @@ class _GithubSettingsDialogState extends State<GithubSettingsDialog> {
                                 }
                               },
                             ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: 12),
                             TextFormField(
                               key: const Key('githubRepository'),
                               controller: _githubRepoCtrl,
@@ -197,7 +200,7 @@ class _GithubSettingsDialogState extends State<GithubSettingsDialog> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -206,20 +209,20 @@ class _GithubSettingsDialogState extends State<GithubSettingsDialog> {
                           onPressed: _isSaving
                               ? null
                               : () => Navigator.of(context).pop(),
-                          child: const Text('Cancel'),
+                          child: Text(CoreLocalizations.of(context)!.cancel),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         FilledButton(
                           key: const Key('saveGithubSettings'),
                           onPressed: _isSaving ? null : _save,
                           child: _isSaving
-                              ? const SizedBox(
+                              ? SizedBox(
                                   width: 16,
                                   height: 16,
                                   child:
                                       CircularProgressIndicator(strokeWidth: 2),
                                 )
-                              : const Text('Save'),
+                              : Text(CoreLocalizations.of(context)!.save),
                         ),
                       ],
                     ),

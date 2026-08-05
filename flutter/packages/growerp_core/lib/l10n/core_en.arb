@@ -1054,5 +1054,311 @@
   "chatMessageFetchFailure": "Failed to fetch messages",
   "@chatMessageFetchFailure": {
     "description": "BLoC message: Failed to fetch messages"
+  },
+  "routeNotFoundPath": "Route not found: {path}",
+  "@routeNotFoundPath": {
+    "description": "Route not found: {path} text",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "restoreDefaultMenu": "Restore default menu",
+  "@restoreDefaultMenu": {
+    "description": "Restore default menu text"
+  },
+  "restore": "Restore",
+  "@restore": {
+    "description": "Restore text"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry text"
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Close text"
+  },
+  "remindMeLater": "Remind Me Later",
+  "@remindMeLater": {
+    "description": "Remind Me Later text"
+  },
+  "subscribeNow": "Subscribe Now",
+  "@subscribeNow": {
+    "description": "Subscribe Now text"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save text"
+  },
+  "none": "None",
+  "@none": {
+    "description": "None text"
+  },
+  "starttls": "STARTTLS",
+  "@starttls": {
+    "description": "STARTTLS text"
+  },
+  "ssltls": "SSL/TLS",
+  "@ssltls": {
+    "description": "SSL/TLS text"
+  },
+  "imapsSecure": "IMAPS (secure)",
+  "@imapsSecure": {
+    "description": "IMAPS (secure) text"
+  },
+  "imap": "IMAP",
+  "@imap": {
+    "description": "IMAP text"
+  },
+  "pop3": "POP3",
+  "@pop3": {
+    "description": "POP3 text"
+  },
+  "systemDefault": "System default",
+  "@systemDefault": {
+    "description": "System default text"
+  },
+  "addProvider": "Add Provider",
+  "@addProvider": {
+    "description": "Add Provider text"
+  },
+  "updateNow": "Update Now",
+  "@updateNow": {
+    "description": "Update Now text"
+  },
+  "reloadNow": "Reload Now",
+  "@reloadNow": {
+    "description": "Reload Now text"
+  },
+  "skip": "Skip",
+  "@skip": {
+    "description": "Skip text"
+  },
+  "seeResult": "See result",
+  "@seeResult": {
+    "description": "See result text"
+  },
+  "getStarted": "Get Started",
+  "@getStarted": {
+    "description": "Get Started text"
+  },
+  "noPlansAvailable": "No plans available",
+  "@noPlansAvailable": {
+    "description": "No plans available text"
+  },
+  "completeSetup": "Complete Setup",
+  "@completeSetup": {
+    "description": "Complete Setup text"
+  },
+  "continueAction": "Continue",
+  "@continueAction": {
+    "description": "Continue text"
+  },
+  "subscriptionExpiringSoon": "Subscription Expiring Soon",
+  "@subscriptionExpiringSoon": {
+    "description": "Subscription Expiring Soon text"
+  },
+  "yourSubscriptionWillExpire": "Your subscription will expire in {daysRemaining} days...",
+  "@yourSubscriptionWillExpire": {
+    "description": "Your subscription will expire in {daysRemaining} days... text",
+    "placeholders": {
+      "daysRemaining": {
+        "type": "String"
+      }
+    }
+  },
+  "thisWipesAllYourMenuChanges": "This wipes all your menu changes and reloads the default. Continue?",
+  "@thisWipesAllYourMenuChanges": {
+    "description": "This wipes all your menu changes and reloads the default. Continue? text"
+  },
+  "updateRequired": "Update Required",
+  "@updateRequired": {
+    "description": "Update Required text"
+  },
+  "aNewVersionIsAvailable": "A new version of the app is available.",
+  "@aNewVersionIsAvailable": {
+    "description": "A new version of the app is available. text"
+  },
+  "systemSetup": "System Setup",
+  "@systemSetup": {
+    "description": "System Setup text"
+  },
+  "configureLlmProviderApiKeys": "Configure LLM provider API keys for your organisation",
+  "@configureLlmProviderApiKeys": {
+    "description": "Configure LLM provider API keys for your organisation text"
+  },
+  "companyDetails": "Company Details",
+  "@companyDetails": {
+    "description": "Company Details text"
+  },
+  "pleaseUpdateToContinue": "Please update to continue using the app.",
+  "@pleaseUpdateToContinue": {
+    "description": "Please update to continue using the app. text"
+  },
+  "pressCtrlF5ToUpdate": "Press CTRL-F5 to update\nor tap the button below.",
+  "@pressCtrlF5ToUpdate": {
+    "description": "Press CTRL-F5 to update\nor tap the button below. text"
+  },
+  "configureLlmProviderApiKeysGeminiOpenaiA": "Configure LLM provider API keys (gemini, openai, anthropic, …).",
+  "@configureLlmProviderApiKeysGeminiOpenaiA": {
+    "description": "Configure LLM provider API keys (gemini, openai, anthropic, …). text"
+  },
+  "loadDemoData": "Load Demo Data",
+  "@loadDemoData": {
+    "description": "Load Demo Data text"
+  },
+  "loadingMenuConfiguration": "Loading Menu Configuration...",
+  "@loadingMenuConfiguration": {
+    "description": "Loading Menu Configuration... text"
+  },
+  "welcomeToGrowerp": "Welcome to GrowERP!",
+  "@welcomeToGrowerp": {
+    "description": "Welcome to GrowERP! text"
+  },
+  "allYourDataWillBePreservedn": "• All your data will be preserved\\n",
+  "@allYourDataWillBePreservedn": {
+    "description": "• All your data will be preserved\\n text"
+  },
+  "nothingFoundAddSome": "nothing found, add some?",
+  "@nothingFoundAddSome": {
+    "description": "nothing found, add some? text"
+  },
+  "thanksYourAnswersAreSaved": "Thanks — your answers are saved",
+  "@thanksYourAnswersAreSaved": {
+    "description": "Thanks — your answers are saved text"
+  },
+  "shouldNeverShowBecauseThisFormIsOnlyUsed": "should never show because this form is only used for non authenticated",
+  "@shouldNeverShowBecauseThisFormIsOnlyUsed": {
+    "description": "should never show because this form is only used for non authenticated text"
+  },
+  "incomingImapPop3": "Incoming (IMAP / POP3)",
+  "@incomingImapPop3": {
+    "description": "Incoming (IMAP / POP3) text"
+  },
+  "toContinueUsingGrowerpWithoutInterruptio": "To continue using GrowERP without interruption, ",
+  "@toContinueUsingGrowerpWithoutInterruptio": {
+    "description": "To continue using GrowERP without interruption,  text"
+  },
+  "failedToLoadMenuConfiguration": "Failed to load menu configuration",
+  "@failedToLoadMenuConfiguration": {
+    "description": "Failed to load menu configuration text"
+  },
+  "growerp": "GrowERP ",
+  "@growerp": {
+    "description": "GrowERP  text"
+  },
+  "githubPersonalAccessTokenGithubtokenAnd": "GitHub personal access token (GITHUB_TOKEN) and ",
+  "@githubPersonalAccessTokenGithubtokenAnd": {
+    "description": "GitHub personal access token (GITHUB_TOKEN) and  text"
+  },
+  "fullAccessToAllFeatures": "Full access to all features:",
+  "@fullAccessToAllFeatures": {
+    "description": "Full access to all features: text"
+  },
+  "outgoingSmtp": "Outgoing (SMTP)",
+  "@outgoingSmtp": {
+    "description": "Outgoing (SMTP) text"
+  },
+  "recent": "Recent",
+  "@recent": {
+    "description": "Recent text"
+  },
+  "yourSubscriptionIsAboutToExpire": "Your subscription is about to expire",
+  "@yourSubscriptionIsAboutToExpire": {
+    "description": "Your subscription is about to expire text"
+  },
+  "noDataFound": "No data found",
+  "@noDataFound": {
+    "description": "No data found text"
+  },
+  "pleaseProvideYourCompanyInformationToCom": "Please provide your company information to complete setup",
+  "@pleaseProvideYourCompanyInformationToCom": {
+    "description": "Please provide your company information to complete setup text"
+  },
+  "selectAPlan": "Select a Plan",
+  "@selectAPlan": {
+    "description": "Select a Plan text"
+  },
+  "growerp1": "GrowERP",
+  "@growerp1": {
+    "description": "GrowERP text"
+  },
+  "menuConfigurationNotAvailable": "Menu configuration not available",
+  "@menuConfigurationNotAvailable": {
+    "description": "Menu configuration not available text"
+  },
+  "oauthCredentialsScopesCalendarreadonly": "OAuth credentials (scopes: calendar.readonly, ",
+  "@oauthCredentialsScopesCalendarreadonly": {
+    "description": "OAuth credentials (scopes: calendar.readonly,  text"
+  },
+  "paymentInformation": "Payment Information",
+  "@paymentInformation": {
+    "description": "Payment Information text"
+  },
+  "subscriptionExpiring": "Subscription Expiring!",
+  "@subscriptionExpiring": {
+    "description": "Subscription Expiring! text"
+  },
+  "remove": "Remove",
+  "@remove": {
+    "description": "Remove text"
+  },
+  "credentials": "Credentials",
+  "@credentials": {
+    "description": "Credentials text"
+  },
+  "populateYourSystemWithSampleDataForTesti": "Populate your system with sample data for testing",
+  "@populateYourSystemWithSampleDataForTesti": {
+    "description": "Populate your system with sample data for testing text"
+  },
+  "aiSettings": "AI Settings",
+  "@aiSettings": {
+    "description": "AI Settings text"
+  },
+  "we": "We\\",
+  "@we": {
+    "description": "We\\ text"
+  },
+  "aiNavigation": "AI Navigation",
+  "@aiNavigation": {
+    "description": "AI Navigation text"
+  },
+  "customizeYourExperience": "Customize your experience",
+  "@customizeYourExperience": {
+    "description": "Customize your experience text"
+  },
+  "manageProductsAndInventoryn": "✓ Manage products and inventory\\n",
+  "@manageProductsAndInventoryn": {
+    "description": "✓ Manage products and inventory\\n text"
+  },
+  "noCreditCardRequiredDuringTrial": "No credit card required during trial.",
+  "@noCreditCardRequiredDuringTrial": {
+    "description": "No credit card required during trial. text"
+  },
+  "couldNotLoadTheAssessment": "Could not load the assessment.",
+  "@couldNotLoadTheAssessment": {
+    "description": "Could not load the assessment. text"
+  },
+  "wellTailorYourMenuToMatchHowYourBusiness": "We'll tailor your menu to match how your business works, so you only see what you need.",
+  "@wellTailorYourMenuToMatchHowYourBusiness": {
+    "description": "We'll tailor your menu to match how your business works, so you only see what you need. text"
+  },
+  "mailServer": "Mail Server",
+  "@mailServer": {
+    "description": "Mail Server text"
+  },
+  "yourTrialExpiresInDaysremainingDays": "Your trial expires in {daysRemaining} days",
+  "@yourTrialExpiresInDaysremainingDays": {
+    "placeholders": {
+      "daysRemaining": {
+        "type": "String"
+      }
+    }
+  },
+  "yourTrialHasExpired": "Your trial has expired",
+  "@yourTrialHasExpired": {
+    "description": "Your trial has expired text"
   }
 }

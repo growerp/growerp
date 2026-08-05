@@ -43,7 +43,7 @@
   "enterCompanyName": "输入公司名称",
   "error": "错误",
   "errorMessage": "错误信息",
-  "expiryDate": "MM/YY",
+  "expiryDate": "月/年",
   "expiryDateHint": "12/25",
   "fieldRequired": "字段为必填项！",
   "firstName": "名",
@@ -246,5 +246,1007 @@
   "chatMessageSendFailure": "消息发送失败",
   "chatMessageDeleteSuccess": "消息删除成功",
   "chatMessageDeleteFailure": "消息删除失败",
-  "chatMessageFetchFailure": "获取消息失败"
+  "chatMessageFetchFailure": "获取消息失败",
+  "subscriptionExpiringSoon": "订阅即将到期",
+  "@subscriptionExpiringSoon": {
+    "description": "Subscription Expiring Soon text"
+  },
+  "yourSubscriptionWillExpire": "您的订阅将在 {daysRemaining} 天后过期...",
+  "@yourSubscriptionWillExpire": {
+    "description": "Your subscription will expire in {daysRemaining} days... text",
+    "placeholders": {
+      "daysRemaining": {
+        "type": "String"
+      }
+    }
+  },
+  "thisWipesAllYourMenuChanges": "这将擦除所有菜单更改并重新加载默认值。继续？",
+  "@thisWipesAllYourMenuChanges": {
+    "description": "This wipes all your menu changes and reloads the default. Continue? text"
+  },
+  "updateRequired": "需要更新",
+  "@updateRequired": {
+    "description": "Update Required text"
+  },
+  "aNewVersionIsAvailable": "该应用程序有新版本可用。",
+  "@aNewVersionIsAvailable": {
+    "description": "A new version of the app is available. text"
+  },
+  "systemSetup": "系统设置",
+  "@systemSetup": {
+    "description": "System Setup text"
+  },
+  "configureLlmProviderApiKeys": "为您的组织配置 LLM 提供商 API 密钥",
+  "@configureLlmProviderApiKeys": {
+    "description": "Configure LLM provider API keys for your organisation text"
+  },
+  "companyDetails": "公司详情",
+  "@companyDetails": {
+    "description": "Company Details text"
+  },
+  "pleaseUpdateToContinue": "请更新以继续使用该应用程序。",
+  "@pleaseUpdateToContinue": {
+    "description": "Please update to continue using the app. text"
+  },
+  "pressCtrlF5ToUpdate": "按 CTRL-F5 进行更新\n或点击下面的按钮。",
+  "@pressCtrlF5ToUpdate": {
+    "description": "Press CTRL-F5 to update\nor tap the button below. text"
+  },
+  "@aboutApp": {
+    "description": "About app dialog title",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "@aboutGrowERP": {
+    "description": "About GrowERP menu item"
+  },
+  "@accounts": {
+    "description": "Accounts menu item or section header"
+  },
+  "@addNew": {
+    "description": "Add new item button text"
+  },
+  "@andAtLeastOne": {
+    "description": "Partial validation message indicating minimum requirement"
+  },
+  "@backendServer": {
+    "description": "Backend server input label"
+  },
+  "@balanceSheet": {
+    "description": "Balance sheet report menu item"
+  },
+  "@balanceSummary": {
+    "description": "Balance summary report menu item"
+  },
+  "@businessCompanyName": {
+    "description": "Business name validation error message"
+  },
+  "@businessNameError": {
+    "description": "Business name validation error message"
+  },
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "@cannotLoadRestRequests": {
+    "description": "Error message when REST requests fail to load"
+  },
+  "@chat": {
+    "description": "Chat menu item"
+  },
+  "@chatServer": {
+    "description": "Chat server input label"
+  },
+  "@completeRegistration": {
+    "description": "Complete registration dialog title"
+  },
+  "@companyPartyId": {
+    "description": "Company party ID input label"
+  },
+  "@continueButton": {
+    "description": "Continue button text"
+  },
+  "@contributing": {
+    "description": "Contributing menu item"
+  },
+  "@copyright": {
+    "description": "Copyright text with year",
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "@create": {
+    "description": "Create button text"
+  },
+  "@createPassword": {
+    "description": "Create password dialog title"
+  },
+  "@creditCardDetails": {
+    "description": "Credit card details hint text"
+  },
+  "@creditCardInfo": {
+    "description": "Credit card info label"
+  },
+  "@currency": {
+    "description": "Currency input label"
+  },
+  "@currencyError": {
+    "description": "Currency validation error message"
+  },
+  "@currentPaymentMethod": {
+    "description": "Current payment method display text",
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "@customer": {
+    "description": "Label for customer"
+  },
+  "@cvvCode": {
+    "description": "CVV code input label"
+  },
+  "@cvvHint": {
+    "description": "CVV code input hint"
+  },
+  "@dateTime": {
+    "description": "Date and time label"
+  },
+  "@deleteWarning": {
+    "description": "Delete warning dialog title"
+  },
+  "@deleteYourself": {
+    "description": "Delete yourself button text"
+  },
+  "@deleteYourselfAndCompany": {
+    "description": "Delete yourself and company button text"
+  },
+  "@demoData": {
+    "description": "Demo data checkbox label"
+  },
+  "@email": {
+    "description": "Email input label"
+  },
+  "@emailAddress": {
+    "description": "Email address input label"
+  },
+  "@emailAddressError": {
+    "description": "Email address validation error message"
+  },
+  "@emailAddressError2": {
+    "description": "Email address format validation error message"
+  },
+  "@enterBackendUrl": {
+    "description": "Enter backend URL dialog title"
+  },
+  "@enterCompanyAndCurrency": {
+    "description": "Company and currency input instruction"
+  },
+  "@enterCompanyName": {
+    "description": "Company name input instruction"
+  },
+  "@error": {
+    "description": "Error status text"
+  },
+  "@errorMessage": {
+    "description": "Error message label"
+  },
+  "@expiryDate": {
+    "description": "Expiry date input label"
+  },
+  "@expiryDateHint": {
+    "description": "Expiry date input hint"
+  },
+  "@fieldRequired": {
+    "description": "Field required validation error message"
+  },
+  "@firstName": {
+    "description": "First name input label"
+  },
+  "@firstNameError": {
+    "description": "First name validation error message"
+  },
+  "@forgotPassword": {
+    "description": "Forgot password link text"
+  },
+  "@generateDemoData": {
+    "description": "Generate demo data checkbox text"
+  },
+  "@goHome": {
+    "description": "Go home button tooltip"
+  },
+  "@invoice": {
+    "description": "Label for invoice"
+  },
+  "@itemIsRequired": {
+    "description": "Validation message indicating a required item"
+  },
+  "@itemTypes": {
+    "description": "Item types menu item or section header"
+  },
+  "@journal": {
+    "description": "Journal menu item or section header"
+  },
+  "@lastName": {
+    "description": "Last name input label"
+  },
+  "@lastNameError": {
+    "description": "Last name validation error message"
+  },
+  "@login": {
+    "description": "Login button text"
+  },
+  "@loginName": {
+    "description": "Login name label"
+  },
+  "@loginWithExistingUserName": {
+    "description": "Login form header text for existing users"
+  },
+  "@logout": {
+    "description": "Logout button text"
+  },
+  "@main": {
+    "description": "Main menu item"
+  },
+  "@mainDashboard": {
+    "description": "Main dashboard menu item or navigation link"
+  },
+  "@ms": {
+    "description": "Milliseconds abbreviation"
+  },
+  "@nameOnCard": {
+    "description": "Name on card input label"
+  },
+  "@no": {
+    "description": "No answer text"
+  },
+  "@noAccess": {
+    "description": "No access error message"
+  },
+  "@noAccessHere": {
+    "description": "No access here error message"
+  },
+  "@noRestRequests": {
+    "description": "No REST requests message"
+  },
+  "@notAvailable": {
+    "description": "Not available placeholder text"
+  },
+  "@number": {
+    "description": "Number input label"
+  },
+  "@numberHint": {
+    "description": "Card number input hint"
+  },
+  "@ok": {
+    "description": "OK button text"
+  },
+  "@onlyUserDelete": {
+    "description": "Only delete user option text"
+  },
+  "@openInvoices": {
+    "description": "Label for open invoices dashboard item"
+  },
+  "@openSourceLicenses": {
+    "description": "Open source licenses menu item"
+  },
+  "@order": {
+    "description": "Label for order"
+  },
+  "@parameters": {
+    "description": "Parameters label"
+  },
+  "@password": {
+    "description": "Password input label"
+  },
+  "@passwordError": {
+    "description": "Password validation error message"
+  },
+  "@passwordError2": {
+    "description": "Password validation error message variant"
+  },
+  "@passwordHelper": {
+    "description": "Password helper text"
+  },
+  "@passwordMismatch": {
+    "description": "Password mismatch validation error"
+  },
+  "@passwordValidationError": {
+    "description": "Password validation error message"
+  },
+  "@payment": {
+    "description": "Label for payment"
+  },
+  "@paymentPlan": {
+    "description": "Payment plan input label"
+  },
+  "@paymentTypes": {
+    "description": "Payment types menu item or section header"
+  },
+  "@privacyCodeOfConduct": {
+    "description": "Privacy and code of conduct menu item"
+  },
+  "@referrerUrl": {
+    "description": "Referrer URL label"
+  },
+  "@refresh": {
+    "description": "Refresh button text"
+  },
+  "@register": {
+    "description": "Register button text"
+  },
+  "payNow": "立即付款",
+  "@payNow": {
+    "description": "Pay now button text"
+  },
+  "subscriptionExpired": "您的订阅已过期。请更新以继续。",
+  "@subscriptionExpired": {
+    "description": "Message shown when subscription has expired"
+  },
+  "@registerNewCompanyAndAdmin": {
+    "description": "Register new company link text"
+  },
+  "@registration": {
+    "description": "Registration dialog title"
+  },
+  "@requestName": {
+    "description": "Request name label"
+  },
+  "@requestUrl": {
+    "description": "Request URL label"
+  },
+  "@restart": {
+    "description": "Restart button text"
+  },
+  "@restRequestDetails": {
+    "description": "REST request details title"
+  },
+  "@revenueExpense": {
+    "description": "Revenue and expense report menu item"
+  },
+  "@runningTime": {
+    "description": "Running time label"
+  },
+  "@selectLanguage": {
+    "description": "Select language instruction"
+  },
+  "@selectPlanError": {
+    "description": "Select plan validation error message"
+  },
+  "@sendNewPassword": {
+    "description": "Send new password dialog title"
+  },
+  "@serverHost": {
+    "description": "Server host label"
+  },
+  "@serverIp": {
+    "description": "Server IP label"
+  },
+  "@shipment": {
+    "description": "Label for shipment"
+  },
+  "@slowHit": {
+    "description": "Slow hit label"
+  },
+  "@status": {
+    "description": "Status label"
+  },
+  "@submitNewPassword": {
+    "description": "Submit new password button text"
+  },
+  "@subscription": {
+    "description": "Subscription dialog title"
+  },
+  "@success": {
+    "description": "Success status text"
+  },
+  "@supplier": {
+    "description": "Label for supplier"
+  },
+  "@tempPassword": {
+    "description": "Temporary password information text"
+  },
+  "@test": {
+    "description": "Test menu item"
+  },
+  "@testSystem": {
+    "description": "Test system text"
+  },
+  "@theme": {
+    "description": "Theme menu item"
+  },
+  "colorScheme": "配色方案",
+  "@colorScheme": {
+    "description": "Color scheme picker dialog title"
+  },
+  "@timePeriods": {
+    "description": "Time periods menu item or section header"
+  },
+  "@transaction": {
+    "description": "Label for transaction"
+  },
+  "@transactions": {
+    "description": "Transactions menu item or section header"
+  },
+  "@trialPeriod": {
+    "description": "Trial period text"
+  },
+  "@unknown": {
+    "description": "Placeholder text for unknown values"
+  },
+  "@update": {
+    "description": "Update button text"
+  },
+  "@user": {
+    "description": "User label"
+  },
+  "@userAndCompanyDelete": {
+    "description": "Delete user and company option text"
+  },
+  "@username": {
+    "description": "Username display text",
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "@usernameEmail": {
+    "description": "Username or email input label"
+  },
+  "@usernameEmailError": {
+    "description": "Username/email validation error message"
+  },
+  "@verifyPassword": {
+    "description": "Verify password input label"
+  },
+  "@verifyPasswordError": {
+    "description": "Verify password validation error message"
+  },
+  "@verifyPasswordHelper": {
+    "description": "Verify password helper text"
+  },
+  "@version": {
+    "description": "Version display text",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "build": {
+        "type": "String"
+      }
+    }
+  },
+  "@viewLicense": {
+    "description": "View license menu item"
+  },
+  "@viewReadme": {
+    "description": "View readme menu item"
+  },
+  "@welcome": {
+    "description": "Welcome message"
+  },
+  "@welcomeToGrowERPBusinessSystem": {
+    "description": "Welcome message on home page"
+  },
+  "@yes": {
+    "description": "Yes answer text"
+  },
+  "@about": {
+    "description": "About menu item"
+  },
+  "@accounting": {
+    "description": "Accounting menu item"
+  },
+  "@accountingDashboard": {
+    "description": "Accounting dashboard menu item"
+  },
+  "@accountingLedger": {
+    "description": "Accounting ledger menu item"
+  },
+  "@accountingPurch": {
+    "description": "Accounting purchase menu item"
+  },
+  "@accountingSales": {
+    "description": "Accounting sales menu item"
+  },
+  "@administrators": {
+    "description": "Administrators label"
+  },
+  "@allOpportunities": {
+    "description": "All opportunities label"
+  },
+  "@assets": {
+    "description": "Assets menu item"
+  },
+  "@catalog": {
+    "description": "Catalog menu item"
+  },
+  "@categories": {
+    "description": "Categories menu item"
+  },
+  "@company": {
+    "description": "Company menu item"
+  },
+  "@crm": {
+    "description": "CRM menu item"
+  },
+  "@customers": {
+    "description": "Customers menu item"
+  },
+  "@employees": {
+    "description": "Employees menu item"
+  },
+  "@incomingInvoices": {
+    "description": "Incoming invoices menu item"
+  },
+  "@incomingPayments": {
+    "description": "Incoming payments menu item"
+  },
+  "@incomingShipments": {
+    "description": "Incoming shipments menu item"
+  },
+  "@inventory": {
+    "description": "Inventory menu item"
+  },
+  "@leads": {
+    "description": "Leads menu item"
+  },
+  "@ledgerAccnt": {
+    "description": "Ledger account menu item"
+  },
+  "@ledgerJournals": {
+    "description": "Ledger journals menu item"
+  },
+  "@ledgerTransaction": {
+    "description": "Ledger transaction menu item"
+  },
+  "@ledgerTree": {
+    "description": "Ledger tree menu item"
+  },
+  "@myTodoTasks": {
+    "description": "My todo tasks menu item"
+  },
+  "@opportunities": {
+    "description": "Opportunities menu item"
+  },
+  "@orders": {
+    "description": "Orders menu item"
+  },
+  "@organization": {
+    "description": "Organization menu item"
+  },
+  "@otherEmployees": {
+    "description": "Other employees label"
+  },
+  "@outgoingInvoices": {
+    "description": "Outgoing invoices menu item"
+  },
+  "@outgoingPayments": {
+    "description": "Outgoing payments menu item"
+  },
+  "@outgoingShipments": {
+    "description": "Outgoing shipments menu item"
+  },
+  "@paymtTypes": {
+    "description": "Payment types menu item"
+  },
+  "@planSelection": {
+    "description": "Plan selection menu item"
+  },
+  "@products": {
+    "description": "Products menu item"
+  },
+  "@purchaseOrders": {
+    "description": "Purchase orders menu item"
+  },
+  "@purchaseUnpaidInvoices": {
+    "description": "Purchase unpaid invoices label"
+  },
+  "@reports": {
+    "description": "Reports menu item"
+  },
+  "@requests": {
+    "description": "Requests menu item"
+  },
+  "@salesOpenInvoices": {
+    "description": "Sales open invoices label"
+  },
+  "@salesOrders": {
+    "description": "Sales orders menu item"
+  },
+  "@setUp": {
+    "description": "Set up menu item"
+  },
+  "@subscriptions": {
+    "description": "Subscriptions menu item"
+  },
+  "@suppliers": {
+    "description": "Suppliers menu item"
+  },
+  "@website": {
+    "description": "Website menu item"
+  },
+  "@whLocations": {
+    "description": "Warehouse locations menu item"
+  },
+  "@checkIn": {
+    "description": "Check in menu item"
+  },
+  "@checkOut": {
+    "description": "Check out menu item"
+  },
+  "@inOut": {
+    "description": "In/out menu item"
+  },
+  "@myHotel": {
+    "description": "My hotel menu item"
+  },
+  "@reservations": {
+    "description": "Reservations menu item"
+  },
+  "@rooms": {
+    "description": "Rooms menu item"
+  },
+  "@roomTypes": {
+    "description": "Room types menu item"
+  },
+  "@tasks": {
+    "description": "Tasks menu item"
+  },
+  "@myOpportunities": {
+    "description": "My opportunities menu item"
+  },
+  "@clients": {
+    "description": "Clients menu item"
+  },
+  "@staff": {
+    "description": "Staff menu item"
+  },
+  "@applications": {
+    "description": "Applications menu item"
+  },
+  "@restRequests": {
+    "description": "REST requests menu item"
+  },
+  "@userRequestStatus": {
+    "description": "REST request list column header for user/request/status"
+  },
+  "@authLoginSuccess": {
+    "description": "BLoC message: Login successful"
+  },
+  "@authLoginFailure": {
+    "description": "BLoC message: Login failed"
+  },
+  "@authLogoutSuccess": {
+    "description": "BLoC message: Logout successful"
+  },
+  "@authRegisterSuccess": {
+    "description": "BLoC message: Registration successful. You can now login with the password sent by email"
+  },
+  "@authRegisterFailure": {
+    "description": "BLoC message: Registration failed"
+  },
+  "@authPasswordResetSuccess": {
+    "description": "BLoC message: Password reset successful"
+  },
+  "@authPasswordResetFailure": {
+    "description": "BLoC message: Password reset failed"
+  },
+  "@authUpdateSuccess": {
+    "description": "BLoC message: Authentication updated successfully"
+  },
+  "@authUpdateFailure": {
+    "description": "BLoC message: Failed to update authentication"
+  },
+  "@notificationFetchSuccess": {
+    "description": "BLoC message: Notifications fetched successfully"
+  },
+  "@notificationFetchFailure": {
+    "description": "BLoC message: Failed to fetch notifications"
+  },
+  "@notificationMarkReadSuccess": {
+    "description": "BLoC message: Notification marked as read"
+  },
+  "@notificationMarkReadFailure": {
+    "description": "BLoC message: Failed to mark notification as read"
+  },
+  "@passwordChangeSuccess": {
+    "description": "BLoC message: Password changed successfully",
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "welcomeTitle": "欢迎来到GrowERP！",
+  "@welcomeTitle": {
+    "description": "Welcome page title for evaluation period"
+  },
+  "welcomeMessage": "欢迎，{name}！",
+  "@welcomeMessage": {
+    "description": "Personalized welcome message",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "evaluationPeriodMessage": "您有 {days} 天的免费评估期来探索所有功能。",
+  "@evaluationPeriodMessage": {
+    "description": "Evaluation period information message",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "evaluationPeriodDetails": "评估期间无需信用卡。评估完成后，您可以选择一个计划继续使用GrowERP。",
+  "@evaluationPeriodDetails": {
+    "description": "Detailed evaluation period explanation"
+  },
+  "startEvaluation": "开始评估",
+  "@startEvaluation": {
+    "description": "Button to start evaluation period"
+  },
+  "@chatNotActive": {
+    "description": "Error message when chat is not active"
+  },
+  "@messageText": {
+    "description": "Placeholder text for message input field"
+  },
+  "@send": {
+    "description": "Send button text"
+  },
+  "@addPartner": {
+    "description": "Button text to add chat partner"
+  },
+  "@chatRoomHeader": {
+    "description": "Chat header with number symbol"
+  },
+  "@newChat": {
+    "description": "Button text for creating new chat"
+  },
+  "@selectChatPartner": {
+    "description": "Instruction to select a chat partner"
+  },
+  "@chatPartner": {
+    "description": "Label for chat partner field"
+  },
+  "@chatFieldRequired": {
+    "description": "Generic required field error message"
+  },
+  "@chatCreate": {
+    "description": "Create button text"
+  },
+  "@chatUpdate": {
+    "description": "Update button text"
+  },
+  "@room": {
+    "description": "Label for room"
+  },
+  "@chatRoom": {
+    "description": "Chat room label or header"
+  },
+  "@chatUsersAndGroups": {
+    "description": "Section header for chat users and groups"
+  },
+  "@chatAddNew": {
+    "description": "Add new item button text"
+  },
+  "@chatNo": {
+    "description": "Partial text for 'no items found' messages"
+  },
+  "@sFound": {
+    "description": "Partial text for 'items found' messages"
+  },
+  "@searchInName": {
+    "description": "Placeholder text for name search field"
+  },
+  "@search": {
+    "description": "Search button text"
+  },
+  "@name": {
+    "description": "Name field label"
+  },
+  "@pvt": {
+    "description": "Abbreviation for Private"
+  },
+  "@nroMembers": {
+    "description": "Abbreviation for number of members"
+  },
+  "@allMessagesRead": {
+    "description": "Status message when all messages are read"
+  },
+  "@unreadMessages": {
+    "description": "Label for unread messages count"
+  },
+  "@chatRoomUpdateSuccess": {
+    "description": "BLoC message: Chat room updated successfully"
+  },
+  "@chatRoomUpdateFailure": {
+    "description": "BLoC message: Failed to update chat room"
+  },
+  "@chatRoomDeleteSuccess": {
+    "description": "BLoC message: Chat room deleted successfully"
+  },
+  "@chatRoomDeleteFailure": {
+    "description": "BLoC message: Failed to delete chat room"
+  },
+  "@chatRoomAddSuccess": {
+    "description": "BLoC message: Chat room added successfully"
+  },
+  "@chatRoomAddFailure": {
+    "description": "BLoC message: Failed to add chat room"
+  },
+  "@chatRoomFetchFailure": {
+    "description": "BLoC message: Failed to fetch chat rooms"
+  },
+  "@chatMessageSendSuccess": {
+    "description": "BLoC message: Message sent successfully"
+  },
+  "@chatMessageSendFailure": {
+    "description": "BLoC message: Failed to send message"
+  },
+  "@chatMessageDeleteSuccess": {
+    "description": "BLoC message: Message deleted successfully"
+  },
+  "@chatMessageDeleteFailure": {
+    "description": "BLoC message: Failed to delete message"
+  },
+  "@chatMessageFetchFailure": {
+    "description": "BLoC message: Failed to fetch messages"
+  },
+  "routeNotFoundPath": "未找到路线：{path}",
+  "@routeNotFoundPath": {
+    "description": "Route not found: {path} text",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "restoreDefaultMenu": "恢复默认菜单",
+  "@restoreDefaultMenu": {
+    "description": "Restore default menu text"
+  },
+  "restore": "恢复",
+  "@restore": {
+    "description": "Restore text"
+  },
+  "retry": "重试",
+  "@retry": {
+    "description": "Retry text"
+  },
+  "close": "关闭",
+  "@close": {
+    "description": "Close text"
+  },
+  "remindMeLater": "稍后提醒我",
+  "@remindMeLater": {
+    "description": "Remind Me Later text"
+  },
+  "subscribeNow": "立即订阅",
+  "@subscribeNow": {
+    "description": "Subscribe Now text"
+  },
+  "save": "节省",
+  "@save": {
+    "description": "Save text"
+  },
+  "none": "没有任何",
+  "@none": {
+    "description": "None text"
+  },
+  "starttls": "启动TLS",
+  "@starttls": {
+    "description": "STARTTLS text"
+  },
+  "ssltls": "SSL/TLS",
+  "@ssltls": {
+    "description": "SSL/TLS text"
+  },
+  "imapsSecure": "IMAPS（安全）",
+  "@imapsSecure": {
+    "description": "IMAPS (secure) text"
+  },
+  "imap": "IMAP",
+  "@imap": {
+    "description": "IMAP text"
+  },
+  "pop3": "POP3",
+  "@pop3": {
+    "description": "POP3 text"
+  },
+  "systemDefault": "系统默认",
+  "@systemDefault": {
+    "description": "System default text"
+  },
+  "addProvider": "添加提供商",
+  "@addProvider": {
+    "description": "Add Provider text"
+  },
+  "updateNow": "立即更新",
+  "@updateNow": {
+    "description": "Update Now text"
+  },
+  "reloadNow": "立即重新加载",
+  "@reloadNow": {
+    "description": "Reload Now text"
+  },
+  "skip": "跳过",
+  "@skip": {
+    "description": "Skip text"
+  },
+  "seeResult": "查看结果",
+  "@seeResult": {
+    "description": "See result text"
+  },
+  "getStarted": "开始使用",
+  "@getStarted": {
+    "description": "Get Started text"
+  },
+  "noPlansAvailable": "没有可用的计划",
+  "@noPlansAvailable": {
+    "description": "No plans available text"
+  },
+  "completeSetup": "完成设置",
+  "@completeSetup": {
+    "description": "Complete Setup text"
+  },
+  "continueAction": "继续",
+  "@continueAction": {
+    "description": "Continue text"
+  },
+  "configureLlmProviderApiKeysGeminiOpenaiA": "配置 LLM 提供商 API 密钥（gemini、openai、anthropic 等）。",
+  "loadDemoData": "加载演示数据",
+  "loadingMenuConfiguration": "正在加载菜单配置...",
+  "welcomeToGrowerp": "欢迎来到GrowERP！",
+  "allYourDataWillBePreservedn": "• 您的所有数据都将被保留\\n",
+  "nothingFoundAddSome": "没有找到任何内容，添加一些吗？",
+  "thanksYourAnswersAreSaved": "谢谢 - 您的答案已保存",
+  "shouldNeverShowBecauseThisFormIsOnlyUsed": "永远不应该显示，因为此表单仅用于未经身份验证的情况",
+  "incomingImapPop3": "传入（IMAP/POP3）",
+  "toContinueUsingGrowerpWithoutInterruptio": "要不间断地继续使用 GrowERP，",
+  "failedToLoadMenuConfiguration": "加载菜单配置失败",
+  "growerp": "成长ERP",
+  "githubPersonalAccessTokenGithubtokenAnd": "GitHub 个人访问令牌 (GITHUB_TOKEN) 和",
+  "fullAccessToAllFeatures": "完全访问所有功能：",
+  "outgoingSmtp": "传出（SMTP）",
+  "recent": "[ZH] Recent",
+  "yourSubscriptionIsAboutToExpire": "您的订阅即将到期",
+  "noDataFound": "没有找到数据",
+  "pleaseProvideYourCompanyInformationToCom": "请提供您的公司信息以完成设置",
+  "selectAPlan": "选择一个计划",
+  "growerp1": "成长ERP",
+  "menuConfigurationNotAvailable": "菜单配置不可用",
+  "oauthCredentialsScopesCalendarreadonly": "OAuth 凭证（范围：calendar.readonly、",
+  "paymentInformation": "付款信息",
+  "subscriptionExpiring": "订阅即将到期！",
+  "remove": "消除",
+  "credentials": "证书",
+  "populateYourSystemWithSampleDataForTesti": "使用示例数据填充您的系统以进行测试",
+  "aiSettings": "人工智能设置",
+  "we": "我们\\",
+  "aiNavigation": "人工智能导航",
+  "customizeYourExperience": "定制您的体验",
+  "manageProductsAndInventoryn": "✓ 管理产品和库存\\n",
+  "noCreditCardRequiredDuringTrial": "试用期间无需信用卡。",
+  "couldNotLoadTheAssessment": "无法加载评估。",
+  "wellTailorYourMenuToMatchHowYourBusiness": "我们将根据您的业务运作方式定制您的菜单，以便您只看到您需要的内容。",
+  "mailServer": "邮件服务器",
+  "yourTrialExpiresInDaysremainingDays": "您的试用期将在 {daysRemaining} 天后到期",
+  "yourTrialHasExpired": "[ZH] Your trial has expired",
+  "@yourTrialExpiresInDaysremainingDays": {
+    "placeholders": {
+      "daysRemaining": {
+        "type": "String"
+      }
+    }
+  }
 }
