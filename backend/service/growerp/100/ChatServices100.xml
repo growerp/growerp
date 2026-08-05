@@ -1165,6 +1165,13 @@ limitations under the License.
             </entity-find>
             <set field="toEmail" from="emailPcms ? emailPcms[0].contactMech.infoString : null" />
             <if condition="!toEmail || toEmail.contains('example.com')"><return /></if>
+            <!-- the GrowERP app this user works in, e.g. AppAdmin -> Admin -->
+            <entity-find entity-name="growerp.PartyApplication" list="partyApps" limit="1">
+                <econdition field-name="partyId" from="toUa.partyId" />
+                <date-filter />
+            </entity-find>
+            <set field="appName"
+                from="partyApps ? partyApps[0].applicationId.substring(3) : 'Admin'" />
             <service-call name="growerp.100.NurtureServices100.get#TenantBaseUrl"
                 in-map="[ownerPartyId: room.ownerPartyId ?: 'GROWERP']" out-map="context" />
             <!-- send from the mail server's own account when it is an address, so a tenant
@@ -1177,7 +1184,8 @@ limitations under the License.
                         : 'noreply@growerp.com'" />
             <script><![CDATA[
                 boolean isVisitor = toUserId == room.visitorUserId
-                String roomName = room.chatRoomName ?: 'chat'
+                // private rooms carry no name: fall back to who wrote last
+                String roomName = room.chatRoomName ?: (latestFirst[0].fromUserFullName ?: 'chat')
                 context.subject = reason == 'noresponse'
                     ? 'Chat waiting for your answer: ' + roomName
                     : 'New chat message: ' + roomName
@@ -1186,7 +1194,7 @@ limitations under the License.
                     : 'A chat message came in while you were not connected.'
                 String closing = isVisitor
                     ? 'You can continue the conversation in the chat window on ' + baseUrl + '.'
-                    : 'Log in to GrowERP on ' + baseUrl + ' to reply.'
+                    : 'Log in to the GrowERP app ' + appName + ' to reply'
                 StringBuilder sb = new StringBuilder()
                 sb.append('<p>').append(intro).append('</p>')
                 sb.append('<p>The conversation so far:</p>')
@@ -1280,12 +1288,16 @@ limitations under the License.
                 <entity-find-one entity-name="growerp.general.ChatRoom" value-field="room">
                     <field-map field-name="chatRoomId" from="member.chatRoomId" />
                 </entity-find-one>
+                <!-- fresh map per member: out-map MERGES, and mailOwnerPartyId is absent
+                     for SYSTEM sends, so a previous tenant value would linger -->
+                <set field="mailOwnerOut" from="[:]" />
                 <service-call name="growerp.100.ChatServices100.get#ChatMailOwner"
                     out-map="mailOwnerOut"
                     in-map="[fromUserId: lastMsg.fromUserId,
                             roomOwnerPartyId: room?.ownerPartyId]" />
                 <set field="ownerKey" from="mailOwnerOut.mailOwnerPartyId ?: 'SYSTEM'" />
                 <if condition="!ownerHasServer.containsKey(ownerKey)">
+                    <set field="serverOut" from="[:]" />
                     <service-call name="growerp.100.GeneralServices100.get#ActiveEmailServer"
                         out-map="serverOut"
                         in-map="[ownerPartyId: mailOwnerOut.mailOwnerPartyId]" />
@@ -1296,6 +1308,7 @@ limitations under the License.
                     <continue />
                 </if>
                 <!-- force-new: a failure for one member must not roll back the sweep -->
+                <set field="notifyOut" from="[:]" />
                 <service-call name="growerp.100.ChatServices100.send#ChatNotificationEmail"
                     ignore-error="true" out-map="notifyOut" transaction="force-new"
                     in-map="[chatRoomId: member.chatRoomId, toUserId: member.userId,
