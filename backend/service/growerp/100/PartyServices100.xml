@@ -1948,7 +1948,20 @@ limitations under the License.
             <service-call name="growerp.100.PartyServices100.get#User"
                 in-map="[ownerPartyId: ownerPartyId, userPartyId: userPartyId]"
                 out-map="userInfo" />
-            <set field="user" from="userInfo.users?[0]" />
+            <!-- get#User reads OwnerPersonDetailAndCompany, whose person member requires
+                 disabled != 'Y'. A user created with loginDisabled therefore reads back as
+                 nothing and this service used to return no user at all, so every caller
+                 doing user.partyId or user.company.partyId got a NullPointerException
+                 (complete#TenantSetup does exactly that for its trial subscription).
+                 Return what was created instead. -->
+            <if condition="userInfo.users">
+                <set field="user" from="userInfo.users[0]" />
+                <else>
+                    <set field="user"
+                        from="user + [partyId: userPartyId,
+                            company: (user.company ?: [:]) + [partyId: userCompanyPartyId]]" />
+                </else>
+            </if>
         </actions>
     </service>
 
