@@ -64,6 +64,7 @@ along with this software (see the LICENSE.md file). If not, see
 
             <parameter name="menu" type="List"/>
             <parameter name="menu1" type="List"/>
+            <parameter name="pages" type="List"/>
         </out-parameters>
         <actions>
             <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore" cache="true"/>
@@ -163,7 +164,8 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="lines" from="docRr.getText()"/>
                 <if condition="lines">
                     <script>
-                        Map menuItem = [items: [], path: page.pagePath];
+                        Map menuItem = [items: [], path: page.pagePath, pageType: pageType,
+                                        lastModified: docRr.getLastModified()];
                         if (pageType == 'ftl') {
                             def titleMatch = (lines =~ /title:\s*(.*?)\s*-->/);
                             menuItem['title'] = titleMatch.find() ? titleMatch.group(1) : page.pagePath;
@@ -175,10 +177,35 @@ along with this software (see the LICENSE.md file). If not, see
                                 }
                             }
                         }
+                        // SEO description front matter, written by the website content dialog and
+                        // the AI generator: '&lt;#-- description: ... --&gt;' or '&lt;!-- description: ... --&gt;'
+                        def descMatch = (lines =~ /description:\s*(.*?)\s*-->/);
+                        if (descMatch.find()) {
+                            menuItem['description'] = descMatch.group(1);
+                        } else {
+                            // no front matter: first real sentence of the page
+                            String plain = lines.replaceAll(/(?s)&lt;#--.*?--&gt;/, '')
+                                    .replaceAll(/(?s)&lt;!--.*?--&gt;/, '').replaceAll(/(?s)&lt;#[^&gt;]*&gt;/, '')
+                                    .replaceAll(/\$\{[^}]*\}/, '').replaceAll(/(?s)&lt;[^&gt;]+&gt;/, ' ')
+                                    .replaceAll(/[*`#\[\]]/, ' ');
+                            String para = plain.readLines().collect({ it.replaceAll(/\s+/, ' ').trim() })
+                                    .find({ it.length() &gt; 40 });
+                            if (para) {
+                                if (para.length() &gt; 155) {
+                                    int cut = para.substring(0, 155).lastIndexOf(' ');
+                                    para = para.substring(0, cut &gt; 0 ? cut : 155) + '...';
+                                }
+                                menuItem['description'] = para;
+                            }
+                        }
                         menu.add(menuItem);
                     </script>
                 </if>
             </iterate>
+            <!-- flat page list before grouping: used by SeoServices for sitemap.xml/llms.txt and by
+                 home.xml for the home page description. The grouped 'menu' below synthesises group
+                 entries whose path is a bare first segment which is not always a real page. -->
+            <set field="pages" from="new ArrayList(menu)"/>
             <!-- group nested pagePaths (two levels: first segment = group) into dropdown menus;
                  a page whose path equals a group key becomes the group title + first item -->
             <script>

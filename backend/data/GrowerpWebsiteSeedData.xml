@@ -19,6 +19,7 @@
         parentResourceId="growerp_content_dir">
         <file mimeType="text/html" versionName="02" rootVersionName="01">
             <fileData><![CDATA[<#-- title: Home -->
+<#-- description: Open source AI powered ERP for small and medium businesses: accounting, inventory, orders, CRM and marketing in one platform. -->
 <!-- ==================== Marketing landing (GrowERP) ==================== -->
 <main class="pt-24 pb-16 relative">
     <!-- Ambient background glows -->
@@ -155,6 +156,7 @@
         parentResourceId="growerp_content_dir">
         <file mimeType="text/html" versionName="02" rootVersionName="01">
             <fileData><![CDATA[<#-- title: Verticals -->
+<#-- description: The GrowERP apps per industry: admin, hotel, freelance, support, marketing, rental and agents, all built from the same building blocks. -->
 <!-- Background Ambient Glow -->
 <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
     <div class="absolute top-[15%] left-[-10%] w-[45%] h-[45%] rounded-full bg-primary/5 blur-[120px]"></div>
@@ -380,7 +382,8 @@
     <moqui.resource.DbResource filename="getting-started.md.ftl" isFile="Y" resourceId="growerp_getting_started"
         parentResourceId="growerp_content_dir">
         <file mimeType="text/markdown" versionName="01" rootVersionName="01">
-            <fileData><![CDATA[# Getting Started
+            <fileData><![CDATA[<!-- description: How to start with GrowERP: create a company, load demo data and run the app on web, Android, iOS, Linux or Windows. -->
+# Getting Started
 
 Get up and running with GrowERP in minutes. No credit card required.
 
@@ -462,6 +465,7 @@ You can delete your account and company data from any GrowERP application (GrowE
         parentResourceId="growerp_content_dir">
         <file mimeType="text/html" versionName="01" rootVersionName="01">
             <fileData><![CDATA[<#-- title: Benefits -->
+<#-- description: Why companies choose GrowERP: one system for every device, open source, no vendor lock-in and AI assistance built into the daily work. -->
 <!-- Background Ambient Glow -->
 <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
     <div class="absolute top-[15%] left-[-10%] w-[45%] h-[45%] rounded-full bg-primary/5 blur-[120px]"></div>
@@ -755,6 +759,7 @@ You can delete your account and company data from any GrowERP application (GrowE
         parentResourceId="growerp_content_dir">
         <file mimeType="text/html" versionName="01" rootVersionName="01">
             <fileData><![CDATA[<#-- title: Pricing -->
+<#-- description: GrowERP pricing: a free two week trial, then a monthly subscription per company, with the source code always freely available. -->
 <!-- Background Ambient Glow -->
 <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
     <div class="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/5 blur-[120px]"></div>
@@ -989,7 +994,8 @@ You can delete your account and company data from any GrowERP application (GrowE
     <moqui.resource.DbResource filename="about.md.ftl" isFile="Y" resourceId="growerp_about"
         parentResourceId="growerp_content_dir">
         <file mimeType="text/markdown" versionName="01" rootVersionName="01">
-            <fileData><![CDATA[# About Us
+            <fileData><![CDATA[<!-- description: GrowERP is built by AntWebsystems Co., Ltd, a registered software company in Thailand under European management, supporting installations worldwide. -->
+# About Us
 
 GrowERP is brought to you by **AntWebsystems Co., Ltd**, an officially registered software development company in Thailand under European management.
 
@@ -1043,7 +1049,8 @@ Whether you need requirements gathering, implementation, custom interfacing, or 
     <moqui.resource.DbResource filename="privacy.md.ftl" isFile="Y" resourceId="growerp_privacy"
         parentResourceId="growerp_content_dir">
         <file mimeType="text/markdown" versionName="01" rootVersionName="01">
-            <fileData><![CDATA[# GrowERP Privacy Policy
+            <fileData><![CDATA[<!-- description: What information the GrowERP apps collect, how it is used and stored, and the rights you have over your own data. -->
+# GrowERP Privacy Policy
 
 **Effective Date:** October 2024
 

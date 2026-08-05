@@ -21,6 +21,13 @@ along with this software (see the LICENSE.md file). If not, see
             out-map="productStoreIdContext"/>
         <set field="productStoreId" value="${productStoreIdContext.productStoreId ?: 'POPC_DEFAULT'}"/>
         <set field="currencyUomId" from="productStoreIdContext.defaultCurrencyUomId"/>
+
+        <!-- page description and the schema.org page type; set here because root.html.ftl renders
+             the head before the actions below run. No pageTitle: the store name is the better title. -->
+        <set field="seoPageType" value="home"/>
+        <set field="homePage" from="storeInfo.pages?.find({ it.title?.toLowerCase()?.startsWith('home') })
+                ?: storeInfo.pages?.getAt(0)"/>
+        <set field="pageDescription" from="homePage?.description"/>
     </pre-actions>
    
     <actions>

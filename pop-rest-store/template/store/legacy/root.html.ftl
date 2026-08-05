@@ -22,8 +22,20 @@
     <meta property="og:site_name" content="${storeInfo.productStore.storeName?html}">
     <meta property="og:title" content="${(pageTitle?has_content)?then(pageTitle?html, storeInfo.productStore.storeName?html)}">
     <#if pageDescription?has_content><meta property="og:description" content="${pageDescription?html}"></#if>
-    <#if ec.web??><meta property="og:url" content="${ec.web.requestUrl?html}">
-    <link rel="canonical" href="${ec.web.requestUrl?html}"></#if>
+    <#-- pageCanonicalUrl is the request url without the query string, see store.xml pre-actions -->
+    <#assign canonicalUrl = pageCanonicalUrl!(ec.web.requestUrl)!"">
+    <#if canonicalUrl?has_content><meta property="og:url" content="${canonicalUrl?html}">
+    <link rel="canonical" href="${canonicalUrl?html}"></#if>
+    <meta property="og:image" content="${siteBaseUrl!}/getLogo">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="${((pageTitle!storeInfo.productStore.storeName))?html}">
+    <#if pageDescription?has_content><meta name="twitter:description" content="${pageDescription?html}"></#if>
+    <meta name="twitter:image" content="${siteBaseUrl!}/getLogo">
+    <#if (pageNoIndex!false)><meta name="robots" content="noindex,follow"></#if>
+    <#-- AI/LLM discovery: markdown twin of this page and the site index, see SeoServices.xml -->
+    <#if (pageMarkdownUrl!'')?has_content>
+    <link rel="alternate" type="text/markdown" href="${pageMarkdownUrl}" title="Markdown"></#if>
+    <link rel="alternate" type="text/plain" href="${siteBaseUrl!}/llms.txt" title="llms.txt">
     
     <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -163,5 +175,8 @@
     
     <#-- Additional Scripts from subpages -->
     <#if footerScriptText?has_content>${footerScriptText}</#if>
+
+    <#-- schema.org structured data, shared with the modern template -->
+    <#include "../jsonld.html.ftl"/>
 </body>
 </html>

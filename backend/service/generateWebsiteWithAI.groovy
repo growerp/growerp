@@ -136,7 +136,8 @@ Return ONLY JSON:
 {
   "pages": [{"pagePath":"home","title":"Home","pageType":"html","sequenceNum":1,
              "sourceUrl":"<the source page url this is based on, or empty>",
-             "purpose":"<one sentence on what this page must convey>"}],
+             "purpose":"<one sentence on what this page must convey>",
+             "metaDescription":"<one sentence of at most 155 characters describing this page for search engines and AI readers>"}],
   "theme": {"luminaBrightness":"light","primary":"#...","onPrimary":"#...","secondary":"#...",
             "onSecondary":"#...","tertiary":"#...","onTertiary":"#...","error":"#...",
             "onError":"#...","surface":"#...","surfaceContainerLowest":"#...",
@@ -272,6 +273,7 @@ fence, no explanation before or after.
         String body = extractBody(raw, isMd)
         if (!body) throw new Exception("the model returned no content for page ${pagePath}")
         pageBodies.add([pagePath: pagePath, title: pageTitle, isMd: isMd,
+                        metaDescription: (p.metaDescription as String)?.replace('-->', '')?.trim(),
                         sequenceNum: (p.sequenceNum ?: (idx + 1)) as int, body: body])
     }
 
@@ -316,6 +318,9 @@ fence, no explanation before or after.
         String body = (p.body as String).trim()
         String header = p.isMd ? '' : "<#-- title: ${p.title} -->\n"
         if (p.isMd && !body.startsWith('#')) header = "# ${p.title}\n\n"
+        // seo/AI description front matter, read back by get#StoreInfo and the store.xml pre-actions
+        if (p.metaDescription) header = (p.isMd ? "<!-- description: ${p.metaDescription} -->\n"
+                : "<#-- description: ${p.metaDescription} -->\n") + header
 
         xml.append("""    <moqui.resource.wiki.WikiPage wikiPageId="${pageId}" wikiSpaceId="${id}_WS" pagePath="${xmlAttr(pagePath)}"\n""")
         xml.append("""        publishedVersionName="01" sequenceNum="${p.sequenceNum}">\n""")

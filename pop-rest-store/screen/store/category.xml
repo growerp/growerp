@@ -60,6 +60,17 @@ along with this software (see the LICENSE.md file). If not, see
             out-map="productStoreIdContext"/>
         <set field="productStoreId" value="${productStoreIdContext.productStoreId ?: 'POPC_DEFAULT'}"/>
         <set field="currencyUomId" from="productStoreIdContext.defaultCurrencyUomId"/>
+
+        <!-- page title/description and the schema.org page type; set here because root.html.ftl
+             renders the head before the actions below run -->
+        <set field="seoPageType" value="category"/>
+        <entity-find-one entity-name="mantle.product.category.ProductCategory" value-field="seoCategory" cache="true">
+            <field-map field-name="productCategoryId" from="categoryId"/>
+        </entity-find-one>
+        <if condition="seoCategory">
+            <set field="pageTitle" from="seoCategory.categoryName"/>
+            <set field="pageDescription" from="seoCategory.description"/>
+        </if>
     </pre-actions>
     <actions>
         <service-call name="popstore.ProductServices.get#CategoryProducts" out-map="products"

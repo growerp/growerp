@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<!-- AI/LLM readability for the public store website: robots.txt, sitemap.xml, llms.txt and a
+     markdown twin of every content page. All per store, resolved from the request hostname by
+     the transitions in screen/store.xml. -->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <service verb="get" noun="SiteBaseUrl">
+        <description>Scheme and host of the current request, without trailing slash, honouring the
+            X-Forwarded-Proto header set by the nginx proxy.</description>
+        <out-parameters><parameter name="baseUrl"/></out-parameters>
+        <actions>
+            <script><![CDATA[
+                if (ec.web == null) { baseUrl = ''; return }
+                String scheme = ec.web.request.getHeader('X-Forwarded-Proto') ?: ec.web.request.getScheme()
+                baseUrl = scheme + '://' + ec.web.getHostName(true)
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="get" noun="SitePages">
+        <description>Public content pages of a store: path, title, description, html and markdown
+            url. Built on the page list get#StoreInfo already assembles.</description>
+        <in-parameters>
+            <parameter name="productStoreId" required="true"/>
+            <parameter name="baseUrl"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="homePath"/>
+            <parameter name="pages" type="List"><parameter name="page" type="Map"/></parameter>
+        </out-parameters>
+        <actions>
+            <if condition="baseUrl == null">
+                <service-call name="popstore.SeoServices.get#SiteBaseUrl" out-map="baseUrlOut"/>
+                <set field="baseUrl" from="baseUrlOut.baseUrl"/>
+            </if>
+            <service-call name="popstore.StoreServices.get#StoreInfo" out-map="storeInfo"
+                    in-map="[productStoreId:productStoreId]"/>
+            <script><![CDATA[
+                List storePages = (List) (storeInfo.pages ?: [])
+                // the home page is the one titled 'home', else the first page: same rule as home.xml
+                Map homePage = storePages.find({ it.title?.toLowerCase()?.startsWith('home') }) ?: storePages[0]
+                homePath = homePage?.path
+                pages = []
+                for (Object pageObj in storePages) {
+                    Map storePage = (Map) pageObj
+                    boolean isHome = storePage.path == homePath
+                    String sitePath = isHome ? '' : 'content/' + storePage.path
+                    pages.add([path: storePage.path, sitePath: sitePath, isHome: isHome,
+                               title: storePage.title, description: storePage.description,
+                               pageType: storePage.pageType, lastModified: storePage.lastModified,
+                               url: baseUrl + '/' + sitePath,
+                               markdownUrl: baseUrl + '/md/' + sitePath])
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="get" noun="PageMarkdown">
+        <description>Markdown twin of a public page with yaml front matter. sitePath is the html
+            path without the leading slash: '' for the home page, 'content/xxx' for a content page.</description>
+        <in-parameters>
+            <parameter name="productStoreId" required="true"/>
+            <parameter name="sitePath" default-value=""/>
+            <parameter name="baseUrl"/>
+        </in-parameters>
+        <out-parameters><parameter name="markdown"/></out-parameters>
+        <actions>
+            <if condition="baseUrl == null">
+                <service-call name="popstore.SeoServices.get#SiteBaseUrl" out-map="baseUrlOut"/>
+                <set field="baseUrl" from="baseUrlOut.baseUrl"/>
+            </if>
+            <service-call name="popstore.SeoServices.get#SitePages" out-map="sitePagesOut"
+                    in-map="[productStoreId:productStoreId, baseUrl:baseUrl]"/>
+            <set field="page" from="sitePagesOut.pages.find({ it.sitePath == (sitePath ?: '') })"/>
+            <if condition="page == null"><return/></if>
+
+            <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore" cache="true"/>
+            <service-call name="org.moqui.impl.WikiServices.get#PublishedWikiPageText" out-map="pageOut"
+                    in-map="[wikiSpaceId:productStore.wikiSpaceId, pagePath:page.path]"/>
+            <if condition="!pageOut.pageText"><return/></if>
+
+            <script><![CDATA[
+                def yaml = { Object value -> '"' + (value ?: '').toString()
+                        .replace('\\', '\\\\').replace('"', '\\"').replace('\n', ' ') + '"' }
+                // first real sentence of the page, used when the page has no description front matter
+                def deriveDescription = { String text ->
+                    String paragraph = text.readLines().find({
+                        it.trim() && !it.startsWith('#') && !it.startsWith('---') && !it.startsWith('|') })
+                    if (!paragraph) return null
+                    paragraph = paragraph.replaceAll(/!?\[([^\]]*)\]\([^)]*\)/, '$1')
+                            .replaceAll(/[*`\\]/, '').trim()
+                    if (paragraph.length() <= 155) return paragraph
+                    int cut = paragraph.substring(0, 155).lastIndexOf(' ')
+                    return paragraph.substring(0, cut > 0 ? cut : 155) + '...'
+                }
+                // rendered markdown is cached per published version, so an edit in the admin app
+                // (which bumps publishedVersionName) shows up on the next request
+                String cacheKey = "${productStoreId}|${page.sitePath}|${pageOut.publishedVersionName}".toString()
+                def pageCache = ec.cache.getCache('growerp.seo.page')
+                String body = (String) pageCache.get(cacheKey)
+                if (body == null) {
+                    String location = pageOut.pageLocation
+                    String rendered = null
+                    // md pages are markdown already: the .md.ftl renderer would turn them into html
+                    if (page.pageType == 'ftl') try {
+                        StringWriter sw = new StringWriter()
+                        ec.resource.getTemplateRendererByLocation(location).render(location, sw)
+                        rendered = sw.toString()
+                        // the freemarker exception handler writes errors inline instead of throwing
+                        if (rendered.contains('[Template Error')) rendered = null
+                    } catch (Exception e) {
+                        ec.logger.warn("get#PageMarkdown could not render ${location}: ${e.message}")
+                    }
+                    if (rendered == null) {
+                        // md content, or a page that would not render: strip the freemarker constructs
+                        rendered = ((String) pageOut.pageText).replaceAll(/(?s)<#--.*?-->/, '')
+                                .replaceAll(/(?s)<#[^>]*>/, '').replaceAll(/\$\{[^}]*\}/, '')
+                    }
+                    if (page.pageType == 'ftl') {
+                        try {
+                            def htmlToMarkdown = ec.resource.script(
+                                    "component://PopRestStore/service/popstore/HtmlToMarkdown.groovy", null)
+                            body = htmlToMarkdown.convert(rendered, baseUrl)
+                        } catch (Exception e) {
+                            ec.logger.warn("get#PageMarkdown could not convert ${location}: ${e.message}")
+                            body = org.jsoup.Jsoup.parseBodyFragment(rendered).text()
+                        }
+                    } else {
+                        // md content: the page text already is markdown, only drop the seo comments
+                        body = rendered.replaceAll(/(?s)<!--.*?-->/, '').replaceAll(/\n{3,}/, '\n\n').trim() + '\n'
+                    }
+                    pageCache.put(cacheKey, body)
+                }
+                if (!body?.trim()) { markdown = null; return }
+
+                String description = page.description ?: deriveDescription(body)
+                String updated = pageOut.pageReference?.getLastModified() ?
+                        new java.text.SimpleDateFormat('yyyy-MM-dd').format(
+                                new Date(pageOut.pageReference.getLastModified())) : null
+                StringBuilder md = new StringBuilder()
+                md.append('---\n')
+                md.append('title: ').append(yaml(page.title ?: productStore.storeName)).append('\n')
+                if (description) md.append('description: ').append(yaml(description)).append('\n')
+                md.append('canonical: ').append(yaml(page.url)).append('\n')
+                if (updated) md.append('updated: ').append(yaml(updated)).append('\n')
+                md.append('site: ').append(yaml(productStore.storeName)).append('\n')
+                md.append('---\n\n')
+                if (page.title && !body.trim().startsWith('# ')) md.append('# ').append(page.title).append('\n\n')
+                md.append(body)
+                markdown = md.toString()
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="get" noun="RobotsTxt">
+        <description>robots.txt for the store of the request hostname: welcomes the AI crawlers,
+            keeps the moqui application paths out and points at the sitemap.</description>
+        <in-parameters>
+            <parameter name="productStoreId"/>
+            <parameter name="baseUrl"/>
+        </in-parameters>
+        <out-parameters><parameter name="text"/></out-parameters>
+        <actions>
+            <if condition="baseUrl == null">
+                <service-call name="popstore.SeoServices.get#SiteBaseUrl" out-map="baseUrlOut"/>
+                <set field="baseUrl" from="baseUrlOut.baseUrl"/>
+            </if>
+            <!-- no store for this hostname: nothing here is meant to be crawled -->
+            <if condition="!productStoreId || productStoreId == 'POPC_DEFAULT'">
+                <set field="text" value="user-agent: *&#10;disallow: /&#10;"/>
+                <return/>
+            </if>
+            <!-- per store override, set as ProductStoreSetting PsstRobotsTxt -->
+            <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="robotsSettings" limit="1">
+                <date-filter/><econdition field-name="productStoreId"/>
+                <econdition field-name="settingTypeEnumId" value="PsstRobotsTxt"/>
+            </entity-find>
+            <if condition="robotsSettings">
+                <set field="text" from="robotsSettings[0].settingValue"/>
+                <return/>
+            </if>
+            <script><![CDATA[
+                // answer engines and their training crawlers are all welcome, they are how buyers
+                // find a company now; the moqui application paths never are
+                List aiAgents = ['GPTBot', 'OAI-SearchBot', 'ChatGPT-User', 'ClaudeBot', 'Claude-User',
+                        'Claude-SearchBot', 'anthropic-ai', 'PerplexityBot', 'Perplexity-User',
+                        'Google-Extended', 'Applebot-Extended', 'CCBot', 'meta-externalagent',
+                        'Amazonbot', 'Bytespider']
+                List disallowList = ['apps', 'vapps', 'qapps', 'rest', 'rpc', 'status', 'menuData',
+                        'admin', 'config.js', 'checkoutOnePage', 'search']
+                StringBuilder out = new StringBuilder()
+                for (String agent in aiAgents) out.append('user-agent: ').append(agent).append('\n')
+                out.append('user-agent: *\n')
+                out.append('allow: /\n')
+                for (String disallow in disallowList) out.append('disallow: /').append(disallow).append('\n')
+                out.append('\nsitemap: ').append(baseUrl).append('/sitemap.xml\n')
+                text = out.toString()
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="get" noun="SitemapXml">
+        <in-parameters>
+            <parameter name="productStoreId" required="true"/>
+            <parameter name="baseUrl"/>
+        </in-parameters>
+        <out-parameters><parameter name="text"/></out-parameters>
+        <actions>
+            <if condition="baseUrl == null">
+                <service-call name="popstore.SeoServices.get#SiteBaseUrl" out-map="baseUrlOut"/>
+                <set field="baseUrl" from="baseUrlOut.baseUrl"/>
+            </if>
+            <set field="cacheKey" value="${productStoreId}|${baseUrl}|sitemap"/>
+            <set field="indexCache" from="ec.cache.getCache('growerp.seo.index')"/>
+            <set field="text" from="indexCache.get(cacheKey)"/>
+            <if condition="text"><return/></if>
+
+            <service-call name="popstore.SeoServices.get#SitePages" out-map="sitePagesOut"
+                    in-map="[productStoreId:productStoreId, baseUrl:baseUrl]"/>
+            <service-call name="popstore.StoreServices.get#StoreInfo" out-map="storeInfo"
+                    in-map="[productStoreId:productStoreId]"/>
+            <!-- catalog stores: add the browsable categories and their products -->
+            <set field="productUrls" from="[]"/>
+            <iterate list="storeInfo.categoryList" entry="category">
+                <service-call name="popstore.ProductServices.get#CategoryProducts" out-map="categoryProductsOut"
+                        in-map="[productStoreId:productStoreId, productCategoryId:category.productCategoryId,
+                                pageSize:1000]"/>
+                <iterate list="categoryProductsOut.productList" entry="categoryProduct">
+                    <set field="productUrls" from="productUrls + ['/product/' + categoryProduct.productId]"/>
+                </iterate>
+            </iterate>
+            <script><![CDATA[
+                def dateFormat = new java.text.SimpleDateFormat('yyyy-MM-dd')
+                StringBuilder out = new StringBuilder()
+                out.append('<?xml version="1.0" encoding="UTF-8"?>\n')
+                out.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n')
+                for (Object pageObj in sitePagesOut.pages) {
+                    Map page = (Map) pageObj
+                    out.append('  <url><loc>').append(page.url.replace('&', '&amp;')).append('</loc>')
+                    if (page.lastModified) out.append('<lastmod>')
+                            .append(dateFormat.format(new Date(page.lastModified as Long))).append('</lastmod>')
+                    out.append('</url>\n')
+                }
+                Set otherPaths = new LinkedHashSet()
+                for (Object categoryObj in (storeInfo.categoryList ?: [])) {
+                    otherPaths.add('/category/' + ((Map) categoryObj).productCategoryId)
+                }
+                otherPaths.addAll(productUrls)
+                int count = 0
+                for (String path in otherPaths) {
+                    if (++count > 5000) break
+                    out.append('  <url><loc>').append(baseUrl).append(path).append('</loc></url>\n')
+                }
+                out.append('</urlset>\n')
+                text = out.toString()
+            ]]></script>
+            <script>indexCache.put(cacheKey, text)</script>
+        </actions>
+    </service>
+
+    <service verb="get" noun="LlmsTxt">
+        <description>llms.txt: a markdown index of the site for LLM readers, see llmstxt.org</description>
+        <in-parameters>
+            <parameter name="productStoreId" required="true"/>
+            <parameter name="baseUrl"/>
+        </in-parameters>
+        <out-parameters><parameter name="text"/></out-parameters>
+        <actions>
+            <if condition="baseUrl == null">
+                <service-call name="popstore.SeoServices.get#SiteBaseUrl" out-map="baseUrlOut"/>
+                <set field="baseUrl" from="baseUrlOut.baseUrl"/>
+            </if>
+            <set field="cacheKey" value="${productStoreId}|${baseUrl}|llms"/>
+            <set field="indexCache" from="ec.cache.getCache('growerp.seo.index')"/>
+            <set field="text" from="indexCache.get(cacheKey)"/>
+            <if condition="text"><return/></if>
+
+            <service-call name="popstore.SeoServices.get#SitePages" out-map="sitePagesOut"
+                    in-map="[productStoreId:productStoreId, baseUrl:baseUrl]"/>
+            <service-call name="popstore.StoreServices.get#StoreInfo" out-map="storeInfo"
+                    in-map="[productStoreId:productStoreId]"/>
+            <script><![CDATA[
+                StringBuilder out = new StringBuilder()
+                out.append('# ').append(storeInfo.productStore.storeName).append('\n\n')
+                String summary = storeInfo.settings?.PsstMetaDescription
+                if (summary) out.append('> ').append(summary).append('\n\n')
+                out.append('Every page below is also available as markdown at the url shown.\n\n')
+                out.append('## Pages\n\n')
+                for (Object pageObj in sitePagesOut.pages) {
+                    Map page = (Map) pageObj
+                    out.append('- [').append(page.title ?: page.path).append('](').append(page.markdownUrl).append(')')
+                    if (page.description) out.append(': ').append(page.description)
+                    out.append('\n')
+                }
+                out.append('\n## Optional\n\n')
+                out.append('- [Full site as one markdown file](').append(baseUrl).append('/llms-full.txt)\n')
+                out.append('- [Sitemap](').append(baseUrl).append('/sitemap.xml)\n')
+                text = out.toString()
+            ]]></script>
+            <script>indexCache.put(cacheKey, text)</script>
+        </actions>
+    </service>
+
+    <service verb="get" noun="LlmsFullTxt">
+        <description>llms-full.txt: every content page as one markdown document</description>
+        <in-parameters>
+            <parameter name="productStoreId" required="true"/>
+            <parameter name="baseUrl"/>
+            <parameter name="maxPages" type="Integer" default="200"/>
+        </in-parameters>
+        <out-parameters><parameter name="text"/></out-parameters>
+        <actions>
+            <if condition="baseUrl == null">
+                <service-call name="popstore.SeoServices.get#SiteBaseUrl" out-map="baseUrlOut"/>
+                <set field="baseUrl" from="baseUrlOut.baseUrl"/>
+            </if>
+            <set field="cacheKey" value="${productStoreId}|${baseUrl}|llmsfull"/>
+            <set field="indexCache" from="ec.cache.getCache('growerp.seo.index')"/>
+            <set field="text" from="indexCache.get(cacheKey)"/>
+            <if condition="text"><return/></if>
+
+            <service-call name="popstore.SeoServices.get#SitePages" out-map="sitePagesOut"
+                    in-map="[productStoreId:productStoreId, baseUrl:baseUrl]"/>
+            <set field="parts" from="[]"/>
+            <set field="pageCount" from="0"/>
+            <iterate list="sitePagesOut.pages" entry="page">
+                <if condition="pageCount >= maxPages"><continue/></if>
+                <service-call name="popstore.SeoServices.get#PageMarkdown" out-map="pageMarkdownOut"
+                        in-map="[productStoreId:productStoreId, sitePath:page.sitePath, baseUrl:baseUrl]"/>
+                <if condition="pageMarkdownOut.markdown">
+                    <set field="parts" from="parts + [pageMarkdownOut.markdown]"/>
+                    <set field="pageCount" from="pageCount + 1"/>
+                </if>
+            </iterate>
+            <script><![CDATA[
+                text = parts.join('\n\n---\n\n')
+                if (sitePagesOut.pages.size() > pageCount) text += "\n\n---\n\n" +
+                        "Truncated at ${pageCount} pages, the remaining pages are listed in ${baseUrl}/llms.txt\n"
+            ]]></script>
+            <script>indexCache.put(cacheKey, text)</script>
+        </actions>
+    </service>
+
+</services>

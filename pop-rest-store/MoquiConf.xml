@@ -3,6 +3,13 @@
 work. -->
 <moqui-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/moqui-conf-2.1.xsd">
+    <!-- AI/LLM readability, see service/popstore/SeoServices.xml. The page cache is keyed by the
+         published wiki version so a content edit invalidates it by itself; the index files depend
+         on all pages and are cleared by the website content services. -->
+    <cache-facade>
+        <cache name="growerp.seo.page" type="local" max-elements="4000" expire-time-live="3600"/>
+        <cache name="growerp.seo.index" type="local" max-elements="500" expire-time-live="900"/>
+    </cache-facade>
     <screen-facade>
         <!-- because no-sub-path this is the root url.-->
         <screen location="component://webroot/screen/webroot.xml" default-subscreen="m">

@@ -839,6 +839,9 @@ limitations under the License.
                     </if>
                 </else>
             </if>
+            <!-- sitemap.xml/llms.txt list all pages, so they cannot self invalidate on a version
+                 bump like the per page markdown does, see PopRestStore SeoServices.xml -->
+            <script>ec.cache.getCache('growerp.seo.index').clear()</script>
             <service-call name="growerp.100.WebsiteServices100.get#WebsiteContent"
                 in-map="[path: content.path, text:content.text]" out-map="context" />
         </actions>

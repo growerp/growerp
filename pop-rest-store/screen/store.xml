@@ -150,6 +150,81 @@ var storeInfo = ${storeInfoJson};
         <default-response url="."/>
     </transition>
 
+    <!-- ==================== AI/LLM readability ====================
+         These transitions are declared here, on the no-sub-path screen mounted at '/', so they
+         take precedence over the generic webroot robots.txt and are resolved per store from the
+         request hostname. See service/popstore/SeoServices.xml. -->
+    <transition name="md" read-only="true">
+        <!-- markdown twin of a page, path mirrors the html path: /md/ = /, /md/content/x = /content/x -->
+        <actions>
+            <!-- no store for this hostname: like the html pages, nothing to serve here -->
+            <if condition="!productStoreId || productStoreId == 'POPC_DEFAULT'">
+                <script>ec.web.sendError(404, "No website is configured for this address", null)</script>
+                <return/>
+            </if>
+            <set field="sitePath" from="sri.screenUrlInfo.extraPathNameList?.join('/') ?: ''"/>
+            <service-call name="popstore.SeoServices.get#PageMarkdown" out-map="markdownOut"
+                    in-map="[productStoreId:productStoreId, sitePath:sitePath]"/>
+            <if condition="markdownOut.markdown"><then>
+                <script>ec.web.sendTextResponse(markdownOut.markdown, "text/markdown; charset=utf-8", null)</script>
+            </then><else>
+                <script>ec.web.sendError(404, "No markdown page at /${sitePath}", null)</script>
+            </else></if>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+    <transition name="robots.txt" read-only="true">
+        <actions>
+            <service-call name="popstore.SeoServices.get#RobotsTxt" out-map="robotsOut"
+                    in-map="[productStoreId:productStoreId]"/>
+            <script>ec.web.sendTextResponse(robotsOut.text, "text/plain; charset=utf-8", null)</script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+    <transition name="sitemap.xml" read-only="true">
+        <actions>
+            <!-- no store for this hostname: like the html pages, nothing to serve here -->
+            <if condition="!productStoreId || productStoreId == 'POPC_DEFAULT'">
+                <script>ec.web.sendError(404, "No website is configured for this address", null)</script>
+                <return/>
+            </if>
+            <service-call name="popstore.SeoServices.get#SitemapXml" out-map="sitemapOut"
+                    in-map="[productStoreId:productStoreId]"/>
+            <script>ec.web.sendTextResponse(sitemapOut.text, "application/xml; charset=utf-8", null)</script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+    <transition name="llms.txt" read-only="true">
+        <actions>
+            <!-- no store for this hostname: like the html pages, nothing to serve here -->
+            <if condition="!productStoreId || productStoreId == 'POPC_DEFAULT'">
+                <script>ec.web.sendError(404, "No website is configured for this address", null)</script>
+                <return/>
+            </if>
+            <service-call name="popstore.SeoServices.get#LlmsTxt" out-map="llmsOut"
+                    in-map="[productStoreId:productStoreId]"/>
+            <script>ec.web.sendTextResponse(llmsOut.text, "text/plain; charset=utf-8", null)</script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+    <transition name="llms-full.txt" read-only="true">
+        <actions>
+            <!-- no store for this hostname: like the html pages, nothing to serve here -->
+            <if condition="!productStoreId || productStoreId == 'POPC_DEFAULT'">
+                <script>ec.web.sendError(404, "No website is configured for this address", null)</script>
+                <return/>
+            </if>
+            <service-call name="popstore.SeoServices.get#LlmsFullTxt" out-map="llmsFullOut"
+                    in-map="[productStoreId:productStoreId]"/>
+            <script>ec.web.sendTextResponse(llmsFullOut.text, "text/plain; charset=utf-8", null)</script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
     <subscreens default-item="home" always-use-full-path="true"/>
 
     <pre-actions>
@@ -274,6 +349,11 @@ var storeInfo = ${storeInfoJson};
         <set field="template_server_content" from="storeInfo.settings.template_server_content" default-value="component://PopRestStore/template/store/${templateId}/help.html.ftl"/>
         <set field="template_server_search" from="storeInfo.settings.template_server_search" default-value="component://PopRestStore/template/store/${templateId}/search.html.ftl"/>
 
+        <!-- legal company name for the schema.org Organization, see template/store/jsonld.html.ftl -->
+        <entity-find-one entity-name="mantle.party.Organization" value-field="organization" cache="true">
+            <field-map field-name="partyId" from="productStore?.organizationPartyId"/>
+        </entity-find-one>
+
         <!-- per-page SEO title/description for content pages; must be resolved here because
              root.html.ftl renders the <head> before the content subscreen actions run -->
         <script><![CDATA[
@@ -293,9 +373,42 @@ var storeInfo = ${storeInfoJson};
                             if (!context.pageTitle && (it.startsWith('# ') || it.startsWith('## ')))
                                 context.pageTitle = it.substring(it.indexOf(' ') + 1)
                         }
+                        // no description front matter: use the first real sentence of the page
+                        if (!context.pageDescription) {
+                            String plain = seoText.replaceAll(/(?s)<#--.*?-->/, '').replaceAll(/(?s)<!--.*?-->/, '')
+                                    .replaceAll(/(?s)<#[^>]*>/, '').replaceAll(/\$\{[^}]*\}/, '')
+                                    .replaceAll(/(?s)<[^>]+>/, ' ').replaceAll(/[*`#\[\]]/, ' ')
+                            String para = plain.readLines().collect({ it.replaceAll(/\s+/, ' ').trim() })
+                                    .find({ it.length() > 40 })
+                            if (para) {
+                                if (para.length() > 155) {
+                                    int cut = para.substring(0, 155).lastIndexOf(' ')
+                                    para = para.substring(0, cut > 0 ? cut : 155) + '...'
+                                }
+                                context.pageDescription = para
+                            }
+                        }
                     }
                 } catch (Exception e) { ec.logger.warn("Page SEO meta lookup failed: ${e.message}") }
+                context.seoPageType = 'content'
+                // breadcrumbs for the schema.org BreadcrumbList
+                List crumbs = [[title: storeInfo.productStore.storeName, url: '/']]
+                String crumbPath = ''
+                for (String segment in seoPagePath.split('/')) {
+                    crumbPath = crumbPath ? crumbPath + '/' + segment : segment
+                    Map crumbPage = ((List) (storeInfo.pages ?: [])).find({ it.path == crumbPath })
+                    crumbs.add([title: crumbPage?.title ?: segment, url: '/content/' + crumbPath])
+                }
+                context.seoBreadcrumbs = crumbs
             }
+            // absolute urls for canonical/og/markdown; note requestUrl carries the query string,
+            // which must not end up in the canonical
+            String scheme = ec.web.request.getHeader('X-Forwarded-Proto') ?: ec.web.request.getScheme()
+            context.siteBaseUrl = scheme + '://' + ec.web.getHostName(true)
+            context.pageCanonicalUrl = context.siteBaseUrl + (seoPathInfo ?: '/')
+            // only the home and content pages have a markdown twin, see SeoServices get#PageMarkdown
+            if (seoPathInfo == '/' || seoPathInfo == '' || seoPathInfo.startsWith('/content/'))
+                context.pageMarkdownUrl = context.siteBaseUrl + '/md' + (seoPathInfo == '' ? '/' : seoPathInfo)
         ]]></script>
     </pre-actions>
 

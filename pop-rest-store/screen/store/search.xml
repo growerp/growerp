@@ -36,6 +36,11 @@ along with this software (see the LICENSE.md file). If not, see
         <if condition="extraPathNameList &amp;&amp; !pageIndex"><set field="pageIndex" from="extraPathNameList[1]"/></if>
         <if condition="!pageIndex"><set field="pageIndex" from="0"/></if>
         <if condition="!categoryId"><set field="categoryId" value="RchAllProducts"/></if>
+
+        <!-- search results are not content: keep them out of the index -->
+        <set field="seoPageType" value="search"/>
+        <set field="pageNoIndex" from="true"/>
+        <if condition="searchParameter"><set field="pageTitle" value="Search: ${searchParameter}"/></if>
     </pre-actions>
     <actions>
         <if condition="searchParameter">

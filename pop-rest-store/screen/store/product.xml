@@ -110,6 +110,15 @@ along with this software (see the LICENSE.md file). If not, see
                 <return error="true" message="Product not found with ID ${productId}"/>
             </then>
         </if>
+
+        <!-- page title/description and the schema.org page type; set here because root.html.ftl
+             renders the head before the actions below run -->
+        <set field="seoPageType" value="product"/>
+        <set field="pageTitle" from="productEntity.productName"/>
+        <if condition="productEntity.description">
+            <set field="pageDescription" from="productEntity.description.length() > 155 ?
+                    productEntity.description.substring(0, 155) + '...' : productEntity.description"/>
+        </if>
     </pre-actions>
     <actions>
         <service-call name="popstore.ProductServices.get#ProductInfo" out-map="product" in-map="[productId:productId, priceUomId: currencyUomId]"/>
