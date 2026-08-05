@@ -1,3 +1,4 @@
+import 'package:growerp_core/growerp_core.dart';
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,6 +173,7 @@ class _GoogleWorkspaceSettingsDialogState
 
   @override
   Widget build(BuildContext context) {
+
     return Dialog(
       key: const Key('GoogleWorkspaceSettingsDialog'),
       insetPadding: const EdgeInsets.all(10),
@@ -202,7 +204,7 @@ class _GoogleWorkspaceSettingsDialogState
                                 color: Theme.of(context).colorScheme.outline,
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16),
                             TextFormField(
                               key: const Key('googleClientId'),
                               controller: _clientIdCtrl,
@@ -211,7 +213,7 @@ class _GoogleWorkspaceSettingsDialogState
                                 prefixIcon: Icon(Icons.badge_outlined),
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: 12),
                             _secretField(
                               key: const Key('googleClientSecret'),
                               controller: _clientSecretCtrl,
@@ -221,7 +223,7 @@ class _GoogleWorkspaceSettingsDialogState
                               onToggleObscure: () => setState(() =>
                                   _obscureClientSecret = !_obscureClientSecret),
                             ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: 12),
                             _secretField(
                               key: const Key('googleRefreshToken'),
                               controller: _refreshTokenCtrl,
@@ -231,7 +233,7 @@ class _GoogleWorkspaceSettingsDialogState
                               onToggleObscure: () => setState(() =>
                                   _obscureRefreshToken = !_obscureRefreshToken),
                             ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: 12),
                             TextFormField(
                               key: const Key('googleCalendarId'),
                               controller: _calendarIdCtrl,
@@ -245,7 +247,7 @@ class _GoogleWorkspaceSettingsDialogState
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -254,20 +256,20 @@ class _GoogleWorkspaceSettingsDialogState
                           onPressed: _isSaving
                               ? null
                               : () => Navigator.of(context).pop(),
-                          child: const Text('Cancel'),
+                          child: Text(CoreLocalizations.of(context)!.cancel),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         FilledButton(
                           key: const Key('saveGoogleWorkspaceSettings'),
                           onPressed: _isSaving ? null : _save,
                           child: _isSaving
-                              ? const SizedBox(
+                              ? SizedBox(
                                   width: 16,
                                   height: 16,
                                   child:
                                       CircularProgressIndicator(strokeWidth: 2),
                                 )
-                              : const Text('Save'),
+                              : Text(CoreLocalizations.of(context)!.save),
                         ),
                       ],
                     ),
@@ -276,5 +278,6 @@ class _GoogleWorkspaceSettingsDialogState
               ),
       ),
     );
+
   }
 }

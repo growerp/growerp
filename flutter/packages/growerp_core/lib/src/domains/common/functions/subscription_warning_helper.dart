@@ -16,6 +16,8 @@ import 'package:flutter/material.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:growerp_core/growerp_core.dart';
+
 /// Helper class for managing subscription expiration warning dialogs.
 ///
 /// Shows a warning dialog when subscription is about to expire (last 3 days).
@@ -82,10 +84,10 @@ class SubscriptionWarningHelper {
               color: Theme.of(dialogContext).colorScheme.error,
               size: 32,
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: Text(
-                'Subscription Expiring!',
+                CoreLocalizations.of(context)!.subscriptionExpiring,
                 style: Theme.of(dialogContext).textTheme.headlineSmall
                     ?.copyWith(fontWeight: FontWeight.bold),
               ),
@@ -116,7 +118,7 @@ class SubscriptionWarningHelper {
                     color: Theme.of(dialogContext).colorScheme.error,
                     size: 40,
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,12 +145,12 @@ class SubscriptionWarningHelper {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             const Text(
               'To continue using GrowERP without interruption, '
               'please renew your subscription before it expires.',
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             const Text(
               '• All your data will be preserved\n'
               '• Access to all features continues\n'
@@ -160,7 +162,7 @@ class SubscriptionWarningHelper {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Remind Me Later'),
+            child: Text(CoreLocalizations.of(context)!.remindMeLater),
           ),
           FilledButton.icon(
             onPressed: () {
@@ -168,7 +170,7 @@ class SubscriptionWarningHelper {
               onSubscribeNow?.call();
             },
             icon: const Icon(Icons.credit_card),
-            label: const Text('Subscribe Now'),
+            label: Text(CoreLocalizations.of(context)!.subscribeNow),
           ),
         ],
       ),

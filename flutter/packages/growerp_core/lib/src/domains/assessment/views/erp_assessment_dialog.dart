@@ -22,6 +22,8 @@ import '../../../services/get_dio_error.dart';
 import '../../common/bloc/menu_config_bloc.dart';
 import '../../common/widgets/popup.dart';
 
+import 'package:growerp_core/growerp_core.dart';
+
 /// Post-login onboarding assessment "Set up GrowERP for your business".
 ///
 /// Loads the GROWERP-owned [ERP_ONBOARD] assessment, which profiles the new
@@ -181,6 +183,7 @@ class _ErpAssessmentDialogState extends State<ErpAssessmentDialog> {
 
   @override
   Widget build(BuildContext context) {
+
     return Dialog(
       clipBehavior: Clip.antiAlias,
       insetPadding: const EdgeInsets.all(16),
@@ -194,7 +197,7 @@ class _ErpAssessmentDialogState extends State<ErpAssessmentDialog> {
           TextButton(
             key: const Key('skipAssessment'),
             onPressed: _close,
-            child: const Text('Skip'),
+            child: Text(CoreLocalizations.of(context)!.skip),
           ),
         ],
         child: ScaffoldMessenger(
@@ -225,15 +228,15 @@ class _ErpAssessmentDialogState extends State<ErpAssessmentDialog> {
             children: [
               Icon(Icons.error_outline,
                   color: Theme.of(context).colorScheme.error, size: 64),
-              const SizedBox(height: 20),
-              Text(_message ?? 'Could not load the assessment.',
+              SizedBox(height: 20),
+              Text(_message ?? CoreLocalizations.of(context)!.couldNotLoadTheAssessment,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyLarge),
-              const SizedBox(height: 28),
+              SizedBox(height: 28),
               FilledButton(
                 key: const Key('closeAssessment'),
                 onPressed: _close,
-                child: const Text('Close'),
+                child: Text(CoreLocalizations.of(context)!.close),
               ),
             ],
           ),
@@ -260,7 +263,7 @@ class _ErpAssessmentDialogState extends State<ErpAssessmentDialog> {
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium
                         ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
               ],
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
@@ -270,7 +273,7 @@ class _ErpAssessmentDialogState extends State<ErpAssessmentDialog> {
                   backgroundColor: theme.colorScheme.surfaceContainerHighest,
                 ),
               ),
-              const SizedBox(height: 6),
+              SizedBox(height: 6),
               Text('$answered of ${questions.length} answered',
                   style: theme.textTheme.labelMedium
                       ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
@@ -289,7 +292,7 @@ class _ErpAssessmentDialogState extends State<ErpAssessmentDialog> {
           child: FilledButton(
             key: const Key('seeResult'),
             onPressed: _allRequiredAnswered ? _submit : null,
-            child: const Text('See result'),
+            child: Text(CoreLocalizations.of(context)!.seeResult),
           ),
         ),
       ],
@@ -316,12 +319,12 @@ class _ErpAssessmentDialogState extends State<ErpAssessmentDialog> {
                       color: theme.colorScheme.onPrimaryContainer,
                       fontWeight: FontWeight.bold)),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Text(question.questionText ?? '',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleMedium
                     ?.copyWith(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             for (final option in options)
               _buildOption(qId, option),
           ],
@@ -379,7 +382,7 @@ class _ErpAssessmentDialogState extends State<ErpAssessmentDialog> {
                             : theme.colorScheme.onSurface,
                       )),
                 ),
-                const SizedBox(width: 20), // balances the leading icon
+                SizedBox(width: 20), // balances the leading icon
               ],
             ),
           ),
@@ -406,27 +409,26 @@ class _ErpAssessmentDialogState extends State<ErpAssessmentDialog> {
             child: Icon(Icons.tune,
                 size: 48, color: theme.colorScheme.onPrimaryContainer),
           ),
-          const SizedBox(height: 24),
-          Text('Thanks — your answers are saved',
+          SizedBox(height: 24),
+          Text(CoreLocalizations.of(context)!.thanksYourAnswersAreSaved,
               key: const Key('assessmentDone'),
               textAlign: TextAlign.center,
               style: theme.textTheme.titleLarge
                   ?.copyWith(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Text(
-            'We\'ll tailor your menu to match how your business works, '
-            'so you only see what you need.',
+            CoreLocalizations.of(context)!.wellTailorYourMenuToMatchHowYourBusiness,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyLarge
                 ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
-          const SizedBox(height: 32),
+          SizedBox(height: 32),
           SizedBox(
             width: double.infinity,
             child: FilledButton(
               key: const Key('doneAssessment'),
               onPressed: _close,
-              child: const Text('Continue'),
+              child: Text(CoreLocalizations.of(context)!.continueAction),
             ),
           ),
         ],

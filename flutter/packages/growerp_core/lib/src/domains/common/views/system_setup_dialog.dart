@@ -20,6 +20,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../functions/functions.dart';
 import '../widgets/widgets.dart';
 
+import 'package:growerp_core/growerp_core.dart';
+
 /// System Setup Screen — configures AI (LLM provider API keys).
 /// Settings are stored per-tenant in the backend via the SystemSettings REST endpoint.
 /// Email and GitHub credentials are configured from the ADK Tools & integrations
@@ -194,6 +196,7 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
 
   @override
   Widget build(BuildContext context) {
+
     final isPhone = ResponsiveBreakpoints.of(context).isMobile;
 
     if (_isLoading) {
@@ -216,17 +219,17 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
                   style: Theme.of(context).textTheme.headlineMedium,
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text(
-                  'Configure LLM provider API keys for your organisation',
+                  CoreLocalizations.of(context)!.configureLlmProviderApiKeys,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.outline,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: 32),
                 _aiSettingsSection(),
-                const SizedBox(height: 32),
+                SizedBox(height: 32),
                 Center(
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -237,9 +240,9 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
                           onPressed: _isSaving
                               ? null
                               : () => Navigator.of(context).pop(),
-                          child: const Text('Cancel'),
+                          child: Text(CoreLocalizations.of(context)!.cancel),
                         ),
-                        const SizedBox(width: 16),
+                        SizedBox(width: 16),
                       ],
                       _saveButton(),
                     ],
@@ -270,7 +273,7 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
               color: Theme.of(context).colorScheme.outline,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           TextFormField(
             key: const Key('llmSystemTokenLimit'),
             controller: _llmTokenLimitCtrl,
@@ -281,7 +284,7 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
             ),
             keyboardType: TextInputType.number,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           DropdownButtonFormField<String>(
             key: const Key('aiModelName'),
             initialValue: _aiModelName,
@@ -290,9 +293,9 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
               helperText: 'Gemini model used for AI content generation across this tenant.',
             ),
             items: [
-              const DropdownMenuItem<String>(
+              DropdownMenuItem<String>(
                 value: null,
-                child: Text('System default'),
+                child: Text(CoreLocalizations.of(context)!.systemDefault),
               ),
               ..._geminiModels.map(
                 (m) => DropdownMenuItem<String>(value: m, child: Text(m)),
@@ -300,13 +303,13 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
             ],
             onChanged: (v) => setState(() => _aiModelName = v),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           ..._llmRows.asMap().entries.map((e) => _llmProviderRow(e.key)),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           TextButton.icon(
             key: const Key('addLlmProvider'),
             icon: const Icon(Icons.add),
-            label: const Text('Add Provider'),
+            label: Text(CoreLocalizations.of(context)!.addProvider),
             onPressed: () => setState(() {
               _llmRows.add({
                 'providerCtrl': TextEditingController(),
@@ -344,7 +347,7 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
                   (v == null || v.isEmpty) ? 'Required' : null,
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Expanded(
             child: TextFormField(
               key: Key('llmApiKey_$index'),
@@ -382,7 +385,7 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
       child: ElevatedButton.icon(
         key: const Key('saveSettings'),
         icon: _isSaving
-            ? const SizedBox(
+            ? SizedBox(
                 width: 16,
                 height: 16,
                 child: CircularProgressIndicator(strokeWidth: 2),

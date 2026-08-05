@@ -18,6 +18,8 @@ import 'package:growerp_models/growerp_models.dart';
 import '../functions/functions.dart';
 import '../widgets/widgets.dart';
 
+import 'package:growerp_core/growerp_core.dart';
+
 /// Edits the tenant's email server (SMTP + credentials + IMAP/store).
 /// Read-modify-write: loads the full [SystemSettings] and resends a complete
 /// payload so the default-valued store/smtp params on update#SystemSettings do
@@ -153,6 +155,7 @@ class _EmailSettingsDialogState extends State<EmailSettingsDialog> {
 
   @override
   Widget build(BuildContext context) {
+
     return Dialog(
       key: const Key('EmailSettingsDialog'),
       insetPadding: const EdgeInsets.all(10),
@@ -173,9 +176,9 @@ class _EmailSettingsDialogState extends State<EmailSettingsDialog> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Outgoing (SMTP)',
+                            Text(CoreLocalizations.of(context)!.outgoingSmtp,
                                 style: Theme.of(context).textTheme.titleSmall),
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8),
                             Row(children: [
                               Expanded(
                                 flex: 3,
@@ -188,7 +191,7 @@ class _EmailSettingsDialogState extends State<EmailSettingsDialog> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              SizedBox(width: 12),
                               Expanded(
                                 flex: 1,
                                 child: TextFormField(
@@ -214,7 +217,7 @@ class _EmailSettingsDialogState extends State<EmailSettingsDialog> {
                                 ),
                               ),
                             ]),
-                            const SizedBox(height: 12),
+                            SizedBox(height: 12),
                             DropdownButtonFormField<String>(
                               key: const Key('smtpSecurity'),
                               initialValue: _smtpSecurity,
@@ -222,23 +225,23 @@ class _EmailSettingsDialogState extends State<EmailSettingsDialog> {
                                 labelText: 'Security',
                                 helperText: '465: SSL/TLS, 587: STARTTLS',
                               ),
-                              items: const [
+                              items: [
                                 DropdownMenuItem(
-                                    value: 'none', child: Text('None')),
+                                    value: 'none', child: Text(CoreLocalizations.of(context)!.none)),
                                 DropdownMenuItem(
-                                    value: 'starttls', child: Text('STARTTLS')),
+                                    value: 'starttls', child: Text(CoreLocalizations.of(context)!.starttls)),
                                 DropdownMenuItem(
-                                    value: 'ssl', child: Text('SSL/TLS')),
+                                    value: 'ssl', child: Text(CoreLocalizations.of(context)!.ssltls)),
                               ],
                               onChanged: (v) {
                                 setState(() => _smtpSecurity = v ?? 'none');
                                 _formKey.currentState?.validate();
                               },
                             ),
-                            const SizedBox(height: 20),
-                            Text('Credentials',
+                            SizedBox(height: 20),
+                            Text(CoreLocalizations.of(context)!.credentials,
                                 style: Theme.of(context).textTheme.titleSmall),
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8),
                             TextFormField(
                               key: const Key('mailUsername'),
                               controller: _mailUserCtrl,
@@ -247,7 +250,7 @@ class _EmailSettingsDialogState extends State<EmailSettingsDialog> {
                                 prefixIcon: Icon(Icons.person_outline),
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: 12),
                             TextFormField(
                               key: const Key('mailPassword'),
                               controller: _mailPassCtrl,
@@ -272,10 +275,10 @@ class _EmailSettingsDialogState extends State<EmailSettingsDialog> {
                                 }
                               },
                             ),
-                            const SizedBox(height: 20),
-                            Text('Incoming (IMAP / POP3)',
+                            SizedBox(height: 20),
+                            Text(CoreLocalizations.of(context)!.incomingImapPop3,
                                 style: Theme.of(context).textTheme.titleSmall),
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8),
                             Row(children: [
                               Expanded(
                                 flex: 3,
@@ -288,7 +291,7 @@ class _EmailSettingsDialogState extends State<EmailSettingsDialog> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              SizedBox(width: 12),
                               Expanded(
                                 flex: 1,
                                 child: TextFormField(
@@ -300,25 +303,25 @@ class _EmailSettingsDialogState extends State<EmailSettingsDialog> {
                                 ),
                               ),
                             ]),
-                            const SizedBox(height: 12),
+                            SizedBox(height: 12),
                             DropdownButtonFormField<String>(
                               key: const Key('storeProtocol'),
                               initialValue: _storeProtocol,
                               decoration:
                                   const InputDecoration(labelText: 'Protocol'),
-                              items: const [
+                              items: [
                                 DropdownMenuItem(
                                     value: 'imaps',
-                                    child: Text('IMAPS (secure)')),
+                                    child: Text(CoreLocalizations.of(context)!.imapsSecure)),
                                 DropdownMenuItem(
-                                    value: 'imap', child: Text('IMAP')),
+                                    value: 'imap', child: Text(CoreLocalizations.of(context)!.imap)),
                                 DropdownMenuItem(
-                                    value: 'pop3', child: Text('POP3')),
+                                    value: 'pop3', child: Text(CoreLocalizations.of(context)!.pop3)),
                               ],
                               onChanged: (v) =>
                                   setState(() => _storeProtocol = v ?? 'imaps'),
                             ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: 12),
                             TextFormField(
                               key: const Key('storeFolder'),
                               controller: _storeFolderCtrl,
@@ -331,7 +334,7 @@ class _EmailSettingsDialogState extends State<EmailSettingsDialog> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -340,20 +343,20 @@ class _EmailSettingsDialogState extends State<EmailSettingsDialog> {
                           onPressed: _isSaving
                               ? null
                               : () => Navigator.of(context).pop(),
-                          child: const Text('Cancel'),
+                          child: Text(CoreLocalizations.of(context)!.cancel),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         FilledButton(
                           key: const Key('saveEmailSettings'),
                           onPressed: _isSaving ? null : _save,
                           child: _isSaving
-                              ? const SizedBox(
+                              ? SizedBox(
                                   width: 16,
                                   height: 16,
                                   child:
                                       CircularProgressIndicator(strokeWidth: 2),
                                 )
-                              : const Text('Save'),
+                              : Text(CoreLocalizations.of(context)!.save),
                         ),
                       ],
                     ),

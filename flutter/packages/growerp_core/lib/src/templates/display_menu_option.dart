@@ -21,6 +21,8 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:universal_io/io.dart';
 import '../../growerp_core.dart';
 
+import 'package:growerp_core/growerp_core.dart';
+
 /// Lazily builds its child only when the tab at [index] is first activated.
 /// Until then it shows an empty box, preventing unnecessary network requests
 /// and skeleton animations for off-screen tabs.
@@ -516,20 +518,20 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
       context: context,
       builder: (ctx) => AlertDialog(
         key: const Key('restoreMenuDialog'),
-        title: const Text('Restore default menu'),
-        content: const Text(
-          'This wipes all your menu changes and reloads the default. Continue?',
+        title: Text(CoreLocalizations.of(context)!.restoreDefaultMenu),
+        content: Text(
+          CoreLocalizations.of(context)!.thisWipesAllYourMenuChanges,
         ),
         actions: [
           TextButton(
             key: const Key('restoreMenuCancel'),
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(CoreLocalizations.of(context)!.cancel),
           ),
           TextButton(
             key: const Key('restoreMenuConfirm'),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Restore'),
+            child: Text(CoreLocalizations.of(context)!.restore),
           ),
         ],
       ),

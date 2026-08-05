@@ -15,6 +15,8 @@
 import 'package:flutter/material.dart';
 import '../domains/common/widgets/loading_indicator.dart';
 
+import 'package:growerp_core/growerp_core.dart';
+
 /// Fetches a record by id and shows its entity dialog once loaded.
 ///
 /// Generalises the `ShowFinDocDialog` / `ShowCompanyDialog` fetch-then-delegate
@@ -46,6 +48,7 @@ class AsyncRecordDialog<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return FutureBuilder<T?>(
       future: fetch(context),
       builder: (context, snapshot) {
@@ -73,7 +76,7 @@ class AsyncRecordDialog<T> extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Close'),
+                child: Text(CoreLocalizations.of(context)!.close),
               ),
             ],
           );
