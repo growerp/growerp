@@ -37,7 +37,7 @@ void main() {
       tester,
       createAdkExampleRouter(),
       adkMenuConfig,
-      UserCompanyLocalizations.localizationsDelegates,
+      adkExampleDelegates,
       restClient: restClient,
       blocProviders: getUserCompanyBlocProviders(restClient, 'AppAdmin'),
       title: 'GrowERP ADK tools & integrations test',

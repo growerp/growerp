@@ -18,6 +18,7 @@ import 'package:go_router/go_router.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_adk/growerp_adk.dart';
+import 'package:growerp_user_company/growerp_user_company.dart';
 
 /// Canonical (static) menu configuration for the standalone ADK app.
 /// Used by both the production app (main.dart) and integration tests — no
@@ -123,6 +124,12 @@ Widget _routeWidget(String route) => switch (route) {
 
 /// Creates the static go_router for the standalone ADK app.
 /// Used by both the production app (main.dart) and all integration tests.
+/// Localization delegates for the adk example app and its tests.
+const List<LocalizationsDelegate> adkExampleDelegates = [
+  UserCompanyLocalizations.delegate,
+  AdkLocalizations.delegate,
+];
+
 GoRouter createAdkExampleRouter() {
   return createStaticAppRouter(
     menuConfig: adkMenuConfig,
