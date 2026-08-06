@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
+import '../../../l10n/generated/support_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -134,11 +135,7 @@ class WebsiteConversionDialogState extends State<WebsiteConversionDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 20),
-            const Text(
-              'The website is read, its pages and colours are rewritten with AI '
-              'for the GrowERP template, and the result is installed as a new '
-              'owner. This takes a few minutes and uses AI credits.',
-            ),
+            Text(SupportLocalizations.of(context)!.websiteReadAI),
             const SizedBox(height: 16),
             TextFormField(
               key: const Key('sourceUrl'),
@@ -234,7 +231,7 @@ class WebsiteConversionDialogState extends State<WebsiteConversionDialog> {
             Center(
               child: OutlinedButton(
                 key: const Key('startConversion'),
-                child: const Text('Start conversion'),
+                child: Text(SupportLocalizations.of(context)!.startConversion),
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     _bloc.add(
@@ -334,7 +331,7 @@ class WebsiteConversionDialogState extends State<WebsiteConversionDialog> {
                 children: [
                   Expanded(
                     child: SelectableText(
-                      'Password: ${c.generatedPassword}',
+                      SupportLocalizations.of(context)!.passwordArg(c.generatedPassword),
                       key: const Key('generatedPassword'),
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
@@ -356,18 +353,14 @@ class WebsiteConversionDialogState extends State<WebsiteConversionDialog> {
                   ),
                 ],
               ),
-              const Text(
-                'Give this to the customer with the admin login: it cannot be '
-                'shown again once this conversion is removed.',
-                style: TextStyle(fontSize: 12),
-              ),
+              Text(SupportLocalizations.of(context)!.giveThisToCustomer, style: const TextStyle(fontSize: 12)),
             ],
           ],
           const SizedBox(height: 20),
           Center(
             child: OutlinedButton(
               key: const Key('deleteConversion'),
-              child: const Text('Remove from list'),
+              child: Text(SupportLocalizations.of(context)!.removeFromList),
               onPressed: () {
                 _bloc.add(WebsiteConversionDelete(c));
                 Navigator.of(context).pop();
@@ -375,13 +368,9 @@ class WebsiteConversionDialogState extends State<WebsiteConversionDialog> {
             ),
           ),
           if (c.isCompleted)
-            const Padding(
-              padding: EdgeInsets.only(top: 8),
-              child: Text(
-                'Removing only clears this row, the created owner and its '
-                'website stay.',
-                style: TextStyle(fontSize: 12),
-              ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(SupportLocalizations.of(context)!.removingClearsRow, style: const TextStyle(fontSize: 12)),
             ),
         ],
       ),

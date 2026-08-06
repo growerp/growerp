@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
+import '../l10n/generated/support_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -55,12 +56,12 @@ class _SplashScreenState extends State<SplashScreen> {
           // If not authenticated, show Login Screen (HomeForm)
           // We pass an empty configuration as it's not needed for login
           return HomeForm(
-            menuConfiguration: const MenuConfiguration(
+            menuConfiguration: MenuConfiguration(
               menuItems: [],
-              name: 'Login',
+              name: SupportLocalizations.of(context)!.login,
               appId: 'support',
             ),
-            title: 'GrowERP Support',
+            title: SupportLocalizations.of(context)!.growerpSupport,
           );
         }
 
@@ -80,12 +81,12 @@ class _SplashScreenState extends State<SplashScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Failed to load menu configuration',
+                        SupportLocalizations.of(context)!.failedToLoadMenuConfiguration,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        menuState.message ?? 'Unknown error',
+                        menuState.message ?? SupportLocalizations.of(context)!.unknownError,
                         style: const TextStyle(color: Colors.red),
                         textAlign: TextAlign.center,
                       ),
@@ -96,14 +97,14 @@ class _SplashScreenState extends State<SplashScreen> {
                             const MenuConfigLoad(userVersion: true),
                           );
                         },
-                        child: const Text('Retry'),
+                        child: Text(SupportLocalizations.of(context)!.retry),
                       ),
                       const SizedBox(height: 16),
                       TextButton(
                         onPressed: () {
                           context.read<AuthBloc>().add(const AuthLoggedOut());
                         },
-                        child: const Text('Logout'),
+                        child: Text(SupportLocalizations.of(context)!.logout),
                       ),
                     ],
                   );
@@ -115,7 +116,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     const CircularProgressIndicator(),
                     const SizedBox(height: 24),
                     Text(
-                      'Loading Menu Configuration...',
+                      SupportLocalizations.of(context)!.loadingMenuConfiguration,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ],

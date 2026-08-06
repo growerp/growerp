@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
+import '../l10n/generated/assessment_localizations.dart';
 
 /// Public landing page display - the main page that visitors see
 class LandingPageDisplay extends StatefulWidget {
@@ -27,7 +28,7 @@ class _LandingPageDisplayState extends State<LandingPageDisplay> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Landing Page'),
+        title: Text(AssessmentLocalizations.of(context)!.landingPage),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Center(
@@ -36,15 +37,15 @@ class _LandingPageDisplayState extends State<LandingPageDisplay> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              const Text(
-                'Welcome to GrowERP Landing Page',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              Text(
+                AssessmentLocalizations.of(context)!.welcomeToGrowerpLandingPage,
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Discover your business potential with our comprehensive assessment.',
-                style: TextStyle(fontSize: 16),
+              Text(
+                AssessmentLocalizations.of(context)!.discoverYourBusinessPotential,
+                style: const TextStyle(fontSize: 16),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 40),
@@ -59,12 +60,12 @@ class _LandingPageDisplayState extends State<LandingPageDisplay> {
                   ),
                   textStyle: const TextStyle(fontSize: 18),
                 ),
-                child: const Text('Start Assessment'),
+                child: Text(AssessmentLocalizations.of(context)!.startAssessment),
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Click the button above to begin your assessment journey.',
-                style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
+              Text(
+                AssessmentLocalizations.of(context)!.clickTheButtonAboveToBegin,
+                style: const TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
                 textAlign: TextAlign.center,
               ),
             ],

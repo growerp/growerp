@@ -16,6 +16,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:universal_io/io.dart';
 import 'package:flutter/material.dart';
+import '../../../l10n/generated/support_localizations.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:file_picker/file_picker.dart';
@@ -168,17 +169,10 @@ class WebsiteConversionListState extends State<WebsiteConversionList> {
               ),
               Expanded(
                 child: _conversions.isEmpty && !_isLoading
-                    ? const Center(
+                    ? Center(
                         child: Padding(
-                          padding: EdgeInsets.all(24),
-                          child: Text(
-                            'No websites converted yet.\n\n'
-                            'Press + to convert an existing company website into a '
-                            'new GrowERP owner: the site is read, its pages and '
-                            'colours are rewritten for the GrowERP template, and '
-                            'the result is installed as a new tenant.',
-                            textAlign: TextAlign.center,
-                          ),
+                          padding: const EdgeInsets.all(24),
+                          child: Text(SupportLocalizations.of(context)!.noWebsitesConverted, textAlign: TextAlign.center),
                         ),
                       )
                     : StyledDataTable(

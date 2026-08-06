@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
+import '../../../l10n/generated/support_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -105,7 +106,7 @@ class ApplicationsListState extends State<ApplicationList> {
         switch (state.status) {
           case ApplicationStatus.failure:
             return Center(
-              child: Text('failed to fetch applications: ${state.message}'),
+              child: Text(SupportLocalizations.of(context)!.failedToFetchApplications(state.message ?? '')),
             );
           case ApplicationStatus.success:
             applications = state.applications;

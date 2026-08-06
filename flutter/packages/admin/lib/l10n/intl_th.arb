@@ -1,0 +1,11 @@
+{
+  "@@locale": "th",
+  "noPlansAvailable": "ไม่มีแผนบริการ",
+  "@noPlansAvailable": {
+    "description": "Text displayed when no plans are available."
+  },
+  "noSubscriptionFound": "ไม่พบการสมัครสมาชิก",
+  "@noSubscriptionFound": {
+    "description": "Text displayed when no subscription is found."
+  }
+}
