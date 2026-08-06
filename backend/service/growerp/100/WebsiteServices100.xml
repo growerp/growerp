@@ -61,6 +61,12 @@ limitations under the License.
             <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
                 <econdition field-name="organizationPartyId" from="companyPartyId" />
             </entity-find>
+            <!-- everything below reads stores[0]; without a store that is a bare
+                 NullPointerException on the client, which says nothing about what is wrong -->
+            <if condition="!stores">
+                <return error="true"
+                    message="Company ${companyPartyId} has no product store yet, so it has no website. Complete the company setup first." />
+            </if>
             <entity-find entity-name="growerp.website.ProductStoreAndWebsiteContent" list="pages">
                 <econdition field-name="organizationPartyId" from="companyPartyId" />
                 <econdition field-name="pagePath" operator="is-not-null" />
