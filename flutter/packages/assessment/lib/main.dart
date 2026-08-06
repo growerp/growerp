@@ -24,6 +24,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:js_interop' if (dart.library.io) 'dart:js_interop';
 import 'package:web/web.dart' as web if (dart.library.io) 'package:web/web.dart';
+import 'l10n/generated/assessment_localizations.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -84,6 +85,7 @@ Future main() async {
 
 List<LocalizationsDelegate> delegates = const [
   MarketingLocalizations.delegate,
+  AssessmentLocalizations.delegate,
 ];
 
 /// Notify parent window that Flutter app is ready (for iframe embedding)

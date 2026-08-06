@@ -32,6 +32,7 @@ import 'src/website_conversion/website_conversion.dart';
 import 'src/website_translation/website_translation.dart';
 import 'views/rest_statistics_view.dart';
 import 'views/support_dashboard_content.dart';
+import 'l10n/generated/support_localizations.dart';
 //webactivate  import 'package:web/web.dart' as web;
 
 Future main() async {
@@ -196,6 +197,7 @@ class _SupportAppState extends State<SupportApp> {
 List<LocalizationsDelegate> delegates = [
   UserCompanyLocalizations.delegate,
   ActivityLocalizations.delegate,
+  SupportLocalizations.delegate,
 ];
 
 List<Map<String, GrowerpWidgetBuilder>> supportWidgetRegistrations = [

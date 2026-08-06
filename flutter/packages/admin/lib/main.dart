@@ -40,6 +40,7 @@ import 'views/admin_dashboard_content.dart';
 import 'views/plan_selection_form.dart';
 import 'views/accounting_form.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'l10n/generated/admin_localizations.dart';
 //webactivate  import 'package:web/web.dart' as web;
 
 Future main() async {
@@ -242,6 +243,7 @@ List<LocalizationsDelegate> delegates = [
   ManufLinerLocalizations.delegate,
   MarketingLocalizations.delegate,
   OutreachLocalizations.delegate,
+  AdminLocalizations.delegate,
 ];
 
 /// Widget registrations for all packages used by Admin app
