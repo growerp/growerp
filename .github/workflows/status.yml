@@ -367,6 +367,18 @@ jobs:
           path: /tmp/test_output.log
           retention-days: 7
 
+      # Fail the job on test failures. Done after the summary/upload steps so
+      # the log artifact is always kept.
+      - name: Fail on test failures
+        if: always()
+        run: |
+          CODE="${TEST_EXIT_CODE:-1}"
+          if [ "$CODE" != "0" ]; then
+            echo "Integration tests failed (exit code $CODE)"
+            exit 1
+          fi
+          echo "Integration tests passed."
+
       # ------------------------------------------------------------------
       # 8. Cleanup
       # ------------------------------------------------------------------

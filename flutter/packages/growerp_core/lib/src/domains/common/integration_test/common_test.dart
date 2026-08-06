@@ -1626,14 +1626,20 @@ class CommonTest {
     // part of the menu that fits the screen: scroll the overlay to the option.
     final option = find.textContaining(RegExp(value, caseSensitive: false));
     if (!tester.any(option)) {
-      try {
-        await tester.scrollUntilVisible(
-          option,
-          100.0,
-          scrollable: find.byType(Scrollable).last,
-          maxScrolls: 30,
-        );
-      } catch (_) {}
+      // the menu opens at the currently selected item, so the wanted option can
+      // sit either below or above it: scroll forward first, then backward.
+      final scrollable = find.byType(Scrollable).last;
+      for (final delta in [100.0, -100.0]) {
+        try {
+          await tester.scrollUntilVisible(
+            option,
+            delta,
+            scrollable: scrollable,
+            maxScrolls: 30,
+          );
+        } catch (_) {}
+        if (tester.any(option)) break;
+      }
     }
     await tapByText(tester, value);
   }
