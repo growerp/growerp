@@ -481,6 +481,10 @@ limitations under the License.
         title="Website Generator" route="/websiteGenerator" iconName="travel_explore"
         widgetName="WebsiteConversionList"
         userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="SUPPORT_WEBSITE_TRANS" menuConfigurationId="SUPPORT_DEFAULT"
+        title="Website Translation" route="/websiteTranslation" iconName="translate"
+        widgetName="WebsiteTranslationList"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="35"/>
     <growerp.menu.MenuItem menuItemId="SUPPORT_LLM_USAGE" menuConfigurationId="SUPPORT_DEFAULT"
         title="LLM Usage" route="/llm-usage" iconName="assessment" widgetName="AdkSystemUsageView" sequenceNum="50"/>
     <growerp.menu.MenuItem menuItemId="SUPPORT_STATISTICS" menuConfigurationId="SUPPORT_DEFAULT"

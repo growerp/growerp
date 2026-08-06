@@ -1,5 +1,8 @@
 <#-- Shared floating chat widget, included by both store.xml and website.xml.
-     Requires screen context vars: productStoreId, productStore. -->
+     Requires screen context vars: productStoreId, productStore.
+     The visible text comes from moqui.basic.LocalizedMessage so the widget follows the
+     language the page is served in (/nl/, /th/, ...), see growerp data/GrowerpL10nData.xml. -->
+<#function l key><#return ec.l10n.localize(key)></#function>
 <style>
 #growerp-chat-btn{position:fixed;right:20px;bottom:20px;z-index:2147483000;
   display:flex;align-items:center;gap:10px;cursor:pointer;
@@ -68,34 +71,34 @@
   margin:6px 0}
 #growerp-chat-msgs .growerp-optimistic{opacity:.55}
 </style>
-<button id="growerp-chat-btn" type="button" aria-label="Ask a question">
+<button id="growerp-chat-btn" type="button" aria-label="${l('GrowerpWebsiteChatAsk')}">
   <svg viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-2 9H6V9h12v2zm0-3H6V6h12v2z"/></svg>
-  <span class="growerp-chat-label">Question?<br>we answer within one day</span>
+  <span class="growerp-chat-label">${l('GrowerpWebsiteChatPrompt')}<br>${l('GrowerpWebsiteChatPromptSub')}</span>
 </button>
-<div id="growerp-chat-panel" role="dialog" aria-label="Ask a question">
+<div id="growerp-chat-panel" role="dialog" aria-label="${l('GrowerpWebsiteChatAsk')}">
   <div class="growerp-chat-head">
-    <span id="growerp-chat-title">Ask us a question</span>
-    <button id="growerp-chat-new" type="button">+ New question</button>
+    <span id="growerp-chat-title">${l('GrowerpWebsiteChatTitle')}</span>
+    <button id="growerp-chat-new" type="button">${l('GrowerpWebsiteChatNewQuestion')}</button>
   </div>
   <!-- start form: shown until a conversation has been started -->
   <div class="growerp-chat-body">
     <div>
-      <label for="growerp-chat-email">Your email *</label>
+      <label for="growerp-chat-email">${l('GrowerpWebsiteChatEmailLabel')}</label>
       <input id="growerp-chat-email" type="email" required placeholder="you@example.com"/>
     </div>
     <div>
-      <label for="growerp-chat-question">Your question *</label>
-      <textarea id="growerp-chat-question" placeholder="How can we help?"></textarea>
+      <label for="growerp-chat-question">${l('GrowerpWebsiteChatQuestionLabel')}</label>
+      <textarea id="growerp-chat-question" placeholder="${l('GrowerpWebsiteChatQuestionPlaceholder')}"></textarea>
     </div>
     <div id="growerp-chat-status"></div>
-    <button class="growerp-chat-send" type="button">Send</button>
+    <button class="growerp-chat-send" type="button">${l('GrowerpWebsiteChatSend')}</button>
   </div>
   <!-- conversation thread: shown once a room exists -->
   <div id="growerp-chat-thread">
     <div id="growerp-chat-msgs"></div>
     <div id="growerp-chat-compose">
-      <textarea id="growerp-chat-input" rows="1" placeholder="Type a message..."></textarea>
-      <button id="growerp-chat-post" type="button">Send</button>
+      <textarea id="growerp-chat-input" rows="1" placeholder="${l('GrowerpWebsiteChatMessagePlaceholder')}"></textarea>
+      <button id="growerp-chat-post" type="button">${l('GrowerpWebsiteChatSend')}</button>
     </div>
   </div>
 </div>
@@ -103,6 +106,17 @@
 (function(){
   var productStoreId = "${productStoreId}";
   var companyName = "${(productStore.storeName)!'Support'}";
+  // the visible strings, localized server side; {name} is filled in below
+  var T = {
+    title: "${l('GrowerpWebsiteChatTitle')?js_string}",
+    chatWith: "${l('GrowerpWebsiteChatWith')?js_string}",
+    expired: "${l('GrowerpWebsiteChatExpired')?js_string}",
+    invalidEmail: "${l('GrowerpWebsiteChatInvalidEmail')?js_string}",
+    noQuestion: "${l('GrowerpWebsiteChatNoQuestion')?js_string}",
+    failed: "${l('GrowerpWebsiteChatError')?js_string}",
+    newDivider: "${l('GrowerpWebsiteChatDivider')?js_string}",
+    close: "${l('GrowerpWebsiteChatClose')?js_string}"
+  };
   var apiBase = window.location.origin + '/rest/s1/growerp/100/WebsiteChat';
   var storeKey  = 'growerp_chat_' + productStoreId;
   var openKey   = 'growerp_chat_open_' + productStoreId;
@@ -186,7 +200,7 @@
   // switch the panel into conversation mode (thread + compose box)
   function showThread(){
     panel.classList.add('growerp-mode-thread');
-    titleEl.textContent = 'Chat with ' + companyName;
+    titleEl.textContent = T.chatWith.replace('{name}', companyName);
   }
 
   function escapeHtml(s){
@@ -234,10 +248,10 @@
     seenIds = {};
     msgsEl.innerHTML = '';
     panel.classList.remove('growerp-mode-thread');
-    titleEl.textContent = 'Ask us a question';
+    titleEl.textContent = T.title;
     questionEl.value = '';
     sendBtn.disabled = false;
-    setStatus('Your previous conversation has expired. Please start a new one.', 'err');
+    setStatus(T.expired, 'err');
   }
   function fetchMessages(){
     if (!session || !session.chatRoomId) return;
@@ -288,8 +302,8 @@
   sendBtn.addEventListener('click', function(){
     var email = (emailEl.value || '').trim();
     var question = (questionEl.value || '').trim();
-    if (!validEmail(email)){ setStatus('Please enter a valid email address.', 'err'); emailEl.focus(); return; }
-    if (!question){ setStatus('Please enter your question.', 'err'); questionEl.focus(); return; }
+    if (!validEmail(email)){ setStatus(T.invalidEmail, 'err'); emailEl.focus(); return; }
+    if (!question){ setStatus(T.noQuestion, 'err'); questionEl.focus(); return; }
     setStatus('', '');
     sendBtn.disabled = true;
     // show the conversation with the question already in it, then send
@@ -301,7 +315,7 @@
       clearOptimistic();
       panel.classList.remove('growerp-mode-thread');
       questionEl.value = question;
-      setStatus('Sorry, something went wrong. Please try again.', 'err');
+      setStatus(T.failed, 'err');
       sendBtn.disabled = false;
     });
   });
@@ -347,7 +361,7 @@
   // ----- "Ask another question": keep old messages, route next send to a NEW room -----
   newBtn.addEventListener('click', function(){
     stopPolling();
-    appendDivider('— new question —');
+    appendDivider(T.newDivider);
     saveSession({ chatRoomId: null });   // keep email cookie; next send starts a new room
     inputEl.focus();
   });
@@ -355,7 +369,7 @@
   function openPanel(remember){
     panel.classList.add('growerp-open');
     btn.classList.add('growerp-expanded');
-    labelEl.textContent = 'Close Chat';
+    labelEl.textContent = T.close;
     if (remember !== false) rememberOpen(true);
     if (session && session.chatRoomId){ startPolling(); inputEl.focus(); }
     else if (panel.classList.contains('growerp-mode-thread')) inputEl.focus();

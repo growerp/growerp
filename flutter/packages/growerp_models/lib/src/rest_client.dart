@@ -190,6 +190,30 @@ abstract class RestClient {
     @Body() required Map<String, dynamic> data,
   });
 
+  // website translation: translate a website into the languages the apps support
+  @GET("rest/s1/growerp/100/WebsiteTranslation")
+  Future<WebsiteTranslations> getWebsiteTranslation({
+    @Query('translationId') String? translationId,
+    @Query('ownerPartyId') String? ownerPartyId,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('search') String? search,
+  });
+
+  @POST("rest/s1/growerp/100/WebsiteTranslation")
+  Future<WebsiteTranslation> createWebsiteTranslation({
+    @Field() required String ownerPartyId,
+    @Field() String? sourceLocale,
+    @Field() required String targetLocales,
+    @Field() String? translateEntityNames,
+    @Field() String? overwriteExisting,
+  });
+
+  @DELETE("rest/s1/growerp/100/WebsiteTranslation")
+  Future<void> deleteWebsiteTranslation({
+    @Field() required String translationId,
+  });
+
   // email templates
   @GET("rest/s1/growerp/100/EmailTemplate")
   Future<EmailTemplates> getEmailTemplates({

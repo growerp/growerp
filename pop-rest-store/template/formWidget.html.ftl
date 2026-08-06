@@ -1,6 +1,7 @@
 <#-- Shared lead-capture form renderer, included by both store.xml and website.xml.
      Page authors embed a form with <div data-growerp-form="FORM_ID"></div> in any
      content page; this script fetches the form definition and renders it inline. -->
+<#function l key><#return ec.l10n.localize(key)></#function>
 <style>
 .growerp-form{max-width:480px;margin:16px 0;padding:18px;border:1px solid #ddd;
   border-radius:12px;font-family:inherit;background:rgba(255,255,255,.85);color:#222}
@@ -18,6 +19,13 @@
 </style>
 <script>
 (function(){
+  // fallback wording; the form's own title, labels and success message are tenant
+  // content and come from the WebsiteForm record
+  var T = {
+    send: "${l('GrowerpWebsiteFormSend')?js_string}",
+    thanks: "${l('GrowerpWebsiteFormThanks')?js_string}",
+    failed: "${l('GrowerpWebsiteFormError')?js_string}"
+  };
   var apiBase = window.location.origin + '/rest/s1/growerp/100/SubmitWebsiteForm';
 
   function el(tag, attrs, text){
@@ -42,7 +50,7 @@
       input.dataset.fieldId = f.fieldId;
       form.appendChild(input);
     });
-    var btn = el('button', {type:'submit'}, def.submitLabel || 'Send');
+    var btn = el('button', {type:'submit'}, def.submitLabel || T.send);
     form.appendChild(btn);
     var status = el('div', {'class':'growerp-form-status'});
     form.appendChild(status);
@@ -63,16 +71,16 @@
         .then(function(res){
           if (res.ok) {
             status.className = 'growerp-form-status growerp-ok';
-            status.textContent = res.j.successMessage || def.successMessage || 'Thank you!';
+            status.textContent = res.j.successMessage || def.successMessage || T.thanks;
             form.querySelectorAll('input,textarea').forEach(function(i){ i.value=''; });
           } else {
             status.className = 'growerp-form-status growerp-err';
-            status.textContent = (res.j && res.j.errors) ? res.j.errors : 'Could not send, try again';
+            status.textContent = (res.j && res.j.errors) ? res.j.errors : T.failed;
             btn.disabled = false;
           }
         }).catch(function(){
           status.className = 'growerp-form-status growerp-err';
-          status.textContent = 'Could not send, try again';
+          status.textContent = T.failed;
           btn.disabled = false;
         });
     });

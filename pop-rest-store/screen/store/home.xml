@@ -25,7 +25,9 @@ along with this software (see the LICENSE.md file). If not, see
         <!-- page description and the schema.org page type; set here because root.html.ftl renders
              the head before the actions below run. No pageTitle: the store name is the better title. -->
         <set field="seoPageType" value="home"/>
-        <set field="homePage" from="storeInfo.pages?.find({ it.title?.toLowerCase()?.startsWith('home') })
+        <!-- match on the path, not the title: under a language the titles are translated -->
+        <set field="homePage" from="storeInfo.pages?.find({ it.path?.toLowerCase()?.startsWith('home') })
+                ?: storeInfo.pages?.find({ it.title?.toLowerCase()?.startsWith('home') })
                 ?: storeInfo.pages?.getAt(0)"/>
         <set field="pageDescription" from="homePage?.description"/>
     </pre-actions>
@@ -90,14 +92,37 @@ along with this software (see the LICENSE.md file). If not, see
         <if condition="specialInstrLocation">
             <set field="specialInstructions" from="ec.resource.getLocationText(specialInstrLocation, true)"/>
         </if>
-        <set field="path" from="storeInfo.menu.find{ it.title?.toLowerCase()?.startsWith('home')}?.path"/>
+        <!-- the page path is the language independent one ('home'); under a language the menu
+             titles are translated, so match on the path first and keep the title as a fallback -->
+        <set field="path" from="storeInfo.menu.find{ it.path?.toLowerCase()?.startsWith('home')}?.path"/>
+        <if condition="!path">
+            <set field="path" from="storeInfo.menu.find{ it.title?.toLowerCase()?.startsWith('home')}?.path"/>
+        </if>
         <if condition="!path">
             <set field="path" from="storeInfo.menu[0].path"/>
         </if>
-        <set field="homeLocation" value="${storeInfo.settings.PsstContentLocation}/content/${path}.md.ftl"/>
+        <!-- Under /{locale}/ the translated home page comes first and the source page is the
+             fallback, the same rule content.xml serves the other pages with. The menu path
+             carries no language, see StoreServices get#StoreInfo. -->
+        <set field="homeContentPath" from="(pagePathPrefix ?: '') + path"/>
+        <set field="homeMdRr"
+            from="ec.resource.getLocationReference(
+                storeInfo.settings.PsstContentLocation + '/content/' + homeContentPath + '.md.ftl')"/>
+        <set field="homeFtlRr"
+            from="ec.resource.getLocationReference(
+                storeInfo.settings.PsstContentLocation + '/content/' + homeContentPath + '.html.ftl')"/>
+        <if condition="pagePathPrefix
+                &amp;&amp; (homeMdRr == null || !homeMdRr.exists)
+                &amp;&amp; (homeFtlRr == null || !homeFtlRr.exists)">
+            <!-- this home page was not translated: show the one the site is written in -->
+            <set field="homeContentPath" from="path"/>
+        </if>
+        <set field="homeLocation"
+            value="${storeInfo.settings.PsstContentLocation}/content/${homeContentPath}.md.ftl"/>
         <!-- ftl content type: full FreeMarker/HTML home page stored in the database (editable
              via the website dialog); when present it replaces the built-in home template -->
-        <set field="homeFtlLocation" value="${storeInfo.settings.PsstContentLocation}/content/${path}.html.ftl"/>
+        <set field="homeFtlLocation"
+            value="${storeInfo.settings.PsstContentLocation}/content/${homeContentPath}.html.ftl"/>
         <set field="homeFtlRr" from="ec.resource.getLocationReference(homeFtlLocation)"/>
         <if condition="homeFtlRr == null || !homeFtlRr.exists">
             <set field="homeFtlLocation" from="null"/>

@@ -1,0 +1,611 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!--
+Website translation: translate an owner's website into the locales the Flutter apps support.
+
+    create#WebsiteTranslation   validate + queue, returns immediately
+    process#WebsiteTranslation  background worker: page by page, locale by locale
+    get#WebsiteTranslations     list/single row for the support app page
+    delete#WebsiteTranslation   remove a row (never the translated pages)
+
+A translated page is a normal wiki page with the locale as its first path segment: 'about'
+becomes 'th/about', stored at ${rootPageLocation}/content/th/about.html.ftl. The public site
+serves it at /th/content/about, see PopRestStore store.xml.
+
+store#TranslatedPage writes the page rather than WebsiteServices100.upload#WebsiteContent:
+that service derives the store from the calling user's own company and names a new page after
+its wikiPageId, while this job writes into another owner's store under a path it chooses.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="get" noun="WebsiteTranslations">
+        <description>List website translations, or a single one by translationId. A system
+            support user sees every owner's rows, anyone else only their own.</description>
+        <in-parameters>
+            <parameter name="translationId" />
+            <parameter name="ownerPartyId" />
+            <parameter name="start" type="Integer" default-value="0" />
+            <parameter name="limit" type="Integer" default-value="20" />
+            <parameter name="search" default="null" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="websiteTranslations" type="List">
+                <parameter name="websiteTranslation" type="Map" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <set field="isSystem"
+                from="ec.user.isInGroup('GROWERP_M_SYSTEM') || ec.user.isInGroup('GROWERP_M_ADMIN')" />
+            <if condition="!isSystem">
+                <!-- a tenant user only ever sees the translations of their own website -->
+                <service-call out-map="context"
+                    name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            </if>
+            <if condition="search != null">
+                <set field="search" value="%${search}%" />
+            </if>
+            <entity-find entity-name="growerp.website.WebsiteTranslation" list="translations"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" ignore-if-empty="true" />
+                <econdition field-name="translationId" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="targetLocales" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="productStoreId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="status" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="-createdDate" />
+            </entity-find>
+            <set field="websiteTranslations" from="[]" />
+            <!-- dates go out as ISO strings: the Flutter DateTimeConverter reads a String, a
+                 raw Timestamp would serialize as epoch millis and blow up the client parse -->
+            <script>def isoFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")</script>
+            <iterate list="translations" entry="translation">
+                <entity-find-one entity-name="mantle.party.Organization" value-field="owner">
+                    <field-map field-name="partyId" from="translation.ownerPartyId" />
+                </entity-find-one>
+                <set field="row" from="[
+                    translationId: translation.translationId,
+                    ownerPartyId: translation.ownerPartyId,
+                    ownerName: owner?.organizationName,
+                    productStoreId: translation.productStoreId,
+                    sourceLocale: translation.sourceLocale,
+                    targetLocales: translation.targetLocales,
+                    translateEntityNames: translation.translateEntityNames,
+                    overwriteExisting: translation.overwriteExisting,
+                    status: translation.status, statusMessage: translation.statusMessage,
+                    pageCount: translation.pageCount,
+                    translatedCount: translation.translatedCount,
+                    errorMessage: translation.errorMessage,
+                    createdDate: (translation.createdDate != null ?
+                        isoFormat.format(translation.createdDate) : null),
+                    completedDate: (translation.completedDate != null ?
+                        isoFormat.format(translation.completedDate) : null)]" />
+                <script>websiteTranslations.add(row)</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="WebsiteTranslation">
+        <description>Validate the request and queue the translation. The owner has to have a
+            website with pages and a usable AI key, both checked here so a translation that
+            cannot run never spends any LLM tokens.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true">
+                <description>the owner whose website is translated</description>
+            </parameter>
+            <parameter name="sourceLocale" default-value="en" />
+            <parameter name="targetLocales" required="true">
+                <description>comma separated, eg 'th,nl'. Any of th, zh, de, fr, nl, en.</description>
+            </parameter>
+            <parameter name="translateEntityNames" default-value="N" />
+            <parameter name="overwriteExisting" default-value="N" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="websiteTranslation" type="Map" />
+        </out-parameters>
+        <actions>
+            <!-- the locales the Flutter apps support, see growerp_core top_app.dart -->
+            <set field="supportedLocales" from="['en', 'th', 'zh', 'de', 'fr', 'nl']" />
+            <set field="localeList"
+                from="targetLocales.split(',').collect({ it.trim() }).findAll({ it })" />
+            <if condition="!localeList">
+                <return error="true" message="No target language selected" />
+            </if>
+            <iterate list="localeList" entry="locale">
+                <if condition="!supportedLocales.contains(locale)">
+                    <return error="true"
+                        message="${locale} is not one of the supported languages ${supportedLocales.join(', ')}" />
+                </if>
+                <if condition="locale == sourceLocale">
+                    <return error="true"
+                        message="${locale} is the language the website is already written in" />
+                </if>
+            </iterate>
+
+            <entity-find-one entity-name="mantle.party.Organization" value-field="owner">
+                <field-map field-name="partyId" from="ownerPartyId" />
+            </entity-find-one>
+            <if condition="!owner">
+                <return error="true" message="Owner ${ownerPartyId} not found" />
+            </if>
+
+            <!-- the owner's own website: the store of the main company of this owner -->
+            <entity-find entity-name="growerp.website.ProductStoreAndWebsiteContent" list="pages">
+                <econdition field-name="organizationPartyId" from="ownerPartyId" />
+                <econdition field-name="pagePath" operator="is-not-null" />
+                <econdition field-name="pagePath" operator="not-like" value="obsidian%" />
+            </entity-find>
+            <if condition="!pages">
+                <return error="true"
+                    message="Owner ${owner.organizationName} has no website pages to translate" />
+            </if>
+            <set field="productStoreId" from="pages[0].productStoreId" />
+
+            <!-- source pages, the ones not already under a locale prefix -->
+            <set field="sourcePages"
+                from="pages.findAll({ !supportedLocales.contains(it.pagePath.split('/')[0]) })" />
+            <if condition="!sourcePages">
+                <return error="true"
+                    message="Owner ${owner.organizationName} has only translated pages, nothing to translate from" />
+            </if>
+
+            <!-- an AI key has to be available or the worker would die silently -->
+            <service-call name="growerp.100.WebsiteTranslationServices100.get#TranslationApiKey"
+                in-map="[ownerPartyId: ownerPartyId]" out-map="keyOut" />
+            <if condition="!keyOut.apiKey">
+                <return error="true"
+                    message="No Gemini API key configured: set it in System Setup or in the GEMINI_API_KEY environment variable" />
+            </if>
+
+            <!-- Write the row in its own transaction and fire the worker only afterwards: the
+                 async worker runs on another thread and looks the row up by id, so it would not
+                 see it yet if it were still in this uncommitted transaction. -->
+            <script><![CDATA[
+                def created = ec.service.sync().name('create#growerp.website.WebsiteTranslation')
+                    .parameters([ownerPartyId: ownerPartyId, productStoreId: productStoreId,
+                                 sourceLocale: sourceLocale,
+                                 targetLocales: localeList.join(','),
+                                 translateEntityNames: translateEntityNames,
+                                 overwriteExisting: overwriteExisting,
+                                 status: 'QUEUED', statusMessage: 'Waiting to start',
+                                 pageCount: sourcePages.size() * localeList.size(),
+                                 translatedCount: 0,
+                                 createdDate: ec.user.nowTimestamp])
+                    .requireNewTransaction(true).call()
+                context.translationId = created.translationId
+            ]]></script>
+            <check-errors />
+
+            <!-- run the translation in the background, it takes minutes -->
+            <script>
+                ec.service.async()
+                    .name('growerp.100.WebsiteTranslationServices100.process#WebsiteTranslation')
+                    .parameters([translationId: translationId, notifyUserId: ec.user.userId,
+                                 username: ec.user.username])
+                    .call()
+            </script>
+
+            <service-call name="growerp.100.WebsiteTranslationServices100.get#WebsiteTranslations"
+                in-map="[translationId: translationId]" out-map="fetched" />
+            <set field="websiteTranslation" from="fetched.websiteTranslations[0]" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="TranslationApiKey">
+        <description>The Gemini key to translate with: this owner's LlmConfig first, the way
+            AdkManager.resolveApiKey resolves it, then the user preference and the environment.
+            GeminiAiUtil does not read LlmConfig itself, so the key is passed in.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="apiKey" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.general.LlmConfig" value-field="llmConfig">
+                <field-map field-name="ownerPartyId" />
+                <field-map field-name="llmProvider" value="gemini" />
+            </entity-find-one>
+            <script><![CDATA[
+                context.apiKey = llmConfig?.apiKey ?: ec.user.getPreference("GEMINI_API_KEY") ?:
+                    System.getenv("GEMINI_API_KEY") ?: System.getenv("GOOGLE_API_KEY")
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="update" noun="WebsiteTranslationStatus" transaction="force-new">
+        <description>Write the progress of a translation in its own transaction, so the page sees
+            it immediately and a later failure cannot roll the progress back.</description>
+        <in-parameters>
+            <parameter name="translationId" required="true" />
+            <parameter name="status" />
+            <parameter name="statusMessage" allow-html="any" />
+            <!-- an error from the AI quotes html or xml often enough that the default check would
+                 reject the write and leave the row stuck in its last status with no message -->
+            <parameter name="errorMessage" allow-html="any" />
+            <parameter name="pageCount" type="Integer" />
+            <parameter name="translatedCount" type="Integer" />
+            <parameter name="completedDate" type="Timestamp" />
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.website.WebsiteTranslation"
+                value-field="translation" for-update="true" />
+            <if condition="!translation">
+                <return error="true" message="Translation ${translationId} not found" />
+            </if>
+            <set field="translation.status" from="status" set-if-empty="false" />
+            <set field="translation.statusMessage" from="statusMessage" set-if-empty="false" />
+            <set field="translation.errorMessage" from="errorMessage" set-if-empty="false" />
+            <set field="translation.pageCount" from="pageCount" set-if-empty="false" />
+            <set field="translation.translatedCount" from="translatedCount" set-if-empty="false" />
+            <set field="translation.completedDate" from="completedDate" set-if-empty="false" />
+            <entity-update value-field="translation" />
+        </actions>
+    </service>
+
+    <service verb="process" noun="WebsiteTranslation" authenticate="anonymous"
+        transaction="ignore">
+        <description>Background worker: translate every source page into every target locale and
+            store it as a locale prefixed page. Every page commits its progress through
+            update#WebsiteTranslationStatus so the support app can follow along.</description>
+        <in-parameters>
+            <parameter name="translationId" required="true" />
+            <parameter name="notifyUserId" />
+            <parameter name="username" />
+        </in-parameters>
+        <actions>
+            <!-- the async worker has no web session: log in as the submitting user for authz -->
+            <if condition="!ec.user.userId &amp;&amp; username">
+                <script>ec.user.internalLoginUser(username)</script>
+            </if>
+            <!-- the caller commits the row just before firing this worker; allow for the commit
+                 not being visible on this thread the very first moment -->
+            <script><![CDATA[
+                def translation = null
+                for (int attempt = 0; attempt < 10 && translation == null; attempt++) {
+                    translation = ec.entity.find("growerp.website.WebsiteTranslation")
+                        .condition("translationId", translationId).useCache(false).disableAuthz().one()
+                    if (translation == null) Thread.sleep(500)
+                }
+                context.translation = translation
+            ]]></script>
+            <if condition="!translation">
+                <return error="true" message="Translation ${translationId} not found" />
+            </if>
+
+            <script><![CDATA[
+                final List SUPPORTED = ['en', 'th', 'zh', 'de', 'fr', 'nl']
+
+                def progress = { String status, String message, Integer done ->
+                    ec.service.sync()
+                        .name('growerp.100.WebsiteTranslationServices100.update#WebsiteTranslationStatus')
+                        .parameters([translationId: translationId, status: status,
+                                     statusMessage: message, translatedCount: done])
+                        .call()
+                }
+                def failed = { String message ->
+                    ec.logger.error("process#WebsiteTranslation ${translationId} failed: ${message}")
+                    ec.message.clearErrors()
+                    ec.service.sync()
+                        .name('growerp.100.WebsiteTranslationServices100.update#WebsiteTranslationStatus')
+                        .parameters([translationId: translationId, status: 'FAILED',
+                                     statusMessage: 'Failed',
+                                     errorMessage: message.take(4000),
+                                     completedDate: ec.user.nowTimestamp])
+                        .call()
+                }
+
+                String apiKey = ec.service.sync()
+                    .name('growerp.100.WebsiteTranslationServices100.get#TranslationApiKey')
+                    .parameters([ownerPartyId: translation.ownerPartyId]).call()?.apiKey
+
+                try {
+                    List locales = (translation.targetLocales ?: '').split(',')
+                        .collect { it.trim() }.findAll { it }
+
+                    def pages = ec.entity.find("growerp.website.ProductStoreAndWebsiteContent")
+                        .condition("productStoreId", translation.productStoreId)
+                        .condition("pagePath", org.moqui.entity.EntityCondition.IS_NOT_NULL, null)
+                        .disableAuthz().list()
+                    // the source pages are the ones not already under a locale prefix
+                    def sourcePages = pages.findAll {
+                        !it.pagePath.startsWith('obsidian') &&
+                        !SUPPORTED.contains(it.pagePath.split('/')[0])
+                    }
+                    def existingPaths = pages.collect { it.pagePath } as Set
+
+                    int total = sourcePages.size() * locales.size()
+                    int done = 0
+                    ec.service.sync()
+                        .name('growerp.100.WebsiteTranslationServices100.update#WebsiteTranslationStatus')
+                        .parameters([translationId: translationId, pageCount: total]).call()
+
+                    for (String locale in locales) {
+                        for (def page in sourcePages) {
+                            String targetPath = "${locale}/${page.pagePath}"
+                            done++
+                            if (existingPaths.contains(targetPath) &&
+                                    translation.overwriteExisting != 'Y') {
+                                progress('TRANSLATING', "${locale}: kept ${page.pagePath} ${done}/${total}", done)
+                                continue
+                            }
+                            progress('TRANSLATING', "${locale}: ${page.pagePath} ${done}/${total}", done)
+
+                            def translated = ec.service.sync()
+                                .name('growerp.100.WebsiteTranslationServices100.translate#WebsitePage')
+                                .parameters([rootPageLocation: page.rootPageLocation,
+                                             pagePath: page.pagePath,
+                                             sourceLocale: translation.sourceLocale ?: 'en',
+                                             targetLocale: locale, apiKey: apiKey,
+                                             ownerPartyId: translation.ownerPartyId])
+                                .call()
+                            if (ec.message.hasError()) throw new Exception(ec.message.getErrorsString())
+                            if (!translated?.translatedText) continue
+
+                            ec.service.sync()
+                                .name('growerp.100.WebsiteTranslationServices100.store#TranslatedPage')
+                                .parameters([productStoreId: translation.productStoreId,
+                                             pagePath: targetPath,
+                                             text: translated.translatedText,
+                                             contentType: translated.contentType,
+                                             sequenceNum: page.sequenceNum])
+                                .call()
+                            if (ec.message.hasError()) throw new Exception(ec.message.getErrorsString())
+                        }
+                    }
+
+                    if (translation.translateEntityNames == 'Y') {
+                        progress('TRANSLATING', 'Translating product and category names', done)
+                        ec.service.sync()
+                            .name('growerp.100.WebsiteTranslationServices100.translate#StoreEntityNames')
+                            .parameters([productStoreId: translation.productStoreId,
+                                         targetLocales: translation.targetLocales,
+                                         sourceLocale: translation.sourceLocale ?: 'en',
+                                         apiKey: apiKey, ownerPartyId: translation.ownerPartyId])
+                            .call()
+                        if (ec.message.hasError()) throw new Exception(ec.message.getErrorsString())
+                    }
+
+                    // sitemap.xml/llms.txt list all pages, so they cannot self invalidate on a
+                    // version bump like the per page markdown does
+                    ec.cache.getCache('growerp.seo.index').clear()
+
+                    ec.service.sync()
+                        .name('growerp.100.WebsiteTranslationServices100.update#WebsiteTranslationStatus')
+                        .parameters([translationId: translationId, status: 'COMPLETED',
+                                     statusMessage: "Translated into ${locales.join(', ')}",
+                                     translatedCount: done,
+                                     completedDate: ec.user.nowTimestamp])
+                        .call()
+                    ec.logger.info("process#WebsiteTranslation ${translationId} completed, ${done} pages")
+
+                    if (notifyUserId) {
+                        ec.makeNotificationMessage().topic('websiteTranslation')
+                            .userId(notifyUserId as String).title('Website translated')
+                            .message([translationId: translationId, status: 'COMPLETED',
+                                message: "Website translated into ${locales.join(', ')}"]).send()
+                    }
+                } catch (Exception e) {
+                    failed(e.message ?: e.toString())
+                    if (notifyUserId) {
+                        ec.makeNotificationMessage().topic('websiteTranslation')
+                            .userId(notifyUserId as String).title('Website translation failed')
+                            .message([translationId: translationId, status: 'FAILED',
+                                message: "Translation of store ${translation.productStoreId} failed"]).send()
+                    }
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="translate" noun="WebsitePage" transaction-timeout="1800">
+        <description>Read one source page and translate it into one locale with Gemini.</description>
+        <in-parameters>
+            <parameter name="rootPageLocation" required="true" />
+            <parameter name="pagePath" required="true" />
+            <parameter name="sourceLocale" default-value="en" />
+            <parameter name="targetLocale" required="true" />
+            <parameter name="apiKey" />
+            <parameter name="ownerPartyId" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="translatedText" allow-html="any" />
+            <parameter name="contentType" />
+        </out-parameters>
+        <actions>
+            <set field="location" value="${rootPageLocation}/content/${pagePath}.md.ftl" />
+            <set field="contentType" value="md" />
+            <set field="contentRef" from="ec.resource.getLocationReference(location)" />
+            <if condition="contentRef == null || !contentRef.exists">
+                <!-- ftl content type: full FreeMarker/HTML page -->
+                <set field="location" value="${rootPageLocation}/content/${pagePath}.html.ftl" />
+                <set field="contentType" value="ftl" />
+                <set field="contentRef" from="ec.resource.getLocationReference(location)" />
+            </if>
+            <if condition="contentRef == null || !contentRef.exists">
+                <return error="true" message="No page content found at ${pagePath}" />
+            </if>
+            <set field="pageText" from="contentRef.getText()" />
+            <if condition="!pageText">
+                <return error="true" message="Page ${pagePath} is empty" />
+            </if>
+            <script location="component://growerp/service/translateWebsiteWithAI.groovy" />
+        </actions>
+    </service>
+
+    <service verb="store" noun="TranslatedPage">
+        <description>Write a translated page into the store's wiki space, creating the WikiPage
+            and its DbResource file when it is new and bumping publishedVersionName when it is
+            not, so the public site serves the new text at once.</description>
+        <in-parameters>
+            <parameter name="productStoreId" required="true" />
+            <parameter name="pagePath" required="true" />
+            <parameter name="text" required="true" allow-html="any" />
+            <parameter name="contentType" default-value="md" />
+            <parameter name="sequenceNum" type="Integer" />
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="store" />
+            <if condition="!store?.wikiSpaceId">
+                <return error="true" message="Store ${productStoreId} has no wiki space" />
+            </if>
+            <entity-find-one entity-name="moqui.resource.wiki.WikiSpace" value-field="wikiSpace">
+                <field-map field-name="wikiSpaceId" from="store.wikiSpaceId" />
+            </entity-find-one>
+
+            <!-- the DbResource directory the page files live in -->
+            <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="topResource">
+                <econdition field-name="productStoreId" />
+                <econdition field-name="settingTypeEnumId" value="PsstContentLocation" />
+                <date-filter />
+                <order-by field-name="-fromDate" />
+            </entity-find>
+            <if condition="!topResource">
+                <return error="true" message="Store ${productStoreId} has no content location" />
+            </if>
+            <entity-find entity-name="moqui.resource.DbResource" list="contentDir">
+                <!-- settingValue is a dbresource:// location, strip the scheme to get the id -->
+                <econdition field-name="parentResourceId"
+                    from="topResource[0].settingValue.substring(13)" />
+                <econdition field-name="filename" value="content" />
+            </entity-find>
+            <if condition="!contentDir">
+                <return error="true" message="Store ${productStoreId} has no content directory" />
+            </if>
+
+            <if condition="contentType == 'ftl'">
+                <then>
+                    <set field="fileExt" value=".html.ftl" />
+                    <set field="mimeType" value="text/html" />
+                </then>
+                <else>
+                    <set field="fileExt" value=".md.ftl" />
+                    <set field="mimeType" value="text/markdown" />
+                </else>
+            </if>
+            <set field="location"
+                value="${wikiSpace.rootPageLocation}/content/${pagePath}${fileExt}" />
+
+            <!-- DbResource is a tree: a slash in a filename is not a path, so 'th/about' needs a
+                 'th' directory resource holding 'about.html.ftl', not one file called
+                 'th/about.html.ftl' (which exists but no location reference ever resolves to it) -->
+            <set field="pathSegments" from="pagePath.split('/') as List" />
+            <set field="fileName" value="${pathSegments[-1]}${fileExt}" />
+            <script><![CDATA[
+                String parentId = contentDir[0].resourceId
+                for (int i = 0; i < pathSegments.size() - 1; i++) {
+                    def dir = ec.entity.find('moqui.resource.DbResource')
+                        .condition('parentResourceId', parentId)
+                        .condition('filename', pathSegments[i])
+                        .useCache(false).disableAuthz().one()
+                    if (dir == null) {
+                        dir = ec.service.sync().name('create#moqui.resource.DbResource')
+                            .parameters([parentResourceId: parentId, isFile: 'N',
+                                         filename: pathSegments[i]])
+                            .disableAuthz().call()
+                    }
+                    parentId = dir.resourceId
+                }
+                context.fileParentResourceId = parentId
+            ]]></script>
+
+            <entity-find entity-name="moqui.resource.wiki.WikiPage" list="wikiPages">
+                <econdition field-name="wikiSpaceId" from="store.wikiSpaceId" />
+                <econdition field-name="pagePath" />
+            </entity-find>
+
+            <if condition="wikiPages">
+                <then><!-- retranslated page: write the text and publish the new version -->
+                    <set field="docRr" from="ec.resource.getLocationReference(location)" />
+                    <if condition="docRr == null">
+                        <return error="true" message="No file reference for ${location}" />
+                    </if>
+                    <script>docRr.putText(text)</script>
+                    <script>
+                        def dbres = ec.entity.find('moqui.resource.DbResource')
+                            .condition('parentResourceId', fileParentResourceId)
+                            .condition('filename', fileName)
+                            .useCache(false).disableAuthz().one()
+                        if (dbres) {
+                            def dbrf = ec.entity.find('moqui.resource.DbResourceFile')
+                                .condition('resourceId', dbres.resourceId)
+                                .useCache(false).disableAuthz().one()
+                            if (dbrf) context.newVersionName = dbrf.versionName
+                        }
+                    </script>
+                    <if condition="newVersionName">
+                        <service-call name="update#moqui.resource.wiki.WikiPage"
+                            in-map="[wikiPageId: wikiPages[0].wikiPageId,
+                                publishedVersionName: newVersionName]" />
+                    </if>
+                </then>
+                <else><!-- new page -->
+                    <service-call name="create#moqui.resource.wiki.WikiPage" out-map="context"
+                        in-map="[wikiSpaceId: store.wikiSpaceId, pagePath: pagePath,
+                            sequenceNum: sequenceNum, publishedVersionName: '01']" />
+                    <service-call name="create#moqui.resource.DbResource" out-map="context"
+                        in-map="[parentResourceId: fileParentResourceId, isFile: 'Y',
+                            filename: fileName]" />
+                    <service-call name="create#moqui.resource.DbResourceFile"
+                        in-map="[resourceId: resourceId, mimeType: mimeType,
+                            versionName: '01', rootVersionName: '01', fileData: text]" />
+                    <service-call name="create#moqui.resource.DbResourceFileHistory"
+                        in-map="[resourceId: resourceId, versionName: '01', isDiff: 'N',
+                            versionDate: ec.user.nowTimestamp]" />
+                </else>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="translate" noun="StoreEntityNames" transaction-timeout="1800">
+        <description>Translate the store, category and product names of a website into the target
+            locales and store them as moqui.basic.LocalizedEntityField rows. The reads resolve
+            through them automatically, see LocalizationExtendEntities.xml.</description>
+        <in-parameters>
+            <parameter name="productStoreId" required="true" />
+            <parameter name="sourceLocale" default-value="en" />
+            <parameter name="targetLocales" required="true" />
+            <parameter name="apiKey" />
+            <parameter name="ownerPartyId" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="translatedCount" type="Integer" />
+        </out-parameters>
+        <actions>
+            <script location="component://growerp/service/translateEntityNamesWithAI.groovy" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="WebsiteTranslation">
+        <description>Remove a translation row. The translated pages stay: they are normal website
+            pages and are removed in the website screen like any other page.</description>
+        <in-parameters>
+            <parameter name="translationId" required="true" />
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.website.WebsiteTranslation"
+                value-field="translation" />
+            <if condition="!translation">
+                <return error="true" message="Translation ${translationId} not found" />
+            </if>
+            <entity-delete value-field="translation" />
+        </actions>
+    </service>
+
+</services>

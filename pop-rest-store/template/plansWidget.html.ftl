@@ -1,6 +1,7 @@
 <#-- Shared pricing-plan renderer, included by both store.xml and website.xml.
      Page authors embed the plan table with <div data-growerp-plans></div> on any
      content page; this script fetches the GROWERP plan products and renders cards. -->
+<#function l key><#return ec.l10n.localize(key)></#function>
 <style>
 .growerp-plans{display:flex;flex-wrap:wrap;gap:16px;margin:16px 0;justify-content:center}
 .growerp-plan{flex:1 1 220px;max-width:300px;border:1px solid #ddd;border-radius:12px;
@@ -13,6 +14,9 @@
 </style>
 <script>
 (function(){
+  // plan names and feature lines are product data and localize through
+  // LocalizedEntityField, only the billing period is chrome
+  var T = { perMonth: "${l('GrowerpWebsitePlanPerMonth')?js_string}" };
   function init(){
     var holders = document.querySelectorAll('[data-growerp-plans]');
     if (!holders.length) return;
@@ -36,7 +40,7 @@
             price.className = 'growerp-plan-price';
             price.textContent = p.price;
             var per = document.createElement('span');
-            per.textContent = ' ' + (p.currencyUomId||'') + '/month';
+            per.textContent = ' ' + (p.currencyUomId||'') + T.perMonth;
             price.appendChild(per);
             card.appendChild(price);
             if (p.description) {

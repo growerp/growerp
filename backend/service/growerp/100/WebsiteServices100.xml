@@ -74,7 +74,24 @@ limitations under the License.
                 <order-by field-name="-fromDate"/>
             </entity-find>
             <if condition="hostNames">
-                <set field="hostName" from="hostNames[0].settingValue" />
+                <then>
+                    <!-- A store keeps the host names of every installation it runs on side by
+                         side: complete#TenantSetup adds the production ones dated 2024-01-01..04
+                         next to the local <storeId>.localhost:8080 dated 2020-01-01. Picking the
+                         newest by date alone therefore shows the production address on a
+                         development machine, so prefer a host name that belongs to the host this
+                         request came in on and only fall back on the date. -->
+                    <script><![CDATA[
+                        // no web request on a background job: keep the date order there
+                        String requestHost = ec.web?.getHostName(true)
+                        def match = null
+                        if (requestHost) {
+                            match = hostNames.find { it.settingValue == requestHost } ?:
+                                    hostNames.find { it.settingValue?.endsWith(requestHost) }
+                        }
+                        context.hostName = (match ?: hostNames[0]).settingValue
+                    ]]></script>
+                </then>
                 <else>
                     <set field="hostName" value="????" />
                 </else>

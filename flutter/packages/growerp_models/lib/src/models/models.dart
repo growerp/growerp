@@ -52,6 +52,7 @@ export 'opportunity_model.dart';
 export 'opportunity_summary_model.dart';
 export 'website_form_model.dart';
 export 'website_conversion_model.dart';
+export 'website_translation_model.dart';
 export 'website_export_model.dart';
 export 'email_sequence_model.dart';
 export 'marketing_dashboard_model.dart';

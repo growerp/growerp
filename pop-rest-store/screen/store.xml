@@ -21,6 +21,28 @@ along with this software (see the LICENSE.md file). If not, see
     standalone="true" require-authentication="anonymous-view" allow-extra-path="true">
 
     <always-actions>
+        <!-- A translated site is served under its language: /th/, /th/content/about. The locale is
+             the first path segment, mounted in MoquiConf.xml, and the translated pages are the
+             normal pages with that same segment in front of their pagePath. Setting the user
+             locale here is also what makes the localized entity fields (store, category and
+             product names) resolve, see growerp entity/LocalizationExtendEntities.xml. -->
+        <set field="websiteLocales" from="['th', 'zh', 'de', 'fr', 'nl']"/>
+        <set field="firstPathSegment"
+                from="(ec.web.getPathInfo() ?: '').split('/').findAll({ it })?.getAt(0)"/>
+        <if condition="websiteLocales.contains(firstPathSegment)">
+            <then>
+                <set field="websiteLocale" from="firstPathSegment"/>
+                <set field="pagePathPrefix" value="${websiteLocale}/"/>
+                <set field="urlPrefix" value="/${websiteLocale}"/>
+                <script>ec.user.setLocale(new Locale(websiteLocale))</script>
+            </then>
+            <else>
+                <set field="websiteLocale" value=""/>
+                <set field="pagePathPrefix" value=""/>
+                <set field="urlPrefix" value=""/>
+            </else>
+        </if>
+
         <service-call name="popstore.StoreServices.get#ProductStoreIdFromHostName" in-map="[
             requestHostName: (ec.web.getHostName(false) == '10.0.2.2' ? 'localhost' : ec.web.getHostName(false))]" out-map="productStoreIdContext"/>
         <set field="productStoreId" value="${productStoreIdContext.productStoreId ?: 'POPC_DEFAULT'}"/>
@@ -29,7 +51,9 @@ along with this software (see the LICENSE.md file). If not, see
             <script>ec.web.response.setStatus(404)</script>
         </if>
 
-        <service-call name="popstore.StoreServices.get#StoreInfo" in-map="[productStoreId:productStoreId]" out-map="storeInfo"/>
+        <service-call name="popstore.StoreServices.get#StoreInfo"
+                in-map="[productStoreId:productStoreId, pagePathPrefix:pagePathPrefix, urlPrefix:urlPrefix]"
+                out-map="storeInfo"/>
         <set field="productStore" from="storeInfo.productStore"/>
         <set field="wikiSpaceId" from="productStore?.wikiSpaceId"/>
 
@@ -358,11 +382,18 @@ var storeInfo = ${storeInfoJson};
              root.html.ftl renders the <head> before the content subscreen actions run -->
         <script><![CDATA[
             String seoPathInfo = ec.web.getPathInfo() ?: ''
-            if (wikiSpaceId && seoPathInfo.startsWith('/content/')) {
-                String seoPagePath = seoPathInfo.substring('/content/'.length())
+            // the locale mount is part of the url but not of the /content/ path below it
+            String seoLocalePath = seoPathInfo
+            if (urlPrefix) seoLocalePath = seoPathInfo.substring(urlPrefix.length())
+            if (wikiSpaceId && seoLocalePath.startsWith('/content/')) {
+                String seoPagePath = seoLocalePath.substring('/content/'.length())
                 if (seoPagePath) try {
+                    // an untranslated page falls back to the source language, like content.xml
                     Map seoOut = ec.service.sync().name('org.moqui.impl.WikiServices.get#PublishedWikiPageText')
-                            .parameters([wikiSpaceId: wikiSpaceId, pagePath: seoPagePath]).call()
+                            .parameters([wikiSpaceId: wikiSpaceId, pagePath: pagePathPrefix + seoPagePath]).call()
+                    if (!seoOut?.pageText && pagePathPrefix)
+                        seoOut = ec.service.sync().name('org.moqui.impl.WikiServices.get#PublishedWikiPageText')
+                                .parameters([wikiSpaceId: wikiSpaceId, pagePath: seoPagePath]).call()
                     String seoText = seoOut?.pageText
                     if (seoText) {
                         def dMatch = (seoText =~ /(?i)description:\s*(.*?)\s*-->/)
@@ -392,12 +423,13 @@ var storeInfo = ${storeInfoJson};
                 } catch (Exception e) { ec.logger.warn("Page SEO meta lookup failed: ${e.message}") }
                 context.seoPageType = 'content'
                 // breadcrumbs for the schema.org BreadcrumbList
-                List crumbs = [[title: storeInfo.productStore.storeName, url: '/']]
+                List crumbs = [[title: storeInfo.productStore.storeName, url: (urlPrefix ?: '') + '/']]
                 String crumbPath = ''
                 for (String segment in seoPagePath.split('/')) {
                     crumbPath = crumbPath ? crumbPath + '/' + segment : segment
                     Map crumbPage = ((List) (storeInfo.pages ?: [])).find({ it.path == crumbPath })
-                    crumbs.add([title: crumbPage?.title ?: segment, url: '/content/' + crumbPath])
+                    crumbs.add([title: crumbPage?.title ?: segment,
+                                url: (urlPrefix ?: '') + '/content/' + crumbPath])
                 }
                 context.seoBreadcrumbs = crumbs
             }
@@ -407,8 +439,19 @@ var storeInfo = ${storeInfoJson};
             context.siteBaseUrl = scheme + '://' + ec.web.getHostName(true)
             context.pageCanonicalUrl = context.siteBaseUrl + (seoPathInfo ?: '/')
             // only the home and content pages have a markdown twin, see SeoServices get#PageMarkdown
-            if (seoPathInfo == '/' || seoPathInfo == '' || seoPathInfo.startsWith('/content/'))
+            if (seoLocalePath == '/' || seoLocalePath == '' || seoLocalePath.startsWith('/content/'))
                 context.pageMarkdownUrl = context.siteBaseUrl + '/md' + (seoPathInfo == '' ? '/' : seoPathInfo)
+            // the same page in the other languages, for the <link rel="alternate"> tags and the
+            // language switcher; only the languages this site actually has pages for
+            List alternates = [[locale: 'x-default', url: context.siteBaseUrl + (seoLocalePath ?: '/')]]
+            for (String loc in (storeInfo.availableLocales ?: [])) {
+                alternates.add([locale: loc,
+                    url: context.siteBaseUrl + '/' + loc + (seoLocalePath == '/' ? '' : seoLocalePath)])
+            }
+            context.pageAlternates = alternates
+            // each language in its own name, the way the app's language picker shows them
+            context.localeNames = [en: 'English', th: 'ไทย', zh: '中文', de: 'Deutsch',
+                                   fr: 'Français', nl: 'Nederlands']
         ]]></script>
     </pre-actions>
 

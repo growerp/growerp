@@ -706,4 +706,872 @@ limitations under the License.
   <moqui.basic.LocalizedMessage locale="nl" original="GrowerpRequestTypeConsultation"
     localized="Consultatie" />
 
+  <!-- ============================================ -->
+  <!-- WEBSITE CHROME - navbar and footer labels -->
+  <!-- ============================================ -->
+
+  <!-- The navbar/footer labels of a hosted website. The page text of a site is
+       translated per tenant by growerp.100.WebsiteTranslationServices100, but this
+       chrome is the same for every tenant, so it lives here. Read with
+       ec.l10n.localize() from the store templates, see the l() function there. -->
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteShop"
+    localized="Shop" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteShop"
+    localized="ร้านค้า" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteShop"
+    localized="商店" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteShop"
+    localized="Shop" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteShop"
+    localized="Boutique" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteShop"
+    localized="Winkel" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteCart"
+    localized="Cart" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteCart"
+    localized="ตะกร้า" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteCart"
+    localized="购物车" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteCart"
+    localized="Warenkorb" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteCart"
+    localized="Panier" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteCart"
+    localized="Winkelwagen" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteCartEmpty"
+    localized="Your Cart is Empty" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteCartEmpty"
+    localized="ตะกร้าของคุณว่างเปล่า" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteCartEmpty"
+    localized="您的购物车是空的" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteCartEmpty"
+    localized="Ihr Warenkorb ist leer" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteCartEmpty"
+    localized="Votre panier est vide" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteCartEmpty"
+    localized="Uw winkelwagen is leeg" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteCartEmptyText"
+    localized="Browse our products and add some items to your cart to get started!" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteCartEmptyText"
+    localized="เลือกดูสินค้าของเราและเพิ่มสินค้าลงในตะกร้าเพื่อเริ่มต้น" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteCartEmptyText"
+    localized="浏览我们的产品，将商品加入购物车即可开始！" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteCartEmptyText"
+    localized="Sehen Sie sich unsere Produkte an und legen Sie Artikel in den Warenkorb, um zu beginnen!" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteCartEmptyText"
+    localized="Parcourez nos produits et ajoutez des articles à votre panier pour commencer !" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteCartEmptyText"
+    localized="Bekijk onze producten en voeg artikelen toe aan uw winkelwagen om te beginnen!" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteContinueShopping"
+    localized="Continue Shopping" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteContinueShopping"
+    localized="เลือกซื้อสินค้าต่อ" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteContinueShopping"
+    localized="继续购物" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteContinueShopping"
+    localized="Weiter einkaufen" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteContinueShopping"
+    localized="Continuer les achats" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteContinueShopping"
+    localized="Verder winkelen" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteFeatures"
+    localized="Features" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteFeatures"
+    localized="คุณสมบัติ" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteFeatures"
+    localized="功能" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteFeatures"
+    localized="Funktionen" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteFeatures"
+    localized="Fonctionnalités" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteFeatures"
+    localized="Functies" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteSignIn"
+    localized="Sign In" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteSignIn"
+    localized="เข้าสู่ระบบ" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteSignIn"
+    localized="登录" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteSignIn"
+    localized="Anmelden" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteSignIn"
+    localized="Se connecter" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteSignIn"
+    localized="Aanmelden" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteLogIn"
+    localized="Log In" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteLogIn"
+    localized="เข้าสู่ระบบ" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteLogIn"
+    localized="登录" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteLogIn"
+    localized="Anmelden" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteLogIn"
+    localized="Connexion" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteLogIn"
+    localized="Inloggen" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteLogout"
+    localized="Logout" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteLogout"
+    localized="ออกจากระบบ" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteLogout"
+    localized="退出登录" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteLogout"
+    localized="Abmelden" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteLogout"
+    localized="Déconnexion" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteLogout"
+    localized="Afmelden" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteRegister"
+    localized="Register" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteRegister"
+    localized="ลงทะเบียน" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteRegister"
+    localized="注册" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteRegister"
+    localized="Registrieren" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteRegister"
+    localized="S'inscrire" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteRegister"
+    localized="Registreren" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteGetStarted"
+    localized="Get Started" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteGetStarted"
+    localized="เริ่มต้นใช้งาน" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteGetStarted"
+    localized="立即开始" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteGetStarted"
+    localized="Jetzt starten" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteGetStarted"
+    localized="Commencer" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteGetStarted"
+    localized="Aan de slag" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteSearchProducts"
+    localized="Search products..." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteSearchProducts"
+    localized="ค้นหาสินค้า..." />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteSearchProducts"
+    localized="搜索产品…" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteSearchProducts"
+    localized="Produkte suchen..." />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteSearchProducts"
+    localized="Rechercher des produits..." />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteSearchProducts"
+    localized="Producten zoeken..." />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteAccountSettings"
+    localized="Account Settings" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteAccountSettings"
+    localized="ตั้งค่าบัญชี" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteAccountSettings"
+    localized="账户设置" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteAccountSettings"
+    localized="Kontoeinstellungen" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteAccountSettings"
+    localized="Paramètres du compte" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteAccountSettings"
+    localized="Accountinstellingen" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteMyOrders"
+    localized="My Orders" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteMyOrders"
+    localized="คำสั่งซื้อของฉัน" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteMyOrders"
+    localized="我的订单" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteMyOrders"
+    localized="Meine Bestellungen" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteMyOrders"
+    localized="Mes commandes" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteMyOrders"
+    localized="Mijn bestellingen" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteHome"
+    localized="Home" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteHome"
+    localized="หน้าแรก" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteHome"
+    localized="首页" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteHome"
+    localized="Startseite" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteHome"
+    localized="Accueil" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteHome"
+    localized="Home" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteQuickLinks"
+    localized="Quick Links" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteQuickLinks"
+    localized="ลิงก์ด่วน" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteQuickLinks"
+    localized="快速链接" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteQuickLinks"
+    localized="Schnellzugriff" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteQuickLinks"
+    localized="Liens rapides" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteQuickLinks"
+    localized="Snelle links" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteContactUs"
+    localized="Contact Us" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteContactUs"
+    localized="ติดต่อเรา" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteContactUs"
+    localized="联系我们" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteContactUs"
+    localized="Kontakt" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteContactUs"
+    localized="Nous contacter" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteContactUs"
+    localized="Contact" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteFollowUs"
+    localized="Follow Us" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteFollowUs"
+    localized="ติดตามเรา" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteFollowUs"
+    localized="关注我们" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteFollowUs"
+    localized="Folgen Sie uns" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteFollowUs"
+    localized="Suivez-nous" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteFollowUs"
+    localized="Volg ons" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteApps"
+    localized="Apps" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteApps"
+    localized="แอป" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteApps"
+    localized="应用" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteApps"
+    localized="Apps" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteApps"
+    localized="Applications" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteApps"
+    localized="Apps" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteLanguage"
+    localized="Language" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteLanguage"
+    localized="ภาษา" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteLanguage"
+    localized="语言" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteLanguage"
+    localized="Sprache" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteLanguage"
+    localized="Langue" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteLanguage"
+    localized="Taal" />
+
+  <!-- ============================================ -->
+  <!-- WEBSITE CHAT WIDGET -->
+  <!-- ============================================ -->
+
+  <!-- The floating ask-a-question widget on every hosted page, see
+       PopRestStore template/chatWidget.html.ftl. Same for every tenant, so it lives here
+       rather than in the per tenant page translation. -->
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteChatAsk"
+    localized="Ask a question" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteChatAsk"
+    localized="ถามคำถาม" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteChatAsk"
+    localized="咨询问题" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteChatAsk"
+    localized="Eine Frage stellen" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteChatAsk"
+    localized="Poser une question" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteChatAsk"
+    localized="Stel een vraag" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteChatPrompt"
+    localized="Question?" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteChatPrompt"
+    localized="มีคำถาม?" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteChatPrompt"
+    localized="有疑问？" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteChatPrompt"
+    localized="Fragen?" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteChatPrompt"
+    localized="Une question ?" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteChatPrompt"
+    localized="Vraag?" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteChatPromptSub"
+    localized="we answer within one day" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteChatPromptSub"
+    localized="เราตอบภายในหนึ่งวัน" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteChatPromptSub"
+    localized="我们一天内回复" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteChatPromptSub"
+    localized="wir antworten innerhalb eines Tages" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteChatPromptSub"
+    localized="nous répondons sous un jour" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteChatPromptSub"
+    localized="wij antwoorden binnen één dag" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteChatTitle"
+    localized="Ask us a question" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteChatTitle"
+    localized="ถามคำถามกับเรา" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteChatTitle"
+    localized="向我们提问" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteChatTitle"
+    localized="Stellen Sie uns eine Frage" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteChatTitle"
+    localized="Posez-nous une question" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteChatTitle"
+    localized="Stel ons een vraag" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteChatNewQuestion"
+    localized="+ New question" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteChatNewQuestion"
+    localized="+ คำถามใหม่" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteChatNewQuestion"
+    localized="+ 新问题" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteChatNewQuestion"
+    localized="+ Neue Frage" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteChatNewQuestion"
+    localized="+ Nouvelle question" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteChatNewQuestion"
+    localized="+ Nieuwe vraag" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteChatEmailLabel"
+    localized="Your email *" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteChatEmailLabel"
+    localized="อีเมลของคุณ *" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteChatEmailLabel"
+    localized="您的邮箱 *" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteChatEmailLabel"
+    localized="Ihre E-Mail *" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteChatEmailLabel"
+    localized="Votre e-mail *" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteChatEmailLabel"
+    localized="Uw e-mail *" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteChatQuestionLabel"
+    localized="Your question *" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteChatQuestionLabel"
+    localized="คำถามของคุณ *" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteChatQuestionLabel"
+    localized="您的问题 *" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteChatQuestionLabel"
+    localized="Ihre Frage *" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteChatQuestionLabel"
+    localized="Votre question *" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteChatQuestionLabel"
+    localized="Uw vraag *" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteChatQuestionPlaceholder"
+    localized="How can we help?" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteChatQuestionPlaceholder"
+    localized="เราช่วยอะไรได้บ้าง?" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteChatQuestionPlaceholder"
+    localized="我们能帮您什么？" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteChatQuestionPlaceholder"
+    localized="Wie können wir helfen?" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteChatQuestionPlaceholder"
+    localized="Comment pouvons-nous aider ?" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteChatQuestionPlaceholder"
+    localized="Waarmee kunnen wij helpen?" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteChatSend"
+    localized="Send" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteChatSend"
+    localized="ส่ง" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteChatSend"
+    localized="发送" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteChatSend"
+    localized="Senden" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteChatSend"
+    localized="Envoyer" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteChatSend"
+    localized="Verzenden" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteChatMessagePlaceholder"
+    localized="Type a message..." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteChatMessagePlaceholder"
+    localized="พิมพ์ข้อความ..." />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteChatMessagePlaceholder"
+    localized="输入消息…" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteChatMessagePlaceholder"
+    localized="Nachricht eingeben..." />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteChatMessagePlaceholder"
+    localized="Saisissez un message..." />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteChatMessagePlaceholder"
+    localized="Typ een bericht..." />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteChatWith"
+    localized="Chat with {name}" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteChatWith"
+    localized="แชทกับ {name}" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteChatWith"
+    localized="与 {name} 聊天" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteChatWith"
+    localized="Chat mit {name}" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteChatWith"
+    localized="Discuter avec {name}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteChatWith"
+    localized="Chat met {name}" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteChatExpired"
+    localized="Your previous conversation has expired. Please start a new one." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteChatExpired"
+    localized="การสนทนาก่อนหน้าของคุณหมดอายุแล้ว กรุณาเริ่มการสนทนาใหม่" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteChatExpired"
+    localized="您之前的对话已过期，请重新开始。" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteChatExpired"
+    localized="Ihre vorherige Unterhaltung ist abgelaufen. Bitte beginnen Sie eine neue." />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteChatExpired"
+    localized="Votre conversation précédente a expiré. Veuillez en commencer une nouvelle." />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteChatExpired"
+    localized="Uw vorige gesprek is verlopen. Begin een nieuw gesprek." />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteChatInvalidEmail"
+    localized="Please enter a valid email address." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteChatInvalidEmail"
+    localized="กรุณากรอกอีเมลที่ถูกต้อง" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteChatInvalidEmail"
+    localized="请输入有效的邮箱地址。" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteChatInvalidEmail"
+    localized="Bitte geben Sie eine gültige E-Mail-Adresse ein." />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteChatInvalidEmail"
+    localized="Veuillez saisir une adresse e-mail valide." />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteChatInvalidEmail"
+    localized="Voer een geldig e-mailadres in." />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteChatNoQuestion"
+    localized="Please enter your question." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteChatNoQuestion"
+    localized="กรุณากรอกคำถามของคุณ" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteChatNoQuestion"
+    localized="请输入您的问题。" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteChatNoQuestion"
+    localized="Bitte geben Sie Ihre Frage ein." />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteChatNoQuestion"
+    localized="Veuillez saisir votre question." />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteChatNoQuestion"
+    localized="Voer uw vraag in." />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteChatError"
+    localized="Sorry, something went wrong. Please try again." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteChatError"
+    localized="ขออภัย เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteChatError"
+    localized="抱歉，出了点问题，请重试。" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteChatError"
+    localized="Leider ist etwas schiefgelaufen. Bitte versuchen Sie es erneut." />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteChatError"
+    localized="Désolé, une erreur est survenue. Veuillez réessayer." />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteChatError"
+    localized="Er is iets misgegaan. Probeer het opnieuw." />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteChatDivider"
+    localized="— new question —" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteChatDivider"
+    localized="— คำถามใหม่ —" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteChatDivider"
+    localized="— 新问题 —" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteChatDivider"
+    localized="— neue Frage —" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteChatDivider"
+    localized="— nouvelle question —" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteChatDivider"
+    localized="— nieuwe vraag —" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteChatClose"
+    localized="Close Chat" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteChatClose"
+    localized="ปิดแชท" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteChatClose"
+    localized="关闭聊天" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteChatClose"
+    localized="Chat schließen" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteChatClose"
+    localized="Fermer le chat" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteChatClose"
+    localized="Chat sluiten" />
+
+  <!-- ============================================ -->
+  <!-- WEBSITE PAGE WIDGETS - form, plans, booking -->
+  <!-- ============================================ -->
+
+  <!-- The lead-capture form, pricing plan and booking widgets embedded in page content,
+       see PopRestStore template/{form,plans,booking}Widget.html.ftl. Only their chrome is
+       here: form labels come from the WebsiteForm record and plan names from the product. -->
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteFormSend"
+    localized="Send" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteFormSend"
+    localized="ส่ง" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteFormSend"
+    localized="发送" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteFormSend"
+    localized="Senden" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteFormSend"
+    localized="Envoyer" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteFormSend"
+    localized="Verzenden" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteFormThanks"
+    localized="Thank you!" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteFormThanks"
+    localized="ขอบคุณ!" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteFormThanks"
+    localized="谢谢！" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteFormThanks"
+    localized="Vielen Dank!" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteFormThanks"
+    localized="Merci !" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteFormThanks"
+    localized="Bedankt!" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteFormError"
+    localized="Could not send, try again" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteFormError"
+    localized="ส่งไม่สำเร็จ กรุณาลองใหม่" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteFormError"
+    localized="发送失败，请重试" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteFormError"
+    localized="Senden fehlgeschlagen, bitte erneut versuchen" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteFormError"
+    localized="Échec de l’envoi, veuillez réessayer" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteFormError"
+    localized="Verzenden mislukt, probeer opnieuw" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsitePlanPerMonth"
+    localized="/month" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsitePlanPerMonth"
+    localized="/เดือน" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsitePlanPerMonth"
+    localized="/月" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsitePlanPerMonth"
+    localized="/Monat" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsitePlanPerMonth"
+    localized="/mois" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsitePlanPerMonth"
+    localized="/maand" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingRoom"
+    localized="room" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingRoom"
+    localized="ห้อง" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingRoom"
+    localized="客房" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingRoom"
+    localized="Zimmer" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingRoom"
+    localized="chambre" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingRoom"
+    localized="kamer" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingRooms"
+    localized="rooms" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingRooms"
+    localized="ห้อง" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingRooms"
+    localized="客房" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingRooms"
+    localized="Zimmer" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingRooms"
+    localized="chambres" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingRooms"
+    localized="kamers" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingEquipment"
+    localized="equipment" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingEquipment"
+    localized="อุปกรณ์" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingEquipment"
+    localized="设备" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingEquipment"
+    localized="Ausrüstung" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingEquipment"
+    localized="équipement" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingEquipment"
+    localized="materieel" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingEquipments"
+    localized="equipment" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingEquipments"
+    localized="อุปกรณ์" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingEquipments"
+    localized="设备" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingEquipments"
+    localized="Ausrüstung" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingEquipments"
+    localized="équipements" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingEquipments"
+    localized="materieel" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingNight"
+    localized="night" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingNight"
+    localized="คืน" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingNight"
+    localized="晚" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingNight"
+    localized="Nacht" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingNight"
+    localized="nuit" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingNight"
+    localized="nacht" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingNights"
+    localized="Nights" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingNights"
+    localized="จำนวนคืน" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingNights"
+    localized="晚数" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingNights"
+    localized="Nächte" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingNights"
+    localized="Nuits" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingNights"
+    localized="Nachten" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingDay"
+    localized="day" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingDay"
+    localized="วัน" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingDay"
+    localized="天" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingDay"
+    localized="Tag" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingDay"
+    localized="jour" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingDay"
+    localized="dag" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingDays"
+    localized="Days" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingDays"
+    localized="จำนวนวัน" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingDays"
+    localized="天数" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingDays"
+    localized="Tage" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingDays"
+    localized="Jours" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingDays"
+    localized="Dagen" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingTitle"
+    localized="Book a {noun}" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingTitle"
+    localized="จอง{noun}" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingTitle"
+    localized="预订{noun}" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingTitle"
+    localized="{noun} buchen" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingTitle"
+    localized="Réserver une {noun}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingTitle"
+    localized="Boek een {noun}" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingArrival"
+    localized="Arrival" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingArrival"
+    localized="วันที่เข้าพัก" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingArrival"
+    localized="入住日期" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingArrival"
+    localized="Anreise" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingArrival"
+    localized="Arrivée" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingArrival"
+    localized="Aankomst" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingCheck"
+    localized="Check availability" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingCheck"
+    localized="ตรวจสอบห้องว่าง" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingCheck"
+    localized="查询空位" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingCheck"
+    localized="Verfügbarkeit prüfen" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingCheck"
+    localized="Vérifier la disponibilité" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingCheck"
+    localized="Beschikbaarheid controleren" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingSearching"
+    localized="Searching..." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingSearching"
+    localized="กำลังค้นหา..." />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingSearching"
+    localized="搜索中…" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingSearching"
+    localized="Suche läuft..." />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingSearching"
+    localized="Recherche..." />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingSearching"
+    localized="Zoeken..." />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingFirstName"
+    localized="First name" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingFirstName"
+    localized="ชื่อ" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingFirstName"
+    localized="名字" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingFirstName"
+    localized="Vorname" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingFirstName"
+    localized="Prénom" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingFirstName"
+    localized="Voornaam" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingLastName"
+    localized="Last name" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingLastName"
+    localized="นามสกุล" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingLastName"
+    localized="姓氏" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingLastName"
+    localized="Nachname" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingLastName"
+    localized="Nom" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingLastName"
+    localized="Achternaam" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingEmail"
+    localized="Email" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingEmail"
+    localized="อีเมล" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingEmail"
+    localized="邮箱" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingEmail"
+    localized="E-Mail" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingEmail"
+    localized="E-mail" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingEmail"
+    localized="E-mail" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingConfirm"
+    localized="Confirm booking" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingConfirm"
+    localized="ยืนยันการจอง" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingConfirm"
+    localized="确认预订" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingConfirm"
+    localized="Buchung bestätigen" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingConfirm"
+    localized="Confirmer la réservation" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingConfirm"
+    localized="Boeking bevestigen" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingSelect"
+    localized="Select" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingSelect"
+    localized="เลือก" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingSelect"
+    localized="选择" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingSelect"
+    localized="Auswählen" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingSelect"
+    localized="Choisir" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingSelect"
+    localized="Kiezen" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingAvailable"
+    localized="{count} available" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingAvailable"
+    localized="ว่าง {count}" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingAvailable"
+    localized="可用 {count}" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingAvailable"
+    localized="{count} verfügbar" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingAvailable"
+    localized="{count} disponible(s)" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingAvailable"
+    localized="{count} beschikbaar" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingNone"
+    localized="No {noun} available for those dates" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingNone"
+    localized="ไม่มี{noun}ว่างในช่วงวันที่เลือก" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingNone"
+    localized="所选日期没有可用的{noun}" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingNone"
+    localized="Keine {noun} für diese Daten verfügbar" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingNone"
+    localized="Aucun {noun} disponible pour ces dates" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingNone"
+    localized="Geen {noun} beschikbaar voor die datums" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingSummary"
+    localized="{count} {unit} from {from} — total {total}" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingSummary"
+    localized="{count} {unit} ตั้งแต่ {from} — รวม {total}" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingSummary"
+    localized="{from} 起 {count} {unit} — 合计 {total}" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingSummary"
+    localized="{count} {unit} ab {from} — gesamt {total}" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingSummary"
+    localized="{count} {unit} à partir du {from} — total {total}" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingSummary"
+    localized="{count} {unit} vanaf {from} — totaal {total}" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingConfirmed"
+    localized="Your reservation is confirmed." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingConfirmed"
+    localized="ยืนยันการจองของคุณแล้ว" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingConfirmed"
+    localized="您的预订已确认。" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingConfirmed"
+    localized="Ihre Reservierung ist bestätigt." />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingConfirmed"
+    localized="Votre réservation est confirmée." />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingConfirmed"
+    localized="Uw reservering is bevestigd." />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingError"
+    localized="Could not book, please try again" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingError"
+    localized="จองไม่สำเร็จ กรุณาลองใหม่" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingError"
+    localized="预订失败，请重试" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingError"
+    localized="Buchung fehlgeschlagen, bitte erneut versuchen" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingError"
+    localized="Échec de la réservation, veuillez réessayer" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingError"
+    localized="Boeken mislukt, probeer opnieuw" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingLoadError"
+    localized="Could not load availability" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingLoadError"
+    localized="ไม่สามารถโหลดข้อมูลห้องว่าง" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteBookingLoadError"
+    localized="无法加载可用情况" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteBookingLoadError"
+    localized="Verfügbarkeit konnte nicht geladen werden" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteBookingLoadError"
+    localized="Impossible de charger la disponibilité" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteBookingLoadError"
+    localized="Kan beschikbaarheid niet laden" />
+
+  <!-- content page sidebar, see template/store/*/content1.html.ftl -->
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteNavigation"
+    localized="Navigation" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteNavigation"
+    localized="สารบัญ" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteNavigation"
+    localized="导航" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteNavigation"
+    localized="Navigation" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteNavigation"
+    localized="Navigation" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteNavigation"
+    localized="Navigatie" />
+
 </entity-facade-xml>

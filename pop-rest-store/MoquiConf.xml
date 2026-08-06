@@ -16,6 +16,22 @@ work. -->
             <subscreens-item name="m" menu-title="GrowERP Ecommerce" menu-include="false"
                     location="component://PopRestStore/screen/store.xml" no-sub-path="true"/>
         </screen>
+        <!-- The translated sites: /th/, /th/content/about, ... mount the same store screen under
+             the locale, so content/category/product resolve as its subscreens as usual. store.xml
+             reads the locale back off the path, see its always-actions. The languages are the ones
+             the Flutter apps support, see growerp_core top_app.dart. -->
+        <screen location="component://webroot/screen/webroot.xml">
+            <subscreens-item name="th" menu-include="false"
+                    location="component://PopRestStore/screen/store.xml"/>
+            <subscreens-item name="zh" menu-include="false"
+                    location="component://PopRestStore/screen/store.xml"/>
+            <subscreens-item name="de" menu-include="false"
+                    location="component://PopRestStore/screen/store.xml"/>
+            <subscreens-item name="fr" menu-include="false"
+                    location="component://PopRestStore/screen/store.xml"/>
+            <subscreens-item name="nl" menu-include="false"
+                    location="component://PopRestStore/screen/store.xml"/>
+        </screen>
         <!-- single page for the url /website -->
         <screen location="component://webroot/screen/webroot.xml">
             <!-- website is the path -->

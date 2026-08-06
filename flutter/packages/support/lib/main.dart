@@ -29,6 +29,7 @@ import 'package:growerp_adk/growerp_adk.dart';
 
 import 'src/application/application.dart';
 import 'src/website_conversion/website_conversion.dart';
+import 'src/website_translation/website_translation.dart';
 import 'views/rest_statistics_view.dart';
 import 'views/support_dashboard_content.dart';
 //webactivate  import 'package:web/web.dart' as web;
@@ -207,6 +208,7 @@ List<Map<String, GrowerpWidgetBuilder>> supportWidgetRegistrations = [
     'AdkSystemUsageView': (args) => const AdkSystemUsageView(),
     'RestStatisticsView': (args) => const RestStatisticsView(),
     'WebsiteConversionList': (args) => const WebsiteConversionList(),
+    'WebsiteTranslationList': (args) => const WebsiteTranslationList(),
   },
 ];
 
@@ -221,6 +223,9 @@ List<BlocProvider> getSupportBlocProviders(
     ),
     BlocProvider<WebsiteConversionBloc>(
       create: (context) => WebsiteConversionBloc(restClient),
+    ),
+    BlocProvider<WebsiteTranslationBloc>(
+      create: (context) => WebsiteTranslationBloc(restClient),
     ),
   ];
 }

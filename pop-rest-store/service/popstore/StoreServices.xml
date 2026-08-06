@@ -53,6 +53,10 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="productStoreId" required="true"/>
             <parameter name="locale" default="ec.user.locale?.toString()"/>
+            <!-- a translated site is served from the pages under this pagePath prefix, eg 'th/';
+                 empty for the language the site is written in, see store.xml always-actions -->
+            <parameter name="pagePathPrefix" default-value=""/>
+            <parameter name="urlPrefix" default-value=""/>
         </in-parameters>
         <out-parameters>
             <parameter name="productStore" type="Map"/>
@@ -65,6 +69,8 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="menu" type="List"/>
             <parameter name="menu1" type="List"/>
             <parameter name="pages" type="List"/>
+            <!-- the languages this site has translated pages for, for the switcher and hreflang -->
+            <parameter name="availableLocales" type="List"/>
         </out-parameters>
         <actions>
             <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore" cache="true"/>
@@ -148,27 +154,52 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <set field="menu" from="[]"/>
             <set field="menu1" from="[]"/><!-- needed for actual content in content.xml -->
+            <!-- Translated pages carry the language as their first path segment ('th/about' next
+                 to 'about'), so they are never menu entries of their own. Under a language the
+                 menu is still the full set of source pages: each one takes its title from its
+                 translation when there is one and from the source page when there is not, which
+                 is the same fallback content.xml serves the page text with. -->
+            <set field="websiteLocales" from="['th', 'zh', 'de', 'fr', 'nl']"/>
+            <set field="availableLocales"
+                from="websiteLocales.findAll({ loc -&gt;
+                    menuPages.any({ it.pagePath.startsWith(loc + '/') }) })"/>
             <iterate list="menuPages" entry="page">
+                <if condition="websiteLocales.contains(page.pagePath.split('/')[0])">
+                    <continue/></if>
                 <!-- pages with any path segment starting with '_' are routable but hidden from navbar/footer -->
                 <if condition="page.pagePath.split('/').any({ it.startsWith('_') })"><continue/></if>
-                <set field="location" value="${page.rootPageLocation}/content/${page.pagePath}.md.ftl"/>
+                <set field="contentPath" value="${pagePathPrefix}${page.pagePath}"/>
+                <set field="location" value="${page.rootPageLocation}/content/${contentPath}.md.ftl"/>
                 <set field="pageType" value="md"/>
                 <set field="docRr" from="ec.resource.getLocationReference(location)"/>
                 <if condition="docRr == null || !docRr.exists">
                     <!-- ftl content type: full FreeMarker/HTML page -->
-                    <set field="location" value="${page.rootPageLocation}/content/${page.pagePath}.html.ftl"/>
+                    <set field="location" value="${page.rootPageLocation}/content/${contentPath}.html.ftl"/>
                     <set field="pageType" value="ftl"/>
                     <set field="docRr" from="ec.resource.getLocationReference(location)"/>
+                </if>
+                <if condition="(docRr == null || !docRr.exists) &amp;&amp; pagePathPrefix">
+                    <!-- this page was not translated: fall back to the source language -->
+                    <set field="location" value="${page.rootPageLocation}/content/${page.pagePath}.md.ftl"/>
+                    <set field="pageType" value="md"/>
+                    <set field="docRr" from="ec.resource.getLocationReference(location)"/>
+                    <if condition="docRr == null || !docRr.exists">
+                        <set field="location" value="${page.rootPageLocation}/content/${page.pagePath}.html.ftl"/>
+                        <set field="pageType" value="ftl"/>
+                        <set field="docRr" from="ec.resource.getLocationReference(location)"/>
+                    </if>
                 </if>
                 <if condition="docRr == null || !docRr.exists"><continue/></if>
                 <set field="lines" from="docRr.getText()"/>
                 <if condition="lines">
                     <script>
-                        Map menuItem = [items: [], path: page.pagePath, pageType: pageType,
+                        // the language is part of the url prefix, not of the page path
+                        String menuPath = page.pagePath;
+                        Map menuItem = [items: [], path: menuPath, pageType: pageType,
                                         lastModified: docRr.getLastModified()];
                         if (pageType == 'ftl') {
                             def titleMatch = (lines =~ /title:\s*(.*?)\s*-->/);
-                            menuItem['title'] = titleMatch.find() ? titleMatch.group(1) : page.pagePath;
+                            menuItem['title'] = titleMatch.find() ? titleMatch.group(1) : menuPath;
                         } else {
                             lines.eachLine {
                                 if (it.startsWith('# ') || it.startsWith('## ')) {

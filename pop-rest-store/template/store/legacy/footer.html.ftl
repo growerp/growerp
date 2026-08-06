@@ -1,3 +1,7 @@
+<#-- url prefix of a translated site, '' for the language the site is written in; the chrome
+     labels come from moqui.basic.LocalizedMessage, see growerp data/GrowerpL10nData.xml -->
+<#assign up = urlPrefix!''>
+<#function l key><#return ec.l10n.localize(key)></#function>
 <footer class="footer">
     <div class="container">
         <div class="row mb-5">
@@ -9,7 +13,7 @@
                 </div>
                 <div class="social-links mt-4">
                     <#if (TwitterUrl!'')?has_content || (FacebookUrl!'')?has_content || (InstagramUrl!'')?has_content || (YouTubeUrl!'')?has_content || (LinkedInUrl!'')?has_content || (SubstackUrl!'')?has_content>
-                    <span class="footer-follow-text d-block mb-3">FOLLOW US</span>
+                    <span class="footer-follow-text d-block mb-3">${l('GrowerpWebsiteFollowUs')}</span>
                     </#if>
                     <#if (TwitterUrl!'')?has_content>
                     <a href="${TwitterUrl}" target="_blank" rel="noopener" class="footer-icon-link"><i class="fab fa-twitter footer-icons"></i></a>
@@ -36,16 +40,16 @@
 
             <!-- Quick Links -->
             <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
-                <h5 class="footer-heading">Quick Links</h5>
+                <h5 class="footer-heading">${l('GrowerpWebsiteQuickLinks')}</h5>
                 <ul class="footer-ul">
-                    <li><a href="/" class="footer-a">Home</a></li>
+                    <li><a href="${up}/" class="footer-a">${l('GrowerpWebsiteHome')}</a></li>
                     <#list storeInfo.menu as topItem>
                     <#if !topItem.title?has_content || topItem.title?lower_case?starts_with('home')><#continue></#if>
                     <li>
                         <#if topItem.path == 'obsidian'>
                         <a href="/${topItem.path}" class="footer-a">${topItem.title!topItem.path}</a>
                         <#else>
-                        <a href="/content/${topItem.path}" class="footer-a">${topItem.title!topItem.path}</a>
+                        <a href="${up}/content/${topItem.path}" class="footer-a">${topItem.title!topItem.path}</a>
                         </#if>
                     </li>
                     </#list>
@@ -54,7 +58,7 @@
 
             <!-- Contact Info -->
             <div class="col-lg-4 col-md-6">
-                <h5 class="footer-heading">Contact Us</h5>
+                <h5 class="footer-heading">${l('GrowerpWebsiteContactUs')}</h5>
                 <ul class="footer-ul footer-contact">
                     <#if companyPostalAddress?? && (companyPostalAddress.address1!'')?has_content>
                     <li class="footer-contact-item">

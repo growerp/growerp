@@ -118,6 +118,17 @@ abstract class WebsiteConversions with _$WebsiteConversions {
 }
 
 @freezed
+abstract class WebsiteTranslations with _$WebsiteTranslations {
+  factory WebsiteTranslations({
+    @Default([]) List<WebsiteTranslation> websiteTranslations,
+  }) = _WebsiteTranslations;
+  WebsiteTranslations._();
+
+  factory WebsiteTranslations.fromJson(Map<String, dynamic> json) =>
+      _$WebsiteTranslationsFromJson(json);
+}
+
+@freezed
 abstract class Users with _$Users {
   factory Users({@Default([]) List<User> users}) = _Users;
   Users._();

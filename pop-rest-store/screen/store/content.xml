@@ -90,11 +90,21 @@ along with this software (see the LICENSE.md file). If not, see
 
     <actions>
         <set field="extraPathNameList" from="sri.screenUrlInfo.extraPathNameList"/>
+        <!-- under /{locale}/ the translated page comes first; a page that was never translated
+             still renders, in the language the site is written in -->
+        <set field="contentPagePath"
+                from="(pagePathPrefix ?: '') + (extraPathNameList?.join('/') ?: '')"/>
         <service-call name="org.moqui.impl.WikiServices.get#PublishedWikiPageText" out-map="context"
-                in-map="[wikiSpaceId:wikiSpaceId, pagePath:extraPathNameList?.join('/')]"/>
+                in-map="[wikiSpaceId:wikiSpaceId, pagePath:contentPagePath]"/>
+        <if condition="!pageText &amp;&amp; pagePathPrefix">
+            <set field="contentPagePath" from="extraPathNameList?.join('/')"/>
+            <service-call name="org.moqui.impl.WikiServices.get#PublishedWikiPageText" out-map="context"
+                    in-map="[wikiSpaceId:wikiSpaceId, pagePath:contentPagePath]"/>
+        </if>
 
         <!-- create content menu -->
-        <set field="location" value="${storeInfo.settings.PsstContentLocation}${ec.web.getPathInfo()}.md"/>
+        <set field="location"
+                value="${storeInfo.settings.PsstContentLocation}/content/${contentPagePath}.md"/>
         <if condition="extraPathNameList[0] != 'obsidian' "><!--
             cater for old filenames -->
             <set field="location" from="location + '.ftl'"/></if>
@@ -154,7 +164,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 items.add(item);
                             }
                         }
-                        if (first == false) storeInfo.menu1.add([path: ec.web.getPathInfo().split('/')[2],
+                        if (first == false) storeInfo.menu1.add([path: extraPathNameList[0],
                             title: title, items: items, anchor: anchorOf(title)]);
                     }
                 </script>

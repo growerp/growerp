@@ -57,7 +57,7 @@ The page type comes from seoPageType, never from which data happens to be in the
 ,{"@type":"WebPage","@id":"${pageUrl}","url":"${pageUrl}",
   "name":"${((pageTitle!storeName))?json_string}",
   <#if (pageDescription!'')?has_content>"description":"${pageDescription?json_string}",</#if>
-  "isPartOf":{"@id":"${base}#website"},"inLanguage":"en"}
+  "isPartOf":{"@id":"${base}#website"},"inLanguage":"${(websiteLocale!'')?has_content?string(websiteLocale!'', 'en')}"}
  <#if seoBreadcrumbs??>
 ,{"@type":"BreadcrumbList","itemListElement":[<#list seoBreadcrumbs as crumb>
   {"@type":"ListItem","position":${crumb_index + 1},"name":"${crumb.title?json_string}","item":"${base}${crumb.url}"}<#sep>,</#sep></#list>]}

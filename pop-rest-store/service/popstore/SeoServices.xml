@@ -36,6 +36,9 @@ along with this software (see the LICENSE.md file). If not, see
         <in-parameters>
             <parameter name="productStoreId" required="true"/>
             <parameter name="baseUrl"/>
+            <!-- 'th/' lists the Thai pages instead of the ones the site is written in; the
+                 sitemap and llms.txt leave it empty, see get#StoreInfo -->
+            <parameter name="pagePathPrefix" default-value=""/>
         </in-parameters>
         <out-parameters>
             <parameter name="homePath"/>
@@ -46,23 +49,34 @@ along with this software (see the LICENSE.md file). If not, see
                 <service-call name="popstore.SeoServices.get#SiteBaseUrl" out-map="baseUrlOut"/>
                 <set field="baseUrl" from="baseUrlOut.baseUrl"/>
             </if>
+            <!-- 'th/' as a path prefix is '/th' as a url prefix -->
+            <set field="urlPrefix"
+                from="pagePathPrefix ? '/' + pagePathPrefix.substring(0, pagePathPrefix.length() - 1) : ''"/>
             <service-call name="popstore.StoreServices.get#StoreInfo" out-map="storeInfo"
-                    in-map="[productStoreId:productStoreId]"/>
+                    in-map="[productStoreId:productStoreId, pagePathPrefix:pagePathPrefix,
+                             urlPrefix:urlPrefix]"/>
             <script><![CDATA[
                 List storePages = (List) (storeInfo.pages ?: [])
                 // the home page is the one titled 'home', else the first page: same rule as home.xml
-                Map homePage = storePages.find({ it.title?.toLowerCase()?.startsWith('home') }) ?: storePages[0]
+                // match on the path, not the title: under a language the titles are translated
+                Map homePage = storePages.find({ it.path?.toLowerCase()?.startsWith('home') }) ?:
+                        storePages.find({ it.title?.toLowerCase()?.startsWith('home') }) ?: storePages[0]
                 homePath = homePage?.path
                 pages = []
                 for (Object pageObj in storePages) {
                     Map storePage = (Map) pageObj
                     boolean isHome = storePage.path == homePath
                     String sitePath = isHome ? '' : 'content/' + storePage.path
-                    pages.add([path: storePage.path, sitePath: sitePath, isHome: isHome,
+                    // the language is part of the url, not of the page path
+                    String siteUrlPath = urlPrefix ?
+                            (sitePath ? urlPrefix.substring(1) + '/' + sitePath : urlPrefix.substring(1)) :
+                            sitePath
+                    pages.add([path: storePage.path, sitePath: siteUrlPath, isHome: isHome,
+                               pagePath: pagePathPrefix + storePage.path,
                                title: storePage.title, description: storePage.description,
                                pageType: storePage.pageType, lastModified: storePage.lastModified,
-                               url: baseUrl + '/' + sitePath,
-                               markdownUrl: baseUrl + '/md/' + sitePath])
+                               url: baseUrl + '/' + siteUrlPath,
+                               markdownUrl: baseUrl + '/md/' + siteUrlPath])
                 }
             ]]></script>
         </actions>
@@ -82,14 +96,26 @@ along with this software (see the LICENSE.md file). If not, see
                 <service-call name="popstore.SeoServices.get#SiteBaseUrl" out-map="baseUrlOut"/>
                 <set field="baseUrl" from="baseUrlOut.baseUrl"/>
             </if>
+            <!-- /md/th/content/x is the twin of /th/content/x: the language leads the path here too -->
+            <set field="websiteLocales" from="['th', 'zh', 'de', 'fr', 'nl']"/>
+            <set field="firstSegment" from="(sitePath ?: '').split('/')[0]"/>
+            <set field="pagePathPrefix"
+                from="websiteLocales.contains(firstSegment) ? firstSegment + '/' : ''"/>
             <service-call name="popstore.SeoServices.get#SitePages" out-map="sitePagesOut"
-                    in-map="[productStoreId:productStoreId, baseUrl:baseUrl]"/>
+                    in-map="[productStoreId:productStoreId, baseUrl:baseUrl,
+                             pagePathPrefix:pagePathPrefix]"/>
             <set field="page" from="sitePagesOut.pages.find({ it.sitePath == (sitePath ?: '') })"/>
             <if condition="page == null"><return/></if>
 
             <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore" cache="true"/>
             <service-call name="org.moqui.impl.WikiServices.get#PublishedWikiPageText" out-map="pageOut"
-                    in-map="[wikiSpaceId:productStore.wikiSpaceId, pagePath:page.path]"/>
+                    in-map="[wikiSpaceId:productStore.wikiSpaceId, pagePath:page.pagePath]"/>
+            <if condition="!pageOut.pageText &amp;&amp; pagePathPrefix">
+                <!-- this page was not translated: fall back to the source language, like content.xml -->
+                <service-call name="org.moqui.impl.WikiServices.get#PublishedWikiPageText" out-map="pageOut"
+                        out-map-add-to-existing="false"
+                        in-map="[wikiSpaceId:productStore.wikiSpaceId, pagePath:page.path]"/>
+            </if>
             <if condition="!pageOut.pageText"><return/></if>
 
             <script><![CDATA[

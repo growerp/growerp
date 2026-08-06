@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="${(websiteLocale!'')?has_content?string(websiteLocale!'', 'en')}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -26,6 +26,9 @@
     <#assign canonicalUrl = pageCanonicalUrl!(ec.web.requestUrl)!"">
     <#if canonicalUrl?has_content><meta property="og:url" content="${canonicalUrl?html}">
     <link rel="canonical" href="${canonicalUrl?html}"></#if>
+    <#-- the same page in the other languages, see store.xml pageAlternates -->
+    <#if (storeInfo.availableLocales?has_content)!false><#list pageAlternates![] as alt>
+    <link rel="alternate" hreflang="${alt.locale}" href="${alt.url?html}"></#list></#if>
     <meta property="og:image" content="${siteBaseUrl!}/getLogo">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${((pageTitle!storeInfo.productStore.storeName))?html}">

@@ -1,3 +1,7 @@
+<#-- url prefix of a translated site, '' for the language the site is written in; the chrome
+     labels come from moqui.basic.LocalizedMessage, see growerp data/GrowerpL10nData.xml -->
+<#assign up = urlPrefix!''>
+<#function l key><#return ec.l10n.localize(key)></#function>
 <#assign isMarketing = storeInfo.productStore.productStoreId == "100000">
 <footer class="border-t border-white/10 bg-surface-container-lowest/60 mt-16">
     <div class="max-w-container mx-auto px-4 md:px-12 py-12">
@@ -9,7 +13,7 @@
                     <span class="font-display font-bold text-lg text-on-surface">${storeInfo.productStore.storeName!''}</span>
                 </div>
                 <#if (TwitterUrl!'')?has_content || (FacebookUrl!'')?has_content || (InstagramUrl!'')?has_content || (YouTubeUrl!'')?has_content || (LinkedInUrl!'')?has_content || (SubstackUrl!'')?has_content>
-                <span class="block font-label text-xs uppercase tracking-widest text-outline mb-3">Follow Us</span>
+                <span class="block font-label text-xs uppercase tracking-widest text-outline mb-3">${l('GrowerpWebsiteFollowUs')}</span>
                 <div class="flex items-center gap-4">
                     <#if (TwitterUrl!'')?has_content>
                     <a href="${TwitterUrl}" target="_blank" rel="noopener" aria-label="Twitter" class="text-on-surface-variant hover:text-primary transition-colors">
@@ -47,11 +51,11 @@
 
             <!-- Quick Links -->
             <div>
-                <h5 class="font-display font-semibold text-on-surface mb-4">Quick Links</h5>
+                <h5 class="font-display font-semibold text-on-surface mb-4">${l('GrowerpWebsiteQuickLinks')}</h5>
                 <ul class="grid grid-cols-2 gap-x-4 gap-y-2">
-                    <li><a href="/" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">Home</a></li>
+                    <li><a href="${up}/" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">${l('GrowerpWebsiteHome')}</a></li>
                     <#if isMarketing>
-                    <li><a href="/modules" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">Apps</a></li>
+                    <li><a href="/modules" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">${l('GrowerpWebsiteApps')}</a></li>
                     <li><a href="https://github.com/growerp/growerp" target="_blank" rel="noopener" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">GitHub</a></li>
                     </#if>
                     <#list storeInfo.menu as topItem>
@@ -60,7 +64,7 @@
                         <#-- grouped pages: list children as individual links; a bare group path has no route -->
                         <#list topItem.items as item>
                         <#if item.path??>
-                        <li><a href="/content/${item.path}" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">${item.title!item.path}</a></li>
+                        <li><a href="${up}/content/${item.path}" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">${item.title!item.path}</a></li>
                         </#if>
                         </#list>
                     <#else>
@@ -68,7 +72,7 @@
                         <#if topItem.path == 'obsidian'>
                         <a href="/${topItem.path}" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">${topItem.title!topItem.path}</a>
                         <#else>
-                        <a href="/content/${topItem.path}" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">${topItem.title!topItem.path}</a>
+                        <a href="${up}/content/${topItem.path}" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">${topItem.title!topItem.path}</a>
                         </#if>
                     </li>
                     </#if>
@@ -78,7 +82,7 @@
 
             <!-- Contact Info -->
             <div>
-                <h5 class="font-display font-semibold text-on-surface mb-4">Contact Us</h5>
+                <h5 class="font-display font-semibold text-on-surface mb-4">${l('GrowerpWebsiteContactUs')}</h5>
                 <ul class="space-y-3">
                     <#if companyPostalAddress?? && (companyPostalAddress.address1!'')?has_content>
                     <li class="flex items-start gap-3">

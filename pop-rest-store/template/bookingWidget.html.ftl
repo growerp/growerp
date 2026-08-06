@@ -5,6 +5,7 @@
      rooms; a rental site overrides it per marker, e.g.
      <div data-growerp-booking data-noun="equipment" data-unit="day"
           data-title="Book equipment"></div>. -->
+<#function l key><#return ec.l10n.localize(key)></#function>
 <style>
 .growerp-booking{max-width:560px;margin:16px 0;padding:18px;border:1px solid #ddd;
   border-radius:12px;font-family:inherit;background:rgba(255,255,255,.9);color:#222}
@@ -31,6 +32,50 @@
 </style>
 <script>
 (function(){
+  // The widget builds its wording from a noun ('room', 'equipment') and a unit
+  // ('night', 'day'). English pluralises by adding an 's', which no other language
+  // does, so the two shipped defaults carry their own singular and plural per
+  // language; a data-noun/data-unit the page author writes is used verbatim, the
+  // way it already was.
+  var T = {
+    room: "${l('GrowerpWebsiteBookingRoom')?js_string}",
+    rooms: "${l('GrowerpWebsiteBookingRooms')?js_string}",
+    equipment: "${l('GrowerpWebsiteBookingEquipment')?js_string}",
+    equipments: "${l('GrowerpWebsiteBookingEquipments')?js_string}",
+    night: "${l('GrowerpWebsiteBookingNight')?js_string}",
+    nights: "${l('GrowerpWebsiteBookingNights')?js_string}",
+    day: "${l('GrowerpWebsiteBookingDay')?js_string}",
+    days: "${l('GrowerpWebsiteBookingDays')?js_string}",
+    title: "${l('GrowerpWebsiteBookingTitle')?js_string}",
+    arrival: "${l('GrowerpWebsiteBookingArrival')?js_string}",
+    check: "${l('GrowerpWebsiteBookingCheck')?js_string}",
+    searching: "${l('GrowerpWebsiteBookingSearching')?js_string}",
+    firstName: "${l('GrowerpWebsiteBookingFirstName')?js_string}",
+    lastName: "${l('GrowerpWebsiteBookingLastName')?js_string}",
+    email: "${l('GrowerpWebsiteBookingEmail')?js_string}",
+    confirm: "${l('GrowerpWebsiteBookingConfirm')?js_string}",
+    select: "${l('GrowerpWebsiteBookingSelect')?js_string}",
+    available: "${l('GrowerpWebsiteBookingAvailable')?js_string}",
+    none: "${l('GrowerpWebsiteBookingNone')?js_string}",
+    summary: "${l('GrowerpWebsiteBookingSummary')?js_string}",
+    booked: "${l('GrowerpWebsiteBookingConfirmed')?js_string}",
+    failed: "${l('GrowerpWebsiteBookingError')?js_string}",
+    loadFailed: "${l('GrowerpWebsiteBookingLoadError')?js_string}"
+  };
+  // the shipped defaults, translated; anything else the author wrote stays as written
+  function nounWords(attr){
+    if (!attr) return {one: T.room, many: T.rooms};
+    if (attr === 'room') return {one: T.room, many: T.rooms};
+    if (attr === 'equipment') return {one: T.equipment, many: T.equipments};
+    return {one: attr, many: attr + 's'};
+  }
+  function unitWords(attr){
+    if (!attr) return {one: T.night, many: T.nights};
+    if (attr === 'night') return {one: T.night, many: T.nights};
+    if (attr === 'day') return {one: T.day, many: T.days};
+    var cap = attr.charAt(0).toUpperCase() + attr.substring(1);
+    return {one: attr, many: cap + 's'};
+  }
   var origin  = window.location.origin;
   var roomsUrl   = origin + '/rest/s1/growerp/100/PublicRooms';
   var bookingUrl = origin + '/rest/s1/growerp/100/PublicBooking';
@@ -46,10 +91,11 @@
 
   function render(holder){
     // Wording is configurable per marker; defaults keep hotel pages unchanged.
-    var noun  = holder.getAttribute('data-noun')  || 'room';
-    var unit  = holder.getAttribute('data-unit')  || 'night';
-    var title = holder.getAttribute('data-title') || ('Book a ' + noun);
-    var unitCap = unit.charAt(0).toUpperCase() + unit.substring(1);
+    var nounW = nounWords(holder.getAttribute('data-noun'));
+    var unitW = unitWords(holder.getAttribute('data-unit'));
+    var noun  = nounW.one;
+    var unit  = unitW.one;
+    var title = holder.getAttribute('data-title') || T.title.replace('{noun}', noun);
 
     var box = el('div', {'class':'growerp-booking'});
     box.appendChild(el('h3', {}, title));
@@ -57,19 +103,19 @@
     var tomorrow = new Date(Date.now() + 86400000);
     var row = el('div', {'class':'growerp-bk-row'});
     var fromWrap = el('div');
-    fromWrap.appendChild(el('label', {'for':'growerp-bk-from'}, 'Arrival'));
+    fromWrap.appendChild(el('label', {'for':'growerp-bk-from'}, T.arrival));
     var fromInput = el('input', {id:'growerp-bk-from', type:'date'});
     fromInput.value = isoDate(tomorrow);
     fromWrap.appendChild(fromInput);
     var nightsWrap = el('div');
-    nightsWrap.appendChild(el('label', {'for':'growerp-bk-nights'}, unitCap + 's'));
+    nightsWrap.appendChild(el('label', {'for':'growerp-bk-nights'}, unitW.many));
     var nightsInput = el('input', {id:'growerp-bk-nights', type:'number', min:'1'});
     nightsInput.value = '1';
     nightsWrap.appendChild(nightsInput);
     row.appendChild(fromWrap); row.appendChild(nightsWrap);
     box.appendChild(row);
 
-    var searchBtn = el('button', {type:'button'}, 'Check availability');
+    var searchBtn = el('button', {type:'button'}, T.check);
     box.appendChild(searchBtn);
     var status = el('div', {'class':'growerp-bk-status'});
     box.appendChild(status);
@@ -86,12 +132,14 @@
       var form = el('form');
       form.appendChild(el('h3', {}, room.productName));
       form.appendChild(el('div', {'class':'growerp-bk-desc'},
-        nightsInput.value + ' ' + unit + '(s) from ' + fromInput.value +
-        ' — total ' + room.grandTotal));
+        T.summary.replace('{count}', nightsInput.value)
+                 .replace('{unit}', nightsInput.value === '1' ? unitW.one : unitW.many)
+                 .replace('{from}', fromInput.value)
+                 .replace('{total}', room.grandTotal)));
       var fields = [
-        {id:'growerp-bk-first', label:'First name', type:'text'},
-        {id:'growerp-bk-last',  label:'Last name',  type:'text'},
-        {id:'growerp-bk-email', label:'Email',      type:'email'}
+        {id:'growerp-bk-first', label:T.firstName, type:'text'},
+        {id:'growerp-bk-last',  label:T.lastName,  type:'text'},
+        {id:'growerp-bk-email', label:T.email,     type:'email'}
       ];
       var inputs = {};
       fields.forEach(function(f){
@@ -100,7 +148,7 @@
         inputs[f.id] = i;
         form.appendChild(i);
       });
-      var bookBtn = el('button', {type:'submit'}, 'Confirm booking');
+      var bookBtn = el('button', {type:'submit'}, T.confirm);
       form.appendChild(bookBtn);
       form.addEventListener('submit', function(ev){
         ev.preventDefault();
@@ -122,14 +170,14 @@
           .then(function(res){
             if (res.ok) {
               results.innerHTML = '';
-              setStatus(res.j.message || 'Your reservation is confirmed.', 'ok');
+              setStatus(res.j.message || T.booked, 'ok');
             } else {
               setStatus((res.j && res.j.errors) ? res.j.errors
-                : 'Could not book, please try again', 'err');
+                : T.failed, 'err');
               bookBtn.disabled = false;
             }
           }).catch(function(){
-            setStatus('Could not book, please try again', 'err');
+            setStatus(T.failed, 'err');
             bookBtn.disabled = false;
           });
       });
@@ -139,7 +187,7 @@
     function search(){
       searchBtn.disabled = true;
       results.innerHTML = '';
-      setStatus('Searching...', null);
+      setStatus(T.searching, null);
       var url = roomsUrl + '?hostName=' + encodeURIComponent(hostName) +
         '&fromDate=' + encodeURIComponent(fromInput.value) +
         '&nights=' + encodeURIComponent(nightsInput.value);
@@ -149,13 +197,13 @@
           searchBtn.disabled = false;
           if (!res.ok) {
             setStatus((res.j && res.j.errors) ? res.j.errors
-              : 'Could not load availability', 'err');
+              : T.loadFailed, 'err');
             return;
           }
           var rooms = (res.j && res.j.rooms) || [];
           var free = rooms.filter(function(r){ return r.available > 0; });
           if (!free.length) {
-            setStatus('No ' + noun + 's available for those dates', 'err');
+            setStatus(T.none.replace('{noun}', nounW.many), 'err');
             return;
           }
           setStatus('', null);
@@ -166,11 +214,11 @@
             if (room.description)
               info.appendChild(el('div', {'class':'growerp-bk-desc'}, room.description));
             info.appendChild(el('div', {'class':'growerp-bk-desc'},
-              room.available + ' available'));
+              T.available.replace('{count}', room.available)));
             card.appendChild(info);
             var right = el('div', {'class':'growerp-bk-price'});
             right.appendChild(el('div', {}, room.grandTotal));
-            var pick = el('button', {type:'button'}, 'Select');
+            var pick = el('button', {type:'button'}, T.select);
             pick.addEventListener('click', function(){ guestForm(room); });
             right.appendChild(pick);
             card.appendChild(right);
@@ -178,7 +226,7 @@
           });
         }).catch(function(){
           searchBtn.disabled = false;
-          setStatus('Could not load availability', 'err');
+          setStatus(T.loadFailed, 'err');
         });
     }
 

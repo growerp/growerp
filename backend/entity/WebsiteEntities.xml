@@ -103,4 +103,36 @@
             <key-map field-name="productStoreId" />
         </relationship>
     </entity>
+
+    <!-- ========================================================= -->
+    <!--  Website translation: translate a site into more locales  -->
+    <!-- ========================================================= -->
+    <entity entity-name="WebsiteTranslation" package="growerp.website">
+        <description>One attempt to translate an owner's website into the locales the Flutter apps
+            support. Every page is translated with AI and written back as a locale prefixed wiki
+            page (pagePath 'th/about' next to 'about'). Runs as a background job; this row carries
+            the progress.</description>
+        <field name="translationId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" /><!-- whose website is translated -->
+        <field name="productStoreId" type="id" />
+        <field name="sourceLocale" type="text-short" /><!-- the language the pages are written in -->
+        <field name="targetLocales" type="text-medium" /><!-- comma separated, e.g. 'th,nl' -->
+        <field name="translateEntityNames" type="text-indicator" /><!-- store/category/product names -->
+        <field name="overwriteExisting" type="text-indicator" />
+        <!-- QUEUED, TRANSLATING, COMPLETED, FAILED -->
+        <field name="status" type="text-short" />
+        <field name="statusMessage" type="text-medium" />
+        <field name="pageCount" type="number-integer" /><!-- source pages x target locales -->
+        <field name="translatedCount" type="number-integer" />
+        <field name="errorMessage" type="text-long" />
+        <field name="createdDate" type="date-time" />
+        <field name="completedDate" type="date-time" />
+
+        <relationship type="one" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+        <relationship type="one" related="mantle.product.store.ProductStore">
+            <key-map field-name="productStoreId" />
+        </relationship>
+    </entity>
 </entities>
