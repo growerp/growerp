@@ -1,0 +1,6 @@
+arb-dir: lib/l10n
+template-arb-file: intl_en.arb
+output-localization-file: agents_localizations.dart
+output-class: AgentsLocalizations
+output-dir: lib/l10n/generated
+preferred-supported-locales: [en, th]

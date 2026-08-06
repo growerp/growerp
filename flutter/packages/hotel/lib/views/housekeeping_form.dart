@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import '../l10n/generated/hotel_localizations.dart';
 
 /// Housekeeping board: every room with its occupancy for today and a
 /// clean/dirty status the housekeeper flips as rooms are serviced.
@@ -96,7 +97,7 @@ class _HousekeepingFormState extends State<HousekeepingForm> {
   Widget build(BuildContext context) {
     if (_loading) return const LoadingIndicator();
     if (_error != null) {
-      return Center(child: Text('Error: $_error', key: const Key('hkError')));
+      return Center(child: Text(HotelLocalizations.of(context)!.errorWithArg('$_error'), key: const Key('hkError')));
     }
     final dirtyCount = _rooms.where((r) => r.hkStatusId != 'Clean').length;
     return Scaffold(
@@ -125,7 +126,7 @@ class _HousekeepingFormState extends State<HousekeepingForm> {
           Padding(
             padding: const EdgeInsets.all(10),
             child: Text(
-              'Rooms: ${_rooms.length}   To clean: $dirtyCount',
+              HotelLocalizations.of(context)!.roomsToClean(_rooms.length, dirtyCount),
               key: const Key('hkSummary'),
               style: Theme.of(context).textTheme.titleMedium,
             ),

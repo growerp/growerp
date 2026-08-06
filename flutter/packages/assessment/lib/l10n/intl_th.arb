@@ -1,0 +1,23 @@
+{
+  "@@locale": "th",
+  "landingPage": "หน้าแรก",
+  "@landingPage": {
+    "description": "Title of the landing page."
+  },
+  "welcomeToGrowerpLandingPage": "ยินดีต้อนรับสู่หน้าแรกของ GrowERP",
+  "@welcomeToGrowerpLandingPage": {
+    "description": "Welcome text on the landing page."
+  },
+  "discoverYourBusinessPotential": "ค้นพบศักยภาพทางธุรกิจของคุณด้วยการประเมินที่ครอบคลุมของเรา",
+  "@discoverYourBusinessPotential": {
+    "description": "Subtitle text on the landing page."
+  },
+  "startAssessment": "เริ่มการประเมิน",
+  "@startAssessment": {
+    "description": "Button text to start the assessment."
+  },
+  "clickTheButtonAboveToBegin": "คลิกปุ่มด้านบนเพื่อเริ่มการประเมินของคุณ",
+  "@clickTheButtonAboveToBegin": {
+    "description": "Instruction text below the start button."
+  }
+}

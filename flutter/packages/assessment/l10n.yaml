@@ -1,0 +1,6 @@
+arb-dir: lib/l10n
+template-arb-file: intl_en.arb
+output-localization-file: assessment_localizations.dart
+output-class: AssessmentLocalizations
+output-dir: lib/l10n/generated
+preferred-supported-locales: [en, th]

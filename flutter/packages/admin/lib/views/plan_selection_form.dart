@@ -19,6 +19,7 @@ import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:decimal/decimal.dart';
+import '../l10n/generated/admin_localizations.dart';
 
 class PlanSelectionForm extends StatefulWidget {
   const PlanSelectionForm({super.key});
@@ -63,7 +64,7 @@ class _PlanSelectionFormState extends State<PlanSelectionForm> {
         if (state.status == DataFetchStatus.loading) {
           return const Center(child: CircularProgressIndicator());
         } else if ((state.data as Products).products.isEmpty) {
-          return const Center(child: Text('No plans available'));
+          return Center(child: Text(AdminLocalizations.of(context)!.noPlansAvailable));
         }
         // get products and sort by price
         Products productsList = state.data as Products;
@@ -75,7 +76,7 @@ class _PlanSelectionFormState extends State<PlanSelectionForm> {
           );
         // get current subscription
         if (subscriptionBloc.state.subscriptions.isEmpty) {
-          return const Center(child: Text('No subscription found'));
+          return Center(child: Text(AdminLocalizations.of(context)!.noSubscriptionFound));
         }
         subscription = (subscriptionBloc.state.subscriptions).first;
         selectedPlan = subscription.product!.productId;

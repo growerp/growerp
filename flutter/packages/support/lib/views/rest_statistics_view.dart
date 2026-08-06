@@ -15,6 +15,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import '../l10n/generated/support_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:intl/intl.dart';
@@ -197,19 +198,19 @@ class _RestStatisticsViewState extends State<RestStatisticsView> {
                     children: [
                       Row(
                         children: [
-                          Text('User REST activity '
+                          Text(SupportLocalizations.of(context)!.userRestActivity +
                               '${stats!.fromDate} — ${stats.thruDate}'),
                           const SizedBox(width: 20),
                           DropdownButton<int>(
                             key: const Key('periodDropDown'),
                             value: _periodDays,
-                            items: const [
+                            items: [
                               DropdownMenuItem(
-                                  value: 30, child: Text('30 days')),
+                                  value: 30, child: Text(SupportLocalizations.of(context)!.thirtyDays)),
                               DropdownMenuItem(
-                                  value: 60, child: Text('60 days')),
+                                  value: 60, child: Text(SupportLocalizations.of(context)!.sixtyDays)),
                               DropdownMenuItem(
-                                  value: 90, child: Text('90 days')),
+                                  value: 90, child: Text(SupportLocalizations.of(context)!.ninetyDays)),
                             ],
                             onChanged: (value) {
                               if (value == null) return;
@@ -218,14 +219,14 @@ class _RestStatisticsViewState extends State<RestStatisticsView> {
                             },
                           ),
                           const SizedBox(width: 20),
-                          Text('${stats.users.length} users'),
+                          Text(SupportLocalizations.of(context)!.usersCount(stats.users.length)),
                         ],
                       ),
                       const SizedBox(height: 10),
                       Expanded(
                         child: stats.users.isEmpty
-                            ? const Center(
-                                child: Text('No REST activity in period'))
+                            ? Center(
+                                child: Text(SupportLocalizations.of(context)!.noRestActivityInPeriod))
                             : _dotGrid(stats),
                       ),
                     ],
