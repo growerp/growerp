@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:go_router/go_router.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 class RelatedFinDocs extends StatelessWidget {
   const RelatedFinDocs({
@@ -57,7 +58,7 @@ class RelatedFinDocs extends StatelessWidget {
           if (finDoc.docType != FinDocType.order && finDoc.orderId != null)
             OutlinedButton(
               key: const Key('relOrder'),
-              child: const Text('Order'),
+              child: Text(OrderAccountingLocalizations.of(context)!.docTypeOrder),
               onPressed: () => context.push(
                 '/findoc',
                 extra: FinDoc(
@@ -70,7 +71,7 @@ class RelatedFinDocs extends StatelessWidget {
           if (finDoc.docType != FinDocType.invoice && finDoc.invoiceId != null)
             OutlinedButton(
               key: const Key('relInvoice'),
-              child: const Text('Invoice'),
+              child: Text(OrderAccountingLocalizations.of(context)!.docTypeInvoice),
               onPressed: () => context.push(
                 '/findoc',
                 extra: FinDoc(
@@ -83,7 +84,7 @@ class RelatedFinDocs extends StatelessWidget {
           if (finDoc.docType != FinDocType.payment && finDoc.paymentId != null)
             OutlinedButton(
               key: const Key('relPayment'),
-              child: const Text('Payment'),
+              child: Text(OrderAccountingLocalizations.of(context)!.docTypePayment),
               onPressed: () => context.push(
                 '/findoc',
                 extra: FinDoc(
@@ -97,7 +98,7 @@ class RelatedFinDocs extends StatelessWidget {
               finDoc.shipmentId != null)
             OutlinedButton(
               key: const Key('relShipment'),
-              child: const Text('Shipment'),
+              child: Text(OrderAccountingLocalizations.of(context)!.docTypeShipment),
               onPressed: () => context.push(
                 '/findoc',
                 extra: FinDoc(
@@ -111,7 +112,7 @@ class RelatedFinDocs extends StatelessWidget {
               finDoc.transactionId != null)
             OutlinedButton(
               key: const Key('relTransaction'),
-              child: const Text('Transaction'),
+              child: Text(OrderAccountingLocalizations.of(context)!.docTypeTransaction),
               onPressed: () => context.push(
                 '/findoc',
                 extra: FinDoc(

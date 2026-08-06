@@ -224,7 +224,10 @@ GoRouter createOrderAccountingExampleRouter() {
       '/accounting/ledger-journal' => const LedgerJournalList(
         key: Key('LedgerJournalListLedgerJournal'),
       ),
-      '/accounting/reports' => const Center(child: Text("Reports")),
+      '/accounting/reports' => Builder(
+        builder: (context) =>
+            Center(child: Text(OrderAccountingLocalizations.of(context)!.reports)),
+      ),
       '/accounting/setup' => const PaymentTypeList(),
       '/accounting/setup/item-types' => const ItemTypeList(),
       '/incoming-shipments' => const FinDocList(

@@ -23,6 +23,7 @@ import '../bloc/outreach_campaign_bloc.dart';
 import '../bloc/outreach_message_bloc.dart';
 import '../bloc/outreach_message_event.dart';
 import '../bloc/outreach_message_state.dart';
+import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
 
 /// Assisted 1-click LinkedIn send queue.
 ///
@@ -173,7 +174,7 @@ class _LinkedInSendQueueScreenState extends State<LinkedInSendQueueScreen> {
       builder: (context, state) {
         if (state.status == OutreachMessageStatus.loading &&
             state.messages.isEmpty) {
-          return const Center(child: LoadingIndicator());
+          return Center(child: LoadingIndicator());
         }
 
         final queue = _queue(state.messages);
@@ -195,9 +196,9 @@ class _LinkedInSendQueueScreenState extends State<LinkedInSendQueueScreen> {
             const Divider(height: 1),
             Expanded(
               child: current == null
-                  ? const Center(
+                  ? Center(
                       key: Key('queueEmpty'),
-                      child: Text('No pending LinkedIn messages 🎉'),
+                      child: Text(OutreachLocalizations.of(context)!.noPendingLinkedinMessages),
                     )
                   : _card(current),
             ),
@@ -224,11 +225,11 @@ class _LinkedInSendQueueScreenState extends State<LinkedInSendQueueScreen> {
                   key: const Key('queueCampaign'),
                   isExpanded: true,
                   value: _campaignId,
-                  hint: const Text('All campaigns'),
+                  hint: Text(OutreachLocalizations.of(context)!.allCampaigns),
                   items: [
-                    const DropdownMenuItem<String?>(
+                    DropdownMenuItem<String?>(
                       value: null,
-                      child: Text('All campaigns'),
+                      child: Text(OutreachLocalizations.of(context)!.allCampaigns),
                     ),
                     ...cState.campaigns.map(
                       (c) => DropdownMenuItem<String?>(
@@ -306,7 +307,7 @@ class _LinkedInSendQueueScreenState extends State<LinkedInSendQueueScreen> {
                 key: const Key('copyOpenLinkedIn'),
                 onPressed: () => _copyAndOpen(m),
                 icon: const Icon(Icons.open_in_new),
-                label: const Text('Copy & Open LinkedIn'),
+                label: Text(OutreachLocalizations.of(context)!.copyOpenLinkedin),
               ),
               ElevatedButton.icon(
                 key: const Key('polishMessage'),
@@ -318,7 +319,7 @@ class _LinkedInSendQueueScreenState extends State<LinkedInSendQueueScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.auto_awesome),
-                label: const Text('AI Polish'),
+                label: Text(OutreachLocalizations.of(context)!.aiPolish),
               ),
               ElevatedButton.icon(
                 key: const Key('markSentNext'),
@@ -329,12 +330,12 @@ class _LinkedInSendQueueScreenState extends State<LinkedInSendQueueScreen> {
                   ),
                 ),
                 icon: const Icon(Icons.check),
-                label: const Text('Sent → Next'),
+                label: Text(OutreachLocalizations.of(context)!.sentNext),
               ),
               OutlinedButton(
                 key: const Key('skipMessage'),
                 onPressed: () => setState(() => _index++),
-                child: const Text('Skip'),
+                child: Text(OutreachLocalizations.of(context)!.skip),
               ),
             ],
           ),

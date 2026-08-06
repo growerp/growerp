@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 /// Compact ledger dashboard for the half-height 'Acct Ledger' dashboard
 /// tile: dense transaction-mix bars (type + count only) with the
@@ -52,7 +53,7 @@ class _LedgerDashboardChartMiniState extends State<LedgerDashboardChartMini> {
   Widget _funnel(BuildContext context, List<LedgerStageSummaryItem> summary) {
     final colorScheme = Theme.of(context).colorScheme;
     if (summary.isEmpty) {
-      return const Center(child: Text('No transaction data'));
+      return Center(child: Text(OrderAccountingLocalizations.of(context)!.noTransactionData));
     }
     int maxCount = 1;
     for (final item in summary) {

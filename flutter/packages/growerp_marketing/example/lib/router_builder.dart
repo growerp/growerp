@@ -18,6 +18,7 @@ import 'package:go_router/go_router.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Canonical menu configuration for Marketing example app.
 ///
@@ -207,7 +208,7 @@ class TakeAssessmentMenu extends StatelessWidget {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Select an Assessment to Take'),
+            title: Text(MarketingLocalizations.of(context)!.selectAnAssessmentToTake),
             backgroundColor: Colors.transparent,
           ),
           body: ListView.builder(

@@ -18,6 +18,7 @@ import 'package:growerp_models/growerp_models.dart';
 
 import '../bloc/outreach_message_bloc.dart';
 import '../bloc/outreach_message_event.dart';
+import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
 
 /// Returns column definitions for outreach message list based on device type
 List<StyledColumn> getOutreachMessageListColumns(BuildContext context) {
@@ -75,14 +76,14 @@ List<Widget> getOutreachMessageListRow({
       context: context,
       barrierDismissible: true,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Message'),
+        title: Text(OutreachLocalizations.of(context)!.deleteMessage),
         content: Text(
           'Are you sure you want to delete this message to "${message.recipientName ?? message.recipientEmail ?? "Unknown"}"?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(OutreachLocalizations.of(context)!.cancel),
           ),
           TextButton(
             key: Key('deleteConfirm$index'),

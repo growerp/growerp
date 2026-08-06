@@ -289,5 +289,19 @@
   "docTypeInvoice": "ใบแจ้งหนี้",
   "docTypePayment": "การชำระเงิน",
   "docTypeShipment": "การจัดส่ง",
-  "docTypeTransaction": "ธุรกรรม"
+  "docTypeTransaction": "ธุรกรรม",
+  "reports": "รายงาน",
+  "noOrderData": "ไม่มีข้อมูลการสั่งซื้อ",
+  "noTransactionData": "ไม่มีข้อมูลการทำธุรกรรม",
+  "authblocNotAvailablePleaseEnsureItIsProvided": "AuthBloc ไม่พร้อมใช้งาน โปรดตรวจสอบให้แน่ใจว่าได้จัดเตรียมไว้แล้ว",
+  "noInvoiceData": "ไม่มีข้อมูลใบแจ้งหนี้",
+  "post": "โพสต์",
+  "yqm": "ใช่/ถาม/ม",
+  "debitAccount": "บัญชีเดบิต",
+  "creditAccount": "บัญชีเครดิต",
+  "error": "ข้อผิดพลาด",
+  "newCustomer": "ลูกค้าใหม่",
+  "addProduct1": "เพิ่มสินค้า",
+  "addReservation": "เพิ่มการจอง",
+  "itemtype": "ประเภทรายการ"
 }

@@ -21,6 +21,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../bloc/landing_page_bloc.dart';
 import '../bloc/landing_page_event.dart';
 import '../bloc/landing_page_state.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Maps backend hookType format to dropdown values
 /// Backend returns formats like 'ResultsHook', 'FrustrationHook'
@@ -177,7 +178,7 @@ class LandingPageDialogState extends State<LandingPageDialog> {
                                                         Navigator.pop(
                                                       context,
                                                     ),
-                                                    child: const Text('Cancel'),
+                                                    child: Text(MarketingLocalizations.of(context)!.cancel),
                                                   ),
                                                   TextButton(
                                                     onPressed: () {
@@ -190,7 +191,7 @@ class LandingPageDialogState extends State<LandingPageDialog> {
                                                       );
                                                       Navigator.pop(context);
                                                     },
-                                                    child: const Text('Delete'),
+                                                    child: Text(MarketingLocalizations.of(context)!.delete),
                                                   ),
                                                 ],
                                               ),
@@ -256,7 +257,7 @@ class LandingPageDialogState extends State<LandingPageDialog> {
                     child: DropdownButtonFormField<String>(
                       key: const Key('status'),
                       decoration: const InputDecoration(labelText: 'Status'),
-                      hint: const Text('Select status'),
+                      hint: Text(MarketingLocalizations.of(context)!.selectStatus),
                       initialValue: _selectedStatus.toUpperCase(),
                       items: ['DRAFT', 'ACTIVE', 'INACTIVE'].map((item) {
                         return DropdownMenuItem<String>(
@@ -289,24 +290,24 @@ class LandingPageDialogState extends State<LandingPageDialog> {
                     child: DropdownButtonFormField<String?>(
                       key: const Key('hookType'),
                       decoration: const InputDecoration(labelText: 'Hook Type'),
-                      hint: const Text('Select hook type'),
+                      hint: Text(MarketingLocalizations.of(context)!.selectHookType),
                       initialValue: _selectedHookType,
                       items: [
-                        const DropdownMenuItem<String?>(
+                        DropdownMenuItem<String?>(
                           value: null,
-                          child: Text('None'),
+                          child: Text(MarketingLocalizations.of(context)!.none),
                         ),
-                        const DropdownMenuItem<String>(
+                        DropdownMenuItem<String>(
                           value: 'frustration',
-                          child: Text('Frustration'),
+                          child: Text(MarketingLocalizations.of(context)!.frustration),
                         ),
-                        const DropdownMenuItem<String>(
+                        DropdownMenuItem<String>(
                           value: 'results',
-                          child: Text('Results'),
+                          child: Text(MarketingLocalizations.of(context)!.results),
                         ),
-                        const DropdownMenuItem<String>(
+                        DropdownMenuItem<String>(
                           value: 'custom',
-                          child: Text('Custom'),
+                          child: Text(MarketingLocalizations.of(context)!.custom),
                         ),
                       ].toList(),
                       onChanged: (String? newValue) {

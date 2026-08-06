@@ -82,7 +82,9 @@ Future main() async {
   });
 }
 
-List<LocalizationsDelegate> delegates = [];
+List<LocalizationsDelegate> delegates = const [
+  MarketingLocalizations.delegate,
+];
 
 /// Notify parent window that Flutter app is ready (for iframe embedding)
 void notifyFlutterReady() {

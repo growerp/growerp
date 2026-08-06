@@ -24,6 +24,7 @@ import '../bloc/outreach_campaign_bloc.dart';
 import '../bloc/platform_config_bloc.dart';
 import '../models/platform_settings.dart';
 import 'linkedin_lead_import_dialog.dart';
+import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
 
 /// Formats backend status for display
 /// 'MKTG_CAMP_PLANNED' -> 'Planned'
@@ -193,7 +194,7 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
       initialValue: isFrom ? _sendFromHour : _sendToHour,
       isExpanded: true,
       items: [
-        const DropdownMenuItem<int?>(value: null, child: Text('Any time')),
+        DropdownMenuItem<int?>(value: null, child: Text(OutreachLocalizations.of(context)!.anyTime)),
         for (int hour = 0; hour < 24; hour++)
           DropdownMenuItem<int?>(
             value: hour,
@@ -220,19 +221,19 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Retry failed sends'),
+        title: Text(OutreachLocalizations.of(context)!.retryFailedSends),
         content: const Text(
           'Put all failed messages of this campaign back in the send queue?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(OutreachLocalizations.of(context)!.cancel),
           ),
           TextButton(
             key: const Key('retryFailedConfirm'),
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Retry'),
+            child: Text(OutreachLocalizations.of(context)!.retry),
           ),
         ],
       ),
@@ -430,21 +431,21 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                             OutlinedButton.icon(
                               key: const Key('importLeads'),
                               icon: const Icon(Icons.upload_file, size: 18),
-                              label: const Text('Import LinkedIn leads'),
+                              label: Text(OutreachLocalizations.of(context)!.importLinkedinLeads),
                               onPressed: () =>
                                   _importLeads(LeadImportSource.linkedin),
                             ),
                             OutlinedButton.icon(
                               key: const Key('importApolloLeads'),
                               icon: const Icon(Icons.upload_file, size: 18),
-                              label: const Text('Import Apollo leads'),
+                              label: Text(OutreachLocalizations.of(context)!.importApolloLeads),
                               onPressed: () =>
                                   _importLeads(LeadImportSource.apollo),
                             ),
                             OutlinedButton.icon(
                               key: const Key('retryFailed'),
                               icon: const Icon(Icons.refresh, size: 18),
-                              label: const Text('Retry failed sends'),
+                              label: Text(OutreachLocalizations.of(context)!.retryFailedSends),
                               onPressed: _retryFailed,
                             ),
                           ],
@@ -468,7 +469,7 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                                 ? () => _showPlatformConfigDialog()
                                 : null,
                             icon: const Icon(Icons.settings, size: 18),
-                            label: const Text('Configure'),
+                            label: Text(OutreachLocalizations.of(context)!.configure),
                           ),
                         ],
                       ),
@@ -620,7 +621,7 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                             child: OutlinedButton(
                               key: const Key('cancel'),
                               onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('Cancel'),
+                              child: Text(OutreachLocalizations.of(context)!.cancel),
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -631,9 +632,8 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                                 if (_formKey.currentState!.validate()) {
                                   if (_selectedPlatforms.isEmpty) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                            'Please select at least one platform.'),
+                                      SnackBar(
+                                        content: Text(OutreachLocalizations.of(context)!.pleaseSelectAtLeastOnePlatform),
                                         backgroundColor: Colors.red,
                                       ),
                                     );
@@ -865,17 +865,17 @@ class _PlatformConfigDialogState extends State<_PlatformConfigDialog>
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Please log in to this platform in your browser:'),
+            Text(OutreachLocalizations.of(context)!.pleaseLogInToThisPlatformInYourBrowser),
             const SizedBox(height: 8),
             SelectableText(url, style: const TextStyle(color: Colors.blue)),
             const SizedBox(height: 16),
-            const Text('After logging in, return here and click "Done".'),
+            Text(OutreachLocalizations.of(context)!.afterLoggingInReturnHereAndClickDone),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Done'),
+            child: Text(OutreachLocalizations.of(context)!.done),
           ),
         ],
       ),
@@ -910,12 +910,12 @@ class _PlatformConfigDialogState extends State<_PlatformConfigDialog>
               children: [
                 OutlinedButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(OutreachLocalizations.of(context)!.cancel),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: _saveAndClose,
-                  child: const Text('Save'),
+                  child: Text(OutreachLocalizations.of(context)!.save),
                 ),
               ],
             ),
@@ -1080,7 +1080,7 @@ class _PlatformConfigDialogState extends State<_PlatformConfigDialog>
                         TextButton.icon(
                           onPressed: () => _openMessageListEditor(platform),
                           icon: const Icon(Icons.edit, size: 16),
-                          label: const Text('Edit'),
+                          label: Text(OutreachLocalizations.of(context)!.edit),
                         ),
                       ],
                     ),
@@ -1320,12 +1320,12 @@ class _MessageListEditorState extends State<_MessageListEditor> {
                   children: [
                     OutlinedButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
+                      child: Text(OutreachLocalizations.of(context)!.cancel),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(_messages),
-                      child: const Text('Save'),
+                      child: Text(OutreachLocalizations.of(context)!.save),
                     ),
                   ],
                 ),

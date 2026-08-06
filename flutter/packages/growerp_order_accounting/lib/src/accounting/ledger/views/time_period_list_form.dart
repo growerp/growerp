@@ -118,7 +118,7 @@ class TimePeriodListState extends State<TimePeriodList> {
                   _ledgerBloc.add(LedgerTimePeriods(periodType: periodType));
                 },
                 tooltip: 'Change period type(Y/Q/M)',
-                label: const Text('Y/Q/M'),
+                label: Text(OrderAccountingLocalizations.of(context)!.yqm),
               ),
               body: Column(
                 children: [

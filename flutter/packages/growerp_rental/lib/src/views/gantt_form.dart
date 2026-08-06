@@ -21,6 +21,7 @@ import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_adk/growerp_adk.dart';
 import 'package:horizontal_data_table/horizontal_data_table.dart';
 import 'package:intl/intl.dart';
+import 'package:growerp_rental/l10n/generated/rental_localizations.dart';
 
 enum Period { day, week, month }
 
@@ -353,7 +354,7 @@ class _GanttFormState extends State<GanttForm> {
                                   onPressed: () =>
                                       setState(() => columnPeriod = Period.day),
                                   tooltip: 'Chart by Day',
-                                  child: const Text('Day'),
+                                  child: Text(RentalLocalizations.of(context)!.day),
                                 ),
                               const SizedBox(height: 5),
                               if (columnPeriod != Period.week &&
@@ -365,7 +366,7 @@ class _GanttFormState extends State<GanttForm> {
                                     () => columnPeriod = Period.week,
                                   ),
                                   tooltip: 'Chart by Week',
-                                  child: const Text('Week'),
+                                  child: Text(RentalLocalizations.of(context)!.week),
                                 ),
                               const SizedBox(height: 5),
                               if (columnPeriod != Period.month &&
@@ -377,7 +378,7 @@ class _GanttFormState extends State<GanttForm> {
                                     () => columnPeriod = Period.month,
                                   ),
                                   tooltip: 'Chart by Month',
-                                  child: const Text('Month'),
+                                  child: Text(RentalLocalizations.of(context)!.month),
                                 ),
                               const SizedBox(height: 5),
                               FloatingActionButton(

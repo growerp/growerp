@@ -23,6 +23,7 @@ import '../bloc/assessment_bloc.dart';
 import '../bloc/question_bloc.dart';
 import 'question_list.dart';
 import 'assessment_leads_screen.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 String _capitalizeFirst(String text) {
   if (text.isEmpty) return text;
@@ -287,7 +288,7 @@ class AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
                           key: const Key('status'),
                           decoration:
                               const InputDecoration(labelText: 'Status'),
-                          hint: const Text('Select status'),
+                          hint: Text(MarketingLocalizations.of(context)!.selectStatus),
                           initialValue: _selectedStatus,
                           items: ['Draft', 'Active', 'Inactive'].map((item) {
                             return DropdownMenuItem<String>(
@@ -361,7 +362,7 @@ class AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
       child: OutlinedButton.icon(
         key: const Key("mobileQuestions"),
         icon: const Icon(Icons.quiz),
-        label: const Text('Questions'),
+        label: Text(MarketingLocalizations.of(context)!.questions),
         style: isNewAssessment
             ? OutlinedButton.styleFrom(
                 foregroundColor: Colors.grey,
@@ -417,24 +418,24 @@ class AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
                 style: ButtonStyle(
                   backgroundColor: WidgetStateProperty.all(Colors.red),
                 ),
-                child: const Text('Delete'),
+                child: Text(MarketingLocalizations.of(context)!.delete),
                 onPressed: () async {
                   final confirmed = await showDialog<bool>(
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: const Text('Delete Assessment'),
+                        title: Text(MarketingLocalizations.of(context)!.deleteAssessment),
                         content: const Text(
                           'Are you sure you want to delete this assessment?',
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(false),
-                            child: const Text('Cancel'),
+                            child: Text(MarketingLocalizations.of(context)!.cancel),
                           ),
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(true),
-                            child: const Text('Delete'),
+                            child: Text(MarketingLocalizations.of(context)!.delete),
                           ),
                         ],
                       );

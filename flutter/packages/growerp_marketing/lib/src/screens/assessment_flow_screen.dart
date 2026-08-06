@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Assessment Flow Container
 /// Manages the three-step assessment process and state transitions
@@ -158,14 +159,14 @@ class _AssessmentFlowScreenState extends State<AssessmentFlowScreen> {
                 // Handle error state first
                 if (state.status == AssessmentStatus.failure) {
                   return Scaffold(
-                    appBar: AppBar(title: const Text('Assessment - Step 2')),
+                    appBar: AppBar(title: Text(MarketingLocalizations.of(context)!.assessmentStep2)),
                     body: Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Icon(Icons.error, color: Colors.red, size: 64),
                           const SizedBox(height: 16),
-                          const Text('Error loading assessment'),
+                          Text(MarketingLocalizations.of(context)!.errorLoadingAssessment),
                           if (state.message != null) ...[
                             const SizedBox(height: 8),
                             Text(state.message!,
@@ -175,7 +176,7 @@ class _AssessmentFlowScreenState extends State<AssessmentFlowScreen> {
                           const SizedBox(height: 24),
                           ElevatedButton(
                             onPressed: _moveToPreviousStep,
-                            child: const Text('Go Back'),
+                            child: Text(MarketingLocalizations.of(context)!.goBack),
                           ),
                         ],
                       ),
@@ -188,7 +189,7 @@ class _AssessmentFlowScreenState extends State<AssessmentFlowScreen> {
                     state.selectedAssessment!.questions == null ||
                     state.selectedAssessment!.questions!.isEmpty) {
                   return Scaffold(
-                    appBar: AppBar(title: const Text('Assessment - Step 2')),
+                    appBar: AppBar(title: Text(MarketingLocalizations.of(context)!.assessmentStep2)),
                     body: Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,

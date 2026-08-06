@@ -21,6 +21,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../growerp_marketing.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 class SocialPostDetailScreen extends StatefulWidget {
   final SocialPost? socialPost;
@@ -296,9 +297,9 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
                           ),
                           initialValue: _selectedPlatform,
                           items: [
-                            const DropdownMenuItem<String>(
+                            DropdownMenuItem<String>(
                               value: null,
-                              child: Text('None'),
+                              child: Text(MarketingLocalizations.of(context)!.none),
                             ),
                             ...platforms.map((platform) {
                               return DropdownMenuItem<String>(
@@ -384,7 +385,7 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
                   child: OutlinedButton(
                     key: const Key('cancel'),
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Cancel'),
+                    child: Text(MarketingLocalizations.of(context)!.cancel),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -495,7 +496,7 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
                     foregroundColor: Colors.white,
                   ),
                   icon: const Icon(Icons.open_in_new),
-                  label: const Text('Copy & Open X'),
+                  label: Text(MarketingLocalizations.of(context)!.copyOpenX),
                   onPressed: _finalContentController.text.isEmpty
                       ? null
                       : () => _copyAndOpenTwitter(),
@@ -556,9 +557,9 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
           ),
           initialValue: value,
           items: [
-            const DropdownMenuItem<String>(
+            DropdownMenuItem<String>(
               value: null,
-              child: Text('None'),
+              child: Text(MarketingLocalizations.of(context)!.none),
             ),
             ...state.contentPlans.map((plan) => DropdownMenuItem<String>(
                   value: plan.planId,

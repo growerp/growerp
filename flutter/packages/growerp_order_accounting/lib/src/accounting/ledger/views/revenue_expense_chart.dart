@@ -362,8 +362,8 @@ class RevenueExpenseChartState extends State<RevenueExpenseForm> {
                         LineChartData(
                           titlesData: FlTitlesData(
                             show: true,
-                            topTitles: const AxisTitles(
-                              axisNameWidget: Text("By Month"),
+                            topTitles: AxisTitles(
+                              axisNameWidget: Text(OrderAccountingLocalizations.of(context)!.byMonth),
                             ),
                             leftTitles: const AxisTitles(
                               axisNameWidget: Text('\$'),

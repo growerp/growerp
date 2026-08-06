@@ -22,6 +22,7 @@ import '../bloc/persona_event.dart';
 import '../bloc/persona_state.dart';
 import 'persona_detail_screen.dart';
 import 'persona_list_styled_data.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// List screen for Marketing Personas
 class PersonaList extends StatefulWidget {
@@ -316,7 +317,7 @@ class GeneratePersonaDialogState extends State<GeneratePersonaDialog> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Cancel'),
+                    child: Text(MarketingLocalizations.of(context)!.cancel),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
@@ -335,7 +336,7 @@ class GeneratePersonaDialogState extends State<GeneratePersonaDialog> {
                       }
                     },
                     icon: const Icon(Icons.auto_awesome),
-                    label: const Text('Generate'),
+                    label: Text(MarketingLocalizations.of(context)!.generate),
                   ),
                 ],
               ),

@@ -18,6 +18,7 @@ import 'package:growerp_models/growerp_models.dart';
 
 import '../bloc/question_bloc.dart';
 import '../bloc/question_event.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Returns column definitions for question list based on device type
 List<StyledColumn> getQuestionListColumns(BuildContext context) {
@@ -55,14 +56,14 @@ List<Widget> getQuestionListRow({
       context: context,
       barrierDismissible: true,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Question'),
+        title: Text(MarketingLocalizations.of(context)!.deleteQuestion),
         content: const Text(
           'Are you sure you want to delete this question?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(MarketingLocalizations.of(context)!.cancel),
           ),
           TextButton(
             key: Key('deleteConfirm$index'),

@@ -1,4 +1,5 @@
 // Re-export assessment and landing page models from growerp_models for convenience
+export 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 export 'package:growerp_models/growerp_models.dart'
     show
         Assessment,

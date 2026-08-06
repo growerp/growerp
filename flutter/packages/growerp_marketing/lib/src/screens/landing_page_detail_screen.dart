@@ -25,6 +25,7 @@ import '../bloc/landing_page_state.dart';
 import '../bloc/assessment_bloc.dart';
 import 'page_section_list.dart';
 import 'credibility_info_list.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Maps backend hookType format to dropdown values
 /// Backend returns formats like 'ResultsHook', 'FrustrationHook'
@@ -307,7 +308,7 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                           key: const Key('status'),
                           decoration:
                               const InputDecoration(labelText: 'Status'),
-                          hint: const Text('Select status'),
+                          hint: Text(MarketingLocalizations.of(context)!.selectStatus),
                           initialValue: _selectedStatus,
                           items: ['Draft', 'Active', 'Inactive', 'Published']
                               .map((item) {
@@ -352,24 +353,24 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                           key: const Key('hookType'),
                           decoration:
                               const InputDecoration(labelText: 'Hook Type'),
-                          hint: const Text('Select hook type'),
+                          hint: Text(MarketingLocalizations.of(context)!.selectHookType),
                           initialValue: _selectedHookType,
                           items: [
-                            const DropdownMenuItem<String?>(
+                            DropdownMenuItem<String?>(
                               value: null,
-                              child: Text('None'),
+                              child: Text(MarketingLocalizations.of(context)!.none),
                             ),
-                            const DropdownMenuItem<String>(
+                            DropdownMenuItem<String>(
                               value: 'frustration',
-                              child: Text('Frustration'),
+                              child: Text(MarketingLocalizations.of(context)!.frustration),
                             ),
-                            const DropdownMenuItem<String>(
+                            DropdownMenuItem<String>(
                               value: 'results',
-                              child: Text('Results'),
+                              child: Text(MarketingLocalizations.of(context)!.results),
                             ),
-                            const DropdownMenuItem<String>(
+                            DropdownMenuItem<String>(
                               value: 'custom',
-                              child: Text('Custom'),
+                              child: Text(MarketingLocalizations.of(context)!.custom),
                             ),
                           ].toList(),
                           onChanged: (String? newValue) {
@@ -463,18 +464,18 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                             prefixIcon: Icon(Icons.touch_app),
                           ),
                           initialValue: _selectedCtaActionType,
-                          items: const [
+                          items: [
                             DropdownMenuItem<String>(
                               value: 'Assessment',
-                              child: Text('Assessment'),
+                              child: Text(MarketingLocalizations.of(context)!.assessment),
                             ),
                             DropdownMenuItem<String>(
                               value: 'Url',
-                              child: Text('Url'),
+                              child: Text(MarketingLocalizations.of(context)!.url),
                             ),
                             DropdownMenuItem<String>(
                               value: 'Form',
-                              child: Text('Form'),
+                              child: Text(MarketingLocalizations.of(context)!.form),
                             ),
                           ],
                           onChanged: (String? newValue) {
@@ -841,24 +842,24 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
               style: ButtonStyle(
                 backgroundColor: WidgetStateProperty.all(Colors.red),
               ),
-              child: const Text('Delete'),
+              child: Text(MarketingLocalizations.of(context)!.delete),
               onPressed: () async {
                 final confirmed = await showDialog<bool>(
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: const Text('Delete Landing Page'),
+                      title: Text(MarketingLocalizations.of(context)!.deleteLandingPage),
                       content: const Text(
                         'Are you sure you want to delete this landing page?',
                       ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(false),
-                          child: const Text('Cancel'),
+                          child: Text(MarketingLocalizations.of(context)!.cancel),
                         ),
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(true),
-                          child: const Text('Delete'),
+                          child: Text(MarketingLocalizations.of(context)!.delete),
                         ),
                       ],
                     );
@@ -928,7 +929,7 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
             child: OutlinedButton.icon(
               key: const Key("openSections"),
               icon: const Icon(Icons.view_list),
-              label: const Text('Sections'),
+              label: Text(MarketingLocalizations.of(context)!.sections),
               onPressed: () async => await showDialog(
                 barrierDismissible: true,
                 context: context,
@@ -952,7 +953,7 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
             child: OutlinedButton.icon(
               key: const Key("openCredibility"),
               icon: const Icon(Icons.verified_user),
-              label: const Text('Credibility'),
+              label: Text(MarketingLocalizations.of(context)!.credibility),
               onPressed: () async => await showDialog(
                 barrierDismissible: true,
                 context: context,

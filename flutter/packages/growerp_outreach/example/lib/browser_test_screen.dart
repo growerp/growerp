@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:growerp_outreach/growerp_outreach.dart';
+import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
 
 /// Test screen for BrowserMCP integration with LinkedIn adapter testing
 class BrowserTestScreen extends StatefulWidget {
@@ -337,7 +338,7 @@ class _BrowserTestScreenState extends State<BrowserTestScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('BrowserMCP Test'),
+        title: Text(OutreachLocalizations.of(context)!.browsermcpTest),
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
@@ -382,13 +383,13 @@ class _BrowserTestScreenState extends State<BrowserTestScreen>
                       ElevatedButton.icon(
                         onPressed: _isLoading ? null : _initialize,
                         icon: const Icon(Icons.play_arrow, size: 18),
-                        label: const Text('Initialize'),
+                        label: Text(OutreachLocalizations.of(context)!.initialize),
                       )
                     else
                       ElevatedButton.icon(
                         onPressed: _isLoading ? null : _cleanup,
                         icon: const Icon(Icons.stop, size: 18),
-                        label: const Text('Cleanup'),
+                        label: Text(OutreachLocalizations.of(context)!.cleanup),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red.shade100,
                         ),
@@ -443,7 +444,7 @@ class _BrowserTestScreenState extends State<BrowserTestScreen>
               ElevatedButton.icon(
                 onPressed: _isLoading || !_isInitialized ? null : _navigate,
                 icon: const Icon(Icons.navigation),
-                label: const Text('Go'),
+                label: Text(OutreachLocalizations.of(context)!.go),
               ),
             ],
           ),
@@ -457,14 +458,14 @@ class _BrowserTestScreenState extends State<BrowserTestScreen>
                   onPressed:
                       _isLoading || !_isInitialized ? null : _getSnapshot,
                   icon: const Icon(Icons.camera),
-                  label: const Text('Get Snapshot'),
+                  label: Text(OutreachLocalizations.of(context)!.getSnapshot),
                 ),
               ),
               const SizedBox(width: 8),
               ElevatedButton.icon(
                 onPressed: _lastSnapshot == null ? null : _showSnapshotDialog,
                 icon: const Icon(Icons.visibility),
-                label: const Text('View Snapshot'),
+                label: Text(OutreachLocalizations.of(context)!.viewSnapshot),
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
                       _lastSnapshot != null ? Colors.blue.shade100 : null,
@@ -492,13 +493,13 @@ class _BrowserTestScreenState extends State<BrowserTestScreen>
                 onPressed:
                     _isLoading || !_isInitialized ? null : _linkedInNavigate,
                 icon: const Icon(Icons.login),
-                label: const Text('Go to LinkedIn'),
+                label: Text(OutreachLocalizations.of(context)!.goToLinkedin),
               ),
               ElevatedButton.icon(
                 onPressed:
                     _isLoading || !_isInitialized ? null : _linkedInCheckLogin,
                 icon: const Icon(Icons.verified_user),
-                label: const Text('Check Login'),
+                label: Text(OutreachLocalizations.of(context)!.checkLogin),
               ),
             ],
           ),
@@ -522,7 +523,7 @@ class _BrowserTestScreenState extends State<BrowserTestScreen>
                 onPressed:
                     _isLoading || !_isInitialized ? null : _linkedInSearch,
                 icon: const Icon(Icons.search),
-                label: const Text('Search'),
+                label: Text(OutreachLocalizations.of(context)!.search),
               ),
             ],
           ),

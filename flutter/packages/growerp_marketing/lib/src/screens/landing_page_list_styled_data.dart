@@ -18,6 +18,7 @@ import 'package:growerp_models/growerp_models.dart';
 
 import '../bloc/landing_page_bloc.dart';
 import '../bloc/landing_page_event.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Returns column definitions for landing page list based on device type
 List<StyledColumn> getLandingPageListColumns(BuildContext context) {
@@ -69,14 +70,14 @@ List<Widget> getLandingPageListRow({
       context: context,
       barrierDismissible: true,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Landing Page'),
+        title: Text(MarketingLocalizations.of(context)!.deleteLandingPage),
         content: Text(
           'Are you sure you want to delete "${page.title}"?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(MarketingLocalizations.of(context)!.cancel),
           ),
           TextButton(
             key: Key('deleteConfirm$index'),

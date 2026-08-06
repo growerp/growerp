@@ -21,6 +21,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../bloc/outreach_message_bloc.dart';
 import '../bloc/outreach_message_event.dart';
 import '../bloc/outreach_message_state.dart';
+import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
 
 class OutreachMessageDetailScreen extends StatefulWidget {
   final OutreachMessage message;
@@ -469,7 +470,7 @@ class OutreachMessageDetailScreenState
                               ),
                             ),
                             icon: const Icon(Icons.refresh, size: 18),
-                            label: const Text('Retry'),
+                            label: Text(OutreachLocalizations.of(context)!.retry),
                           ),
                         ),
                         const SizedBox(width: 10),

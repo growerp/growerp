@@ -30,6 +30,7 @@ import '../bloc/persona_bloc.dart';
 import '../bloc/persona_event.dart';
 import '../bloc/persona_state.dart';
 import 'master_content_detail_screen.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 class ContentPlanDetailScreen extends StatefulWidget {
   final ContentPlan? contentPlan;
@@ -235,9 +236,9 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
                               initialValue: _selectedPersona,
                               isExpanded: true,
                               items: [
-                                const DropdownMenuItem<Persona>(
+                                DropdownMenuItem<Persona>(
                                   value: null,
-                                  child: Text('None'),
+                                  child: Text(MarketingLocalizations.of(context)!.none),
                                 ),
                                 ...personaState.personas.map((persona) {
                                   return DropdownMenuItem<Persona>(
@@ -484,7 +485,7 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
                 child: TextButton.icon(
                   key: const Key('addContent'),
                   icon: const Icon(Icons.add, size: 18),
-                  label: const Text('Add Content'),
+                  label: Text(MarketingLocalizations.of(context)!.addContent),
                   onPressed: () async {
                     final masterContentBloc = context.read<MasterContentBloc>();
                     await showDialog(
@@ -532,24 +533,24 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
                 style: ButtonStyle(
                   backgroundColor: WidgetStateProperty.all(Colors.red),
                 ),
-                child: const Text('Delete'),
+                child: Text(MarketingLocalizations.of(context)!.delete),
                 onPressed: () async {
                   final confirmed = await showDialog<bool>(
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: const Text('Delete Content Plan'),
+                        title: Text(MarketingLocalizations.of(context)!.deleteContentPlan),
                         content: const Text(
                           'Are you sure you want to delete this content plan?',
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(false),
-                            child: const Text('Cancel'),
+                            child: Text(MarketingLocalizations.of(context)!.cancel),
                           ),
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(true),
-                            child: const Text('Delete'),
+                            child: Text(MarketingLocalizations.of(context)!.delete),
                           ),
                         ],
                       );

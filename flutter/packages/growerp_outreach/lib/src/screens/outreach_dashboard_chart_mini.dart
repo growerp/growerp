@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
 
 /// Compact outreach dashboard for the half-height 'Outreach' dashboard
 /// tile: dense message-status funnel bars (status + count only) with the
@@ -63,7 +64,7 @@ class _OutreachDashboardChartMiniState
   ) {
     final colorScheme = Theme.of(context).colorScheme;
     if (summary.isEmpty) {
-      return const Center(child: Text('No message data'));
+      return Center(child: Text(OutreachLocalizations.of(context)!.noMessageData));
     }
     int maxCount = 1;
     for (final item in summary) {

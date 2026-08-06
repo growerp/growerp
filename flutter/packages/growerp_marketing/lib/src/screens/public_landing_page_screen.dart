@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 class PublicLandingPageScreen extends StatefulWidget {
   const PublicLandingPageScreen({
@@ -63,7 +64,7 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Assessment Landing Page'),
+        title: Text(MarketingLocalizations.of(context)!.assessmentLandingPage),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -100,7 +101,7 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
                             ),
                           );
                     },
-                    child: const Text('Retry'),
+                    child: Text(MarketingLocalizations.of(context)!.retry),
                   ),
                 ],
               ),
@@ -115,7 +116,7 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
             );
           }
 
-          return const Center(child: Text('Landing page not found'));
+          return Center(child: Text(MarketingLocalizations.of(context)!.landingPageNotFound));
         },
       ),
     );

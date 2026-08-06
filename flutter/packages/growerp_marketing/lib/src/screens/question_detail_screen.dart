@@ -21,6 +21,7 @@ import '../bloc/question_bloc.dart';
 import '../bloc/question_event.dart';
 import '../bloc/question_state.dart';
 import 'answer_option_list_styled_data.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 class QuestionDetailScreen extends StatefulWidget {
   final String assessmentId;
@@ -260,7 +261,7 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
                     // Is Required Checkbox
                     CheckboxListTile(
                       key: const Key('isRequired'),
-                      title: const Text('Required Question'),
+                      title: Text(MarketingLocalizations.of(context)!.requiredQuestion),
                       value: _isRequired,
                       onChanged: (value) {
                         setState(() {
@@ -287,7 +288,7 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
                             key: const Key('addOption'),
                             onPressed: _addOption,
                             icon: const Icon(Icons.add),
-                            label: const Text('Add Option'),
+                            label: Text(MarketingLocalizations.of(context)!.addOption),
                           ),
                         ],
                       ),

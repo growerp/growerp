@@ -217,6 +217,7 @@ List<LocalizationsDelegate> delegates = [
   InventoryLocalizations.delegate,
   CatalogLocalizations.delegate,
   ActivityLocalizations.delegate,
+  RentalLocalizations.delegate,
 ];
 
 /// Widget registrations for all packages used by Hotel app

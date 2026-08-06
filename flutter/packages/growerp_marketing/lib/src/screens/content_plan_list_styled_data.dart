@@ -19,6 +19,7 @@ import 'package:intl/intl.dart';
 
 import '../bloc/content_plan_bloc.dart';
 import '../bloc/content_plan_event.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Returns column definitions for content plan list based on device type
 List<StyledColumn> getContentPlanListColumns(BuildContext context) {
@@ -62,14 +63,14 @@ List<Widget> getContentPlanListRow({
       context: context,
       barrierDismissible: true,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Content Plan'),
+        title: Text(MarketingLocalizations.of(context)!.deleteContentPlan),
         content: Text(
           'Are you sure you want to delete plan "${plan.theme ?? plan.pseudoId}"?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(MarketingLocalizations.of(context)!.cancel),
           ),
           TextButton(
             key: Key('deleteConfirm$index'),

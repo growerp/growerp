@@ -19,6 +19,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 import '../bloc/outreach_campaign_bloc.dart';
 import 'automation_styled_data.dart';
+import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
 
 class AutomationScreen extends StatefulWidget {
   const AutomationScreen({super.key});
@@ -76,7 +77,7 @@ class _AutomationScreenState extends State<AutomationScreen> {
 
           Widget activeCampaignsTable() {
             if (state.campaigns.isEmpty) {
-              return const Center(child: Text('No active campaigns'));
+              return Center(child: Text(OutreachLocalizations.of(context)!.noActiveCampaigns));
             }
             final rows = state.campaigns.map((campaign) {
               final index = state.campaigns.indexOf(campaign);
@@ -110,7 +111,7 @@ class _AutomationScreenState extends State<AutomationScreen> {
 
           Widget recentActivityTable() {
             if (state.messages.isEmpty) {
-              return const Center(child: Text('No recent activity'));
+              return Center(child: Text(OutreachLocalizations.of(context)!.noRecentActivity));
             }
             final rows = state.messages.map((message) {
               final index = state.messages.indexOf(message);

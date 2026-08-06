@@ -1,4 +1,5 @@
 // BLoC exports
+export 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
 export 'src/bloc/outreach_campaign_bloc.dart';
 export 'src/bloc/outreach_message_bloc.dart';
 export 'src/bloc/platform_config_bloc.dart';

@@ -19,6 +19,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../../../../growerp_order_accounting.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 class GlAccountDialog extends StatefulWidget {
   final GlAccount glAccount;
@@ -149,16 +150,16 @@ class GlAccountDialogState extends State<GlAccountDialog> {
             debitSelected = value;
           });
         },
-        child: const Row(
+        child: Row(
           children: [
             Expanded(
               child: Row(
-                children: [Text('Debit account'), Radio<bool>(value: true)],
+                children: [Text(OrderAccountingLocalizations.of(context)!.debitAccount), Radio<bool>(value: true)],
               ),
             ),
             Expanded(
               child: Row(
-                children: [Text('Credit account'), Radio<bool>(value: false)],
+                children: [Text(OrderAccountingLocalizations.of(context)!.creditAccount), Radio<bool>(value: false)],
               ),
             ),
           ],

@@ -17,6 +17,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../bloc/outreach_campaign_bloc.dart';
+import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
 
 /// Returns column definitions for campaign list based on device type
 List<StyledColumn> getCampaignListColumns(BuildContext context) {
@@ -79,14 +80,14 @@ List<Widget> getCampaignListRow({
       context: context,
       barrierDismissible: true,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Campaign'),
+        title: Text(OutreachLocalizations.of(context)!.deleteCampaign),
         content: Text(
           'Are you sure you want to delete "${campaign.name}"?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(OutreachLocalizations.of(context)!.cancel),
           ),
           TextButton(
             key: Key('deleteConfirm$index'),

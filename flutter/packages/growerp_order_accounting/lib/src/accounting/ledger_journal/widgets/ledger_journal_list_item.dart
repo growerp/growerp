@@ -18,6 +18,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 class LedgerJournalListItem extends StatelessWidget {
   const LedgerJournalListItem({
@@ -91,7 +92,7 @@ class LedgerJournalListItem extends StatelessWidget {
         );
       },
       trailing: GestureDetector(
-        child: const Text('POST'),
+        child: Text(OrderAccountingLocalizations.of(context)!.post),
         onTap: () async {
           if (ledgerJournal.isPosted == false) {
             ledgerJournalBloc.add(

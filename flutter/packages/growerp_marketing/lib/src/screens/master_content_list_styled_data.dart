@@ -18,6 +18,7 @@ import 'package:growerp_models/growerp_models.dart';
 
 import '../bloc/master_content_bloc.dart';
 import '../bloc/master_content_event.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Returns column definitions for master content list based on device type
 List<StyledColumn> getMasterContentListColumns(BuildContext context) {
@@ -69,14 +70,14 @@ List<Widget> getMasterContentListRow({
       context: context,
       barrierDismissible: true,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Master Content'),
+        title: Text(MarketingLocalizations.of(context)!.deleteMasterContent),
         content: Text(
           'Are you sure you want to delete "${content.title ?? content.pseudoId}"?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(MarketingLocalizations.of(context)!.cancel),
           ),
           TextButton(
             key: Key('deleteConfirm$index'),

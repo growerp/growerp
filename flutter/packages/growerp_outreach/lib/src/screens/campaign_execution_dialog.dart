@@ -25,6 +25,7 @@ import '../services/adapters/x_automation_adapter.dart';
 import '../services/adapters/substack_automation_adapter.dart';
 import '../services/adapters/email_automation_adapter.dart';
 import '../services/platform_automation_adapter.dart';
+import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
 
 /// Dialog for executing campaign actions on specific platforms
 ///
@@ -131,8 +132,8 @@ class _CampaignExecutionDialogState extends State<CampaignExecutionDialog>
           title: 'Execute Campaign',
           width: 400,
           height: 200,
-          child: const Center(
-            child: Text('No platforms configured for this campaign'),
+          child: Center(
+            child: Text(OutreachLocalizations.of(context)!.noPlatformsConfiguredForThisCampaign),
           ),
         ),
       );
@@ -465,18 +466,18 @@ class _LinkedInTabState extends State<_LinkedInTab> {
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     initialValue: _selectedAction,
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         value: 'message_connections',
-                        child: Text('Message 1st-Level Connections'),
+                        child: Text(OutreachLocalizations.of(context)!.message1stlevelConnections),
                       ),
                       DropdownMenuItem(
                         value: 'search_and_connect',
-                        child: Text('Search & Send Connection Requests'),
+                        child: Text(OutreachLocalizations.of(context)!.searchSendConnectionRequests),
                       ),
                       DropdownMenuItem(
                         value: 'send_connection_requests',
-                        child: Text('Send Connection Requests'),
+                        child: Text(OutreachLocalizations.of(context)!.sendConnectionRequests),
                       ),
                     ],
                     onChanged: (v) {
@@ -543,7 +544,7 @@ class _LinkedInTabState extends State<_LinkedInTab> {
                   _saveSettings();
                 },
                 icon: const Icon(Icons.copy, size: 16),
-                label: const Text('Use Campaign Template'),
+                label: Text(OutreachLocalizations.of(context)!.useCampaignTemplate),
               ),
             ),
 
@@ -612,11 +613,11 @@ class _LinkedInTabState extends State<_LinkedInTab> {
                       () => _selectedIndices =
                           Set.from(List.generate(_profiles.length, (i) => i)),
                     ),
-                    child: const Text('Select All'),
+                    child: Text(OutreachLocalizations.of(context)!.selectAll),
                   ),
                   TextButton(
                     onPressed: () => setState(() => _selectedIndices = {}),
-                    child: const Text('Clear'),
+                    child: Text(OutreachLocalizations.of(context)!.clear),
                   ),
                 ],
               ),
@@ -901,18 +902,18 @@ class _TwitterTabState extends State<_TwitterTab> {
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     initialValue: _selectedAction,
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         value: 'post_tweet',
-                        child: Text('Post Tweet'),
+                        child: Text(OutreachLocalizations.of(context)!.postTweet),
                       ),
                       DropdownMenuItem(
                         value: 'follow_profiles',
-                        child: Text('Search & Follow Profiles'),
+                        child: Text(OutreachLocalizations.of(context)!.searchFollowProfiles),
                       ),
                       DropdownMenuItem(
                         value: 'send_dms',
-                        child: Text('Send Direct Messages'),
+                        child: Text(OutreachLocalizations.of(context)!.sendDirectMessages),
                       ),
                     ],
                     onChanged: (v) {
@@ -977,7 +978,7 @@ class _TwitterTabState extends State<_TwitterTab> {
                   _saveSettings();
                 },
                 icon: const Icon(Icons.copy, size: 16),
-                label: const Text('Use Campaign Template'),
+                label: Text(OutreachLocalizations.of(context)!.useCampaignTemplate),
               ),
             ),
 
@@ -1260,18 +1261,18 @@ class _SubstackTabState extends State<_SubstackTab> {
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     initialValue: _selectedAction,
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         value: 'post_note',
-                        child: Text('Post Note'),
+                        child: Text(OutreachLocalizations.of(context)!.postNote),
                       ),
                       DropdownMenuItem(
                         value: 'subscribe',
-                        child: Text('Search & Subscribe to Publications'),
+                        child: Text(OutreachLocalizations.of(context)!.searchSubscribeToPublications),
                       ),
                       DropdownMenuItem(
                         value: 'comment',
-                        child: Text('Comment on Latest Posts'),
+                        child: Text(OutreachLocalizations.of(context)!.commentOnLatestPosts),
                       ),
                     ],
                     onChanged: (v) {
@@ -1336,7 +1337,7 @@ class _SubstackTabState extends State<_SubstackTab> {
                     _saveSettings();
                   },
                   icon: const Icon(Icons.copy, size: 16),
-                  label: const Text('Use Campaign Template'),
+                  label: Text(OutreachLocalizations.of(context)!.useCampaignTemplate),
                 ),
               ),
           ],
@@ -1391,7 +1392,7 @@ class _SubstackTabState extends State<_SubstackTab> {
                     _saveSettings();
                   },
                   icon: const Icon(Icons.copy, size: 16),
-                  label: const Text('Use Campaign Template'),
+                  label: Text(OutreachLocalizations.of(context)!.useCampaignTemplate),
                 ),
               ),
           ],

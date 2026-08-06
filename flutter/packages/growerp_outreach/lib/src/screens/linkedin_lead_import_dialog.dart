@@ -19,6 +19,7 @@ import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
 
 /// Where the uploaded CSV came from; selects parser, labels and the
 /// outreach platform queued recipients get.
@@ -165,7 +166,7 @@ class _LinkedInLeadImportDialogState extends State<LinkedInLeadImportDialog> {
         OutlinedButton.icon(
           key: Key(_isApollo ? 'uploadApollo' : 'uploadLinkedIn'),
           icon: const Icon(Icons.upload_file),
-          label: const Text('Choose CSV file'),
+          label: Text(OutreachLocalizations.of(context)!.chooseCsvFile),
           onPressed: _busy ? null : _pickAndImport,
         ),
         const SizedBox(height: 16),

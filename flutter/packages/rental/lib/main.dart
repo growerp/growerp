@@ -195,6 +195,8 @@ List<LocalizationsDelegate> delegates = const [
   ActivityLocalizations.delegate,
   SalesLocalizations.delegate,
   WebsiteLocalizations.delegate,
+  MarketingLocalizations.delegate,
+  RentalLocalizations.delegate,
 ];
 
 List<BlocProvider> getRentalBlocProviders(

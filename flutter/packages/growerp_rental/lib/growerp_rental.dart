@@ -12,6 +12,7 @@
  * limitations under the License.
  */
 
+export 'package:growerp_rental/l10n/generated/rental_localizations.dart';
 export 'src/views/gantt_form.dart';
 export 'src/views/rental_rate_form.dart';
 export 'src/views/statistics_form.dart';

@@ -19,6 +19,7 @@ import 'package:growerp_models/growerp_models.dart';
 
 import '../bloc/persona_bloc.dart';
 import '../bloc/persona_event.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Dialog for creating or editing a Marketing Persona
 class PersonaDialog extends StatefulWidget {
@@ -158,13 +159,13 @@ class PersonaDialogState extends State<PersonaDialog> {
                     TextButton(
                       key: const Key('cancel'),
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
+                      child: Text(MarketingLocalizations.of(context)!.cancel),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
                       key: const Key('save'),
                       onPressed: _savePersona,
-                      child: const Text('Save'),
+                      child: Text(MarketingLocalizations.of(context)!.save),
                     ),
                   ],
                 ),

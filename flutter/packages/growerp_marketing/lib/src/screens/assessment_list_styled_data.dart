@@ -17,6 +17,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../bloc/assessment_bloc.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Returns column definitions for assessment list based on device type
 List<StyledColumn> getAssessmentListColumns(BuildContext context) {
@@ -65,14 +66,14 @@ List<Widget> getAssessmentListRow({
       context: context,
       barrierDismissible: true,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Assessment'),
+        title: Text(MarketingLocalizations.of(context)!.deleteAssessment),
         content: Text(
           'Are you sure you want to delete "${assessment.assessmentName}"?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(MarketingLocalizations.of(context)!.cancel),
           ),
           TextButton(
             key: Key('deleteConfirm$index'),

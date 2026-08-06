@@ -22,6 +22,7 @@ import 'package:growerp_models/growerp_models.dart';
 import '../bloc/page_section_bloc.dart';
 import '../bloc/page_section_event.dart';
 import '../bloc/page_section_state.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 const List<String> pageSectionTypes = [
   'text',
@@ -331,7 +332,7 @@ class PageSectionDetailScreenState extends State<PageSectionDetailScreen> {
                             onPressed: () =>
                                 setState(() => _rows.add(_ContentRow())),
                             icon: const Icon(Icons.add),
-                            label: const Text('Add row'),
+                            label: Text(MarketingLocalizations.of(context)!.addRow),
                           ),
                         ),
                       ],
@@ -341,7 +342,7 @@ class PageSectionDetailScreenState extends State<PageSectionDetailScreen> {
                           Expanded(
                             child: OutlinedButton(
                               onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('Cancel'),
+                              child: Text(MarketingLocalizations.of(context)!.cancel),
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -349,7 +350,7 @@ class PageSectionDetailScreenState extends State<PageSectionDetailScreen> {
                             child: ElevatedButton(
                               key: const Key('saveSection'),
                               onPressed: () => _save(isNew),
-                              child: const Text('Save'),
+                              child: Text(MarketingLocalizations.of(context)!.save),
                             ),
                           ),
                         ],

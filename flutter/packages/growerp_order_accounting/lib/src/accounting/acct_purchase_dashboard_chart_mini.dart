@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 /// Compact accounts-payable dashboard for the half-height 'Acct Purchase'
 /// dashboard tile: dense invoice-status funnel bars (stage + count only)
@@ -58,7 +59,7 @@ class _AcctPurchaseDashboardChartMiniState
   ) {
     final colorScheme = Theme.of(context).colorScheme;
     if (summary.isEmpty) {
-      return const Center(child: Text('No invoice data'));
+      return Center(child: Text(OrderAccountingLocalizations.of(context)!.noInvoiceData));
     }
     int maxCount = 1;
     for (final item in summary) {

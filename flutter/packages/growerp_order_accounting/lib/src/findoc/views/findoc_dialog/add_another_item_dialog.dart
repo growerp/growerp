@@ -18,6 +18,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../../../../growerp_order_accounting.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 Future addAnotherItemDialog(
   BuildContext context,
@@ -52,7 +53,7 @@ Future addAnotherItemDialog(
                     DropdownButtonFormField<ItemType>(
                       key: const Key('itemType'),
                       decoration: const InputDecoration(labelText: 'Item Type'),
-                      hint: const Text('ItemType'),
+                      hint: Text(OrderAccountingLocalizations.of(context)!.itemtype),
                       initialValue: selectedItemType,
                       validator: (value) =>
                           value == null ? 'field required' : null,
@@ -106,7 +107,7 @@ Future addAnotherItemDialog(
                     const SizedBox(height: 20),
                     OutlinedButton(
                       key: const Key('ok'),
-                      child: const Text('Ok'),
+                      child: Text(OrderAccountingLocalizations.of(context)!.ok),
                       onPressed: () {
                         if (addOtherFormKey.currentState!.validate()) {
                           Navigator.of(context).pop(
