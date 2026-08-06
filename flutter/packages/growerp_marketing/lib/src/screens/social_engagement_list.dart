@@ -16,6 +16,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 const List<String> socialEngagementTypes = [
   'LIKE',
@@ -71,7 +72,7 @@ class SocialEngagementListState extends State<SocialEngagementList> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         key: const Key('SocialEngagementDialog'),
-        title: const Text('Record engagement'),
+        title: Text(MarketingLocalizations.of(context)!.recordEngagement),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -113,12 +114,12 @@ class SocialEngagementListState extends State<SocialEngagementList> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
+            child: Text(MarketingLocalizations.of(context)!.cancel),
           ),
           FilledButton(
             key: const Key('saveEngagement'),
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Save'),
+            child: Text(MarketingLocalizations.of(context)!.save),
           ),
         ],
       ),
@@ -158,12 +159,12 @@ class SocialEngagementListState extends State<SocialEngagementList> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
+            child: Text(MarketingLocalizations.of(context)!.cancel),
           ),
           FilledButton(
             key: const Key('confirmConvert'),
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Convert'),
+            child: Text(MarketingLocalizations.of(context)!.convert),
           ),
         ],
       ),
@@ -237,7 +238,7 @@ class SocialEngagementListState extends State<SocialEngagementList> {
                         ? TextButton(
                             key: Key('convert$index'),
                             onPressed: () => _convert(engagement),
-                            child: const Text('To lead'),
+                            child: Text(MarketingLocalizations.of(context)!.toLead),
                           )
                         : null,
                   );

@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
 
 /// A card widget displaying automation progress for a campaign
 class AutomationProgressCard extends StatelessWidget {
@@ -102,7 +103,7 @@ class AutomationProgressCard extends StatelessWidget {
                   FilledButton.icon(
                     onPressed: onPause,
                     icon: const Icon(Icons.pause),
-                    label: const Text('Pause'),
+                    label: Text(OutreachLocalizations.of(context)!.pause),
                     style: FilledButton.styleFrom(
                       backgroundColor: colorScheme.error,
                     ),
@@ -111,7 +112,7 @@ class AutomationProgressCard extends StatelessWidget {
                   FilledButton.icon(
                     onPressed: onStart,
                     icon: const Icon(Icons.play_arrow),
-                    label: const Text('Start'),
+                    label: Text(OutreachLocalizations.of(context)!.start),
                   ),
               ],
             ),

@@ -18,6 +18,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:intl/intl.dart';
+import 'package:growerp_rental/l10n/generated/rental_localizations.dart';
 
 /// Seasonal rental rates: date bands that override the rental product's
 /// standard daily price for the days they cover (weekends, high season,
@@ -187,7 +188,7 @@ class _RentalRateFormState extends State<RentalRateForm> {
                   OutlinedButton(
                     key: const Key('saveTouristTax'),
                     onPressed: _savingTax ? null : _saveTouristTax,
-                    child: const Text('Save'),
+                    child: Text(RentalLocalizations.of(context)!.save),
                   ),
                 ],
               ),
@@ -418,7 +419,7 @@ class _RentalRateDialogState extends State<_RentalRateDialog> {
                   OutlinedButton(
                     key: const Key('cancel'),
                     onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('Cancel'),
+                    child: Text(RentalLocalizations.of(context)!.cancel),
                   ),
                   const SizedBox(width: 20),
                   Expanded(

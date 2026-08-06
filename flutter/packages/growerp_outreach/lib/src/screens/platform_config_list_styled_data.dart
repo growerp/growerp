@@ -17,6 +17,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../bloc/platform_config_bloc.dart';
+import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
 
 /// Platform configuration data for table display
 class PlatformConfigData {
@@ -68,14 +69,14 @@ List<Widget> getPlatformConfigListRow({
       context: context,
       barrierDismissible: true,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Configuration'),
+        title: Text(OutreachLocalizations.of(context)!.deleteConfiguration),
         content: Text(
           'Are you sure you want to delete the ${data.platform.name} configuration?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(OutreachLocalizations.of(context)!.cancel),
           ),
           TextButton(
             key: Key('deleteConfirm$index'),

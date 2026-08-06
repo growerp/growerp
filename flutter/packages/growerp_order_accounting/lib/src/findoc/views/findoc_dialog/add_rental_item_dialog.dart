@@ -20,6 +20,7 @@ import 'package:intl/intl.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../../../../growerp_order_accounting.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 /// [addRentalItemDialog] add a rental order item [FinDocItem]
 Future addRentalItemDialog(
@@ -335,7 +336,7 @@ Future addRentalItemDialog(
                               Expanded(
                                 child: OutlinedButton(
                                   key: const Key('okRental'),
-                                  child: const Text('Add reservation'),
+                                  child: Text(OrderAccountingLocalizations.of(context)!.addReservation),
                                   onPressed: () {
                                     if (addRentalFormKey.currentState!
                                         .validate()) {

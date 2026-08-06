@@ -17,6 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'ledger/views/revenue_expense_chart_mini.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 /// A reusable accounting dashboard widget that displays accounting menu options
 /// as cards with statistics. This widget can be used across different apps
@@ -115,7 +116,7 @@ class AccountingDashboard extends StatelessWidget {
     final authBloc = context.read<AuthBloc?>();
     if (authBloc == null) {
       return const Center(
-        child: Text('AuthBloc not available. Please ensure it is provided.'),
+        child: Text(OrderAccountingLocalizations.of(context)!.authblocNotAvailablePleaseEnsureItIsProvided),
       );
     }
 

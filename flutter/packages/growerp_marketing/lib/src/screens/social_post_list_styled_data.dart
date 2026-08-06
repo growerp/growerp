@@ -19,6 +19,7 @@ import 'package:intl/intl.dart';
 
 import '../bloc/social_post_bloc.dart';
 import '../bloc/social_post_event.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Returns column definitions for social post list based on device type
 List<StyledColumn> getSocialPostListColumns(BuildContext context) {
@@ -76,14 +77,14 @@ List<Widget> getSocialPostListRow({
       context: context,
       barrierDismissible: true,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Social Post'),
+        title: Text(MarketingLocalizations.of(context)!.deleteSocialPost),
         content: Text(
           'Are you sure you want to delete post "${post.headline ?? post.pseudoId}"?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(MarketingLocalizations.of(context)!.cancel),
           ),
           TextButton(
             key: Key('deleteConfirm$index'),

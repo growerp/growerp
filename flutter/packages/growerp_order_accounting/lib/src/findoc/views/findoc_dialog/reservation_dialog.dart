@@ -748,7 +748,7 @@ class _NewCustomerDialogState extends State<_NewCustomerDialog> {
       },
       builder: (context, state) {
         return AlertDialog(
-          title: const Text('New Customer'),
+          title: Text(OrderAccountingLocalizations.of(context)!.newCustomer),
           content: Form(
             key: _formKey,
             child: Column(
@@ -784,7 +784,7 @@ class _NewCustomerDialogState extends State<_NewCustomerDialog> {
             TextButton(
               key: const Key('cancelNewCustomer'),
               onPressed: () => Navigator.of(context).pop(null),
-              child: const Text('Cancel'),
+              child: Text(OrderAccountingLocalizations.of(context)!.cancel),
             ),
             ElevatedButton(
               key: const Key('createNewCustomer'),
@@ -795,7 +795,7 @@ class _NewCustomerDialogState extends State<_NewCustomerDialog> {
                       height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Create'),
+                  : Text(OrderAccountingLocalizations.of(context)!.create),
             ),
           ],
         );

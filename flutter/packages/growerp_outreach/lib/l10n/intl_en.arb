@@ -1,0 +1,222 @@
+{
+  "browsermcpTest": "BrowserMCP Test",
+  "@browsermcpTest": {
+    "description": "BrowserMCP Test"
+  },
+  "initialize": "Initialize",
+  "@initialize": {
+    "description": "Initialize"
+  },
+  "cleanup": "Cleanup",
+  "@cleanup": {
+    "description": "Cleanup"
+  },
+  "go": "Go",
+  "@go": {
+    "description": "Go"
+  },
+  "getSnapshot": "Get Snapshot",
+  "@getSnapshot": {
+    "description": "Get Snapshot"
+  },
+  "viewSnapshot": "View Snapshot",
+  "@viewSnapshot": {
+    "description": "View Snapshot"
+  },
+  "goToLinkedin": "Go to LinkedIn",
+  "@goToLinkedin": {
+    "description": "Go to LinkedIn"
+  },
+  "checkLogin": "Check Login",
+  "@checkLogin": {
+    "description": "Check Login"
+  },
+  "search": "Search",
+  "@search": {
+    "description": "Search"
+  },
+  "pause": "Pause",
+  "@pause": {
+    "description": "Pause"
+  },
+  "start": "Start",
+  "@start": {
+    "description": "Start"
+  },
+  "progress": "Progress",
+  "@progress": {
+    "description": "Progress"
+  },
+  "deleteCampaign": "Delete Campaign",
+  "@deleteCampaign": {
+    "description": "Delete Campaign"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel"
+  },
+  "anyTime": "Any time",
+  "@anyTime": {
+    "description": "Any time"
+  },
+  "retryFailedSends": "Retry failed sends",
+  "@retryFailedSends": {
+    "description": "Retry failed sends"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry"
+  },
+  "importLinkedinLeads": "Import LinkedIn leads",
+  "@importLinkedinLeads": {
+    "description": "Import LinkedIn leads"
+  },
+  "importApolloLeads": "Import Apollo leads",
+  "@importApolloLeads": {
+    "description": "Import Apollo leads"
+  },
+  "configure": "Configure",
+  "@configure": {
+    "description": "Configure"
+  },
+  "pleaseSelectAtLeastOnePlatform": "Please select at least one platform.",
+  "@pleaseSelectAtLeastOnePlatform": {
+    "description": "Please select at least one platform."
+  },
+  "pleaseLogInToThisPlatformInYourBrowser": "Please log in to this platform in your browser:",
+  "@pleaseLogInToThisPlatformInYourBrowser": {
+    "description": "Please log in to this platform in your browser:"
+  },
+  "afterLoggingInReturnHereAndClickDone": "After logging in, return here and click \"Done\".",
+  "@afterLoggingInReturnHereAndClickDone": {
+    "description": "After logging in, return here and click \"Done\"."
+  },
+  "done": "Done",
+  "@done": {
+    "description": "Done"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save"
+  },
+  "edit": "Edit",
+  "@edit": {
+    "description": "Edit"
+  },
+  "noPlatformsConfiguredForThisCampaign": "No platforms configured for this campaign",
+  "@noPlatformsConfiguredForThisCampaign": {
+    "description": "No platforms configured for this campaign"
+  },
+  "message1stlevelConnections": "Message 1st-Level Connections",
+  "@message1stlevelConnections": {
+    "description": "Message 1st-Level Connections"
+  },
+  "searchSendConnectionRequests": "Search & Send Connection Requests",
+  "@searchSendConnectionRequests": {
+    "description": "Search & Send Connection Requests"
+  },
+  "sendConnectionRequests": "Send Connection Requests",
+  "@sendConnectionRequests": {
+    "description": "Send Connection Requests"
+  },
+  "useCampaignTemplate": "Use Campaign Template",
+  "@useCampaignTemplate": {
+    "description": "Use Campaign Template"
+  },
+  "selectAll": "Select All",
+  "@selectAll": {
+    "description": "Select All"
+  },
+  "clear": "Clear",
+  "@clear": {
+    "description": "Clear"
+  },
+  "postTweet": "Post Tweet",
+  "@postTweet": {
+    "description": "Post Tweet"
+  },
+  "searchFollowProfiles": "Search & Follow Profiles",
+  "@searchFollowProfiles": {
+    "description": "Search & Follow Profiles"
+  },
+  "sendDirectMessages": "Send Direct Messages",
+  "@sendDirectMessages": {
+    "description": "Send Direct Messages"
+  },
+  "postNote": "Post Note",
+  "@postNote": {
+    "description": "Post Note"
+  },
+  "searchSubscribeToPublications": "Search & Subscribe to Publications",
+  "@searchSubscribeToPublications": {
+    "description": "Search & Subscribe to Publications"
+  },
+  "commentOnLatestPosts": "Comment on Latest Posts",
+  "@commentOnLatestPosts": {
+    "description": "Comment on Latest Posts"
+  },
+  "deleteMessage": "Delete Message",
+  "@deleteMessage": {
+    "description": "Delete Message"
+  },
+  "enabled": "Enabled",
+  "@enabled": {
+    "description": "Enabled"
+  },
+  "allowOutreachOnThisPlatform": "Allow outreach on this platform",
+  "@allowOutreachOnThisPlatform": {
+    "description": "Allow outreach on this platform"
+  },
+  "changeEmailServerSettings": "Change email server settings",
+  "@changeEmailServerSettings": {
+    "description": "Change email server settings"
+  },
+  "deleteConfiguration": "Delete Configuration",
+  "@deleteConfiguration": {
+    "description": "Delete Configuration"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete"
+  },
+  "noActiveCampaigns": "No active campaigns",
+  "@noActiveCampaigns": {
+    "description": "No active campaigns"
+  },
+  "noRecentActivity": "No recent activity",
+  "@noRecentActivity": {
+    "description": "No recent activity"
+  },
+  "noPendingLinkedinMessages": "No pending LinkedIn messages 🎉",
+  "@noPendingLinkedinMessages": {
+    "description": "No pending LinkedIn messages 🎉"
+  },
+  "allCampaigns": "All campaigns",
+  "@allCampaigns": {
+    "description": "All campaigns"
+  },
+  "copyOpenLinkedin": "Copy & Open LinkedIn",
+  "@copyOpenLinkedin": {
+    "description": "Copy & Open LinkedIn"
+  },
+  "aiPolish": "AI Polish",
+  "@aiPolish": {
+    "description": "AI Polish"
+  },
+  "sentNext": "Sent → Next",
+  "@sentNext": {
+    "description": "Sent → Next"
+  },
+  "skip": "Skip",
+  "@skip": {
+    "description": "Skip"
+  },
+  "noMessageData": "No message data",
+  "@noMessageData": {
+    "description": "No message data"
+  },
+  "chooseCsvFile": "Choose CSV file",
+  "@chooseCsvFile": {
+    "description": "Choose CSV file"
+  }
+}

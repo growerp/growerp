@@ -1215,5 +1215,61 @@
   "docTypeTransaction": "Transaction",
   "@docTypeTransaction": {
     "description": "Document type: Transaction"
+  },
+  "reports": "Reports",
+  "@reports": {
+    "description": "Reports"
+  },
+  "noOrderData": "No order data",
+  "@noOrderData": {
+    "description": "No order data"
+  },
+  "noTransactionData": "No transaction data",
+  "@noTransactionData": {
+    "description": "No transaction data"
+  },
+  "authblocNotAvailablePleaseEnsureItIsProvided": "AuthBloc not available. Please ensure it is provided.",
+  "@authblocNotAvailablePleaseEnsureItIsProvided": {
+    "description": "AuthBloc not available. Please ensure it is provided."
+  },
+  "noInvoiceData": "No invoice data",
+  "@noInvoiceData": {
+    "description": "No invoice data"
+  },
+  "post": "POST",
+  "@post": {
+    "description": "POST"
+  },
+  "yqm": "Y/Q/M",
+  "@yqm": {
+    "description": "Y/Q/M"
+  },
+  "debitAccount": "Debit account",
+  "@debitAccount": {
+    "description": "Debit account"
+  },
+  "creditAccount": "Credit account",
+  "@creditAccount": {
+    "description": "Credit account"
+  },
+  "error": "Error",
+  "@error": {
+    "description": "Error"
+  },
+  "newCustomer": "New Customer",
+  "@newCustomer": {
+    "description": "New Customer"
+  },
+  "addProduct1": "Add product",
+  "@addProduct1": {
+    "description": "Add product"
+  },
+  "addReservation": "Add reservation",
+  "@addReservation": {
+    "description": "Add reservation"
+  },
+  "itemtype": "ItemType",
+  "@itemtype": {
+    "description": "ItemType"
   }
 }

@@ -71,8 +71,6 @@ dev_dependencies:
   flutter_lints: ^6.0.0
 
 flutter:
-  uses-material-design: true
-  generate: true
 
   assets:
     - packages/growerp_core/images/growerp.png
@@ -81,3 +79,6 @@ flutter:
     - packages/growerp_core/images/growerpDark.jpg
     - packages/growerp_core/images/growerp100.png
     - packages/growerp_core/images/growerpDark100.png
+
+  generate: true
+  uses-material-design: true

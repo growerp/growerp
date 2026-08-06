@@ -19,6 +19,7 @@ import 'package:growerp_models/growerp_models.dart';
 
 import '../../accounting/accounting.dart';
 import '../findoc.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 /// Returns column definitions for item type list based on device type
 List<StyledColumn> getItemTypeListColumns(BuildContext context) {
@@ -74,7 +75,7 @@ List<Widget> getItemTypeListRow({
     builder: (context, state) {
       switch (state.status) {
         case GlAccountStatus.failure:
-          return const Text('Error');
+          return Text(OrderAccountingLocalizations.of(context)!.error);
         case GlAccountStatus.success:
           return Autocomplete<GlAccount>(
             key: Key(

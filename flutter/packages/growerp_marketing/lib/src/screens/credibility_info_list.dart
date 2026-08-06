@@ -21,6 +21,7 @@ import '../bloc/credibility_bloc.dart';
 import '../bloc/credibility_event.dart';
 import '../bloc/credibility_state.dart';
 import 'credibility_info_detail_screen.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 class CredibilityInfoListScreen extends StatefulWidget {
   final String landingPageId;
@@ -202,13 +203,13 @@ class CredibilityInfoListScreenState extends State<CredibilityInfoListScreen> {
                                                 onPressed: () => Navigator.of(
                                                   context,
                                                 ).pop(false),
-                                                child: const Text('Cancel'),
+                                                child: Text(MarketingLocalizations.of(context)!.cancel),
                                               ),
                                               TextButton(
                                                 onPressed: () => Navigator.of(
                                                   context,
                                                 ).pop(true),
-                                                child: const Text('Delete'),
+                                                child: Text(MarketingLocalizations.of(context)!.delete),
                                               ),
                                             ],
                                           );

@@ -21,6 +21,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../bloc/email_sequence_bloc.dart';
 import '../bloc/email_sequence_event.dart';
 import '../bloc/email_sequence_state.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 class EmailSequenceDialog extends StatefulWidget {
   final EmailSequence emailSequence;
@@ -107,7 +108,7 @@ class EmailSequenceDialogState extends State<EmailSequenceDialog> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                const Text('Active'),
+                Text(MarketingLocalizations.of(context)!.active),
                 Switch(
                   key: const Key('sequenceActive'),
                   value: _active,
@@ -183,7 +184,7 @@ class EmailSequenceDialogState extends State<EmailSequenceDialog> {
                 key: const Key('addStep'),
                 onPressed: () => setState(() => _stepRows.add(_StepRow())),
                 icon: const Icon(Icons.add),
-                label: const Text('Add step'),
+                label: Text(MarketingLocalizations.of(context)!.addStep),
               ),
             ),
             const SizedBox(height: 15),

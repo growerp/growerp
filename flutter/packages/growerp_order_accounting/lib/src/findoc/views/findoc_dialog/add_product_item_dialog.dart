@@ -24,6 +24,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:intl/intl.dart';
 
 import '../../../accounting/accounting.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 Future addProductItemDialog(BuildContext context) async {
   final priceController = TextEditingController();
@@ -352,7 +353,7 @@ Future addProductItemDialog(BuildContext context) async {
                               Expanded(
                                 child: OutlinedButton(
                                   key: const Key('ok'),
-                                  child: const Text('Add product'),
+                                  child: Text(OrderAccountingLocalizations.of(context)!.addProduct1),
                                   onPressed: () {
                                     if (addProductFormKey.currentState!
                                         .validate()) {

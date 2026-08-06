@@ -18,6 +18,7 @@ import 'package:growerp_models/growerp_models.dart';
 
 import '../bloc/persona_bloc.dart';
 import '../bloc/persona_event.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Returns column definitions for persona list based on device type
 List<StyledColumn> getPersonaListColumns(BuildContext context) {
@@ -56,14 +57,14 @@ List<Widget> getPersonaListRow({
       context: context,
       barrierDismissible: true,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Persona'),
+        title: Text(MarketingLocalizations.of(context)!.deletePersona),
         content: Text(
           'Are you sure you want to delete "${persona.name}"?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(MarketingLocalizations.of(context)!.cancel),
           ),
           TextButton(
             key: Key('deleteConfirm$index'),

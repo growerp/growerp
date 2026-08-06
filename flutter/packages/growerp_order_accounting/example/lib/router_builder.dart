@@ -20,6 +20,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 List<BlocProvider> getOrderAccountingBlocProvidersExample(
   RestClient restClient,
@@ -224,7 +225,7 @@ GoRouter createOrderAccountingExampleRouter() {
       '/accounting/ledger-journal' => const LedgerJournalList(
         key: Key('LedgerJournalListLedgerJournal'),
       ),
-      '/accounting/reports' => const Center(child: Text("Reports")),
+      '/accounting/reports' => Center(child: Text(OrderAccountingLocalizations.of(context)!.reports)),
       '/accounting/setup' => const PaymentTypeList(),
       '/accounting/setup/item-types' => const ItemTypeList(),
       '/incoming-shipments' => const FinDocList(

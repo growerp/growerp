@@ -21,6 +21,7 @@ import 'package:growerp_models/growerp_models.dart';
 import '../bloc/credibility_bloc.dart';
 import '../bloc/credibility_event.dart';
 import '../bloc/credibility_state.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 class CredibilityInfoDetailScreen extends StatefulWidget {
   final String landingPageId;
@@ -365,7 +366,7 @@ class CredibilityInfoDetailScreenState
                                 context,
                                 rootNavigator: false,
                               ).pop(),
-                              child: const Text('Cancel'),
+                              child: Text(MarketingLocalizations.of(context)!.cancel),
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -373,7 +374,7 @@ class CredibilityInfoDetailScreenState
                             child: ElevatedButton(
                               key: const Key('saveCredibility'),
                               onPressed: _saveCredibility,
-                              child: const Text('Save'),
+                              child: Text(MarketingLocalizations.of(context)!.save),
                             ),
                           ),
                         ],

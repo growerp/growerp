@@ -1,0 +1,194 @@
+{
+  "selectAnAssessmentToTake": "Select an Assessment to Take",
+  "@selectAnAssessmentToTake": {
+    "description": "Select an Assessment to Take"
+  },
+  "deleteContentPlan": "Delete Content Plan",
+  "@deleteContentPlan": {
+    "description": "Delete Content Plan"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel"
+  },
+  "none": "None",
+  "@none": {
+    "description": "None"
+  },
+  "addContent": "Add Content",
+  "@addContent": {
+    "description": "Add Content"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete"
+  },
+  "assessmentNotAvailableForThisLandingPage": "Assessment not available for this landing page",
+  "@assessmentNotAvailableForThisLandingPage": {
+    "description": "Assessment not available for this landing page"
+  },
+  "backToLandingPage": "Back to Landing Page",
+  "@backToLandingPage": {
+    "description": "Back to Landing Page"
+  },
+  "viewDetailedResults": "View Detailed Results",
+  "@viewDetailedResults": {
+    "description": "View Detailed Results"
+  },
+  "noPipelineData": "No pipeline data",
+  "@noPipelineData": {
+    "description": "No pipeline data"
+  },
+  "selectStatus": "Select status",
+  "@selectStatus": {
+    "description": "Select status"
+  },
+  "questions": "Questions",
+  "@questions": {
+    "description": "Questions"
+  },
+  "deleteAssessment": "Delete Assessment",
+  "@deleteAssessment": {
+    "description": "Delete Assessment"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save"
+  },
+  "generate": "Generate",
+  "@generate": {
+    "description": "Generate"
+  },
+  "active": "Active",
+  "@active": {
+    "description": "Active"
+  },
+  "addStep": "Add step",
+  "@addStep": {
+    "description": "Add step"
+  },
+  "deleteQuestion": "Delete Question",
+  "@deleteQuestion": {
+    "description": "Delete Question"
+  },
+  "deleteSection": "Delete Section",
+  "@deleteSection": {
+    "description": "Delete Section"
+  },
+  "deleteLandingPage": "Delete Landing Page",
+  "@deleteLandingPage": {
+    "description": "Delete Landing Page"
+  },
+  "selectHookType": "Select hook type",
+  "@selectHookType": {
+    "description": "Select hook type"
+  },
+  "frustration": "Frustration",
+  "@frustration": {
+    "description": "Frustration"
+  },
+  "results": "Results",
+  "@results": {
+    "description": "Results"
+  },
+  "custom": "Custom",
+  "@custom": {
+    "description": "Custom"
+  },
+  "advancedOptions": "Advanced Options",
+  "@advancedOptions": {
+    "description": "Advanced Options"
+  },
+  "deletePersona": "Delete Persona",
+  "@deletePersona": {
+    "description": "Delete Persona"
+  },
+  "assessmentStep2": "Assessment - Step 2",
+  "@assessmentStep2": {
+    "description": "Assessment - Step 2"
+  },
+  "errorLoadingAssessment": "Error loading assessment",
+  "@errorLoadingAssessment": {
+    "description": "Error loading assessment"
+  },
+  "goBack": "Go Back",
+  "@goBack": {
+    "description": "Go Back"
+  },
+  "adaptToSelectedPlatforms": "Adapt to selected platforms",
+  "@adaptToSelectedPlatforms": {
+    "description": "Adapt to selected platforms"
+  },
+  "noPlatformVariantsYetAdaptToCreateThem": "No platform variants yet — adapt to create them.",
+  "@noPlatformVariantsYetAdaptToCreateThem": {
+    "description": "No platform variants yet — adapt to create them."
+  },
+  "addRow": "Add row",
+  "@addRow": {
+    "description": "Add row"
+  },
+  "assessment": "Assessment",
+  "@assessment": {
+    "description": "Assessment"
+  },
+  "url": "Url",
+  "@url": {
+    "description": "Url"
+  },
+  "form": "Form",
+  "@form": {
+    "description": "Form"
+  },
+  "sections": "Sections",
+  "@sections": {
+    "description": "Sections"
+  },
+  "credibility": "Credibility",
+  "@credibility": {
+    "description": "Credibility"
+  },
+  "requiredQuestion": "Required Question",
+  "@requiredQuestion": {
+    "description": "Required Question"
+  },
+  "addOption": "Add Option",
+  "@addOption": {
+    "description": "Add Option"
+  },
+  "deleteMasterContent": "Delete Master Content",
+  "@deleteMasterContent": {
+    "description": "Delete Master Content"
+  },
+  "deleteSocialPost": "Delete Social Post",
+  "@deleteSocialPost": {
+    "description": "Delete Social Post"
+  },
+  "recordEngagement": "Record engagement",
+  "@recordEngagement": {
+    "description": "Record engagement"
+  },
+  "convert": "Convert",
+  "@convert": {
+    "description": "Convert"
+  },
+  "toLead": "To lead",
+  "@toLead": {
+    "description": "To lead"
+  },
+  "copyOpenX": "Copy & Open X",
+  "@copyOpenX": {
+    "description": "Copy & Open X"
+  },
+  "assessmentLandingPage": "Assessment Landing Page",
+  "@assessmentLandingPage": {
+    "description": "Assessment Landing Page"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry"
+  },
+  "landingPageNotFound": "Landing page not found",
+  "@landingPageNotFound": {
+    "description": "Landing page not found"
+  }
+}

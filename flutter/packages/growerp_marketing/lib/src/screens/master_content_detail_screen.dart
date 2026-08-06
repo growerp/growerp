@@ -24,6 +24,7 @@ import '../bloc/master_content_event.dart';
 import '../bloc/master_content_state.dart';
 import '../bloc/social_post_bloc.dart';
 import 'social_post_detail_screen.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 class MasterContentDetailScreen extends StatefulWidget {
   final MasterContent? masterContent;
@@ -339,7 +340,7 @@ class MasterContentDetailScreenState
                   child: OutlinedButton(
                     key: const Key('cancel'),
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Cancel'),
+                    child: Text(MarketingLocalizations.of(context)!.cancel),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -464,7 +465,7 @@ class MasterContentDetailScreenState
             child: ElevatedButton.icon(
               key: const Key('adaptButton'),
               icon: const Icon(Icons.auto_awesome),
-              label: const Text('Adapt to selected platforms'),
+              label: Text(MarketingLocalizations.of(context)!.adaptToSelectedPlatforms),
               onPressed: _selectedPlatforms.isEmpty
                   ? null
                   : () => _bloc.add(
@@ -501,7 +502,7 @@ class MasterContentDetailScreenState
         if (posts.isEmpty) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 8),
-            child: Text('No platform variants yet — adapt to create them.'),
+            child: Text(MarketingLocalizations.of(context)!.noPlatformVariantsYetAdaptToCreateThem),
           );
         }
         return Column(

@@ -1,0 +1,22 @@
+{
+  "day": "Day",
+  "@day": {
+    "description": "Day"
+  },
+  "week": "Week",
+  "@week": {
+    "description": "Week"
+  },
+  "month": "Month",
+  "@month": {
+    "description": "Month"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel"
+  }
+}

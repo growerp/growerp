@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Integrated landing page to assessment flow screen
 ///
@@ -94,7 +95,7 @@ class _LandingPageAssessmentFlowScreenState
       // If assessment ID not available, show error or retry
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Assessment not available for this landing page'),
+          content: Text(MarketingLocalizations.of(context)!.assessmentNotAvailableForThisLandingPage),
           backgroundColor: Colors.red,
         ),
       );
@@ -253,14 +254,14 @@ class _LandingPageAssessmentFlowScreenState
                         backgroundColor: Colors.grey[300],
                         foregroundColor: Colors.black87,
                       ),
-                      child: const Text('Back to Landing Page'),
+                      child: Text(MarketingLocalizations.of(context)!.backToLandingPage),
                     ),
                     ElevatedButton(
                       onPressed: () {
                         // Navigate to detailed results dashboard
                         Navigator.of(context).pop();
                       },
-                      child: const Text('View Detailed Results'),
+                      child: Text(MarketingLocalizations.of(context)!.viewDetailedResults),
                     ),
                   ],
                 ),

@@ -19,6 +19,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import '../bloc/platform_config_bloc.dart';
+import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
 
 class PlatformConfigDetailScreen extends StatefulWidget {
   final OutreachPlatform platform;
@@ -147,8 +148,8 @@ class _PlatformConfigDetailScreenState
                   const SizedBox(height: 16),
                   SwitchListTile(
                     key: const Key('Enabled'),
-                    title: const Text('Enabled'),
-                    subtitle: const Text('Allow outreach on this platform'),
+                    title: Text(OutreachLocalizations.of(context)!.enabled),
+                    subtitle: Text(OutreachLocalizations.of(context)!.allowOutreachOnThisPlatform),
                     value: _isEnabled,
                     onChanged: (value) {
                       setState(() {
@@ -202,7 +203,7 @@ class _PlatformConfigDetailScreenState
                     OutlinedButton.icon(
                       key: const Key('emailServerSettings'),
                       icon: const Icon(Icons.mail_outline),
-                      label: const Text('Change email server settings'),
+                      label: Text(OutreachLocalizations.of(context)!.changeEmailServerSettings),
                       onPressed: () => EmailSettingsDialog.show(context),
                     ),
                   ],
@@ -472,18 +473,18 @@ class _PlatformConfigDetailScreenState
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: const Text('Delete Configuration'),
+                      title: Text(OutreachLocalizations.of(context)!.deleteConfiguration),
                       content: Text(
                         'Are you sure you want to delete the ${widget.platform.name} configuration?',
                       ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(false),
-                          child: const Text('Cancel'),
+                          child: Text(OutreachLocalizations.of(context)!.cancel),
                         ),
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(true),
-                          child: const Text('Delete'),
+                          child: Text(OutreachLocalizations.of(context)!.delete),
                         ),
                       ],
                     );
@@ -495,7 +496,7 @@ class _PlatformConfigDetailScreenState
                       );
                 }
               },
-              child: const Text('Delete'),
+              child: Text(OutreachLocalizations.of(context)!.delete),
             ),
           ),
           const SizedBox(width: 10),

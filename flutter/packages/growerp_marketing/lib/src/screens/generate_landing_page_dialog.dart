@@ -18,6 +18,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../bloc/landing_page_generation_bloc.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 class GenerateLandingPageDialog extends StatefulWidget {
   final Function(LandingPage) onSuccess;
@@ -172,7 +173,7 @@ class _GenerateLandingPageDialogState extends State<GenerateLandingPageDialog> {
 
             // Advanced Options
             ExpansionTile(
-              title: const Text('Advanced Options'),
+              title: Text(MarketingLocalizations.of(context)!.advancedOptions),
               children: [
                 Column(
                   children: [
@@ -219,14 +220,14 @@ class _GenerateLandingPageDialogState extends State<GenerateLandingPageDialog> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(MarketingLocalizations.of(context)!.cancel),
                 ),
                 const SizedBox(width: 12),
                 ElevatedButton(
                   onPressed: _descriptionController.text.length >= 20
                       ? () => _generateLandingPage(context)
                       : null,
-                  child: const Text('Generate'),
+                  child: Text(MarketingLocalizations.of(context)!.generate),
                 ),
               ],
             ),

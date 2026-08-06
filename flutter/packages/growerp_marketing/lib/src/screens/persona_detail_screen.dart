@@ -22,6 +22,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../bloc/persona_bloc.dart';
 import '../bloc/persona_event.dart';
 import '../bloc/persona_state.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 class PersonaDetailScreen extends StatefulWidget {
   final Persona? persona;
@@ -312,24 +313,24 @@ class PersonaDetailScreenState extends State<PersonaDetailScreen> {
                 style: ButtonStyle(
                   backgroundColor: WidgetStateProperty.all(Colors.red),
                 ),
-                child: const Text('Delete'),
+                child: Text(MarketingLocalizations.of(context)!.delete),
                 onPressed: () async {
                   final confirmed = await showDialog<bool>(
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: const Text('Delete Persona'),
+                        title: Text(MarketingLocalizations.of(context)!.deletePersona),
                         content: const Text(
                           'Are you sure you want to delete this persona?',
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(false),
-                            child: const Text('Cancel'),
+                            child: Text(MarketingLocalizations.of(context)!.cancel),
                           ),
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(true),
-                            child: const Text('Delete'),
+                            child: Text(MarketingLocalizations.of(context)!.delete),
                           ),
                         ],
                       );

@@ -21,6 +21,7 @@ import '../bloc/page_section_bloc.dart';
 import '../bloc/page_section_event.dart';
 import '../bloc/page_section_state.dart';
 import 'page_section_detail_screen.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 class PageSectionList extends StatefulWidget {
   final String landingPageId;
@@ -253,7 +254,7 @@ class PageSectionListState extends State<PageSectionList> {
                                         context: context,
                                         builder: (BuildContext context) {
                                           return AlertDialog(
-                                            title: const Text('Delete Section'),
+                                            title: Text(MarketingLocalizations.of(context)!.deleteSection),
                                             content: const Text(
                                               'Are you sure you want to delete this section?',
                                             ),
@@ -262,13 +263,13 @@ class PageSectionListState extends State<PageSectionList> {
                                                 onPressed: () => Navigator.of(
                                                   context,
                                                 ).pop(false),
-                                                child: const Text('Cancel'),
+                                                child: Text(MarketingLocalizations.of(context)!.cancel),
                                               ),
                                               TextButton(
                                                 onPressed: () => Navigator.of(
                                                   context,
                                                 ).pop(true),
-                                                child: const Text('Delete'),
+                                                child: Text(MarketingLocalizations.of(context)!.delete),
                                               ),
                                             ],
                                           );
