@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -112,7 +113,7 @@ class RestRequestStatsDialogState extends State<RestRequestStatsDialog> {
                   ),
                   ElevatedButton(
                     onPressed: () => _selectDateRange(context),
-                    child: const Text('Change Period'),
+                    child: Text(UserCompanyLocalizations.of(context)!.changePeriod),
                   ),
                 ],
               ),
@@ -122,7 +123,7 @@ class RestRequestStatsDialogState extends State<RestRequestStatsDialog> {
             else if (_errorMessage != null)
               Expanded(child: Center(child: Text(_errorMessage!, style: const TextStyle(color: Colors.red))))
             else if (_stats.isEmpty)
-              const Expanded(child: Center(child: Text('No accesses found for this period.')))
+              const Expanded(child: Center(child: Text(UserCompanyLocalizations.of(context)!.noAccessesFoundForThisPeriod)))
             else
               Expanded(
                 child: ListView.builder(

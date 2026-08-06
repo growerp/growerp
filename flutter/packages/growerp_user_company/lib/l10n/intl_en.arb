@@ -980,5 +980,50 @@
   "compUserDownloadFailure": "Failed to download companies/users",
   "@compUserDownloadFailure": {
     "description": "BLoC message: Failure when downloading company/user data"
+  },
+  "periodLabel": "Period: ",
+  "@periodLabel": {
+    "description": "Period: "
+  },
+  "changePeriod": "Change Period",
+  "@changePeriod": {
+    "description": "Change Period"
+  },
+  "noAccessesFoundForThisPeriod": "No accesses found for this period.",
+  "@noAccessesFoundForThisPeriod": {
+    "description": "No accesses found for this period."
+  },
+  "companiesUsersUpDownload": "companies/users up/download",
+  "@companiesUsersUpDownload": {
+    "description": "companies/users up/download"
+  },
+  "jobTitlePosition": "Job Title / Position",
+  "@jobTitlePosition": {
+    "description": "Job Title / Position"
+  },
+  "uploadCsvFile": "Upload CSV file",
+  "@uploadCsvFile": {
+    "description": "Upload CSV file"
+  },
+  "downloadViaEmail": "Download via email",
+  "@downloadViaEmail": {
+    "description": "Download via email"
+  },
+  "downloadFirstToObtainTheFormat": "Download first to obtain the format",
+  "@downloadFirstToObtainTheFormat": {
+    "description": "Download first to obtain the format"
+  },
+  "aDataFileWillBeSendByEmail": "A data file will be send by email",
+  "@aDataFileWillBeSendByEmail": {
+    "description": "A data file will be send by email"
+  },
+  "couldNotLoadRoles": "Could not load {role}s!",
+  "@couldNotLoadRoles": {
+    "description": "Could not load {role}s!",
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
   }
 }

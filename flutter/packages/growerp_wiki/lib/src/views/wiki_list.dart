@@ -1,3 +1,4 @@
+import 'package:growerp_wiki/l10n/generated/wiki_localizations.dart';
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +14,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:growerp_wiki/growerp_wiki.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -124,7 +126,7 @@ class WikiListState extends State<WikiList> {
                     value: spaces.any((s) => s.wikiSpaceId == wikiSpaceId)
                         ? wikiSpaceId
                         : null,
-                    hint: const Text('Wiki space'),
+                    hint: Text(WikiLocalizations.of(context)!.wikiSpace),
                     items: spaces
                         .map(
                           (s) => DropdownMenuItem(
@@ -144,8 +146,8 @@ class WikiListState extends State<WikiList> {
                     child: TextField(
                       key: const Key('searchField'),
                       controller: _searchController,
-                      decoration: const InputDecoration(
-                        labelText: 'Search page path',
+                      decoration: InputDecoration(
+                        labelText: WikiLocalizations.of(context)!.searchPagePath,
                         suffixIcon: Icon(Icons.search),
                       ),
                       onSubmitted: (_) => _load(),
@@ -156,7 +158,7 @@ class WikiListState extends State<WikiList> {
             ),
             Expanded(
               child: pages.isEmpty
-                  ? const Center(child: Text('No pages found'))
+                  ? Center(child: Text(WikiLocalizations.of(context)!.noPagesFound))
                   : ListView.builder(
                       key: const Key('wikiPageList'),
                       itemCount: pages.length,
@@ -197,7 +199,7 @@ class WikiListState extends State<WikiList> {
           child: FloatingActionButton(
             key: const Key('addNew'),
             onPressed: _addPage,
-            tooltip: 'Add page',
+            tooltip: WikiLocalizations.of(context)!.addPage,
             child: const Icon(Icons.add),
           ),
         ),

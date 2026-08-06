@@ -1,3 +1,4 @@
+
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +14,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -257,7 +259,7 @@ class UserListState extends State<UserList> {
                                 );
                                 _searchFocusNode.requestFocus();
                               },
-                              tooltip: 'companies/users up/download',
+                              tooltip: UserCompanyLocalizations.of(context)!.companiesUsersUpDownload,
                               child: const Icon(Icons.file_copy),
                             ),
                           ],

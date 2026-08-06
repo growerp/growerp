@@ -14,11 +14,11 @@
 
 // ignore_for_file: exhaustive_cases
 import 'package:flutter/material.dart';
+import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
 import '../../common/common.dart';
 import '../company_user.dart';

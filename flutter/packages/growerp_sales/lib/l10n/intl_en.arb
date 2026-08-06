@@ -277,5 +277,22 @@
   "opportunityDownloadFailure": "Failed to download opportunities",
   "@opportunityDownloadFailure": {
     "description": "BLoC message: Failed to download opportunities"
+  },
+  "noPipelineData": "No pipeline data",
+  "@noPipelineData": {
+    "description": "No pipeline data"
+  },
+  "convertToQuote": "Convert to Quote",
+  "@convertToQuote": {
+    "description": "Convert to Quote"
+  },
+  "opportunityConvertSuccess": "Quote #{id} created successfully",
+  "@opportunityConvertSuccess": {
+    "description": "Quote #{id} created successfully",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
   }
 }

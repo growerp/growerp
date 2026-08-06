@@ -17,6 +17,7 @@ import 'package:universal_io/io.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -24,7 +25,6 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
 import '../../common/common.dart';
 import '../company_user.dart';

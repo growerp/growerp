@@ -1,3 +1,4 @@
+import 'package:growerp_wiki/l10n/generated/wiki_localizations.dart';
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +14,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:growerp_wiki/growerp_wiki.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -130,10 +132,9 @@ class WikiPageDialogState extends State<WikiPageDialog> {
                   ? TextFormField(
                       key: const Key('pagePath'),
                       controller: _pathController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText:
-                            "Page path (e.g. 'notes/my-page' - avoid the "
-                            "generated tables/ and datasets/ prefixes)",
+                            WikiLocalizations.of(context)!.pagePathHint + "generated tables/ and datasets/ prefixes)",
                       ),
                     )
                   : const SizedBox.shrink(),
@@ -156,9 +157,9 @@ class WikiPageDialogState extends State<WikiPageDialog> {
                   expands: true,
                   textAlignVertical: TextAlignVertical.top,
                   style: const TextStyle(fontFamily: 'monospace'),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    hintText: 'Markdown text (YAML frontmatter allowed)',
+                    hintText: WikiLocalizations.of(context)!.markdownTextYamlFrontmatterAllowed,
                   ),
                 )
               : MarkdownWidget(
@@ -173,7 +174,7 @@ class WikiPageDialogState extends State<WikiPageDialog> {
             TextButton(
               key: const Key('cancel'),
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: Text(WikiLocalizations.of(context)!.cancel),
             ),
             const SizedBox(width: 10),
             OutlinedButton(

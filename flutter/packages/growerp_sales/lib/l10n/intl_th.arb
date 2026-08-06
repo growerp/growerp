@@ -58,5 +58,8 @@
   "opportunityUploadSuccess": "อัปโหลดโอกาสสำเร็จ",
   "opportunityUploadFailure": "การอัปโหลดโอกาสล้มเหลว",
   "opportunityDownloadSuccess": "กำหนดเวลาดาวน์โหลดโอกาสแล้ว อีเมลจะถูกส่งในไม่ช้า",
-  "opportunityDownloadFailure": "การดาวน์โหลดโอกาสล้มเหลว"
+  "opportunityDownloadFailure": "การดาวน์โหลดโอกาสล้มเหลว",
+  "noPipelineData": "ไม่มีข้อมูลท่อส่ง",
+  "convertToQuote": "แปลงเป็นใบเสนอราคา",
+  "opportunityConvertSuccess": "ใบเสนอราคา #{id} สร้างสำเร็จแล้ว"
 }

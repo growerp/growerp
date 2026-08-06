@@ -19,6 +19,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
+import 'package:growerp_website/growerp_website.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:reorderables/reorderables.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -346,8 +347,8 @@ class WebsiteDialogState extends State<WebsiteDialog> {
               key: const Key('websiteThemeBrightness'),
               showSelectedIcon: false,
               segments: const [
-                ButtonSegment(value: false, label: Text('Light')),
-                ButtonSegment(value: true, label: Text('Dark')),
+                ButtonSegment(value: false, label: Text(WebsiteLocalizations.of(context)!.light)),
+                ButtonSegment(value: true, label: Text(WebsiteLocalizations.of(context)!.dark)),
               ],
               selected: {dark},
               onSelectionChanged: (selection) {
@@ -383,7 +384,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                   ),
                 );
               },
-              child: const Text('Reset to defaults'),
+              child: Text(WebsiteLocalizations.of(context)!.resetToDefaults),
             ),
           ],
         ),
@@ -473,7 +474,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
       IconButton(
         key: const Key('addFtl'),
         iconSize: 30,
-        tooltip: 'Add FreeMarker/HTML page',
+        tooltip: WebsiteLocalizations.of(context)!.addFreemarkerhtmlPage,
         icon: const Icon(Icons.code),
         color: Colors.deepOrange,
         onPressed: () async {
@@ -651,7 +652,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
     List<Widget> widgets = [
       GroupingDecorator(
         useCardStyle: false,
-        labelText: 'Website Info',
+        labelText: WebsiteLocalizations.of(context)!.websiteInfo,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -691,7 +692,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                       IconButton(
                         key: const Key('launchUrl'),
                         icon: const Icon(Icons.open_in_new),
-                        tooltip: 'Open website',
+                        tooltip: WebsiteLocalizations.of(context)!.openWebsite,
                         onPressed: doLlaunchUrl,
                       ),
                     ],
@@ -720,15 +721,15 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     key: const Key('templateId'),
-                    decoration: const InputDecoration(
-                      labelText: 'Website Template',
+                    decoration: InputDecoration(
+                      labelText: WebsiteLocalizations.of(context)!.websiteTemplate,
                     ),
                     initialValue: _templateId ?? state.website!.templateId,
                     items: const [
-                      DropdownMenuItem(value: 'legacy', child: Text('Legacy')),
+                      DropdownMenuItem(value: 'legacy', child: Text(WebsiteLocalizations.of(context)!.legacy)),
                       DropdownMenuItem(
                         value: 'modern',
-                        child: Text('Modern Tailwind'),
+                        child: Text(WebsiteLocalizations.of(context)!.modernTailwind),
                       ),
                     ],
                     onChanged: (String? newValue) {
@@ -741,49 +742,49 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                   TextFormField(
                     key: const Key('twitterUrl'),
                     controller: _twitterController,
-                    decoration: const InputDecoration(
-                      labelText: 'Twitter / X URL',
-                      hintText: 'https://twitter.com/yourhandle',
+                    decoration: InputDecoration(
+                      labelText: WebsiteLocalizations.of(context)!.twitterXUrl,
+                      hintText: WebsiteLocalizations.of(context)!.httpstwittercomyourhandle,
                     ),
                   ),
                   TextFormField(
                     key: const Key('facebookUrl'),
                     controller: _facebookController,
-                    decoration: const InputDecoration(
-                      labelText: 'Facebook URL',
-                      hintText: 'https://facebook.com/yourpage',
+                    decoration: InputDecoration(
+                      labelText: WebsiteLocalizations.of(context)!.facebookUrl,
+                      hintText: WebsiteLocalizations.of(context)!.httpsfacebookcomyourpage,
                     ),
                   ),
                   TextFormField(
                     key: const Key('instagramUrl'),
                     controller: _instagramController,
-                    decoration: const InputDecoration(
-                      labelText: 'Instagram URL',
-                      hintText: 'https://instagram.com/yourhandle',
+                    decoration: InputDecoration(
+                      labelText: WebsiteLocalizations.of(context)!.instagramUrl,
+                      hintText: WebsiteLocalizations.of(context)!.httpsinstagramcomyourhandle,
                     ),
                   ),
                   TextFormField(
                     key: const Key('youtubeUrl'),
                     controller: _youtubeController,
-                    decoration: const InputDecoration(
-                      labelText: 'YouTube URL',
-                      hintText: 'https://youtube.com/yourchannel',
+                    decoration: InputDecoration(
+                      labelText: WebsiteLocalizations.of(context)!.youtubeUrl,
+                      hintText: WebsiteLocalizations.of(context)!.httpsyoutubecomyourchannel,
                     ),
                   ),
                   TextFormField(
                     key: const Key('linkedinUrl'),
                     controller: _linkedinController,
-                    decoration: const InputDecoration(
-                      labelText: 'LinkedIn URL',
-                      hintText: 'https://linkedin.com/company/yourcompany',
+                    decoration: InputDecoration(
+                      labelText: WebsiteLocalizations.of(context)!.linkedinUrl,
+                      hintText: WebsiteLocalizations.of(context)!.httpslinkedincomcompanyyourcompany,
                     ),
                   ),
                   TextFormField(
                     key: const Key('substackUrl'),
                     controller: _substackController,
-                    decoration: const InputDecoration(
-                      labelText: 'Substack URL',
-                      hintText: 'https://yourname.substack.com',
+                    decoration: InputDecoration(
+                      labelText: WebsiteLocalizations.of(context)!.substackUrl,
+                      hintText: WebsiteLocalizations.of(context)!.httpsyournamesubstackcom,
                     ),
                   ),
                 ],
@@ -791,7 +792,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Website theme (applies to both Legacy and Modern templates)',
+              WebsiteLocalizations.of(context)!.websiteThemeAppliesToBothLegacyAndModernTemplates,
               style: TextStyle(
                 fontSize: 12,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -923,7 +924,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
       ),
       GroupingDecorator(
         useCardStyle: false,
-        labelText: 'Quick Links',
+        labelText: WebsiteLocalizations.of(context)!.quickLinks,
         child: Column(
           children: [
             OutlinedButton.icon(
@@ -947,7 +948,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                       if (_landingPageIdController.text.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Please select a page first'),
+                            content: Text(WebsiteLocalizations.of(context)!.pleaseSelectAPageFirst),
                           ),
                         );
                         return;
@@ -1017,8 +1018,8 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                 Expanded(
                   child: TextField(
                     controller: _checkoutAmountController,
-                    decoration: const InputDecoration(
-                      hintText: 'Amount',
+                    decoration: InputDecoration(
+                      hintText: WebsiteLocalizations.of(context)!.amount,
                       isDense: true,
                       contentPadding: EdgeInsets.symmetric(
                         horizontal: 8,

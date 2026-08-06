@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:flutter/foundation.dart' as foundation;
 
 import '../../../l10n/generated/user_company_localizations.dart';
@@ -54,11 +55,11 @@ class _CompanyUserFilesDialogState extends State<CompanyUserFilesDialog> {
               title: "CompanyUser Up/Download",
               children: [
                 const SizedBox(height: 40),
-                const Text("Download first to obtain the format"),
+                Text(UserCompanyLocalizations.of(context)!.downloadFirstToObtainTheFormat),
                 const SizedBox(height: 10),
                 OutlinedButton(
                   key: const Key('upload'),
-                  child: const Text('Upload CSV file'),
+                  child: Text(UserCompanyLocalizations.of(context)!.uploadCsvFile),
                   onPressed: () async {
                     FilePickerResult? result = await FilePicker.platform
                         .pickFiles(
@@ -86,13 +87,13 @@ class _CompanyUserFilesDialogState extends State<CompanyUserFilesDialog> {
                 const SizedBox(height: 20),
                 OutlinedButton(
                   key: const Key('download'),
-                  child: const Text('Download via email'),
+                  child: Text(UserCompanyLocalizations.of(context)!.downloadViaEmail),
                   onPressed: () {
                     companyUserBloc.add(CompanyUserDownload());
                   },
                 ),
                 const SizedBox(height: 20),
-                const Text("A data file will be send by email"),
+                Text(UserCompanyLocalizations.of(context)!.aDataFileWillBeSendByEmail),
               ],
             ),
             if (state.status == CompanyUserStatus.filesLoading)

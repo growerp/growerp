@@ -14,6 +14,7 @@
 
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
+import 'package:growerp_website/growerp_website.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -130,43 +131,43 @@ class WebsiteFormDialogState extends State<WebsiteFormDialog> {
             TextFormField(
               key: const Key('formName'),
               controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Form Name'),
+              decoration: InputDecoration(labelText: WebsiteLocalizations.of(context)!.formName),
               validator: (value) =>
                   value == null || value.isEmpty ? 'Name required' : null,
             ),
             TextFormField(
               key: const Key('formTitle'),
               controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Title shown above the form'),
+              decoration: InputDecoration(labelText: WebsiteLocalizations.of(context)!.titleShownAboveTheForm),
             ),
             TextFormField(
               key: const Key('submitLabel'),
               controller: _submitLabelController,
-              decoration: const InputDecoration(labelText: 'Submit button label'),
+              decoration: InputDecoration(labelText: WebsiteLocalizations.of(context)!.submitButtonLabel),
             ),
             TextFormField(
               key: const Key('successMessage'),
               controller: _successMessageController,
-              decoration: const InputDecoration(labelText: 'Message after submit'),
+              decoration: InputDecoration(labelText: WebsiteLocalizations.of(context)!.messageAfterSubmit),
             ),
             TextFormField(
               key: const Key('emailTemplateId'),
               controller: _emailTemplateIdController,
-              decoration: const InputDecoration(
-                labelText: 'Email template ID (optional)',
-                hintText: 'Sends this EmailTemplate to the submitter, e.g. a document delivery',
+              decoration: InputDecoration(
+                labelText: WebsiteLocalizations.of(context)!.emailTemplateIdOptional,
+                hintText: WebsiteLocalizations.of(context)!.sendsThisEmailtemplateToTheSubmitterEgADocumentDelivery,
               ),
             ),
             DropdownButtonFormField<String?>(
               key: const Key('emailSequenceId'),
-              decoration: const InputDecoration(
-                labelText: 'Enroll into nurture sequence (optional)',
+              decoration: InputDecoration(
+                labelText: WebsiteLocalizations.of(context)!.enrollIntoNurtureSequenceOptional,
               ),
               initialValue: _selectedEmailSequenceId,
               items: [
                 const DropdownMenuItem<String?>(
                   value: null,
-                  child: Text('None'),
+                  child: Text(WebsiteLocalizations.of(context)!.none),
                 ),
                 ..._emailSequences.map(
                   (seq) => DropdownMenuItem<String?>(
@@ -182,7 +183,7 @@ class WebsiteFormDialogState extends State<WebsiteFormDialog> {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Fields',
+                WebsiteLocalizations.of(context)!.fields,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
             ),
@@ -195,7 +196,7 @@ class WebsiteFormDialogState extends State<WebsiteFormDialog> {
                     child: TextFormField(
                       key: Key('fieldLabel$index'),
                       controller: row.label,
-                      decoration: const InputDecoration(labelText: 'Label'),
+                      decoration: InputDecoration(labelText: WebsiteLocalizations.of(context)!.label),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -236,15 +237,14 @@ class WebsiteFormDialogState extends State<WebsiteFormDialog> {
                 key: const Key('addField'),
                 onPressed: () => setState(() => _fieldRows.add(_FieldRow())),
                 icon: const Icon(Icons.add),
-                label: const Text('Add field'),
+                label: Text(WebsiteLocalizations.of(context)!.addField),
               ),
             ),
             if (widget.webForm.formId.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: SelectableText(
-                  'Embed on a page with: '
-                  '<div data-growerp-form="${widget.webForm.formId}"></div>',
+                  "${WebsiteLocalizations.of(context)!.embedOnPageWith}\n<div data-growerp-form='${widget.webForm.formId}'></div>",
                   key: const Key('embedCode'),
                   style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
                 ),
