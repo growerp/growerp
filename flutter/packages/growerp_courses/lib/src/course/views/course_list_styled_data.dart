@@ -17,6 +17,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../bloc/course_bloc.dart';
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
 /// Returns column definitions for course list based on device type
 List<StyledColumn> getCourseListColumns(BuildContext context) {
@@ -88,16 +89,14 @@ List<Widget> getCourseListRow({
             ),
           Row(
             children: [
-              Text(
-                '${course.modules?.length ?? 0}m',
+              Text(CoursesLocalizations.of(context)!.courses_coursemoduleslength0M((course.modules?.length ?? 0).toString()),
                 style: TextStyle(
                   fontSize: 11,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
-                '${course.modules?.fold<int>(0, (sum, m) => sum + (m.lessons?.length ?? 0)) ?? 0}l',
+              Text(CoursesLocalizations.of(context)!.courses_coursemodulesfoldint0summsummlessonslength00L((course.modules?.fold<int>(0, (sum, m) => sum + (m.lessons?.length ?? 0)) ?? 0).toString()),
                 style: TextStyle(
                   fontSize: 11,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,

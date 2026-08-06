@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_adk/l10n/generated/adk_localizations.dart';
 
 /// Compact agent-control dashboard for the half-height 'Agent Control'
 /// dashboard tile: dense approval-queue funnel bars (stage + count only)
@@ -58,7 +59,7 @@ class _AgentControlDashboardChartMiniState
   ) {
     final colorScheme = Theme.of(context).colorScheme;
     if (summary.isEmpty) {
-      return const Center(child: Text('No approval data'));
+      return Center(child: Text(AdkLocalizations.of(context)!.adk_noApprovalData));
     }
     int maxCount = 1;
     for (final item in summary) {

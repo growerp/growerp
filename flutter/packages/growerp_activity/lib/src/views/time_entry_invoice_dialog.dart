@@ -18,6 +18,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../../growerp_activity.dart';
+import 'package:growerp_activity/l10n/generated/activity_localizations.dart';
 
 /// Admin dialog to create an invoice from approved time entries:
 /// either a sales invoice for a client (billing the hours on their tasks)
@@ -88,14 +89,14 @@ class TimeEntryInvoiceDialogState extends State<TimeEntryInvoiceDialog> {
             key: const Key('invoiceType'),
             decoration: const InputDecoration(labelText: 'Invoice type'),
             initialValue: _sales,
-            items: const [
+            items: [
               DropdownMenuItem(
                 value: true,
-                child: Text('Sales invoice to client'),
+                child: Text(ActivityLocalizations.of(context)!.activity_salesInvoiceToClient),
               ),
               DropdownMenuItem(
                 value: false,
-                child: Text('Purchase invoice for assistant'),
+                child: Text(ActivityLocalizations.of(context)!.activity_purchaseInvoiceForAssistant),
               ),
             ],
             onChanged: (value) {
@@ -142,7 +143,7 @@ class TimeEntryInvoiceDialogState extends State<TimeEntryInvoiceDialog> {
           const SizedBox(height: 20),
           OutlinedButton(
             key: const Key('createInvoice'),
-            child: const Text('Create invoice'),
+            child: Text(ActivityLocalizations.of(context)!.activity_createInvoice),
             onPressed: () {
               if (_selectedParty == null) {
                 HelperFunctions.showMessage(

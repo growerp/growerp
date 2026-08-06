@@ -17,6 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_media_bloc.dart';
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
 /// Dialog for generating AI content from a course
 class GenerateMediaDialog extends StatefulWidget {
@@ -90,13 +91,11 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
         children: [
           const CircularProgressIndicator(),
           const SizedBox(height: 24),
-          Text(
-            'Generating content...',
+          Text(CoursesLocalizations.of(context)!.courses_generatingContent,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
-          Text(
-            'This may take a few moments',
+          Text(CoursesLocalizations.of(context)!.courses_thisMayTakeA,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
@@ -152,7 +151,7 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Select Platforms', style: Theme.of(context).textTheme.titleSmall),
+        Text(CoursesLocalizations.of(context)!.courses_selectPlatforms, style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -185,8 +184,7 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Content Scope (optional)',
+        Text(CoursesLocalizations.of(context)!.courses_contentScopeOptional,
           style: Theme.of(context).textTheme.titleSmall,
         ),
         const SizedBox(height: 8),
@@ -198,9 +196,9 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
             hintText: 'Entire course',
           ),
           items: [
-            const DropdownMenuItem<CourseModule?>(
+            DropdownMenuItem<CourseModule?>(
               value: null,
-              child: Text('Entire course'),
+              child: Text(CoursesLocalizations.of(context)!.courses_entireCourse),
             ),
             ...modules.map(
               (module) =>
@@ -224,9 +222,9 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
               hintText: 'Entire module',
             ),
             items: [
-              const DropdownMenuItem<CourseLesson?>(
+              DropdownMenuItem<CourseLesson?>(
                 value: null,
-                child: Text('Entire module'),
+                child: Text(CoursesLocalizations.of(context)!.courses_entireModule),
               ),
               ...(_selectedModule!.lessons ?? []).map(
                 (lesson) =>

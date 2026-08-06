@@ -613,5 +613,18 @@
   "categoryDeleteFailure": "Failed to delete category",
   "@categoryDeleteFailure": {
     "description": "BLoC message: Failed to delete category"
+  },
+  "catalog_noProductData": "No product data",
+  "@catalog_noProductData": {
+    "description": "Extracted string: No product data"
+  },
+  "catalog_categorynbrofproductsProducts": "{categorynbrOfProducts} products",
+  "@catalog_categorynbrofproductsProducts": {
+    "description": "Extracted string: ${category.nbrOfProducts} products",
+    "placeholders": {
+      "categorynbrOfProducts": {
+        "type": "String"
+      }
+    }
   }
 }

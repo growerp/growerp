@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
 /// Course detail view showing modules and lessons
 class CourseDetail extends StatelessWidget {
@@ -23,8 +24,8 @@ class CourseDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Course Detail')),
-      body: Center(child: Text('Course Detail - $courseId')),
+      appBar: AppBar(title: Text(CoursesLocalizations.of(context)!.courses_courseDetail)),
+      body: Center(child: Text(CoursesLocalizations.of(context)!.courses_courseDetailCourseid(courseId.toString()))),
     );
   }
 }

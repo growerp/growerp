@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_activity/l10n/generated/activity_localizations.dart';
 
 class _TaskStageSummaryItem {
   final String stageName;
@@ -33,7 +34,7 @@ class TaskDashboardChartMini extends StatelessWidget {
   Widget _funnel(BuildContext context, List<_TaskStageSummaryItem> summary) {
     final colorScheme = Theme.of(context).colorScheme;
     if (summary.isEmpty) {
-      return const Center(child: Text('No task data'));
+      return Center(child: Text(ActivityLocalizations.of(context)!.activity_noTaskData));
     }
     int maxCount = 1;
     for (final item in summary) {

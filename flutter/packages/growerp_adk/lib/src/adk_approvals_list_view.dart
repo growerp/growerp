@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'adk_governance_service.dart';
+import 'package:growerp_adk/l10n/generated/adk_localizations.dart';
 
 /// Pending agent write-approvals for the logged-in company. Approving runs the
 /// stored service; rejecting discards it. Owner-scoped by the backend.
@@ -106,7 +107,7 @@ class _AdkApprovalsListViewState extends State<AdkApprovalsListView> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_failedE(e.toString())), backgroundColor: Colors.red),
         );
       }
     }
@@ -195,7 +196,7 @@ class _AdkApprovalsListViewState extends State<AdkApprovalsListView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Error: $_error'),
+            Text(AdkLocalizations.of(context)!.adk_errorError(_error.toString())),
             const SizedBox(height: 8),
             ElevatedButton(onPressed: _load, child: const Text('Retry')),
           ],

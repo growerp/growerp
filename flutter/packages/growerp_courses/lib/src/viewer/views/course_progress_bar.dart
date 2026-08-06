@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
 /// Progress bar widget for course completion
 class CourseProgressBar extends StatelessWidget {
@@ -39,12 +40,10 @@ class CourseProgressBar extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '$completedLessons of $totalLessons lessons',
+              Text(CoursesLocalizations.of(context)!.courses_completedlessonsOfTotallessonsLessons(completedLessons.toString(), totalLessons.toString()),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-              Text(
-                '$progressPercent%',
+              Text(CoursesLocalizations.of(context)!.courses_progresspercent(progressPercent.toString()),
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),

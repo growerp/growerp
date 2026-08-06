@@ -223,5 +223,68 @@
   "activityFetchFailure": "Failed to fetch activities",
   "@activityFetchFailure": {
     "description": "BLoC message: Failed to fetch activities"
+  },
+  "activity_noTaskData": "No task data",
+  "@activity_noTaskData": {
+    "description": "Extracted string: No task data"
+  },
+  "activity_fromToParty": "From/To Party",
+  "@activity_fromToParty": {
+    "description": "Extracted string: From/To Party"
+  },
+  "activity_failedToFetchSearch": "failed to fetch search items: {statemessage}",
+  "@activity_failedToFetchSearch": {
+    "description": "Extracted string: failed to fetch search items: ${state.message}",
+    "placeholders": {
+      "statemessage": {
+        "type": "String"
+      }
+    }
+  },
+  "activity_searchResults": "Search results",
+  "@activity_searchResults": {
+    "description": "Extracted string: Search results"
+  },
+  "activity_noSearchItemsFound": "No search items found (yet)",
+  "@activity_noSearchItemsFound": {
+    "description": "Extracted string: No search items found (yet)"
+  },
+  "activity_idActivitiesindexpseudoidN": "ID: {activitiesindexpseudoId}\\n",
+  "@activity_idActivitiesindexpseudoidN": {
+    "description": "Extracted string: ID: ${activities[index].pseudoId}\\n",
+    "placeholders": {
+      "activitiesindexpseudoId": {
+        "type": "String"
+      }
+    }
+  },
+  "activity_errorGettingHoursReport": "Error getting hours report: {snapshoterror}",
+  "@activity_errorGettingHoursReport": {
+    "description": "Extracted string: Error getting hours report: ${snapshot.error}",
+    "placeholders": {
+      "snapshoterror": {
+        "type": "String"
+      }
+    }
+  },
+  "activity_noHoursFound": "No hours found",
+  "@activity_noHoursFound": {
+    "description": "Extracted string: No hours found"
+  },
+  "activity_inProcess": "In process",
+  "@activity_inProcess": {
+    "description": "Extracted string: In process"
+  },
+  "activity_salesInvoiceToClient": "Sales invoice to client",
+  "@activity_salesInvoiceToClient": {
+    "description": "Extracted string: Sales invoice to client"
+  },
+  "activity_purchaseInvoiceForAssistant": "Purchase invoice for assistant",
+  "@activity_purchaseInvoiceForAssistant": {
+    "description": "Extracted string: Purchase invoice for assistant"
+  },
+  "activity_createInvoice": "Create invoice",
+  "@activity_createInvoice": {
+    "description": "Extracted string: Create invoice"
   }
 }

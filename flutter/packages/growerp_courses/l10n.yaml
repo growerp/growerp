@@ -1,0 +1,6 @@
+arb-dir: lib/l10n
+template-arb-file: intl_en.arb
+output-dir: lib/l10n/generated
+output-localization-file: courses_localizations.dart
+output-class: CoursesLocalizations
+preferred-supported-locales: [en, th, zh, de, fr, nl]

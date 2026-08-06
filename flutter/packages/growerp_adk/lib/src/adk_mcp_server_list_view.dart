@@ -17,6 +17,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'adk_mcp_server_dialog.dart';
 import 'adk_config_service.dart';
+import 'package:growerp_adk/l10n/generated/adk_localizations.dart';
 
 /// Tools & integrations screen. Lists every tool an agent can use:
 /// the built-in Moqui MCP server (read-only), the auth-bearing built-in tools
@@ -114,9 +115,8 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete MCP server?'),
-        content: Text(
-            'Delete "${server.serverName}"? It will be detached from all agents.'),
+        title: Text(AdkLocalizations.of(context)!.adk_deleteMcpServer),
+        content: Text(AdkLocalizations.of(context)!.adk_deleteServerservernameItWill(server.serverName.toString())),
         actions: [
           TextButton(
             key: const Key('cancelDeleteServer'),
@@ -142,7 +142,7 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Delete failed: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_deleteFailedE(e.toString())), backgroundColor: Colors.red),
         );
       }
     }
@@ -215,15 +215,15 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
         ListTile(
           key: const Key('builtinMcpServer'),
           leading: Icon(Icons.verified, color: cs.primary),
-          title: const Text('Moqui (built-in)'),
-          subtitle: const Text('Always attached to every agent · read-only'),
+          title: Text(AdkLocalizations.of(context)!.adk_moquiBuiltIn),
+          subtitle: Text(AdkLocalizations.of(context)!.adk_alwaysAttachedToEvery),
           trailing: badge(ok: true, okText: 'Built-in'),
         ),
         ListTile(
           key: const Key('emailIntegration'),
           leading: Icon(Icons.email_outlined, color: cs.onSurfaceVariant),
           title: const Text('Email'),
-          subtitle: const Text('SMTP / IMAP for the AI email tool'),
+          subtitle: Text(AdkLocalizations.of(context)!.adk_smtpImapForThe),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -241,7 +241,7 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
           key: const Key('githubIntegration'),
           leading: Icon(Icons.code, color: cs.onSurfaceVariant),
           title: const Text('GitHub'),
-          subtitle: const Text('Token / repository for the AI GitHub tool'),
+          subtitle: Text(AdkLocalizations.of(context)!.adk_tokenRepositoryForThe),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -258,9 +258,8 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
         ListTile(
           key: const Key('googleWorkspaceIntegration'),
           leading: Icon(Icons.calendar_month, color: cs.onSurfaceVariant),
-          title: const Text('Google Workspace'),
-          subtitle: const Text(
-              'Calendar booking capture + Gemini meeting notes'),
+          title: Text(AdkLocalizations.of(context)!.adk_googleWorkspace),
+          subtitle: Text(AdkLocalizations.of(context)!.adk_calendarBookingCaptureGemini),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -279,7 +278,7 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
           child: Align(
             alignment: Alignment.centerLeft,
-            child: Text('External MCP servers',
+            child: Text(AdkLocalizations.of(context)!.adk_externalMcpServers,
                 style: Theme.of(context).textTheme.titleSmall),
           ),
         ),
@@ -308,8 +307,7 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
           children: [
             const Icon(Icons.dns_outlined, size: 64, color: Colors.grey),
             const SizedBox(height: 12),
-            const Text(
-              'No MCP servers yet.\nTap + to register one.',
+            Text(AdkLocalizations.of(context)!.adk_noMcpServersYet,
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey),
             ),

@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_adk/growerp_adk.dart';
+import 'package:growerp_adk/l10n/generated/adk_localizations.dart';
 
 /// Support App View: Audit trail of agent tool/service actions for tenants using the system LLM.
 class AdkSystemUsageView extends StatefulWidget {
@@ -143,7 +144,7 @@ class _AdkSystemUsageViewState extends State<AdkSystemUsageView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Error: $_error'),
+            Text(AdkLocalizations.of(context)!.adk_errorError(_error.toString())),
             const SizedBox(height: 8),
             ElevatedButton(onPressed: _load, child: const Text('Retry')),
           ],

@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 
 import '../blocs/activity_bloc.dart';
+import 'package:growerp_activity/l10n/generated/activity_localizations.dart';
 
 class TimeEntryListHeader extends StatelessWidget {
   const TimeEntryListHeader({super.key, required this.activityBloc});
@@ -34,8 +35,8 @@ class TimeEntryListHeader extends StatelessWidget {
                 child: Text("Status", textAlign: TextAlign.center),
               ),
               if (isPhone(context))
-                const Expanded(
-                  child: Text("From/To Party", textAlign: TextAlign.center),
+                Expanded(
+                  child: Text(ActivityLocalizations.of(context)!.activity_fromToParty, textAlign: TextAlign.center),
                 ),
               if (isPhone(context))
                 const Expanded(

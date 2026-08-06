@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'adk_governance_service.dart';
+import 'package:growerp_adk/l10n/generated/adk_localizations.dart';
 
 /// Audit trail of agent tool/service actions for the logged-in company.
 /// Owner-scoped by the backend — a tenant never sees another company's rows.
@@ -145,7 +146,7 @@ class _AdkActionsListViewState extends State<AdkActionsListView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Error: $_error'),
+            Text(AdkLocalizations.of(context)!.adk_errorError(_error.toString())),
             const SizedBox(height: 8),
             ElevatedButton(onPressed: _load, child: const Text('Retry')),
           ],
@@ -218,7 +219,7 @@ class _AdkActionsListViewState extends State<AdkActionsListView> {
     );
     if (isAPhone(context)) {
       final sub = a.reason != null && a.reason!.isNotEmpty ? '\n${a.reason}' : '';
-      return [icon, Text('$title$sub'), decision];
+      return [icon, Text(AdkLocalizations.of(context)!.adk_titleSub(title.toString(), sub.toString())), decision];
     }
     return [
       icon,

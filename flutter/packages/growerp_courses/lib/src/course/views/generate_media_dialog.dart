@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_bloc.dart';
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
 /// Dialog for generating AI-powered media content from course material
 class GenerateMediaDialog extends StatefulWidget {
@@ -78,7 +79,7 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
           ),
           child: Scaffold(
             appBar: AppBar(
-              title: const Text('Generate Media Content'),
+              title: Text(CoursesLocalizations.of(context)!.courses_generateMediaContent),
               automaticallyImplyLeading: false,
               actions: [
                 IconButton(
@@ -217,15 +218,13 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Content Scope',
+        Text(CoursesLocalizations.of(context)!.courses_contentScope,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
         ),
         const SizedBox(height: 8),
-        Text(
-          'Select what content to use for media generation',
+        Text(CoursesLocalizations.of(context)!.courses_selectWhatContentTo,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -241,9 +240,9 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
           ),
           initialValue: _selectedModuleId,
           items: [
-            const DropdownMenuItem<String?>(
+            DropdownMenuItem<String?>(
               value: null,
-              child: Text('All modules (entire course)'),
+              child: Text(CoursesLocalizations.of(context)!.courses_allModulesEntireCourse),
             ),
             ...modules.map((m) => DropdownMenuItem(
                   value: m.moduleId,
@@ -282,9 +281,9 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
       ),
       initialValue: _selectedLessonId,
       items: [
-        const DropdownMenuItem<String?>(
+        DropdownMenuItem<String?>(
           value: null,
-          child: Text('All lessons in module'),
+          child: Text(CoursesLocalizations.of(context)!.courses_allLessonsInModule),
         ),
         ...lessons.map((l) => DropdownMenuItem(
               value: l.lessonId,
@@ -299,15 +298,13 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Target Platform',
+        Text(CoursesLocalizations.of(context)!.courses_targetPlatform,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
         ),
         const SizedBox(height: 8),
-        Text(
-          'Choose where you want to publish this content',
+        Text(CoursesLocalizations.of(context)!.courses_chooseWhereYouWant,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -358,15 +355,13 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Content Type',
+        Text(CoursesLocalizations.of(context)!.courses_contentType,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
         ),
         const SizedBox(height: 8),
-        Text(
-          'Select the type of content to generate for ${_getPlatformLabel(_selectedPlatform!)}',
+        Text(CoursesLocalizations.of(context)!.courses_selectTheTypeOf(_getPlatformLabel(_selectedPlatform!).toString()),
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -443,8 +438,7 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
                 color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(width: 8),
-              Text(
-                'Content Generated Successfully!',
+              Text(CoursesLocalizations.of(context)!.courses_contentGeneratedSuccessfully,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.primary,

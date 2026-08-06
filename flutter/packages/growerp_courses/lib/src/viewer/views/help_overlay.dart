@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
 /// Position for help overlay
 enum TooltipPosition { topLeft, topRight, bottomLeft, bottomRight, center }
@@ -232,9 +233,9 @@ If you want to learn more, check out the GrowERP training course.
     }
 
     if (_helpContent == null) {
-      return const Padding(
+      return Padding(
         padding: EdgeInsets.all(16),
-        child: Text('No help content available for this screen.'),
+        child: Text(CoursesLocalizations.of(context)!.courses_noHelpContentAvailable),
       );
     }
 
@@ -255,7 +256,7 @@ If you want to learn more, check out the GrowERP training course.
         children: [
           TextButton.icon(
             icon: const Icon(Icons.school),
-            label: const Text('View Full Course'),
+            label: Text(CoursesLocalizations.of(context)!.courses_viewFullCourse),
             onPressed: () {
               Navigator.pop(context);
               // TODO: Navigate to full course viewer

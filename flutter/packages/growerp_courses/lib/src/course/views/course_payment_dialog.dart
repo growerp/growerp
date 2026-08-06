@@ -22,6 +22,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../bloc/course_bloc.dart';
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
 /// Payment dialog shown when a participant taps Subscribe on a course.
 /// Shows the course price (or "Free") and collects credit card details
@@ -94,8 +95,7 @@ class _CoursePaymentDialogState extends State<CoursePaymentDialog> {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Text(
-                      'Price: ',
+                    Text(CoursesLocalizations.of(context)!.courses_price,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     Text(
@@ -113,8 +113,7 @@ class _CoursePaymentDialogState extends State<CoursePaymentDialog> {
 
                 // Credit card form — only for paid courses
                 if (!_isFree) ...[
-                  Text(
-                    'Payment Information',
+                  Text(CoursesLocalizations.of(context)!.courses_paymentInformation,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 16),

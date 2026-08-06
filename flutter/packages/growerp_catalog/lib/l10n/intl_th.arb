@@ -116,5 +116,7 @@
   "categoryAddFailure": "การเพิ่มหมวดหมู่ล้มเหลว",
   "subscriptionUpdateSuccess": "อัปเดตการสมัครสมาชิกสำเร็จ",
   "productUploadFailure": "การอัปโหลดผลิตภัณฑ์ล้มเหลว",
-  "categoryDeleteFailure": "การลบหมวดหมู่ล้มเหลว"
+  "categoryDeleteFailure": "การลบหมวดหมู่ล้มเหลว",
+  "catalog_noProductData": "ไม่มีข้อมูลสินค้า",
+  "catalog_categorynbrofproductsProducts": "{categorynbrOfProducts} products"
 }

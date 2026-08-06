@@ -17,9 +17,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'adk_job_service.dart';
+import 'package:growerp_adk/l10n/generated/adk_localizations.dart';
 
 class AdkJobListView extends StatefulWidget {
-  const AdkJobListView({super.key});
+  AdkJobListView({super.key});
 
   @override
   State<AdkJobListView> createState() => _AdkJobListViewState();
@@ -66,21 +67,21 @@ class _AdkJobListViewState extends State<AdkJobListView> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Clear stale lock?'),
+        title: Text(AdkLocalizations.of(context)!.adk_clearStaleLock),
         content: Text(
           'Force-clear the lock on "${job.agentName}"?\n'
           'The locked run (${job.lockRunId}) will be marked as completed.',
         ),
         actions: [
           TextButton(
-            key: const Key('cancelClearLock'),
+            key: Key('cancelClearLock'),
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
+            child: Text('Cancel'),
           ),
           FilledButton(
-            key: const Key('confirmClearLock'),
+            key: Key('confirmClearLock'),
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Clear Lock'),
+            child: Text(AdkLocalizations.of(context)!.adk_clearLock),
           ),
         ],
       ),
@@ -93,7 +94,7 @@ class _AdkJobListViewState extends State<AdkJobListView> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_failedE(e.toString())), backgroundColor: Colors.red),
         );
       }
     }
@@ -104,18 +105,18 @@ class _AdkJobListViewState extends State<AdkJobListView> {
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text('Error — ${job.agentName}'),
+        title: Text(AdkLocalizations.of(context)!.adk_errorJobagentname(job.agentName.toString())),
         content: SingleChildScrollView(
           child: SelectableText(
             job.latestErrors!,
-            key: const Key('jobErrorText'),
+            key: Key('jobErrorText'),
           ),
         ),
         actions: [
           TextButton(
-            key: const Key('closeJobError'),
+            key: Key('closeJobError'),
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Close'),
+            child: Text('Close'),
           ),
         ],
       ),
@@ -134,7 +135,7 @@ class _AdkJobListViewState extends State<AdkJobListView> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_failedE(e.toString())), backgroundColor: Colors.red),
         );
       }
     }
@@ -159,8 +160,8 @@ class _AdkJobListViewState extends State<AdkJobListView> {
             },
             actions: [
               IconButton(
-                key: const Key('refreshAdkJobs'),
-                icon: const Icon(Icons.refresh),
+                key: Key('refreshAdkJobs'),
+                icon: Icon(Icons.refresh),
                 tooltip: 'Refresh',
                 onPressed: _load,
               ),
@@ -173,28 +174,27 @@ class _AdkJobListViewState extends State<AdkJobListView> {
   }
 
   Widget _buildBody() {
-    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_loading) return Center(child: CircularProgressIndicator());
     if (_error != null) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(_error!, style: const TextStyle(color: Colors.red)),
-            const SizedBox(height: 8),
-            ElevatedButton(onPressed: _load, child: const Text('Retry')),
+            Text(_error!, style: TextStyle(color: Colors.red)),
+            SizedBox(height: 8),
+            ElevatedButton(onPressed: _load, child: Text('Retry')),
           ],
         ),
       );
     }
     if (_jobs.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.schedule, size: 64, color: Colors.grey),
             SizedBox(height: 12),
-            Text(
-              'No scheduled agent jobs.\nEnable scheduling in AI Agents.',
+            Text(AdkLocalizations.of(context)!.adk_noScheduledAgentJobs,
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey),
             ),
@@ -212,9 +212,9 @@ class _AdkJobListViewState extends State<AdkJobListView> {
   Widget _buildCardList() {
     final jobs = _jobs;
     return ListView.separated(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(12),
       itemCount: jobs.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => SizedBox(height: 8),
       itemBuilder: (ctx, i) => _JobCard(
         index: i,
         job: jobs[i],
@@ -226,8 +226,7 @@ class _AdkJobListViewState extends State<AdkJobListView> {
 
   Widget _buildTable() {
     final cs = Theme.of(context).colorScheme;
-
-    const columns = [
+    final columns = [
       StyledColumn(header: '', flex: 1),
       StyledColumn(header: 'Agent', flex: 3),
       StyledColumn(header: 'Schedule', flex: 2),
@@ -264,16 +263,16 @@ class _AdkJobListViewState extends State<AdkJobListView> {
 
       final statusChip = job.paused
           ? Chip(
-              label: const Text('Paused'),
+              label: Text('Paused'),
               backgroundColor: Colors.orange.withValues(alpha: 0.15),
-              labelStyle: const TextStyle(color: Colors.orange, fontSize: 11),
+              labelStyle: TextStyle(color: Colors.orange, fontSize: 11),
               padding: EdgeInsets.zero,
               visualDensity: VisualDensity.compact,
             )
           : Chip(
-              label: const Text('Active'),
+              label: Text('Active'),
               backgroundColor: Colors.green.withValues(alpha: 0.15),
-              labelStyle: const TextStyle(color: Colors.green, fontSize: 11),
+              labelStyle: TextStyle(color: Colors.green, fontSize: 11),
               padding: EdgeInsets.zero,
               visualDensity: VisualDensity.compact,
             );
@@ -282,7 +281,7 @@ class _AdkJobListViewState extends State<AdkJobListView> {
           ? Tooltip(
               message: 'Run ${job.lockRunId} • ${job.lockAgeMin} min ago',
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: cs.errorContainer,
                   borderRadius: BorderRadius.circular(6),
@@ -291,9 +290,8 @@ class _AdkJobListViewState extends State<AdkJobListView> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.lock, size: 12, color: cs.onErrorContainer),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${job.lockAgeMin}m ago',
+                    SizedBox(width: 4),
+                    Text(AdkLocalizations.of(context)!.adk_joblockageminMAgo(job.lockAgeMin.toString()),
                       style: TextStyle(
                         fontSize: 11,
                         color: cs.onErrorContainer,
@@ -304,7 +302,7 @@ class _AdkJobListViewState extends State<AdkJobListView> {
                 ),
               ),
             )
-          : const SizedBox.shrink();
+          : SizedBox.shrink();
 
       final lastRun = job.latestStart.toLocalizedDateTime(context);
       final lastRunText = lastRun.isEmpty ? '—' : lastRun;
@@ -336,28 +334,28 @@ class _AdkJobListViewState extends State<AdkJobListView> {
         Text(
           job.agentName,
           key: Key('name$i'),
-          style: const TextStyle(fontWeight: FontWeight.w500),
+          style: TextStyle(fontWeight: FontWeight.w500),
         ),
         Text(
           job.cronExpression ?? '—',
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'monospace',
             fontSize: 12,
             color: Colors.grey,
           ),
         ),
-        Text(lastRunText, style: const TextStyle(fontSize: 12)),
+        Text(lastRunText, style: TextStyle(fontSize: 12)),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(statusIcon, size: 14, color: statusColor),
-            const SizedBox(width: 4),
+            SizedBox(width: 4),
             Text(
               job.latestStatus,
               style: TextStyle(fontSize: 12, color: statusColor),
             ),
             if (job.latestErrors != null && job.latestErrors!.isNotEmpty) ...[
-              const SizedBox(width: 4),
+              SizedBox(width: 4),
               Icon(Icons.info_outline, size: 14, color: statusColor),
             ],
           ],
@@ -365,7 +363,7 @@ class _AdkJobListViewState extends State<AdkJobListView> {
         lockCell,
         Row(
           mainAxisSize: MainAxisSize.min,
-          children: [statusChip, const SizedBox(width: 4), actions],
+          children: [statusChip, SizedBox(width: 4), actions],
         ),
       ];
     }).toList();
@@ -385,7 +383,7 @@ class _JobCard extends StatelessWidget {
   final VoidCallback onClearLock;
   final VoidCallback onTogglePause;
 
-  const _JobCard({
+  _JobCard({
     required this.index,
     required this.job,
     required this.onClearLock,
@@ -415,19 +413,19 @@ class _JobCard extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Icon(Icons.smart_toy, color: cs.primary, size: 20),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     job.agentName,
                     key: Key('name$index'),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
                     ),
@@ -435,9 +433,9 @@ class _JobCard extends StatelessWidget {
                 ),
                 if (job.paused)
                   Chip(
-                    label: const Text('Paused'),
+                    label: Text('Paused'),
                     backgroundColor: Colors.orange.withValues(alpha: 0.15),
-                    labelStyle: const TextStyle(
+                    labelStyle: TextStyle(
                       color: Colors.orange,
                       fontSize: 11,
                     ),
@@ -445,9 +443,9 @@ class _JobCard extends StatelessWidget {
                   )
                 else
                   Chip(
-                    label: const Text('Active'),
+                    label: Text('Active'),
                     backgroundColor: Colors.green.withValues(alpha: 0.15),
-                    labelStyle: const TextStyle(
+                    labelStyle: TextStyle(
                       color: Colors.green,
                       fontSize: 11,
                     ),
@@ -456,14 +454,14 @@ class _JobCard extends StatelessWidget {
               ],
             ),
             if (job.cronExpression != null) ...[
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               Row(
                 children: [
-                  const Icon(Icons.access_time, size: 13, color: Colors.grey),
-                  const SizedBox(width: 4),
+                  Icon(Icons.access_time, size: 13, color: Colors.grey),
+                  SizedBox(width: 4),
                   Text(
                     job.cronExpression!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'monospace',
                       fontSize: 12,
                       color: Colors.grey,
@@ -472,28 +470,27 @@ class _JobCard extends StatelessWidget {
                 ],
               ),
             ],
-            const SizedBox(height: 6),
+            SizedBox(height: 6),
             Row(
               children: [
                 Icon(statusIcon, size: 14, color: statusColor),
-                const SizedBox(width: 4),
-                Text(
-                  'Last run: ${job.latestStatus}',
+                SizedBox(width: 4),
+                Text(AdkLocalizations.of(context)!.adk_lastRunJoblateststatus(job.latestStatus.toString()),
                   style: TextStyle(fontSize: 12, color: statusColor),
                 ),
                 if (job.latestStart != null) ...[
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Text(
                     job.latestStart.toLocalizedDateTime(context),
-                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                    style: TextStyle(fontSize: 11, color: Colors.grey),
                   ),
                 ],
               ],
             ),
             if (job.isLocked) ...[
-              const SizedBox(height: 6),
+              SizedBox(height: 6),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: cs.errorContainer,
                   borderRadius: BorderRadius.circular(6),
@@ -502,7 +499,7 @@ class _JobCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.lock, size: 13, color: cs.onErrorContainer),
-                    const SizedBox(width: 4),
+                    SizedBox(width: 4),
                     Text(
                       'Locked — run ${job.lockRunId} '
                       '(${job.lockAgeMin} min ago)',
@@ -517,7 +514,7 @@ class _JobCard extends StatelessWidget {
               ),
             ],
             if (job.latestErrors != null && job.latestErrors!.isNotEmpty) ...[
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               Text(
                 job.latestErrors!,
                 style: TextStyle(fontSize: 11, color: cs.error),
@@ -525,7 +522,7 @@ class _JobCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ],
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -533,11 +530,11 @@ class _JobCard extends StatelessWidget {
                   TextButton.icon(
                     key: Key('clearLockJob$index'),
                     onPressed: onClearLock,
-                    icon: const Icon(Icons.lock_open, size: 16),
-                    label: const Text('Clear Lock'),
+                    icon: Icon(Icons.lock_open, size: 16),
+                    label: Text(AdkLocalizations.of(context)!.adk_clearLock),
                     style: TextButton.styleFrom(foregroundColor: cs.error),
                   ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 TextButton.icon(
                   key: Key('toggleJob$index'),
                   onPressed: onTogglePause,

@@ -1,0 +1,355 @@
+{
+  "@@locale": "en",
+  "adk_addsTheFiveGrowerp": "Adds the five GrowERP marketing agents (Outreach Personalizer, ",
+  "@adk_addsTheFiveGrowerp": {
+    "description": "Extracted string: Adds the five GrowERP marketing agents (Outreach Personalizer, "
+  },
+  "adk_marketingAgentTeamEnabled": "Marketing agent team enabled",
+  "@adk_marketingAgentTeamEnabled": {
+    "description": "Extracted string: Marketing agent team enabled"
+  },
+  "adk_enableFailedE": "Enable failed: {e}",
+  "@adk_enableFailedE": {
+    "description": "Extracted string: Enable failed: $e",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_addsTheAgentControl": "Adds the Agent Control Center demo: an Operations Assistant that ",
+  "@adk_addsTheAgentControl": {
+    "description": "Extracted string: Adds the Agent Control Center demo: an Operations Assistant that "
+  },
+  "adk_agentDemoLoaded": "Agent demo loaded",
+  "@adk_agentDemoLoaded": {
+    "description": "Extracted string: Agent demo loaded"
+  },
+  "adk_loadFailedE": "Load failed: {e}",
+  "@adk_loadFailedE": {
+    "description": "Extracted string: Load failed: $e",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_deleteFailedE": "Delete failed: {e}",
+  "@adk_deleteFailedE": {
+    "description": "Extracted string: Delete failed: $e",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_noAgentsYetNtap": "No agents yet.\\nTap + to create your first agent.",
+  "@adk_noAgentsYetNtap": {
+    "description": "Extracted string: No agents yet.\\nTap + to create your first agent."
+  },
+  "adk_menuIsNotAvailable": "Menu is not available to tailor here.",
+  "@adk_menuIsNotAvailable": {
+    "description": "Extracted string: Menu is not available to tailor here."
+  },
+  "adk_aiFilledThisForm": "AI filled this form — please review the values before saving.",
+  "@adk_aiFilledThisForm": {
+    "description": "Extracted string: AI filled this form — please review the values before saving."
+  },
+  "adk_openScreen": "Open screen:",
+  "@adk_openScreen": {
+    "description": "Extracted string: Open screen:"
+  },
+  "adk_failedE": "Failed: {e}",
+  "@adk_failedE": {
+    "description": "Extracted string: Failed: $e",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_errorError": "Error: {error}",
+  "@adk_errorError": {
+    "description": "Extracted string: Error: $_error",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_saveFailedE": "Save failed: {e}",
+  "@adk_saveFailedE": {
+    "description": "Extracted string: Save failed: $e",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_httpStreamable": "HTTP (streamable)",
+  "@adk_httpStreamable": {
+    "description": "Extracted string: HTTP (streamable)"
+  },
+  "adk_authHeaders": "Auth headers",
+  "@adk_authHeaders": {
+    "description": "Extracted string: Auth headers"
+  },
+  "adk_existingHeaderValuesAre": "Existing header values are hidden; re-enter them to change.",
+  "@adk_existingHeaderValuesAre": {
+    "description": "Extracted string: Existing header values are hidden; re-enter them to change."
+  },
+  "adk_moquiBuiltIn": "Moqui (built-in)",
+  "@adk_moquiBuiltIn": {
+    "description": "Extracted string: Moqui (built-in)"
+  },
+  "adk_alwaysAttachedToEvery": "Always attached to every agent · read-only",
+  "@adk_alwaysAttachedToEvery": {
+    "description": "Extracted string: Always attached to every agent · read-only"
+  },
+  "adk_smtpImapForThe": "SMTP / IMAP for the AI email tool",
+  "@adk_smtpImapForThe": {
+    "description": "Extracted string: SMTP / IMAP for the AI email tool"
+  },
+  "adk_tokenRepositoryForThe": "Token / repository for the AI GitHub tool",
+  "@adk_tokenRepositoryForThe": {
+    "description": "Extracted string: Token / repository for the AI GitHub tool"
+  },
+  "adk_googleWorkspace": "Google Workspace",
+  "@adk_googleWorkspace": {
+    "description": "Extracted string: Google Workspace"
+  },
+  "adk_calendarBookingCaptureGemini": "Calendar booking capture + Gemini meeting notes",
+  "@adk_calendarBookingCaptureGemini": {
+    "description": "Extracted string: Calendar booking capture + Gemini meeting notes"
+  },
+  "adk_externalMcpServers": "External MCP servers",
+  "@adk_externalMcpServers": {
+    "description": "Extracted string: External MCP servers"
+  },
+  "adk_noMcpServersYet": "No MCP servers yet.\\nTap + to register one.",
+  "@adk_noMcpServersYet": {
+    "description": "Extracted string: No MCP servers yet.\\nTap + to register one."
+  },
+  "adk_addFailedE": "Add failed: {e}",
+  "@adk_addFailedE": {
+    "description": "Extracted string: Add failed: $e",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_removeFailedE": "Remove failed: {e}",
+  "@adk_removeFailedE": {
+    "description": "Extracted string: Remove failed: $e",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_attachFailedE": "Attach failed: {e}",
+  "@adk_attachFailedE": {
+    "description": "Extracted string: Attach failed: $e",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_detachFailedE": "Detach failed: {e}",
+  "@adk_detachFailedE": {
+    "description": "Extracted string: Detach failed: $e",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_setInstructionOrSchedule": "Set instruction or schedule prompt — at least one required",
+  "@adk_setInstructionOrSchedule": {
+    "description": "Extracted string: Set instruction or schedule prompt — at least one required"
+  },
+  "adk_saveTheCoordinatorFirst": "Save the coordinator first, then re-open it to add team members.",
+  "@adk_saveTheCoordinatorFirst": {
+    "description": "Extracted string: Save the coordinator first, then re-open it to add team members."
+  },
+  "adk_teamMembers": "Team members",
+  "@adk_teamMembers": {
+    "description": "Extracted string: Team members"
+  },
+  "adk_noMembersYetAdd": "No members yet — add specialists below.",
+  "@adk_noMembersYetAdd": {
+    "description": "Extracted string: No members yet — add specialists below."
+  },
+  "adk_addSpecialist": "Add specialist…",
+  "@adk_addSpecialist": {
+    "description": "Extracted string: Add specialist…"
+  },
+  "adk_alwaysAttachedReadOnly": "Always attached · read-only",
+  "@adk_alwaysAttachedReadOnly": {
+    "description": "Extracted string: Always attached · read-only"
+  },
+  "adk_saveTheAgentFirst": "Save the agent first, then re-open it to attach external MCP servers.",
+  "@adk_saveTheAgentFirst": {
+    "description": "Extracted string: Save the agent first, then re-open it to attach external MCP servers."
+  },
+  "adk_noExternalMcpServers": "No external MCP servers attached.",
+  "@adk_noExternalMcpServers": {
+    "description": "Extracted string: No external MCP servers attached."
+  },
+  "adk_attachMcpServer": "Attach MCP server…",
+  "@adk_attachMcpServer": {
+    "description": "Extracted string: Attach MCP server…"
+  },
+  "adk_permissionsGovernance": "Permissions & governance",
+  "@adk_permissionsGovernance": {
+    "description": "Extracted string: Permissions & governance"
+  },
+  "adk_readOnly": "Read-only",
+  "@adk_readOnly": {
+    "description": "Extracted string: Read-only"
+  },
+  "adk_scopedAllowList": "Scoped (allow-list)",
+  "@adk_scopedAllowList": {
+    "description": "Extracted string: Scoped (allow-list)"
+  },
+  "adk_blockWrites": "Block writes",
+  "@adk_blockWrites": {
+    "description": "Extracted string: Block writes"
+  },
+  "adk_requireApproval": "Require approval",
+  "@adk_requireApproval": {
+    "description": "Extracted string: Require approval"
+  },
+  "adk_allowAutoRun": "Allow (auto-run)",
+  "@adk_allowAutoRun": {
+    "description": "Extracted string: Allow (auto-run)"
+  },
+  "adk_answerWebsiteChat": "Answer website chat",
+  "@adk_answerWebsiteChat": {
+    "description": "Extracted string: Answer website chat"
+  },
+  "adk_thisAgentRepliesTo": "This agent replies to the public website chat; one agent per company",
+  "@adk_thisAgentRepliesTo": {
+    "description": "Extracted string: This agent replies to the public website chat; one agent per company"
+  },
+  "adk_teamOrchestration": "Team / orchestration",
+  "@adk_teamOrchestration": {
+    "description": "Extracted string: Team / orchestration"
+  },
+  "adk_coordinatorTeam": "Coordinator (team)",
+  "@adk_coordinatorTeam": {
+    "description": "Extracted string: Coordinator (team)"
+  },
+  "adk_routerLlmPicks": "Router (LLM picks)",
+  "@adk_routerLlmPicks": {
+    "description": "Extracted string: Router (LLM picks)"
+  },
+  "adk_mcpServers": "MCP servers",
+  "@adk_mcpServers": {
+    "description": "Extracted string: MCP servers"
+  },
+  "adk_externalToolServersSse": "External tool servers (SSE / HTTP) this agent may use. ",
+  "@adk_externalToolServersSse": {
+    "description": "Extracted string: External tool servers (SSE / HTTP) this agent may use. "
+  },
+  "adk_enableScheduledRuns": "Enable scheduled runs",
+  "@adk_enableScheduledRuns": {
+    "description": "Extracted string: Enable scheduled runs"
+  },
+  "adk_h1H2": "{h1}  ({h2})",
+  "@adk_h1H2": {
+    "description": "Extracted string: ${h.$1}  (${h.$2})",
+    "placeholders": {
+      "h1": {
+        "type": "String"
+      },
+      "h2": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_noApprovalData": "No approval data",
+  "@adk_noApprovalData": {
+    "description": "Extracted string: No approval data"
+  },
+  "adk_clearLock": "Clear Lock",
+  "@adk_clearLock": {
+    "description": "Extracted string: Clear Lock"
+  },
+  "adk_errorJobagentname": "Error — {jobagentName}",
+  "@adk_errorJobagentname": {
+    "description": "Extracted string: Error — ${job.agentName}",
+    "placeholders": {
+      "jobagentName": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_noScheduledAgentJobs": "No scheduled agent jobs.\\nEnable scheduling in AI Agents.",
+  "@adk_noScheduledAgentJobs": {
+    "description": "Extracted string: No scheduled agent jobs.\\nEnable scheduling in AI Agents."
+  },
+  "adk_joblockageminMAgo": "{joblockAgeMin}m ago",
+  "@adk_joblockageminMAgo": {
+    "description": "Extracted string: ${job.lockAgeMin}m ago",
+    "placeholders": {
+      "joblockAgeMin": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_lastRunJoblateststatus": "Last run: {joblatestStatus}",
+  "@adk_lastRunJoblateststatus": {
+    "description": "Extracted string: Last run: ${job.latestStatus}",
+    "placeholders": {
+      "joblatestStatus": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_lockedRunJoblockrunid": "Locked — run {joblockRunId} ",
+  "@adk_lockedRunJoblockrunid": {
+    "description": "Extracted string: Locked — run ${job.lockRunId} ",
+    "placeholders": {
+      "joblockRunId": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_couldNotOpenFile": "Could not open file: {e}",
+  "@adk_couldNotOpenFile": {
+    "description": "Extracted string: Could not open file: $e",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_addOrRefreshOne": "Add (or refresh) one knowledge entry per product so agents can answer ",
+  "@adk_addOrRefreshOne": {
+    "description": "Extracted string: Add (or refresh) one knowledge entry per product so agents can answer "
+  },
+  "adk_importedNProductS": "Imported {n} product(s) into the knowledge base",
+  "@adk_importedNProductS": {
+    "description": "Extracted string: Imported $n product(s) into the knowledge base",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_titleSub": "{title}{sub}",
+  "@adk_titleSub": {
+    "description": "Extracted string: $title$sub",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "sub": {
+        "type": "String"
+      }
+    }
+  }
+}
