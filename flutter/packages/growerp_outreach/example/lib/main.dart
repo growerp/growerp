@@ -42,6 +42,8 @@ Future main() async {
       router: createOutreachExampleRouter(),
       extraDelegates: const [
         UserCompanyLocalizations.delegate,
+        OutreachLocalizations.delegate,
+        MarketingLocalizations.delegate,
       ],
       extraBlocProviders: [
         BlocProvider<OutreachCampaignBloc>(

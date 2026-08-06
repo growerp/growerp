@@ -10,6 +10,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 
 final List<LocalizationsDelegate> linerExampleDelegates = [
+  ManufLinerLocalizations.delegate,
   ManufacturingLocalizations.delegate,
   OrderAccountingLocalizations.delegate,
   CatalogLocalizations.delegate,

@@ -24,6 +24,7 @@ import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 
 /// Localization delegates for the liner example.
 final List<LocalizationsDelegate> linerExampleDelegates = [
+  ManufLinerLocalizations.delegate,
   ManufacturingLocalizations.delegate,
   OrderAccountingLocalizations.delegate,
   CatalogLocalizations.delegate,
