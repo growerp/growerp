@@ -244,6 +244,8 @@ List<LocalizationsDelegate> delegates = [
   MarketingLocalizations.delegate,
   OutreachLocalizations.delegate,
   AdminLocalizations.delegate,
+  AdkLocalizations.delegate,
+  CoursesLocalizations.delegate,
 ];
 
 /// Widget registrations for all packages used by Admin app

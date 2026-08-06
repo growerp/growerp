@@ -3,7 +3,7 @@
 // ISO strings, epoch millis throw in DateTimeConverter and used to leave the
 // support screen stuck on its loading spinner.
 import 'dart:convert';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 const _payload = r'''{

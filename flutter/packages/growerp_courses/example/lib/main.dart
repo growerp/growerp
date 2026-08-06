@@ -39,7 +39,10 @@ Future main() async {
       notificationClient: notificationClient,
       title: 'GrowERP Courses Example',
       router: createCoursesExampleRouter(),
-      extraDelegates: const [UserCompanyLocalizations.delegate],
+      extraDelegates: const [
+              UserCompanyLocalizations.delegate,
+              CoursesLocalizations.delegate,
+            ],
       extraBlocProviders: [
         ...getUserCompanyBlocProviders(restClient, 'AppAdmin'),
         ...getCoursesBlocProviders(restClient),

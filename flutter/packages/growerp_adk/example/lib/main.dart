@@ -20,6 +20,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'router_builder.dart';
+import 'package:growerp_adk/growerp_adk.dart';
 
 /// Standalone GrowERP ADK application — composes the growerp_adk building
 /// block (agents, jobs, chat, governance) on a static menu/router so it runs
@@ -42,7 +43,10 @@ Future main() async {
       notificationClient: notificationClient,
       title: 'GrowERP ADK',
       router: createAdkExampleRouter(),
-      extraDelegates: const [UserCompanyLocalizations.delegate],
+      extraDelegates: const [
+              UserCompanyLocalizations.delegate,
+              AdkLocalizations.delegate,
+            ],
       extraBlocProviders: getUserCompanyBlocProviders(
         restClient,
         applicationId,

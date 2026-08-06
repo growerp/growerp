@@ -17,6 +17,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'adk_agent_config_dialog.dart';
 import 'adk_config_service.dart';
+import 'package:growerp_adk/l10n/generated/adk_localizations.dart';
 
 /// Screen that lists all ADK agent configs and lets users create / edit / delete them.
 ///
@@ -83,7 +84,7 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Enable marketing agent team?'),
+        title: Text(AdkLocalizations.of(context)!.adk_enableMarketingAgentTeam),
         content: const Text(
           'Adds the five GrowERP marketing agents (Outreach Personalizer, '
           'SDR, Lead Triage, Content and Social, Marketing Ops Digest) to '
@@ -111,14 +112,14 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
       await _load();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Marketing agent team enabled')),
+          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_marketingAgentTeamEnabled)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Enable failed: $e'),
+            content: Text(AdkLocalizations.of(context)!.adk_enableFailedE(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -130,7 +131,7 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Load agent demo?'),
+        title: Text(AdkLocalizations.of(context)!.adk_loadAgentDemo),
         content: const Text(
           'Adds the Agent Control Center demo: an Operations Assistant that '
           'delegates to Sales, Inventory and Support specialists. '
@@ -157,14 +158,14 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
       await _load();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Agent demo loaded')),
+          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_agentDemoLoaded)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Load failed: $e'),
+            content: Text(AdkLocalizations.of(context)!.adk_loadFailedE(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -181,8 +182,8 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete agent?'),
-        content: Text('Delete "${cfg.agentName}"? This cannot be undone.'),
+        title: Text(AdkLocalizations.of(context)!.adk_deleteAgent),
+        content: Text(AdkLocalizations.of(context)!.adk_deleteCfgagentnameThisCannot(cfg.agentName.toString())),
         actions: [
           TextButton(
             key: const Key('cancelDeleteAgent'),
@@ -209,7 +210,7 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Delete failed: $e'),
+            content: Text(AdkLocalizations.of(context)!.adk_deleteFailedE(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -295,8 +296,7 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
           children: [
             const Icon(Icons.smart_toy, size: 64, color: Colors.grey),
             const SizedBox(height: 12),
-            const Text(
-              'No agents yet.\nTap + to create your first agent.',
+            Text(AdkLocalizations.of(context)!.adk_noAgentsYetNtap,
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey),
             ),

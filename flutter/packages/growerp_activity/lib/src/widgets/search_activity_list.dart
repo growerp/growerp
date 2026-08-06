@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_activity/l10n/generated/activity_localizations.dart';
 
 class SearchActivityList extends StatefulWidget {
   const SearchActivityList(this.type, {super.key});
@@ -54,7 +55,7 @@ class SearchActivityState extends State<SearchActivityList> {
       builder: (context, state) {
         if (state.status == DataFetchStatus.failure) {
           return Center(
-            child: Text('failed to fetch search items: ${state.message}'),
+            child: Text(ActivityLocalizations.of(context)!.activity_failedToFetchSearch(state.message.toString())),
           );
         }
         if (state.status == DataFetchStatus.success) {
@@ -119,7 +120,7 @@ class ActivitySearchDialog extends StatelessWidget {
               },
             ),
             const SizedBox(height: 20),
-            const Text('Search results'),
+            Text(ActivityLocalizations.of(context)!.activity_searchResults),
             Expanded(
               child: ListView.builder(
                 key: const Key('listView'),
@@ -131,10 +132,9 @@ class ActivitySearchDialog extends StatelessWidget {
                   if (index == 0) {
                     return Visibility(
                       visible: activities.isEmpty,
-                      child: const Center(
+                      child: Center(
                         heightFactor: 20,
-                        child: Text(
-                          'No search items found (yet)',
+                        child: Text(ActivityLocalizations.of(context)!.activity_noSearchItemsFound,
                           key: Key('empty'),
                           textAlign: TextAlign.center,
                         ),

@@ -5,6 +5,7 @@
  */
 
 // Agent chat
+export 'package:growerp_adk/l10n/generated/adk_localizations.dart';
 export 'src/adk_chat_view.dart';
 export 'src/adk_chat_dialog.dart';
 // Agent configuration & scheduled jobs

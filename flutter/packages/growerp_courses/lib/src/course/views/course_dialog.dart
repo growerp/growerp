@@ -19,6 +19,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_bloc.dart';
 import 'course_participants_view.dart';
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
 class CourseDialog extends StatefulWidget {
   final Course? course;
@@ -294,22 +295,21 @@ class _CourseDialogState extends State<CourseDialog> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Modules (${modules.length})',
+            Text(CoursesLocalizations.of(context)!.courses_modulesModuleslength(modules.length.toString()),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             TextButton.icon(
               icon: const Icon(Icons.add),
-              label: const Text('Add Module'),
+              label: Text(CoursesLocalizations.of(context)!.courses_addModule),
               onPressed: () => _showAddModuleDialog(),
             ),
           ],
         ),
         const Divider(),
         if (modules.isEmpty)
-          const Padding(
+          Padding(
             padding: EdgeInsets.all(16.0),
-            child: Text('No modules yet. Add your first module.'),
+            child: Text(CoursesLocalizations.of(context)!.courses_noModulesYetAdd),
           )
         else
           ListView.builder(
@@ -321,7 +321,7 @@ class _CourseDialogState extends State<CourseDialog> {
               return ExpansionTile(
                 leading: CircleAvatar(child: Text('${index + 1}')),
                 title: Text(module.title),
-                subtitle: Text('${module.lessons?.length ?? 0} lessons'),
+                subtitle: Text(CoursesLocalizations.of(context)!.courses_modulelessonslength0Lessons((module.lessons?.length ?? 0).toString())),
                 children: [
                   if (module.lessons != null)
                     ...module.lessons!.map(
@@ -333,15 +333,14 @@ class _CourseDialogState extends State<CourseDialog> {
                         leading: const Icon(Icons.play_circle_outline),
                         title: Text(lesson.title),
                         subtitle: lesson.estimatedDuration != null
-                            ? Text('${lesson.estimatedDuration} min')
+                            ? Text(CoursesLocalizations.of(context)!.courses_lessonestimateddurationMin(lesson.estimatedDuration.toString()))
                             : null,
                       ),
                     ),
                   ListTile(
                     contentPadding: const EdgeInsets.only(left: 72, right: 16),
                     leading: const Icon(Icons.add, color: Colors.blue),
-                    title: const Text(
-                      'Add Lesson',
+                    title: Text(CoursesLocalizations.of(context)!.courses_addLesson,
                       style: TextStyle(color: Colors.blue),
                     ),
                     onTap: () => _showAddLessonDialog(module),
@@ -445,9 +444,8 @@ class _CourseDialogState extends State<CourseDialog> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Course'),
-        content: Text(
-          'Are you sure you want to delete "${widget.course!.title}"?',
+        title: Text(CoursesLocalizations.of(context)!.courses_deleteCourse),
+        content: Text(CoursesLocalizations.of(context)!.courses_areYouSureYou(widget.course!.title.toString()),
         ),
         actions: [
           TextButton(
@@ -475,7 +473,7 @@ class _CourseDialogState extends State<CourseDialog> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Add Module'),
+        title: Text(CoursesLocalizations.of(context)!.courses_addModule),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -533,7 +531,7 @@ class _CourseDialogState extends State<CourseDialog> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text('Add Lesson to ${module.title}'),
+        title: Text(CoursesLocalizations.of(context)!.courses_addLessonToModuletitle(module.title.toString())),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

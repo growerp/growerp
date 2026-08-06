@@ -17,6 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_media_bloc.dart';
 import 'media_preview.dart';
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
 /// List of generated course media
 class CourseMediaList extends StatelessWidget {
@@ -63,12 +64,11 @@ class CourseMediaListView extends StatelessWidget {
               children: [
                 Icon(Icons.auto_awesome, size: 64, color: Colors.grey[400]),
                 const SizedBox(height: 16),
-                Text(
-                  'No generated content',
+                Text(CoursesLocalizations.of(context)!.courses_noGeneratedContent,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
-                const Text('Generate content from your courses'),
+                Text(CoursesLocalizations.of(context)!.courses_generateContentFromYour),
               ],
             ),
           );

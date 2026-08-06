@@ -42,5 +42,17 @@
   "activityDeleteFailure": "การลบกิจกรรมล้มเหลว",
   "activityAddSuccess": "เพิ่มกิจกรรมสำเร็จ",
   "activityAddFailure": "การเพิ่มกิจกรรมล้มเหลว",
-  "activityFetchFailure": "การดึงข้อมูลกิจกรรมล้มเหลว"
+  "activityFetchFailure": "การดึงข้อมูลกิจกรรมล้มเหลว",
+  "activity_noTaskData": "ไม่มีข้อมูลงาน",
+  "activity_fromToParty": "From/To Party",
+  "activity_failedToFetchSearch": "failed to fetch search items: {statemessage}",
+  "activity_searchResults": "ผลการค้นหา",
+  "activity_noSearchItemsFound": "No search items found (yet)",
+  "activity_idActivitiesindexpseudoidN": "ID: {activitiesindexpseudoId}\\n",
+  "activity_errorGettingHoursReport": "Error getting hours report: {snapshoterror}",
+  "activity_noHoursFound": "No hours found",
+  "activity_inProcess": "In process",
+  "activity_salesInvoiceToClient": "ใบแจ้งหนี้การขายให้กับลูกค้า",
+  "activity_purchaseInvoiceForAssistant": "ใบแจ้งหนี้การซื้อสำหรับผู้ช่วย",
+  "activity_createInvoice": "สร้างใบแจ้งหนี้"
 }

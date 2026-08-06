@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'adk_config_service.dart';
+import 'package:growerp_adk/l10n/generated/adk_localizations.dart';
 
 /// Dialog to create or edit an [AdkMcpServer] (a tenant-registered external MCP server).
 /// Returns the saved [AdkMcpServer] or null if cancelled.
@@ -110,7 +111,7 @@ class _AdkMcpServerDialogState extends State<AdkMcpServerDialog> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Save failed: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_saveFailedE(e.toString())), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -168,17 +169,17 @@ class _AdkMcpServerDialogState extends State<AdkMcpServerDialog> {
                           labelText: 'Transport',
                           helperText: 'sse: Server-Sent Events · http: streamable HTTP',
                         ),
-                        items: const [
+                        items: [
                           DropdownMenuItem(value: 'sse', child: Text('SSE')),
-                          DropdownMenuItem(value: 'http', child: Text('HTTP (streamable)')),
+                          DropdownMenuItem(value: 'http', child: Text(AdkLocalizations.of(context)!.adk_httpStreamable)),
                         ],
                         onChanged: (v) => setState(() => _transport = v ?? 'sse'),
                       ),
                       const Divider(height: 24),
                       Row(
                         children: [
-                          const Expanded(
-                            child: Text('Auth headers',
+                          Expanded(
+                            child: Text(AdkLocalizations.of(context)!.adk_authHeaders,
                                 style: TextStyle(fontWeight: FontWeight.w600)),
                           ),
                           TextButton.icon(
@@ -190,8 +191,7 @@ class _AdkMcpServerDialogState extends State<AdkMcpServerDialog> {
                         ],
                       ),
                       if (!isNew)
-                        const Text(
-                          'Existing header values are hidden; re-enter them to change.',
+                        Text(AdkLocalizations.of(context)!.adk_existingHeaderValuesAre,
                           style: TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                       ..._headers.asMap().entries.map((entry) {

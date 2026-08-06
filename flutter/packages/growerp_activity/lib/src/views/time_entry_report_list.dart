@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_activity/l10n/generated/activity_localizations.dart';
 
 /// Hours per assistant: in process (not yet approved), approved (billable)
 /// and invoiced. Admins see all assistants; assistants only their own hours.
@@ -41,7 +42,7 @@ class TimeEntryReportListState extends State<TimeEntryReportList> {
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(
-            child: Text("Error getting hours report: ${snapshot.error}"),
+            child: Text(ActivityLocalizations.of(context)!.activity_errorGettingHoursReport(snapshot.error.toString())),
           );
         }
         if (!snapshot.hasData) {
@@ -49,8 +50,8 @@ class TimeEntryReportListState extends State<TimeEntryReportList> {
         }
         final items = snapshot.data!.reportItems;
         if (items.isEmpty) {
-          return const Center(
-            child: Text("No hours found", key: Key('empty')),
+          return Center(
+            child: Text(ActivityLocalizations.of(context)!.activity_noHoursFound, key: Key('empty')),
           );
         }
         return RefreshIndicator(
@@ -62,12 +63,12 @@ class TimeEntryReportListState extends State<TimeEntryReportList> {
           child: ListView(
             key: const Key('timeEntryReport'),
             children: [
-              const ListTile(
+              ListTile(
                 title: Row(
                   children: [
                     Expanded(flex: 2, child: Text("Assistant")),
                     Expanded(
-                      child: Text("In process", textAlign: TextAlign.right),
+                      child: Text(ActivityLocalizations.of(context)!.activity_inProcess, textAlign: TextAlign.right),
                     ),
                     Expanded(
                       child: Text("Approved", textAlign: TextAlign.right),

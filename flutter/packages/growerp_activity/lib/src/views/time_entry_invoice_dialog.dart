@@ -88,14 +88,14 @@ class TimeEntryInvoiceDialogState extends State<TimeEntryInvoiceDialog> {
             key: const Key('invoiceType'),
             decoration: const InputDecoration(labelText: 'Invoice type'),
             initialValue: _sales,
-            items: const [
+            items: [
               DropdownMenuItem(
                 value: true,
-                child: Text('Sales invoice to client'),
+                child: Text(ActivityLocalizations.of(context)!.activity_salesInvoiceToClient),
               ),
               DropdownMenuItem(
                 value: false,
-                child: Text('Purchase invoice for assistant'),
+                child: Text(ActivityLocalizations.of(context)!.activity_purchaseInvoiceForAssistant),
               ),
             ],
             onChanged: (value) {
@@ -142,7 +142,7 @@ class TimeEntryInvoiceDialogState extends State<TimeEntryInvoiceDialog> {
           const SizedBox(height: 20),
           OutlinedButton(
             key: const Key('createInvoice'),
-            child: const Text('Create invoice'),
+            child: Text(ActivityLocalizations.of(context)!.activity_createInvoice),
             onPressed: () {
               if (_selectedParty == null) {
                 HelperFunctions.showMessage(

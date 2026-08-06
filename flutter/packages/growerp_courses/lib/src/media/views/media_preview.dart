@@ -19,6 +19,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
 /// Preview dialog for generated media content
 class MediaPreview extends StatefulWidget {
@@ -107,8 +108,7 @@ class _MediaPreviewState extends State<MediaPreview> {
           _buildStatusChip(),
           const Spacer(),
           if (widget.media.createdDate != null)
-            Text(
-              'Generated: ${_formatDate(widget.media.createdDate!)}',
+            Text(CoursesLocalizations.of(context)!.courses_generatedFormatdatewidgetmediacreateddate(_formatDate(widget.media.createdDate!).toString()),
               style: Theme.of(context).textTheme.bodySmall,
             ),
         ],
@@ -158,7 +158,7 @@ class _MediaPreviewState extends State<MediaPreview> {
     final content = _contentController.text;
 
     if (content.isEmpty) {
-      return const Center(child: Text('No content available'));
+      return Center(child: Text(CoursesLocalizations.of(context)!.courses_noContentAvailable));
     }
 
     return SingleChildScrollView(
@@ -276,8 +276,8 @@ class _MediaPreviewState extends State<MediaPreview> {
   Future<void> _generateVideo() async {
     if (widget.media.mediaId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cannot generate video: Media ID is missing'),
+        SnackBar(
+          content: Text(CoursesLocalizations.of(context)!.courses_cannotGenerateVideoMedia),
           backgroundColor: Colors.red,
         ),
       );
@@ -316,15 +316,15 @@ class _MediaPreviewState extends State<MediaPreview> {
 
       if (status == 'success' && videoUrl != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Video generated successfully!'),
+          SnackBar(
+            content: Text(CoursesLocalizations.of(context)!.courses_videoGeneratedSuccessfully),
             backgroundColor: Colors.green,
           ),
         );
       } else if (status == 'pending') {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Video generation started. You will be notified when complete.'),
+          SnackBar(
+            content: Text(CoursesLocalizations.of(context)!.courses_videoGenerationStartedYou),
             backgroundColor: Colors.blue,
           ),
         );
@@ -339,7 +339,7 @@ class _MediaPreviewState extends State<MediaPreview> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to generate video: ${e.toString()}'),
+          content: Text(CoursesLocalizations.of(context)!.courses_failedToGenerateVideo(e.toString().toString())),
           backgroundColor: Colors.red,
         ),
       );
@@ -349,8 +349,8 @@ class _MediaPreviewState extends State<MediaPreview> {
   void _copyToClipboard() {
     Clipboard.setData(ClipboardData(text: _contentController.text));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Content copied to clipboard'),
+      SnackBar(
+        content: Text(CoursesLocalizations.of(context)!.courses_contentCopiedToClipboard),
         duration: Duration(seconds: 2),
       ),
     );

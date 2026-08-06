@@ -20,6 +20,7 @@ import '../bloc/course_bloc.dart';
 import '../../viewer/bloc/course_viewer_bloc.dart';
 import '../../viewer/views/course_viewer.dart';
 import 'course_payment_dialog.dart';
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
 /// Customer view that shows ALL published courses with a "Subscribed" badge
 /// on courses the current user has an active subscription for.
@@ -34,8 +35,8 @@ class _CourseCatalogViewState extends State<CourseCatalogView> {
   @override
   void initState() {
     super.initState();
-    context.read<CourseBloc>().add(const CourseFetch(refresh: true));
-    context.read<CourseViewerBloc>().add(const FetchAvailableCourses());
+    context.read<CourseBloc>().add(CourseFetch(refresh: true));
+    context.read<CourseViewerBloc>().add(FetchAvailableCourses());
   }
 
   @override
@@ -46,7 +47,7 @@ class _CourseCatalogViewState extends State<CourseCatalogView> {
           builder: (context, viewerState) {
             if (courseState.status == CourseBlocStatus.loading &&
                 courseState.courses.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
+              return Center(child: CircularProgressIndicator());
             }
 
             if (courseState.status == CourseBlocStatus.failure) {
@@ -54,15 +55,15 @@ class _CourseCatalogViewState extends State<CourseCatalogView> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.error_outline,
+                    Icon(Icons.error_outline,
                         color: Colors.red, size: 48),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     Text(courseState.message ?? 'Failed to load courses'),
                     TextButton(
                       onPressed: () => context
                           .read<CourseBloc>()
-                          .add(const CourseFetch(refresh: true)),
-                      child: const Text('Retry'),
+                          .add(CourseFetch(refresh: true)),
+                      child: Text('Retry'),
                     ),
                   ],
                 ),
@@ -70,14 +71,13 @@ class _CourseCatalogViewState extends State<CourseCatalogView> {
             }
 
             if (courseState.courses.isEmpty) {
-              return const Center(
+              return Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.school_outlined, size: 64, color: Colors.grey),
                     SizedBox(height: 16),
-                    Text(
-                      'No courses available yet',
+                    Text(CoursesLocalizations.of(context)!.courses_noCoursesAvailableYet,
                       style: TextStyle(fontSize: 18, color: Colors.grey),
                     ),
                   ],
@@ -94,13 +94,13 @@ class _CourseCatalogViewState extends State<CourseCatalogView> {
               onRefresh: () async {
                 context
                     .read<CourseBloc>()
-                    .add(const CourseFetch(refresh: true));
+                    .add(CourseFetch(refresh: true));
                 context
                     .read<CourseViewerBloc>()
-                    .add(const FetchAvailableCourses());
+                    .add(FetchAvailableCourses());
               },
               child: ListView.builder(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(8),
                 itemCount: courseState.courses.length,
                 itemBuilder: (context, index) {
                   final course = courseState.courses[index];
@@ -130,7 +130,7 @@ class _CourseCatalogViewState extends State<CourseCatalogView> {
       ),
     ).then((_) {
       if (context.mounted) {
-        context.read<CourseViewerBloc>().add(const FetchAvailableCourses());
+        context.read<CourseViewerBloc>().add(FetchAvailableCourses());
       }
     });
   }
@@ -165,11 +165,11 @@ class _CourseCatalogTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 6),
+      margin: EdgeInsets.symmetric(vertical: 6),
       child: InkWell(
         onTap: isSubscribed ? onOpen : onSubscribe,
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(12),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -190,12 +190,12 @@ class _CourseCatalogTile extends StatelessWidget {
                           course.coverImageUrl!,
                           fit: BoxFit.cover,
                           errorBuilder: (_, _, _) =>
-                              const Icon(Icons.school, size: 40),
+                              Icon(Icons.school, size: 40),
                         ),
                       )
-                    : const Icon(Icons.school, size: 40),
+                    : Icon(Icons.school, size: 40),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -210,7 +210,7 @@ class _CourseCatalogTile extends StatelessWidget {
                         ),
                         if (isSubscribed)
                           Chip(
-                            label: const Text('Subscribed'),
+                            label: Text('Subscribed'),
                             backgroundColor: Theme.of(context)
                                 .colorScheme
                                 .primaryContainer,
@@ -227,7 +227,7 @@ class _CourseCatalogTile extends StatelessWidget {
                       ],
                     ),
                     if (course.description != null) ...[
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4),
                       Text(
                         course.description!,
                         maxLines: 2,
@@ -238,31 +238,30 @@ class _CourseCatalogTile extends StatelessWidget {
                             ?.copyWith(color: Colors.grey),
                       ),
                     ],
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6),
                     Row(
                       children: [
                         if (course.difficulty != null)
                           _DifficultyBadge(difficulty: course.difficulty!),
                         if (course.estimatedDuration != null) ...[
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8),
                           Icon(Icons.schedule,
                               size: 14, color: Colors.grey[600]),
-                          const SizedBox(width: 2),
-                          Text(
-                            '${course.estimatedDuration} min',
+                          SizedBox(width: 2),
+                          Text(CoursesLocalizations.of(context)!.courses_courseestimateddurationMin(course.estimatedDuration.toString()),
                             style: Theme.of(context)
                                 .textTheme
                                 .bodySmall
                                 ?.copyWith(color: Colors.grey),
                           ),
                         ],
-                        const Spacer(),
+                        Spacer(),
                         if (isSubscribed)
                           TextButton.icon(
                             onPressed: onOpen,
-                            icon: const Icon(Icons.play_circle_outline,
+                            icon: Icon(Icons.play_circle_outline,
                                 size: 16),
-                            label: const Text('Open'),
+                            label: Text('Open'),
                           )
                         else ...[
                           Text(
@@ -281,11 +280,11 @@ class _CourseCatalogTile extends StatelessWidget {
                                   fontWeight: FontWeight.bold,
                                 ),
                           ),
-                          const SizedBox(width: 4),
+                          SizedBox(width: 4),
                           TextButton.icon(
                             onPressed: onSubscribe,
-                            icon: const Icon(Icons.lock_outline, size: 16),
-                            label: const Text('Subscribe'),
+                            icon: Icon(Icons.lock_outline, size: 16),
+                            label: Text('Subscribe'),
                           ),
                         ],
                       ],
@@ -324,7 +323,7 @@ class _DifficultyBadge extends StatelessWidget {
     final label = _label;
     final color = _color;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(4),

@@ -35,6 +35,7 @@ import 'package:growerp_rental/growerp_rental.dart';
 import 'views/accounting_form.dart';
 import 'views/housekeeping_form.dart';
 import 'l10n/generated/hotel_localizations.dart';
+import 'package:growerp_adk/growerp_adk.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -220,6 +221,7 @@ List<LocalizationsDelegate> delegates = [
   ActivityLocalizations.delegate,
   RentalLocalizations.delegate,
   HotelLocalizations.delegate,
+  AdkLocalizations.delegate,
 ];
 
 /// Widget registrations for all packages used by Hotel app

@@ -28,7 +28,7 @@ Map<String, GrowerpWidgetBuilder> getCoursesWidgets() {
     'CourseMediaList': (args) =>
         CourseMediaList(courseId: args?['courseId'] as String?),
     'AllCourseParticipantsView': (args) => const AllCourseParticipantsView(),
-    'CourseCatalogView': (args) => const CourseCatalogView(),
+    'CourseCatalogView': (args) => CourseCatalogView(),
   };
 }
 

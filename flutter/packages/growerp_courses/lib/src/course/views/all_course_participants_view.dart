@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_bloc.dart';
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
 /// Admin view showing participants across ALL courses with search on
 /// name, email (username) and course title.
@@ -221,13 +222,12 @@ class _ParticipantTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text('$progress%'),
+                Text(CoursesLocalizations.of(context)!.courses_progress(progress.toString())),
               ],
             ),
             if (participant.lastAccessDate != null) ...[
               const SizedBox(height: 4),
-              Text(
-                'Last active: ${_fmt(participant.lastAccessDate!)}',
+              Text(CoursesLocalizations.of(context)!.courses_lastActiveFmtparticipantlastaccessdate(_fmt(participant.lastAccessDate!).toString()),
                 style: Theme.of(context)
                     .textTheme
                     .bodySmall
@@ -257,14 +257,14 @@ class _ProgressChip extends StatelessWidget {
         labelStyle: TextStyle(color: Colors.green),
       );
     } else if (progressPercent > 0) {
-      return const Chip(
-        label: Text('In Progress'),
+      return Chip(
+        label: Text(CoursesLocalizations.of(context)!.courses_inProgress),
         backgroundColor: Color(0xFFFFF3E0),
         labelStyle: TextStyle(color: Colors.orange),
       );
     } else {
-      return const Chip(
-        label: Text('Not Started'),
+      return Chip(
+        label: Text(CoursesLocalizations.of(context)!.courses_notStarted),
         backgroundColor: Color(0xFFF5F5F5),
         labelStyle: TextStyle(color: Colors.grey),
       );

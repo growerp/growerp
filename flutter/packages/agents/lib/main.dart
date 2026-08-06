@@ -24,6 +24,7 @@ import 'package:growerp_website/growerp_website.dart';
 import 'package:growerp_wiki/growerp_wiki.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'router_builder.dart';
+import 'package:growerp_adk/growerp_adk.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -183,6 +184,7 @@ List<LocalizationsDelegate> delegates = const [
   UserCompanyLocalizations.delegate,
   WebsiteLocalizations.delegate,
   WikiLocalizations.delegate,
+  AdkLocalizations.delegate,
 ];
 
 List<BlocProvider> getAgentsBlocProviders(

@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'adk_config_service.dart';
+import 'package:growerp_adk/l10n/generated/adk_localizations.dart';
 
 /// Dialog to create or edit an [AdkAgentConfig].
 /// Returns the saved [AdkAgentConfig] (with the generated ID) or null if cancelled.
@@ -142,7 +143,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       if (mounted) {
         setState(() => _teamLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Add failed: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_addFailedE(e.toString())), backgroundColor: Colors.red),
         );
       }
     }
@@ -158,7 +159,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       if (mounted) {
         setState(() => _teamLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Remove failed: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_removeFailedE(e.toString())), backgroundColor: Colors.red),
         );
       }
     }
@@ -199,7 +200,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       if (mounted) {
         setState(() => _mcpLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Attach failed: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_attachFailedE(e.toString())), backgroundColor: Colors.red),
         );
       }
     }
@@ -225,7 +226,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       if (mounted) {
         setState(() => _mcpLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Detach failed: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_detachFailedE(e.toString())), backgroundColor: Colors.red),
         );
       }
     }
@@ -254,8 +255,8 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
         _instructionCtrl.text.trim().isEmpty &&
         _schedulePromptCtrl.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Set instruction or schedule prompt — at least one required'),
+        SnackBar(
+          content: Text(AdkLocalizations.of(context)!.adk_setInstructionOrSchedule),
           backgroundColor: Colors.red,
         ),
       );
@@ -306,7 +307,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Save failed: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_saveFailedE(e.toString())), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -318,9 +319,9 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   /// coordinator that already exists (needs an id); for a new one, prompt to save first.
   Widget _teamMembersSection({required bool isNew}) {
     if (isNew) {
-      return const Padding(
+      return Padding(
         padding: EdgeInsets.symmetric(vertical: 4),
-        child: Text('Save the coordinator first, then re-open it to add team members.',
+        child: Text(AdkLocalizations.of(context)!.adk_saveTheCoordinatorFirst,
             style: TextStyle(fontStyle: FontStyle.italic)),
       );
     }
@@ -335,18 +336,18 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Team members', style: TextStyle(fontWeight: FontWeight.w600)),
-        if (_teamLoading) const LinearProgressIndicator(),
+        Text(AdkLocalizations.of(context)!.adk_teamMembers, style: TextStyle(fontWeight: FontWeight.w600)),
+        if (_teamLoading) LinearProgressIndicator(),
         if (_members.isEmpty && !_teamLoading)
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(vertical: 4),
-            child: Text('No members yet — add specialists below.'),
+            child: Text(AdkLocalizations.of(context)!.adk_noMembersYetAdd),
           ),
         ..._members.map((m) => ListTile(
               key: Key('teamMember_${m.memberConfigId}'),
               dense: true,
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.smart_toy_outlined),
+              leading: Icon(Icons.smart_toy_outlined),
               title: Text(m.memberName ?? m.memberConfigId ?? '?'),
               subtitle: m.memberDescription != null
                   ? Text(m.memberDescription!,
@@ -354,7 +355,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                   : null,
               trailing: IconButton(
                 key: Key('removeMember_${m.memberConfigId}'),
-                icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+                icon: Icon(Icons.remove_circle_outline, color: Colors.red),
                 tooltip: 'Remove',
                 onPressed: _teamLoading || m.adkAgentTeamMemberId == null
                     ? null
@@ -365,7 +366,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
           Align(
             alignment: Alignment.centerLeft,
             child: PopupMenuButton<String>(
-              key: const Key('addTeamMember'),
+              key: Key('addTeamMember'),
               enabled: !_teamLoading,
               tooltip: 'Add specialist',
               itemBuilder: (_) => available
@@ -375,14 +376,14 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                       ))
                   .toList(),
               onSelected: (v) => _addMember(v),
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.add),
                     SizedBox(width: 8),
-                    Text('Add specialist…'),
+                    Text(AdkLocalizations.of(context)!.adk_addSpecialist),
                   ],
                 ),
               ),
@@ -398,23 +399,22 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     // The built-in Moqui MCP server is hardcoded into every agent — show it
     // first as a read-only, always-attached tile (no detach).
     final builtinTile = ListTile(
-      key: const Key('builtinMcpServer'),
+      key: Key('builtinMcpServer'),
       dense: true,
       contentPadding: EdgeInsets.zero,
       leading: Icon(Icons.verified,
           color: Theme.of(context).colorScheme.primary),
-      title: const Text('Moqui (built-in)'),
-      subtitle: const Text('Always attached · read-only'),
+      title: Text(AdkLocalizations.of(context)!.adk_moquiBuiltIn),
+      subtitle: Text(AdkLocalizations.of(context)!.adk_alwaysAttachedReadOnly),
     );
     if (isNew) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           builtinTile,
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(vertical: 4),
-            child: Text(
-                'Save the agent first, then re-open it to attach external MCP servers.',
+            child: Text(AdkLocalizations.of(context)!.adk_saveTheAgentFirst,
                 style: TextStyle(fontStyle: FontStyle.italic)),
           ),
         ],
@@ -429,24 +429,24 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         builtinTile,
-        if (_mcpLoading) const LinearProgressIndicator(),
+        if (_mcpLoading) LinearProgressIndicator(),
         if (_attachedServers.isEmpty && !_mcpLoading)
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(vertical: 4),
-            child: Text('No external MCP servers attached.'),
+            child: Text(AdkLocalizations.of(context)!.adk_noExternalMcpServers),
           ),
         ..._attachedServers.map((s) => ListTile(
               key: Key('mcpServer_${s.adkMcpServerId}'),
               dense: true,
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.dns_outlined),
+              leading: Icon(Icons.dns_outlined),
               title: Text(s.serverName ?? s.adkMcpServerId ?? '?'),
               subtitle: s.url != null
                   ? Text(s.url!, maxLines: 1, overflow: TextOverflow.ellipsis)
                   : null,
               trailing: IconButton(
                 key: Key('detachMcpServer_${s.adkMcpServerId}'),
-                icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+                icon: Icon(Icons.remove_circle_outline, color: Colors.red),
                 tooltip: 'Detach',
                 onPressed: _mcpLoading || s.adkAgentMcpServerId == null
                     ? null
@@ -457,7 +457,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
           Align(
             alignment: Alignment.centerLeft,
             child: PopupMenuButton<String>(
-              key: const Key('attachMcpServer'),
+              key: Key('attachMcpServer'),
               enabled: !_mcpLoading,
               tooltip: 'Attach MCP server',
               itemBuilder: (_) => available
@@ -467,14 +467,14 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                       ))
                   .toList(),
               onSelected: (v) => _attachServer(v),
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.add),
                     SizedBox(width: 8),
-                    Text('Attach MCP server…'),
+                    Text(AdkLocalizations.of(context)!.adk_attachMcpServer),
                   ],
                 ),
               ),
@@ -489,8 +489,8 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     final isNew = widget.existing == null;
     final id = widget.existing?.adkAgentConfigId ?? 'new';
     return Dialog(
-      key: const Key('AdkAgentConfigDialog'),
-      insetPadding: const EdgeInsets.all(10),
+      key: Key('AdkAgentConfigDialog'),
+      insetPadding: EdgeInsets.all(10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: popUp(
         context: context,
@@ -507,25 +507,25 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       TextFormField(
-                        key: const Key('agentName'),
+                        key: Key('agentName'),
                         controller: _nameCtrl,
                         maxLength: 63,
                         decoration:
-                            const InputDecoration(labelText: 'Agent name *'),
+                            InputDecoration(labelText: 'Agent name *'),
                         validator: (v) =>
                             (v == null || v.trim().isEmpty) ? 'Required' : null,
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       TextFormField(
-                        key: const Key('modelName'),
+                        key: Key('modelName'),
                         controller: _modelCtrl,
                         decoration: InputDecoration(
                           labelText: 'Model',
                           hintText: 'gemini-2.5-flash-lite',
                           suffixIcon: PopupMenuButton<String>(
-                            key: const Key('modelNameMenu'),
+                            key: Key('modelNameMenu'),
                             tooltip: 'Pick a Gemini model',
-                            icon: const Icon(Icons.arrow_drop_down),
+                            icon: Icon(Icons.arrow_drop_down),
                             itemBuilder: (context) => _geminiModels
                                 .map((m) => PopupMenuItem<String>(
                                       value: m,
@@ -537,38 +537,38 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       TextFormField(
-                        key: const Key('llmProvider'),
+                        key: Key('llmProvider'),
                         controller: _llmProviderCtrl,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'LLM Provider',
                           hintText: 'gemini',
                           helperText:
                               'Provider configured in System Setup (gemini, openai, anthropic, …)',
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       TextFormField(
-                        key: const Key('instruction'),
+                        key: Key('instruction'),
                         controller: _instructionCtrl,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Instruction (system prompt)',
                           hintText: 'You are a helpful assistant…',
                         ),
                         maxLines: 3,
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       TextFormField(
-                        key: const Key('description'),
+                        key: Key('description'),
                         controller: _descriptionCtrl,
                         maxLength: 255,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                             labelText: 'Description (optional)'),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       TextFormField(
-                        key: const Key('apiKey'),
+                        key: Key('apiKey'),
                         controller: _apiKeyCtrl,
                         decoration: InputDecoration(
                           labelText: isNew
@@ -577,34 +577,34 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                         ),
                         obscureText: true,
                       ),
-                      const Divider(height: 24),
-                      const Text('Permissions & governance',
+                      Divider(height: 24),
+                      Text(AdkLocalizations.of(context)!.adk_permissionsGovernance,
                           style: TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        key: const Key('toolMode'),
+                        key: Key('toolMode'),
                         initialValue: _toolMode,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Tool access',
                           helperText:
                               'readOnly: queries only · scoped: allow-listed services · full: any service',
                         ),
-                        items: const [
+                        items: [
                           DropdownMenuItem(
-                              value: 'readOnly', child: Text('Read-only')),
+                              value: 'readOnly', child: Text(AdkLocalizations.of(context)!.adk_readOnly)),
                           DropdownMenuItem(
-                              value: 'scoped', child: Text('Scoped (allow-list)')),
+                              value: 'scoped', child: Text(AdkLocalizations.of(context)!.adk_scopedAllowList)),
                           DropdownMenuItem(value: 'full', child: Text('Full')),
                         ],
                         onChanged: (v) =>
                             setState(() => _toolMode = v ?? 'readOnly'),
                       ),
                       if (_toolMode == 'scoped') ...[
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         TextFormField(
-                          key: const Key('serviceAllowlist'),
+                          key: Key('serviceAllowlist'),
                           controller: _allowlistCtrl,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Allowed services',
                             hintText: 'growerp.*#get*, mantle.order.*',
                             helperText:
@@ -612,85 +612,84 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                           ),
                         ),
                       ],
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        key: const Key('writePolicy'),
+                        key: Key('writePolicy'),
                         initialValue: _writePolicy,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Write policy',
                           helperText:
                               'How write (create/update/…) actions are handled',
                         ),
-                        items: const [
+                        items: [
                           DropdownMenuItem(
-                              value: 'block', child: Text('Block writes')),
+                              value: 'block', child: Text(AdkLocalizations.of(context)!.adk_blockWrites)),
                           DropdownMenuItem(
                               value: 'approve',
-                              child: Text('Require approval')),
+                              child: Text(AdkLocalizations.of(context)!.adk_requireApproval)),
                           DropdownMenuItem(
-                              value: 'allow', child: Text('Allow (auto-run)')),
+                              value: 'allow', child: Text(AdkLocalizations.of(context)!.adk_allowAutoRun)),
                         ],
                         onChanged: (v) =>
                             setState(() => _writePolicy = v ?? 'approve'),
                       ),
                       if (_writePolicy == 'approve') ...[
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         TextFormField(
-                          key: const Key('approvalChatRoomId'),
+                          key: Key('approvalChatRoomId'),
                           controller: _approvalRoomCtrl,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Approval chat room ID (optional)',
                             hintText: 'Where approval requests are posted',
                           ),
                         ),
                       ],
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       CheckboxListTile(
-                        key: const Key('websiteChat'),
+                        key: Key('websiteChat'),
                         contentPadding: EdgeInsets.zero,
                         controlAffinity: ListTileControlAffinity.leading,
                         value: _websiteChat,
-                        title: const Text('Answer website chat'),
-                        subtitle: const Text(
-                          'This agent replies to the public website chat; one agent per company',
+                        title: Text(AdkLocalizations.of(context)!.adk_answerWebsiteChat),
+                        subtitle: Text(AdkLocalizations.of(context)!.adk_thisAgentRepliesTo,
                           style: TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                         onChanged: (v) =>
                             setState(() => _websiteChat = v ?? false),
                       ),
-                      const Divider(height: 24),
-                      const Text('Team / orchestration',
+                      Divider(height: 24),
+                      Text(AdkLocalizations.of(context)!.adk_teamOrchestration,
                           style: TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        key: const Key('agentRole'),
+                        key: Key('agentRole'),
                         initialValue: _agentRole,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Role',
                           helperText:
                               'specialist: does the work · coordinator: delegates to a team of specialists',
                         ),
-                        items: const [
+                        items: [
                           DropdownMenuItem(
                               value: 'specialist', child: Text('Specialist')),
                           DropdownMenuItem(
-                              value: 'coordinator', child: Text('Coordinator (team)')),
+                              value: 'coordinator', child: Text(AdkLocalizations.of(context)!.adk_coordinatorTeam)),
                         ],
                         onChanged: (v) =>
                             setState(() => _agentRole = v ?? 'specialist'),
                       ),
                       if (_agentRole != 'specialist') ...[
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         DropdownButtonFormField<String>(
-                          key: const Key('orchestrationType'),
+                          key: Key('orchestrationType'),
                           initialValue: _orchestrationType,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Orchestration',
                             helperText:
                                 'router: the LLM picks specialists (sequential/parallel/loop: Phase 4b)',
                           ),
-                          items: const [
-                            DropdownMenuItem(value: 'router', child: Text('Router (LLM picks)')),
+                          items: [
+                            DropdownMenuItem(value: 'router', child: Text(AdkLocalizations.of(context)!.adk_routerLlmPicks)),
                             DropdownMenuItem(value: 'sequential', child: Text('Sequential')),
                             DropdownMenuItem(value: 'parallel', child: Text('Parallel')),
                             DropdownMenuItem(value: 'loop', child: Text('Loop')),
@@ -699,36 +698,36 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                               setState(() => _orchestrationType = v ?? 'router'),
                         ),
                         if (_orchestrationType == 'loop') ...[
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8),
                           TextFormField(
-                            key: const Key('loopMaxIterations'),
+                            key: Key('loopMaxIterations'),
                             controller: _loopMaxCtrl,
                             keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               labelText: 'Max loop iterations',
                               hintText: '3',
                               helperText: 'Safety cap for the loop workflow',
                             ),
                           ),
                         ],
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         _teamMembersSection(isNew: widget.existing == null),
                       ],
-                      const Divider(height: 24),
-                      const Text('MCP servers',
+                      Divider(height: 24),
+                      Text(AdkLocalizations.of(context)!.adk_mcpServers,
                           style: TextStyle(fontWeight: FontWeight.bold)),
-                      const Text(
+                      Text(
                         'External tool servers (SSE / HTTP) this agent may use. '
                         'Register them in the MCP Servers screen first.',
                         style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       _mcpServersSection(isNew: widget.existing == null),
-                      const Divider(height: 24),
+                      Divider(height: 24),
                       SwitchListTile(
-                        key: const Key('scheduleEnabled'),
+                        key: Key('scheduleEnabled'),
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Enable scheduled runs'),
+                        title: Text(AdkLocalizations.of(context)!.adk_enableScheduledRuns),
                         value: _scheduleEnabled,
                         onChanged: (v) =>
                             setState(() => _scheduleEnabled = v),
@@ -738,9 +737,9 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                           children: [
                             Expanded(
                               child: TextFormField(
-                                key: const Key('scheduleExpression'),
+                                key: Key('scheduleExpression'),
                                 controller: _scheduleCronCtrl,
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   labelText: 'Cron expression *',
                                   hintText: '0 * * * * ?',
                                 ),
@@ -752,34 +751,34 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                             ),
                             PopupMenuButton<String>(
                               tooltip: 'Quick schedules',
-                              icon: const Icon(Icons.schedule),
+                              icon: Icon(Icons.schedule),
                               onSelected: (v) =>
                                   setState(() => _scheduleCronCtrl.text = v),
                               itemBuilder: (_) => _cronHints
                                   .map(
                                     (h) => PopupMenuItem<String>(
                                       value: h.$2,
-                                      child: Text('${h.$1}  (${h.$2})'),
+                                      child: Text(AdkLocalizations.of(context)!.adk_h1H2(h.$1.toString(), h.$2.toString())),
                                     ),
                                   )
                                   .toList(),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         TextFormField(
-                          key: const Key('schedulePrompt'),
+                          key: Key('schedulePrompt'),
                           controller: _schedulePromptCtrl,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Prompt for each scheduled run',
                             hintText: 'What is the current time?',
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         TextFormField(
-                          key: const Key('scheduleChatRoomId'),
+                          key: Key('scheduleChatRoomId'),
                           controller: _chatRoomIdCtrl,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Chat room ID for delivery (optional)',
                             hintText: 'Leave blank to log only',
                           ),
@@ -789,27 +788,27 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    key: const Key('AdkAgentConfigCancel'),
+                    key: Key('AdkAgentConfigCancel'),
                     onPressed:
                         _saving ? null : () => Navigator.of(context).pop(),
-                    child: const Text('Cancel'),
+                    child: Text('Cancel'),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   FilledButton(
-                    key: const Key('AdkAgentConfigSave'),
+                    key: Key('AdkAgentConfigSave'),
                     onPressed: _saving ? null : _save,
                     child: _saving
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 16,
                             height: 16,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Save'),
+                        : Text('Save'),
                   ),
                 ],
               ),

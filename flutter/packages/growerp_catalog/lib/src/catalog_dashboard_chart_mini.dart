@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_catalog/l10n/generated/catalog_localizations.dart';
 
 /// Compact catalog dashboard for the half-height 'Catalog' dashboard tile:
 /// dense product-mix bars (type + count only) with the category/lifecycle
@@ -55,7 +56,7 @@ class _CatalogDashboardChartMiniState
   ) {
     final colorScheme = Theme.of(context).colorScheme;
     if (summary.isEmpty) {
-      return const Center(child: Text('No product data'));
+      return Center(child: Text(CatalogLocalizations.of(context)!.catalog_noProductData));
     }
     int maxCount = 1;
     for (final item in summary) {

@@ -213,6 +213,7 @@ List<LocalizationsDelegate> delegates = const [
   ActivityLocalizations.delegate,
   MarketingLocalizations.delegate,
   OutreachLocalizations.delegate,
+  AdkLocalizations.delegate,
 ];
 
 List<BlocProvider> getFreelanceBlocProviders(

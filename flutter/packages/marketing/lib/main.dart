@@ -211,6 +211,7 @@ List<LocalizationsDelegate> delegates = const [
   WikiLocalizations.delegate,
   MarketingLocalizations.delegate,
   OutreachLocalizations.delegate,
+  AdkLocalizations.delegate,
 ];
 
 /// Named ...AppBlocProviders to avoid clashing with getMarketingBlocProviders
@@ -245,7 +246,7 @@ List<Map<String, GrowerpWidgetBuilder>> marketingWidgetRegistrations = [
     'AboutForm': (args) => const AboutForm(),
     'AdkAgentListView': (args) => const AdkAgentListView(),
     'AdkMcpServerListView': (args) => const AdkMcpServerListView(),
-    'AdkJobListView': (args) => const AdkJobListView(),
+    'AdkJobListView': (args) => AdkJobListView(),
     'AdkApprovalsListView': (args) => const AdkApprovalsListView(),
     'AdkActionsListView': (args) => const AdkActionsListView(),
     'AdkKnowledgeView': (args) => const AdkKnowledgeView(),

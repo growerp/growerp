@@ -33,6 +33,7 @@ import 'package:growerp_website/growerp_website.dart';
 import 'package:growerp_rental/growerp_rental.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'views/rental_db_form.dart';
+import 'package:growerp_adk/growerp_adk.dart';
 //webactivate  import 'package:web/web.dart' as web;
 
 Future main() async {
@@ -197,6 +198,7 @@ List<LocalizationsDelegate> delegates = const [
   WebsiteLocalizations.delegate,
   MarketingLocalizations.delegate,
   RentalLocalizations.delegate,
+  AdkLocalizations.delegate,
 ];
 
 List<BlocProvider> getRentalBlocProviders(

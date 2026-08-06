@@ -13,6 +13,7 @@
  */
 
 // Models - exported from growerp_models
+export 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 export 'package:growerp_models/growerp_models.dart'
     show
         Course,

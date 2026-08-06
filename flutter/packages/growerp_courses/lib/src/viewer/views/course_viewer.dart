@@ -18,6 +18,7 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_viewer_bloc.dart';
 import '../../media/views/media_preview.dart';
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
 /// In-app course viewer widget for presenting courses
 class CourseViewer extends StatelessWidget {
@@ -149,7 +150,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
         }
 
         if (state.course == null) {
-          return const Center(child: Text('Course not found'));
+          return Center(child: Text(CoursesLocalizations.of(context)!.courses_courseNotFound));
         }
 
         return _buildViewer(context, state);
@@ -161,7 +162,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
     final courses = state.availableCourses;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Select a Course'), centerTitle: true),
+      appBar: AppBar(title: Text(CoursesLocalizations.of(context)!.courses_selectACourse), centerTitle: true),
       body: courses.isEmpty
           ? Center(
               child: Column(
@@ -173,13 +174,11 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
                     color: Colors.grey[400],
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    'No courses available',
+                  Text(CoursesLocalizations.of(context)!.courses_noCoursesAvailable,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    'Create a course first to start learning',
+                  Text(CoursesLocalizations.of(context)!.courses_createACourseFirst,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -190,8 +189,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Choose a course to begin',
+                  Text(CoursesLocalizations.of(context)!.courses_chooseACourseTo,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 16),
@@ -292,8 +290,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    '$progress%',
+                  Text(CoursesLocalizations.of(context)!.courses_progress(progress.toString()),
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -309,8 +306,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
                     color: Theme.of(context).colorScheme.secondary,
                   ),
                   const SizedBox(width: 4),
-                  Text(
-                    '$moduleCount modules',
+                  Text(CoursesLocalizations.of(context)!.courses_modulecountModules(moduleCount.toString()),
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
                   const SizedBox(width: 12),
@@ -320,8 +316,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
                     color: Theme.of(context).colorScheme.secondary,
                   ),
                   const SizedBox(width: 4),
-                  Text(
-                    '$lessonCount lessons',
+                  Text(CoursesLocalizations.of(context)!.courses_lessoncountLessons(lessonCount.toString()),
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
                 ],
@@ -447,7 +442,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
                       ),
                       title: Text(lesson.title),
                       subtitle: lesson.estimatedDuration != null
-                          ? Text('${lesson.estimatedDuration} min')
+                          ? Text(CoursesLocalizations.of(context)!.courses_lessonestimateddurationMin(lesson.estimatedDuration.toString()))
                           : null,
                       onTap: () {
                         context.read<CourseViewerBloc>().add(
@@ -477,8 +472,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Progress', style: Theme.of(context).textTheme.titleSmall),
-              Text(
-                '$progress%',
+              Text(CoursesLocalizations.of(context)!.courses_progress(progress.toString()),
                 style: Theme.of(
                   context,
                 ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
@@ -505,8 +499,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
           children: [
             Icon(Icons.play_circle_outline, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
-            Text(
-              'Select a lesson to begin',
+            Text(CoursesLocalizations.of(context)!.courses_selectALessonTo,
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ],
@@ -526,14 +519,14 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
               children: [
                 const Icon(Icons.access_time, size: 16),
                 const SizedBox(width: 4),
-                Text('${lesson.estimatedDuration} minutes'),
+                Text(CoursesLocalizations.of(context)!.courses_lessonestimateddurationMinutes(lesson.estimatedDuration.toString())),
               ],
             ),
           const SizedBox(height: 24),
           if (lesson.content != null && lesson.content!.isNotEmpty)
             MarkdownBody(data: lesson.content!, selectable: true)
           else
-            const Text('No content available for this lesson.'),
+            Text(CoursesLocalizations.of(context)!.courses_noContentAvailableFor),
           const SizedBox(height: 32),
           _buildLessonActions(context, state, lesson),
         ],
@@ -642,8 +635,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
               children: [
                 const Icon(Icons.video_library, size: 20),
                 const SizedBox(width: 8),
-                Text(
-                  'Generated Media',
+                Text(CoursesLocalizations.of(context)!.courses_generatedMedia,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 const Spacer(),
@@ -678,8 +670,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
           children: [
             Icon(Icons.video_library, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
-            Text(
-              'No media available',
+            Text(CoursesLocalizations.of(context)!.courses_noMediaAvailable,
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ],

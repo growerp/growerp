@@ -143,7 +143,7 @@ class _AdkSystemUsageViewState extends State<AdkSystemUsageView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Error: $_error'),
+            Text(AdkLocalizations.of(context)!.adk_errorError(_error.toString())),
             const SizedBox(height: 8),
             ElevatedButton(onPressed: _load, child: const Text('Retry')),
           ],

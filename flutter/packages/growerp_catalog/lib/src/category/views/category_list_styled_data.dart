@@ -18,6 +18,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../blocs/category_bloc.dart';
+import 'package:growerp_catalog/l10n/generated/catalog_localizations.dart';
 
 /// Returns column definitions for category list based on device type
 List<StyledColumn> getCategoryListColumns(BuildContext context) {
@@ -78,8 +79,7 @@ List<Widget> getCategoryListRow({
             key: Key('name$index'),
             style: const TextStyle(fontWeight: FontWeight.w500),
           ),
-          Text(
-            '${category.nbrOfProducts} products',
+          Text(CatalogLocalizations.of(context)!.catalog_categorynbrofproductsProducts(category.nbrOfProducts.toString()),
             style: TextStyle(
               fontSize: 12,
               color: Theme.of(context).colorScheme.onSurfaceVariant,

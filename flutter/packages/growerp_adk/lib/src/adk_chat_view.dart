@@ -22,6 +22,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_core/growerp_core.dart';
 
 import 'adk_config_service.dart';
+import 'package:growerp_adk/l10n/generated/adk_localizations.dart';
 
 /// A single navigable menu entry passed to [AdkChatView].
 class ChatMenuEntry {
@@ -594,7 +595,7 @@ class _AdkChatViewState extends State<AdkChatView> {
     final config = bloc?.state.menuConfiguration;
     if (bloc == null || config == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Menu is not available to tailor here.')),
+        SnackBar(content: Text(AdkLocalizations.of(context)!.adk_menuIsNotAvailable)),
       );
       return;
     }
@@ -701,8 +702,8 @@ class _AdkChatViewState extends State<AdkChatView> {
       if (p != null && (p['_aiPrefill'] == true || p['_aiPrefill'] == 'true')) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           final messenger = ScaffoldMessenger.maybeOf(rootNav.context);
-          messenger?.showSnackBar(const SnackBar(
-            content: Text('AI filled this form — please review the values before saving.'),
+          messenger?.showSnackBar(SnackBar(
+            content: Text(AdkLocalizations.of(context)!.adk_aiFilledThisForm),
             duration: Duration(seconds: 4),
           ));
         });
@@ -877,8 +878,7 @@ class _Bubble extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  'Open screen:',
+                Text(AdkLocalizations.of(context)!.adk_openScreen,
                   style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
                 ),
               ],

@@ -28,6 +28,8 @@ dependencies:
   json_annotation: ^4.9.0
 
 dev_dependencies:
+  flutter_test:
+    sdk: flutter
   lints: ^6.0.0
   build_runner: ^2.4.12
   json_serializable: ^6.8.0

@@ -21,6 +21,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'router_builder.dart';
+import 'package:growerp_adk/growerp_adk.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -155,7 +156,10 @@ class _CoreAppState extends State<CoreApp> {
             notificationClient: widget.notificationClient,
             title: 'Core Example',
             router: router,
-            extraDelegates: const [UserCompanyLocalizations.delegate],
+            extraDelegates: const [
+              UserCompanyLocalizations.delegate,
+              AdkLocalizations.delegate,
+            ],
             extraBlocProviders: [
               ...getUserCompanyBlocProviders(
                 widget.restClient,

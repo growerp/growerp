@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'adk_knowledge_service.dart';
+import 'package:growerp_adk/l10n/generated/adk_localizations.dart';
 
 /// The company's agent knowledge base: add notes/documents that agents can
 /// retrieve via the searchKnowledge tool. Tenant-scoped by the backend.
@@ -156,7 +157,7 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
       if (mounted) {
         setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_failedE(e.toString())), backgroundColor: Colors.red),
         );
       }
     }
@@ -175,7 +176,7 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not open file: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_couldNotOpenFile(e.toString())), backgroundColor: Colors.red),
         );
       }
       return;
@@ -204,7 +205,7 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
       if (mounted) {
         setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_failedE(e.toString())), backgroundColor: Colors.red),
         );
       }
     }
@@ -216,7 +217,7 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (dctx) => AlertDialog(
-        title: const Text('Import products?'),
+        title: Text(AdkLocalizations.of(context)!.adk_importProducts),
         content: const Text(
             'Add (or refresh) one knowledge entry per product so agents can answer '
             'questions about your catalog. This may take a moment.'),
@@ -240,14 +241,14 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
       await _load();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Imported $n product(s) into the knowledge base')),
+          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_importedNProductS(n.toString()))),
         );
       }
     } catch (e) {
       if (mounted) {
         setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_failedE(e.toString())), backgroundColor: Colors.red),
         );
       }
     }
@@ -263,7 +264,7 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_failedE(e.toString())), backgroundColor: Colors.red),
         );
       }
       return;
@@ -283,7 +284,7 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
       if (mounted) {
         setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_failedE(e.toString())), backgroundColor: Colors.red),
         );
       }
     }
@@ -293,8 +294,8 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (dctx) => AlertDialog(
-        title: const Text('Delete?'),
-        content: Text('Remove "${d.title}" from the knowledge base?'),
+        title: Text(AdkLocalizations.of(context)!.adk_delete),
+        content: Text(AdkLocalizations.of(context)!.adk_removeDtitleFromThe(d.title.toString())),
         actions: [
           TextButton(
               key: const Key('cancelDeleteKnowledge'),
@@ -317,7 +318,7 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_failedE(e.toString())), backgroundColor: Colors.red),
         );
       }
     }
@@ -330,7 +331,7 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Error: $_error'),
+            Text(AdkLocalizations.of(context)!.adk_errorError(_error.toString())),
             const SizedBox(height: 8),
             ElevatedButton(onPressed: _load, child: const Text('Retry')),
           ],

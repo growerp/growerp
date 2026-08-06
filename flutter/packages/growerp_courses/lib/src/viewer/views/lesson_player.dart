@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
 /// Individual lesson player widget
 class LessonPlayer extends StatelessWidget {
@@ -43,7 +44,7 @@ class LessonPlayer extends StatelessWidget {
           _buildHeader(context),
           const SizedBox(height: 24),
           if (lesson.imageUrl != null) _buildImage(),
-          if (lesson.videoUrl != null) _buildVideoPlaceholder(),
+          if (lesson.videoUrl != null) _buildVideoPlaceholder(context),
           if (lesson.content != null && lesson.content!.isNotEmpty)
             MarkdownBody(data: lesson.content!, selectable: true),
           if (lesson.keyPoints != null && lesson.keyPoints!.isNotEmpty) ...[
@@ -68,7 +69,7 @@ class LessonPlayer extends StatelessWidget {
             if (lesson.estimatedDuration != null) ...[
               const Icon(Icons.access_time, size: 16),
               const SizedBox(width: 4),
-              Text('${lesson.estimatedDuration} min'),
+              Text(CoursesLocalizations.of(context)!.courses_lessonestimateddurationMin(lesson.estimatedDuration.toString())),
               const SizedBox(width: 16),
             ],
             if (isCompleted) ...[
@@ -102,7 +103,7 @@ class LessonPlayer extends StatelessWidget {
     );
   }
 
-  Widget _buildVideoPlaceholder() {
+  Widget _buildVideoPlaceholder(BuildContext context) {
     return Container(
       height: 300,
       margin: const EdgeInsets.only(bottom: 24),
@@ -124,7 +125,7 @@ class LessonPlayer extends StatelessWidget {
                 // TODO: Implement video player or launch URL
               },
             ),
-            const Text('Video content', style: TextStyle(color: Colors.white)),
+            Text(CoursesLocalizations.of(context)!.courses_videoContent, style: TextStyle(color: Colors.white)),
           ],
         ),
       ),
@@ -142,8 +143,7 @@ class LessonPlayer extends StatelessWidget {
               children: [
                 const Icon(Icons.lightbulb_outline, color: Colors.amber),
                 const SizedBox(width: 8),
-                Text(
-                  'Key Points',
+                Text(CoursesLocalizations.of(context)!.courses_keyPoints,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ],
@@ -183,7 +183,7 @@ class LessonPlayer extends StatelessWidget {
         if (onMarkComplete != null && !isCompleted)
           ElevatedButton.icon(
             icon: const Icon(Icons.check_circle_outline),
-            label: const Text('Mark as Complete'),
+            label: Text(CoursesLocalizations.of(context)!.courses_markAsComplete),
             onPressed: onMarkComplete,
           ),
         if (isCompleted)
