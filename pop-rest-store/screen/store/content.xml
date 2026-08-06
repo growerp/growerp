@@ -142,20 +142,29 @@ along with this software (see the LICENSE.md file). If not, see
                 <script>
                     storeInfo.menu1 = []
                     if (pageText) {
-                        // same heading id rule as the markdown renderer, so the anchors match
-                        def anchorOf = { String s -> s.toLowerCase().replaceAll('[^a-z0-9 -]','').trim().replaceAll(' +','-') };
+                        // The heading ids come from the markdown renderer, so ask it rather than
+                        // reimplementing the rule: a regex over [a-z0-9] dropped every Thai and
+                        // Chinese heading to an empty anchor. One generator per page, called in
+                        // heading order, also reproduces its -1/-2 suffixes for repeated titles.
+                        def idGenerator =
+                            new com.vladsch.flexmark.html.renderer.HeaderIdGenerator.Factory().create();
+                        def anchorOf = { String s -> idGenerator.getId(s) };
                         List items = [];
                         String title;
+                        String titleAnchor;
                         boolean first = true;
                         pageText.eachLine {
                             if (it.startsWith('# ')) {
                                 if (first == false) {
-                                    storeInfo.menu1.add([path: ec.web.getPathInfo().split('/')[2],
+                                    storeInfo.menu1.add([path: extraPathNameList[0],
                                                         title: title, items: items,
-                                                        anchor: anchorOf(title)]);
+                                                        anchor: titleAnchor]);
                                     items = [];
                                 }
                                 title = it.substring(it.indexOf(' ') + 1);
+                                // in document order, so the generator numbers repeats the way
+                                // the renderer does
+                                titleAnchor = anchorOf(title);
                                 first = false;
                             }
                             if (it.startsWith('## ')) {
@@ -165,7 +174,7 @@ along with this software (see the LICENSE.md file). If not, see
                             }
                         }
                         if (first == false) storeInfo.menu1.add([path: extraPathNameList[0],
-                            title: title, items: items, anchor: anchorOf(title)]);
+                            title: title, items: items, anchor: titleAnchor]);
                     }
                 </script>
             </else>

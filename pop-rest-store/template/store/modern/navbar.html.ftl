@@ -47,7 +47,7 @@
                 <#list storeInfo.menu as topItem>
                 <#if !topItem.title?has_content || topItem.path == 'home'><#continue></#if>
                 <#if isMarketing && topItem.path == 'verticals'>
-                    <a href="/modules" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">${l('GrowerpWebsiteFeatures')}</a>
+                    <a href="${up}/modules" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">${l('GrowerpWebsiteFeatures')}</a>
                 </#if>
                 <#if topItem.items?has_content>
                 <div class="relative">
@@ -186,7 +186,7 @@
                 <#list storeInfo.menu as topItem>
                 <#if !topItem.title?has_content || topItem.path == 'home'><#continue></#if>
                 <#if topItem.path == 'verticals'>
-                    <a href="/modules" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">${l('GrowerpWebsiteFeatures')}</a>
+                    <a href="${up}/modules" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">${l('GrowerpWebsiteFeatures')}</a>
                 </#if>
                 <a href="${up}/content/${topItem.path}" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">${topItem.title!topItem.path}</a>
                 </#list>

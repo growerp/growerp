@@ -55,7 +55,7 @@
                 <ul class="grid grid-cols-2 gap-x-4 gap-y-2">
                     <li><a href="${up}/" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">${l('GrowerpWebsiteHome')}</a></li>
                     <#if isMarketing>
-                    <li><a href="/modules" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">${l('GrowerpWebsiteApps')}</a></li>
+                    <li><a href="${up}/modules" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">${l('GrowerpWebsiteApps')}</a></li>
                     <li><a href="https://github.com/growerp/growerp" target="_blank" rel="noopener" class="font-label text-sm text-on-surface-variant hover:text-primary transition-colors">GitHub</a></li>
                     </#if>
                     <#list storeInfo.menu as topItem>
