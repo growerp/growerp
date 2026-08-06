@@ -13,9 +13,9 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
 class AddressDialog extends StatefulWidget {
   final Address? address;

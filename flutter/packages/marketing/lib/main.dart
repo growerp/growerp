@@ -208,6 +208,7 @@ List<LocalizationsDelegate> delegates = const [
   OrderAccountingLocalizations.delegate,
   WebsiteLocalizations.delegate,
   ActivityLocalizations.delegate,
+  WikiLocalizations.delegate,
 ];
 
 /// Named ...AppBlocProviders to avoid clashing with getMarketingBlocProviders

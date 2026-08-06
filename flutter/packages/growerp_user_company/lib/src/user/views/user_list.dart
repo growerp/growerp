@@ -1,3 +1,4 @@
+
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -257,7 +258,7 @@ class UserListState extends State<UserList> {
                                 );
                                 _searchFocusNode.requestFocus();
                               },
-                              tooltip: 'companies/users up/download',
+                              tooltip: UserCompanyLocalizations.of(context)!.companiesUsersUpDownload,
                               child: const Icon(Icons.file_copy),
                             ),
                           ],

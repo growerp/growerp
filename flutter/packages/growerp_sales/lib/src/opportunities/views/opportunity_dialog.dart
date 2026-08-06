@@ -14,13 +14,13 @@
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+import 'package:growerp_sales/l10n/generated/sales_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_sales/l10n/generated/sales_localizations.dart';
 import '../bloc/opportunity_bloc.dart';
 
 class OpportunityDialog extends StatefulWidget {
@@ -328,7 +328,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
               child: ElevatedButton.icon(
                 key: const Key('convertToOrder'),
                 icon: const Icon(Icons.receipt_long),
-                label: const Text('Convert to Quote'),
+                label: Text(SalesLocalizations.of(context)!.convertToQuote),
                 onPressed: () {
                   _opportunityBloc.add(
                     OpportunityConvertToOrder(

@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:growerp_sales/l10n/generated/sales_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -50,7 +51,7 @@ class _CrmDashboardChartMiniState extends State<CrmDashboardChartMini> {
   Widget _funnel(BuildContext context, List<CrmStageSummaryItem> summary) {
     final colorScheme = Theme.of(context).colorScheme;
     if (summary.isEmpty) {
-      return const Center(child: Text('No pipeline data'));
+      return Center(child: Text(SalesLocalizations.of(context)!.noPipelineData));
     }
     int maxCount = 1;
     for (final item in summary) {

@@ -345,9 +345,9 @@ class WebsiteDialogState extends State<WebsiteDialog> {
             SegmentedButton<bool>(
               key: const Key('websiteThemeBrightness'),
               showSelectedIcon: false,
-              segments: const [
-                ButtonSegment(value: false, label: Text('Light')),
-                ButtonSegment(value: true, label: Text('Dark')),
+              segments: [
+                ButtonSegment(value: false, label: Text(WebsiteLocalizations.of(context)!.light)),
+                ButtonSegment(value: true, label: Text(WebsiteLocalizations.of(context)!.dark)),
               ],
               selected: {dark},
               onSelectionChanged: (selection) {
@@ -383,7 +383,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                   ),
                 );
               },
-              child: const Text('Reset to defaults'),
+              child: Text(WebsiteLocalizations.of(context)!.resetToDefaults),
             ),
           ],
         ),
@@ -473,7 +473,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
       IconButton(
         key: const Key('addFtl'),
         iconSize: 30,
-        tooltip: 'Add FreeMarker/HTML page',
+        tooltip: WebsiteLocalizations.of(context)!.addFreemarkerhtmlPage,
         icon: const Icon(Icons.code),
         color: Colors.deepOrange,
         onPressed: () async {
@@ -651,7 +651,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
     List<Widget> widgets = [
       GroupingDecorator(
         useCardStyle: false,
-        labelText: 'Website Info',
+        labelText: WebsiteLocalizations.of(context)!.websiteInfo,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -691,7 +691,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                       IconButton(
                         key: const Key('launchUrl'),
                         icon: const Icon(Icons.open_in_new),
-                        tooltip: 'Open website',
+                        tooltip: WebsiteLocalizations.of(context)!.openWebsite,
                         onPressed: doLlaunchUrl,
                       ),
                     ],
@@ -720,15 +720,15 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     key: const Key('templateId'),
-                    decoration: const InputDecoration(
-                      labelText: 'Website Template',
+                    decoration: InputDecoration(
+                      labelText: WebsiteLocalizations.of(context)!.websiteTemplate,
                     ),
                     initialValue: _templateId ?? state.website!.templateId,
-                    items: const [
-                      DropdownMenuItem(value: 'legacy', child: Text('Legacy')),
+                    items: [
+                      DropdownMenuItem(value: 'legacy', child: Text(WebsiteLocalizations.of(context)!.legacy)),
                       DropdownMenuItem(
                         value: 'modern',
-                        child: Text('Modern Tailwind'),
+                        child: Text(WebsiteLocalizations.of(context)!.modernTailwind),
                       ),
                     ],
                     onChanged: (String? newValue) {
@@ -741,48 +741,48 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                   TextFormField(
                     key: const Key('twitterUrl'),
                     controller: _twitterController,
-                    decoration: const InputDecoration(
-                      labelText: 'Twitter / X URL',
+                    decoration: InputDecoration(
+                      labelText: WebsiteLocalizations.of(context)!.twitterXUrl,
                       hintText: 'https://twitter.com/yourhandle',
                     ),
                   ),
                   TextFormField(
                     key: const Key('facebookUrl'),
                     controller: _facebookController,
-                    decoration: const InputDecoration(
-                      labelText: 'Facebook URL',
+                    decoration: InputDecoration(
+                      labelText: WebsiteLocalizations.of(context)!.facebookUrl,
                       hintText: 'https://facebook.com/yourpage',
                     ),
                   ),
                   TextFormField(
                     key: const Key('instagramUrl'),
                     controller: _instagramController,
-                    decoration: const InputDecoration(
-                      labelText: 'Instagram URL',
+                    decoration: InputDecoration(
+                      labelText: WebsiteLocalizations.of(context)!.instagramUrl,
                       hintText: 'https://instagram.com/yourhandle',
                     ),
                   ),
                   TextFormField(
                     key: const Key('youtubeUrl'),
                     controller: _youtubeController,
-                    decoration: const InputDecoration(
-                      labelText: 'YouTube URL',
+                    decoration: InputDecoration(
+                      labelText: WebsiteLocalizations.of(context)!.youtubeUrl,
                       hintText: 'https://youtube.com/yourchannel',
                     ),
                   ),
                   TextFormField(
                     key: const Key('linkedinUrl'),
                     controller: _linkedinController,
-                    decoration: const InputDecoration(
-                      labelText: 'LinkedIn URL',
+                    decoration: InputDecoration(
+                      labelText: WebsiteLocalizations.of(context)!.linkedinUrl,
                       hintText: 'https://linkedin.com/company/yourcompany',
                     ),
                   ),
                   TextFormField(
                     key: const Key('substackUrl'),
                     controller: _substackController,
-                    decoration: const InputDecoration(
-                      labelText: 'Substack URL',
+                    decoration: InputDecoration(
+                      labelText: WebsiteLocalizations.of(context)!.substackUrl,
                       hintText: 'https://yourname.substack.com',
                     ),
                   ),
@@ -791,7 +791,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Website theme (applies to both Legacy and Modern templates)',
+              WebsiteLocalizations.of(context)!.websiteThemeAppliesToBothLegacyAndModernTemplates,
               style: TextStyle(
                 fontSize: 12,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -923,7 +923,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
       ),
       GroupingDecorator(
         useCardStyle: false,
-        labelText: 'Quick Links',
+        labelText: WebsiteLocalizations.of(context)!.quickLinks,
         child: Column(
           children: [
             OutlinedButton.icon(
@@ -946,8 +946,8 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                     onPressed: () {
                       if (_landingPageIdController.text.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Please select a page first'),
+                          SnackBar(
+                            content: Text(WebsiteLocalizations.of(context)!.pleaseSelectAPageFirst),
                           ),
                         );
                         return;
@@ -1017,8 +1017,8 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                 Expanded(
                   child: TextField(
                     controller: _checkoutAmountController,
-                    decoration: const InputDecoration(
-                      hintText: 'Amount',
+                    decoration: InputDecoration(
+                      hintText: WebsiteLocalizations.of(context)!.amount,
                       isDense: true,
                       contentPadding: EdgeInsets.symmetric(
                         horizontal: 8,

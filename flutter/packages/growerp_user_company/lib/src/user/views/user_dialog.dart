@@ -1,3 +1,4 @@
+
 // ignore_for_file: unnecessary_string_interpolations
 
 /*
@@ -18,6 +19,7 @@ import 'package:universal_io/io.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -28,7 +30,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
 //import 'package:growerp_activity/growerp_activity.dart';
 import 'package:flutter/rendering.dart';
-import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
+
 
 import '../../common/address_dialog.dart';
 import '../../common/payment_method_dialog.dart';
@@ -403,8 +405,8 @@ class UserDialogState extends State<UserDialogStateFull> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('personalTitle'),
-                    decoration: const InputDecoration(
-                      labelText: 'Job Title / Position',
+                    decoration: InputDecoration(
+                      labelText: UserCompanyLocalizations.of(context)!.jobTitlePosition,
                     ),
                     controller: _personalTitleController,
                   ),

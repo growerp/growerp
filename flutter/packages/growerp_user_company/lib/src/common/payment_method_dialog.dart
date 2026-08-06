@@ -14,11 +14,11 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 import 'package:credit_card_validator/credit_card_validator.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
 class PaymentMethodDialog extends StatefulWidget {
   final PaymentMethod? paymentMethod;

@@ -282,8 +282,8 @@ class WebsiteContentState extends State<WebsiteContent> {
         TextFormField(
           key: const Key('seoDescription'),
           controller: _seoDescriptionController,
-          decoration: const InputDecoration(
-            labelText: 'SEO description (search engines & link previews)',
+          decoration: InputDecoration(
+            labelText: WebsiteLocalizations.of(context)!.seoDescriptionSearchEnginesLinkPreviews,
           ),
         ),
         const SizedBox(height: 10),
@@ -372,7 +372,7 @@ class WebsiteContentState extends State<WebsiteContent> {
      Widget input = TextFormField(
         key: const Key('htmlInput'),
         autofocus: true,
-        decoration: const InputDecoration(labelText: 'Enter text here...'),
+        decoration: InputDecoration(labelText: WebsiteLocalizations.of(context)!.enterTextHere),
         expands: true,
         maxLines: null,
         textAlignVertical: TextAlignVertical.top,

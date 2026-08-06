@@ -1,3 +1,4 @@
+import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 // ignore_for_file: unnecessary_string_interpolations
 
 /*
@@ -26,7 +27,6 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
 import '../../common/common.dart';
 import '../../company/bloc/company_bloc.dart';
@@ -335,8 +335,8 @@ class UserDialogState extends State<UserDialog> {
                 Expanded(
                   child: TextFormField(
                     key: const Key('personalTitle'),
-                    decoration: const InputDecoration(
-                      labelText: 'Job Title / Position',
+                    decoration: InputDecoration(
+                      labelText: UserCompanyLocalizations.of(context)!.jobTitlePosition,
                     ),
                     controller: _personalTitleController,
                   ),
@@ -540,8 +540,8 @@ class UserDialogState extends State<UserDialog> {
                       builder: (context, state) {
                         switch (state.status) {
                           case CompanyStatus.failure:
-                            return const FatalErrorForm(
-                              message: 'server connection problem',
+                            return FatalErrorForm(
+                              message: UserCompanyLocalizations.of(context)!.serverConnectionProblem,
                             );
                           case CompanyStatus.success:
                             return AutocompleteLabel<Company>(

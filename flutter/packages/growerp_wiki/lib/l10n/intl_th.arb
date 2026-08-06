@@ -1,0 +1,10 @@
+{
+  "@@locale": "th",
+  "wikiSpace": "พื้นที่วิกิ",
+  "noPagesFound": "ไม่พบหน้า",
+  "searchPagePath": "ค้นหาเส้นทางหน้า",
+  "addPage": "เพิ่มหน้า",
+  "cancel": "ยกเลิก",
+  "pagePathHint": "เส้นทางหน้า (เช่น 'notes/my-page' - หลีกเลี่ยงคำนำหน้า tables/ และ datasets/ ที่สร้างขึ้นอัตโนมัติ)",
+  "markdownTextYamlFrontmatterAllowed": "ข้อความ Markdown (อนุญาตให้ใช้ YAML frontmatter)"
+}

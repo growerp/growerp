@@ -329,5 +329,168 @@
   "contentFetchFailure": "Failed to fetch content",
   "@contentFetchFailure": {
     "description": "BLoC message: Failed to fetch content"
+  },
+  "light": "Light",
+  "@light": {
+    "description": "Light"
+  },
+  "dark": "Dark",
+  "@dark": {
+    "description": "Dark"
+  },
+  "resetToDefaults": "Reset to defaults",
+  "@resetToDefaults": {
+    "description": "Reset to defaults"
+  },
+  "legacy": "Legacy",
+  "@legacy": {
+    "description": "Legacy"
+  },
+  "modernTailwind": "Modern Tailwind",
+  "@modernTailwind": {
+    "description": "Modern Tailwind"
+  },
+  "websiteThemeAppliesToBothLegacyAndModernTemplates": "Website theme (applies to both Legacy and Modern templates)",
+  "@websiteThemeAppliesToBothLegacyAndModernTemplates": {
+    "description": "Website theme (applies to both Legacy and Modern templates)"
+  },
+  "pleaseSelectAPageFirst": "Please select a page first",
+  "@pleaseSelectAPageFirst": {
+    "description": "Please select a page first"
+  },
+  "websiteInfo": "Website Info",
+  "@websiteInfo": {
+    "description": "Website Info"
+  },
+  "websiteTemplate": "Website Template",
+  "@websiteTemplate": {
+    "description": "Website Template"
+  },
+  "twitterXUrl": "Twitter / X URL",
+  "@twitterXUrl": {
+    "description": "Twitter / X URL"
+  },
+  "facebookUrl": "Facebook URL",
+  "@facebookUrl": {
+    "description": "Facebook URL"
+  },
+  "instagramUrl": "Instagram URL",
+  "@instagramUrl": {
+    "description": "Instagram URL"
+  },
+  "youtubeUrl": "YouTube URL",
+  "@youtubeUrl": {
+    "description": "YouTube URL"
+  },
+  "linkedinUrl": "LinkedIn URL",
+  "@linkedinUrl": {
+    "description": "LinkedIn URL"
+  },
+  "substackUrl": "Substack URL",
+  "@substackUrl": {
+    "description": "Substack URL"
+  },
+  "quickLinks": "Quick Links",
+  "@quickLinks": {
+    "description": "Quick Links"
+  },
+  "amount": "Amount",
+  "@amount": {
+    "description": "Amount"
+  },
+  "addFreemarkerhtmlPage": "Add FreeMarker/HTML page",
+  "@addFreemarkerhtmlPage": {
+    "description": "Add FreeMarker/HTML page"
+  },
+  "openWebsite": "Open website",
+  "@openWebsite": {
+    "description": "Open website"
+  },
+  "none": "None",
+  "@none": {
+    "description": "None"
+  },
+  "fields": "Fields",
+  "@fields": {
+    "description": "Fields"
+  },
+  "addField": "Add field",
+  "@addField": {
+    "description": "Add field"
+  },
+  "embedOnPageWith": "Embed on a page with: ",
+  "@embedOnPageWith": {
+    "description": "Embed on a page with: "
+  },
+  "formName": "Form Name",
+  "@formName": {
+    "description": "Form Name"
+  },
+  "titleShownAboveTheForm": "Title shown above the form",
+  "@titleShownAboveTheForm": {
+    "description": "Title shown above the form"
+  },
+  "submitButtonLabel": "Submit button label",
+  "@submitButtonLabel": {
+    "description": "Submit button label"
+  },
+  "messageAfterSubmit": "Message after submit",
+  "@messageAfterSubmit": {
+    "description": "Message after submit"
+  },
+  "emailTemplateIdOptional": "Email template ID (optional)",
+  "@emailTemplateIdOptional": {
+    "description": "Email template ID (optional)"
+  },
+  "enrollIntoNurtureSequenceOptional": "Enroll into nurture sequence (optional)",
+  "@enrollIntoNurtureSequenceOptional": {
+    "description": "Enroll into nurture sequence (optional)"
+  },
+  "label": "Label",
+  "@label": {
+    "description": "Label"
+  },
+  "sendsThisEmailtemplateToTheSubmitterEgADocumentDelivery": "Sends this EmailTemplate to the submitter, e.g. a document delivery",
+  "@sendsThisEmailtemplateToTheSubmitterEgADocumentDelivery": {
+    "description": "Sends this EmailTemplate to the submitter, e.g. a document delivery"
+  },
+  "addNew": "Add new",
+  "@addNew": {
+    "description": "Add new"
+  },
+  "seoDescriptionSearchEnginesLinkPreviews": "SEO description (search engines & link previews)",
+  "@seoDescriptionSearchEnginesLinkPreviews": {
+    "description": "SEO description (search engines & link previews)"
+  },
+  "enterTextHere": "Enter text here...",
+  "@enterTextHere": {
+    "description": "Enter text here..."
+  },
+  "formUpdateSuccess": "Form {name} updated",
+  "@formUpdateSuccess": {
+    "description": "Form {name} updated",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "formAddSuccess": "Form {name} added",
+  "@formAddSuccess": {
+    "description": "Form {name} added",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "formDeleteSuccess": "Form {name} deleted",
+  "@formDeleteSuccess": {
+    "description": "Form {name} deleted",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }

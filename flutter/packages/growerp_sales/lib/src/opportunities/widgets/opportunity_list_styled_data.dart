@@ -13,9 +13,9 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:growerp_sales/l10n/generated/sales_localizations.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_sales/l10n/generated/sales_localizations.dart';
 
 import '../bloc/opportunity_bloc.dart';
 

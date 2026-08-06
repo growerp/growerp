@@ -71,6 +71,7 @@ List<BlocProvider> getExampleBlocProviders(
 /// Localizations delegates for the wiki example app.
 List<LocalizationsDelegate<dynamic>> extraDelegates = const [
   UserCompanyLocalizations.delegate,
+  WikiLocalizations.delegate,
 ];
 
 /// Simple dashboard for the wiki example

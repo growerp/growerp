@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:growerp_sales/l10n/generated/sales_localizations.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 /// Horizontal funnel bars: one row per pipeline stage showing the
@@ -26,7 +27,7 @@ class SalesFunnelChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     if (summary.isEmpty) {
-      return const Center(child: Text('No pipeline data'));
+      return Center(child: Text(SalesLocalizations.of(context)!.noPipelineData));
     }
     int maxCount = 1;
     for (final item in summary) {

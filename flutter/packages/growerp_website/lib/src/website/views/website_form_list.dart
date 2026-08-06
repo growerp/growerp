@@ -14,6 +14,7 @@
 
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
+import 'package:growerp_website/l10n/generated/website_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -172,7 +173,7 @@ class WebsiteFormListState extends State<WebsiteFormList> {
                           ),
                         );
                       },
-                      tooltip: 'Add new',
+                      tooltip: WebsiteLocalizations.of(context)!.addNew,
                       child: const Icon(Icons.add),
                     ),
                   ),

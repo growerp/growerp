@@ -206,5 +206,15 @@
   "userAdded": "เพิ่มผู้ใช้ {name} ที่ด้านบนของรายการแล้ว...",
   "asCompany": "อย่างไรก็ตาม ตอนนี้แสดงเป็นบริษัท",
   "compUserUploadSuccess": "การอัปโหลดบริษัท/ผู้ใช้สิ้นสุดลงแล้ว",
-  "compUserDownloadSuccess": "คำขอกำหนดเวลาแล้วและอีเมลจะถูกส่งในไม่ช้า"
+  "compUserDownloadSuccess": "คำขอกำหนดเวลาแล้วและอีเมลจะถูกส่งในไม่ช้า",
+  "periodLabel": "ระยะเวลา: ",
+  "changePeriod": "เปลี่ยนระยะเวลา",
+  "noAccessesFoundForThisPeriod": "ไม่พบการเข้าถึงสำหรับช่วงเวลานี้",
+  "companiesUsersUpDownload": "อัปโหลด/ดาวน์โหลด บริษัท/ผู้ใช้",
+  "jobTitlePosition": "ตำแหน่งงาน / ตำแหน่ง",
+  "uploadCsvFile": "อัปโหลดไฟล์ CSV",
+  "downloadViaEmail": "ดาวน์โหลดทางอีเมล",
+  "downloadFirstToObtainTheFormat": "ดาวน์โหลดก่อนเพื่อรับรูปแบบ",
+  "aDataFileWillBeSendByEmail": "ไฟล์ข้อมูลจะถูกส่งทางอีเมล",
+  "couldNotLoadRoles": "ไม่สามารถโหลด {role}s!"
 }

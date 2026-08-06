@@ -21,6 +21,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_website/growerp_website.dart';
+import 'package:growerp_wiki/growerp_wiki.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'router_builder.dart';
 
@@ -181,6 +182,7 @@ class _AgentsAppState extends State<AgentsApp> {
 List<LocalizationsDelegate> delegates = const [
   UserCompanyLocalizations.delegate,
   WebsiteLocalizations.delegate,
+  WikiLocalizations.delegate,
 ];
 
 List<BlocProvider> getAgentsBlocProviders(

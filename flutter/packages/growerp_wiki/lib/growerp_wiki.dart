@@ -14,6 +14,7 @@
 
 library;
 
+export 'package:growerp_wiki/l10n/generated/wiki_localizations.dart';
 export 'src/views/wiki_list.dart';
 export 'src/views/wiki_page_dialog.dart';
 export 'src/get_wiki_widgets.dart';
