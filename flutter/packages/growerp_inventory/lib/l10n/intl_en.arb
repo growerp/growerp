@@ -303,5 +303,17 @@
   "locationFetchFailure": "Failed to fetch locations",
   "@locationFetchFailure": {
     "description": "BLoC message: Failed to fetch locations"
+  },
+  "helloWorld": "Hello World!",
+  "@helloWorld": {
+    "description": "Hello World message"
+  },
+  "noShipmentData": "No shipment data",
+  "@noShipmentData": {
+    "description": "Message showing there is no shipment data"
+  },
+  "unknownText": "????",
+  "@unknownText": {
+    "description": "Placeholder for unknown text"
   }
 }

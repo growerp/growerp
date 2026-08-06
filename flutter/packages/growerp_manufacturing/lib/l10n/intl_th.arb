@@ -4,7 +4,9 @@
   "@failedToFetchBomItems": {
     "description": "Error message when the app fails to fetch BOM items",
     "placeholders": {
-      "message": { "type": "String" }
+      "message": {
+        "type": "String"
+      }
     }
   },
   "noBomItemsFound": "no BOM items found",
@@ -15,7 +17,9 @@
   "@failedToFetchWorkOrders": {
     "description": "Error message when the app fails to fetch work orders",
     "placeholders": {
-      "message": { "type": "String" }
+      "message": {
+        "type": "String"
+      }
     }
   },
   "noWorkOrdersFound": "no work orders found",
@@ -38,7 +42,9 @@
   "@error": {
     "description": "Generic error message",
     "placeholders": {
-      "message": { "type": "String" }
+      "message": {
+        "type": "String"
+      }
     }
   },
   "newLabel": "New",
@@ -49,44 +55,93 @@
   "@bomInfo": {
     "description": "BOM dialog title",
     "placeholders": {
-      "id": { "type": "String" }
+      "id": {
+        "type": "String"
+      }
     }
   },
   "workOrderInfo": "Work Order {id}",
   "@workOrderInfo": {
     "description": "Work order dialog title",
     "placeholders": {
-      "id": { "type": "String" }
+      "id": {
+        "type": "String"
+      }
     }
   },
   "productId": "Product ID",
-  "@productId": { "description": "Product ID label" },
+  "@productId": {
+    "description": "Product ID label"
+  },
   "productName": "Product Name",
-  "@productName": { "description": "Product name label" },
+  "@productName": {
+    "description": "Product name label"
+  },
   "componentId": "Component ID",
-  "@componentId": { "description": "Component ID label" },
+  "@componentId": {
+    "description": "Component ID label"
+  },
   "componentName": "Component Name",
-  "@componentName": { "description": "Component name label" },
+  "@componentName": {
+    "description": "Component name label"
+  },
   "quantity": "Quantity",
-  "@quantity": { "description": "Quantity label" },
+  "@quantity": {
+    "description": "Quantity label"
+  },
   "scrapFactor": "Scrap Factor",
-  "@scrapFactor": { "description": "Scrap factor label" },
+  "@scrapFactor": {
+    "description": "Scrap factor label"
+  },
   "sequenceNum": "Seq#",
-  "@sequenceNum": { "description": "Sequence number label" },
+  "@sequenceNum": {
+    "description": "Sequence number label"
+  },
   "status": "Status",
-  "@status": { "description": "Status label" },
+  "@status": {
+    "description": "Status label"
+  },
   "startDate": "Start Date",
-  "@startDate": { "description": "Start date label" },
+  "@startDate": {
+    "description": "Start date label"
+  },
   "completionDate": "Completion Date",
-  "@completionDate": { "description": "Completion date label" },
+  "@completionDate": {
+    "description": "Completion date label"
+  },
   "enterQuantity": "Please enter a quantity",
-  "@enterQuantity": { "description": "Validation message for quantity" },
+  "@enterQuantity": {
+    "description": "Validation message for quantity"
+  },
   "enterProduct": "Please enter a product",
-  "@enterProduct": { "description": "Validation message for product" },
+  "@enterProduct": {
+    "description": "Validation message for product"
+  },
   "enterComponent": "Please enter a component",
-  "@enterComponent": { "description": "Validation message for component" },
+  "@enterComponent": {
+    "description": "Validation message for component"
+  },
   "bomTitle": "Bill of Materials",
-  "@bomTitle": { "description": "BOM list screen title" },
+  "@bomTitle": {
+    "description": "BOM list screen title"
+  },
   "workOrderTitle": "Work Orders",
-  "@workOrderTitle": { "description": "Work order list screen title" }
+  "@workOrderTitle": {
+    "description": "Work order list screen title"
+  },
+  "noWorkOrderData": "ไม่มีข้อมูลใบสั่งงาน",
+  "deleteButton": "ลบ",
+  "addStepButton": "เพิ่มขั้นตอน",
+  "noneOption": "— ไม่มี —",
+  "releaseToShopFloor": "ปล่อยไปที่พื้นโรงงาน",
+  "startProduction": "เริ่มการผลิต",
+  "completeProduction": "เสร็จสิ้นการผลิต",
+  "workOrderNameOptional": "ชื่อใบสั่งงาน (ไม่บังคับ)",
+  "startDateOptional": "วันที่เริ่มต้น (ปปปป-ดด-วว)",
+  "productionRoutingOptional": "เส้นทางการผลิต (ไม่บังคับ)",
+  "productIdOptional": "รหัสสินค้า (ไม่บังคับ)",
+  "descriptionRequired": "คำอธิบาย *",
+  "qtyLabel": "จำนวน",
+  "scrap0to1": "เศษ (0–1)",
+  "seqHash": "ลำดับ #"
 }

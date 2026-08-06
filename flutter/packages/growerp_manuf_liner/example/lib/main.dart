@@ -194,7 +194,7 @@ GoRouter createLinerExampleRouter() {
               child: IconButton(
                 key: const Key('printProductionOrder'),
                 icon: const Icon(Icons.print),
-                onPressed: () => printProductionOrder(workOrder),
+                onPressed: () => printProductionOrder(workOrder, null),
               ),
             ),
           ],

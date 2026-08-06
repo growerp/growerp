@@ -1,0 +1,19 @@
+{
+  "@@locale": "th",
+  "linerType": "ประเภทซับใน",
+  "descriptionOptional": "คำอธิบาย (ไม่บังคับ)",
+  "linerWeight": "น้ำหนักซับใน (lb/sqft)",
+  "productionOrderTitle": "ใบสั่งผลิต {pseudoId}",
+  "noteWorkEffort": "หมายเหตุ: {workEffortName}",
+  "noPanelsRecorded": "ไม่มีการบันทึกแผง",
+  "linerPanels": "แผงซับใน",
+  "linerTotals": "ยอดรวมซับใน",
+  "bomMaterials": "BOM / วัสดุ",
+  "linerName": "ชื่อซับใน",
+  "panelNameOptional": "ชื่อแผง (ไม่บังคับ)",
+  "panelWidth": "ความกว้างแผง (ft)",
+  "panelLength": "ความยาวแผง (ft)",
+  "sequenceNoOptional": "หมายเลขลำดับ (ไม่บังคับ)",
+  "rollStockWidth": "ความกว้างม้วนสต็อก (ft)",
+  "widthIncrement": "ส่วนเพิ่มความกว้าง (ft)"
+}

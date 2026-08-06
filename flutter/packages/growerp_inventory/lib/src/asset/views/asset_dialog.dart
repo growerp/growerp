@@ -126,7 +126,7 @@ class AssetDialogState extends State<AssetDialog> {
             );
             break;
           default:
-            const Text("????");
+            Text(InventoryLocalizations.of(context)!.unknownText);
         }
       },
       child: Dialog(

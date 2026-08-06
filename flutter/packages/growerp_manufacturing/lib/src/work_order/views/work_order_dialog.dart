@@ -14,6 +14,7 @@
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+import 'package:growerp_manufacturing/l10n/generated/manufacturing_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -130,7 +131,7 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
             TextFormField(
               key: const Key('name'),
               decoration:
-                  const InputDecoration(labelText: 'Work Order Name (optional)'),
+                  InputDecoration(labelText: ManufacturingLocalizations.of(context)!.workOrderNameOptional),
               controller: _nameController,
               readOnly: isComplete,
             ),
@@ -172,7 +173,7 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
             TextFormField(
               key: const Key('startDate'),
               decoration:
-                  const InputDecoration(labelText: 'Start Date (YYYY-MM-DD)'),
+                  InputDecoration(labelText: ManufacturingLocalizations.of(context)!.startDateOptional),
               controller: _startDateController,
               readOnly: isComplete,
             ),
@@ -191,17 +192,17 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
                   children: [
                     DropdownButtonFormField<String>(
                       key: const Key('routingDropdown'),
-                      decoration: const InputDecoration(
-                        labelText: 'Production Routing (optional)',
+                      decoration: InputDecoration(
+                        labelText: ManufacturingLocalizations.of(context)!.productionRoutingOptional,
                       ),
                       initialValue: routings.any(
                               (r) => r.routingId == _selectedRoutingId)
                           ? _selectedRoutingId
                           : null,
                       items: [
-                        const DropdownMenuItem<String>(
+                        DropdownMenuItem<String>(
                           value: null,
-                          child: Text('— None —'),
+                          child: Text(ManufacturingLocalizations.of(context)!.noneOption),
                         ),
                         ...routings.map((r) => DropdownMenuItem<String>(
                               value: r.routingId,
@@ -267,7 +268,7 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
                         TextButton.icon(
                           key: const Key('addRoutingTask'),
                           icon: const Icon(Icons.add),
-                          label: const Text('Add Step'),
+                          label: Text(ManufacturingLocalizations.of(context)!.addStepButton),
                           onPressed: () => showDialog(
                             context: context,
                             builder: (_) => BlocProvider.value(
@@ -379,7 +380,7 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
                   workOrder.status == WorkOrderStatusVal.inPlanning)
                 ElevatedButton(
                   key: const Key('releaseButton'),
-                  child: const Text('Release to Shop Floor'),
+                  child: Text(ManufacturingLocalizations.of(context)!.releaseToShopFloor),
                   onPressed: () => context.read<WorkOrderBloc>().add(
                         WorkOrderUpdate(
                           workOrder.copyWith(
@@ -390,7 +391,7 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
               if (workOrder.status == WorkOrderStatusVal.approved)
                 ElevatedButton(
                   key: const Key('startButton'),
-                  child: const Text('Start Production'),
+                  child: Text(ManufacturingLocalizations.of(context)!.startProduction),
                   onPressed: () => context.read<WorkOrderBloc>().add(
                         WorkOrderUpdate(
                           workOrder.copyWith(
@@ -401,7 +402,7 @@ class WorkOrderDialogState extends State<WorkOrderDialog> {
               if (workOrder.status == WorkOrderStatusVal.inProgress)
                 ElevatedButton(
                   key: const Key('completeButton'),
-                  child: const Text('Complete Production'),
+                  child: Text(ManufacturingLocalizations.of(context)!.completeProduction),
                   onPressed: () => context.read<WorkOrderBloc>().add(
                         WorkOrderUpdate(
                           workOrder.copyWith(

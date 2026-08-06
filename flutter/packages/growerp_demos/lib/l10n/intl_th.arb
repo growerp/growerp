@@ -1,0 +1,23 @@
+{
+  "@@locale": "th",
+  "resetDemoTitle": "รีเซ็ตการสาธิต?",
+  "resetDemoContent": "การดำเนินการนี้จะรีเซ็ตความคืบหน้าของคุณเป็นขั้นตอนที่ 0\nข้อมูลสาธิตที่สร้างในระบบจะยังคงอยู่",
+  "cancelButton": "ยกเลิก",
+  "resetButton": "รีเซ็ต",
+  "resetDemoProgressTooltip": "รีเซ็ตความคืบหน้าการสาธิต",
+  "allStepsComplete": "เสร็จสมบูรณ์ทั้งหมด {count} ขั้นตอน",
+  "stepProgress": "ขั้นตอนที่ {current} จาก {total}",
+  "demoCompleteMessage": "การสาธิตเสร็จสมบูรณ์ — ทุกเฟสเสร็จสิ้นแล้ว!",
+  "showingPhase": "กำลังแสดง: {phaseName}",
+  "resetToRunAgainButton": "รีเซ็ตเพื่อเรียกใช้อีกครั้ง",
+  "runningStep": "กำลังเรียกใช้ขั้นตอนที่ {step}…",
+  "retryStep": "ลองทำขั้นตอนที่ {step} อีกครั้ง",
+  "runStep": "เรียกใช้ขั้นตอนที่ {current} จาก {total}",
+  "progressSavedMessage": "บันทึกความคืบหน้าแล้ว — คุณสามารถปิดและกลับมาทำต่อได้ในภายหลัง",
+  "demoFeaturesNotAvail": "คุณลักษณะการสาธิตไม่สามารถใช้ได้ในการผลิต",
+  "devEnvDemosHidden": "สภาพแวดล้อมการพัฒนา — การสาธิตจะถูกซ่อนในบิลด์การผลิต",
+  "growerpDemosTitle": "การสาธิต GrowERP",
+  "noDemosRegistered": "ไม่มีการสาธิตที่ลงทะเบียน",
+  "resetDemoListTitle": "รีเซ็ตการสาธิต?",
+  "resetDemoListContent": "ความคืบหน้าจะถูกรีเซ็ตเป็นขั้นตอนที่ 0\nข้อมูลที่สร้างในระบบจะยังคงอยู่"
+}

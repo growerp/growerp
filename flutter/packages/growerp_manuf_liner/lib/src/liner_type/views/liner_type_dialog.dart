@@ -14,6 +14,7 @@
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+import 'package:growerp_manuf_liner/l10n/generated/manuf_liner_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -111,8 +112,8 @@ class LinerTypeDialogState extends State<LinerTypeDialog> {
             const SizedBox(height: 20),
             TextFormField(
               key: const Key('widthIncrement'),
-              decoration: const InputDecoration(
-                  labelText: 'Width Increment (ft)', hintText: 'e.g. 12.5'),
+              decoration: InputDecoration(
+                  labelText: ManufLinerLocalizations.of(context)!.widthIncrement, hintText: 'e.g. 12.5'),
               controller: _widthIncrementController,
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
@@ -120,8 +121,8 @@ class LinerTypeDialogState extends State<LinerTypeDialog> {
             const SizedBox(height: 20),
             TextFormField(
               key: const Key('rollStockWidth'),
-              decoration: const InputDecoration(
-                  labelText: 'Roll Stock Width (ft)', hintText: 'e.g. 22.5'),
+              decoration: InputDecoration(
+                  labelText: ManufLinerLocalizations.of(context)!.rollStockWidth, hintText: 'e.g. 22.5'),
               controller: _rollStockWidthController,
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
@@ -129,8 +130,8 @@ class LinerTypeDialogState extends State<LinerTypeDialog> {
             const SizedBox(height: 20),
             TextFormField(
               key: const Key('linerWeight'),
-              decoration: const InputDecoration(
-                  labelText: 'Liner Weight (lb/sqft)', hintText: 'e.g. 0.63'),
+              decoration: InputDecoration(
+                  labelText: ManufLinerLocalizations.of(context)!.linerWeight, hintText: 'e.g. 0.63'),
               controller: _linerWeightController,
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),

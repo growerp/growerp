@@ -65,5 +65,8 @@
   "locationDeleteFailure": "การลบสถานที่ล้มเหลว",
   "locationAddSuccess": "เพิ่มสถานที่สำเร็จ",
   "locationAddFailure": "การเพิ่มสถานที่ล้มเหลว",
-  "locationFetchFailure": "การดึงข้อมูลสถานที่ล้มเหลว"
+  "locationFetchFailure": "การดึงข้อมูลสถานที่ล้มเหลว",
+  "helloWorld": "สวัสดีชาวโลก!",
+  "noShipmentData": "ไม่มีข้อมูลการจัดส่ง",
+  "unknownText": "????"
 }

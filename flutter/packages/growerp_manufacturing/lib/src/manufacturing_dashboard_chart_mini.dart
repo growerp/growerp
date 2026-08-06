@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:growerp_manufacturing/l10n/generated/manufacturing_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -58,7 +59,7 @@ class _ManufacturingDashboardChartMiniState
   ) {
     final colorScheme = Theme.of(context).colorScheme;
     if (summary.isEmpty) {
-      return const Center(child: Text('No work order data'));
+      return Center(child: Text(ManufacturingLocalizations.of(context)!.noWorkOrderData));
     }
     int maxCount = 1;
     for (final item in summary) {

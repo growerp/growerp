@@ -1,3 +1,4 @@
+import 'package:growerp_manuf_liner/l10n/generated/manuf_liner_localizations.dart';
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +17,27 @@ import 'dart:typed_data';
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+
 import 'package:growerp_models/growerp_models.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 /// Builds the Production Order PDF and returns the raw bytes.
-Future<Uint8List> buildProductionOrderPdfBytes(WorkOrder workOrder) async {
+Future<Uint8List> buildProductionOrderPdfBytes(WorkOrder workOrder, BuildContext? context) async {
   final pdf = pw.Document();
   pdf.addPage(
     pw.MultiPage(
       pageFormat: PdfPageFormat.letter,
-      build: (pw.Context context) => [
-        _buildHeader(workOrder),
+      build: (pw.Context pdfContext) => [
+        _buildHeader(workOrder, context),
         pw.SizedBox(height: 12),
-        _buildPanelsTable(workOrder.linerPanels),
+        _buildPanelsTable(workOrder.linerPanels, context),
         pw.SizedBox(height: 12),
-        _buildLinerTotals(workOrder.linerPanels),
+        _buildLinerTotals(workOrder.linerPanels, context),
         if (workOrder.bomItems.isNotEmpty) ...[
           pw.SizedBox(height: 12),
-          _buildBomTable(workOrder.bomItems),
+          _buildBomTable(workOrder.bomItems, context),
         ],
       ],
     ),
@@ -50,9 +52,9 @@ Future<Uint8List> buildProductionOrderPdfBytes(WorkOrder workOrder) async {
 ///   - Panels table: QC# | Panel Name | Liner | Width | Length | SqFt | Passes | Weight
 ///   - Liner Totals: Liner | Total SqFt | Est. Weight
 ///   - BOM Items: Product ID | Quantity
-Future<void> printProductionOrder(WorkOrder workOrder) async {
+Future<void> printProductionOrder(WorkOrder workOrder, BuildContext? context) async {
   await Printing.layoutPdf(
-    onLayout: (_) => buildProductionOrderPdfBytes(workOrder),
+    onLayout: (_) => buildProductionOrderPdfBytes(workOrder, context),
     name: 'ProductionOrder_${workOrder.pseudoId}',
   );
 }
@@ -66,19 +68,20 @@ Future<void> showProductionOrderPreview(
 ) async {
   await showDialog<void>(
     context: context,
-    builder: (_) => _ProductionOrderPreviewDialog(workOrder: workOrder),
+    builder: (ctx) => _ProductionOrderPreviewDialog(workOrder: workOrder, context: ctx),
   );
 }
 
 class _ProductionOrderPreviewDialog extends StatelessWidget {
   final WorkOrder workOrder;
-  const _ProductionOrderPreviewDialog({required this.workOrder});
+  const _ProductionOrderPreviewDialog({required this.workOrder, this.context});
+  final BuildContext? context;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Production Order ${workOrder.pseudoId}'),
+        title: Text(ManufLinerLocalizations.of(context)!.productionOrderTitle(workOrder.pseudoId)),
         actions: [
           IconButton(
             key: const Key('closePrintPreview'),
@@ -89,7 +92,7 @@ class _ProductionOrderPreviewDialog extends StatelessWidget {
         ],
       ),
       body: PdfPreview(
-        build: (_) => buildProductionOrderPdfBytes(workOrder),
+        build: (pdfCtx) => buildProductionOrderPdfBytes(workOrder, context),
         canChangeOrientation: false,
         canChangePageFormat: false,
         canDebug: false,
@@ -98,7 +101,7 @@ class _ProductionOrderPreviewDialog extends StatelessWidget {
   }
 }
 
-pw.Widget _buildHeader(WorkOrder workOrder) {
+pw.Widget _buildHeader(WorkOrder workOrder, BuildContext? context) {
   return pw.Container(
     padding: const pw.EdgeInsets.all(8),
     decoration: pw.BoxDecoration(
@@ -133,7 +136,7 @@ pw.Widget _buildHeader(WorkOrder workOrder) {
         if (workOrder.workEffortName != null)
           pw.Padding(
             padding: const pw.EdgeInsets.only(top: 4),
-            child: pw.Text('Note: ${workOrder.workEffortName!}'),
+            child: pw.Text(ManufLinerLocalizations.of(context!)!.noteWorkEffort(workOrder.workEffortName!)),
           ),
       ],
     ),
@@ -156,15 +159,15 @@ pw.Widget _headerField(String label, String value) {
   );
 }
 
-pw.Widget _buildPanelsTable(List<LinerPanel> panels) {
+pw.Widget _buildPanelsTable(List<LinerPanel> panels, BuildContext? context) {
   if (panels.isEmpty) {
-    return pw.Text('No panels recorded.',
+    return pw.Text(ManufLinerLocalizations.of(context!)!.noPanelsRecorded,
         style: const pw.TextStyle(fontSize: 10));
   }
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
     children: [
-      pw.Text('Liner Panels',
+      pw.Text(ManufLinerLocalizations.of(context!)!.linerPanels,
           style:
               pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
       pw.SizedBox(height: 4),
@@ -227,7 +230,7 @@ pw.TableRow _tablePanelRow(LinerPanel p) {
   );
 }
 
-pw.Widget _buildLinerTotals(List<LinerPanel> panels) {
+pw.Widget _buildLinerTotals(List<LinerPanel> panels, BuildContext? context) {
   if (panels.isEmpty) return pw.SizedBox();
 
   // Group by liner type
@@ -241,7 +244,7 @@ pw.Widget _buildLinerTotals(List<LinerPanel> panels) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
     children: [
-      pw.Text('Liner Totals',
+      pw.Text(ManufLinerLocalizations.of(context!)!.linerTotals,
           style:
               pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
       pw.SizedBox(height: 4),
@@ -273,11 +276,11 @@ pw.Widget _buildLinerTotals(List<LinerPanel> panels) {
   );
 }
 
-pw.Widget _buildBomTable(List<BomItem> items) {
+pw.Widget _buildBomTable(List<BomItem> items, BuildContext? context) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
     children: [
-      pw.Text('BOM / Materials',
+      pw.Text(ManufLinerLocalizations.of(context!)!.bomMaterials,
           style:
               pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
       pw.SizedBox(height: 4),

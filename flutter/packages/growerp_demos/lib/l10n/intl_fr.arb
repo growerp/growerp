@@ -1,0 +1,23 @@
+{
+  "@@locale": "fr",
+  "resetDemoTitle": "Reset Demo? [fr]",
+  "resetDemoContent": "This will reset your progress to step 0.\nDemo data already created in the system will remain. [fr]",
+  "cancelButton": "Cancel [fr]",
+  "resetButton": "Reset [fr]",
+  "resetDemoProgressTooltip": "Reset demo progress [fr]",
+  "allStepsComplete": "All {count} steps complete [fr]",
+  "stepProgress": "Step {current} of {total} [fr]",
+  "demoCompleteMessage": "Demo complete \u2014 all phases finished! [fr]",
+  "showingPhase": "Showing: {phaseName} [fr]",
+  "resetToRunAgainButton": "Reset to Run Again [fr]",
+  "runningStep": "Running step {step}\u2026 [fr]",
+  "retryStep": "Retry Step {step} [fr]",
+  "runStep": "Run Step {current} of {total} [fr]",
+  "progressSavedMessage": "Progress saved \u2014 you can close and resume later. [fr]",
+  "demoFeaturesNotAvail": "Demo features are not available in production. [fr]",
+  "devEnvDemosHidden": "Development environment \u2014 demos are hidden in production builds. [fr]",
+  "growerpDemosTitle": "GrowERP Demos [fr]",
+  "noDemosRegistered": "No demos registered. [fr]",
+  "resetDemoListTitle": "Reset demo? [fr]",
+  "resetDemoListContent": "Progress will be reset to step 0.\nData already created in the system is kept. [fr]"
+}
