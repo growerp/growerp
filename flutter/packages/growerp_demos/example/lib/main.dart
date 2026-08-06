@@ -61,6 +61,8 @@ final List<LocalizationsDelegate> delegates = [
   InventoryLocalizations.delegate,
   ManufacturingLocalizations.delegate,
   OrderAccountingLocalizations.delegate,
+  DemosLocalizations.delegate,
+  ManufLinerLocalizations.delegate,
 ];
 
 // ── BLoC providers (exported for integration tests) ───────────────────────────

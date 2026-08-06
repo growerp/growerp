@@ -238,6 +238,8 @@ List<LocalizationsDelegate> delegates = [
   SalesLocalizations.delegate,
   ActivityLocalizations.delegate,
   WikiLocalizations.delegate,
+  DemosLocalizations.delegate,
+  ManufLinerLocalizations.delegate,
 ];
 
 /// Widget registrations for all packages used by Admin app

@@ -14,6 +14,7 @@
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+import 'package:growerp_manufacturing/l10n/generated/manufacturing_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -128,16 +129,16 @@ class BomDialogState extends State<BomDialog> {
                   TextFormField(
                     key: const Key('pseudoId'),
                     controller: _pseudoIdController,
-                    decoration: const InputDecoration(
-                      labelText: 'Product ID (optional)',
+                    decoration: InputDecoration(
+                      labelText: ManufacturingLocalizations.of(context)!.productIdOptional,
                     ),
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
                     key: const Key('productName'),
                     controller: _productNameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Description *',
+                    decoration: InputDecoration(
+                      labelText: ManufacturingLocalizations.of(context)!.descriptionRequired,
                     ),
                     onChanged: (_) => setState(() {}),
                   ),
@@ -191,7 +192,7 @@ class BomDialogState extends State<BomDialog> {
                       child: TextFormField(
                         key: const Key('quantity'),
                         controller: _quantityController,
-                        decoration: const InputDecoration(labelText: 'Qty'),
+                        decoration: InputDecoration(labelText: ManufacturingLocalizations.of(context)!.qtyLabel),
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
@@ -203,7 +204,7 @@ class BomDialogState extends State<BomDialog> {
                         key: const Key('scrapFactor'),
                         controller: _scrapFactorController,
                         decoration:
-                            const InputDecoration(labelText: 'Scrap (0–1)'),
+                            InputDecoration(labelText: ManufacturingLocalizations.of(context)!.scrap0to1),
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
@@ -214,7 +215,7 @@ class BomDialogState extends State<BomDialog> {
                       child: TextFormField(
                         key: const Key('sequenceNum'),
                         controller: _seqNumController,
-                        decoration: const InputDecoration(labelText: 'Seq #'),
+                        decoration: InputDecoration(labelText: ManufacturingLocalizations.of(context)!.seqHash),
                         keyboardType: TextInputType.number,
                       ),
                     ),

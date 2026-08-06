@@ -1,0 +1,19 @@
+{
+  "@@locale": "zh",
+  "linerType": "Liner Type [zh]",
+  "descriptionOptional": "Description (optional) [zh]",
+  "linerWeight": "Liner Weight (lb/sqft) [zh]",
+  "productionOrderTitle": "Production Order {pseudoId} [zh]",
+  "noteWorkEffort": "Note: {workEffortName} [zh]",
+  "noPanelsRecorded": "No panels recorded. [zh]",
+  "linerPanels": "Liner Panels [zh]",
+  "linerTotals": "Liner Totals [zh]",
+  "bomMaterials": "BOM / Materials [zh]",
+  "linerName": "Liner Name [zh]",
+  "panelNameOptional": "Panel Name (optional) [zh]",
+  "panelWidth": "Panel Width (ft) [zh]",
+  "panelLength": "Panel Length (ft) [zh]",
+  "sequenceNoOptional": "Sequence No. (optional) [zh]",
+  "rollStockWidth": "Roll Stock Width (ft) [zh]",
+  "widthIncrement": "Width Increment (ft) [zh]"
+}

@@ -165,10 +165,12 @@ GoRouter createLinerExampleRouter() {
           extraActionBuilder: (workOrder) => [
             Tooltip(
               message: 'Print Production Order',
-              child: IconButton(
-                key: const Key('printProductionOrder'),
-                icon: const Icon(Icons.print),
-                onPressed: () => printProductionOrder(workOrder),
+              child: Builder(
+                builder: (context) => IconButton(
+                  key: const Key('printProductionOrder'),
+                  icon: const Icon(Icons.print),
+                  onPressed: () => printProductionOrder(workOrder, context),
+                ),
               ),
             ),
           ],

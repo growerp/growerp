@@ -13,7 +13,7 @@
   "locationName": "Locatienaam",
   "enterLocationName": "Voer een locatienaam in",
   "quantityOnHand": "Aantal op voorraad",
-  "create": "Creëer",
+  "create": "Cre\u00eber",
   "update": "Update",
   "failedToFetchSearchItems": "ophalen van zoekitems mislukt: {message}",
   "locationSearch": "Locatie zoeken",
@@ -65,5 +65,8 @@
   "locationDeleteFailure": "Verwijderen van locatie mislukt",
   "locationAddSuccess": "Locatie succesvol toegevoegd",
   "locationAddFailure": "Toevoegen van locatie mislukt",
-  "locationFetchFailure": "Ophalen van locaties mislukt"
+  "locationFetchFailure": "Ophalen van locaties mislukt",
+  "helloWorld": "Hello World! [nl]",
+  "noShipmentData": "No shipment data [nl]",
+  "unknownText": "???? [nl]"
 }

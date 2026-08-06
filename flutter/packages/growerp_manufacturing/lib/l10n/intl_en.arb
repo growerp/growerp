@@ -4,7 +4,9 @@
   "@failedToFetchBomItems": {
     "description": "Error message when the app fails to fetch BOM items",
     "placeholders": {
-      "message": { "type": "String" }
+      "message": {
+        "type": "String"
+      }
     }
   },
   "noBomItemsFound": "no BOM items found",
@@ -15,7 +17,9 @@
   "@failedToFetchWorkOrders": {
     "description": "Error message when the app fails to fetch work orders",
     "placeholders": {
-      "message": { "type": "String" }
+      "message": {
+        "type": "String"
+      }
     }
   },
   "noWorkOrdersFound": "no work orders found",
@@ -38,7 +42,9 @@
   "@error": {
     "description": "Generic error message",
     "placeholders": {
-      "message": { "type": "String" }
+      "message": {
+        "type": "String"
+      }
     }
   },
   "newLabel": "New",
@@ -49,44 +55,138 @@
   "@bomInfo": {
     "description": "BOM dialog title",
     "placeholders": {
-      "id": { "type": "String" }
+      "id": {
+        "type": "String"
+      }
     }
   },
   "workOrderInfo": "Work Order {id}",
   "@workOrderInfo": {
     "description": "Work order dialog title",
     "placeholders": {
-      "id": { "type": "String" }
+      "id": {
+        "type": "String"
+      }
     }
   },
   "productId": "Product ID",
-  "@productId": { "description": "Product ID label" },
+  "@productId": {
+    "description": "Product ID label"
+  },
   "productName": "Product Name",
-  "@productName": { "description": "Product name label" },
+  "@productName": {
+    "description": "Product name label"
+  },
   "componentId": "Component ID",
-  "@componentId": { "description": "Component ID label" },
+  "@componentId": {
+    "description": "Component ID label"
+  },
   "componentName": "Component Name",
-  "@componentName": { "description": "Component name label" },
+  "@componentName": {
+    "description": "Component name label"
+  },
   "quantity": "Quantity",
-  "@quantity": { "description": "Quantity label" },
+  "@quantity": {
+    "description": "Quantity label"
+  },
   "scrapFactor": "Scrap Factor",
-  "@scrapFactor": { "description": "Scrap factor label" },
+  "@scrapFactor": {
+    "description": "Scrap factor label"
+  },
   "sequenceNum": "Seq#",
-  "@sequenceNum": { "description": "Sequence number label" },
+  "@sequenceNum": {
+    "description": "Sequence number label"
+  },
   "status": "Status",
-  "@status": { "description": "Status label" },
+  "@status": {
+    "description": "Status label"
+  },
   "startDate": "Start Date",
-  "@startDate": { "description": "Start date label" },
+  "@startDate": {
+    "description": "Start date label"
+  },
   "completionDate": "Completion Date",
-  "@completionDate": { "description": "Completion date label" },
+  "@completionDate": {
+    "description": "Completion date label"
+  },
   "enterQuantity": "Please enter a quantity",
-  "@enterQuantity": { "description": "Validation message for quantity" },
+  "@enterQuantity": {
+    "description": "Validation message for quantity"
+  },
   "enterProduct": "Please enter a product",
-  "@enterProduct": { "description": "Validation message for product" },
+  "@enterProduct": {
+    "description": "Validation message for product"
+  },
   "enterComponent": "Please enter a component",
-  "@enterComponent": { "description": "Validation message for component" },
+  "@enterComponent": {
+    "description": "Validation message for component"
+  },
   "bomTitle": "Bill of Materials",
-  "@bomTitle": { "description": "BOM list screen title" },
+  "@bomTitle": {
+    "description": "BOM list screen title"
+  },
   "workOrderTitle": "Work Orders",
-  "@workOrderTitle": { "description": "Work order list screen title" }
+  "@workOrderTitle": {
+    "description": "Work order list screen title"
+  },
+  "noWorkOrderData": "No work order data",
+  "@noWorkOrderData": {
+    "description": "Message when no work order data is available"
+  },
+  "deleteButton": "Delete",
+  "@deleteButton": {
+    "description": "Delete button label"
+  },
+  "addStepButton": "Add Step",
+  "@addStepButton": {
+    "description": "Add step button label"
+  },
+  "noneOption": "\u2014 None \u2014",
+  "@noneOption": {
+    "description": "Option for None"
+  },
+  "releaseToShopFloor": "Release to Shop Floor",
+  "@releaseToShopFloor": {
+    "description": "Label to release work order to shop floor"
+  },
+  "startProduction": "Start Production",
+  "@startProduction": {
+    "description": "Label to start production"
+  },
+  "completeProduction": "Complete Production",
+  "@completeProduction": {
+    "description": "Label to complete production"
+  },
+  "workOrderNameOptional": "Work Order Name (optional)",
+  "@workOrderNameOptional": {
+    "description": "Label for optional Work Order Name"
+  },
+  "startDateOptional": "Start Date (YYYY-MM-DD)",
+  "@startDateOptional": {
+    "description": "Label for optional Start Date"
+  },
+  "productionRoutingOptional": "Production Routing (optional)",
+  "@productionRoutingOptional": {
+    "description": "Label for optional Production Routing"
+  },
+  "productIdOptional": "Product ID (optional)",
+  "@productIdOptional": {
+    "description": "Label for optional Product ID"
+  },
+  "descriptionRequired": "Description *",
+  "@descriptionRequired": {
+    "description": "Label for required description"
+  },
+  "qtyLabel": "Qty",
+  "@qtyLabel": {
+    "description": "Short label for quantity"
+  },
+  "scrap0to1": "Scrap (0\u20131)",
+  "@scrap0to1": {
+    "description": "Label for Scrap with range"
+  },
+  "seqHash": "Seq #",
+  "@seqHash": {
+    "description": "Label for Sequence Number"
+  }
 }

@@ -14,6 +14,7 @@
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:growerp_demos/l10n/generated/demos_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -146,19 +147,16 @@ class _GenericDemoRunnerState extends State<GenericDemoRunner> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Reset Demo?'),
-        content: const Text(
-          'This will reset your progress to step 0.\n'
-          'Demo data already created in the system will remain.',
-        ),
+        title: Text(DemosLocalizations.of(context)!.resetDemoTitle),
+        content: Text(DemosLocalizations.of(context)!.resetDemoContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(DemosLocalizations.of(context)!.cancelButton),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Reset', style: TextStyle(color: Colors.red)),
+            child: Text(DemosLocalizations.of(context)!.resetButton, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -184,7 +182,7 @@ class _GenericDemoRunnerState extends State<GenericDemoRunner> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            tooltip: 'Reset demo progress',
+            tooltip: DemosLocalizations.of(context)!.resetDemoProgressTooltip,
             onPressed: _isRunning ? null : _reset,
           ),
         ],
@@ -221,8 +219,8 @@ class _GenericDemoRunnerState extends State<GenericDemoRunner> {
             children: [
               Text(
                 _isComplete
-                    ? 'All ${widget.phases.length} steps complete'
-                    : 'Step ${_currentStep + 1} of ${widget.phases.length}',
+                    ? DemosLocalizations.of(context)!.allStepsComplete(widget.phases.length)
+                    : DemosLocalizations.of(context)!.stepProgress(_currentStep + 1, widget.phases.length),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(width: 10),
@@ -265,7 +263,7 @@ class _GenericDemoRunnerState extends State<GenericDemoRunner> {
             ),
           ] else ...[
             Text(
-              'Demo complete — all phases finished!',
+              DemosLocalizations.of(context)!.demoCompleteMessage,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: Colors.green.shade700,
@@ -278,7 +276,7 @@ class _GenericDemoRunnerState extends State<GenericDemoRunner> {
               Icon(Icons.tv, size: 14, color: Colors.grey.shade500),
               const SizedBox(width: 4),
               Text(
-                'Showing: ${displayPhase.title.split(':').last.trim()}',
+                DemosLocalizations.of(context)!.showingPhase(displayPhase.title.split(':').last.trim()),
                 style: TextStyle(
                   fontSize: 11,
                   color: Colors.grey.shade600,
@@ -309,7 +307,7 @@ class _GenericDemoRunnerState extends State<GenericDemoRunner> {
             child: _isComplete
                 ? ElevatedButton.icon(
                     icon: const Icon(Icons.replay),
-                    label: const Text('Reset to Run Again'),
+                    label: Text(DemosLocalizations.of(context)!.resetToRunAgainButton),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green.shade700,
                       foregroundColor: Colors.white,
@@ -330,10 +328,10 @@ class _GenericDemoRunnerState extends State<GenericDemoRunner> {
                         : const Icon(Icons.play_arrow),
                     label: Text(
                       _isRunning
-                          ? 'Running step ${_currentStep + 1}…'
+                          ? DemosLocalizations.of(context)!.runningStep(_currentStep + 1)
                           : _errorMessage != null
-                          ? 'Retry Step ${_currentStep + 1}'
-                          : 'Run Step ${_currentStep + 1} of ${widget.phases.length}',
+                          ? DemosLocalizations.of(context)!.retryStep(_currentStep + 1)
+                          : DemosLocalizations.of(context)!.runStep(_currentStep + 1, widget.phases.length),
                     ),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -344,7 +342,7 @@ class _GenericDemoRunnerState extends State<GenericDemoRunner> {
           if (!_isComplete && _currentStep > 0) ...[
             const SizedBox(height: 6),
             Text(
-              'Progress saved — you can close and resume later.',
+              DemosLocalizations.of(context)!.progressSavedMessage,
               style: TextStyle(
                 fontSize: 10,
                 color: Colors.grey.shade500,

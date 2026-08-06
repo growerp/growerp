@@ -1,0 +1,19 @@
+{
+  "@@locale": "de",
+  "linerType": "Liner Type [de]",
+  "descriptionOptional": "Description (optional) [de]",
+  "linerWeight": "Liner Weight (lb/sqft) [de]",
+  "productionOrderTitle": "Production Order {pseudoId} [de]",
+  "noteWorkEffort": "Note: {workEffortName} [de]",
+  "noPanelsRecorded": "No panels recorded. [de]",
+  "linerPanels": "Liner Panels [de]",
+  "linerTotals": "Liner Totals [de]",
+  "bomMaterials": "BOM / Materials [de]",
+  "linerName": "Liner Name [de]",
+  "panelNameOptional": "Panel Name (optional) [de]",
+  "panelWidth": "Panel Width (ft) [de]",
+  "panelLength": "Panel Length (ft) [de]",
+  "sequenceNoOptional": "Sequence No. (optional) [de]",
+  "rollStockWidth": "Roll Stock Width (ft) [de]",
+  "widthIncrement": "Width Increment (ft) [de]"
+}

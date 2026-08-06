@@ -16,6 +16,9 @@ environment:
   flutter: '>=3.33.0'
 
 dependencies:
+  intl: ^0.20.0
+  flutter_localizations:
+    sdk: flutter
   flutter:
     sdk: flutter
   growerp_core: ^1.11.0
@@ -31,3 +34,4 @@ dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true

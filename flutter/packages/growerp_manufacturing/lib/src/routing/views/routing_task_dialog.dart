@@ -14,6 +14,7 @@
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+import 'package:growerp_manufacturing/l10n/generated/manufacturing_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -130,7 +131,7 @@ class RoutingTaskDialogState extends State<RoutingTaskDialog> {
                     key: const Key('delete'),
                     style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red),
-                    child: const Text('Delete'),
+                    child: Text(ManufacturingLocalizations.of(context)!.deleteButton),
                     onPressed: () {
                       context
                           .read<RoutingBloc>()

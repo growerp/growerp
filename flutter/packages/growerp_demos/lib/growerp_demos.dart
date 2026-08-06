@@ -12,6 +12,7 @@
  * limitations under the License.
  */
 
+export 'package:growerp_demos/l10n/generated/demos_localizations.dart';
 export 'src/demo_entry.dart';
 export 'src/demo_progress_helper.dart';
 export 'src/demo_list_screen.dart';

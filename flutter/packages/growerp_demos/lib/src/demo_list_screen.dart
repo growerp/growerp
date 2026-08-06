@@ -14,6 +14,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:growerp_demos/l10n/generated/demos_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 
@@ -70,16 +71,16 @@ class _DemoListScreenState extends State<DemoListScreen> {
   @override
   Widget build(BuildContext context) {
     if (kReleaseMode) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
-          child: Text('Demo features are not available in production.'),
+          child: Text(DemosLocalizations.of(context)!.demoFeaturesNotAvail),
         ),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('GrowERP Demos'),
+        title: Text(DemosLocalizations.of(context)!.growerpDemosTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -309,15 +310,12 @@ class _DemoCard extends StatelessWidget {
         final confirm = await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Text('Reset demo?'),
-            content: const Text(
-              'Progress will be reset to step 0.\n'
-              'Data already created in the system is kept.',
-            ),
+            title: Text(DemosLocalizations.of(context)!.resetDemoListTitle),
+            content: Text(DemosLocalizations.of(context)!.resetDemoListContent),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(false),
-                child: const Text('Cancel'),
+                child: Text(DemosLocalizations.of(context)!.cancelButton),
               ),
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(true),

@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:growerp_manufacturing/l10n/generated/manufacturing_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -170,7 +171,7 @@ class RoutingDialogState extends State<RoutingDialog> {
             TextButton.icon(
               key: const Key('addTask'),
               icon: const Icon(Icons.add),
-              label: const Text('Add Step'),
+              label: Text(ManufacturingLocalizations.of(context)!.addStepButton),
               onPressed: () => showDialog(
                 context: context,
                 builder: (_) => BlocProvider.value(
