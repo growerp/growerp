@@ -21,6 +21,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_marketing_example/demo_router_builder.dart';
+import 'package:growerp_marketing/growerp_marketing.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,7 +40,11 @@ Future main() async {
       notificationClient: notificationClient,
       title: 'GrowERP Marketing Demo',
       router: createMarketingDemoRouter(),
-      extraDelegates: const [OrderAccountingLocalizations.delegate],
+      extraDelegates: const [
+        OrderAccountingLocalizations.delegate,
+        MarketingLocalizations.delegate,
+        CatalogLocalizations.delegate,
+      ],
       extraBlocProviders: [
         ...getCatalogBlocProviders(restClient, applicationId),
         ...getOrderAccountingBlocProviders(restClient, applicationId),

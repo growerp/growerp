@@ -100,6 +100,11 @@ const marketingMenuConfig = MenuConfiguration(
 /// Creates a static go_router for the marketing example app using shared helper.
 ///
 /// Used by both the production app (main.dart) and all integration tests.
+/// Localization delegates for the marketing example app and its tests.
+const List<LocalizationsDelegate> marketingExampleDelegates = [
+  MarketingLocalizations.delegate,
+];
+
 GoRouter createMarketingExampleRouter() {
   return createStaticAppRouter(
     menuConfig: marketingMenuConfig,

@@ -24,7 +24,7 @@ void main() {
       tester,
       app.createOutreachExampleRouter(),
       app.outreachMenuConfig,
-      const [UserCompanyLocalizations.delegate],
+      app.outreachExampleDelegates,
       restClient: restClient,
       blocProviders: [
         BlocProvider<OutreachCampaignBloc>(

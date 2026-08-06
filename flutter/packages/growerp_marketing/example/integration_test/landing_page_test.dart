@@ -36,7 +36,7 @@ void main() {
       tester,
       createMarketingExampleRouter(),
       marketingMenuConfig,
-      const [],
+      marketingExampleDelegates,
       restClient: restClient,
       blocProviders: getExampleBlocProviders(
         restClient,
@@ -65,7 +65,7 @@ void main() {
       tester,
       createMarketingExampleRouter(),
       marketingMenuConfig,
-      const [],
+      marketingExampleDelegates,
       restClient: restClient,
       blocProviders: getExampleBlocProviders(
         restClient,
@@ -94,7 +94,7 @@ void main() {
       tester,
       createMarketingExampleRouter(),
       marketingMenuConfig,
-      const [],
+      marketingExampleDelegates,
       restClient: restClient,
       blocProviders: getExampleBlocProviders(
         restClient,

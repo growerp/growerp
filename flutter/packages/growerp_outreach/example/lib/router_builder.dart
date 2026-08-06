@@ -99,6 +99,13 @@ const outreachMenuConfig = MenuConfiguration(
 /// Creates a static go_router for the outreach example app using shared helper.
 ///
 /// Used by both the production app (main.dart) and all integration tests.
+/// Localization delegates for the outreach example app and its tests.
+const List<LocalizationsDelegate> outreachExampleDelegates = [
+  UserCompanyLocalizations.delegate,
+  OutreachLocalizations.delegate,
+  MarketingLocalizations.delegate,
+];
+
 GoRouter createOutreachExampleRouter() {
   return createStaticAppRouter(
     menuConfig: outreachMenuConfig,

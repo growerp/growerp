@@ -43,7 +43,7 @@ void main() {
       tester,
       createOutreachExampleRouter(),
       outreachMenuConfig,
-      const [],
+      outreachExampleDelegates,
       restClient: restClient,
       blocProviders: [
         BlocProvider<OutreachCampaignBloc>(

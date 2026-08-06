@@ -18,6 +18,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'router_builder.dart';
+import 'package:growerp_marketing/growerp_marketing.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,7 +37,7 @@ Future main() async {
       notificationClient: notificationClient,
       title: 'GrowERP Marketing Example',
       router: createMarketingExampleRouter(),
-      extraDelegates: const [],
+      extraDelegates: const [MarketingLocalizations.delegate],
       extraBlocProviders: getExampleBlocProviders(restClient, applicationId),
     ),
   );
