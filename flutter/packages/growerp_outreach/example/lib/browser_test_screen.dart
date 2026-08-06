@@ -14,7 +14,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:growerp_outreach/growerp_outreach.dart';
-import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
 
 /// Test screen for BrowserMCP integration with LinkedIn adapter testing
 class BrowserTestScreen extends StatefulWidget {

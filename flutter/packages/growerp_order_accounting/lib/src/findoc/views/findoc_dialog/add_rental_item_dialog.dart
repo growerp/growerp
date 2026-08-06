@@ -20,7 +20,6 @@ import 'package:intl/intl.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../../../../growerp_order_accounting.dart';
-import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 /// [addRentalItemDialog] add a rental order item [FinDocItem]
 Future addRentalItemDialog(

@@ -16,8 +16,6 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
-import '../functions/functions.dart';
-import '../widgets/widgets.dart';
 
 /// Edits the tenant's Google Workspace OAuth credentials (client id/secret,
 /// refresh token, calendar id) used by the Google Calendar booking capture:

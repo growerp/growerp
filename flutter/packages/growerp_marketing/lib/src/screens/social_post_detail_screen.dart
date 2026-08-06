@@ -21,7 +21,6 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../growerp_marketing.dart';
-import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 class SocialPostDetailScreen extends StatefulWidget {
   final SocialPost? socialPost;

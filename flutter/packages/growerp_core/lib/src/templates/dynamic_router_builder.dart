@@ -19,7 +19,6 @@ import 'package:growerp_models/growerp_models.dart';
 import '../../growerp_core.dart';
 import 'dialog_page.dart';
 
-import 'package:growerp_core/growerp_core.dart';
 
 /// Configuration for creating a dynamic app router
 ///

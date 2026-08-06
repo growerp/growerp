@@ -21,7 +21,6 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:universal_io/io.dart';
 import '../../growerp_core.dart';
 
-import 'package:growerp_core/growerp_core.dart';
 
 /// Lazily builds its child only when the tab at [index] is first activated.
 /// Until then it shows an empty box, preventing unnecessary network requests

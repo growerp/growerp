@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
-import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Assessment Flow Container
 /// Manages the three-step assessment process and state transitions

@@ -21,8 +21,6 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-import '../../../domains/domains.dart';
-import '../../../extensions.dart';
 
 import 'package:growerp_core/growerp_core.dart';
 
@@ -70,7 +68,6 @@ class PaymentSubscriptionDialogState extends State<PaymentSubscriptionDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = CoreLocalizations.of(context);
     final daysRemaining = widget.authenticate.subscriptionDaysRemaining ?? 0;
 
     return popUp(

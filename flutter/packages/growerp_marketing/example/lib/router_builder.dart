@@ -18,7 +18,6 @@ import 'package:go_router/go_router.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Canonical menu configuration for Marketing example app.
 ///

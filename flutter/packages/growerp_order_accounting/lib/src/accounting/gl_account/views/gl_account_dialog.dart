@@ -19,7 +19,6 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../../../../growerp_order_accounting.dart';
-import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 class GlAccountDialog extends StatefulWidget {
   final GlAccount glAccount;

@@ -15,7 +15,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
-import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Integrated landing page to assessment flow screen
 ///

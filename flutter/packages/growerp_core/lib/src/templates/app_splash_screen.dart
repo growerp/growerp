@@ -17,7 +17,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../../growerp_core.dart';
 
-import 'package:growerp_core/growerp_core.dart';
 
 /// Generic Splash Screen that handles authentication state and menu loading.
 ///

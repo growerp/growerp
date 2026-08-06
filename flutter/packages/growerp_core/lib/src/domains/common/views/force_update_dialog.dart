@@ -16,8 +16,6 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../functions/get_backend_url.dart';
-import '../constant.dart';
 import 'reload_web_stub.dart'
     if (dart.library.js_interop) 'reload_web_web.dart';
 
