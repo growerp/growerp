@@ -1612,6 +1612,7 @@ jobs:
                       version = tag
                   apps.setdefault(app, {})[env] = {
                       'version': version.split('+')[0] or '?',
+                      'image': image,
                       'replicas': replicas or '?',
                       'updated': fmt_updated(updated),
                   }
@@ -1621,31 +1622,34 @@ jobs:
               apps = parse_swarm_images()
               if not apps:
                   return ''
-              head = ('<tr><th>App</th>'
-                      '<th>Staging version</th><th>Replicas</th><th>Deployed</th>'
-                      '<th>Production version</th><th>Replicas</th><th>Deployed</th></tr>')
-              rows = ''
-              # Backend first, then alphabetical — same order as the server's apps.conf.
-              for app in sorted(apps, key=lambda a: (0 if a == 'moqui' else 1, a)):
-                  envs = apps[app]
-                  stg, prd = envs.get('staging'), envs.get('production')
-                  cells = f'<td>{esc(app)}</td>'
-                  for env in ('staging', 'production'):
-                      env_data = envs.get(env)
+              head = ('<tr><th>App</th><th>Version</th><th>Image</th>'
+                      '<th>Replicas</th><th>Deployed</th></tr>')
+
+              def env_table(title, env):
+                  rows = ''
+                  # Backend first, then alphabetical — the server's apps.conf order.
+                  for app in sorted(apps, key=lambda a: (0 if a == 'moqui' else 1, a)):
+                      env_data = apps[app].get(env)
                       if not env_data:
-                          cells += '<td class="bad" colspan="3">not deployed</td>'
+                          rows += (f'<tr><td>{esc(app)}</td>'
+                                   '<td class="bad" colspan="4">not deployed</td></tr>')
                           continue
                       # Production trailing staging is the normal state between
                       # promotions, so it is a note, not a failure.
+                      stg = apps[app].get('staging')
                       behind = (env == 'production' and stg
-                                and stg['version'] != prd['version'])
+                                and stg['version'] != env_data['version'])
                       cls = ' class="warn"' if behind else ''
-                      cells += (f'<td{cls}>{esc(env_data["version"])}</td>'
-                                + swarm_cell('REPLICAS', env_data['replicas'])
-                                + f'<td>{esc(env_data["updated"])}</td>')
-                  rows += f'<tr>{cells}</tr>'
-              return ('<h3>Deployed Images</h3><table>' + head + rows + '</table>'
-                      '<p>An amber production version means staging is ahead — promote '
+                      rows += (f'<tr><td>{esc(app)}</td>'
+                               + f'<td{cls}>{esc(env_data["version"])}</td>'
+                               + f'<td>{esc(env_data["image"])}</td>'
+                               + swarm_cell('REPLICAS', env_data['replicas'])
+                               + f'<td>{esc(env_data["updated"])}</td></tr>')
+                  return f'<h3>{title}</h3><table>{head}{rows}</table>'
+
+              return (env_table('Staging images (test services)', 'staging')
+                      + env_table('Production images', 'production')
+                      + '<p>An amber production version means staging is ahead — promote '
                       'it with the "Copy Staging to Production" workflow.</p>')
 
           def swarm_html():

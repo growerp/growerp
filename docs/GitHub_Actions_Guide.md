@@ -110,7 +110,7 @@ check-changes                       resolve-matrix              swarm-status
 **What it does — report:**
 1. Merges the store fragments into one matrix table (app rows × store columns) and lists apps waiting for approval.
 2. Sums the test totals (backend Spock, Flutter mobile/desktop packages and tests). When the tests were skipped, the last published totals are carried over from `tests-data.json` on the Pages site and labelled with their original date.
-3. Renders the swarm section from the `status-swarm` fragment: the `docker stack ps` tasks, plus a **Deployed Images** table with the version, replica count and last-deployed time of every app on staging and on production. Non-running tasks and incomplete replica counts (`0/1`) are red; a production version behind staging is amber.
+3. Renders the swarm section from the `status-swarm` fragment: the `docker stack ps` tasks, plus a **Staging images** and a **Production images** table listing every app's running version, image, replica count and last-deployed time. Non-running tasks and incomplete replica counts (`0/1`) are red; a production version behind staging is amber.
 4. Writes `index.html`, `failures.html`, `tests-data.json` for GitHub Pages, a PDF artifact (`status-report`, retained 30 days) and the run's step summary.
 5. Fails the run when more than one individual test failed on a layout, or when the backend tests failed — the page is still published in that case.
 
