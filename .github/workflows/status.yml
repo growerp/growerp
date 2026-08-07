@@ -1667,8 +1667,11 @@ jobs:
 
               return (env_table('Staging images (test services)', 'staging')
                       + env_table('Production images', 'production')
-                      + '<p>An amber production version means staging is ahead — promote '
-                      'it with the "Copy Staging to Production" workflow.</p>')
+                      + '<p>Versions are compared per app: an amber production version '
+                      'means that app\'s staging build is ahead of it. Both "Update '
+                      'Staging" and "Copy Staging to Production" can run for a single '
+                      'app, so apps sitting at different versions within the same '
+                      'environment is normal, not an error.</p>')
 
           def swarm_html():
               images = images_table()
