@@ -24,14 +24,15 @@ name: status
 #
 # Per-store app availability: storeApps in flutter/release/release_config.json
 #
-# Runs daily at 1 AM Bangkok time (18:00 UTC previous day). The store jobs run
+# Runs daily at 10 PM Bangkok time (15:00 UTC). Actual start is typically 1-2 hours
+# later because GitHub queues scheduled runs. The store jobs run
 # every time; the test jobs only when there were commits that day. Can also be
 # triggered manually via workflow_dispatch.
 
 on:
   schedule:
-    # 1 AM Bangkok time (UTC+7) = 18:00 UTC previous day
-    - cron: "0 18 * * *"
+    # 10 PM Bangkok time (UTC+7) = 15:00 UTC same day
+    - cron: "0 15 * * *"
   workflow_dispatch:
     inputs:
       package_filter:

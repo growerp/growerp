@@ -66,7 +66,7 @@ GrowERP uses six GitHub Actions workflows to automate testing, releasing Docker 
 **Purpose:** One nightly status run — the full Flutter integration test suite plus the backend Spock tests against a locally-built Moqui backend, the publish state of every app in every store, *and* the state of the production Docker swarm. All results are published as a single GitHub Pages page: <https://growerp.github.io/growerp/>.
 
 **Triggers:**
-- **Schedule:** Daily at 1 AM Bangkok time (18:00 UTC previous day). The store-status jobs run every time; the test jobs only run when there were commits in the last 24 hours affecting `flutter/**` or `moqui/runtime/component/**`.
+- **Schedule:** Daily at 10 PM Bangkok time (15:00 UTC); GitHub queues scheduled runs, so the actual start is usually 1-2 hours later. The store-status jobs run every time; the test jobs only run when there were commits in the last 24 hours affecting `flutter/**` or `moqui/runtime/component/**`.
 - **Manual (`workflow_dispatch`):** Run at any time from the Actions tab.
 
 **Concurrency:** Only one status run per branch at a time; new runs cancel in-progress runs. Pages deployment uses its own `pages` concurrency group and is never cancelled.
