@@ -82,9 +82,9 @@ GrowERP uses six GitHub Actions workflows to automate testing, releasing Docker 
 
 ```
 check-changes                       resolve-matrix              swarm-status
-    ├── backend-tests                   ├── status-ios          (ssh growerp.com
-    └── integration-tests               ├── status-macos         ./deploy.sh status)
-        (matrix: 4 slices × mobile/     ├── status-android
+    ├── backend-tests                   ├── status-ios          (ssh growerp.com:
+    └── integration-tests               ├── status-macos         deploy.sh status +
+        (matrix: 4 slices × mobile/     ├── status-android       image versions)
          desktop, or 1 slice when       ├── status-windows
          package_filter is set)         └── status-snap
                        ↓                       ↓                       ↓
@@ -110,11 +110,11 @@ check-changes                       resolve-matrix              swarm-status
 **What it does — report:**
 1. Merges the store fragments into one matrix table (app rows × store columns) and lists apps waiting for approval.
 2. Sums the test totals (backend Spock, Flutter mobile/desktop packages and tests). When the tests were skipped, the last published totals are carried over from `tests-data.json` on the Pages site and labelled with their original date.
-3. Renders the production swarm section from the `status-swarm` fragment: the `docker stack ps` tasks and the `docker service ls` services, with non-running tasks and incomplete replica counts (`0/1`) highlighted in red.
+3. Renders the swarm section from the `status-swarm` fragment: the `docker stack ps` tasks, plus a **Deployed Images** table with the version, replica count and last-deployed time of every app on staging and on production. Non-running tasks and incomplete replica counts (`0/1`) are red; a production version behind staging is amber.
 4. Writes `index.html`, `failures.html`, `tests-data.json` for GitHub Pages, a PDF artifact (`status-report`, retained 30 days) and the run's step summary.
 5. Fails the run when more than one individual test failed on a layout, or when the backend tests failed — the page is still published in that case.
 
-**What it does — swarm:** `swarm-status` SSHes into `growerp.com` and runs `cd ~/server/swarm && ./deploy.sh status` (read-only: `docker stack ps` + `docker service ls`). The raw output is uploaded as the `status-swarm` fragment. The job never blocks the run — when the SSH credentials are missing or the host is unreachable, the page shows "Swarm status unavailable".
+**What it does — swarm:** `swarm-status` SSHes into `growerp.com` twice, both read-only. First `cd ~/server/swarm && ./deploy.sh status` (`docker stack ps` + `docker service ls`) → `status.txt`. Then an inline loop over the stack's `<app>-test` (staging) and `<app>-prod` (production) services, recording `app|env|version|image|replicas|updated` → `images.txt`. The version comes from the image's `version` label (set at build time by `release_tool.dart`), because staging is deployed from `:latest` and its tag carries no version. Both files are uploaded as the `status-swarm` fragment and are independent — one failing SSH call does not blank the other's table. The job never blocks the run; when the credentials are missing or the host is unreachable the page says the swarm status is unavailable.
 
 **Failure drill-down:** every non-zero `Failed` count on the page links to `failures.html` on the same site, listing the failed packages, the failed test lines and the exceptions caught by the Flutter test framework, plus a link back to the workflow run for the raw logs. That detail is stored inside `tests-data.json`, so a run that skipped the tests rebuilds the same failures page from the carried-over data.
 

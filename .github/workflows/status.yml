@@ -1044,9 +1044,10 @@ jobs:
                 retention-days: 1
 
   # ------------------------------------------------------------------
-  # Production swarm status — runs `./deploy.sh status` on growerp.com and
-  # hands the raw output to the report job (parsed into tables there).
-  # Read-only: the status arm is just `docker stack ps` + `docker service ls`.
+  # Swarm status — two read-only SSH calls on growerp.com, both handed to the
+  # report job as raw text (parsed into tables there):
+  #   * `./deploy.sh status`   — `docker stack ps` + `docker service ls`
+  #   * an inline image inventory — running version per app per environment
   # ------------------------------------------------------------------
   swarm-status:
     runs-on: ubuntu-latest
@@ -1067,11 +1068,50 @@ jobs:
           capture_stdout: true
           script: cd ~/server/swarm && ./deploy.sh status
 
+      # Which version runs where. One swarm stack holds both environments:
+      # growerp_<app>-test is staging (deployed from :latest, so the tag itself
+      # carries no version) and growerp_<app>-prod is production (pinned tag).
+      # The version comes from the image's `version` label — set at build time by
+      # release_tool.dart and already used by the server's sync-to-prod.sh. It is
+      # only readable from the running container, which works because the swarm is
+      # a single node. Services without a -test/-prod suffix are infrastructure.
+      - name: Collect deployed image versions on growerp.com
+        id: ssh_images
+        continue-on-error: true
+        uses: appleboy/ssh-action@v1
+        with:
+          host: growerp.com
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          capture_stdout: true
+          script: |
+            for s in $(docker service ls --filter label=com.docker.stack.namespace=growerp --format '{{.Name}}' | sort); do
+              base=${s#growerp_}
+              case "$base" in
+                *-test) app=${base%-test}; envn=staging ;;
+                *-prod) app=${base%-prod}; envn=production ;;
+                *) continue ;;
+              esac
+              img=$(docker service inspect "$s" --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}' 2>/dev/null)
+              upd=$(docker service inspect "$s" --format '{{.UpdatedAt}}' 2>/dev/null)
+              # The name filter is a prefix match, so pick the exact service.
+              rep=$(docker service ls --filter "name=$s" --format '{{.Name}} {{.Replicas}}' | awk -v n="$s" '$1 == n { print $2; exit }')
+              cid=$(docker ps -q -f "name=$s" | head -1)
+              ver=""
+              if [ -n "$cid" ]; then
+                ver=$(docker inspect --format '{{index .Config.Labels "version"}}' "$cid" 2>/dev/null)
+              fi
+              printf '%s|%s|%s|%s|%s|%s\n' "$app" "$envn" "$ver" "${img%%@*}" "$rep" "$upd"
+            done
+
+      # The two SSH steps are saved independently — one failing must not blank
+      # the other's section on the page.
       - name: Save swarm status fragment
         if: always()
         env:
           SWARM_OUT: ${{ steps.ssh.outputs.stdout }}
           SSH_OUTCOME: ${{ steps.ssh.outcome }}
+          IMAGES_OUT: ${{ steps.ssh_images.outputs.stdout }}
         run: |
           mkdir -p /tmp/swarm
           if [ -n "$SWARM_OUT" ]; then
@@ -1080,6 +1120,11 @@ jobs:
           else
             echo "deploy.sh status returned no output (ssh step: $SSH_OUTCOME)" \
               > /tmp/swarm/error.txt
+          fi
+          if [ -n "$IMAGES_OUT" ]; then
+            printf '%s\n' "$IMAGES_OUT" \
+              | { grep -v '^=\{4,\}' || true; } \
+              | { grep '|' || true; } > /tmp/swarm/images.txt
           fi
           cat /tmp/swarm/*.txt
 
@@ -1503,7 +1548,7 @@ jobs:
           else:
               tests_table = '<p>No test results published yet.</p>'
 
-          # ══ Production swarm status ═════════════════════════════════════
+          # ══ Swarm status ════════════════════════════════════════════════
           # Raw output of `./deploy.sh status` on growerp.com, collected by the
           # swarm-status job. Two docker "table" sections; values contain spaces
           # ("Running 3 days ago"), so rows are sliced by the header's column
@@ -1541,24 +1586,92 @@ jobs:
                   for r in rows)
               return f'<h3>{title}</h3><table><tr>{head}</tr>{body}</table>'
 
-          def swarm_html():
-              err = os.path.join(SWARM_DIR, 'error.txt')
-              if os.path.exists(err):
-                  return ('<p>Swarm status unavailable — '
-                          + esc(open(err).read().strip()) + '</p>')
-              path = os.path.join(SWARM_DIR, 'status.txt')
+          # ── Deployed images: which version runs on staging vs production ──
+          # images.txt lines: app|env|version|image|replicas|updated, one per
+          # <app>-test / <app>-prod service. Staging is deployed from :latest,
+          # so its version can only come from the image's `version` label;
+          # production pins the version as the tag, which is the fallback when
+          # the label is unreadable (container not running).
+          def fmt_updated(value):
+              # docker prints "2026-08-05 09:12:33.123456789 +0000 UTC"
+              m = re.match(r'(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})', value or '')
+              return f'{m.group(1)} {m.group(2)}' if m else (value or '?')
+
+          def parse_swarm_images():
+              path = os.path.join(SWARM_DIR, 'images.txt')
               if not os.path.exists(path):
-                  return '<p>Swarm status unavailable — no data collected.</p>'
-              text = open(path, errors='replace').read()
-              text = re.sub(r"^\(Use '\./deploy\.sh status.*$", '', text, flags=re.M)
-              parts = re.split(r'^=== (.+?) ===\s*$', text, flags=re.M)
-              # parts = [preamble, title1, block1, title2, block2, ...]
-              sections = dict(zip(parts[1::2], parts[2::2]))
-              if not sections:
-                  return f'<pre>{esc(text.strip())}</pre>'
-              return (swarm_table('Tasks', sections.get('Stack Status', ''))
-                      + swarm_table('Services', sections.get('Services', ''),
-                                    drop_cols=('ID',)))
+                  return {}
+              apps = {}
+              for line in open(path, errors='replace'):
+                  parts = [p.strip() for p in line.split('|')]
+                  if len(parts) != 6 or parts[1] not in ('staging', 'production'):
+                      continue
+                  app, env, version, image, replicas, updated = parts
+                  tag = image.rsplit(':', 1)[-1] if ':' in image else ''
+                  if not version and re.match(r'^\d+\.\d+\.\d+', tag):
+                      version = tag
+                  apps.setdefault(app, {})[env] = {
+                      'version': version.split('+')[0] or '?',
+                      'replicas': replicas or '?',
+                      'updated': fmt_updated(updated),
+                  }
+              return apps
+
+          def images_table():
+              apps = parse_swarm_images()
+              if not apps:
+                  return ''
+              head = ('<tr><th>App</th>'
+                      '<th>Staging version</th><th>Replicas</th><th>Deployed</th>'
+                      '<th>Production version</th><th>Replicas</th><th>Deployed</th></tr>')
+              rows = ''
+              # Backend first, then alphabetical — same order as the server's apps.conf.
+              for app in sorted(apps, key=lambda a: (0 if a == 'moqui' else 1, a)):
+                  envs = apps[app]
+                  stg, prd = envs.get('staging'), envs.get('production')
+                  cells = f'<td>{esc(app)}</td>'
+                  for env in ('staging', 'production'):
+                      env_data = envs.get(env)
+                      if not env_data:
+                          cells += '<td class="bad" colspan="3">not deployed</td>'
+                          continue
+                      # Production trailing staging is the normal state between
+                      # promotions, so it is a note, not a failure.
+                      behind = (env == 'production' and stg
+                                and stg['version'] != prd['version'])
+                      cls = ' class="warn"' if behind else ''
+                      cells += (f'<td{cls}>{esc(env_data["version"])}</td>'
+                                + swarm_cell('REPLICAS', env_data['replicas'])
+                                + f'<td>{esc(env_data["updated"])}</td>')
+                  rows += f'<tr>{cells}</tr>'
+              return ('<h3>Deployed Images</h3><table>' + head + rows + '</table>'
+                      '<p>An amber production version means staging is ahead — promote '
+                      'it with the "Copy Staging to Production" workflow.</p>')
+
+          def swarm_html():
+              images = images_table()
+              err = os.path.join(SWARM_DIR, 'error.txt')
+              path = os.path.join(SWARM_DIR, 'status.txt')
+              if os.path.exists(err):
+                  tasks = ('<p>Swarm task status unavailable — '
+                           + esc(open(err).read().strip()) + '</p>')
+              elif not os.path.exists(path):
+                  tasks = '<p>Swarm task status unavailable — no data collected.</p>'
+              else:
+                  text = open(path, errors='replace').read()
+                  text = re.sub(r"^\(Use '\./deploy\.sh status.*$", '', text, flags=re.M)
+                  parts = re.split(r'^=== (.+?) ===\s*$', text, flags=re.M)
+                  # parts = [preamble, title1, block1, title2, block2, ...]
+                  sections = dict(zip(parts[1::2], parts[2::2]))
+                  if not sections:
+                      tasks = f'<pre>{esc(text.strip())}</pre>'
+                  else:
+                      tasks = swarm_table('Tasks', sections.get('Stack Status', ''))
+                      if not images:
+                          # No image inventory collected — keep the raw service list.
+                          tasks += swarm_table('Services', sections.get('Services', ''),
+                                               drop_cols=('ID',))
+              return tasks + images
 
           # ══ Page + PDF ══════════════════════════════════════════════════
           css = '\n'.join([
@@ -1577,6 +1690,7 @@ jobs:
               'font-size: 9pt; white-space: pre-wrap; word-wrap: break-word; }',
               '  h3    { color: #1a5276; margin-top: 1.2em; }',
               '  .bad  { color: #b03030; font-weight: bold; }',
+              '  .warn { color: #b06a00; font-weight: bold; }',
           ])
           full_html = (
               '<!DOCTYPE html><html><head><meta charset="utf-8"><title>GrowERP Status</title>'
@@ -1586,7 +1700,7 @@ jobs:
               + md_lib.markdown(store_md, extensions=['tables'])
               + f'<h2>{tests_heading}</h2>'
               + tests_table
-              + '<h2>Production Swarm Status</h2>'
+              + '<h2>Swarm Status — Staging and Production</h2>'
               + swarm_html()
               + '</body></html>'
           )
