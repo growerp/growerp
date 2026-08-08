@@ -5,57 +5,79 @@
 
 /* CSS Custom Properties - Design Tokens */
 :root {
-    /* Dynamic Header/Footer colors derived from the Lumina theme (websiteColor.json
-       "lumina" map, defaults from store.xml); values are "R G B" channel strings */
-    --header-footer-bg: rgb(${(lumina.surfaceContainerLowest)!'6 14 32'});
-    --header-footer-text: rgb(${(lumina.onSurface)!'218 226 253'});
+    /* Header/Footer: primaryContainer is the Lumina token meant for a large brand-tinted
+       surface (primary itself is for small filled elements and glares full-bleed).
+       --l-on-primary-container carries its readable on-colour, see store.xml. */
+    --header-footer-bg: rgb(var(--l-primary-container));
+    --header-footer-text: rgb(var(--l-on-primary-container));
+    /* channel form, for the translucent tints and hovers layered on the chrome */
+    --header-footer-text-rgb: var(--l-on-primary-container);
     
-    /* Primary Palette - Deep Emerald/Teal */
-    --primary-50: #e6f7f5;
-    --primary-100: #b3e8e3;
-    --primary-200: #80d9d0;
-    --primary-300: #4dcabd;
-    --primary-400: #26bfaf;
-    --primary-500: #00b4a2;
-    --primary-600: #00a394;
-    --primary-700: #008f82;
-    --primary-800: #007b70;
-    --primary-900: #005a52;
-    
-    /* Accent Palette - Warm Coral */
-    --accent-50: #fff3f0;
-    --accent-100: #ffe0d9;
-    --accent-200: #ffccbf;
-    --accent-300: #ffb8a5;
-    --accent-400: #ffa08a;
-    --accent-500: #ff8870;
-    --accent-600: #e6715a;
-    --accent-700: #cc5a44;
-    --accent-800: #b3442f;
-    --accent-900: #992e1a;
-    
-    /* Neutral Palette */
-    --neutral-50: #f8fafc;
-    --neutral-100: #f1f5f9;
-    --neutral-200: #e2e8f0;
-    --neutral-300: #cbd5e1;
-    --neutral-400: #94a3b8;
-    --neutral-500: #64748b;
-    --neutral-600: #475569;
-    --neutral-700: #334155;
-    --neutral-800: #1e293b;
-    --neutral-900: #0f172a;
-    
-    /* Special Colors */
+    /* All ramps below are derived from the --l-* Lumina tokens, which are declared in the
+       :root near the bottom of this sheet (search "LUMINA design tokens"). Custom
+       properties resolve at use time, so referencing them ahead of their declaration is
+       fine. This is what makes the legacy template set follow the website colour setting;
+       nothing here may be a fixed brand colour. */
+
+    /* Two roles the ramps must keep working in BOTH a light and a dark scheme:
+       - the light end (50..300) are page/panel surfaces, so they mix toward --l-surface
+       - the dark end (600..900) are text/emphasis, so they mix toward --l-contrast
+       --l-contrast is white on dark schemes and black on light schemes (see store.xml),
+       i.e. it is always "further away from the page background". */
+
+    /* Primary Palette - the brand colour */
+    --primary-50:  color-mix(in srgb, rgb(var(--l-primary)) 10%, rgb(var(--l-surface)));
+    --primary-100: color-mix(in srgb, rgb(var(--l-primary)) 22%, rgb(var(--l-surface)));
+    --primary-200: color-mix(in srgb, rgb(var(--l-primary)) 38%, rgb(var(--l-surface)));
+    --primary-300: color-mix(in srgb, rgb(var(--l-primary)) 55%, rgb(var(--l-surface)));
+    --primary-400: color-mix(in srgb, rgb(var(--l-primary)) 78%, rgb(var(--l-surface)));
+    --primary-500: rgb(var(--l-primary));
+    --primary-600: color-mix(in srgb, rgb(var(--l-primary)) 90%, #000);
+    --primary-700: color-mix(in srgb, rgb(var(--l-primary)) 78%, #000);
+    --primary-800: color-mix(in srgb, rgb(var(--l-primary)) 66%, #000);
+    --primary-900: color-mix(in srgb, rgb(var(--l-primary)) 48%, #000);
+
+    /* Accent Palette - the secondary brand colour */
+    --accent-50:  color-mix(in srgb, rgb(var(--l-tertiary)) 10%, rgb(var(--l-surface)));
+    --accent-100: color-mix(in srgb, rgb(var(--l-tertiary)) 22%, rgb(var(--l-surface)));
+    --accent-200: color-mix(in srgb, rgb(var(--l-tertiary)) 38%, rgb(var(--l-surface)));
+    --accent-300: color-mix(in srgb, rgb(var(--l-tertiary)) 55%, rgb(var(--l-surface)));
+    --accent-400: color-mix(in srgb, rgb(var(--l-tertiary)) 78%, rgb(var(--l-surface)));
+    --accent-500: rgb(var(--l-tertiary));
+    --accent-600: color-mix(in srgb, rgb(var(--l-tertiary)) 88%, #000);
+    --accent-700: color-mix(in srgb, rgb(var(--l-tertiary)) 76%, #000);
+    --accent-800: color-mix(in srgb, rgb(var(--l-tertiary)) 64%, #000);
+    --accent-900: color-mix(in srgb, rgb(var(--l-tertiary)) 50%, #000);
+
+    /* Neutral Palette - the surface -> text ladder */
+    --neutral-50:  rgb(var(--l-surface-container-lowest));
+    --neutral-100: rgb(var(--l-surface-container-low));
+    --neutral-200: rgb(var(--l-surface-container));
+    --neutral-300: rgb(var(--l-surface-container-high));
+    --neutral-400: rgb(var(--l-outline-variant));
+    --neutral-500: rgb(var(--l-outline));
+    --neutral-600: rgb(var(--l-on-surface-variant));
+    --neutral-700: color-mix(in srgb, rgb(var(--l-on-surface)) 75%, rgb(var(--l-on-surface-variant)));
+    --neutral-800: rgb(var(--l-on-surface));
+    --neutral-900: color-mix(in srgb, rgb(var(--l-on-surface)) 88%, rgb(var(--l-contrast)));
+
+    /* Card/panel surface - what used to be hardcoded #ffffff. One step up the elevation
+       ramp from the #store-root page gradient (--neutral-50 -> --neutral-100), otherwise
+       cards land between the two gradient stops and disappear on a dark scheme. */
+    --surface-solid: rgb(var(--l-surface-container));
+    /* Text that sits on a primary/accent filled element */
+    --on-brand: rgb(var(--l-on-primary));
+
+    /* Special Colors - gold stays fixed, it is semantic (ratings), not brand */
     --gold: #f59e0b;
     --gold-light: #fbbf24;
     --success: #10b981;
     --warning: #f59e0b;
-    --error: #ef4444;
-    
+    --error: rgb(var(--l-error));
+
     /* Glass Effect */
-    --glass-bg: rgba(255, 255, 255, 0.85);
-    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-bg: rgb(var(--l-surface-container) / 0.85);
+    --glass-border: rgb(var(--l-outline-variant) / 0.5);
     --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     
     /* Shadows */
@@ -134,7 +156,7 @@ nav.navbar,
     top: 0;
     z-index: 1000;
     backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgb(var(--header-footer-text-rgb) / 0.1);
     box-shadow: var(--shadow-lg);
 }
 
@@ -188,14 +210,14 @@ nav.navbar.bg-dark,
     margin: 0;
     border-radius: var(--radius-md);
     padding: 4px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 15px rgba(0, 180, 162, 0.3);
+    background: rgb(var(--header-footer-text-rgb) / 0.1);
+    border: 2px solid rgb(var(--header-footer-text-rgb) / 0.2);
+    box-shadow: 0 4px 15px rgb(var(--l-primary) / 0.3);
     transition: all var(--transition-base);
 }
 
 .navbar-brand:hover .moqui-dynamic {
-    box-shadow: 0 6px 20px rgba(0, 180, 162, 0.5);
+    box-shadow: 0 6px 20px rgb(var(--l-primary) / 0.5);
     border-color: var(--primary-400);
 }
 
@@ -219,8 +241,8 @@ nav.navbar.bg-dark,
 }
 
 .navbar-dark .navbar-nav .nav-link:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.1);
+    color: rgb(var(--header-footer-text-rgb));
+    background: rgb(var(--header-footer-text-rgb) / 0.1);
 }
 
 .navbar-dark .navbar-nav .nav-link::after {
@@ -297,7 +319,11 @@ nav.navbar.bg-dark,
     height: 22px;
     font-size: 0.75rem;
     font-weight: 600;
-    background: linear-gradient(135deg, var(--accent-500) 0%, var(--accent-600) 100%);
+    /* the badge sits on the chrome, so it takes the chrome's own colours inverted: keying
+       it to accent made it invisible whenever the brand's tertiary was close to its
+       primaryContainer (the default green palette being exactly that case) */
+    background: rgb(var(--header-footer-text-rgb));
+    color: var(--header-footer-bg);
     border-radius: var(--radius-full);
     display: inline-flex;
     position: absolute;
@@ -305,7 +331,7 @@ nav.navbar.bg-dark,
     align-items: center;
     margin-left: -8px;
     margin-top: -8px;
-    box-shadow: 0 2px 8px rgba(230, 113, 90, 0.5);
+    box-shadow: 0 2px 8px rgb(var(--header-footer-text-rgb) / 0.35);
     animation: pulse-badge 2s ease infinite;
 }
 
@@ -323,26 +349,26 @@ nav.navbar.bg-dark,
 }
 
 .search-input input {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgb(var(--header-footer-text-rgb) / 0.1);
+    border: 1px solid rgb(var(--header-footer-text-rgb) / 0.2);
     border-radius: var(--radius-full);
     padding: var(--space-3) var(--space-4);
     padding-right: 50px;
     width: 100%;
-    color: #ffffff;
+    color: var(--header-footer-text);
     font-size: 0.9rem;
     transition: all var(--transition-base);
 }
 
 .search-input input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgb(var(--header-footer-text-rgb) / 0.5);
 }
 
 .search-input input:focus {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgb(var(--header-footer-text-rgb) / 0.15);
     border-color: var(--primary-400);
     outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 180, 162, 0.2);
+    box-shadow: 0 0 0 3px rgb(var(--l-primary) / 0.2);
 }
 
 .search-input .search-button {
@@ -355,7 +381,7 @@ nav.navbar.bg-dark,
     top: 50%;
     right: 4px;
     transform: translateY(-50%);
-    color: #ffffff;
+    color: var(--on-brand);
     cursor: pointer;
     transition: all var(--transition-fast);
     display: flex;
@@ -374,7 +400,9 @@ nav.navbar.bg-dark,
    =================================================================== */
 
 .hero-section {
-    background: linear-gradient(135deg, var(--neutral-900) 0%, var(--neutral-800) 50%, var(--primary-900) 100%);
+    /* chrome surface, not the neutral text ramp: --neutral-800/900 are now the on-surface
+       text colours and would invert this panel */
+    background: linear-gradient(135deg, var(--header-footer-bg) 0%, var(--neutral-100) 50%, var(--primary-900) 100%);
     padding: var(--space-16) 0;
     position: relative;
     overflow: hidden;
@@ -387,8 +415,8 @@ nav.navbar.bg-dark,
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at 30% 50%, rgba(0, 180, 162, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 70% 80%, rgba(255, 136, 112, 0.1) 0%, transparent 40%);
+    background: radial-gradient(circle at 30% 50%, rgb(var(--l-primary) / 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgb(var(--l-tertiary) / 0.1) 0%, transparent 40%);
 }
 
 /* ===================================================================
@@ -430,7 +458,7 @@ nav.navbar.bg-dark,
 
 /* Customer Menu Sidebar */
 .customer-menu {
-    background: #ffffff;
+    background: var(--surface-solid);
     border: none;
     border-radius: var(--radius-lg);
     padding: var(--space-6);
@@ -495,7 +523,7 @@ nav.navbar.bg-dark,
 }
 
 .category-product .figure {
-    background: #ffffff;
+    background: var(--surface-solid);
     border-radius: var(--radius-lg);
     padding: var(--space-4);
     box-shadow: var(--shadow-sm);
@@ -564,7 +592,7 @@ nav.navbar.bg-dark,
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #ffffff;
+    color: var(--on-brand);
     font-size: 1.25rem;
     cursor: pointer;
     transition: all var(--transition-fast);
@@ -656,7 +684,7 @@ nav.navbar.bg-dark,
 .review {
     margin-top: var(--space-8);
     padding: var(--space-6);
-    background: #ffffff;
+    background: var(--surface-solid);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
 }
@@ -677,7 +705,7 @@ nav.navbar.bg-dark,
 
 .review-btn {
     background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
-    color: #ffffff;
+    color: var(--on-brand);
     border: none;
     border-radius: var(--radius-md);
     padding: var(--space-3) var(--space-6);
@@ -697,7 +725,7 @@ nav.navbar.bg-dark,
 
 .btn-continue {
     background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
-    color: #ffffff;
+    color: var(--on-brand);
     border: none;
     border-radius: var(--radius-md);
     height: 50px;
@@ -712,12 +740,12 @@ nav.navbar.bg-dark,
     background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
-    color: #ffffff;
+    color: var(--on-brand);
 }
 
 .btn-login {
     background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
-    color: #ffffff;
+    color: var(--on-brand);
     border: none;
     border-radius: var(--radius-md);
     height: 50px;
@@ -732,7 +760,7 @@ nav.navbar.bg-dark,
 
 .btn-create-account {
     background: linear-gradient(135deg, var(--accent-500) 0%, var(--accent-600) 100%);
-    color: #ffffff;
+    color: var(--on-brand);
     border: none;
     border-radius: var(--radius-md);
     height: 50px;
@@ -747,7 +775,7 @@ nav.navbar.bg-dark,
 
 .btn-place-order {
     background: linear-gradient(135deg, var(--accent-500) 0%, var(--accent-600) 100%);
-    color: #ffffff;
+    color: var(--on-brand);
     border: none;
     border-radius: var(--radius-md);
     padding: var(--space-4) var(--space-8);
@@ -761,7 +789,7 @@ nav.navbar.bg-dark,
     background: linear-gradient(135deg, var(--accent-600) 0%, var(--accent-700) 100%);
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
-    color: #ffffff;
+    color: var(--on-brand);
 }
 
 /* ===================================================================
@@ -819,7 +847,7 @@ nav.navbar.bg-dark,
 }
 
 .footer-ul li a:hover {
-    color: #ffffff;
+    color: rgb(var(--header-footer-text-rgb));
     padding-left: var(--space-2);
 }
 
@@ -900,7 +928,7 @@ nav.navbar.bg-dark,
 }
 
 .footer-bottom {
-    border-top: 1px solid rgba(128, 128, 128, 0.2);
+    border-top: 1px solid var(--neutral-300);
 }
 
 .footer-copyright {
@@ -931,7 +959,7 @@ nav.navbar.bg-dark,
 
 .features {
     background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
-    color: #ffffff;
+    color: var(--on-brand);
     padding: var(--space-6) 0;
     box-shadow: var(--shadow-md);
 }
@@ -962,7 +990,7 @@ nav.navbar.bg-dark,
    =================================================================== */
 
 .cart-div {
-    background: #ffffff;
+    background: var(--surface-solid);
     border: none;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
@@ -981,7 +1009,7 @@ nav.navbar.bg-dark,
 
 .cart-form-btn {
     background: linear-gradient(135deg, var(--accent-500) 0%, var(--accent-600) 100%);
-    color: #ffffff;
+    color: var(--on-brand);
     border: none;
     border-radius: var(--radius-md);
     padding: var(--space-3) var(--space-6);
@@ -1041,17 +1069,17 @@ nav.navbar.bg-dark,
 }
 
 .order-navbar-circle-red {
-    color: #ffffff;
+    color: var(--on-brand);
     background: linear-gradient(135deg, var(--accent-500) 0%, var(--accent-600) 100%);
     border: none;
-    box-shadow: 0 4px 12px rgba(230, 113, 90, 0.4);
+    box-shadow: 0 4px 12px rgb(var(--l-tertiary) / 0.4);
 }
 
 .order-navbar-circle-blue {
-    color: #ffffff;
+    color: var(--on-brand);
     background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
     border: none;
-    box-shadow: 0 4px 12px rgba(0, 180, 162, 0.4);
+    box-shadow: 0 4px 12px rgb(var(--l-primary) / 0.4);
 }
 
 .hr-active {
@@ -1068,13 +1096,13 @@ nav.navbar.bg-dark,
 
 /* Step Indicators */
 .step-active .circle {
-    color: #ffffff;
+    color: var(--on-brand);
     background: linear-gradient(135deg, var(--accent-500) 0%, var(--accent-600) 100%);
     width: 28px;
     height: 28px;
     border-radius: var(--radius-full);
     border: none;
-    box-shadow: 0 2px 8px rgba(230, 113, 90, 0.4);
+    box-shadow: 0 2px 8px rgb(var(--l-tertiary) / 0.4);
 }
 
 .step-active .text-address {
@@ -1083,13 +1111,13 @@ nav.navbar.bg-dark,
 }
 
 .step-complete .circle {
-    color: #ffffff;
+    color: var(--on-brand);
     background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
     width: 28px;
     height: 28px;
     border-radius: var(--radius-full);
     border: none;
-    box-shadow: 0 2px 8px rgba(0, 180, 162, 0.4);
+    box-shadow: 0 2px 8px rgb(var(--l-primary) / 0.4);
 }
 
 .step-complete .text-address {
@@ -1130,7 +1158,7 @@ nav.navbar.bg-dark,
 /* Login & Account Forms */
 .login-form,
 .new-customer {
-    background: #ffffff;
+    background: var(--surface-solid);
     border-radius: var(--radius-lg);
     padding: var(--space-8);
     box-shadow: var(--shadow-md);
@@ -1394,7 +1422,7 @@ hr {
 /* Fix navbar dark background */
 .navbar.navbar-dark.bg-dark,
 .navbar.navbar-expand-md.navbar-dark {
-    background: linear-gradient(135deg, var(--neutral-900) 0%, var(--neutral-800) 100%) !important;
+    background: linear-gradient(135deg, var(--header-footer-bg) 0%, var(--neutral-100) 100%) !important;
 }
 
 /* Fix double brand visibility on desktop - hide mobile brand on larger screens */
@@ -2029,6 +2057,9 @@ body.growerp-store-100000 .customer-menu {
     /* server-derived (from luminaBrightness), not part of the 16-token contract:
        white on dark themes, black on light themes */
     --l-contrast: ${(lumina.contrast)!'255 255 255'};
+    /* black or white, whichever is readable on --l-primary-container (store.xml picks it
+       from that colour's luminance); the legacy header/footer are painted with it */
+    --l-on-primary-container: ${(lumina.onPrimaryContainer)!'0 0 0'};
 }
 
 body.lumina {

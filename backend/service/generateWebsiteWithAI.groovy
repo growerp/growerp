@@ -126,11 +126,17 @@ PAGE RULES
   everything else.
 
 THEME RULES
-- Fill all 16 lumina tokens. Values are CSS colours (hex).
+- Fill all 17 lumina tokens. Values are CSS colours (hex). Return exactly these keys, no more:
+  surface, surfaceContainerLowest, surfaceContainerLow, surfaceContainer, surfaceContainerHigh,
+  surfaceContainerHighest, onSurface, onSurfaceVariant, primary, onPrimary, primaryContainer,
+  onPrimaryContainer, secondary, tertiary, error, outline, outlineVariant.
 - luminaBrightness is "dark" or "light" and must match the surfaces.
 - surface..surfaceContainerHighest is a monotonic elevation ramp starting at the page
   background. onSurface must have at least 7:1 contrast against surface, onSurfaceVariant at
   least 4.5:1. primary is the brand colour, onPrimary must be readable on it.
+- primaryContainer is the large brand-tinted surface (it paints the site header and footer),
+  and onPrimaryContainer must be readable on it - at least 4.5:1.
+- outline is a border colour readable against surface, outlineVariant a subtler version of it.
 
 Return ONLY JSON:
 {
@@ -138,12 +144,12 @@ Return ONLY JSON:
              "sourceUrl":"<the source page url this is based on, or empty>",
              "purpose":"<one sentence on what this page must convey>",
              "metaDescription":"<one sentence of at most 155 characters describing this page for search engines and AI readers>"}],
-  "theme": {"luminaBrightness":"light","primary":"#...","onPrimary":"#...","secondary":"#...",
-            "onSecondary":"#...","tertiary":"#...","onTertiary":"#...","error":"#...",
-            "onError":"#...","surface":"#...","surfaceContainerLowest":"#...",
+  "theme": {"luminaBrightness":"light","surface":"#...","surfaceContainerLowest":"#...",
             "surfaceContainerLow":"#...","surfaceContainer":"#...","surfaceContainerHigh":"#...",
             "surfaceContainerHighest":"#...","onSurface":"#...","onSurfaceVariant":"#...",
-            "outlineVariant":"#..."},
+            "primary":"#...","onPrimary":"#...","primaryContainer":"#...",
+            "onPrimaryContainer":"#...","secondary":"#...",
+            "tertiary":"#...","error":"#...","outline":"#...","outlineVariant":"#..."},
   "logoUrl": "<the url from the candidates that is most likely the company logo, or empty>",
   "images": [{"url":"<content image url worth keeping>","alt":"...","usedOnPagePath":"..."}]
 }
@@ -334,12 +340,16 @@ fence, no explanation before or after.
         xml.append("""        </file>\n    </moqui.resource.DbResource>\n\n""")
     }
 
-    // theme
+    // theme: the 17 tokens must be nested under "lumina", which is the only shape
+    // store.xml reads (context.lumina instanceof Map); luminaBrightness stays top level.
+    Map luminaOut = [:]
+    ['surface', 'surfaceContainerLowest', 'surfaceContainerLow', 'surfaceContainer',
+     'surfaceContainerHigh', 'surfaceContainerHighest', 'onSurface', 'onSurfaceVariant',
+     'primary', 'onPrimary', 'primaryContainer', 'onPrimaryContainer', 'secondary',
+     'tertiary', 'error', 'outline', 'outlineVariant'].each { k -> if (theme[k]) luminaOut[k] = theme[k] }
     Map themeOut = [:]
-    ['luminaBrightness', 'primary', 'onPrimary', 'secondary', 'onSecondary', 'tertiary',
-     'onTertiary', 'error', 'onError', 'surface', 'surfaceContainerLowest', 'surfaceContainerLow',
-     'surfaceContainer', 'surfaceContainerHigh', 'surfaceContainerHighest', 'onSurface',
-     'onSurfaceVariant', 'outlineVariant'].each { k -> if (theme[k]) themeOut[k] = theme[k] }
+    if (theme.luminaBrightness) themeOut.luminaBrightness = theme.luminaBrightness
+    if (luminaOut) themeOut.lumina = luminaOut
     xml.append("""    <moqui.resource.DbResource filename="websiteColor.json" isFile="Y" resourceId="${low}_website_color"\n""")
     xml.append("""        parentResourceId="${low}_content_dir">\n""")
     xml.append("""        <file mimeType="application/json" versionName="01" rootVersionName="01">\n""")

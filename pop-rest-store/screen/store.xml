@@ -298,24 +298,39 @@ var storeInfo = ${storeInfoJson};
                 outline: '#87948b', outlineVariant: '#3d4a42']
             Map luminaOverrides = context.lumina instanceof Map ? (Map) context.lumina : [:]
             Map luminaChannels = [:]
-            luminaDefaults.each { String key, String defaultHex ->
-                String value = (luminaOverrides[key] ?: defaultHex).toString().trim()
+            Closure toChannels = { String value, String fallbackHex ->
                 try {
-                    if (value ==~ /\d+ \d+ \d+/) {
-                        luminaChannels[key] = value
-                    } else {
-                        String hex = value.startsWith('#') ? value.substring(1) : value
-                        luminaChannels[key] = "${Integer.parseInt(hex.substring(0,2),16)} ${Integer.parseInt(hex.substring(2,4),16)} ${Integer.parseInt(hex.substring(4,6),16)}".toString()
-                    }
+                    if (value ==~ /\d+ \d+ \d+/) return value
+                    String hex = value.startsWith('#') ? value.substring(1) : value
+                    return "${Integer.parseInt(hex.substring(0,2),16)} ${Integer.parseInt(hex.substring(2,4),16)} ${Integer.parseInt(hex.substring(4,6),16)}".toString()
                 } catch (Exception e) {
-                    String hex = defaultHex.substring(1)
-                    luminaChannels[key] = "${Integer.parseInt(hex.substring(0,2),16)} ${Integer.parseInt(hex.substring(2,4),16)} ${Integer.parseInt(hex.substring(4,6),16)}".toString()
+                    String hex = fallbackHex.substring(1)
+                    return "${Integer.parseInt(hex.substring(0,2),16)} ${Integer.parseInt(hex.substring(2,4),16)} ${Integer.parseInt(hex.substring(4,6),16)}".toString()
                 }
+            }
+            luminaDefaults.each { String key, String defaultHex ->
+                luminaChannels[key] = toChannels((luminaOverrides[key] ?: defaultHex).toString().trim(), defaultHex)
             }
             // brightness-aware chrome: contrast channel (white on dark, black on light) and
             // the surface hex used for the theme-color meta tag / anti-FOUC style
             String luminaBrightness = (context.luminaBrightness ?: 'dark').toString()
             luminaChannels.contrast = (luminaBrightness == 'light') ? '0 0 0' : '255 255 255'
+            // the legacy header/footer are painted with primaryContainer, so they need its
+            // on-colour. Themes stored before onPrimaryContainer existed do not carry it:
+            // fall back to black or white picked from primaryContainer's own relative
+            // luminance (WCAG crossover is around 0.18), which is readable for any brand.
+            if (luminaOverrides.onPrimaryContainer) {
+                luminaChannels.onPrimaryContainer =
+                    toChannels(luminaOverrides.onPrimaryContainer.toString().trim(), '#000000')
+            } else {
+                // comparisons are written with &gt; on purpose: a raw less-than character
+                // anywhere in this script block would not be well-formed XML
+                List pcLin = luminaChannels.primaryContainer.split(' ').collect{
+                    double c = (it as Integer) / 255.0d
+                    c > 0.03928d ? Math.pow((c + 0.055d) / 1.055d, 2.4d) : c / 12.92d }
+                double pcLum = 0.2126d * pcLin[0] + 0.7152d * pcLin[1] + 0.0722d * pcLin[2]
+                luminaChannels.onPrimaryContainer = (pcLum > 0.18d) ? '0 0 0' : '255 255 255'
+            }
             context.luminaBrightness = luminaBrightness
             context.luminaSurfaceHex = '#' + luminaChannels.surface.split(' ').collect{ String.format('%02x', it as Integer) }.join('')
             context.lumina = luminaChannels

@@ -107,7 +107,7 @@
                             <a href="/product/${localProd.productId}" class="category-product">
                                 <figure class="figure" style="margin: 0;">
                                     <!-- Product Image -->
-                                    <div class="product-image-wrapper" style="overflow: hidden; border-radius: var(--radius-md); background: #fff;">
+                                    <div class="product-image-wrapper" style="overflow: hidden; border-radius: var(--radius-md); background: var(--surface-solid);">
                                         <#if localProd.mediumImageInfo?? || localProd.smallImageInfo??>
                                             <#assign img = localProd.smallImageInfo! localProd.mediumImageInfo>
                                             <img class="figure-img img-fluid w-100"

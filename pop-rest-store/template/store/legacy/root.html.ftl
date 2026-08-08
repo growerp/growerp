@@ -11,7 +11,7 @@
     <#else>
     <meta name="description" content="Welcome to ${storeInfo.productStore.storeName} - Your trusted online store">
     </#if>
-    <meta name="theme-color" content="#1e293b">
+    <meta name="theme-color" content="${luminaSurfaceHex!'#0b1326'}">
 
     <#if pageTitle?has_content>
     <title>${pageTitle?html} — ${storeInfo.productStore.storeName}</title>
@@ -88,6 +88,9 @@
     </style>
 </head>
 
+<#-- no "lumina" class here: the --l-* tokens live in a global :root so the legacy palette
+     in styles.css.ftl derives from them directly, while the body.lumina rules (which
+     neutralise #store-root) stay exclusive to the modern set -->
 <body>
     <div id="store-root">
         ${sri.renderSubscreen()}

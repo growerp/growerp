@@ -46,7 +46,9 @@ No template code deployment is needed: the pages and theme are plain data, loade
 
 ## 3. Theme: the `websiteColor.json` contract
 
-One JSON file per store. The **`lumina` map is the single color vocabulary** — it drives the modern template's full palette *and* the legacy template's header/footer colors (derived server-side from `surfaceContainerLowest`/`onSurface`). All 16 keys are required when providing a theme; values are `#rrggbb` hex:
+One JSON file per store. The **`lumina` map is the single color vocabulary** — it drives the modern template's full palette *and* the legacy template's entire palette (its `--primary-*`/`--accent-*`/`--neutral-*` ramps are derived from these tokens with `color-mix()`; its header and footer are painted with `primaryContainer`/`onPrimaryContainer`). All 17 keys are required when providing a theme; values are `#rrggbb` hex:
+
+The map **must be nested under `"lumina"`** — `store.xml` reads it as `context.lumina instanceof Map`, so tokens written flat at the top level are silently ignored and the built-in defaults are used instead.
 
 ```json
 {
@@ -62,6 +64,7 @@ One JSON file per store. The **`lumina` map is the single color vocabulary** —
     "primary": "#68dba9",
     "onPrimary": "#003825",
     "primaryContainer": "#25a475",
+    "onPrimaryContainer": "#00281a",
     "secondary": "#4edea3",
     "tertiary": "#45dfa4",
     "error": "#ffb4ab",
@@ -148,7 +151,7 @@ Pages are FreeMarker templates, so they *may* use dynamic values. For a static m
 Given an existing website (URL or HTML dump), produce the conversion as follows:
 
 1. **Inventory** the source site's pages; map each to the page-type matrix (§2). Merge or drop pages that correspond to system-provided routes (product listings, search). For sites with many pages, organize them into two-level groups (`products/pvc`, `applications/canals`) to get navbar dropdowns, and prefix rarely-visited detail pages with `_` to keep them out of the menus. **Known gap** (not yet supported): dated blog/news post lists.
-2. **Extract the brand palette** from the source site (background, text, brand/accent colors). Fill **all 16** lumina tokens (§3): choose `luminaBrightness`; derive the six `surface*` steps as a monotonic elevation ramp from the page background; pick `onSurface`/`onSurfaceVariant` with ≥ 7:1 / 4.5:1 contrast against the surfaces; map the brand color to `primary` (+ readable `onPrimary`), secondary accents to `secondary`/`tertiary`. Emit `websiteColor.json`.
+2. **Extract the brand palette** from the source site (background, text, brand/accent colors). Fill **all 17** lumina tokens (§3): choose `luminaBrightness`; derive the six `surface*` steps as a monotonic elevation ramp from the page background; pick `onSurface`/`onSurfaceVariant` with ≥ 7:1 / 4.5:1 contrast against the surfaces; map the brand color to `primary` (+ readable `onPrimary`) and to `primaryContainer` (+ readable `onPrimaryContainer`, which paints the header and footer), secondary accents to `secondary`/`tertiary`. Emit `websiteColor.json`.
 3. **Author `home.html.ftl`**: `<#-- title: Home -->`, then hero (headline, subtitle, primary + secondary CTA), followed by the site's key selling-point sections as glass-card grids. Body-only, `<main class="pt-24 …">`.
 4. **Author one `.html.ftl` per remaining page** (`<#-- title: X -->`, `<main class="pt-28 …">`), converting the source content into the styling contract (§4) — no hardcoded colors, no external CSS/JS, images either external URLs or uploaded via the Website dialog's image section.
 5. **Register** the pages and theme, either:
@@ -180,4 +183,4 @@ Given an existing website (URL or HTML dump), produce the conversion as follows:
 
 *Worked examples: `backend/data/GrowerpWebsiteSeedData.xml` (GrowERP's own marketing site, dark theme — content-only file repointed onto an existing store) and the owner-import files produced by `/convert-website`, e.g. `backend/data/AccuGeoOwnerImportData.xml` (light theme, grouped menus, hidden page, logo + images, creates its own owner). Test a served site with `curl -H 'Host: www.accugeo.com' http://localhost:8080/`.*
 
-*Architecture references (for maintainers with repo access): template sets in `pop-rest-store/template/store/{legacy,modern}/`; set selection + theme pipeline in `pop-rest-store/screen/store.xml` (websiteColor.json → `styles.css.ftl` → per-store CSS with `--l-*` vars); content rendering in `screen/store/home.xml` and `screen/store/content.xml`; dialog backend `backend/service/growerp/100/WebsiteServices100.xml`; Flutter dialog `flutter/packages/growerp_website/.../website_dialog.dart`. The 16 lumina token names must stay in sync across `store.xml` (defaults), `styles.css.ftl` (emission), and `_luminaFromScheme` in the Flutter dialog.*
+*Architecture references (for maintainers with repo access): template sets in `pop-rest-store/template/store/{legacy,modern}/`; set selection + theme pipeline in `pop-rest-store/screen/store.xml` (websiteColor.json → `styles.css.ftl` → per-store CSS with `--l-*` vars); content rendering in `screen/store/home.xml` and `screen/store/content.xml`; dialog backend `backend/service/growerp/100/WebsiteServices100.xml`; Flutter dialog `flutter/packages/growerp_website/.../website_dialog.dart`. The 17 lumina token names must stay in sync across `store.xml` (defaults), `styles.css.ftl` (emission), `_luminaFromScheme` in the Flutter dialog, and the key list + prompt in `backend/service/generateWebsiteWithAI.groovy`. `onPrimaryContainer` is the exception to the defaults rule: it is not in `luminaDefaults`, because themes stored before it existed must fall back to black or white computed from `primaryContainer`'s luminance rather than to a fixed colour.*

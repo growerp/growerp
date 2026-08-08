@@ -754,23 +754,25 @@
         <file mimeType="application/json" versionName="01" rootVersionName="01">
             <fileData><![CDATA[{
     "luminaBrightness": "light",
-    "primary": "#007bff",
-    "onPrimary": "#ffffff",
-    "secondary": "#6c757d",
-    "onSecondary": "#ffffff",
-    "tertiary": "#17a2b8",
-    "onTertiary": "#ffffff",
-    "error": "#dc3545",
-    "onError": "#ffffff",
-    "surface": "#ffffff",
-    "surfaceContainerLowest": "#f8f9fa",
-    "surfaceContainerLow": "#e9ecef",
-    "surfaceContainer": "#dee2e6",
-    "surfaceContainerHigh": "#ced4da",
-    "surfaceContainerHighest": "#adb5bd",
-    "onSurface": "#212529",
-    "onSurfaceVariant": "#495057",
-    "outlineVariant": "#ced4da"
+    "lumina": {
+        "surface": "#ffffff",
+        "surfaceContainerLowest": "#f8f9fa",
+        "surfaceContainerLow": "#e9ecef",
+        "surfaceContainer": "#dee2e6",
+        "surfaceContainerHigh": "#ced4da",
+        "surfaceContainerHighest": "#adb5bd",
+        "onSurface": "#212529",
+        "onSurfaceVariant": "#495057",
+        "primary": "#007bff",
+        "onPrimary": "#ffffff",
+        "primaryContainer": "#0062cc",
+        "onPrimaryContainer": "#ffffff",
+        "secondary": "#6c757d",
+        "tertiary": "#17a2b8",
+        "error": "#dc3545",
+        "outline": "#6c757d",
+        "outlineVariant": "#ced4da"
+    }
 }]]></fileData>
             <histories versionName="01" versionDate="1785818725769" isDiff="N"/>
         </file>

@@ -84,6 +84,7 @@
                         "primary": "rgb(var(--l-primary) / <alpha-value>)",
                         "on-primary": "rgb(var(--l-on-primary) / <alpha-value>)",
                         "primary-container": "rgb(var(--l-primary-container) / <alpha-value>)",
+                        "on-primary-container": "rgb(var(--l-on-primary-container) / <alpha-value>)",
                         "secondary": "rgb(var(--l-secondary) / <alpha-value>)",
                         "tertiary": "rgb(var(--l-tertiary) / <alpha-value>)",
                         "error": "rgb(var(--l-error) / <alpha-value>)",

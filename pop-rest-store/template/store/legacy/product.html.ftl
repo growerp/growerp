@@ -72,7 +72,7 @@
         
         <!-- Main Product Image -->
         <div class="col-lg-5 col-md-5 col-sm-9 col-9 order-2 order-lg-2">
-            <div class="product-image-container" style="position: relative; overflow: hidden; border-radius: var(--radius-lg); background: #fff; box-shadow: var(--shadow-md);">
+            <div class="product-image-container" style="position: relative; overflow: hidden; border-radius: var(--radius-lg); background: var(--surface-solid); box-shadow: var(--shadow-md);">
                 <img id="product-image-large" class="product-img-select" style="width: 100%; height: auto;"
                     <#if imgDetail>data-toggle="modal" data-target="#modal2"</#if>>
             </div>

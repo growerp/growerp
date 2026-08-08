@@ -115,6 +115,8 @@ class WebsiteDialogState extends State<WebsiteDialog> {
     'primary': _toCssHex(cs.primary),
     'onPrimary': _toCssHex(cs.onPrimary),
     'primaryContainer': _toCssHex(cs.primaryContainer),
+    // the legacy template set paints the header and footer with primaryContainer
+    'onPrimaryContainer': _toCssHex(cs.onPrimaryContainer),
     'secondary': _toCssHex(cs.secondary),
     'tertiary': _toCssHex(cs.tertiary),
     'error': _toCssHex(cs.error),
