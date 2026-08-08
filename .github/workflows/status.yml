@@ -397,6 +397,7 @@ jobs:
       outputs:
           apps: ${{ steps.matrix.outputs.apps }}
           store_ids: ${{ steps.matrix.outputs.store_ids }}
+          store_overrides: ${{ steps.matrix.outputs.store_overrides }}
           run_ios: ${{ steps.matrix.outputs.run_ios }}
           run_macos: ${{ steps.matrix.outputs.run_macos }}
           run_android: ${{ steps.matrix.outputs.run_android }}
@@ -422,6 +423,10 @@ jobs:
 
                 # Per-app store IDs for console deep links in the report
                 echo "store_ids=$(jq -c '.storeIds // {}' flutter/release/release_config.json)" >> "$GITHUB_OUTPUT"
+
+                # Manually maintained ground truth the store APIs cannot report,
+                # e.g. Play does not expose "rejected" — see storeStatusOverrides.
+                echo "store_overrides=$(jq -c '.storeStatusOverrides // {}' flutter/release/release_config.json)" >> "$GITHUB_OUTPUT"
 
                 build_matrix() {
                   local store_apps="$1"
@@ -1197,6 +1202,7 @@ jobs:
         env:
           APPS: ${{ needs.resolve-matrix.outputs.apps }}
           STORE_IDS: ${{ needs.resolve-matrix.outputs.store_ids }}
+          STORE_OVERRIDES: ${{ needs.resolve-matrix.outputs.store_overrides }}
           TESTS_RESULT: ${{ needs.integration-tests.result }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
@@ -1230,6 +1236,9 @@ jobs:
           STORE_ORDER = ['ios', 'macos', 'android', 'windows', 'snap']
           APP_ORDER   = [a for a in os.environ.get('APPS', '').split(',') if a]
           STORE_IDS   = json.loads(os.environ.get('STORE_IDS') or '{}')
+          # Hand-maintained states the store APIs cannot report (e.g. Play never
+          # exposes "rejected"). Wins over anything derived from the API rows.
+          STORE_OVERRIDES = json.loads(os.environ.get('STORE_OVERRIDES') or '{}')
 
           # Always all apps (central app map) and all stores — no selection input.
           selected_apps = list(APP_ORDER)
@@ -1247,7 +1256,11 @@ jobs:
                   if os.path.exists(path):
                       with open(path) as f:
                           frag = json.load(f)
-                      data[(store, app)] = frag.get('rows', [])
+                      rows = frag.get('rows', [])
+                      override = STORE_OVERRIDES.get(app, {}).get(store)
+                      for r in rows:
+                          r['override'] = override
+                      data[(store, app)] = rows
 
           # ── Store console deep links ─────────────────────────────────────
           def console_url(store, app):
@@ -1275,6 +1288,20 @@ jobs:
               r = rows[0]
               return f"{link(r.get('version','—'), url)}<br>{r.get('state','?')}"
 
+          # The Play API reports per-track release status only; it never says
+          # whether the app itself passed review. A completed release that is
+          # not on the public store can be in review OR rejected — the API
+          # cannot tell them apart, so report the fact ('not on store') and let
+          # storeStatusOverrides carry the real state when it is known.
+          def android_status(r):
+              status = r.get('status', '?')
+              override = r.get('override')
+              if override:
+                  return override
+              if r.get('live') is False:
+                  return 'not on store' if status == 'completed' else f'{status} · not on store'
+              return status
+
           def cell_android(rows, url):
               if not rows:
                   return '—'
@@ -1283,12 +1310,7 @@ jobs:
               # the completed release is the one that reflects production.
               done = [r for r in prod if r.get('status') == 'completed']
               src  = (done or prod or rows)[0]
-              status = src.get('status', '?')
-              if src.get('live') is False:
-                  # Track says completed, but the app is not on the store:
-                  # first publication is still awaiting Play review.
-                  status = 'in review' if status == 'completed' else f'{status} · in review'
-              return f"{link(src.get('version','?'), url)}<br>{status}"
+              return f"{link(src.get('version','?'), url)}<br>{android_status(src)}"
 
           def cell_windows(rows, url):
               if not rows:
@@ -1339,7 +1361,7 @@ jobs:
                           'PENDING_APPLE_RELEASE'},
               'macos':   {'IN_REVIEW', 'WAITING_FOR_REVIEW', 'PENDING_DEVELOPER_RELEASE',
                           'PENDING_APPLE_RELEASE'},
-              'android': {'inProgress', 'draft', 'in review'},
+              'android': {'inProgress', 'draft', 'in review', 'not on store'},
               'windows': {'Certification', 'PreProcessing', 'CommitStarted',
                           'PendingCommit', 'PendingPublication', 'ReadyToPublish'},
               'snap':    set(),
@@ -1356,10 +1378,10 @@ jobs:
                       status_val = r.get('state') or r.get('status', '')
                       track_info = f" [{r['track']}]" if 'track' in r else ''
                       label_info = f" [{r['label']}]" if 'label' in r else ''
-                      if store == 'android' and r.get('live') is False \
-                              and r.get('track') == 'production' \
-                              and status_val == 'completed':
-                          status_val = 'in review'
+                      if store == 'android' and r.get('track') == 'production':
+                          status_val = android_status(r)
+                      elif r.get('override'):
+                          status_val = r['override']
                       if status_val in PENDING_STATES.get(store, set()):
                           ver = r.get('version', '?')
                           waiting.append(
