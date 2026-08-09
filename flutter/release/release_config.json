@@ -28,9 +28,7 @@
   },
   "bundleIds": {},
   "androidIds": {},
-  "storeStatusOverrides": {
-    "agents": { "android": "rejected" }
-  },
+  "storeStatusOverrides": {},
   "dockerRegistry": "ghcr.io/growerp",
   "repositoryUrl": "git@github.com:growerp/growerp.git",
   "tempWorkspaceDir": "/tmp/growerpRelease",

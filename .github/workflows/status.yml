@@ -1290,16 +1290,19 @@ jobs:
 
           # The Play API reports per-track release status only; it never says
           # whether the app itself passed review. A completed release that is
-          # not on the public store can be in review OR rejected — the API
-          # cannot tell them apart, so report the fact ('not on store') and let
-          # storeStatusOverrides carry the real state when it is known.
+          # not on the public store is either still in review or rejected, and
+          # nothing in the API tells them apart — say exactly that instead of
+          # picking one (a wrong guess is worse than the ambiguity, and a
+          # hand-maintained override goes stale the moment the store moves on).
+          # storeStatusOverrides still wins when the real state is worth pinning.
+          AMBIGUOUS = 'in review or rejected'
           def android_status(r):
               status = r.get('status', '?')
               override = r.get('override')
               if override:
                   return override
               if r.get('live') is False:
-                  return 'not on store' if status == 'completed' else f'{status} · not on store'
+                  return AMBIGUOUS if status == 'completed' else f'{status} · {AMBIGUOUS}'
               return status
 
           def cell_android(rows, url):
@@ -1361,7 +1364,7 @@ jobs:
                           'PENDING_APPLE_RELEASE'},
               'macos':   {'IN_REVIEW', 'WAITING_FOR_REVIEW', 'PENDING_DEVELOPER_RELEASE',
                           'PENDING_APPLE_RELEASE'},
-              'android': {'inProgress', 'draft', 'in review', 'not on store'},
+              'android': {'inProgress', 'draft', 'in review', 'in review or rejected'},
               'windows': {'Certification', 'PreProcessing', 'CommitStarted',
                           'PendingCommit', 'PendingPublication', 'ReadyToPublish'},
               'snap':    set(),
