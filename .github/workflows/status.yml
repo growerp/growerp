@@ -1163,7 +1163,7 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     # No continue-on-error here: the last step enforces the test failure
-    # threshold ("CI FAILED: more than 1 individual test failure"), so its
+    # gate ("CI FAILED: test failures detected"), so its
     # result must reach the workflow status. A stuck run (runner-allocation
     # hiccup) is bounded by the timeout instead — re-run the job if that happens.
     timeout-minutes: 15
@@ -1803,10 +1803,16 @@ jobs:
         if: always()
         env:
           BACKEND_RESULT: ${{ needs.backend-tests.result }}
+          TESTS_RESULT: ${{ needs.integration-tests.result }}
         run: |
           FAIL_FILE=$(mktemp)
           echo "0" > "$FAIL_FILE"
           if [ "$BACKEND_RESULT" = "failure" ]; then
+            echo "1" > "$FAIL_FILE"
+          fi
+          # A slice that dies before writing test_output.log produces no
+          # counts below, so trust the job result as well.
+          if [ "$TESTS_RESULT" = "failure" ]; then
             echo "1" > "$FAIL_FILE"
           fi
 
@@ -1863,7 +1869,7 @@ jobs:
             echo "Tests passed    : $IND_PASSED"
             echo "Tests failed    : $IND_FAILED"
 
-            if [ "$IND_FAILED" -gt 1 ]; then
+            if [ "$IND_FAILED" -gt 0 ] || [ "$FAILED_PKGS" -gt 0 ]; then
               echo "1" > "$FAIL_FILE"
             fi
 
@@ -1919,7 +1925,7 @@ jobs:
           } | tee -a "$GITHUB_STEP_SUMMARY"
 
           if [ "$(cat "$FAIL_FILE")" = "1" ]; then
-            echo "CI FAILED: more than 1 individual test failure for at least one platform." \
+            echo "CI FAILED: test failures detected (backend, integration job, or per-platform test counts)." \
               | tee -a "$GITHUB_STEP_SUMMARY"
             exit 1
           fi

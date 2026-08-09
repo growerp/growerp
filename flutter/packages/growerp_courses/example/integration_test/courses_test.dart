@@ -37,7 +37,10 @@ void main() {
       tester,
       createCoursesExampleRouter(),
       coursesMenuConfig,
-      CoreLocalizations.localizationsDelegates,
+      const [
+        UserCompanyLocalizations.delegate,
+        ...CoursesLocalizations.localizationsDelegates,
+      ],
       restClient: restClient,
       clear: true,
       title: 'Courses Test',
