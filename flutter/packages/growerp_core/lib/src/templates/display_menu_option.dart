@@ -665,7 +665,7 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
               ),
         title: appBarTitle(
           context,
-          '$title ${isPhone ? '\n' : ', '}${tabItems.isNotEmpty && tabIndex < tabItems.length ? tabItems[tabIndex].title : ''}',
+          '$title ${isPhone ? '\n' : ', '}${tabItems.isNotEmpty && tabIndex < tabItems.length ? HelperFunctions.translateMenuTitle(_localizations!, tabItems[tabIndex].title) : ''}',
           isPhone,
         ),
         actions: actions,

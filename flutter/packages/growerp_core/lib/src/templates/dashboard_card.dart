@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
+import 'package:growerp_core/l10n/generated/core_localizations.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../domains/domains.dart';
 
@@ -786,6 +787,12 @@ class _DashboardGridState extends State<DashboardGrid> {
   String _itemId(MenuItem m) =>
       m.menuItemId ?? m.itemKey ?? m.route ?? m.title;
 
+  /// Backend menu title in the current app language.
+  String _menuTitle(MenuItem m) => HelperFunctions.translateMenuTitle(
+    CoreLocalizations.of(context)!,
+    m.title,
+  );
+
   /// Rebuilds [_orderedItems] preserving the current visual order:
   /// - keeps existing tiles in their dragged positions
   /// - removes tiles that became minimized
@@ -878,7 +885,7 @@ class _DashboardGridState extends State<DashboardGrid> {
           width: w,
           height: h,
           child: DashboardCard(
-            title: item.title,
+            title: _menuTitle(item),
             iconName: item.iconName ?? 'dashboard',
             route: item.route,
             tileType: et,
@@ -1043,7 +1050,7 @@ class _DashboardGridState extends State<DashboardGrid> {
     final visibleOrdered = _searchQuery.isEmpty
         ? _orderedItems
         : _orderedItems
-            .where((m) => m.title.toLowerCase().contains(_searchQuery))
+            .where((m) => _menuTitle(m).toLowerCase().contains(_searchQuery))
             .toList();
     final minimizedItems = _searchQuery.isEmpty
         ? widget.items.where((m) => m.isMinimized).toList()
@@ -1117,7 +1124,7 @@ class _DashboardGridState extends State<DashboardGrid> {
 
                           Widget card = DashboardCard(
                             key: ValueKey(item.menuItemId),
-                            title: item.title,
+                            title: _menuTitle(item),
                             iconName: item.iconName ?? 'dashboard',
                             route: item.route,
                             tileType: et,
@@ -1203,7 +1210,7 @@ class _DashboardGridState extends State<DashboardGrid> {
                           height: miniSize,
                           child: DashboardCard(
                             key: ValueKey('min_${item.menuItemId}'),
-                            title: item.title,
+                            title: _menuTitle(item),
                             iconName: item.iconName ?? 'dashboard',
                             route: item.route,
                             tileType: item.tileType,

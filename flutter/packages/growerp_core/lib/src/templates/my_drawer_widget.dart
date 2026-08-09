@@ -200,7 +200,10 @@ Widget? myDrawer(BuildContext context, bool isPhone, List<MenuItem> menu) {
               customIcon:
                   getIconFromRegistry(menuOption.iconName) ??
                   const Icon(Icons.circle),
-              title: menuOption.title,
+              title: HelperFunctions.translateMenuTitle(
+                localizations,
+                menuOption.title,
+              ),
               onTap: () {
                 if (menuOption.route != null) {
                   Navigator.pop(context);
