@@ -18,47 +18,51 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../blocs/asset_bloc.dart';
+import 'package:growerp_inventory/l10n/generated/inventory_localizations.dart';
 
 /// Returns column definitions for asset list based on device type
 List<StyledColumn> getAssetListColumns(
   BuildContext context, {
   String? applicationId,
 }) {
+  final localizations = InventoryLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
   // Hotel and rental both show the rentable-asset layout (unit nr/name/type/
   // price) instead of the generic stock-inventory columns.
   final isRentalLayout =
       applicationId == 'AppHotel' || applicationId == 'AppRental';
-  final noun = applicationId == 'AppRental' ? 'Equipment' : 'Room';
+  final noun = applicationId == 'AppRental'
+      ? localizations.assetNounEquipment
+      : localizations.assetNounRoom;
 
   if (isPhone) {
     return [
       const StyledColumn(header: '', flex: 1), // Avatar
-      const StyledColumn(header: 'Info', flex: 4),
-      const StyledColumn(header: 'Status', flex: 1),
+      StyledColumn(header: localizations.tableHdrInfo, flex: 4),
+      StyledColumn(header: localizations.status, flex: 1),
       const StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
   if (isRentalLayout) {
     return [
-      StyledColumn(header: '$noun Nr', flex: 1),
-      StyledColumn(header: '$noun Name', flex: 2),
-      StyledColumn(header: '$noun Type', flex: 2),
-      const StyledColumn(header: 'List Price', flex: 1),
-      const StyledColumn(header: 'Price', flex: 1),
-      const StyledColumn(header: 'Active', flex: 1),
+      StyledColumn(header: localizations.tableHdrNounNr(noun), flex: 1),
+      StyledColumn(header: localizations.tableHdrNounName(noun), flex: 2),
+      StyledColumn(header: localizations.tableHdrNounType(noun), flex: 2),
+      StyledColumn(header: localizations.tableHdrListPrice, flex: 1),
+      StyledColumn(header: localizations.tableHdrPrice, flex: 1),
+      StyledColumn(header: localizations.tableHdrActive, flex: 1),
       const StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
   return [
-    const StyledColumn(header: 'ID', flex: 1),
-    const StyledColumn(header: 'Product', flex: 3),
-    const StyledColumn(header: 'Qty', flex: 1),
-    const StyledColumn(header: 'Cost', flex: 1),
-    const StyledColumn(header: 'Location', flex: 1),
-    const StyledColumn(header: 'Active', flex: 1),
+    StyledColumn(header: localizations.idLabel, flex: 1),
+    StyledColumn(header: localizations.product, flex: 3),
+    StyledColumn(header: localizations.tableHdrQty, flex: 1),
+    StyledColumn(header: localizations.tableHdrCost, flex: 1),
+    StyledColumn(header: localizations.location, flex: 1),
+    StyledColumn(header: localizations.tableHdrActive, flex: 1),
     const StyledColumn(header: '', flex: 1), // Actions
   ];
 }
@@ -72,8 +76,7 @@ List<Widget> getAssetListRow({
   String? applicationId,
 }) {
   bool isPhone = isAPhone(context);
-  final isHotel =
-      applicationId == 'AppHotel' || applicationId == 'AppRental';
+  final isHotel = applicationId == 'AppHotel' || applicationId == 'AppRental';
   String currencyId = context
       .read<AuthBloc>()
       .state
@@ -139,10 +142,12 @@ List<Widget> getAssetListRow({
   } else {
     if (isHotel) {
       // Room Nr
-      cells.add(SizedBox(
-        key: Key('item$index'),
-        child: Text(asset.pseudoId, key: Key('id$index')),
-      ));
+      cells.add(
+        SizedBox(
+          key: Key('item$index'),
+          child: Text(asset.pseudoId, key: Key('id$index')),
+        ),
+      );
 
       // Room Name
       cells.add(Text(asset.assetName ?? ''));
@@ -167,10 +172,12 @@ List<Widget> getAssetListRow({
       );
     } else {
       // ID
-      cells.add(SizedBox(
-        key: Key('item$index'),
-        child: Text(asset.pseudoId, key: Key('id$index')),
-      ));
+      cells.add(
+        SizedBox(
+          key: Key('item$index'),
+          child: Text(asset.pseudoId, key: Key('id$index')),
+        ),
+      );
 
       // Product
       cells.add(Text(asset.product?.productName ?? '', key: Key('name$index')));

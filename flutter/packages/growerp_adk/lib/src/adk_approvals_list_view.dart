@@ -61,7 +61,9 @@ class _AdkApprovalsListViewState extends State<AdkApprovalsListView> {
     try {
       final svc = await AdkGovernanceService.create();
       final list = await svc.approvals(
-          status: _status, search: _search.isEmpty ? null : _search);
+        status: _status,
+        search: _search.isEmpty ? null : _search,
+      );
       if (mounted) setState(() => _approvals = list);
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
@@ -107,7 +109,12 @@ class _AdkApprovalsListViewState extends State<AdkApprovalsListView> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_failedE(e.toString())), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+              AdkLocalizations.of(context)!.adk_failedE(e.toString()),
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -124,9 +131,13 @@ class _AdkApprovalsListViewState extends State<AdkApprovalsListView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label,
-                    style: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.bold)),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 SelectableText(value),
               ],
             ),
@@ -151,8 +162,14 @@ class _AdkApprovalsListViewState extends State<AdkApprovalsListView> {
                     children: [
                       line('Service', a.serviceName),
                       line('Status', a.status),
-                      line('Requested', a.requestTime.toLocalizedDateTime(context)),
-                      line('Decided', a.decisionTime.toLocalizedDateTime(context)),
+                      line(
+                        'Requested',
+                        a.requestTime.toLocalizedDateTime(context),
+                      ),
+                      line(
+                        'Decided',
+                        a.decisionTime.toLocalizedDateTime(context),
+                      ),
                       line('Arguments', a.argsJson),
                     ],
                   ),
@@ -196,7 +213,9 @@ class _AdkApprovalsListViewState extends State<AdkApprovalsListView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(AdkLocalizations.of(context)!.adk_errorError(_error.toString())),
+            Text(
+              AdkLocalizations.of(context)!.adk_errorError(_error.toString()),
+            ),
             const SizedBox(height: 8),
             ElevatedButton(onPressed: _load, child: const Text('Retry')),
           ],
@@ -254,16 +273,17 @@ class _AdkApprovalsListViewState extends State<AdkApprovalsListView> {
   }
 
   List<StyledColumn> _columns(BuildContext context) {
+    final localizations = AdkLocalizations.of(context)!;
     if (isAPhone(context)) {
-      return const [
-        StyledColumn(header: 'Service', flex: 5),
+      return [
+        StyledColumn(header: localizations.adk_tableHdrService, flex: 5),
         StyledColumn(header: '', flex: 2),
       ];
     }
-    return const [
-      StyledColumn(header: 'Service', flex: 4),
-      StyledColumn(header: 'Requested', flex: 2),
-      StyledColumn(header: 'Status', flex: 2),
+    return [
+      StyledColumn(header: localizations.adk_tableHdrService, flex: 4),
+      StyledColumn(header: localizations.adk_tableHdrRequested, flex: 2),
+      StyledColumn(header: localizations.adk_tableHdrStatus, flex: 2),
       StyledColumn(header: '', flex: 2),
     ];
   }
@@ -300,8 +320,10 @@ class _AdkApprovalsListViewState extends State<AdkApprovalsListView> {
     }
     return [
       Text(a.serviceName ?? '?'),
-      Text(a.requestTime.toLocalizedDateTime(context),
-          style: const TextStyle(fontSize: 12)),
+      Text(
+        a.requestTime.toLocalizedDateTime(context),
+        style: const TextStyle(fontSize: 12),
+      ),
       Text(a.status ?? '', style: const TextStyle(fontSize: 12)),
       decide,
     ];

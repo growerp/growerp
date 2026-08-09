@@ -20,27 +20,29 @@ import 'package:growerp_models/growerp_models.dart';
 
 import '../company.dart';
 import 'rest_request_stats_dialog.dart';
+import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
 /// Returns column definitions for company list based on device type
 List<StyledColumn> getCompanyListColumns(BuildContext context) {
+  final localizations = UserCompanyLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
 
   if (isPhone) {
-    return const [
+    return [
       StyledColumn(header: '', flex: 1), // Avatar
-      StyledColumn(header: 'ID', flex: 1),
-      StyledColumn(header: 'Info', flex: 4),
+      StyledColumn(header: localizations.id, flex: 1),
+      StyledColumn(header: localizations.tableHdrInfo, flex: 4),
       StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
-  return const [
-    StyledColumn(header: 'ID', flex: 1),
-    StyledColumn(header: 'Name', flex: 2),
-    StyledColumn(header: 'Role', flex: 1),
-    StyledColumn(header: 'Email', flex: 2),
-    StyledColumn(header: 'Phone', flex: 1),
-    StyledColumn(header: 'VAT/SLS', flex: 1),
+  return [
+    StyledColumn(header: localizations.id, flex: 1),
+    StyledColumn(header: localizations.name, flex: 2),
+    StyledColumn(header: localizations.role, flex: 1),
+    StyledColumn(header: localizations.email, flex: 2),
+    StyledColumn(header: localizations.tableHdrPhone, flex: 1),
+    StyledColumn(header: localizations.vatSls, flex: 1),
     StyledColumn(header: '', flex: 1), // Actions
   ];
 }
@@ -96,15 +98,17 @@ List<Widget> getCompanyListRow({
     );
   } else {
     // ID
-    cells.add(SizedBox(
-      key: Key('item$index'),
-      child: Text(
-        applicationId == 'AppSupport'
-            ? (company.partyId ?? '')
-            : (company.pseudoId ?? ''),
-        key: Key('id$index'),
+    cells.add(
+      SizedBox(
+        key: Key('item$index'),
+        child: Text(
+          applicationId == 'AppSupport'
+              ? (company.partyId ?? '')
+              : (company.pseudoId ?? ''),
+          key: Key('id$index'),
+        ),
       ),
-    ));
+    );
 
     // Name
     cells.add(Text(company.name ?? '', key: Key('name$index')));

@@ -22,22 +22,23 @@ import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Returns column definitions for landing page list based on device type
 List<StyledColumn> getLandingPageListColumns(BuildContext context) {
+  final localizations = MarketingLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
 
   if (isPhone) {
-    return const [
+    return [
       StyledColumn(header: '', flex: 1), // Avatar
-      StyledColumn(header: 'Info', flex: 4),
+      StyledColumn(header: localizations.tableHdrInfo, flex: 4),
       StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
-  return const [
-    StyledColumn(header: 'ID', flex: 1),
-    StyledColumn(header: 'Title', flex: 2),
-    StyledColumn(header: 'Headline', flex: 3),
-    StyledColumn(header: 'Status', flex: 1),
-    StyledColumn(header: 'Hook Type', flex: 1),
+  return [
+    StyledColumn(header: localizations.tableHdrId, flex: 1),
+    StyledColumn(header: localizations.tableHdrTitle, flex: 2),
+    StyledColumn(header: localizations.tableHdrHeadline, flex: 3),
+    StyledColumn(header: localizations.tableHdrStatus, flex: 1),
+    StyledColumn(header: localizations.tableHdrHookType, flex: 1),
     StyledColumn(header: '', flex: 1), // Actions
   ];
 }
@@ -71,9 +72,7 @@ List<Widget> getLandingPageListRow({
       barrierDismissible: true,
       builder: (dialogContext) => AlertDialog(
         title: Text(MarketingLocalizations.of(context)!.deleteLandingPage),
-        content: Text(
-          'Are you sure you want to delete "${page.title}"?',
-        ),
+        content: Text('Are you sure you want to delete "${page.title}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -148,10 +147,12 @@ List<Widget> getLandingPageListRow({
   } else {
     // ID (wrapped so the constant 'landingPageItem' key is present on desktop
     // too — tests count it to determine the number of rows)
-    cells.add(SizedBox(
-      key: const Key('landingPageItem'),
-      child: Text(page.pseudoId ?? '', key: Key('id$index')),
-    ));
+    cells.add(
+      SizedBox(
+        key: const Key('landingPageItem'),
+        child: Text(page.pseudoId ?? '', key: Key('id$index')),
+      ),
+    );
 
     // Title
     cells.add(

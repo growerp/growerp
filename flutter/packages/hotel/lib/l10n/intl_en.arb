@@ -23,5 +23,21 @@
         "description": "Number of rooms to clean"
       }
     }
+  },
+  "tableHdrOccupied": "Occupied",
+  "@tableHdrOccupied": {
+    "description": "Table column header"
+  },
+  "tableHdrRoom": "Room",
+  "@tableHdrRoom": {
+    "description": "Table column header"
+  },
+  "tableHdrStatus": "Status",
+  "@tableHdrStatus": {
+    "description": "Table column header"
+  },
+  "tableHdrType": "Type",
+  "@tableHdrType": {
+    "description": "Table column header"
   }
 }

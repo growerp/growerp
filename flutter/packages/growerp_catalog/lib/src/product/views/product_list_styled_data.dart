@@ -18,30 +18,32 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../blocs/product_bloc.dart';
+import 'package:growerp_catalog/l10n/generated/catalog_localizations.dart';
 
 /// Returns column definitions for product list based on device type
 List<StyledColumn> getProductListColumns(
   BuildContext context, {
   String? applicationId,
 }) {
+  final localizations = CatalogLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
   final isHotel = applicationId == 'AppHotel';
 
   if (isPhone) {
     return [
       const StyledColumn(header: '', flex: 1), // Image
-      const StyledColumn(header: 'Info', flex: 4),
-      const StyledColumn(header: 'Price', flex: 2),
+      StyledColumn(header: localizations.tableHdrInfo, flex: 4),
+      StyledColumn(header: localizations.tableHdrPrice, flex: 2),
       const StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
   return [
-    const StyledColumn(header: 'ID', flex: 1),
-    const StyledColumn(header: 'Name', flex: 3),
-    const StyledColumn(header: 'Price', flex: 1),
-    const StyledColumn(header: 'List Price', flex: 1),
-    if (!isHotel) const StyledColumn(header: 'Category', flex: 2),
+    StyledColumn(header: localizations.tableHdrId, flex: 1),
+    StyledColumn(header: localizations.tableHdrName, flex: 3),
+    StyledColumn(header: localizations.tableHdrPrice, flex: 1),
+    StyledColumn(header: localizations.tableHdrListPrice, flex: 1),
+    if (!isHotel) StyledColumn(header: localizations.category, flex: 2),
     StyledColumn(header: isHotel ? 'Units' : 'Assets', flex: 1),
     const StyledColumn(header: '', flex: 1), // Actions
   ];
@@ -123,13 +125,15 @@ List<Widget> getProductListRow({
   } else {
     // ID (the constant 'productItem' key must be present on desktop too —
     // tests count it to determine the number of rows)
-    cells.add(SizedBox(
-      key: const Key('productItem'),
-      child: SizedBox(
-        key: Key('item$index'),
-        child: Text(product.pseudoId, key: Key('id$index')),
+    cells.add(
+      SizedBox(
+        key: const Key('productItem'),
+        child: SizedBox(
+          key: Key('item$index'),
+          child: Text(product.pseudoId, key: Key('id$index')),
+        ),
       ),
-    ));
+    );
 
     // Name
     cells.add(Text(product.productName ?? '', key: Key('name$index')));

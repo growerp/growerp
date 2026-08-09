@@ -116,5 +116,6 @@
   "enterTextHere": "Saisissez le texte ici...",
   "formUpdateSuccess": "Formulaire {name} mis à jour",
   "formAddSuccess": "Formulaire {name} ajouté",
-  "formDeleteSuccess": "Formulaire {name} supprimé"
+  "formDeleteSuccess": "Formulaire {name} supprimé",
+  "tableHdrSubmissions": "Soumissions"
 }

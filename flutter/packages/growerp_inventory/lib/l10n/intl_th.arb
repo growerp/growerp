@@ -68,5 +68,18 @@
   "locationFetchFailure": "การดึงข้อมูลสถานที่ล้มเหลว",
   "helloWorld": "สวัสดีชาวโลก!",
   "noShipmentData": "ไม่มีข้อมูลการจัดส่ง",
-  "unknownText": "????"
+  "unknownText": "????",
+  "tableHdrAssets": "# สินทรัพย์",
+  "tableHdrActive": "ใช้งาน",
+  "tableHdrCost": "ต้นทุน",
+  "tableHdrInfo": "ข้อมูล",
+  "tableHdrListPrice": "ราคาตั้ง",
+  "tableHdrName": "ชื่อ",
+  "tableHdrPrice": "ราคา",
+  "tableHdrQty": "จำนวน",
+  "tableHdrNounNr": "เลขที่{noun}",
+  "tableHdrNounName": "ชื่อ{noun}",
+  "tableHdrNounType": "ประเภท{noun}",
+  "assetNounEquipment": "อุปกรณ์",
+  "assetNounRoom": "ห้อง"
 }

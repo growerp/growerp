@@ -21,6 +21,7 @@ import '../bloc/email_sequence_bloc.dart';
 import '../bloc/email_sequence_event.dart';
 import '../bloc/email_sequence_state.dart';
 import 'email_sequence_dialog.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// List of email nurture (drip) sequences.
 class EmailSequenceList extends StatefulWidget {
@@ -53,22 +54,23 @@ class EmailSequenceListState extends State<EmailSequenceList> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = MarketingLocalizations.of(context)!;
     final isPhone = isAPhone(context);
 
     List<StyledColumn> columns = isPhone
         ? [
-            StyledColumn(header: 'ID', flex: 1),
-            StyledColumn(header: 'Name', flex: 3),
-            StyledColumn(header: 'Active', flex: 1),
+            StyledColumn(header: localizations.tableHdrId, flex: 1),
+            StyledColumn(header: localizations.tableHdrName, flex: 3),
+            StyledColumn(header: localizations.active, flex: 1),
             StyledColumn(header: '', flex: 1),
           ]
         : [
-            StyledColumn(header: 'ID', flex: 1),
-            StyledColumn(header: 'Name', flex: 3),
-            StyledColumn(header: 'Status', flex: 1),
-            StyledColumn(header: 'Steps', flex: 1),
-            StyledColumn(header: 'Active', flex: 1),
-            StyledColumn(header: 'Completed', flex: 1),
+            StyledColumn(header: localizations.tableHdrId, flex: 1),
+            StyledColumn(header: localizations.tableHdrName, flex: 3),
+            StyledColumn(header: localizations.tableHdrStatus, flex: 1),
+            StyledColumn(header: localizations.tableHdrSteps, flex: 1),
+            StyledColumn(header: localizations.active, flex: 1),
+            StyledColumn(header: localizations.tableHdrCompleted, flex: 1),
             StyledColumn(header: '', flex: 1),
           ];
 

@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/outreach_campaign_bloc.dart';
+import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
 
 String _formatStatus(String status) {
   final cleaned = status.replaceFirst('MKTG_CAMP_', '');
@@ -50,17 +51,18 @@ Color _getStatusColor(String status) {
 }
 
 List<StyledColumn> getCampaignColumns(BuildContext context) {
+  final localizations = OutreachLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
   if (isPhone) {
     return [
-      const StyledColumn(header: 'Campaign', flex: 3),
-      const StyledColumn(header: 'Action', flex: 1),
+      StyledColumn(header: localizations.tableHdrCampaign, flex: 3),
+      StyledColumn(header: localizations.tableHdrAction, flex: 1),
     ];
   }
   return [
-    const StyledColumn(header: 'Name', flex: 2),
-    const StyledColumn(header: 'Status', flex: 1),
-    const StyledColumn(header: 'Action', flex: 1),
+    StyledColumn(header: localizations.tableHdrName, flex: 2),
+    StyledColumn(header: localizations.tableHdrStatus, flex: 1),
+    StyledColumn(header: localizations.tableHdrAction, flex: 1),
   ];
 }
 
@@ -162,16 +164,17 @@ List<Widget> getCampaignRow({
 }
 
 List<StyledColumn> getMessageColumns(BuildContext context) {
+  final localizations = OutreachLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
   if (isPhone) {
-    return [const StyledColumn(header: 'Message', flex: 1)];
+    return [StyledColumn(header: localizations.tableHdrMessage, flex: 1)];
   }
   return [
-    const StyledColumn(header: 'Recipient', flex: 2),
-    const StyledColumn(header: 'Platform', flex: 1),
-    const StyledColumn(header: 'Status', flex: 1),
-    const StyledColumn(header: 'Time', flex: 1),
-    const StyledColumn(header: 'Error', flex: 2),
+    StyledColumn(header: localizations.tableHdrRecipient, flex: 2),
+    StyledColumn(header: localizations.tableHdrPlatform, flex: 1),
+    StyledColumn(header: localizations.tableHdrStatus, flex: 1),
+    StyledColumn(header: localizations.tableHdrTime, flex: 1),
+    StyledColumn(header: localizations.tableHdrError, flex: 2),
   ];
 }
 

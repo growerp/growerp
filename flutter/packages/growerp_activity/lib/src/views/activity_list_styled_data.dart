@@ -16,23 +16,27 @@ import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../blocs/activity_bloc.dart';
+import 'package:growerp_activity/l10n/generated/activity_localizations.dart';
 
 List<StyledColumn> getActivityListColumns(
   BuildContext context,
   ActivityType activityType,
 ) {
+  final localizations = ActivityLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
   return [
-    StyledColumn(header: 'ID', flex: isPhone ? 2 : 1),
-    StyledColumn(header: 'Name', flex: isPhone ? 4 : 3),
+    StyledColumn(header: localizations.activity_id, flex: isPhone ? 2 : 1),
+    StyledColumn(header: localizations.activity_name, flex: isPhone ? 4 : 3),
     if (!isPhone && activityType == ActivityType.todo)
-      const StyledColumn(header: 'Assignee', flex: 2),
-    if (!isPhone) const StyledColumn(header: 'Third Party', flex: 2),
+      StyledColumn(header: localizations.activity_tableHdrAssignee, flex: 2),
+    if (!isPhone)
+      StyledColumn(header: localizations.activity_tableHdrThirdParty, flex: 2),
     if (activityType == ActivityType.todo)
-      const StyledColumn(header: 'Status', flex: 2),
+      StyledColumn(header: localizations.activity_status, flex: 2),
     if (activityType == ActivityType.todo)
-      const StyledColumn(header: 'Est. From', flex: 2),
-    if (!isPhone) const StyledColumn(header: 'Act. From', flex: 2),
+      StyledColumn(header: localizations.activity_tableHdrEstFrom, flex: 2),
+    if (!isPhone)
+      StyledColumn(header: localizations.activity_tableHdrActFrom, flex: 2),
     const StyledColumn(header: '', flex: 1),
   ];
 }

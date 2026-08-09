@@ -62,8 +62,9 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
     });
     try {
       final svc = await AdkConfigService.create();
-      final list =
-          await svc.listMcpServers(search: _search.isEmpty ? null : _search);
+      final list = await svc.listMcpServers(
+        search: _search.isEmpty ? null : _search,
+      );
       // Best-effort: status badges for the built-in tools. Never block the list.
       SystemSettings? settings;
       try {
@@ -116,7 +117,11 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(AdkLocalizations.of(context)!.adk_deleteMcpServer),
-        content: Text(AdkLocalizations.of(context)!.adk_deleteServerservernameItWill(server.serverName.toString())),
+        content: Text(
+          AdkLocalizations.of(
+            context,
+          )!.adk_deleteServerservernameItWill(server.serverName.toString()),
+        ),
         actions: [
           TextButton(
             key: const Key('cancelDeleteServer'),
@@ -142,7 +147,12 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_deleteFailedE(e.toString())), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+              AdkLocalizations.of(context)!.adk_deleteFailedE(e.toString()),
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -199,16 +209,14 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
     final cs = Theme.of(context).colorScheme;
 
     Widget badge({required bool ok, String okText = 'Configured'}) => Chip(
-          label: Text(ok ? okText : 'Needs setup'),
-          visualDensity: VisualDensity.compact,
-          backgroundColor: ok
-              ? cs.secondaryContainer
-              : cs.surfaceContainerHighest,
-          labelStyle: TextStyle(
-            fontSize: 12,
-            color: ok ? cs.onSecondaryContainer : cs.onSurfaceVariant,
-          ),
-        );
+      label: Text(ok ? okText : 'Needs setup'),
+      visualDensity: VisualDensity.compact,
+      backgroundColor: ok ? cs.secondaryContainer : cs.surfaceContainerHighest,
+      labelStyle: TextStyle(
+        fontSize: 12,
+        color: ok ? cs.onSecondaryContainer : cs.onSurfaceVariant,
+      ),
+    );
 
     return Column(
       children: [
@@ -216,7 +224,9 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
           key: const Key('builtinMcpServer'),
           leading: Icon(Icons.verified, color: cs.primary),
           title: Text(AdkLocalizations.of(context)!.adk_moquiBuiltIn),
-          subtitle: Text(AdkLocalizations.of(context)!.adk_alwaysAttachedToEvery),
+          subtitle: Text(
+            AdkLocalizations.of(context)!.adk_alwaysAttachedToEvery,
+          ),
           trailing: badge(ok: true, okText: 'Built-in'),
         ),
         ListTile(
@@ -241,7 +251,9 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
           key: const Key('githubIntegration'),
           leading: Icon(Icons.code, color: cs.onSurfaceVariant),
           title: const Text('GitHub'),
-          subtitle: Text(AdkLocalizations.of(context)!.adk_tokenRepositoryForThe),
+          subtitle: Text(
+            AdkLocalizations.of(context)!.adk_tokenRepositoryForThe,
+          ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -259,7 +271,9 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
           key: const Key('googleWorkspaceIntegration'),
           leading: Icon(Icons.calendar_month, color: cs.onSurfaceVariant),
           title: Text(AdkLocalizations.of(context)!.adk_googleWorkspace),
-          subtitle: Text(AdkLocalizations.of(context)!.adk_calendarBookingCaptureGemini),
+          subtitle: Text(
+            AdkLocalizations.of(context)!.adk_calendarBookingCaptureGemini,
+          ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -278,8 +292,10 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
           child: Align(
             alignment: Alignment.centerLeft,
-            child: Text(AdkLocalizations.of(context)!.adk_externalMcpServers,
-                style: Theme.of(context).textTheme.titleSmall),
+            child: Text(
+              AdkLocalizations.of(context)!.adk_externalMcpServers,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
           ),
         ),
       ],
@@ -307,7 +323,8 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
           children: [
             const Icon(Icons.dns_outlined, size: 64, color: Colors.grey),
             const SizedBox(height: 12),
-            Text(AdkLocalizations.of(context)!.adk_noMcpServersYet,
+            Text(
+              AdkLocalizations.of(context)!.adk_noMcpServersYet,
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey),
             ),
@@ -320,16 +337,28 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
     final cs = Theme.of(context).colorScheme;
 
     final columns = phone
-        ? const [
+        ? [
             StyledColumn(header: '', flex: 1),
-            StyledColumn(header: 'Info', flex: 5),
+            StyledColumn(
+              header: AdkLocalizations.of(context)!.adk_tableHdrInfo,
+              flex: 5,
+            ),
             StyledColumn(header: '', flex: 2),
           ]
-        : const [
+        : [
             StyledColumn(header: '', flex: 1),
-            StyledColumn(header: 'Name', flex: 3),
-            StyledColumn(header: 'URL', flex: 5),
-            StyledColumn(header: 'Transport', flex: 2),
+            StyledColumn(
+              header: AdkLocalizations.of(context)!.adk_tableHdrName,
+              flex: 3,
+            ),
+            StyledColumn(
+              header: AdkLocalizations.of(context)!.adk_tableHdrUrl,
+              flex: 5,
+            ),
+            StyledColumn(
+              header: AdkLocalizations.of(context)!.adk_tableHdrTransport,
+              flex: 2,
+            ),
             StyledColumn(header: '', flex: 1),
           ];
 

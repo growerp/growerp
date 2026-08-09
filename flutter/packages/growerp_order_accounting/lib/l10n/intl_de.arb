@@ -303,5 +303,22 @@
   "newCustomer": "Neuer Kunde",
   "addProduct1": "Produkt hinzufügen",
   "addReservation": "Reservierung hinzufügen",
-  "itemtype": "Positionsart"
+  "itemtype": "Positionsart",
+  "tableHdrNumber": "Nr.",
+  "tableHdrAccount": "Konto",
+  "tableHdrApplied": "Zugeordnet",
+  "tableHdrCustomerSupplier": "Kunde/Lieferant",
+  "tableHdrDirection": "Richtung",
+  "tableHdrEmail": "E-Mail",
+  "tableHdrError": "Fehler",
+  "tableHdrInfo": "Info",
+  "tableHdrItemType": "Positionsart",
+  "tableHdrItemTypeDirection": "Positionsart / Richtung",
+  "tableHdrJournalName": "Journalname",
+  "tableHdrPostedDate": "Buchungsdatum",
+  "tableHdrProductId": "Produkt-ID",
+  "tableHdrQuantity": "Menge",
+  "tableHdrSubtotal": "Zwischensumme",
+  "tableHdrTotal": "Gesamt",
+  "tableHdrDocTypeId": "{docType}-ID"
 }

@@ -18,22 +18,24 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../blocs/work_order_bloc.dart';
+import 'package:growerp_manufacturing/l10n/generated/manufacturing_localizations.dart';
 
 List<StyledColumn> getWorkOrderListColumns(BuildContext context) {
+  final localizations = ManufacturingLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
   if (isPhone) {
     return [
       const StyledColumn(header: '', flex: 1),
-      const StyledColumn(header: 'Info', flex: 4),
+      StyledColumn(header: localizations.tableHdrInfo, flex: 4),
       const StyledColumn(header: '', flex: 1),
     ];
   }
   return [
-    const StyledColumn(header: 'ID', flex: 1),
-    const StyledColumn(header: 'Product', flex: 3),
-    const StyledColumn(header: 'Qty', flex: 1),
-    const StyledColumn(header: 'Status', flex: 2),
-    const StyledColumn(header: 'Start Date', flex: 2),
+    StyledColumn(header: localizations.tableHdrId, flex: 1),
+    StyledColumn(header: localizations.tableHdrProduct, flex: 3),
+    StyledColumn(header: localizations.qtyLabel, flex: 1),
+    StyledColumn(header: localizations.status, flex: 2),
+    StyledColumn(header: localizations.startDate, flex: 2),
     const StyledColumn(header: '', flex: 1),
   ];
 }
@@ -93,10 +95,7 @@ List<Widget> getWorkOrderListRow({
     );
     cells.add(Text(workOrder.status?.name ?? '', key: Key('statusId$index')));
     cells.add(
-      Text(
-        workOrder.estimatedStartDate ?? '',
-        key: Key('startDate$index'),
-      ),
+      Text(workOrder.estimatedStartDate ?? '', key: Key('startDate$index')),
     );
   }
 

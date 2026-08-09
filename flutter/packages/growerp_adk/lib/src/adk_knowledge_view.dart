@@ -157,7 +157,12 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
       if (mounted) {
         setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_failedE(e.toString())), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+              AdkLocalizations.of(context)!.adk_failedE(e.toString()),
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -171,12 +176,25 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
       picked = await FilePicker.platform.pickFiles(
         withData: true,
         type: FileType.custom,
-        allowedExtensions: const ['txt', 'md', 'markdown', 'csv', 'json', 'log', 'text'],
+        allowedExtensions: const [
+          'txt',
+          'md',
+          'markdown',
+          'csv',
+          'json',
+          'log',
+          'text',
+        ],
       );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_couldNotOpenFile(e.toString())), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+              AdkLocalizations.of(context)!.adk_couldNotOpenFile(e.toString()),
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
       return;
@@ -194,7 +212,11 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
     final dot = f.name.lastIndexOf('.');
     final base = dot > 0 ? f.name.substring(0, dot) : f.name;
     if (!mounted) return;
-    final r = await _knowledgeForm(heading: 'Add document', title: base, text: content);
+    final r = await _knowledgeForm(
+      heading: 'Add document',
+      title: base,
+      text: content,
+    );
     if (r == null) return;
     setState(() => _loading = true);
     try {
@@ -205,7 +227,12 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
       if (mounted) {
         setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_failedE(e.toString())), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+              AdkLocalizations.of(context)!.adk_failedE(e.toString()),
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -219,17 +246,20 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
       builder: (dctx) => AlertDialog(
         title: Text(AdkLocalizations.of(context)!.adk_importProducts),
         content: const Text(
-            'Add (or refresh) one knowledge entry per product so agents can answer '
-            'questions about your catalog. This may take a moment.'),
+          'Add (or refresh) one knowledge entry per product so agents can answer '
+          'questions about your catalog. This may take a moment.',
+        ),
         actions: [
           TextButton(
-              key: const Key('cancelImport'),
-              onPressed: () => Navigator.pop(dctx, false),
-              child: const Text('Cancel')),
+            key: const Key('cancelImport'),
+            onPressed: () => Navigator.pop(dctx, false),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
-              key: const Key('confirmImport'),
-              onPressed: () => Navigator.pop(dctx, true),
-              child: const Text('Import')),
+            key: const Key('confirmImport'),
+            onPressed: () => Navigator.pop(dctx, true),
+            child: const Text('Import'),
+          ),
         ],
       ),
     );
@@ -241,14 +271,23 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
       await _load();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_importedNProductS(n.toString()))),
+          SnackBar(
+            content: Text(
+              AdkLocalizations.of(context)!.adk_importedNProductS(n.toString()),
+            ),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_failedE(e.toString())), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+              AdkLocalizations.of(context)!.adk_failedE(e.toString()),
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -264,7 +303,12 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_failedE(e.toString())), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+              AdkLocalizations.of(context)!.adk_failedE(e.toString()),
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
       return;
@@ -284,7 +328,12 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
       if (mounted) {
         setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_failedE(e.toString())), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+              AdkLocalizations.of(context)!.adk_failedE(e.toString()),
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -295,12 +344,17 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
       context: context,
       builder: (dctx) => AlertDialog(
         title: Text(AdkLocalizations.of(context)!.adk_delete),
-        content: Text(AdkLocalizations.of(context)!.adk_removeDtitleFromThe(d.title.toString())),
+        content: Text(
+          AdkLocalizations.of(
+            context,
+          )!.adk_removeDtitleFromThe(d.title.toString()),
+        ),
         actions: [
           TextButton(
-              key: const Key('cancelDeleteKnowledge'),
-              onPressed: () => Navigator.pop(dctx, false),
-              child: const Text('Cancel')),
+            key: const Key('cancelDeleteKnowledge'),
+            onPressed: () => Navigator.pop(dctx, false),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             key: const Key('confirmDeleteKnowledge'),
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
@@ -318,7 +372,12 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_failedE(e.toString())), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+              AdkLocalizations.of(context)!.adk_failedE(e.toString()),
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -331,7 +390,9 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(AdkLocalizations.of(context)!.adk_errorError(_error.toString())),
+            Text(
+              AdkLocalizations.of(context)!.adk_errorError(_error.toString()),
+            ),
             const SizedBox(height: 8),
             ElevatedButton(onPressed: _load, child: const Text('Retry')),
           ],
@@ -404,18 +465,19 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
   }
 
   List<StyledColumn> _columns(BuildContext context) {
+    final localizations = AdkLocalizations.of(context)!;
     if (isAPhone(context)) {
-      return const [
+      return [
         StyledColumn(header: '', flex: 1),
-        StyledColumn(header: 'Title', flex: 5),
+        StyledColumn(header: localizations.adk_tableHdrTitle, flex: 5),
         StyledColumn(header: '', flex: 1),
       ];
     }
-    return const [
+    return [
       StyledColumn(header: '', flex: 1),
-      StyledColumn(header: 'Title', flex: 4),
-      StyledColumn(header: 'Type', flex: 2),
-      StyledColumn(header: 'Chunks', flex: 1),
+      StyledColumn(header: localizations.adk_tableHdrTitle, flex: 4),
+      StyledColumn(header: localizations.adk_tableHdrType, flex: 2),
+      StyledColumn(header: localizations.adk_tableHdrChunks, flex: 1),
       StyledColumn(header: '', flex: 1),
     ];
   }

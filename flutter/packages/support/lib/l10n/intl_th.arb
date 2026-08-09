@@ -101,5 +101,15 @@
   "growerpSupport": "ฝ่ายสนับสนุน GrowERP",
   "@growerpSupport": {
     "description": "Title for the support app."
-  }
+  },
+  "tableHdrAssessmentId": "รหัสการประเมิน",
+  "tableHdrBackendUrl": "URL แบ็กเอนด์",
+  "tableHdrCompany": "บริษัท",
+  "tableHdrId": "รหัส",
+  "tableHdrLanguages": "ภาษา",
+  "tableHdrOwner": "เจ้าของ",
+  "tableHdrPages": "หน้า",
+  "tableHdrStatus": "สถานะ",
+  "tableHdrVersion": "เวอร์ชัน",
+  "tableHdrWebsite": "เว็บไซต์"
 }

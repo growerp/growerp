@@ -24,32 +24,30 @@ class PlatformConfigData {
   final OutreachPlatform platform;
   final PlatformConfiguration? config;
 
-  const PlatformConfigData({
-    required this.platform,
-    this.config,
-  });
+  const PlatformConfigData({required this.platform, this.config});
 
   bool get isConfigured => config != null;
 }
 
 /// Returns column definitions for platform config list based on device type
 List<StyledColumn> getPlatformConfigListColumns(BuildContext context) {
+  final localizations = OutreachLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
 
   if (isPhone) {
-    return const [
+    return [
       StyledColumn(header: '', flex: 1), // Status icon
-      StyledColumn(header: 'Info', flex: 4),
+      StyledColumn(header: localizations.tableHdrInfo, flex: 4),
       StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
-  return const [
-    StyledColumn(header: 'Platform', flex: 2),
-    StyledColumn(header: 'Status', flex: 2),
-    StyledColumn(header: 'Enabled', flex: 1),
-    StyledColumn(header: 'Daily Limit', flex: 1),
-    StyledColumn(header: 'Config ID', flex: 2),
+  return [
+    StyledColumn(header: localizations.tableHdrPlatform, flex: 2),
+    StyledColumn(header: localizations.tableHdrStatus, flex: 2),
+    StyledColumn(header: localizations.enabled, flex: 1),
+    StyledColumn(header: localizations.tableHdrDailyLimit, flex: 1),
+    StyledColumn(header: localizations.tableHdrConfigId, flex: 2),
     StyledColumn(header: '', flex: 1), // Actions
   ];
 }
@@ -162,9 +160,7 @@ List<Widget> getPlatformConfigListRow({
       Text(
         data.isConfigured ? 'Configured' : 'Not Configured',
         key: Key('status$index'),
-        style: TextStyle(
-          color: data.isConfigured ? Colors.green : Colors.grey,
-        ),
+        style: TextStyle(color: data.isConfigured ? Colors.green : Colors.grey),
       ),
     );
 

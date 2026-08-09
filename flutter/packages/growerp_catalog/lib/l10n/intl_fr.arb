@@ -118,5 +118,16 @@
   "productUploadFailure": "Échec du téléchargement des produits",
   "categoryDeleteFailure": "Échec de la suppression de la catégorie",
   "catalog_noProductData": "Aucune donnée de produit",
-  "catalog_categorynbrofproductsProducts": "{categorynbrOfProducts} produits"
+  "catalog_categorynbrofproductsProducts": "{categorynbrOfProducts} produits",
+  "tableHdrProducts": "# Produits",
+  "tableHdrEmail": "E-mail",
+  "tableHdrFromThruDate": "Date début\nDate fin",
+  "tableHdrId": "ID",
+  "tableHdrInfo": "Infos",
+  "tableHdrListPrice": "Prix catalogue",
+  "tableHdrName": "Nom",
+  "tableHdrPrice": "Prix",
+  "tableHdrPurchFrom": "Achat dès",
+  "tableHdrPurchThru": "Achat jusqu'à",
+  "tableHdrSubscriberEmail": "Abonné\nE-mail"
 }

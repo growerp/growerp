@@ -13,7 +13,7 @@
   "locationName": "Locatienaam",
   "enterLocationName": "Voer een locatienaam in",
   "quantityOnHand": "Aantal op voorraad",
-  "create": "Cre\u00eber",
+  "create": "Creëer",
   "update": "Update",
   "failedToFetchSearchItems": "ophalen van zoekitems mislukt: {message}",
   "locationSearch": "Locatie zoeken",
@@ -68,5 +68,18 @@
   "locationFetchFailure": "Ophalen van locaties mislukt",
   "helloWorld": "Hello World! [nl]",
   "noShipmentData": "No shipment data [nl]",
-  "unknownText": "???? [nl]"
+  "unknownText": "???? [nl]",
+  "tableHdrAssets": "# Activa",
+  "tableHdrActive": "Actief",
+  "tableHdrCost": "Kosten",
+  "tableHdrInfo": "Info",
+  "tableHdrListPrice": "Adviesprijs",
+  "tableHdrName": "Naam",
+  "tableHdrPrice": "Prijs",
+  "tableHdrQty": "Aantal",
+  "tableHdrNounNr": "{noun}-nr.",
+  "tableHdrNounName": "{noun}-naam",
+  "tableHdrNounType": "{noun}-type",
+  "assetNounEquipment": "Apparatuur",
+  "assetNounRoom": "Kamer"
 }

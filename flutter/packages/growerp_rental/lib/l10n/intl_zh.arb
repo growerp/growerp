@@ -4,5 +4,8 @@
   "week": "周",
   "month": "月",
   "save": "保存",
-  "cancel": "取消"
+  "cancel": "取消",
+  "tableHdrFrom": "起",
+  "tableHdrRate": "费率",
+  "tableHdrThru": "止"
 }

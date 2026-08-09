@@ -22,21 +22,22 @@ import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Returns column definitions for question list based on device type
 List<StyledColumn> getQuestionListColumns(BuildContext context) {
+  final localizations = MarketingLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
 
   if (isPhone) {
-    return const [
+    return [
       StyledColumn(header: '', flex: 1), // Sequence
-      StyledColumn(header: 'Info', flex: 4),
+      StyledColumn(header: localizations.tableHdrInfo, flex: 4),
       StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
-  return const [
-    StyledColumn(header: '#', flex: 1),
-    StyledColumn(header: 'Question Text', flex: 4),
-    StyledColumn(header: 'Type', flex: 1),
-    StyledColumn(header: 'Options', flex: 1),
+  return [
+    StyledColumn(header: localizations.tableHdrNumber, flex: 1),
+    StyledColumn(header: localizations.tableHdrQuestionText, flex: 4),
+    StyledColumn(header: localizations.tableHdrType, flex: 1),
+    StyledColumn(header: localizations.tableHdrOptions, flex: 1),
     StyledColumn(header: '', flex: 1), // Actions
   ];
 }
@@ -57,9 +58,7 @@ List<Widget> getQuestionListRow({
       barrierDismissible: true,
       builder: (dialogContext) => AlertDialog(
         title: Text(MarketingLocalizations.of(context)!.deleteQuestion),
-        content: const Text(
-          'Are you sure you want to delete this question?',
-        ),
+        content: const Text('Are you sure you want to delete this question?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -139,19 +138,11 @@ List<Widget> getQuestionListRow({
     );
 
     // Type
-    cells.add(
-      Text(
-        question.questionType ?? 'text',
-        key: Key('type$index'),
-      ),
-    );
+    cells.add(Text(question.questionType ?? 'text', key: Key('type$index')));
 
     // Options count
     cells.add(
-      Text(
-        '${question.options?.length ?? 0}',
-        key: Key('options$index'),
-      ),
+      Text('${question.options?.length ?? 0}', key: Key('options$index')),
     );
   }
 

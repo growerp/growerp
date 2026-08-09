@@ -15,18 +15,20 @@
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_manufacturing/l10n/generated/manufacturing_localizations.dart';
 
 List<StyledColumn> getBomHeaderColumns(BuildContext context) {
+  final localizations = ManufacturingLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
   if (isPhone) {
     return [
       const StyledColumn(header: '', flex: 1),
-      const StyledColumn(header: 'Assembly Product', flex: 5),
+      StyledColumn(header: localizations.tableHdrAssemblyProduct, flex: 5),
     ];
   }
   return [
-    const StyledColumn(header: 'Product ID', flex: 2),
-    const StyledColumn(header: 'Product Name', flex: 5),
+    StyledColumn(header: localizations.productId, flex: 2),
+    StyledColumn(header: localizations.productName, flex: 5),
     const StyledColumn(header: '', flex: 1),
   ];
 }
@@ -76,12 +78,9 @@ List<Widget> getBomHeaderRow({
         ],
       ),
     );
-    cells.add(
-      Text(bom.productName ?? '', key: Key('productName$index')),
-    );
+    cells.add(Text(bom.productName ?? '', key: Key('productName$index')));
     cells.add(const Icon(Icons.chevron_right));
   }
 
   return cells;
 }
-

@@ -19,32 +19,34 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../user.dart';
+import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
 /// Returns column definitions for user list based on device type
 List<StyledColumn> getUserListColumns(BuildContext context, {Role? role}) {
+  final localizations = UserCompanyLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
 
   if (isPhone) {
     return [
       const StyledColumn(header: '', flex: 1), // Avatar
-      const StyledColumn(header: 'Info', flex: 4),
+      StyledColumn(header: localizations.tableHdrInfo, flex: 4),
       if (role == null || role == Role.unknown)
-        const StyledColumn(header: 'Role', flex: 2)
+        StyledColumn(header: localizations.role, flex: 2)
       else
-        const StyledColumn(header: 'Company', flex: 3),
+        StyledColumn(header: localizations.company, flex: 3),
       const StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
   return [
-    const StyledColumn(header: 'ID', flex: 1),
-    const StyledColumn(header: 'Name', flex: 2),
-    const StyledColumn(header: 'Email', flex: 2),
-    const StyledColumn(header: 'Url', flex: 2),
+    StyledColumn(header: localizations.id, flex: 1),
+    StyledColumn(header: localizations.name, flex: 2),
+    StyledColumn(header: localizations.email, flex: 2),
+    StyledColumn(header: localizations.tableHdrUrl, flex: 2),
     if (role == null || role == Role.unknown)
-      const StyledColumn(header: 'Role', flex: 2)
+      StyledColumn(header: localizations.role, flex: 2)
     else
-      const StyledColumn(header: 'Company', flex: 2),
+      StyledColumn(header: localizations.company, flex: 2),
     const StyledColumn(header: '', flex: 1), // Actions
   ];
 }
@@ -109,13 +111,15 @@ List<Widget> getUserListRow({
   } else {
     // ID (the constant 'userItem' key must be present on desktop too —
     // tests count it to determine the number of rows)
-    cells.add(SizedBox(
-      key: const Key('userItem'),
-      child: SizedBox(
-        key: Key('item$index'),
-        child: Text(user.pseudoId ?? '', key: Key('id$index')),
+    cells.add(
+      SizedBox(
+        key: const Key('userItem'),
+        child: SizedBox(
+          key: Key('item$index'),
+          child: Text(user.pseudoId ?? '', key: Key('id$index')),
+        ),
       ),
-    ));
+    );
 
     // Name
     cells.add(

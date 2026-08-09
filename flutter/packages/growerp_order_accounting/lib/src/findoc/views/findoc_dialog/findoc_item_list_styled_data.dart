@@ -16,17 +16,19 @@ import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:decimal/decimal.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 List<StyledColumn> getFinDocItemListColumns(BuildContext context) {
+  final localizations = OrderAccountingLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
   return [
-    const StyledColumn(header: '#', flex: 1),
-    const StyledColumn(header: 'Product ID', flex: 2),
-    const StyledColumn(header: 'Description', flex: 4),
-    if (!isPhone) const StyledColumn(header: 'Item', flex: 2),
-    const StyledColumn(header: 'Quantity', flex: 2),
-    if (!isPhone) const StyledColumn(header: 'Price', flex: 2),
-    if (!isPhone) const StyledColumn(header: 'SubTotal', flex: 2),
+    StyledColumn(header: localizations.tableHdrNumber, flex: 1),
+    StyledColumn(header: localizations.tableHdrProductId, flex: 2),
+    StyledColumn(header: localizations.description, flex: 4),
+    if (!isPhone) StyledColumn(header: localizations.item, flex: 2),
+    StyledColumn(header: localizations.tableHdrQuantity, flex: 2),
+    if (!isPhone) StyledColumn(header: localizations.price, flex: 2),
+    if (!isPhone) StyledColumn(header: localizations.tableHdrSubtotal, flex: 2),
     const StyledColumn(header: '', flex: 1),
   ];
 }
@@ -93,13 +95,14 @@ List<StyledColumn> getFinDocItemListShipmentColumns(
   BuildContext context,
   FinDoc finDoc,
 ) {
+  final localizations = OrderAccountingLocalizations.of(context)!;
   return [
-    const StyledColumn(header: '#', flex: 1),
-    const StyledColumn(header: 'Product ID', flex: 2),
-    const StyledColumn(header: 'Description', flex: 4),
-    const StyledColumn(header: 'Quantity', flex: 2),
+    StyledColumn(header: localizations.tableHdrNumber, flex: 1),
+    StyledColumn(header: localizations.tableHdrProductId, flex: 2),
+    StyledColumn(header: localizations.description, flex: 4),
+    StyledColumn(header: localizations.tableHdrQuantity, flex: 2),
     if (finDoc.status == FinDocStatusVal.completed)
-      const StyledColumn(header: 'Location', flex: 2),
+      StyledColumn(header: localizations.location, flex: 2),
     const StyledColumn(header: '', flex: 1),
   ];
 }
@@ -141,13 +144,14 @@ List<Widget> getFinDocItemListShipmentRow({
 }
 
 List<StyledColumn> getFinDocItemListTransactionColumns(BuildContext context) {
+  final localizations = OrderAccountingLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
   return [
-    const StyledColumn(header: 'GL Account', flex: 2),
-    const StyledColumn(header: 'Debit', flex: 2),
-    const StyledColumn(header: 'Credit', flex: 2),
-    const StyledColumn(header: 'Product ID', flex: 2),
-    if (!isPhone) const StyledColumn(header: 'Description', flex: 3),
+    StyledColumn(header: localizations.glAccountLabel, flex: 2),
+    StyledColumn(header: localizations.debit, flex: 2),
+    StyledColumn(header: localizations.credit, flex: 2),
+    StyledColumn(header: localizations.tableHdrProductId, flex: 2),
+    if (!isPhone) StyledColumn(header: localizations.description, flex: 3),
     const StyledColumn(header: '', flex: 1),
   ];
 }

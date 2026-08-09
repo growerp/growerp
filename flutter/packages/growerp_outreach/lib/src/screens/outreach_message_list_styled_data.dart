@@ -22,22 +22,23 @@ import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
 
 /// Returns column definitions for outreach message list based on device type
 List<StyledColumn> getOutreachMessageListColumns(BuildContext context) {
+  final localizations = OutreachLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
 
   if (isPhone) {
-    return const [
+    return [
       StyledColumn(header: '', flex: 1), // Avatar
-      StyledColumn(header: 'Info', flex: 4),
+      StyledColumn(header: localizations.tableHdrInfo, flex: 4),
       StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
-  return const [
-    StyledColumn(header: 'Recipient', flex: 2),
-    StyledColumn(header: 'Platform', flex: 1),
-    StyledColumn(header: 'Message', flex: 3),
-    StyledColumn(header: 'Sent Date', flex: 1),
-    StyledColumn(header: 'Status', flex: 1),
+  return [
+    StyledColumn(header: localizations.tableHdrRecipient, flex: 2),
+    StyledColumn(header: localizations.tableHdrPlatform, flex: 1),
+    StyledColumn(header: localizations.tableHdrMessage, flex: 3),
+    StyledColumn(header: localizations.tableHdrSentDate, flex: 1),
+    StyledColumn(header: localizations.tableHdrStatus, flex: 1),
     StyledColumn(header: '', flex: 1), // Actions
   ];
 }

@@ -118,5 +118,16 @@
   "productUploadFailure": "การอัปโหลดผลิตภัณฑ์ล้มเหลว",
   "categoryDeleteFailure": "การลบหมวดหมู่ล้มเหลว",
   "catalog_noProductData": "ไม่มีข้อมูลสินค้า",
-  "catalog_categorynbrofproductsProducts": "{categorynbrOfProducts} products"
+  "catalog_categorynbrofproductsProducts": "{categorynbrOfProducts} products",
+  "tableHdrProducts": "# สินค้า",
+  "tableHdrEmail": "อีเมล",
+  "tableHdrFromThruDate": "วันที่เริ่ม\nวันที่สิ้นสุด",
+  "tableHdrId": "รหัส",
+  "tableHdrInfo": "ข้อมูล",
+  "tableHdrListPrice": "ราคาตั้ง",
+  "tableHdrName": "ชื่อ",
+  "tableHdrPrice": "ราคา",
+  "tableHdrPurchFrom": "ซื้อจาก",
+  "tableHdrPurchThru": "ซื้อถึง",
+  "tableHdrSubscriberEmail": "ผู้สมัคร\nอีเมล"
 }

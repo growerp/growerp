@@ -22,20 +22,21 @@ import 'package:growerp_catalog/l10n/generated/catalog_localizations.dart';
 
 /// Returns column definitions for category list based on device type
 List<StyledColumn> getCategoryListColumns(BuildContext context) {
+  final localizations = CatalogLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
 
   if (isPhone) {
     return [
       const StyledColumn(header: '', flex: 1), // Image
-      const StyledColumn(header: 'Info', flex: 4),
+      StyledColumn(header: localizations.tableHdrInfo, flex: 4),
       const StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
   return [
-    const StyledColumn(header: 'ID', flex: 1),
-    const StyledColumn(header: 'Name', flex: 4),
-    const StyledColumn(header: '# Products', flex: 1),
+    StyledColumn(header: localizations.tableHdrId, flex: 1),
+    StyledColumn(header: localizations.tableHdrName, flex: 4),
+    StyledColumn(header: localizations.tableHdrProducts, flex: 1),
     const StyledColumn(header: '', flex: 1), // Actions
   ];
 }
@@ -79,7 +80,12 @@ List<Widget> getCategoryListRow({
             key: Key('name$index'),
             style: const TextStyle(fontWeight: FontWeight.w500),
           ),
-          Text(CatalogLocalizations.of(context)!.catalog_categorynbrofproductsProducts(category.nbrOfProducts.toString()),
+          Text(
+            CatalogLocalizations.of(
+              context,
+            )!.catalog_categorynbrofproductsProducts(
+              category.nbrOfProducts.toString(),
+            ),
             style: TextStyle(
               fontSize: 12,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -92,13 +98,15 @@ List<Widget> getCategoryListRow({
   } else {
     // ID (the constant 'categoryItem' key must be present on desktop too —
     // tests count it to determine the number of rows)
-    cells.add(SizedBox(
-      key: const Key('categoryItem'),
-      child: SizedBox(
-        key: Key('item$index'),
-        child: Text(category.pseudoId, key: Key('id$index')),
+    cells.add(
+      SizedBox(
+        key: const Key('categoryItem'),
+        child: SizedBox(
+          key: Key('item$index'),
+          child: Text(category.pseudoId, key: Key('id$index')),
+        ),
       ),
-    ));
+    );
 
     // Name
     cells.add(Text(category.categoryName, key: Key('name$index')));

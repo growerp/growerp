@@ -406,5 +406,101 @@
         "type": "String"
       }
     }
+  },
+  "adk_tableHdrAction": "Action",
+  "@adk_tableHdrAction": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrAgent": "Agent",
+  "@adk_tableHdrAgent": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrChunks": "Chunks",
+  "@adk_tableHdrChunks": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrDecision": "Decision",
+  "@adk_tableHdrDecision": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrIn": "In",
+  "@adk_tableHdrIn": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrInfo": "Info",
+  "@adk_tableHdrInfo": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrInstruction": "Instruction",
+  "@adk_tableHdrInstruction": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrLastRun": "Last Run",
+  "@adk_tableHdrLastRun": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrLock": "Lock",
+  "@adk_tableHdrLock": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrModel": "Model",
+  "@adk_tableHdrModel": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrName": "Name",
+  "@adk_tableHdrName": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrOut": "Out",
+  "@adk_tableHdrOut": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrRequested": "Requested",
+  "@adk_tableHdrRequested": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrSchedule": "Schedule",
+  "@adk_tableHdrSchedule": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrService": "Service",
+  "@adk_tableHdrService": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrServiceTool": "Service / tool",
+  "@adk_tableHdrServiceTool": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrStatus": "Status",
+  "@adk_tableHdrStatus": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrTenant": "Tenant",
+  "@adk_tableHdrTenant": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrTitle": "Title",
+  "@adk_tableHdrTitle": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrTokens": "Tokens",
+  "@adk_tableHdrTokens": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrTransport": "Transport",
+  "@adk_tableHdrTransport": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrType": "Type",
+  "@adk_tableHdrType": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrUrl": "URL",
+  "@adk_tableHdrUrl": {
+    "description": "Table column header"
+  },
+  "adk_tableHdrWhen": "When",
+  "@adk_tableHdrWhen": {
+    "description": "Table column header"
   }
 }

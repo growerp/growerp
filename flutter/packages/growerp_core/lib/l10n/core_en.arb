@@ -1360,5 +1360,257 @@
   "yourTrialHasExpired": "Your trial has expired",
   "@yourTrialHasExpired": {
     "description": "Your trial has expired text"
+  },
+  "acctLedger": "Acct Ledger",
+  "@acctLedger": {
+    "description": "Menu item title: Acct Ledger"
+  },
+  "acctPurchase": "Acct Purchase",
+  "@acctPurchase": {
+    "description": "Menu item title: Acct Purchase"
+  },
+  "acctReports": "Acct Reports",
+  "@acctReports": {
+    "description": "Menu item title: Acct Reports"
+  },
+  "acctSales": "Acct Sales",
+  "@acctSales": {
+    "description": "Menu item title: Acct Sales"
+  },
+  "acctSetup": "Acct Setup",
+  "@acctSetup": {
+    "description": "Menu item title: Acct Setup"
+  },
+  "agentActions": "Agent Actions",
+  "@agentActions": {
+    "description": "Menu item title: Agent Actions"
+  },
+  "agentControl": "Agent Control",
+  "@agentControl": {
+    "description": "Menu item title: Agent Control"
+  },
+  "agentJobs": "Agent Jobs",
+  "@agentJobs": {
+    "description": "Menu item title: Agent Jobs"
+  },
+  "aiAgents": "AI Agents",
+  "@aiAgents": {
+    "description": "Menu item title: AI Agents"
+  },
+  "aiChat": "AI Chat",
+  "@aiChat": {
+    "description": "Menu item title: AI Chat"
+  },
+  "approvals": "Approvals",
+  "@approvals": {
+    "description": "Menu item title: Approvals"
+  },
+  "assessments": "Assessments",
+  "@assessments": {
+    "description": "Menu item title: Assessments"
+  },
+  "assistantHours": "Assistant Hours",
+  "@assistantHours": {
+    "description": "Menu item title: Assistant Hours"
+  },
+  "automation": "Automation",
+  "@automation": {
+    "description": "Menu item title: Automation"
+  },
+  "billOfMaterials": "Bill of Materials",
+  "@billOfMaterials": {
+    "description": "Menu item title: Bill of Materials"
+  },
+  "campaigns": "Campaigns",
+  "@campaigns": {
+    "description": "Menu item title: Campaigns"
+  },
+  "content": "Content",
+  "@content": {
+    "description": "Menu item title: Content"
+  },
+  "contentPlans": "Content Plans",
+  "@contentPlans": {
+    "description": "Menu item title: Content Plans"
+  },
+  "courseList": "Course List",
+  "@courseList": {
+    "description": "Menu item title: Course List"
+  },
+  "courseMedia": "Course Media",
+  "@courseMedia": {
+    "description": "Menu item title: Course Media"
+  },
+  "courses": "Courses",
+  "@courses": {
+    "description": "Menu item title: Courses"
+  },
+  "courseViewer": "Course Viewer",
+  "@courseViewer": {
+    "description": "Menu item title: Course Viewer"
+  },
+  "emailSequences": "Email Sequences",
+  "@emailSequences": {
+    "description": "Menu item title: Email Sequences"
+  },
+  "engagements": "Engagements",
+  "@engagements": {
+    "description": "Menu item title: Engagements"
+  },
+  "equipment": "Equipment",
+  "@equipment": {
+    "description": "Menu item title: Equipment"
+  },
+  "equipmentTypes": "Equipment Types",
+  "@equipmentTypes": {
+    "description": "Menu item title: Equipment Types"
+  },
+  "housekeeping": "Housekeeping",
+  "@housekeeping": {
+    "description": "Menu item title: Housekeeping"
+  },
+  "knowledge": "Knowledge",
+  "@knowledge": {
+    "description": "Menu item title: Knowledge"
+  },
+  "landingPages": "Landing Pages",
+  "@landingPages": {
+    "description": "Menu item title: Landing Pages"
+  },
+  "ledger": "Ledger",
+  "@ledger": {
+    "description": "Menu item title: Ledger"
+  },
+  "ledgerAccounts": "Ledger Accounts",
+  "@ledgerAccounts": {
+    "description": "Menu item title: Ledger Accounts"
+  },
+  "llmUsage": "LLM Usage",
+  "@llmUsage": {
+    "description": "Menu item title: LLM Usage"
+  },
+  "manufacturing": "Manufacturing",
+  "@manufacturing": {
+    "description": "Menu item title: Manufacturing"
+  },
+  "marketing": "Marketing",
+  "@marketing": {
+    "description": "Menu item title: Marketing"
+  },
+  "messages": "Messages",
+  "@messages": {
+    "description": "Menu item title: Messages"
+  },
+  "myCompany": "My Company",
+  "@myCompany": {
+    "description": "Menu item title: My Company"
+  },
+  "occupancyAdr": "Occupancy/ADR",
+  "@occupancyAdr": {
+    "description": "Menu item title: Occupancy/ADR"
+  },
+  "outreach": "Outreach",
+  "@outreach": {
+    "description": "Menu item title: Outreach"
+  },
+  "owners": "Owners",
+  "@owners": {
+    "description": "Menu item title: Owners"
+  },
+  "personas": "Personas",
+  "@personas": {
+    "description": "Menu item title: Personas"
+  },
+  "pickup": "Pickup",
+  "@pickup": {
+    "description": "Menu item title: Pickup"
+  },
+  "pickupReturn": "Pickup/Return",
+  "@pickupReturn": {
+    "description": "Menu item title: Pickup/Return"
+  },
+  "pipeline": "Pipeline",
+  "@pipeline": {
+    "description": "Menu item title: Pipeline"
+  },
+  "platforms": "Platforms",
+  "@platforms": {
+    "description": "Menu item title: Platforms"
+  },
+  "purchaseInvoices": "Purchase Invoices",
+  "@purchaseInvoices": {
+    "description": "Menu item title: Purchase Invoices"
+  },
+  "rates": "Rates",
+  "@rates": {
+    "description": "Menu item title: Rates"
+  },
+  "rentals": "Rentals",
+  "@rentals": {
+    "description": "Menu item title: Rentals"
+  },
+  "returnLabel": "Return",
+  "@returnLabel": {
+    "description": "Menu item title: Return"
+  },
+  "routings": "Routings",
+  "@routings": {
+    "description": "Menu item title: Routings"
+  },
+  "sales": "Sales",
+  "@sales": {
+    "description": "Menu item title: Sales"
+  },
+  "salesInvoices": "Sales Invoices",
+  "@salesInvoices": {
+    "description": "Menu item title: Sales Invoices"
+  },
+  "sendQueue": "Send Queue",
+  "@sendQueue": {
+    "description": "Menu item title: Send Queue"
+  },
+  "statistics": "Statistics",
+  "@statistics": {
+    "description": "Menu item title: Statistics"
+  },
+  "takeACourse": "Take a Course",
+  "@takeACourse": {
+    "description": "Menu item title: Take a Course"
+  },
+  "toolsIntegrations": "Tools & Integrations",
+  "@toolsIntegrations": {
+    "description": "Menu item title: Tools & Integrations"
+  },
+  "users": "Users",
+  "@users": {
+    "description": "Menu item title: Users"
+  },
+  "utilisation": "Utilisation",
+  "@utilisation": {
+    "description": "Menu item title: Utilisation"
+  },
+  "web": "Web",
+  "@web": {
+    "description": "Menu item title: Web"
+  },
+  "webForms": "Web Forms",
+  "@webForms": {
+    "description": "Menu item title: Web Forms"
+  },
+  "websiteGenerator": "Website Generator",
+  "@websiteGenerator": {
+    "description": "Menu item title: Website Generator"
+  },
+  "websiteTranslation": "Website Translation",
+  "@websiteTranslation": {
+    "description": "Menu item title: Website Translation"
+  },
+  "wiki": "Wiki",
+  "@wiki": {
+    "description": "Menu item title: Wiki"
+  },
+  "workOrders": "Work Orders",
+  "@workOrders": {
+    "description": "Menu item title: Work Orders"
   }
 }

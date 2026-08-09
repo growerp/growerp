@@ -15,14 +15,17 @@
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:support/l10n/generated/support_localizations.dart';
 
 List<StyledColumn> getWebsiteTranslationListColumns(BuildContext context) {
+  final localizations = SupportLocalizations.of(context)!;
   final isPhone = isAPhone(context);
   return [
-    StyledColumn(header: 'Owner', flex: isPhone ? 3 : 2),
-    if (!isPhone) const StyledColumn(header: 'Languages', flex: 2),
-    const StyledColumn(header: 'Status', flex: 2),
-    if (!isPhone) const StyledColumn(header: 'Pages', flex: 1),
+    StyledColumn(header: localizations.tableHdrOwner, flex: isPhone ? 3 : 2),
+    if (!isPhone)
+      StyledColumn(header: localizations.tableHdrLanguages, flex: 2),
+    StyledColumn(header: localizations.tableHdrStatus, flex: 2),
+    if (!isPhone) StyledColumn(header: localizations.tableHdrPages, flex: 1),
     const StyledColumn(header: '', flex: 1),
   ];
 }

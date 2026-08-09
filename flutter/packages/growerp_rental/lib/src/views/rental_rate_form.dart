@@ -63,7 +63,8 @@ class _RentalRateFormState extends State<RentalRateForm> {
       );
       final rateLists = await Future.wait(
         products.products.map(
-          (product) => _restClient.getRentalPrices(productId: product.productId),
+          (product) =>
+              _restClient.getRentalPrices(productId: product.productId),
         ),
       );
       _ratesByProduct
@@ -159,6 +160,7 @@ class _RentalRateFormState extends State<RentalRateForm> {
     if (_error != null) {
       return Center(child: Text('Error: $_error', key: const Key('rateError')));
     }
+    final localizations = RentalLocalizations.of(context)!;
     final rows = _rows;
     final dateFormat = DateFormat('yyyy-MM-dd');
     return Scaffold(
@@ -205,9 +207,9 @@ class _RentalRateFormState extends State<RentalRateForm> {
             child: StyledDataTable(
               columns: [
                 StyledColumn(header: _productNoun, flex: 3),
-                const StyledColumn(header: 'From', flex: 2),
-                const StyledColumn(header: 'Thru', flex: 2),
-                const StyledColumn(header: 'Rate', flex: 2),
+                StyledColumn(header: localizations.tableHdrFrom, flex: 2),
+                StyledColumn(header: localizations.tableHdrThru, flex: 2),
+                StyledColumn(header: localizations.tableHdrRate, flex: 2),
                 const StyledColumn(header: '', flex: 1),
               ],
               rows: rows.indexed.map((entry) {
@@ -237,10 +239,8 @@ class _RentalRateFormState extends State<RentalRateForm> {
                   ),
                 ];
               }).toList(),
-              onRowTap: (index) => _showDialog(
-                product: rows[index].$1,
-                rate: rows[index].$2,
-              ),
+              onRowTap: (index) =>
+                  _showDialog(product: rows[index].$1, rate: rows[index].$2),
             ),
           ),
         ],
@@ -363,8 +363,7 @@ class _RentalRateDialogState extends State<_RentalRateDialog> {
               DropdownButtonFormField<Product>(
                 key: const Key('rentalProductType'),
                 initialValue: _product,
-                decoration:
-                    InputDecoration(labelText: widget.productNoun),
+                decoration: InputDecoration(labelText: widget.productNoun),
                 items: widget.productTypes
                     .map(
                       (p) => DropdownMenuItem(

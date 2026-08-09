@@ -112,14 +112,20 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
       await _load();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_marketingAgentTeamEnabled)),
+          SnackBar(
+            content: Text(
+              AdkLocalizations.of(context)!.adk_marketingAgentTeamEnabled,
+            ),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AdkLocalizations.of(context)!.adk_enableFailedE(e.toString())),
+            content: Text(
+              AdkLocalizations.of(context)!.adk_enableFailedE(e.toString()),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -158,14 +164,18 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
       await _load();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_agentDemoLoaded)),
+          SnackBar(
+            content: Text(AdkLocalizations.of(context)!.adk_agentDemoLoaded),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AdkLocalizations.of(context)!.adk_loadFailedE(e.toString())),
+            content: Text(
+              AdkLocalizations.of(context)!.adk_loadFailedE(e.toString()),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -183,7 +193,11 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(AdkLocalizations.of(context)!.adk_deleteAgent),
-        content: Text(AdkLocalizations.of(context)!.adk_deleteCfgagentnameThisCannot(cfg.agentName.toString())),
+        content: Text(
+          AdkLocalizations.of(
+            context,
+          )!.adk_deleteCfgagentnameThisCannot(cfg.agentName.toString()),
+        ),
         actions: [
           TextButton(
             key: const Key('cancelDeleteAgent'),
@@ -210,7 +224,9 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AdkLocalizations.of(context)!.adk_deleteFailedE(e.toString())),
+            content: Text(
+              AdkLocalizations.of(context)!.adk_deleteFailedE(e.toString()),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -296,7 +312,8 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
           children: [
             const Icon(Icons.smart_toy, size: 64, color: Colors.grey),
             const SizedBox(height: 12),
-            Text(AdkLocalizations.of(context)!.adk_noAgentsYetNtap,
+            Text(
+              AdkLocalizations.of(context)!.adk_noAgentsYetNtap,
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey),
             ),
@@ -309,24 +326,40 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
     final cs = Theme.of(context).colorScheme;
 
     final columns = phone
-        ? const [
+        ? [
             StyledColumn(header: '', flex: 1),
-            StyledColumn(header: 'Info', flex: 5),
+            StyledColumn(
+              header: AdkLocalizations.of(context)!.adk_tableHdrInfo,
+              flex: 5,
+            ),
             StyledColumn(header: '', flex: 2),
           ]
-        : const [
+        : [
             StyledColumn(header: '', flex: 1),
-            StyledColumn(header: 'Name', flex: 2),
-            StyledColumn(header: 'Model', flex: 2),
-            StyledColumn(header: 'Instruction', flex: 4),
-            StyledColumn(header: 'Schedule', flex: 2),
+            StyledColumn(
+              header: AdkLocalizations.of(context)!.adk_tableHdrName,
+              flex: 2,
+            ),
+            StyledColumn(
+              header: AdkLocalizations.of(context)!.adk_tableHdrModel,
+              flex: 2,
+            ),
+            StyledColumn(
+              header: AdkLocalizations.of(context)!.adk_tableHdrInstruction,
+              flex: 4,
+            ),
+            StyledColumn(
+              header: AdkLocalizations.of(context)!.adk_tableHdrSchedule,
+              flex: 2,
+            ),
             StyledColumn(header: '', flex: 1),
           ];
 
     final rows = _configs.asMap().entries.map((entry) {
       final i = entry.key;
       final cfg = entry.value;
-      final hasSchedule = cfg.scheduleEnabled &&
+      final hasSchedule =
+          cfg.scheduleEnabled &&
           cfg.scheduleExpression != null &&
           cfg.scheduleExpression!.isNotEmpty;
 

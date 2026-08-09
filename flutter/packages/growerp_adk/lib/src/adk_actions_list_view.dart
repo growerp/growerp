@@ -63,7 +63,9 @@ class _AdkActionsListViewState extends State<AdkActionsListView> {
     try {
       final svc = await AdkGovernanceService.create();
       final list = await svc.actions(
-          configId: widget.configId, search: _search.isEmpty ? null : _search);
+        configId: widget.configId,
+        search: _search.isEmpty ? null : _search,
+      );
       if (mounted) setState(() => _actions = list);
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
@@ -98,9 +100,13 @@ class _AdkActionsListViewState extends State<AdkActionsListView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label,
-                    style: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.bold)),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 SelectableText(value),
               ],
             ),
@@ -146,7 +152,9 @@ class _AdkActionsListViewState extends State<AdkActionsListView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(AdkLocalizations.of(context)!.adk_errorError(_error.toString())),
+            Text(
+              AdkLocalizations.of(context)!.adk_errorError(_error.toString()),
+            ),
             const SizedBox(height: 8),
             ElevatedButton(onPressed: _load, child: const Text('Retry')),
           ],
@@ -187,19 +195,20 @@ class _AdkActionsListViewState extends State<AdkActionsListView> {
   }
 
   List<StyledColumn> _columns(BuildContext context) {
+    final localizations = AdkLocalizations.of(context)!;
     if (isAPhone(context)) {
-      return const [
+      return [
         StyledColumn(header: '', flex: 1),
-        StyledColumn(header: 'Action', flex: 5),
-        StyledColumn(header: 'Decision', flex: 2),
+        StyledColumn(header: localizations.adk_tableHdrAction, flex: 5),
+        StyledColumn(header: localizations.adk_tableHdrDecision, flex: 2),
       ];
     }
-    return const [
+    return [
       StyledColumn(header: '', flex: 1),
-      StyledColumn(header: 'Service / tool', flex: 4),
-      StyledColumn(header: 'Type', flex: 1),
-      StyledColumn(header: 'When', flex: 2),
-      StyledColumn(header: 'Decision', flex: 1),
+      StyledColumn(header: localizations.adk_tableHdrServiceTool, flex: 4),
+      StyledColumn(header: localizations.adk_tableHdrType, flex: 1),
+      StyledColumn(header: localizations.adk_tableHdrWhen, flex: 2),
+      StyledColumn(header: localizations.adk_tableHdrDecision, flex: 1),
     ];
   }
 
@@ -208,8 +217,8 @@ class _AdkActionsListViewState extends State<AdkActionsListView> {
       a.verbClass == 'write'
           ? Icons.edit
           : a.verbClass == 'delegate'
-              ? Icons.share
-              : Icons.visibility,
+          ? Icons.share
+          : Icons.visibility,
       color: _decisionColor(a.decision),
     );
     final title = a.serviceName ?? a.toolName ?? '?';
@@ -218,15 +227,31 @@ class _AdkActionsListViewState extends State<AdkActionsListView> {
       style: TextStyle(color: _decisionColor(a.decision), fontSize: 12),
     );
     if (isAPhone(context)) {
-      final sub = a.reason != null && a.reason!.isNotEmpty ? '\n${a.reason}' : '';
-      return [icon, Text(AdkLocalizations.of(context)!.adk_titleSub(title.toString(), sub.toString())), decision];
+      final sub = a.reason != null && a.reason!.isNotEmpty
+          ? '\n${a.reason}'
+          : '';
+      return [
+        icon,
+        Text(
+          AdkLocalizations.of(
+            context,
+          )!.adk_titleSub(title.toString(), sub.toString()),
+        ),
+        decision,
+      ];
     }
     return [
       icon,
-      Text(a.reason != null && a.reason!.isNotEmpty ? '$title\n${a.reason}' : title),
+      Text(
+        a.reason != null && a.reason!.isNotEmpty
+            ? '$title\n${a.reason}'
+            : title,
+      ),
       Text(a.verbClass ?? '', style: const TextStyle(fontSize: 12)),
-      Text(a.actionTime.toLocalizedDateTime(context),
-          style: const TextStyle(fontSize: 12)),
+      Text(
+        a.actionTime.toLocalizedDateTime(context),
+        style: const TextStyle(fontSize: 12),
+      ),
       decision,
     ];
   }

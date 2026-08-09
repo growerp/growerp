@@ -303,5 +303,22 @@
   "newCustomer": "新客户",
   "addProduct1": "添加产品",
   "addReservation": "添加预订",
-  "itemtype": "项目类型"
+  "itemtype": "项目类型",
+  "tableHdrNumber": "序号",
+  "tableHdrAccount": "科目",
+  "tableHdrApplied": "已应用",
+  "tableHdrCustomerSupplier": "客户/供应商",
+  "tableHdrDirection": "方向",
+  "tableHdrEmail": "电子邮件",
+  "tableHdrError": "错误",
+  "tableHdrInfo": "信息",
+  "tableHdrItemType": "项目类型",
+  "tableHdrItemTypeDirection": "项目类型 / 方向",
+  "tableHdrJournalName": "日记账名称",
+  "tableHdrPostedDate": "过账日期",
+  "tableHdrProductId": "产品 ID",
+  "tableHdrQuantity": "数量",
+  "tableHdrSubtotal": "小计",
+  "tableHdrTotal": "合计",
+  "tableHdrDocTypeId": "{docType} ID"
 }

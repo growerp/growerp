@@ -18,21 +18,23 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../blocs/liner_type_bloc.dart';
+import 'package:growerp_manuf_liner/l10n/generated/manuf_liner_localizations.dart';
 
 List<StyledColumn> getLinerTypeListColumns(BuildContext context) {
+  final localizations = ManufLinerLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
   if (isPhone) {
     return [
       const StyledColumn(header: '', flex: 1),
-      const StyledColumn(header: 'Info', flex: 4),
+      StyledColumn(header: localizations.tableHdrInfo, flex: 4),
       const StyledColumn(header: '', flex: 1),
     ];
   }
   return [
-    const StyledColumn(header: 'Name', flex: 3),
-    const StyledColumn(header: 'Width Inc. (ft)', flex: 2),
-    const StyledColumn(header: 'Roll Width (ft)', flex: 2),
-    const StyledColumn(header: 'Weight (lb/sqft)', flex: 2),
+    StyledColumn(header: localizations.tableHdrName, flex: 3),
+    StyledColumn(header: localizations.tableHdrWidthIncFt, flex: 2),
+    StyledColumn(header: localizations.tableHdrRollWidthFt, flex: 2),
+    StyledColumn(header: localizations.tableHdrWeightLbSqft, flex: 2),
     const StyledColumn(header: '', flex: 1),
   ];
 }
@@ -86,16 +88,33 @@ List<Widget> getLinerTypeListRow({
   } else {
     // wrap so the row's 'item$index' tap-key exists on desktop too (tests tap it
     // to open the row)
-    cells.add(SizedBox(
-      key: Key('item$index'),
-      child: Text(linerType.linerName ?? '', key: Key('linerName$index')),
-    ));
-    cells.add(Text(linerType.widthIncrement?.toString() ?? '',
-        key: Key('widthIncrement$index'), textAlign: TextAlign.right));
-    cells.add(Text(linerType.rollStockWidth?.toString() ?? '',
-        key: Key('rollStockWidth$index'), textAlign: TextAlign.right));
-    cells.add(Text(linerType.linerWeight?.toString() ?? '',
-        key: Key('linerWeight$index'), textAlign: TextAlign.right));
+    cells.add(
+      SizedBox(
+        key: Key('item$index'),
+        child: Text(linerType.linerName ?? '', key: Key('linerName$index')),
+      ),
+    );
+    cells.add(
+      Text(
+        linerType.widthIncrement?.toString() ?? '',
+        key: Key('widthIncrement$index'),
+        textAlign: TextAlign.right,
+      ),
+    );
+    cells.add(
+      Text(
+        linerType.rollStockWidth?.toString() ?? '',
+        key: Key('rollStockWidth$index'),
+        textAlign: TextAlign.right,
+      ),
+    );
+    cells.add(
+      Text(
+        linerType.linerWeight?.toString() ?? '',
+        key: Key('linerWeight$index'),
+        textAlign: TextAlign.right,
+      ),
+    );
   }
 
   cells.add(

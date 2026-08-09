@@ -21,21 +21,22 @@ import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Returns column definitions for assessment list based on device type
 List<StyledColumn> getAssessmentListColumns(BuildContext context) {
+  final localizations = MarketingLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
 
   if (isPhone) {
-    return const [
+    return [
       StyledColumn(header: '', flex: 1), // Avatar
-      StyledColumn(header: 'Info', flex: 3),
+      StyledColumn(header: localizations.tableHdrInfo, flex: 3),
       StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
-  return const [
-    StyledColumn(header: 'ID', flex: 1),
-    StyledColumn(header: 'Name', flex: 2),
-    StyledColumn(header: 'Description', flex: 3),
-    StyledColumn(header: 'Status', flex: 1),
+  return [
+    StyledColumn(header: localizations.tableHdrId, flex: 1),
+    StyledColumn(header: localizations.tableHdrName, flex: 2),
+    StyledColumn(header: localizations.tableHdrDescription, flex: 3),
+    StyledColumn(header: localizations.tableHdrStatus, flex: 1),
     StyledColumn(header: '', flex: 1), // Actions
   ];
 }

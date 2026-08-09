@@ -14,24 +14,26 @@
 
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Returns column definitions for answer option list based on device type
 List<StyledColumn> getAnswerOptionListColumns(BuildContext context) {
+  final localizations = MarketingLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
 
   if (isPhone) {
-    return const [
-      StyledColumn(header: '#', flex: 1),
-      StyledColumn(header: 'Option', flex: 3),
-      StyledColumn(header: 'Score', flex: 1),
+    return [
+      StyledColumn(header: localizations.tableHdrNumber, flex: 1),
+      StyledColumn(header: localizations.tableHdrOption, flex: 3),
+      StyledColumn(header: localizations.tableHdrScore, flex: 1),
       StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
-  return const [
-    StyledColumn(header: '#', flex: 1),
-    StyledColumn(header: 'Option Text', flex: 4),
-    StyledColumn(header: 'Score', flex: 1),
+  return [
+    StyledColumn(header: localizations.tableHdrNumber, flex: 1),
+    StyledColumn(header: localizations.tableHdrOptionText, flex: 4),
+    StyledColumn(header: localizations.tableHdrScore, flex: 1),
     StyledColumn(header: '', flex: 1), // Actions
   ];
 }

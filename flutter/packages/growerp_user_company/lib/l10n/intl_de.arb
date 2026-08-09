@@ -216,5 +216,9 @@
   "downloadViaEmail": "Per E-Mail herunterladen",
   "downloadFirstToObtainTheFormat": "Zuerst herunterladen, um das Format zu erhalten",
   "aDataFileWillBeSendByEmail": "Eine Datendatei wird per E-Mail versendet",
-  "couldNotLoadRoles": "{role}s konnten nicht geladen werden!"
+  "couldNotLoadRoles": "{role}s konnten nicht geladen werden!",
+  "tableHdrInfo": "Info",
+  "tableHdrPhone": "Telefon",
+  "tableHdrT": "T",
+  "tableHdrUrl": "URL"
 }

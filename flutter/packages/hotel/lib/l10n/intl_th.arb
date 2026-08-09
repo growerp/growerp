@@ -23,5 +23,9 @@
         "description": "Number of rooms to clean"
       }
     }
-  }
+  },
+  "tableHdrOccupied": "มีผู้เข้าพัก",
+  "tableHdrRoom": "ห้อง",
+  "tableHdrStatus": "สถานะ",
+  "tableHdrType": "ประเภท"
 }

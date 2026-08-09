@@ -56,7 +56,8 @@ class _AdkSystemUsageViewState extends State<AdkSystemUsageView> {
     try {
       final svc = await AdkGovernanceService.create();
       final list = await svc.systemUsage(
-          search: _search.isEmpty ? null : _search);
+        search: _search.isEmpty ? null : _search,
+      );
       if (mounted) setState(() => _actions = list);
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
@@ -90,9 +91,13 @@ class _AdkSystemUsageViewState extends State<AdkSystemUsageView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label,
-                    style: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.bold)),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 SelectableText(value),
               ],
             ),
@@ -124,7 +129,10 @@ class _AdkSystemUsageViewState extends State<AdkSystemUsageView> {
                 if ((a.tokensTotal ?? 0) > 0)
                   line('Tokens', '${a.tokensTotal}'),
                 line('Tokens In', a.tokensIn != null ? '${a.tokensIn}' : null),
-                line('Tokens Out', a.tokensOut != null ? '${a.tokensOut}' : null),
+                line(
+                  'Tokens Out',
+                  a.tokensOut != null ? '${a.tokensOut}' : null,
+                ),
                 line('Result', a.resultSummary),
                 line('Arguments', a.argsJson),
               ],
@@ -143,7 +151,9 @@ class _AdkSystemUsageViewState extends State<AdkSystemUsageView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(AdkLocalizations.of(context)!.adk_errorError(_error.toString())),
+            Text(
+              AdkLocalizations.of(context)!.adk_errorError(_error.toString()),
+            ),
             const SizedBox(height: 8),
             ElevatedButton(onPressed: _load, child: const Text('Retry')),
           ],
@@ -186,22 +196,23 @@ class _AdkSystemUsageViewState extends State<AdkSystemUsageView> {
   }
 
   List<StyledColumn> _columns(BuildContext context) {
+    final localizations = AdkLocalizations.of(context)!;
     if (isAPhone(context)) {
-      return const [
+      return [
         StyledColumn(header: '', flex: 1),
-        StyledColumn(header: 'Action', flex: 3),
-        StyledColumn(header: 'Tenant', flex: 2),
-        StyledColumn(header: 'Tokens', flex: 2),
+        StyledColumn(header: localizations.adk_tableHdrAction, flex: 3),
+        StyledColumn(header: localizations.adk_tableHdrTenant, flex: 2),
+        StyledColumn(header: localizations.adk_tableHdrTokens, flex: 2),
       ];
     }
-    return const [
+    return [
       StyledColumn(header: '', flex: 1),
-      StyledColumn(header: 'Service / tool', flex: 3),
-      StyledColumn(header: 'Tenant', flex: 2),
-      StyledColumn(header: 'When', flex: 2),
-      StyledColumn(header: 'In', flex: 1),
-      StyledColumn(header: 'Out', flex: 1),
-      StyledColumn(header: 'Decision', flex: 1),
+      StyledColumn(header: localizations.adk_tableHdrServiceTool, flex: 3),
+      StyledColumn(header: localizations.adk_tableHdrTenant, flex: 2),
+      StyledColumn(header: localizations.adk_tableHdrWhen, flex: 2),
+      StyledColumn(header: localizations.adk_tableHdrIn, flex: 1),
+      StyledColumn(header: localizations.adk_tableHdrOut, flex: 1),
+      StyledColumn(header: localizations.adk_tableHdrDecision, flex: 1),
     ];
   }
 
@@ -212,10 +223,10 @@ class _AdkSystemUsageViewState extends State<AdkSystemUsageView> {
       a.verbClass == 'write'
           ? Icons.edit
           : a.verbClass == 'delegate'
-              ? Icons.share
-              : a.verbClass == 'chat'
-                  ? Icons.chat_bubble_outline
-                  : Icons.visibility,
+          ? Icons.share
+          : a.verbClass == 'chat'
+          ? Icons.chat_bubble_outline
+          : Icons.visibility,
       color: _decisionColor(a.decision),
     );
     final title = a.serviceName ?? a.toolName ?? '?';
@@ -233,8 +244,10 @@ class _AdkSystemUsageViewState extends State<AdkSystemUsageView> {
       icon,
       Text(title),
       tenant,
-      Text(a.actionTime.toLocalizedDateTime(context),
-          style: const TextStyle(fontSize: 12)),
+      Text(
+        a.actionTime.toLocalizedDateTime(context),
+        style: const TextStyle(fontSize: 12),
+      ),
       Text(_tok(a.tokensIn), style: tokStyle),
       Text(_tok(a.tokensOut), style: tokStyle),
       Text(

@@ -303,5 +303,22 @@
   "newCustomer": "Nouveau client",
   "addProduct1": "Ajouter un produit",
   "addReservation": "Ajouter une réservation",
-  "itemtype": "Type d'article"
+  "itemtype": "Type d'article",
+  "tableHdrNumber": "N°",
+  "tableHdrAccount": "Compte",
+  "tableHdrApplied": "Affecté",
+  "tableHdrCustomerSupplier": "Client/Fournisseur",
+  "tableHdrDirection": "Sens",
+  "tableHdrEmail": "E-mail",
+  "tableHdrError": "Erreur",
+  "tableHdrInfo": "Infos",
+  "tableHdrItemType": "Type d'article",
+  "tableHdrItemTypeDirection": "Type d'article / sens",
+  "tableHdrJournalName": "Nom du journal",
+  "tableHdrPostedDate": "Date de comptabilisation",
+  "tableHdrProductId": "ID produit",
+  "tableHdrQuantity": "Quantité",
+  "tableHdrSubtotal": "Sous-total",
+  "tableHdrTotal": "Total",
+  "tableHdrDocTypeId": "ID {docType}"
 }

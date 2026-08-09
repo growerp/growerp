@@ -116,5 +116,6 @@
   "enterTextHere": "在此输入文本...",
   "formUpdateSuccess": "表单 {name} 已更新",
   "formAddSuccess": "表单 {name} 已添加",
-  "formDeleteSuccess": "表单 {name} 已删除"
+  "formDeleteSuccess": "表单 {name} 已删除",
+  "tableHdrSubmissions": "提交记录"
 }

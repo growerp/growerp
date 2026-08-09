@@ -23,24 +23,25 @@ import 'package:growerp_order_accounting/l10n/generated/order_accounting_localiz
 
 /// Returns column definitions for payment type list based on device type
 List<StyledColumn> getPaymentTypeListColumns(BuildContext context) {
+  final localizations = OrderAccountingLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
 
   if (isPhone) {
     return [
       const StyledColumn(header: '', flex: 1), // Avatar
-      const StyledColumn(header: 'Payment Type', flex: 3),
-      const StyledColumn(header: 'Account', flex: 3),
+      StyledColumn(header: localizations.paymentType, flex: 3),
+      StyledColumn(header: localizations.tableHdrAccount, flex: 3),
       const StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
   return [
     const StyledColumn(header: '', flex: 1), // Avatar
-    const StyledColumn(header: 'Payment Type', flex: 2),
-    const StyledColumn(header: 'Direction', flex: 1),
-    const StyledColumn(header: 'Applied', flex: 1),
-    const StyledColumn(header: 'Account Code', flex: 2),
-    const StyledColumn(header: 'Account Name', flex: 3),
+    StyledColumn(header: localizations.paymentType, flex: 2),
+    StyledColumn(header: localizations.tableHdrDirection, flex: 1),
+    StyledColumn(header: localizations.tableHdrApplied, flex: 1),
+    StyledColumn(header: localizations.accountCode, flex: 2),
+    StyledColumn(header: localizations.accountName, flex: 3),
     const StyledColumn(header: '', flex: 1), // Actions
   ];
 }

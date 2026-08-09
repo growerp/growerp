@@ -101,5 +101,45 @@
   "growerpSupport": "GrowERP Support",
   "@growerpSupport": {
     "description": "Title for the support app."
+  },
+  "tableHdrAssessmentId": "Assessment ID",
+  "@tableHdrAssessmentId": {
+    "description": "Table column header"
+  },
+  "tableHdrBackendUrl": "Backend URL",
+  "@tableHdrBackendUrl": {
+    "description": "Table column header"
+  },
+  "tableHdrCompany": "Company",
+  "@tableHdrCompany": {
+    "description": "Table column header"
+  },
+  "tableHdrId": "ID",
+  "@tableHdrId": {
+    "description": "Table column header"
+  },
+  "tableHdrLanguages": "Languages",
+  "@tableHdrLanguages": {
+    "description": "Table column header"
+  },
+  "tableHdrOwner": "Owner",
+  "@tableHdrOwner": {
+    "description": "Table column header"
+  },
+  "tableHdrPages": "Pages",
+  "@tableHdrPages": {
+    "description": "Table column header"
+  },
+  "tableHdrStatus": "Status",
+  "@tableHdrStatus": {
+    "description": "Table column header"
+  },
+  "tableHdrVersion": "Version",
+  "@tableHdrVersion": {
+    "description": "Table column header"
+  },
+  "tableHdrWebsite": "Website",
+  "@tableHdrWebsite": {
+    "description": "Table column header"
   }
 }

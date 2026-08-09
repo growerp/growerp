@@ -286,5 +286,21 @@
   "activity_createInvoice": "Create invoice",
   "@activity_createInvoice": {
     "description": "Extracted string: Create invoice"
+  },
+  "activity_tableHdrAssignee": "Assignee",
+  "@activity_tableHdrAssignee": {
+    "description": "Table column header"
+  },
+  "activity_tableHdrThirdParty": "Third Party",
+  "@activity_tableHdrThirdParty": {
+    "description": "Table column header"
+  },
+  "activity_tableHdrEstFrom": "Est. From",
+  "@activity_tableHdrEstFrom": {
+    "description": "Table column header"
+  },
+  "activity_tableHdrActFrom": "Act. From",
+  "@activity_tableHdrActFrom": {
+    "description": "Table column header"
   }
 }

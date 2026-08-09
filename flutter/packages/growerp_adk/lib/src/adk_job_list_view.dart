@@ -94,7 +94,12 @@ class _AdkJobListViewState extends State<AdkJobListView> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_failedE(e.toString())), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+              AdkLocalizations.of(context)!.adk_failedE(e.toString()),
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -105,12 +110,13 @@ class _AdkJobListViewState extends State<AdkJobListView> {
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(AdkLocalizations.of(context)!.adk_errorJobagentname(job.agentName.toString())),
+        title: Text(
+          AdkLocalizations.of(
+            context,
+          )!.adk_errorJobagentname(job.agentName.toString()),
+        ),
         content: SingleChildScrollView(
-          child: SelectableText(
-            job.latestErrors!,
-            key: Key('jobErrorText'),
-          ),
+          child: SelectableText(job.latestErrors!, key: Key('jobErrorText')),
         ),
         actions: [
           TextButton(
@@ -135,7 +141,12 @@ class _AdkJobListViewState extends State<AdkJobListView> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AdkLocalizations.of(context)!.adk_failedE(e.toString())), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+              AdkLocalizations.of(context)!.adk_failedE(e.toString()),
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -194,7 +205,8 @@ class _AdkJobListViewState extends State<AdkJobListView> {
           children: [
             Icon(Icons.schedule, size: 64, color: Colors.grey),
             SizedBox(height: 12),
-            Text(AdkLocalizations.of(context)!.adk_noScheduledAgentJobs,
+            Text(
+              AdkLocalizations.of(context)!.adk_noScheduledAgentJobs,
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey),
             ),
@@ -228,11 +240,26 @@ class _AdkJobListViewState extends State<AdkJobListView> {
     final cs = Theme.of(context).colorScheme;
     final columns = [
       StyledColumn(header: '', flex: 1),
-      StyledColumn(header: 'Agent', flex: 3),
-      StyledColumn(header: 'Schedule', flex: 2),
-      StyledColumn(header: 'Last Run', flex: 2),
-      StyledColumn(header: 'Status', flex: 2),
-      StyledColumn(header: 'Lock', flex: 3),
+      StyledColumn(
+        header: AdkLocalizations.of(context)!.adk_tableHdrAgent,
+        flex: 3,
+      ),
+      StyledColumn(
+        header: AdkLocalizations.of(context)!.adk_tableHdrSchedule,
+        flex: 2,
+      ),
+      StyledColumn(
+        header: AdkLocalizations.of(context)!.adk_tableHdrLastRun,
+        flex: 2,
+      ),
+      StyledColumn(
+        header: AdkLocalizations.of(context)!.adk_tableHdrStatus,
+        flex: 2,
+      ),
+      StyledColumn(
+        header: AdkLocalizations.of(context)!.adk_tableHdrLock,
+        flex: 3,
+      ),
       StyledColumn(header: '', flex: 2),
     ];
 
@@ -291,7 +318,10 @@ class _AdkJobListViewState extends State<AdkJobListView> {
                   children: [
                     Icon(Icons.lock, size: 12, color: cs.onErrorContainer),
                     SizedBox(width: 4),
-                    Text(AdkLocalizations.of(context)!.adk_joblockageminMAgo(job.lockAgeMin.toString()),
+                    Text(
+                      AdkLocalizations.of(
+                        context,
+                      )!.adk_joblockageminMAgo(job.lockAgeMin.toString()),
                       style: TextStyle(
                         fontSize: 11,
                         color: cs.onErrorContainer,
@@ -319,10 +349,7 @@ class _AdkJobListViewState extends State<AdkJobListView> {
             ),
           IconButton(
             key: Key('toggleJob$i'),
-            icon: Icon(
-              job.paused ? Icons.play_arrow : Icons.pause,
-              size: 18,
-            ),
+            icon: Icon(job.paused ? Icons.play_arrow : Icons.pause, size: 18),
             tooltip: job.paused ? 'Resume' : 'Pause',
             onPressed: () => _togglePause(job),
           ),
@@ -425,30 +452,21 @@ class _JobCard extends StatelessWidget {
                   child: Text(
                     job.agentName,
                     key: Key('name$index'),
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                   ),
                 ),
                 if (job.paused)
                   Chip(
                     label: Text('Paused'),
                     backgroundColor: Colors.orange.withValues(alpha: 0.15),
-                    labelStyle: TextStyle(
-                      color: Colors.orange,
-                      fontSize: 11,
-                    ),
+                    labelStyle: TextStyle(color: Colors.orange, fontSize: 11),
                     padding: EdgeInsets.zero,
                   )
                 else
                   Chip(
                     label: Text('Active'),
                     backgroundColor: Colors.green.withValues(alpha: 0.15),
-                    labelStyle: TextStyle(
-                      color: Colors.green,
-                      fontSize: 11,
-                    ),
+                    labelStyle: TextStyle(color: Colors.green, fontSize: 11),
                     padding: EdgeInsets.zero,
                   ),
               ],
@@ -475,7 +493,10 @@ class _JobCard extends StatelessWidget {
               children: [
                 Icon(statusIcon, size: 14, color: statusColor),
                 SizedBox(width: 4),
-                Text(AdkLocalizations.of(context)!.adk_lastRunJoblateststatus(job.latestStatus.toString()),
+                Text(
+                  AdkLocalizations.of(
+                    context,
+                  )!.adk_lastRunJoblateststatus(job.latestStatus.toString()),
                   style: TextStyle(fontSize: 12, color: statusColor),
                 ),
                 if (job.latestStart != null) ...[

@@ -116,5 +116,6 @@
   "enterTextHere": "Voer hier tekst in...",
   "formUpdateSuccess": "Formulier {name} bijgewerkt",
   "formAddSuccess": "Formulier {name} toegevoegd",
-  "formDeleteSuccess": "Formulier {name} verwijderd"
+  "formDeleteSuccess": "Formulier {name} verwijderd",
+  "tableHdrSubmissions": "Inzendingen"
 }

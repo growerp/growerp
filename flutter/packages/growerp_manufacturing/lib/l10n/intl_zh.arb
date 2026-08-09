@@ -132,7 +132,7 @@
   "noWorkOrderData": "No work order data [zh]",
   "deleteButton": "Delete [zh]",
   "addStepButton": "Add Step [zh]",
-  "noneOption": "\u2014 None \u2014 [zh]",
+  "noneOption": "— None — [zh]",
   "releaseToShopFloor": "Release to Shop Floor [zh]",
   "startProduction": "Start Production [zh]",
   "completeProduction": "Complete Production [zh]",
@@ -142,6 +142,12 @@
   "productIdOptional": "Product ID (optional) [zh]",
   "descriptionRequired": "Description * [zh]",
   "qtyLabel": "Qty [zh]",
-  "scrap0to1": "Scrap (0\u20131) [zh]",
-  "seqHash": "Seq # [zh]"
+  "scrap0to1": "Scrap (0–1) [zh]",
+  "seqHash": "Seq # [zh]",
+  "tableHdrAssemblyProduct": "组装产品",
+  "tableHdrId": "ID",
+  "tableHdrInfo": "信息",
+  "tableHdrProduct": "产品",
+  "tableHdrRoutingName": "工艺路线名称",
+  "tableHdrTasks": "任务"
 }

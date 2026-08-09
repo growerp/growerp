@@ -143,5 +143,11 @@
   "descriptionRequired": "คำอธิบาย *",
   "qtyLabel": "จำนวน",
   "scrap0to1": "เศษ (0–1)",
-  "seqHash": "ลำดับ #"
+  "seqHash": "ลำดับ #",
+  "tableHdrAssemblyProduct": "สินค้าประกอบ",
+  "tableHdrId": "รหัส",
+  "tableHdrInfo": "ข้อมูล",
+  "tableHdrProduct": "สินค้า",
+  "tableHdrRoutingName": "ชื่อเส้นทางผลิต",
+  "tableHdrTasks": "งาน"
 }

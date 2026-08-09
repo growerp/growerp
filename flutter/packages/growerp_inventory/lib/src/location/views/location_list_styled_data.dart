@@ -19,24 +19,26 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../blocs/location_bloc.dart';
+import 'package:growerp_inventory/l10n/generated/inventory_localizations.dart';
 
 /// Returns column definitions for location list based on device type
 List<StyledColumn> getLocationListColumns(BuildContext context) {
+  final localizations = InventoryLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
 
   if (isPhone) {
     return [
       const StyledColumn(header: '', flex: 1), // Avatar
-      const StyledColumn(header: 'Info', flex: 4),
+      StyledColumn(header: localizations.tableHdrInfo, flex: 4),
       const StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
   return [
-    const StyledColumn(header: 'ID', flex: 1),
-    const StyledColumn(header: 'Name', flex: 3),
-    const StyledColumn(header: 'Qty', flex: 1),
-    const StyledColumn(header: '# Assets', flex: 1),
+    StyledColumn(header: localizations.idLabel, flex: 1),
+    StyledColumn(header: localizations.tableHdrName, flex: 3),
+    StyledColumn(header: localizations.tableHdrQty, flex: 1),
+    StyledColumn(header: localizations.tableHdrAssets, flex: 1),
     const StyledColumn(header: '', flex: 1), // Actions
   ];
 }
@@ -108,10 +110,12 @@ List<Widget> getLocationListRow({
     );
   } else {
     // ID
-    cells.add(SizedBox(
-      key: Key('item$index'),
-      child: Text(location.pseudoId ?? '', key: Key('id$index')),
-    ));
+    cells.add(
+      SizedBox(
+        key: Key('item$index'),
+        child: Text(location.pseudoId ?? '', key: Key('id$index')),
+      ),
+    );
 
     // Name
     cells.add(Text(location.locationName ?? '', key: Key('name$index')));

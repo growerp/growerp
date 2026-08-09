@@ -67,5 +67,12 @@
   "courses_contentScopeOptional": "内容范围（可选）",
   "courses_entireCourse": "整门课程",
   "courses_entireModule": "整个模块",
-  "courses_areYouSureYou": "确定要删除“{valwidgetcoursetitle}”吗？"
+  "courses_areYouSureYou": "确定要删除“{valwidgetcoursetitle}”吗？",
+  "courses_tableHdrDescription": "描述",
+  "courses_tableHdrDifficulty": "难度",
+  "courses_tableHdrDuration": "时长",
+  "courses_tableHdrId": "ID",
+  "courses_tableHdrInfo": "信息",
+  "courses_tableHdrStatus": "状态",
+  "courses_tableHdrTitle": "标题"
 }

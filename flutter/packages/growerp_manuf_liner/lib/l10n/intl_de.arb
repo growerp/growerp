@@ -15,5 +15,18 @@
   "panelLength": "Panel Length (ft) [de]",
   "sequenceNoOptional": "Sequence No. (optional) [de]",
   "rollStockWidth": "Roll Stock Width (ft) [de]",
-  "widthIncrement": "Width Increment (ft) [de]"
+  "widthIncrement": "Width Increment (ft) [de]",
+  "tableHdrInfo": "Info",
+  "tableHdrLFt": "L (ft)",
+  "tableHdrLiner": "Liner",
+  "tableHdrName": "Name",
+  "tableHdrPanelName": "Panelname",
+  "tableHdrPasses": "Durchgänge",
+  "tableHdrQcNumber": "QK-Nr.",
+  "tableHdrRollWidthFt": "Rollenbreite (ft)",
+  "tableHdrSqft": "Quadratfuß",
+  "tableHdrWFt": "B (ft)",
+  "tableHdrWeightLbSqft": "Gewicht (lb/sqft)",
+  "tableHdrWidthIncFt": "Breite inkl. (ft)",
+  "tableHdrWtLb": "Gew. (lb)"
 }

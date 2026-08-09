@@ -53,21 +53,22 @@ class WebsiteFormListState extends State<WebsiteFormList> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = WebsiteLocalizations.of(context)!;
     final isPhone = isAPhone(context);
 
     List<StyledColumn> columns = isPhone
         ? [
-            StyledColumn(header: 'ID', flex: 1),
-            StyledColumn(header: 'Name', flex: 3),
-            StyledColumn(header: 'Submissions', flex: 2),
+            StyledColumn(header: localizations.id, flex: 1),
+            StyledColumn(header: localizations.name, flex: 3),
+            StyledColumn(header: localizations.tableHdrSubmissions, flex: 2),
             StyledColumn(header: '', flex: 1),
           ]
         : [
-            StyledColumn(header: 'ID', flex: 1),
-            StyledColumn(header: 'Name', flex: 2),
-            StyledColumn(header: 'Title', flex: 3),
-            StyledColumn(header: 'Fields', flex: 1),
-            StyledColumn(header: 'Submissions', flex: 1),
+            StyledColumn(header: localizations.id, flex: 1),
+            StyledColumn(header: localizations.name, flex: 2),
+            StyledColumn(header: localizations.title, flex: 3),
+            StyledColumn(header: localizations.fields, flex: 1),
+            StyledColumn(header: localizations.tableHdrSubmissions, flex: 1),
             StyledColumn(header: '', flex: 1),
           ];
 

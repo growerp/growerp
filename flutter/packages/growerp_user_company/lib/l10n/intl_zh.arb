@@ -216,5 +216,9 @@
   "downloadViaEmail": "通过电子邮件下载",
   "downloadFirstToObtainTheFormat": "请先下载以获取格式",
   "aDataFileWillBeSendByEmail": "数据文件将通过电子邮件发送",
-  "couldNotLoadRoles": "无法加载 {role}！"
+  "couldNotLoadRoles": "无法加载 {role}！",
+  "tableHdrInfo": "信息",
+  "tableHdrPhone": "电话",
+  "tableHdrT": "T",
+  "tableHdrUrl": "网址"
 }

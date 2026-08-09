@@ -19,6 +19,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../blocs/fin_doc_bloc.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 /// Returns column definitions for FinDoc list based on device type and docType
 List<StyledColumn> getFinDocListColumns(
@@ -26,6 +27,7 @@ List<StyledColumn> getFinDocListColumns(
   required FinDocType docType,
   String? applicationId,
 }) {
+  final localizations = OrderAccountingLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
   final isHotel = applicationId == 'AppHotel' || applicationId == 'AppRental';
   final isTransaction = docType == FinDocType.transaction;
@@ -34,30 +36,37 @@ List<StyledColumn> getFinDocListColumns(
   if (isPhone) {
     return [
       const StyledColumn(header: '', flex: 1), // Avatar
-      const StyledColumn(header: 'Info', flex: 5),
+      StyledColumn(header: localizations.tableHdrInfo, flex: 5),
       const StyledColumn(header: '', flex: 2), // Actions
     ];
   }
 
   List<StyledColumn> columns = [
-    StyledColumn(header: '${docType.name} ID', flex: 1),
+    StyledColumn(
+      header: localizations.tableHdrDocTypeId(
+        _docTypeLabel(localizations, docType),
+      ),
+      flex: 1,
+    ),
   ];
 
   if (isTransaction) {
-    columns.add(const StyledColumn(header: 'Type', flex: 1));
+    columns.add(StyledColumn(header: localizations.type, flex: 1));
   }
 
   columns.add(
     StyledColumn(header: isHotel ? 'Reserv. Date' : 'Created', flex: 1),
   );
-  columns.add(const StyledColumn(header: 'Customer/Supplier', flex: 2));
+  columns.add(
+    StyledColumn(header: localizations.tableHdrCustomerSupplier, flex: 2),
+  );
 
   if (!isShipment) {
-    columns.add(const StyledColumn(header: 'Total', flex: 1));
+    columns.add(StyledColumn(header: localizations.tableHdrTotal, flex: 1));
   }
 
-  columns.add(const StyledColumn(header: 'Status', flex: 1));
-  columns.add(const StyledColumn(header: 'Email', flex: 2));
+  columns.add(StyledColumn(header: localizations.status, flex: 1));
+  columns.add(StyledColumn(header: localizations.tableHdrEmail, flex: 2));
   columns.add(const StyledColumn(header: '', flex: 1)); // Actions
 
   return columns;
@@ -185,10 +194,12 @@ List<Widget> getFinDocListRow({
     );
   } else {
     // ID
-    cells.add(SizedBox(
-      key: Key('item$index'),
-      child: Text(finDoc.pseudoId ?? '', key: Key('id$index')),
-    ));
+    cells.add(
+      SizedBox(
+        key: Key('item$index'),
+        child: Text(finDoc.pseudoId ?? '', key: Key('id$index')),
+      ),
+    );
 
     // Type (only for transactions)
     if (finDoc.docType == FinDocType.transaction) {
@@ -297,4 +308,26 @@ List<Widget> getFinDocListRow({
   );
 
   return cells;
+}
+
+String _docTypeLabel(
+  OrderAccountingLocalizations localizations,
+  FinDocType docType,
+) {
+  switch (docType) {
+    case FinDocType.request:
+      return localizations.docTypeRequest;
+    case FinDocType.order:
+      return localizations.docTypeOrder;
+    case FinDocType.invoice:
+      return localizations.docTypeInvoice;
+    case FinDocType.payment:
+      return localizations.docTypePayment;
+    case FinDocType.shipment:
+      return localizations.docTypeShipment;
+    case FinDocType.transaction:
+      return localizations.docTypeTransaction;
+    default:
+      return '';
+  }
 }

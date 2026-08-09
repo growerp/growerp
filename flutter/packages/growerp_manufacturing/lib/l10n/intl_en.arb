@@ -141,7 +141,7 @@
   "@addStepButton": {
     "description": "Add step button label"
   },
-  "noneOption": "\u2014 None \u2014",
+  "noneOption": "— None —",
   "@noneOption": {
     "description": "Option for None"
   },
@@ -181,12 +181,36 @@
   "@qtyLabel": {
     "description": "Short label for quantity"
   },
-  "scrap0to1": "Scrap (0\u20131)",
+  "scrap0to1": "Scrap (0–1)",
   "@scrap0to1": {
     "description": "Label for Scrap with range"
   },
   "seqHash": "Seq #",
   "@seqHash": {
     "description": "Label for Sequence Number"
+  },
+  "tableHdrAssemblyProduct": "Assembly Product",
+  "@tableHdrAssemblyProduct": {
+    "description": "Table column header"
+  },
+  "tableHdrId": "ID",
+  "@tableHdrId": {
+    "description": "Table column header"
+  },
+  "tableHdrInfo": "Info",
+  "@tableHdrInfo": {
+    "description": "Table column header"
+  },
+  "tableHdrProduct": "Product",
+  "@tableHdrProduct": {
+    "description": "Table column header"
+  },
+  "tableHdrRoutingName": "Routing Name",
+  "@tableHdrRoutingName": {
+    "description": "Table column header"
+  },
+  "tableHdrTasks": "Tasks",
+  "@tableHdrTasks": {
+    "description": "Table column header"
   }
 }

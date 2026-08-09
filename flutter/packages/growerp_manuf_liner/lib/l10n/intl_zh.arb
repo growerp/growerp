@@ -15,5 +15,18 @@
   "panelLength": "Panel Length (ft) [zh]",
   "sequenceNoOptional": "Sequence No. (optional) [zh]",
   "rollStockWidth": "Roll Stock Width (ft) [zh]",
-  "widthIncrement": "Width Increment (ft) [zh]"
+  "widthIncrement": "Width Increment (ft) [zh]",
+  "tableHdrInfo": "信息",
+  "tableHdrLFt": "长（英尺）",
+  "tableHdrLiner": "内衬",
+  "tableHdrName": "名称",
+  "tableHdrPanelName": "面板名称",
+  "tableHdrPasses": "道次",
+  "tableHdrQcNumber": "质检号",
+  "tableHdrRollWidthFt": "卷宽（英尺）",
+  "tableHdrSqft": "平方英尺",
+  "tableHdrWFt": "宽（英尺）",
+  "tableHdrWeightLbSqft": "重量（磅/平方英尺）",
+  "tableHdrWidthIncFt": "含宽（英尺）",
+  "tableHdrWtLb": "重量（磅）"
 }

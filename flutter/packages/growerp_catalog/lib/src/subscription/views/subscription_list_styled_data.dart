@@ -18,25 +18,27 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../blocs/subscription_bloc.dart';
+import 'package:growerp_catalog/l10n/generated/catalog_localizations.dart';
 
 /// Returns column definitions for the subscription list based on device type
-List<StyledColumn> getSubscriptionColumns(bool isPhone) {
+List<StyledColumn> getSubscriptionColumns(BuildContext context, bool isPhone) {
+  final localizations = CatalogLocalizations.of(context)!;
   if (isPhone) {
     return [
-      const StyledColumn(header: 'Id', flex: 15),
-      const StyledColumn(header: 'Subscriber\nEmail', flex: 45),
-      const StyledColumn(header: 'From Date\nThru Date', flex: 25),
+      StyledColumn(header: localizations.tableHdrId, flex: 15),
+      StyledColumn(header: localizations.tableHdrSubscriberEmail, flex: 45),
+      StyledColumn(header: localizations.tableHdrFromThruDate, flex: 25),
       const StyledColumn(header: '', flex: 15), // Actions
     ];
   } else {
     return [
-      const StyledColumn(header: 'Id', flex: 8),
-      const StyledColumn(header: 'Subscriber', flex: 20),
-      const StyledColumn(header: 'Email', flex: 20),
-      const StyledColumn(header: 'From Date', flex: 12),
-      const StyledColumn(header: 'Thru Date', flex: 12),
-      const StyledColumn(header: 'Purch. From', flex: 12),
-      const StyledColumn(header: 'Purch. Thru', flex: 12),
+      StyledColumn(header: localizations.tableHdrId, flex: 8),
+      StyledColumn(header: localizations.subscriberLabel, flex: 20),
+      StyledColumn(header: localizations.tableHdrEmail, flex: 20),
+      StyledColumn(header: localizations.fromDate, flex: 12),
+      StyledColumn(header: localizations.thruDate, flex: 12),
+      StyledColumn(header: localizations.tableHdrPurchFrom, flex: 12),
+      StyledColumn(header: localizations.tableHdrPurchThru, flex: 12),
       const StyledColumn(header: '', flex: 8), // Actions
     ];
   }

@@ -75,5 +75,12 @@
         "type": "String"
       }
     }
-  }
+  },
+  "courses_tableHdrDescription": "คำอธิบาย",
+  "courses_tableHdrDifficulty": "ระดับความยาก",
+  "courses_tableHdrDuration": "ระยะเวลา",
+  "courses_tableHdrId": "รหัส",
+  "courses_tableHdrInfo": "ข้อมูล",
+  "courses_tableHdrStatus": "สถานะ",
+  "courses_tableHdrTitle": "หัวข้อ"
 }

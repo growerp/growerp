@@ -22,22 +22,23 @@ import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Returns column definitions for persona list based on device type
 List<StyledColumn> getPersonaListColumns(BuildContext context) {
+  final localizations = MarketingLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
 
   if (isPhone) {
-    return const [
+    return [
       StyledColumn(header: '', flex: 1), // Avatar
-      StyledColumn(header: 'Info', flex: 4),
+      StyledColumn(header: localizations.tableHdrInfo, flex: 4),
       StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
-  return const [
-    StyledColumn(header: 'ID', flex: 1),
-    StyledColumn(header: 'Name', flex: 2),
-    StyledColumn(header: 'Demographics', flex: 2),
-    StyledColumn(header: 'Pain Points', flex: 2),
-    StyledColumn(header: 'Goals', flex: 2),
+  return [
+    StyledColumn(header: localizations.tableHdrId, flex: 1),
+    StyledColumn(header: localizations.tableHdrName, flex: 2),
+    StyledColumn(header: localizations.tableHdrDemographics, flex: 2),
+    StyledColumn(header: localizations.tableHdrPainPoints, flex: 2),
+    StyledColumn(header: localizations.tableHdrGoals, flex: 2),
     StyledColumn(header: '', flex: 1), // Actions
   ];
 }
@@ -58,9 +59,7 @@ List<Widget> getPersonaListRow({
       barrierDismissible: true,
       builder: (dialogContext) => AlertDialog(
         title: Text(MarketingLocalizations.of(context)!.deletePersona),
-        content: Text(
-          'Are you sure you want to delete "${persona.name}"?',
-        ),
+        content: Text('Are you sure you want to delete "${persona.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -130,10 +129,12 @@ List<Widget> getPersonaListRow({
   } else {
     // ID (wrapped so the constant 'personaItem' key is present on desktop too —
     // tests count it to determine the number of rows)
-    cells.add(SizedBox(
-      key: const Key('personaItem'),
-      child: Text(persona.pseudoId ?? '', key: Key('id$index')),
-    ));
+    cells.add(
+      SizedBox(
+        key: const Key('personaItem'),
+        child: Text(persona.pseudoId ?? '', key: Key('id$index')),
+      ),
+    );
 
     // Name
     cells.add(

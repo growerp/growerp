@@ -95,9 +95,15 @@ class _HousekeepingFormState extends State<HousekeepingForm> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = HotelLocalizations.of(context)!;
     if (_loading) return const LoadingIndicator();
     if (_error != null) {
-      return Center(child: Text(HotelLocalizations.of(context)!.errorWithArg('$_error'), key: const Key('hkError')));
+      return Center(
+        child: Text(
+          HotelLocalizations.of(context)!.errorWithArg('$_error'),
+          key: const Key('hkError'),
+        ),
+      );
     }
     final dirtyCount = _rooms.where((r) => r.hkStatusId != 'Clean').length;
     return Scaffold(
@@ -126,18 +132,20 @@ class _HousekeepingFormState extends State<HousekeepingForm> {
           Padding(
             padding: const EdgeInsets.all(10),
             child: Text(
-              HotelLocalizations.of(context)!.roomsToClean(_rooms.length, dirtyCount),
+              HotelLocalizations.of(
+                context,
+              )!.roomsToClean(_rooms.length, dirtyCount),
               key: const Key('hkSummary'),
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
           Expanded(
             child: StyledDataTable(
-              columns: const [
-                StyledColumn(header: 'Room', flex: 2),
-                StyledColumn(header: 'Type', flex: 2),
-                StyledColumn(header: 'Occupied', flex: 1),
-                StyledColumn(header: 'Status', flex: 2),
+              columns: [
+                StyledColumn(header: localizations.tableHdrRoom, flex: 2),
+                StyledColumn(header: localizations.tableHdrType, flex: 2),
+                StyledColumn(header: localizations.tableHdrOccupied, flex: 1),
+                StyledColumn(header: localizations.tableHdrStatus, flex: 2),
               ],
               rows: _rooms.indexed.map((entry) {
                 final index = entry.$1;

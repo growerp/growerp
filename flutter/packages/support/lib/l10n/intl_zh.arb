@@ -20,5 +20,15 @@
   "logout": "退出登录",
   "loadingMenuConfiguration": "正在加载菜单配置...",
   "login": "登录",
-  "growerpSupport": "GrowERP 支持"
+  "growerpSupport": "GrowERP 支持",
+  "tableHdrAssessmentId": "评估 ID",
+  "tableHdrBackendUrl": "后端网址",
+  "tableHdrCompany": "公司",
+  "tableHdrId": "ID",
+  "tableHdrLanguages": "语言",
+  "tableHdrOwner": "所有者",
+  "tableHdrPages": "页面",
+  "tableHdrStatus": "状态",
+  "tableHdrVersion": "版本",
+  "tableHdrWebsite": "网站"
 }

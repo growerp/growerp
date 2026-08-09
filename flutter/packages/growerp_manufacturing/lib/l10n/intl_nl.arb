@@ -132,7 +132,7 @@
   "noWorkOrderData": "No work order data [nl]",
   "deleteButton": "Delete [nl]",
   "addStepButton": "Add Step [nl]",
-  "noneOption": "\u2014 None \u2014 [nl]",
+  "noneOption": "— None — [nl]",
   "releaseToShopFloor": "Release to Shop Floor [nl]",
   "startProduction": "Start Production [nl]",
   "completeProduction": "Complete Production [nl]",
@@ -142,6 +142,12 @@
   "productIdOptional": "Product ID (optional) [nl]",
   "descriptionRequired": "Description * [nl]",
   "qtyLabel": "Qty [nl]",
-  "scrap0to1": "Scrap (0\u20131) [nl]",
-  "seqHash": "Seq # [nl]"
+  "scrap0to1": "Scrap (0–1) [nl]",
+  "seqHash": "Seq # [nl]",
+  "tableHdrAssemblyProduct": "Assemblageproduct",
+  "tableHdrId": "ID",
+  "tableHdrInfo": "Info",
+  "tableHdrProduct": "Product",
+  "tableHdrRoutingName": "Routingnaam",
+  "tableHdrTasks": "Taken"
 }

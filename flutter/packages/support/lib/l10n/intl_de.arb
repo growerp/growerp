@@ -20,5 +20,15 @@
   "logout": "Abmelden",
   "loadingMenuConfiguration": "Menükonfiguration wird geladen...",
   "login": "Anmeldung",
-  "growerpSupport": "GrowERP-Support"
+  "growerpSupport": "GrowERP-Support",
+  "tableHdrAssessmentId": "Bewertungs-ID",
+  "tableHdrBackendUrl": "Backend-URL",
+  "tableHdrCompany": "Unternehmen",
+  "tableHdrId": "ID",
+  "tableHdrLanguages": "Sprachen",
+  "tableHdrOwner": "Eigentümer",
+  "tableHdrPages": "Seiten",
+  "tableHdrStatus": "Status",
+  "tableHdrVersion": "Version",
+  "tableHdrWebsite": "Website"
 }

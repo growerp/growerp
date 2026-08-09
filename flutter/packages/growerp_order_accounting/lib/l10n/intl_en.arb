@@ -1271,5 +1271,78 @@
   "itemtype": "ItemType",
   "@itemtype": {
     "description": "ItemType"
+  },
+  "tableHdrNumber": "#",
+  "@tableHdrNumber": {
+    "description": "Table column header"
+  },
+  "tableHdrAccount": "Account",
+  "@tableHdrAccount": {
+    "description": "Table column header"
+  },
+  "tableHdrApplied": "Applied",
+  "@tableHdrApplied": {
+    "description": "Table column header"
+  },
+  "tableHdrCustomerSupplier": "Customer/Supplier",
+  "@tableHdrCustomerSupplier": {
+    "description": "Table column header"
+  },
+  "tableHdrDirection": "Direction",
+  "@tableHdrDirection": {
+    "description": "Table column header"
+  },
+  "tableHdrEmail": "Email",
+  "@tableHdrEmail": {
+    "description": "Table column header"
+  },
+  "tableHdrError": "Error",
+  "@tableHdrError": {
+    "description": "Table column header"
+  },
+  "tableHdrInfo": "Info",
+  "@tableHdrInfo": {
+    "description": "Table column header"
+  },
+  "tableHdrItemType": "Item Type",
+  "@tableHdrItemType": {
+    "description": "Table column header"
+  },
+  "tableHdrItemTypeDirection": "Item Type / Direction",
+  "@tableHdrItemTypeDirection": {
+    "description": "Table column header"
+  },
+  "tableHdrJournalName": "Journal Name",
+  "@tableHdrJournalName": {
+    "description": "Table column header"
+  },
+  "tableHdrPostedDate": "Posted Date",
+  "@tableHdrPostedDate": {
+    "description": "Table column header"
+  },
+  "tableHdrProductId": "Product ID",
+  "@tableHdrProductId": {
+    "description": "Table column header"
+  },
+  "tableHdrQuantity": "Quantity",
+  "@tableHdrQuantity": {
+    "description": "Table column header"
+  },
+  "tableHdrSubtotal": "SubTotal",
+  "@tableHdrSubtotal": {
+    "description": "Table column header"
+  },
+  "tableHdrTotal": "Total",
+  "@tableHdrTotal": {
+    "description": "Table column header"
+  },
+  "tableHdrDocTypeId": "{docType} ID",
+  "@tableHdrDocTypeId": {
+    "description": "Table column header",
+    "placeholders": {
+      "docType": {
+        "type": "String"
+      }
+    }
   }
 }

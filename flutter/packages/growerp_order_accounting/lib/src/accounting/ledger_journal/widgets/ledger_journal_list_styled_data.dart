@@ -17,27 +17,29 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../blocs/ledger_journal_bloc.dart';
+import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 /// Returns column definitions for ledger journal list based on device type
 List<StyledColumn> getLedgerJournalListColumns(BuildContext context) {
+  final localizations = OrderAccountingLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
 
   if (isPhone) {
     return [
       const StyledColumn(header: '', flex: 1), // Avatar
-      const StyledColumn(header: 'Journal Name', flex: 3),
-      const StyledColumn(header: 'Posted Date', flex: 2),
-      const StyledColumn(header: 'Posted', flex: 1),
+      StyledColumn(header: localizations.tableHdrJournalName, flex: 3),
+      StyledColumn(header: localizations.tableHdrPostedDate, flex: 2),
+      StyledColumn(header: localizations.postedHeader, flex: 1),
       const StyledColumn(header: '', flex: 1), // Post action
     ];
   }
 
   return [
     const StyledColumn(header: '', flex: 1), // Avatar
-    const StyledColumn(header: 'Journal Name', flex: 3),
-    const StyledColumn(header: 'Posted Date', flex: 2),
-    const StyledColumn(header: 'Posted', flex: 1),
-    const StyledColumn(header: 'Error?', flex: 1),
+    StyledColumn(header: localizations.tableHdrJournalName, flex: 3),
+    StyledColumn(header: localizations.tableHdrPostedDate, flex: 2),
+    StyledColumn(header: localizations.postedHeader, flex: 1),
+    StyledColumn(header: localizations.tableHdrError, flex: 1),
     const StyledColumn(header: '', flex: 1), // Post action
   ];
 }

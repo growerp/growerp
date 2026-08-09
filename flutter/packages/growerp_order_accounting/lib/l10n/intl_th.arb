@@ -303,5 +303,22 @@
   "newCustomer": "ลูกค้าใหม่",
   "addProduct1": "เพิ่มสินค้า",
   "addReservation": "เพิ่มการจอง",
-  "itemtype": "ประเภทรายการ"
+  "itemtype": "ประเภทรายการ",
+  "tableHdrNumber": "#",
+  "tableHdrAccount": "บัญชี",
+  "tableHdrApplied": "ใช้ไปแล้ว",
+  "tableHdrCustomerSupplier": "ลูกค้า/ผู้ขาย",
+  "tableHdrDirection": "ทิศทาง",
+  "tableHdrEmail": "อีเมล",
+  "tableHdrError": "ข้อผิดพลาด",
+  "tableHdrInfo": "ข้อมูล",
+  "tableHdrItemType": "ประเภทรายการ",
+  "tableHdrItemTypeDirection": "ประเภทรายการ / ทิศทาง",
+  "tableHdrJournalName": "ชื่อสมุดรายวัน",
+  "tableHdrPostedDate": "วันที่ผ่านรายการ",
+  "tableHdrProductId": "รหัสสินค้า",
+  "tableHdrQuantity": "จำนวน",
+  "tableHdrSubtotal": "ยอดรวมย่อย",
+  "tableHdrTotal": "รวม",
+  "tableHdrDocTypeId": "รหัส{docType}"
 }

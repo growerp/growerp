@@ -54,5 +54,9 @@
   "activity_inProcess": "En cours",
   "activity_salesInvoiceToClient": "Facture de vente au client",
   "activity_purchaseInvoiceForAssistant": "Facture d'achat pour l'assistant",
-  "activity_createInvoice": "Créer une facture"
+  "activity_createInvoice": "Créer une facture",
+  "activity_tableHdrAssignee": "Assigné à",
+  "activity_tableHdrThirdParty": "Tiers",
+  "activity_tableHdrEstFrom": "Prév. du",
+  "activity_tableHdrActFrom": "Réel du"
 }

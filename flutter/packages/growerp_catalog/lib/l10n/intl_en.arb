@@ -626,5 +626,49 @@
         "type": "String"
       }
     }
+  },
+  "tableHdrProducts": "# Products",
+  "@tableHdrProducts": {
+    "description": "Table column header"
+  },
+  "tableHdrEmail": "Email",
+  "@tableHdrEmail": {
+    "description": "Table column header"
+  },
+  "tableHdrFromThruDate": "From Date\nThru Date",
+  "@tableHdrFromThruDate": {
+    "description": "Table column header"
+  },
+  "tableHdrId": "ID",
+  "@tableHdrId": {
+    "description": "Table column header"
+  },
+  "tableHdrInfo": "Info",
+  "@tableHdrInfo": {
+    "description": "Table column header"
+  },
+  "tableHdrListPrice": "List Price",
+  "@tableHdrListPrice": {
+    "description": "Table column header"
+  },
+  "tableHdrName": "Name",
+  "@tableHdrName": {
+    "description": "Table column header"
+  },
+  "tableHdrPrice": "Price",
+  "@tableHdrPrice": {
+    "description": "Table column header"
+  },
+  "tableHdrPurchFrom": "Purch. From",
+  "@tableHdrPurchFrom": {
+    "description": "Table column header"
+  },
+  "tableHdrPurchThru": "Purch. Thru",
+  "@tableHdrPurchThru": {
+    "description": "Table column header"
+  },
+  "tableHdrSubscriberEmail": "Subscriber\nEmail",
+  "@tableHdrSubscriberEmail": {
+    "description": "Table column header"
   }
 }

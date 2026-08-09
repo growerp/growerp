@@ -303,5 +303,22 @@
   "newCustomer": "Nieuwe klant",
   "addProduct1": "Product toevoegen",
   "addReservation": "Reservering toevoegen",
-  "itemtype": "Itemtype"
+  "itemtype": "Itemtype",
+  "tableHdrNumber": "Nr.",
+  "tableHdrAccount": "Rekening",
+  "tableHdrApplied": "Toegepast",
+  "tableHdrCustomerSupplier": "Klant/Leverancier",
+  "tableHdrDirection": "Richting",
+  "tableHdrEmail": "E-mail",
+  "tableHdrError": "Fout",
+  "tableHdrInfo": "Info",
+  "tableHdrItemType": "Itemtype",
+  "tableHdrItemTypeDirection": "Itemtype / richting",
+  "tableHdrJournalName": "Journaalnaam",
+  "tableHdrPostedDate": "Boekdatum",
+  "tableHdrProductId": "Product-ID",
+  "tableHdrQuantity": "Hoeveelheid",
+  "tableHdrSubtotal": "Subtotaal",
+  "tableHdrTotal": "Totaal",
+  "tableHdrDocTypeId": "{docType}-ID"
 }

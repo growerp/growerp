@@ -23,23 +23,24 @@ import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Returns column definitions for social post list based on device type
 List<StyledColumn> getSocialPostListColumns(BuildContext context) {
+  final localizations = MarketingLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
 
   if (isPhone) {
-    return const [
-      StyledColumn(header: 'ID', flex: 1),
-      StyledColumn(header: 'Info', flex: 4),
+    return [
+      StyledColumn(header: localizations.tableHdrId, flex: 1),
+      StyledColumn(header: localizations.tableHdrInfo, flex: 4),
       StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
-  return const [
-    StyledColumn(header: 'ID', flex: 1),
-    StyledColumn(header: 'Type', flex: 1),
-    StyledColumn(header: 'Headline', flex: 3),
-    StyledColumn(header: 'Platform', flex: 1),
-    StyledColumn(header: 'Status', flex: 1),
-    StyledColumn(header: 'Scheduled', flex: 1),
+  return [
+    StyledColumn(header: localizations.tableHdrId, flex: 1),
+    StyledColumn(header: localizations.tableHdrType, flex: 1),
+    StyledColumn(header: localizations.tableHdrHeadline, flex: 3),
+    StyledColumn(header: localizations.tableHdrPlatform, flex: 1),
+    StyledColumn(header: localizations.tableHdrStatus, flex: 1),
+    StyledColumn(header: localizations.tableHdrScheduled, flex: 1),
     StyledColumn(header: '', flex: 1), // Actions
   ];
 }
@@ -103,12 +104,7 @@ List<Widget> getSocialPostListRow({
 
   if (isPhone) {
     // ID
-    cells.add(
-      Text(
-        post.pseudoId ?? '',
-        key: const Key('socialPostItem'),
-      ),
-    );
+    cells.add(Text(post.pseudoId ?? '', key: const Key('socialPostItem')));
 
     // Combined info cell
     cells.add(
@@ -197,7 +193,8 @@ List<Widget> getSocialPostListRow({
 
     // Scheduled
     cells.add(
-        Text(_formatDate(post.scheduledDate), key: Key('scheduledDate$index')));
+      Text(_formatDate(post.scheduledDate), key: Key('scheduledDate$index')),
+    );
   }
 
   // Delete action

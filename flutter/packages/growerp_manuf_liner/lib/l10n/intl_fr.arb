@@ -15,5 +15,18 @@
   "panelLength": "Panel Length (ft) [fr]",
   "sequenceNoOptional": "Sequence No. (optional) [fr]",
   "rollStockWidth": "Roll Stock Width (ft) [fr]",
-  "widthIncrement": "Width Increment (ft) [fr]"
+  "widthIncrement": "Width Increment (ft) [fr]",
+  "tableHdrInfo": "Infos",
+  "tableHdrLFt": "L (pi)",
+  "tableHdrLiner": "Liner",
+  "tableHdrName": "Nom",
+  "tableHdrPanelName": "Nom du panneau",
+  "tableHdrPasses": "Passes",
+  "tableHdrQcNumber": "N° CQ",
+  "tableHdrRollWidthFt": "Largeur rouleau (pi)",
+  "tableHdrSqft": "Pi²",
+  "tableHdrWFt": "l (pi)",
+  "tableHdrWeightLbSqft": "Poids (lb/pi²)",
+  "tableHdrWidthIncFt": "Largeur incl. (pi)",
+  "tableHdrWtLb": "Poids (lb)"
 }

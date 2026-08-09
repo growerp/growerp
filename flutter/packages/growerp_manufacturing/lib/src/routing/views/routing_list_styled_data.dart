@@ -18,20 +18,22 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../blocs/routing_bloc.dart';
+import 'package:growerp_manufacturing/l10n/generated/manufacturing_localizations.dart';
 
 List<StyledColumn> getRoutingListColumns(BuildContext context) {
+  final localizations = ManufacturingLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
   if (isPhone) {
     return [
       const StyledColumn(header: '', flex: 1),
-      const StyledColumn(header: 'Info', flex: 4),
+      StyledColumn(header: localizations.tableHdrInfo, flex: 4),
       const StyledColumn(header: '', flex: 1),
     ];
   }
   return [
-    const StyledColumn(header: 'ID', flex: 1),
-    const StyledColumn(header: 'Routing Name', flex: 4),
-    const StyledColumn(header: 'Tasks', flex: 1),
+    StyledColumn(header: localizations.tableHdrId, flex: 1),
+    StyledColumn(header: localizations.tableHdrRoutingName, flex: 4),
+    StyledColumn(header: localizations.tableHdrTasks, flex: 1),
     const StyledColumn(header: '', flex: 1),
   ];
 }

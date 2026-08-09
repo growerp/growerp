@@ -20,5 +20,15 @@
   "logout": "Déconnexion",
   "loadingMenuConfiguration": "Chargement de la configuration du menu...",
   "login": "Connexion",
-  "growerpSupport": "Support GrowERP"
+  "growerpSupport": "Support GrowERP",
+  "tableHdrAssessmentId": "ID d'évaluation",
+  "tableHdrBackendUrl": "URL du backend",
+  "tableHdrCompany": "Entreprise",
+  "tableHdrId": "ID",
+  "tableHdrLanguages": "Langues",
+  "tableHdrOwner": "Propriétaire",
+  "tableHdrPages": "Pages",
+  "tableHdrStatus": "Statut",
+  "tableHdrVersion": "Version",
+  "tableHdrWebsite": "Site web"
 }

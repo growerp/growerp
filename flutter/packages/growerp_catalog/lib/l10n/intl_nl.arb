@@ -118,5 +118,16 @@
   "productUploadFailure": "Uploaden van producten mislukt",
   "categoryDeleteFailure": "Verwijderen van categorie mislukt",
   "catalog_noProductData": "Geen productgegevens",
-  "catalog_categorynbrofproductsProducts": "{categorynbrOfProducts} producten"
+  "catalog_categorynbrofproductsProducts": "{categorynbrOfProducts} producten",
+  "tableHdrProducts": "# Producten",
+  "tableHdrEmail": "E-mail",
+  "tableHdrFromThruDate": "Van datum\nTot datum",
+  "tableHdrId": "ID",
+  "tableHdrInfo": "Info",
+  "tableHdrListPrice": "Adviesprijs",
+  "tableHdrName": "Naam",
+  "tableHdrPrice": "Prijs",
+  "tableHdrPurchFrom": "Aankoop vanaf",
+  "tableHdrPurchThru": "Aankoop tot",
+  "tableHdrSubscriberEmail": "Abonnee\nE-mail"
 }

@@ -116,5 +116,6 @@
   "enterTextHere": "ป้อนข้อความที่นี่...",
   "formUpdateSuccess": "ฟอร์ม {name} อัปเดตแล้ว",
   "formAddSuccess": "ฟอร์ม {name} เพิ่มแล้ว",
-  "formDeleteSuccess": "ฟอร์ม {name} ลบแล้ว"
+  "formDeleteSuccess": "ฟอร์ม {name} ลบแล้ว",
+  "tableHdrSubmissions": "การส่งแบบฟอร์ม"
 }

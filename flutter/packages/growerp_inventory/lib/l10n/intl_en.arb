@@ -315,5 +315,72 @@
   "unknownText": "????",
   "@unknownText": {
     "description": "Placeholder for unknown text"
+  },
+  "tableHdrAssets": "# Assets",
+  "@tableHdrAssets": {
+    "description": "Table column header"
+  },
+  "tableHdrActive": "Active",
+  "@tableHdrActive": {
+    "description": "Table column header"
+  },
+  "tableHdrCost": "Cost",
+  "@tableHdrCost": {
+    "description": "Table column header"
+  },
+  "tableHdrInfo": "Info",
+  "@tableHdrInfo": {
+    "description": "Table column header"
+  },
+  "tableHdrListPrice": "List Price",
+  "@tableHdrListPrice": {
+    "description": "Table column header"
+  },
+  "tableHdrName": "Name",
+  "@tableHdrName": {
+    "description": "Table column header"
+  },
+  "tableHdrPrice": "Price",
+  "@tableHdrPrice": {
+    "description": "Table column header"
+  },
+  "tableHdrQty": "Qty",
+  "@tableHdrQty": {
+    "description": "Table column header"
+  },
+  "tableHdrNounNr": "{noun} Nr",
+  "@tableHdrNounNr": {
+    "description": "Table column header",
+    "placeholders": {
+      "noun": {
+        "type": "String"
+      }
+    }
+  },
+  "tableHdrNounName": "{noun} Name",
+  "@tableHdrNounName": {
+    "description": "Table column header",
+    "placeholders": {
+      "noun": {
+        "type": "String"
+      }
+    }
+  },
+  "tableHdrNounType": "{noun} Type",
+  "@tableHdrNounType": {
+    "description": "Table column header",
+    "placeholders": {
+      "noun": {
+        "type": "String"
+      }
+    }
+  },
+  "assetNounEquipment": "Equipment",
+  "@assetNounEquipment": {
+    "description": "Table column header"
+  },
+  "assetNounRoom": "Room",
+  "@assetNounRoom": {
+    "description": "Table column header"
   }
 }

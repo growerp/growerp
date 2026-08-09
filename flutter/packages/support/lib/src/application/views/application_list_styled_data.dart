@@ -16,14 +16,16 @@ import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../blocs/application_bloc.dart';
+import 'package:support/l10n/generated/support_localizations.dart';
 
 List<StyledColumn> getApplicationListColumns(BuildContext context) {
+  final localizations = SupportLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
   return [
-    StyledColumn(header: 'ID', flex: isPhone ? 2 : 1),
-    const StyledColumn(header: 'Version', flex: 1),
-    const StyledColumn(header: 'Backend URL', flex: 2),
-    const StyledColumn(header: 'Assessment ID', flex: 1),
+    StyledColumn(header: localizations.tableHdrId, flex: isPhone ? 2 : 1),
+    StyledColumn(header: localizations.tableHdrVersion, flex: 1),
+    StyledColumn(header: localizations.tableHdrBackendUrl, flex: 2),
+    StyledColumn(header: localizations.tableHdrAssessmentId, flex: 1),
     const StyledColumn(header: '', flex: 1),
   ];
 }

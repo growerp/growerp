@@ -1,5 +1,9 @@
 {
   "@@locale": "fr",
   "errorWithArg": "Erreur : {error}",
-  "roomsToClean": "Chambres : {totalRooms}   À nettoyer : {dirtyCount}"
+  "roomsToClean": "Chambres : {totalRooms}   À nettoyer : {dirtyCount}",
+  "tableHdrOccupied": "Occupée",
+  "tableHdrRoom": "Chambre",
+  "tableHdrStatus": "Statut",
+  "tableHdrType": "Type"
 }

@@ -54,5 +54,9 @@
   "activity_inProcess": "处理中",
   "activity_salesInvoiceToClient": "开给客户的销售发票",
   "activity_purchaseInvoiceForAssistant": "助理的采购发票",
-  "activity_createInvoice": "创建发票"
+  "activity_createInvoice": "创建发票",
+  "activity_tableHdrAssignee": "负责人",
+  "activity_tableHdrThirdParty": "第三方",
+  "activity_tableHdrEstFrom": "预计起",
+  "activity_tableHdrActFrom": "实际起"
 }

@@ -190,5 +190,113 @@
   "landingPageNotFound": "Landing page not found",
   "@landingPageNotFound": {
     "description": "Landing page not found"
+  },
+  "tableHdrNumber": "#",
+  "@tableHdrNumber": {
+    "description": "Table column header"
+  },
+  "tableHdrCompleted": "Completed",
+  "@tableHdrCompleted": {
+    "description": "Table column header"
+  },
+  "tableHdrDemographics": "Demographics",
+  "@tableHdrDemographics": {
+    "description": "Table column header"
+  },
+  "tableHdrDescription": "Description",
+  "@tableHdrDescription": {
+    "description": "Table column header"
+  },
+  "tableHdrGoals": "Goals",
+  "@tableHdrGoals": {
+    "description": "Table column header"
+  },
+  "tableHdrHeadline": "Headline",
+  "@tableHdrHeadline": {
+    "description": "Table column header"
+  },
+  "tableHdrHookType": "Hook Type",
+  "@tableHdrHookType": {
+    "description": "Table column header"
+  },
+  "tableHdrId": "ID",
+  "@tableHdrId": {
+    "description": "Table column header"
+  },
+  "tableHdrInfo": "Info",
+  "@tableHdrInfo": {
+    "description": "Table column header"
+  },
+  "tableHdrModified": "Modified",
+  "@tableHdrModified": {
+    "description": "Table column header"
+  },
+  "tableHdrName": "Name",
+  "@tableHdrName": {
+    "description": "Table column header"
+  },
+  "tableHdrOption": "Option",
+  "@tableHdrOption": {
+    "description": "Table column header"
+  },
+  "tableHdrOptionText": "Option Text",
+  "@tableHdrOptionText": {
+    "description": "Table column header"
+  },
+  "tableHdrOptions": "Options",
+  "@tableHdrOptions": {
+    "description": "Table column header"
+  },
+  "tableHdrPnp": "PNP",
+  "@tableHdrPnp": {
+    "description": "Table column header"
+  },
+  "tableHdrPainPoints": "Pain Points",
+  "@tableHdrPainPoints": {
+    "description": "Table column header"
+  },
+  "tableHdrPersona": "Persona",
+  "@tableHdrPersona": {
+    "description": "Table column header"
+  },
+  "tableHdrPlatform": "Platform",
+  "@tableHdrPlatform": {
+    "description": "Table column header"
+  },
+  "tableHdrQuestionText": "Question Text",
+  "@tableHdrQuestionText": {
+    "description": "Table column header"
+  },
+  "tableHdrScheduled": "Scheduled",
+  "@tableHdrScheduled": {
+    "description": "Table column header"
+  },
+  "tableHdrScore": "Score",
+  "@tableHdrScore": {
+    "description": "Table column header"
+  },
+  "tableHdrStatus": "Status",
+  "@tableHdrStatus": {
+    "description": "Table column header"
+  },
+  "tableHdrSteps": "Steps",
+  "@tableHdrSteps": {
+    "description": "Table column header"
+  },
+  "tableHdrTheme": "Theme",
+  "@tableHdrTheme": {
+    "description": "Table column header"
+  },
+  "tableHdrTitle": "Title",
+  "@tableHdrTitle": {
+    "description": "Table column header"
+  },
+  "tableHdrType": "Type",
+  "@tableHdrType": {
+    "description": "Table column header"
+  },
+  "tableHdrWeekStart": "Week Start",
+  "@tableHdrWeekStart": {
+    "description": "Table column header"
   }
 }

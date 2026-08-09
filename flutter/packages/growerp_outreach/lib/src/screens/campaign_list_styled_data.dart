@@ -21,24 +21,25 @@ import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
 
 /// Returns column definitions for campaign list based on device type
 List<StyledColumn> getCampaignListColumns(BuildContext context) {
+  final localizations = OutreachLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
 
   if (isPhone) {
-    return const [
+    return [
       StyledColumn(header: '', flex: 1), // Avatar
-      StyledColumn(header: 'Info', flex: 4),
+      StyledColumn(header: localizations.tableHdrInfo, flex: 4),
       StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
-  return const [
-    StyledColumn(header: 'ID', flex: 1),
-    StyledColumn(header: 'Name', flex: 3),
-    StyledColumn(header: 'Status', flex: 1),
-    StyledColumn(header: 'Sent', flex: 1),
-    StyledColumn(header: 'Resp', flex: 1),
-    StyledColumn(header: 'Targets', flex: 1),
-    StyledColumn(header: 'Platforms', flex: 2),
+  return [
+    StyledColumn(header: localizations.tableHdrId, flex: 1),
+    StyledColumn(header: localizations.tableHdrName, flex: 3),
+    StyledColumn(header: localizations.tableHdrStatus, flex: 1),
+    StyledColumn(header: localizations.tableHdrSent, flex: 1),
+    StyledColumn(header: localizations.tableHdrResp, flex: 1),
+    StyledColumn(header: localizations.tableHdrTargets, flex: 1),
+    StyledColumn(header: localizations.tableHdrPlatforms, flex: 2),
     StyledColumn(header: '', flex: 1), // Actions
   ];
 }
@@ -81,9 +82,7 @@ List<Widget> getCampaignListRow({
       barrierDismissible: true,
       builder: (dialogContext) => AlertDialog(
         title: Text(OutreachLocalizations.of(context)!.deleteCampaign),
-        content: Text(
-          'Are you sure you want to delete "${campaign.name}"?',
-        ),
+        content: Text('Are you sure you want to delete "${campaign.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -158,10 +157,12 @@ List<Widget> getCampaignListRow({
   } else {
     // ID (wrapped so the constant 'campaignItem' key is present on desktop too —
     // tests count it to determine the number of rows)
-    cells.add(SizedBox(
-      key: const Key('campaignItem'),
-      child: Text(campaign.pseudoId ?? '', key: Key('id$index')),
-    ));
+    cells.add(
+      SizedBox(
+        key: const Key('campaignItem'),
+        child: Text(campaign.pseudoId ?? '', key: Key('id$index')),
+      ),
+    );
 
     // Name
     cells.add(

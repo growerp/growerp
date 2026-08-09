@@ -23,22 +23,23 @@ import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Returns column definitions for content plan list based on device type
 List<StyledColumn> getContentPlanListColumns(BuildContext context) {
+  final localizations = MarketingLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
 
   if (isPhone) {
-    return const [
+    return [
       StyledColumn(header: '', flex: 1), // Avatar
-      StyledColumn(header: 'Info', flex: 4),
+      StyledColumn(header: localizations.tableHdrInfo, flex: 4),
       StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
-  return const [
-    StyledColumn(header: 'ID', flex: 1),
-    StyledColumn(header: 'Theme', flex: 3),
-    StyledColumn(header: 'Week Start', flex: 1),
-    StyledColumn(header: 'Persona', flex: 1),
-    StyledColumn(header: 'Modified', flex: 1),
+  return [
+    StyledColumn(header: localizations.tableHdrId, flex: 1),
+    StyledColumn(header: localizations.tableHdrTheme, flex: 3),
+    StyledColumn(header: localizations.tableHdrWeekStart, flex: 1),
+    StyledColumn(header: localizations.tableHdrPersona, flex: 1),
+    StyledColumn(header: localizations.tableHdrModified, flex: 1),
     StyledColumn(header: '', flex: 1), // Actions
   ];
 }
@@ -132,10 +133,12 @@ List<Widget> getContentPlanListRow({
     );
   } else {
     // ID (the SizedBox carries the per-row marker key used to count rows)
-    cells.add(SizedBox(
-      key: const Key('contentPlanItem'),
-      child: Text(plan.pseudoId ?? '', key: Key('id$index')),
-    ));
+    cells.add(
+      SizedBox(
+        key: const Key('contentPlanItem'),
+        child: Text(plan.pseudoId ?? '', key: Key('id$index')),
+      ),
+    );
 
     // Theme
     cells.add(
@@ -150,14 +153,19 @@ List<Widget> getContentPlanListRow({
 
     // Week Start
     cells.add(
-        Text(_formatDate(plan.weekStartDate), key: Key('weekStartDate$index')));
+      Text(_formatDate(plan.weekStartDate), key: Key('weekStartDate$index')),
+    );
 
     // Persona ID
     cells.add(Text(plan.personaId ?? 'N/A', key: Key('personaId$index')));
 
     // Modified
-    cells.add(Text(_formatDate(plan.lastModifiedDate),
-        key: Key('lastModifiedDate$index')));
+    cells.add(
+      Text(
+        _formatDate(plan.lastModifiedDate),
+        key: Key('lastModifiedDate$index'),
+      ),
+    );
   }
 
   // Delete action

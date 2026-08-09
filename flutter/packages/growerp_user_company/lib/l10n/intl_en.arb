@@ -1025,5 +1025,21 @@
         "type": "String"
       }
     }
+  },
+  "tableHdrInfo": "Info",
+  "@tableHdrInfo": {
+    "description": "Table column header"
+  },
+  "tableHdrPhone": "Phone",
+  "@tableHdrPhone": {
+    "description": "Table column header"
+  },
+  "tableHdrT": "T",
+  "@tableHdrT": {
+    "description": "Table column header"
+  },
+  "tableHdrUrl": "Url",
+  "@tableHdrUrl": {
+    "description": "Table column header"
   }
 }

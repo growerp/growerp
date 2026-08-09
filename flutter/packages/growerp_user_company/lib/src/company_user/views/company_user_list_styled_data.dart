@@ -18,29 +18,31 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../company_user.dart';
+import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
 /// Returns column definitions for company user list based on device type
 List<StyledColumn> getCompanyUserListColumns(BuildContext context) {
+  final localizations = UserCompanyLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
 
   if (isPhone) {
-    return const [
+    return [
       StyledColumn(header: '', flex: 1), // Avatar
-      StyledColumn(header: 'ID', flex: 1),
-      StyledColumn(header: 'T', flex: 1), // Type
-      StyledColumn(header: 'Info', flex: 5),
+      StyledColumn(header: localizations.id, flex: 1),
+      StyledColumn(header: localizations.tableHdrT, flex: 1), // Type
+      StyledColumn(header: localizations.tableHdrInfo, flex: 5),
       StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
-  return const [
-    StyledColumn(header: 'ID', flex: 1),
-    StyledColumn(header: 'T', flex: 1), // Type
-    StyledColumn(header: 'Name', flex: 3),
-    StyledColumn(header: 'Role', flex: 1),
-    StyledColumn(header: 'Email', flex: 2),
-    StyledColumn(header: 'Phone', flex: 1),
-    StyledColumn(header: 'Location', flex: 2),
+  return [
+    StyledColumn(header: localizations.id, flex: 1),
+    StyledColumn(header: localizations.tableHdrT, flex: 1), // Type
+    StyledColumn(header: localizations.name, flex: 3),
+    StyledColumn(header: localizations.role, flex: 1),
+    StyledColumn(header: localizations.email, flex: 2),
+    StyledColumn(header: localizations.tableHdrPhone, flex: 1),
+    StyledColumn(header: localizations.location, flex: 2),
     StyledColumn(header: '', flex: 1), // Actions
   ];
 }
@@ -98,10 +100,12 @@ List<Widget> getCompanyUserListRow({
     );
   } else {
     // ID
-    cells.add(SizedBox(
-      key: Key('item$index'),
-      child: Text(companyUser.pseudoId ?? '', key: Key('id$index')),
-    ));
+    cells.add(
+      SizedBox(
+        key: Key('item$index'),
+        child: Text(companyUser.pseudoId ?? '', key: Key('id$index')),
+      ),
+    );
 
     // Type indicator
     cells.add(

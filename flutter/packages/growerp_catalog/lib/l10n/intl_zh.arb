@@ -118,5 +118,16 @@
   "productUploadFailure": "产品上传失败",
   "categoryDeleteFailure": "类别删除失败",
   "catalog_noProductData": "无产品数据",
-  "catalog_categorynbrofproductsProducts": "{categorynbrOfProducts} 个产品"
+  "catalog_categorynbrofproductsProducts": "{categorynbrOfProducts} 个产品",
+  "tableHdrProducts": "产品数",
+  "tableHdrEmail": "电子邮件",
+  "tableHdrFromThruDate": "起始日期\n结束日期",
+  "tableHdrId": "ID",
+  "tableHdrInfo": "信息",
+  "tableHdrListPrice": "标价",
+  "tableHdrName": "名称",
+  "tableHdrPrice": "价格",
+  "tableHdrPurchFrom": "采购起",
+  "tableHdrPurchThru": "采购止",
+  "tableHdrSubscriberEmail": "订阅者\n电子邮件"
 }

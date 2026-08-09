@@ -67,5 +67,12 @@
   "courses_contentScopeOptional": "Contentbereik (optioneel)",
   "courses_entireCourse": "Hele cursus",
   "courses_entireModule": "Hele module",
-  "courses_areYouSureYou": "Weet u zeker dat u \"{valwidgetcoursetitle}\" wilt verwijderen?"
+  "courses_areYouSureYou": "Weet u zeker dat u \"{valwidgetcoursetitle}\" wilt verwijderen?",
+  "courses_tableHdrDescription": "Beschrijving",
+  "courses_tableHdrDifficulty": "Moeilijkheid",
+  "courses_tableHdrDuration": "Duur",
+  "courses_tableHdrId": "ID",
+  "courses_tableHdrInfo": "Info",
+  "courses_tableHdrStatus": "Status",
+  "courses_tableHdrTitle": "Titel"
 }

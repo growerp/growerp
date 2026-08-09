@@ -21,24 +21,25 @@ import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
 /// Returns column definitions for course list based on device type
 List<StyledColumn> getCourseListColumns(BuildContext context) {
+  final localizations = CoursesLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
 
   if (isPhone) {
-    return const [
+    return [
       StyledColumn(header: '', flex: 1), // Icon
-      StyledColumn(header: 'Info', flex: 4),
-      StyledColumn(header: 'Status', flex: 2),
+      StyledColumn(header: localizations.courses_tableHdrInfo, flex: 4),
+      StyledColumn(header: localizations.courses_tableHdrStatus, flex: 2),
       StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
-  return const [
-    StyledColumn(header: 'ID', flex: 1),
-    StyledColumn(header: 'Title', flex: 3),
-    StyledColumn(header: 'Description', flex: 3),
-    StyledColumn(header: 'Difficulty', flex: 1),
-    StyledColumn(header: 'Duration', flex: 1),
-    StyledColumn(header: 'Status', flex: 1),
+  return [
+    StyledColumn(header: localizations.courses_tableHdrId, flex: 1),
+    StyledColumn(header: localizations.courses_tableHdrTitle, flex: 3),
+    StyledColumn(header: localizations.courses_tableHdrDescription, flex: 3),
+    StyledColumn(header: localizations.courses_tableHdrDifficulty, flex: 1),
+    StyledColumn(header: localizations.courses_tableHdrDuration, flex: 1),
+    StyledColumn(header: localizations.courses_tableHdrStatus, flex: 1),
     StyledColumn(header: '', flex: 1), // Actions
   ];
 }
@@ -89,14 +90,27 @@ List<Widget> getCourseListRow({
             ),
           Row(
             children: [
-              Text(CoursesLocalizations.of(context)!.courses_coursemoduleslength0M((course.modules?.length ?? 0).toString()),
+              Text(
+                CoursesLocalizations.of(context)!.courses_coursemoduleslength0M(
+                  (course.modules?.length ?? 0).toString(),
+                ),
                 style: TextStyle(
                   fontSize: 11,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(width: 8),
-              Text(CoursesLocalizations.of(context)!.courses_coursemodulesfoldint0summsummlessonslength00L((course.modules?.fold<int>(0, (sum, m) => sum + (m.lessons?.length ?? 0)) ?? 0).toString()),
+              Text(
+                CoursesLocalizations.of(
+                  context,
+                )!.courses_coursemodulesfoldint0summsummlessonslength00L(
+                  (course.modules?.fold<int>(
+                            0,
+                            (sum, m) => sum + (m.lessons?.length ?? 0),
+                          ) ??
+                          0)
+                      .toString(),
+                ),
                 style: TextStyle(
                   fontSize: 11,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -246,11 +260,7 @@ Widget _buildStatusChip(BuildContext context, CourseStatus? status) {
     ),
     child: Text(
       label,
-      style: TextStyle(
-        color: color,
-        fontSize: 11,
-        fontWeight: FontWeight.w500,
-      ),
+      style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w500),
     ),
   );
 }

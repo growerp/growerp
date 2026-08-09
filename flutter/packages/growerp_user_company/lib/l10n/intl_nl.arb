@@ -216,5 +216,9 @@
   "downloadViaEmail": "Downloaden via e-mail",
   "downloadFirstToObtainTheFormat": "Download eerst om het formaat te verkrijgen",
   "aDataFileWillBeSendByEmail": "Een gegevensbestand wordt per e-mail verzonden",
-  "couldNotLoadRoles": "Kon {role}s niet laden!"
+  "couldNotLoadRoles": "Kon {role}s niet laden!",
+  "tableHdrInfo": "Info",
+  "tableHdrPhone": "Telefoon",
+  "tableHdrT": "T",
+  "tableHdrUrl": "URL"
 }

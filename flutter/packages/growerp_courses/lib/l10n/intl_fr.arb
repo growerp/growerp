@@ -67,5 +67,12 @@
   "courses_contentScopeOptional": "Portée du contenu (facultatif)",
   "courses_entireCourse": "Cours entier",
   "courses_entireModule": "Module entier",
-  "courses_areYouSureYou": "Voulez-vous vraiment supprimer « {valwidgetcoursetitle} » ?"
+  "courses_areYouSureYou": "Voulez-vous vraiment supprimer « {valwidgetcoursetitle} » ?",
+  "courses_tableHdrDescription": "Description",
+  "courses_tableHdrDifficulty": "Difficulté",
+  "courses_tableHdrDuration": "Durée",
+  "courses_tableHdrId": "ID",
+  "courses_tableHdrInfo": "Infos",
+  "courses_tableHdrStatus": "Statut",
+  "courses_tableHdrTitle": "Titre"
 }

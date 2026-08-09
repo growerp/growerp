@@ -125,7 +125,7 @@ class SubscriptionListState extends State<SubscriptionList> {
                       ? const Center(child: LoadingIndicator())
                       : StyledDataTable(
                           scrollController: _scrollController,
-                          columns: getSubscriptionColumns(isPhone),
+                          columns: getSubscriptionColumns(context, isPhone),
                           rows: subscriptions.isEmpty
                               ? []
                               : subscriptions

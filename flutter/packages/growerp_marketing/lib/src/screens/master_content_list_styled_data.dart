@@ -22,22 +22,23 @@ import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// Returns column definitions for master content list based on device type
 List<StyledColumn> getMasterContentListColumns(BuildContext context) {
+  final localizations = MarketingLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
 
   if (isPhone) {
-    return const [
-      StyledColumn(header: 'ID', flex: 1),
-      StyledColumn(header: 'Info', flex: 4),
+    return [
+      StyledColumn(header: localizations.tableHdrId, flex: 1),
+      StyledColumn(header: localizations.tableHdrInfo, flex: 4),
       StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
-  return const [
-    StyledColumn(header: 'ID', flex: 1),
-    StyledColumn(header: 'Type', flex: 1),
-    StyledColumn(header: 'PNP', flex: 1),
-    StyledColumn(header: 'Title', flex: 3),
-    StyledColumn(header: 'Status', flex: 1),
+  return [
+    StyledColumn(header: localizations.tableHdrId, flex: 1),
+    StyledColumn(header: localizations.tableHdrType, flex: 1),
+    StyledColumn(header: localizations.tableHdrPnp, flex: 1),
+    StyledColumn(header: localizations.tableHdrTitle, flex: 3),
+    StyledColumn(header: localizations.tableHdrStatus, flex: 1),
     StyledColumn(header: '', flex: 1), // Actions
   ];
 }
@@ -95,7 +96,9 @@ List<Widget> getMasterContentListRow({
   List<Widget> cells = [];
 
   if (isPhone) {
-    cells.add(Text(content.pseudoId ?? '', key: const Key('masterContentItem')));
+    cells.add(
+      Text(content.pseudoId ?? '', key: const Key('masterContentItem')),
+    );
     cells.add(
       Column(
         key: Key('masterContentInfo$index'),
@@ -120,11 +123,11 @@ List<Widget> getMasterContentListRow({
           Row(
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color:
-                      _getStatusColor(content.status).withValues(alpha: 0.15),
+                  color: _getStatusColor(
+                    content.status,
+                  ).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -143,8 +146,9 @@ List<Widget> getMasterContentListRow({
                     : Icons.hourglass_empty,
                 key: Key('approvalIcon$index'),
                 size: 14,
-                color:
-                    content.approvedDate != null ? Colors.green : Colors.grey,
+                color: content.approvedDate != null
+                    ? Colors.green
+                    : Colors.grey,
               ),
             ],
           ),
@@ -153,10 +157,15 @@ List<Widget> getMasterContentListRow({
     );
   } else {
     cells.add(
-        Text(content.pseudoId ?? '', key: const Key('masterContentItem')));
-    cells.add(Text(content.contentType,
+      Text(content.pseudoId ?? '', key: const Key('masterContentItem')),
+    );
+    cells.add(
+      Text(
+        content.contentType,
         key: Key('contentType$index'),
-        style: const TextStyle(fontWeight: FontWeight.bold)));
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+    );
     cells.add(Text(content.pnpType, key: Key('pnpType$index')));
     cells.add(
       Text(

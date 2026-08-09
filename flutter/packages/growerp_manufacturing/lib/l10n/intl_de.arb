@@ -132,7 +132,7 @@
   "noWorkOrderData": "No work order data [de]",
   "deleteButton": "Delete [de]",
   "addStepButton": "Add Step [de]",
-  "noneOption": "\u2014 None \u2014 [de]",
+  "noneOption": "— None — [de]",
   "releaseToShopFloor": "Release to Shop Floor [de]",
   "startProduction": "Start Production [de]",
   "completeProduction": "Complete Production [de]",
@@ -142,6 +142,12 @@
   "productIdOptional": "Product ID (optional) [de]",
   "descriptionRequired": "Description * [de]",
   "qtyLabel": "Qty [de]",
-  "scrap0to1": "Scrap (0\u20131) [de]",
-  "seqHash": "Seq # [de]"
+  "scrap0to1": "Scrap (0–1) [de]",
+  "seqHash": "Seq # [de]",
+  "tableHdrAssemblyProduct": "Baugruppenprodukt",
+  "tableHdrId": "ID",
+  "tableHdrInfo": "Info",
+  "tableHdrProduct": "Produkt",
+  "tableHdrRoutingName": "Arbeitsplanname",
+  "tableHdrTasks": "Aufgaben"
 }

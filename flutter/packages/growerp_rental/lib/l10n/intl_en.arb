@@ -18,5 +18,17 @@
   "cancel": "Cancel",
   "@cancel": {
     "description": "Cancel"
+  },
+  "tableHdrFrom": "From",
+  "@tableHdrFrom": {
+    "description": "Table column header"
+  },
+  "tableHdrRate": "Rate",
+  "@tableHdrRate": {
+    "description": "Table column header"
+  },
+  "tableHdrThru": "Thru",
+  "@tableHdrThru": {
+    "description": "Table column header"
   }
 }

@@ -1,5 +1,9 @@
 {
   "@@locale": "zh",
   "errorWithArg": "错误：{error}",
-  "roomsToClean": "房间：{totalRooms}   待清洁：{dirtyCount}"
+  "roomsToClean": "房间：{totalRooms}   待清洁：{dirtyCount}",
+  "tableHdrOccupied": "已入住",
+  "tableHdrRoom": "房间",
+  "tableHdrStatus": "状态",
+  "tableHdrType": "类型"
 }

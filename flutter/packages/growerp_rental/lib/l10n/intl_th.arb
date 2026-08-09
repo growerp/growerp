@@ -3,5 +3,8 @@
   "week": "สัปดาห์",
   "month": "เดือน",
   "save": "บันทึก",
-  "cancel": "ยกเลิก"
+  "cancel": "ยกเลิก",
+  "tableHdrFrom": "จาก",
+  "tableHdrRate": "อัตรา",
+  "tableHdrThru": "ถึง"
 }

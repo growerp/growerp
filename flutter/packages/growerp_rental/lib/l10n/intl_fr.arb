@@ -4,5 +4,8 @@
   "week": "Semaine",
   "month": "Mois",
   "save": "Enregistrer",
-  "cancel": "Annuler"
+  "cancel": "Annuler",
+  "tableHdrFrom": "Du",
+  "tableHdrRate": "Tarif",
+  "tableHdrThru": "Au"
 }

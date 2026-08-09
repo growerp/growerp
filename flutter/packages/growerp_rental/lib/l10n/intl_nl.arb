@@ -4,5 +4,8 @@
   "week": "Week",
   "month": "Maand",
   "save": "Opslaan",
-  "cancel": "Annuleren"
+  "cancel": "Annuleren",
+  "tableHdrFrom": "Van",
+  "tableHdrRate": "Tarief",
+  "tableHdrThru": "Tot"
 }

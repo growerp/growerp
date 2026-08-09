@@ -1,5 +1,9 @@
 {
   "@@locale": "nl",
   "errorWithArg": "Fout: {error}",
-  "roomsToClean": "Kamers: {totalRooms}   Te reinigen: {dirtyCount}"
+  "roomsToClean": "Kamers: {totalRooms}   Te reinigen: {dirtyCount}",
+  "tableHdrOccupied": "Bezet",
+  "tableHdrRoom": "Kamer",
+  "tableHdrStatus": "Status",
+  "tableHdrType": "Type"
 }

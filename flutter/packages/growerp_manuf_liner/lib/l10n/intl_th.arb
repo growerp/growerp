@@ -15,5 +15,18 @@
   "panelLength": "ความยาวแผง (ft)",
   "sequenceNoOptional": "หมายเลขลำดับ (ไม่บังคับ)",
   "rollStockWidth": "ความกว้างม้วนสต็อก (ft)",
-  "widthIncrement": "ส่วนเพิ่มความกว้าง (ft)"
+  "widthIncrement": "ส่วนเพิ่มความกว้าง (ft)",
+  "tableHdrInfo": "ข้อมูล",
+  "tableHdrLFt": "ย (ฟุต)",
+  "tableHdrLiner": "ไลเนอร์",
+  "tableHdrName": "ชื่อ",
+  "tableHdrPanelName": "ชื่อแผง",
+  "tableHdrPasses": "จำนวนรอบ",
+  "tableHdrQcNumber": "QC#",
+  "tableHdrRollWidthFt": "ความกว้างม้วน (ฟุต)",
+  "tableHdrSqft": "ตร.ฟุต",
+  "tableHdrWFt": "ก (ฟุต)",
+  "tableHdrWeightLbSqft": "น้ำหนัก (ปอนด์/ตร.ฟุต)",
+  "tableHdrWidthIncFt": "ความกว้างรวม (ฟุต)",
+  "tableHdrWtLb": "นน. (ปอนด์)"
 }

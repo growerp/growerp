@@ -218,5 +218,77 @@
   "chooseCsvFile": "Choose CSV file",
   "@chooseCsvFile": {
     "description": "Choose CSV file"
+  },
+  "tableHdrAction": "Action",
+  "@tableHdrAction": {
+    "description": "Table column header"
+  },
+  "tableHdrCampaign": "Campaign",
+  "@tableHdrCampaign": {
+    "description": "Table column header"
+  },
+  "tableHdrConfigId": "Config ID",
+  "@tableHdrConfigId": {
+    "description": "Table column header"
+  },
+  "tableHdrDailyLimit": "Daily Limit",
+  "@tableHdrDailyLimit": {
+    "description": "Table column header"
+  },
+  "tableHdrError": "Error",
+  "@tableHdrError": {
+    "description": "Table column header"
+  },
+  "tableHdrId": "ID",
+  "@tableHdrId": {
+    "description": "Table column header"
+  },
+  "tableHdrInfo": "Info",
+  "@tableHdrInfo": {
+    "description": "Table column header"
+  },
+  "tableHdrMessage": "Message",
+  "@tableHdrMessage": {
+    "description": "Table column header"
+  },
+  "tableHdrName": "Name",
+  "@tableHdrName": {
+    "description": "Table column header"
+  },
+  "tableHdrPlatform": "Platform",
+  "@tableHdrPlatform": {
+    "description": "Table column header"
+  },
+  "tableHdrPlatforms": "Platforms",
+  "@tableHdrPlatforms": {
+    "description": "Table column header"
+  },
+  "tableHdrRecipient": "Recipient",
+  "@tableHdrRecipient": {
+    "description": "Table column header"
+  },
+  "tableHdrResp": "Resp",
+  "@tableHdrResp": {
+    "description": "Table column header"
+  },
+  "tableHdrSent": "Sent",
+  "@tableHdrSent": {
+    "description": "Table column header"
+  },
+  "tableHdrSentDate": "Sent Date",
+  "@tableHdrSentDate": {
+    "description": "Table column header"
+  },
+  "tableHdrStatus": "Status",
+  "@tableHdrStatus": {
+    "description": "Table column header"
+  },
+  "tableHdrTargets": "Targets",
+  "@tableHdrTargets": {
+    "description": "Table column header"
+  },
+  "tableHdrTime": "Time",
+  "@tableHdrTime": {
+    "description": "Table column header"
   }
 }

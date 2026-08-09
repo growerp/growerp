@@ -118,5 +118,16 @@
   "productUploadFailure": "Hochladen der Produkte fehlgeschlagen",
   "categoryDeleteFailure": "Kategorie konnte nicht gelöscht werden",
   "catalog_noProductData": "Keine Produktdaten",
-  "catalog_categorynbrofproductsProducts": "{categorynbrOfProducts} Produkte"
+  "catalog_categorynbrofproductsProducts": "{categorynbrOfProducts} Produkte",
+  "tableHdrProducts": "# Produkte",
+  "tableHdrEmail": "E-Mail",
+  "tableHdrFromThruDate": "Von Datum\nBis Datum",
+  "tableHdrId": "ID",
+  "tableHdrInfo": "Info",
+  "tableHdrListPrice": "Listenpreis",
+  "tableHdrName": "Name",
+  "tableHdrPrice": "Preis",
+  "tableHdrPurchFrom": "Kauf ab",
+  "tableHdrPurchThru": "Kauf bis",
+  "tableHdrSubscriberEmail": "Abonnent\nE-Mail"
 }

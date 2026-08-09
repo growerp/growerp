@@ -20,5 +20,15 @@
   "logout": "Uitloggen",
   "loadingMenuConfiguration": "Menuconfiguratie laden...",
   "login": "Inloggen",
-  "growerpSupport": "GrowERP-ondersteuning"
+  "growerpSupport": "GrowERP-ondersteuning",
+  "tableHdrAssessmentId": "Beoordelings-ID",
+  "tableHdrBackendUrl": "Backend-URL",
+  "tableHdrCompany": "Bedrijf",
+  "tableHdrId": "ID",
+  "tableHdrLanguages": "Talen",
+  "tableHdrOwner": "Eigenaar",
+  "tableHdrPages": "Pagina's",
+  "tableHdrStatus": "Status",
+  "tableHdrVersion": "Versie",
+  "tableHdrWebsite": "Website"
 }

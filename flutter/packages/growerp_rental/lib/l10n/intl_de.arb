@@ -4,5 +4,8 @@
   "week": "Woche",
   "month": "Monat",
   "save": "Speichern",
-  "cancel": "Abbrechen"
+  "cancel": "Abbrechen",
+  "tableHdrFrom": "Von",
+  "tableHdrRate": "Satz",
+  "tableHdrThru": "Bis"
 }

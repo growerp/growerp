@@ -374,5 +374,33 @@
         "type": "String"
       }
     }
+  },
+  "courses_tableHdrDescription": "Description",
+  "@courses_tableHdrDescription": {
+    "description": "Table column header"
+  },
+  "courses_tableHdrDifficulty": "Difficulty",
+  "@courses_tableHdrDifficulty": {
+    "description": "Table column header"
+  },
+  "courses_tableHdrDuration": "Duration",
+  "@courses_tableHdrDuration": {
+    "description": "Table column header"
+  },
+  "courses_tableHdrId": "ID",
+  "@courses_tableHdrId": {
+    "description": "Table column header"
+  },
+  "courses_tableHdrInfo": "Info",
+  "@courses_tableHdrInfo": {
+    "description": "Table column header"
+  },
+  "courses_tableHdrStatus": "Status",
+  "@courses_tableHdrStatus": {
+    "description": "Table column header"
+  },
+  "courses_tableHdrTitle": "Title",
+  "@courses_tableHdrTitle": {
+    "description": "Table column header"
   }
 }

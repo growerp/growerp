@@ -54,5 +54,9 @@
   "activity_inProcess": "In process",
   "activity_salesInvoiceToClient": "ใบแจ้งหนี้การขายให้กับลูกค้า",
   "activity_purchaseInvoiceForAssistant": "ใบแจ้งหนี้การซื้อสำหรับผู้ช่วย",
-  "activity_createInvoice": "สร้างใบแจ้งหนี้"
+  "activity_createInvoice": "สร้างใบแจ้งหนี้",
+  "activity_tableHdrAssignee": "ผู้รับผิดชอบ",
+  "activity_tableHdrThirdParty": "บุคคลที่สาม",
+  "activity_tableHdrEstFrom": "ประมาณจาก",
+  "activity_tableHdrActFrom": "จริงจาก"
 }

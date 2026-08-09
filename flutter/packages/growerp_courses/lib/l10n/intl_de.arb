@@ -67,5 +67,12 @@
   "courses_contentScopeOptional": "Inhaltsumfang (optional)",
   "courses_entireCourse": "Gesamter Kurs",
   "courses_entireModule": "Gesamtes Modul",
-  "courses_areYouSureYou": "Möchten Sie \"{valwidgetcoursetitle}\" wirklich löschen?"
+  "courses_areYouSureYou": "Möchten Sie \"{valwidgetcoursetitle}\" wirklich löschen?",
+  "courses_tableHdrDescription": "Beschreibung",
+  "courses_tableHdrDifficulty": "Schwierigkeit",
+  "courses_tableHdrDuration": "Dauer",
+  "courses_tableHdrId": "ID",
+  "courses_tableHdrInfo": "Info",
+  "courses_tableHdrStatus": "Status",
+  "courses_tableHdrTitle": "Titel"
 }

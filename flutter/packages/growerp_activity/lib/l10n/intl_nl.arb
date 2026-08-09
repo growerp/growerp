@@ -54,5 +54,9 @@
   "activity_inProcess": "In behandeling",
   "activity_salesInvoiceToClient": "Verkoopfactuur aan klant",
   "activity_purchaseInvoiceForAssistant": "Inkoopfactuur voor assistent",
-  "activity_createInvoice": "Factuur aanmaken"
+  "activity_createInvoice": "Factuur aanmaken",
+  "activity_tableHdrAssignee": "Toegewezen aan",
+  "activity_tableHdrThirdParty": "Derde partij",
+  "activity_tableHdrEstFrom": "Gepl. vanaf",
+  "activity_tableHdrActFrom": "Werk. vanaf"
 }

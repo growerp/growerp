@@ -54,5 +54,9 @@
   "activity_inProcess": "In Bearbeitung",
   "activity_salesInvoiceToClient": "Ausgangsrechnung an Kunden",
   "activity_purchaseInvoiceForAssistant": "Eingangsrechnung für Assistent",
-  "activity_createInvoice": "Rechnung erstellen"
+  "activity_createInvoice": "Rechnung erstellen",
+  "activity_tableHdrAssignee": "Zugewiesen an",
+  "activity_tableHdrThirdParty": "Dritte",
+  "activity_tableHdrEstFrom": "Gepl. ab",
+  "activity_tableHdrActFrom": "Ist ab"
 }

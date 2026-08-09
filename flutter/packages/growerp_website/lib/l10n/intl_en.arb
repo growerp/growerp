@@ -492,5 +492,9 @@
         "type": "String"
       }
     }
+  },
+  "tableHdrSubmissions": "Submissions",
+  "@tableHdrSubmissions": {
+    "description": "Table column header"
   }
 }
