@@ -116,5 +116,7 @@
   "categoryAddFailure": "Kategorie konnte nicht hinzugefügt werden",
   "subscriptionUpdateSuccess": "Abonnement erfolgreich aktualisiert",
   "productUploadFailure": "Hochladen der Produkte fehlgeschlagen",
-  "categoryDeleteFailure": "Kategorie konnte nicht gelöscht werden"
+  "categoryDeleteFailure": "Kategorie konnte nicht gelöscht werden",
+  "catalog_noProductData": "Keine Produktdaten",
+  "catalog_categorynbrofproductsProducts": "{categorynbrOfProducts} Produkte"
 }

@@ -58,5 +58,8 @@
   "opportunityUploadSuccess": "Opportunities erfolgreich hochgeladen",
   "opportunityUploadFailure": "Hochladen der Opportunities fehlgeschlagen",
   "opportunityDownloadSuccess": "Opportunity-Download geplant, E-Mail wird in Kürze gesendet",
-  "opportunityDownloadFailure": "Herunterladen der Opportunities fehlgeschlagen"
+  "opportunityDownloadFailure": "Herunterladen der Opportunities fehlgeschlagen",
+  "noPipelineData": "Keine Pipeline-Daten",
+  "convertToQuote": "In Angebot umwandeln",
+  "opportunityConvertSuccess": "Angebot Nr. {id} erfolgreich erstellt"
 }

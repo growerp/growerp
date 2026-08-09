@@ -116,5 +116,7 @@
   "categoryAddFailure": "类别添加失败",
   "subscriptionUpdateSuccess": "订阅更新成功",
   "productUploadFailure": "产品上传失败",
-  "categoryDeleteFailure": "类别删除失败"
+  "categoryDeleteFailure": "类别删除失败",
+  "catalog_noProductData": "无产品数据",
+  "catalog_categorynbrofproductsProducts": "{categorynbrOfProducts} 个产品"
 }

@@ -42,5 +42,17 @@
   "activityDeleteFailure": "Échec de la suppression de l'activité",
   "activityAddSuccess": "Activité ajoutée avec succès",
   "activityAddFailure": "Échec de l'ajout de l'activité",
-  "activityFetchFailure": "Échec de la récupération des activités"
+  "activityFetchFailure": "Échec de la récupération des activités",
+  "activity_noTaskData": "Aucune donnée de tâche",
+  "activity_fromToParty": "Partie émettrice/destinataire",
+  "activity_failedToFetchSearch": "échec de la récupération des résultats de recherche : {statemessage}",
+  "activity_searchResults": "Résultats de recherche",
+  "activity_noSearchItemsFound": "Aucun élément de recherche trouvé (pour l'instant)",
+  "activity_idActivitiesindexpseudoidN": "ID : {activitiesindexpseudoId}\\n",
+  "activity_errorGettingHoursReport": "Erreur lors de la récupération du rapport d'heures : {snapshoterror}",
+  "activity_noHoursFound": "Aucune heure trouvée",
+  "activity_inProcess": "En cours",
+  "activity_salesInvoiceToClient": "Facture de vente au client",
+  "activity_purchaseInvoiceForAssistant": "Facture d'achat pour l'assistant",
+  "activity_createInvoice": "Créer une facture"
 }

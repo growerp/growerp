@@ -1,0 +1,6 @@
+{
+  "@@locale": "zh",
+  "pageHomeWelcome": "欢迎 {name}",
+  "screenNotFound": "未找到屏幕 {screen}",
+  "applicationNotDefined": "系统中未找到 {applicationId} 公司\n 请前往管理应用创建一个！"
+}

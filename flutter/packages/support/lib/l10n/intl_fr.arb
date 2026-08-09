@@ -1,1 +1,24 @@
-{}
+{
+  "@@locale": "fr",
+  "websiteReadAI": "Le site web est lu, ses pages et ses couleurs sont réécrites par IA pour le modèle GrowERP, puis le résultat est installé en tant que nouveau propriétaire. Cela prend quelques minutes et consomme des crédits IA.",
+  "startConversion": "Démarrer la conversion",
+  "passwordArg": "Mot de passe : {password}",
+  "giveThisToCustomer": "Donnez ceci au client avec l'identifiant administrateur : il ne pourra plus être affiché une fois cette conversion supprimée.",
+  "removeFromList": "Retirer de la liste",
+  "removingClearsRow": "La suppression efface uniquement cette ligne ; le propriétaire créé et son site web sont conservés.",
+  "noWebsitesConverted": "Aucun site web converti pour le moment.\n\nAppuyez sur + pour convertir un site web d'entreprise existant en un nouveau propriétaire GrowERP : le site est lu, ses pages et ses couleurs sont réécrites pour le modèle GrowERP, puis le résultat est installé en tant que nouveau locataire.",
+  "failedToFetchApplications": "échec de la récupération des applications : {message}",
+  "userRestActivity": "Activité REST des utilisateurs ",
+  "thirtyDays": "30 jours",
+  "sixtyDays": "60 jours",
+  "ninetyDays": "90 jours",
+  "usersCount": "{count} utilisateurs",
+  "noRestActivityInPeriod": "Aucune activité REST sur la période",
+  "failedToLoadMenuConfiguration": "Échec du chargement de la configuration du menu",
+  "unknownError": "Erreur inconnue",
+  "retry": "Réessayer",
+  "logout": "Déconnexion",
+  "loadingMenuConfiguration": "Chargement de la configuration du menu...",
+  "login": "Connexion",
+  "growerpSupport": "Support GrowERP"
+}

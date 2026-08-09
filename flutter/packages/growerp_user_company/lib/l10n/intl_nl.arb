@@ -206,5 +206,15 @@
   "companyAddFailure": "Toevoegen van bedrijf mislukt",
   "companyFetchFailure": "Ophalen van bedrijven mislukt",
   "compUserUploadFailure": "Uploaden van bedrijven/gebruikers mislukt",
-  "compUserDownloadFailure": "Downloaden van bedrijven/gebruikers mislukt"
+  "compUserDownloadFailure": "Downloaden van bedrijven/gebruikers mislukt",
+  "periodLabel": "Periode: ",
+  "changePeriod": "Periode wijzigen",
+  "noAccessesFoundForThisPeriod": "Geen toegangen gevonden voor deze periode.",
+  "companiesUsersUpDownload": "bedrijven/gebruikers up-/downloaden",
+  "jobTitlePosition": "Functietitel / Positie",
+  "uploadCsvFile": "CSV-bestand uploaden",
+  "downloadViaEmail": "Downloaden via e-mail",
+  "downloadFirstToObtainTheFormat": "Download eerst om het formaat te verkrijgen",
+  "aDataFileWillBeSendByEmail": "Een gegevensbestand wordt per e-mail verzonden",
+  "couldNotLoadRoles": "Kon {role}s niet laden!"
 }

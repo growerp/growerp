@@ -42,5 +42,17 @@
   "activityDeleteFailure": "Verwijderen van activiteit mislukt",
   "activityAddSuccess": "Activiteit succesvol toegevoegd",
   "activityAddFailure": "Toevoegen van activiteit mislukt",
-  "activityFetchFailure": "Ophalen van activiteiten mislukt"
+  "activityFetchFailure": "Ophalen van activiteiten mislukt",
+  "activity_noTaskData": "Geen taakgegevens",
+  "activity_fromToParty": "Van/Naar partij",
+  "activity_failedToFetchSearch": "ophalen van zoekitems mislukt: {statemessage}",
+  "activity_searchResults": "Zoekresultaten",
+  "activity_noSearchItemsFound": "(Nog) geen zoekitems gevonden",
+  "activity_idActivitiesindexpseudoidN": "ID: {activitiesindexpseudoId}\\n",
+  "activity_errorGettingHoursReport": "Fout bij ophalen van urenrapport: {snapshoterror}",
+  "activity_noHoursFound": "Geen uren gevonden",
+  "activity_inProcess": "In behandeling",
+  "activity_salesInvoiceToClient": "Verkoopfactuur aan klant",
+  "activity_purchaseInvoiceForAssistant": "Inkoopfactuur voor assistent",
+  "activity_createInvoice": "Factuur aanmaken"
 }

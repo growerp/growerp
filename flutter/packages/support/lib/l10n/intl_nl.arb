@@ -1,1 +1,24 @@
-{}
+{
+  "@@locale": "nl",
+  "websiteReadAI": "De website wordt gelezen, de pagina's en kleuren worden met AI herschreven voor de GrowERP-sjabloon en het resultaat wordt geïnstalleerd als nieuwe eigenaar. Dit duurt enkele minuten en verbruikt AI-credits.",
+  "startConversion": "Conversie starten",
+  "passwordArg": "Wachtwoord: {password}",
+  "giveThisToCustomer": "Geef dit samen met de admin-login aan de klant: het kan niet opnieuw worden getoond zodra deze conversie is verwijderd.",
+  "removeFromList": "Uit lijst verwijderen",
+  "removingClearsRow": "Verwijderen wist alleen deze rij; de aangemaakte eigenaar en de website blijven bestaan.",
+  "noWebsitesConverted": "Nog geen websites geconverteerd.\n\nDruk op + om een bestaande bedrijfswebsite om te zetten naar een nieuwe GrowERP-eigenaar: de site wordt gelezen, de pagina's en kleuren worden herschreven voor de GrowERP-sjabloon en het resultaat wordt geïnstalleerd als nieuwe tenant.",
+  "failedToFetchApplications": "ophalen van applicaties mislukt: {message}",
+  "userRestActivity": "Gebruikers-REST-activiteit ",
+  "thirtyDays": "30 dagen",
+  "sixtyDays": "60 dagen",
+  "ninetyDays": "90 dagen",
+  "usersCount": "{count} gebruikers",
+  "noRestActivityInPeriod": "Geen REST-activiteit in periode",
+  "failedToLoadMenuConfiguration": "Laden van menuconfiguratie mislukt",
+  "unknownError": "Onbekende fout",
+  "retry": "Opnieuw proberen",
+  "logout": "Uitloggen",
+  "loadingMenuConfiguration": "Menuconfiguratie laden...",
+  "login": "Inloggen",
+  "growerpSupport": "GrowERP-ondersteuning"
+}

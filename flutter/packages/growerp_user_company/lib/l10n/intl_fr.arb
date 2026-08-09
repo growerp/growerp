@@ -206,5 +206,15 @@
   "companyAddFailure": "Échec de l'ajout de l'entreprise",
   "companyFetchFailure": "Échec de la récupération des entreprises",
   "compUserUploadFailure": "Échec du téléchargement des entreprises/utilisateurs",
-  "compUserDownloadFailure": "Échec du téléchargement des entreprises/utilisateurs"
+  "compUserDownloadFailure": "Échec du téléchargement des entreprises/utilisateurs",
+  "periodLabel": "Période : ",
+  "changePeriod": "Modifier la période",
+  "noAccessesFoundForThisPeriod": "Aucun accès trouvé pour cette période.",
+  "companiesUsersUpDownload": "téléversement/téléchargement des entreprises/utilisateurs",
+  "jobTitlePosition": "Intitulé du poste / Fonction",
+  "uploadCsvFile": "Téléverser un fichier CSV",
+  "downloadViaEmail": "Télécharger par e-mail",
+  "downloadFirstToObtainTheFormat": "Téléchargez d'abord pour obtenir le format",
+  "aDataFileWillBeSendByEmail": "Un fichier de données sera envoyé par e-mail",
+  "couldNotLoadRoles": "Impossible de charger les {role}s !"
 }

@@ -58,5 +58,8 @@
   "opportunityUploadSuccess": "Kansen succesvol geüpload",
   "opportunityUploadFailure": "Uploaden van kansen mislukt",
   "opportunityDownloadSuccess": "Kansendownload gepland, e-mail wordt binnenkort verzonden",
-  "opportunityDownloadFailure": "Downloaden van kansen mislukt"
+  "opportunityDownloadFailure": "Downloaden van kansen mislukt",
+  "noPipelineData": "Geen pipelinegegevens",
+  "convertToQuote": "Omzetten naar offerte",
+  "opportunityConvertSuccess": "Offerte #{id} succesvol aangemaakt"
 }

@@ -1,1 +1,5 @@
-{}
+{
+  "@@locale": "zh",
+  "errorWithArg": "错误：{error}",
+  "roomsToClean": "房间：{totalRooms}   待清洁：{dirtyCount}"
+}

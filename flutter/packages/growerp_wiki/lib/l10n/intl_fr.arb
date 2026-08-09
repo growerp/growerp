@@ -1,1 +1,10 @@
-{}
+{
+  "@@locale": "fr",
+  "wikiSpace": "Espace wiki",
+  "noPagesFound": "Aucune page trouvée",
+  "searchPagePath": "Rechercher un chemin de page",
+  "addPage": "Ajouter une page",
+  "cancel": "Annuler",
+  "pagePathHint": "Chemin de la page (p. ex. 'notes/my-page' - évitez les préfixes générés tables/ et datasets/)",
+  "markdownTextYamlFrontmatterAllowed": "Texte Markdown (frontmatter YAML autorisé)"
+}

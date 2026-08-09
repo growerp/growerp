@@ -1,1 +1,8 @@
-{}
+{
+  "@@locale": "fr",
+  "day": "Jour",
+  "week": "Semaine",
+  "month": "Mois",
+  "save": "Enregistrer",
+  "cancel": "Annuler"
+}

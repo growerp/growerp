@@ -32,6 +32,7 @@ import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_outreach/growerp_outreach.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
+import 'l10n/generated/freelance_localizations.dart';
 import 'views/freelance_db_form.dart';
 import 'views/accounting_form.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -214,6 +215,7 @@ List<LocalizationsDelegate> delegates = const [
   MarketingLocalizations.delegate,
   OutreachLocalizations.delegate,
   AdkLocalizations.delegate,
+  FreelanceLocalizations.delegate,
 ];
 
 List<BlocProvider> getFreelanceBlocProviders(

@@ -58,5 +58,8 @@
   "opportunityUploadSuccess": "机会上传成功",
   "opportunityUploadFailure": "机会上传失败",
   "opportunityDownloadSuccess": "机会下载已安排，电子邮件将很快发送",
-  "opportunityDownloadFailure": "机会下载失败"
+  "opportunityDownloadFailure": "机会下载失败",
+  "noPipelineData": "无管道数据",
+  "convertToQuote": "转换为报价",
+  "opportunityConvertSuccess": "报价 #{id} 创建成功"
 }

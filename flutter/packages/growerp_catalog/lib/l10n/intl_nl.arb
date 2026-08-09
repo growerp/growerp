@@ -116,5 +116,7 @@
   "categoryAddFailure": "Toevoegen van categorie mislukt",
   "subscriptionUpdateSuccess": "Abonnement succesvol bijgewerkt",
   "productUploadFailure": "Uploaden van producten mislukt",
-  "categoryDeleteFailure": "Verwijderen van categorie mislukt"
+  "categoryDeleteFailure": "Verwijderen van categorie mislukt",
+  "catalog_noProductData": "Geen productgegevens",
+  "catalog_categorynbrofproductsProducts": "{categorynbrOfProducts} producten"
 }

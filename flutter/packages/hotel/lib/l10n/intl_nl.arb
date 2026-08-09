@@ -1,1 +1,5 @@
-{}
+{
+  "@@locale": "nl",
+  "errorWithArg": "Fout: {error}",
+  "roomsToClean": "Kamers: {totalRooms}   Te reinigen: {dirtyCount}"
+}

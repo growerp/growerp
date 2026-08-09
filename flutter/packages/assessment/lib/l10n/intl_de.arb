@@ -1,1 +1,8 @@
-{}
+{
+  "@@locale": "de",
+  "landingPage": "Landingpage",
+  "welcomeToGrowerpLandingPage": "Willkommen auf der GrowERP-Landingpage",
+  "discoverYourBusinessPotential": "Entdecken Sie Ihr Geschäftspotenzial mit unserer umfassenden Bewertung.",
+  "startAssessment": "Bewertung starten",
+  "clickTheButtonAboveToBegin": "Klicken Sie auf die Schaltfläche oben, um Ihre Bewertung zu beginnen."
+}

@@ -206,5 +206,15 @@
   "companyAddFailure": "公司添加失败",
   "companyFetchFailure": "获取公司失败",
   "compUserUploadFailure": "上传公司/用户失败",
-  "compUserDownloadFailure": "下载公司/用户失败"
+  "compUserDownloadFailure": "下载公司/用户失败",
+  "periodLabel": "期间：",
+  "changePeriod": "更改期间",
+  "noAccessesFoundForThisPeriod": "此期间未找到访问记录。",
+  "companiesUsersUpDownload": "公司/用户上传下载",
+  "jobTitlePosition": "职位名称 / 岗位",
+  "uploadCsvFile": "上传 CSV 文件",
+  "downloadViaEmail": "通过电子邮件下载",
+  "downloadFirstToObtainTheFormat": "请先下载以获取格式",
+  "aDataFileWillBeSendByEmail": "数据文件将通过电子邮件发送",
+  "couldNotLoadRoles": "无法加载 {role}！"
 }

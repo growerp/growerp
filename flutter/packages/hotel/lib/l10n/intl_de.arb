@@ -1,1 +1,5 @@
-{}
+{
+  "@@locale": "de",
+  "errorWithArg": "Fehler: {error}",
+  "roomsToClean": "Zimmer: {totalRooms}   Zu reinigen: {dirtyCount}"
+}

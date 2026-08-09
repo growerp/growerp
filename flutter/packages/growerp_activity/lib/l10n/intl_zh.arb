@@ -42,5 +42,17 @@
   "activityDeleteFailure": "活动删除失败",
   "activityAddSuccess": "活动添加成功",
   "activityAddFailure": "活动添加失败",
-  "activityFetchFailure": "获取活动失败"
+  "activityFetchFailure": "获取活动失败",
+  "activity_noTaskData": "无任务数据",
+  "activity_fromToParty": "来往参与方",
+  "activity_failedToFetchSearch": "获取搜索项失败：{statemessage}",
+  "activity_searchResults": "搜索结果",
+  "activity_noSearchItemsFound": "（尚）未找到搜索项",
+  "activity_idActivitiesindexpseudoidN": "ID：{activitiesindexpseudoId}\\n",
+  "activity_errorGettingHoursReport": "获取工时报告出错：{snapshoterror}",
+  "activity_noHoursFound": "未找到工时",
+  "activity_inProcess": "处理中",
+  "activity_salesInvoiceToClient": "开给客户的销售发票",
+  "activity_purchaseInvoiceForAssistant": "助理的采购发票",
+  "activity_createInvoice": "创建发票"
 }

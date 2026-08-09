@@ -1,6 +1,0 @@
-{
-    "@@locale": "th_TH",
-    "pageHomeWelcome": "ยินดีต้อนรับ {name}",
-    "screenNotFound": "ไม่พบหน้าจอ {screen}",
-    "applicationNotDefined": "ไม่พบบริษัท {applicationId} ในระบบ\n ไปที่แอปผู้ดูแลระบบเพื่อสร้าง!"
-}

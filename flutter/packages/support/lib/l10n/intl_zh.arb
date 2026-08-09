@@ -1,1 +1,24 @@
-{}
+{
+  "@@locale": "zh",
+  "websiteReadAI": "系统会读取该网站，用 AI 按 GrowERP 模板重写其页面和配色，并将结果安装为新的所有者。此过程需要几分钟并消耗 AI 额度。",
+  "startConversion": "开始转换",
+  "passwordArg": "密码：{password}",
+  "giveThisToCustomer": "请将此信息连同管理员登录信息一起交给客户：删除此转换后将无法再次显示。",
+  "removeFromList": "从列表中移除",
+  "removingClearsRow": "移除仅清除此行，已创建的所有者及其网站将保留。",
+  "noWebsitesConverted": "尚未转换任何网站。\n\n按 + 可将现有公司网站转换为新的 GrowERP 所有者：系统会读取该站点，按 GrowERP 模板重写其页面和配色，并将结果安装为新租户。",
+  "failedToFetchApplications": "获取应用失败：{message}",
+  "userRestActivity": "用户 REST 活动 ",
+  "thirtyDays": "30 天",
+  "sixtyDays": "60 天",
+  "ninetyDays": "90 天",
+  "usersCount": "{count} 位用户",
+  "noRestActivityInPeriod": "该期间无 REST 活动",
+  "failedToLoadMenuConfiguration": "加载菜单配置失败",
+  "unknownError": "未知错误",
+  "retry": "重试",
+  "logout": "退出登录",
+  "loadingMenuConfiguration": "正在加载菜单配置...",
+  "login": "登录",
+  "growerpSupport": "GrowERP 支持"
+}

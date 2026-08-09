@@ -206,5 +206,15 @@
   "companyAddFailure": "Unternehmen konnte nicht hinzugefügt werden",
   "companyFetchFailure": "Unternehmen konnten nicht abgerufen werden",
   "compUserUploadFailure": "Hochladen von Unternehmen/Benutzern fehlgeschlagen",
-  "compUserDownloadFailure": "Herunterladen von Unternehmen/Benutzern fehlgeschlagen"
+  "compUserDownloadFailure": "Herunterladen von Unternehmen/Benutzern fehlgeschlagen",
+  "periodLabel": "Zeitraum: ",
+  "changePeriod": "Zeitraum ändern",
+  "noAccessesFoundForThisPeriod": "Für diesen Zeitraum wurden keine Zugriffe gefunden.",
+  "companiesUsersUpDownload": "Unternehmen/Benutzer hoch-/herunterladen",
+  "jobTitlePosition": "Berufsbezeichnung / Position",
+  "uploadCsvFile": "CSV-Datei hochladen",
+  "downloadViaEmail": "Per E-Mail herunterladen",
+  "downloadFirstToObtainTheFormat": "Zuerst herunterladen, um das Format zu erhalten",
+  "aDataFileWillBeSendByEmail": "Eine Datendatei wird per E-Mail versendet",
+  "couldNotLoadRoles": "{role}s konnten nicht geladen werden!"
 }

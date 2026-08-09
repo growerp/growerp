@@ -1,1 +1,8 @@
-{}
+{
+  "@@locale": "nl",
+  "landingPage": "Landingspagina",
+  "welcomeToGrowerpLandingPage": "Welkom op de GrowERP-landingspagina",
+  "discoverYourBusinessPotential": "Ontdek uw zakelijke potentieel met onze uitgebreide beoordeling.",
+  "startAssessment": "Beoordeling starten",
+  "clickTheButtonAboveToBegin": "Klik op de knop hierboven om uw beoordeling te beginnen."
+}

@@ -1,1 +1,8 @@
-{}
+{
+  "@@locale": "nl",
+  "day": "Dag",
+  "week": "Week",
+  "month": "Maand",
+  "save": "Opslaan",
+  "cancel": "Annuleren"
+}

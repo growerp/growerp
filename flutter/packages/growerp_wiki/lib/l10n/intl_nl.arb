@@ -1,1 +1,10 @@
-{}
+{
+  "@@locale": "nl",
+  "wikiSpace": "Wikiruimte",
+  "noPagesFound": "Geen pagina's gevonden",
+  "searchPagePath": "Zoek paginapad",
+  "addPage": "Pagina toevoegen",
+  "cancel": "Annuleren",
+  "pagePathHint": "Paginapad (bijv. 'notes/my-page' - vermijd de gegenereerde prefixen tables/ en datasets/)",
+  "markdownTextYamlFrontmatterAllowed": "Markdown-tekst (YAML-frontmatter toegestaan)"
+}

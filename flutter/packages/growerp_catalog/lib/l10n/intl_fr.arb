@@ -116,5 +116,7 @@
   "categoryAddFailure": "Échec de l'ajout de la catégorie",
   "subscriptionUpdateSuccess": "Abonnement mis à jour avec succès",
   "productUploadFailure": "Échec du téléchargement des produits",
-  "categoryDeleteFailure": "Échec de la suppression de la catégorie"
+  "categoryDeleteFailure": "Échec de la suppression de la catégorie",
+  "catalog_noProductData": "Aucune donnée de produit",
+  "catalog_categorynbrofproductsProducts": "{categorynbrOfProducts} produits"
 }

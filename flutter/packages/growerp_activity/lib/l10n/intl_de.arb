@@ -42,5 +42,17 @@
   "activityDeleteFailure": "Aktivität konnte nicht gelöscht werden",
   "activityAddSuccess": "Aktivität erfolgreich hinzugefügt",
   "activityAddFailure": "Aktivität konnte nicht hinzugefügt werden",
-  "activityFetchFailure": "Aktivitäten konnten nicht abgerufen werden"
+  "activityFetchFailure": "Aktivitäten konnten nicht abgerufen werden",
+  "activity_noTaskData": "Keine Aufgabendaten",
+  "activity_fromToParty": "Von/An Partei",
+  "activity_failedToFetchSearch": "Suchergebnisse konnten nicht abgerufen werden: {statemessage}",
+  "activity_searchResults": "Suchergebnisse",
+  "activity_noSearchItemsFound": "(Noch) keine Suchergebnisse gefunden",
+  "activity_idActivitiesindexpseudoidN": "ID: {activitiesindexpseudoId}\\n",
+  "activity_errorGettingHoursReport": "Fehler beim Abrufen des Stundenberichts: {snapshoterror}",
+  "activity_noHoursFound": "Keine Stunden gefunden",
+  "activity_inProcess": "In Bearbeitung",
+  "activity_salesInvoiceToClient": "Ausgangsrechnung an Kunden",
+  "activity_purchaseInvoiceForAssistant": "Eingangsrechnung für Assistent",
+  "activity_createInvoice": "Rechnung erstellen"
 }

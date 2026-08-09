@@ -1,1 +1,24 @@
-{}
+{
+  "@@locale": "de",
+  "websiteReadAI": "Die Website wird gelesen, ihre Seiten und Farben werden mit KI für die GrowERP-Vorlage neu geschrieben und das Ergebnis wird als neuer Eigentümer installiert. Dies dauert einige Minuten und verbraucht KI-Credits.",
+  "startConversion": "Konvertierung starten",
+  "passwordArg": "Passwort: {password}",
+  "giveThisToCustomer": "Geben Sie dies zusammen mit dem Admin-Login an den Kunden: Es kann nicht erneut angezeigt werden, sobald diese Konvertierung entfernt wurde.",
+  "removeFromList": "Aus Liste entfernen",
+  "removingClearsRow": "Das Entfernen löscht nur diese Zeile; der erstellte Eigentümer und seine Website bleiben bestehen.",
+  "noWebsitesConverted": "Noch keine Websites konvertiert.\n\nDrücken Sie +, um eine bestehende Firmenwebsite in einen neuen GrowERP-Eigentümer zu konvertieren: Die Site wird gelesen, ihre Seiten und Farben werden für die GrowERP-Vorlage neu geschrieben und das Ergebnis wird als neuer Mandant installiert.",
+  "failedToFetchApplications": "Anwendungen konnten nicht abgerufen werden: {message}",
+  "userRestActivity": "Benutzer-REST-Aktivität ",
+  "thirtyDays": "30 Tage",
+  "sixtyDays": "60 Tage",
+  "ninetyDays": "90 Tage",
+  "usersCount": "{count} Benutzer",
+  "noRestActivityInPeriod": "Keine REST-Aktivität im Zeitraum",
+  "failedToLoadMenuConfiguration": "Menükonfiguration konnte nicht geladen werden",
+  "unknownError": "Unbekannter Fehler",
+  "retry": "Wiederholen",
+  "logout": "Abmelden",
+  "loadingMenuConfiguration": "Menükonfiguration wird geladen...",
+  "login": "Anmeldung",
+  "growerpSupport": "GrowERP-Support"
+}

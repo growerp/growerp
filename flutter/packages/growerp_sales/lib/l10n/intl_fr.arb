@@ -58,5 +58,8 @@
   "opportunityUploadSuccess": "Opportunités téléchargées avec succès",
   "opportunityUploadFailure": "Échec du téléchargement des opportunités",
   "opportunityDownloadSuccess": "Téléchargement d'opportunité programmé, l'email sera envoyé sous peu",
-  "opportunityDownloadFailure": "Échec du téléchargement des opportunités"
+  "opportunityDownloadFailure": "Échec du téléchargement des opportunités",
+  "noPipelineData": "Aucune donnée de pipeline",
+  "convertToQuote": "Convertir en devis",
+  "opportunityConvertSuccess": "Devis n° {id} créé avec succès"
 }

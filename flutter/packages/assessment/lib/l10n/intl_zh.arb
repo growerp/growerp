@@ -1,1 +1,8 @@
-{}
+{
+  "@@locale": "zh",
+  "landingPage": "着陆页",
+  "welcomeToGrowerpLandingPage": "欢迎来到 GrowERP 着陆页",
+  "discoverYourBusinessPotential": "通过我们的全面评估发现您的业务潜力。",
+  "startAssessment": "开始评估",
+  "clickTheButtonAboveToBegin": "点击上面的按钮开始您的评估之旅。"
+}

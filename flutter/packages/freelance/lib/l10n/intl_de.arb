@@ -1,0 +1,6 @@
+{
+  "@@locale": "de",
+  "pageHomeWelcome": "Willkommen {name}",
+  "screenNotFound": "Bildschirm {screen} nicht gefunden",
+  "applicationNotDefined": "Kein {applicationId}-Unternehmen im System gefunden\n Erstellen Sie eines in der Admin-App!"
+}
