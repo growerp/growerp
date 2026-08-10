@@ -260,6 +260,11 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
                                 '🇳🇱',
                                 'Nederlands',
                               ),
+                              _buildLanguageMenuItem(
+                                const Locale('es'),
+                                '🇪🇸',
+                                'Español',
+                              ),
                             ],
                           ),
                         ],

@@ -1,0 +1,12 @@
+{
+  "@@locale": "es",
+  "day": "Día",
+  "week": "Semana",
+  "month": "Mes",
+  "save": "Ahorrar",
+  "cancel": "Cancelar",
+  "tableHdrFrom": "De",
+  "tableHdrRate": "Tasa",
+  "tableHdrThru": "a través de",
+  "searchHintReservations": "Buscar ID de reserva, nombre del cliente, fecha..."
+}
