@@ -1,0 +1,31 @@
+{
+  "@@locale": "es",
+  "wikiSpace": "Wiki space",
+  "@wikiSpace": {
+    "description": "Wiki space"
+  },
+  "noPagesFound": "No pages found",
+  "@noPagesFound": {
+    "description": "No pages found"
+  },
+  "searchPagePath": "Search page path",
+  "@searchPagePath": {
+    "description": "Search page path"
+  },
+  "addPage": "Add page",
+  "@addPage": {
+    "description": "Add page"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel"
+  },
+  "pagePathHint": "Page path (e.g. 'notes/my-page' - avoid the generated tables/ and datasets/ prefixes)",
+  "@pagePathHint": {
+    "description": "Page path (e.g. 'notes/my-page' - avoid the generated tables/ and datasets/ prefixes)"
+  },
+  "markdownTextYamlFrontmatterAllowed": "Markdown text (YAML frontmatter allowed)",
+  "@markdownTextYamlFrontmatterAllowed": {
+    "description": "Markdown text (YAML frontmatter allowed)"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "@@locale": "es",
+  "day": "Day",
+  "@day": {
+    "description": "Day"
+  },
+  "week": "Week",
+  "@week": {
+    "description": "Week"
+  },
+  "month": "Month",
+  "@month": {
+    "description": "Month"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel"
+  },
+  "tableHdrFrom": "From",
+  "@tableHdrFrom": {
+    "description": "Table column header"
+  },
+  "tableHdrRate": "Rate",
+  "@tableHdrRate": {
+    "description": "Table column header"
+  },
+  "tableHdrThru": "Thru",
+  "@tableHdrThru": {
+    "description": "Table column header"
+  },
+  "searchHintReservations": "Search reservation ID, customer name, date...",
+  "@searchHintReservations": {
+    "description": "Search field hint"
+  }
+}

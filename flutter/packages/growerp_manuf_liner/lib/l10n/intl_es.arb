@@ -1,0 +1,129 @@
+{
+  "@@locale": "es",
+  "linerType": "Liner Type",
+  "@linerType": {
+    "description": "Label for Liner Type"
+  },
+  "descriptionOptional": "Description (optional)",
+  "@descriptionOptional": {
+    "description": "Label for optional description"
+  },
+  "linerWeight": "Liner Weight (lb/sqft)",
+  "@linerWeight": {
+    "description": "Label for Liner Weight"
+  },
+  "productionOrderTitle": "Production Order {pseudoId}",
+  "@productionOrderTitle": {
+    "description": "Title for production order PDF",
+    "placeholders": {
+      "pseudoId": {
+        "type": "String"
+      }
+    }
+  },
+  "noteWorkEffort": "Note: {workEffortName}",
+  "@noteWorkEffort": {
+    "description": "Note displaying work effort name",
+    "placeholders": {
+      "workEffortName": {
+        "type": "String"
+      }
+    }
+  },
+  "noPanelsRecorded": "No panels recorded.",
+  "@noPanelsRecorded": {
+    "description": "Message when no panels are recorded"
+  },
+  "linerPanels": "Liner Panels",
+  "@linerPanels": {
+    "description": "Label for liner panels section"
+  },
+  "linerTotals": "Liner Totals",
+  "@linerTotals": {
+    "description": "Label for liner totals section"
+  },
+  "bomMaterials": "BOM / Materials",
+  "@bomMaterials": {
+    "description": "Label for BOM/Materials section"
+  },
+  "linerName": "Liner Name",
+  "@linerName": {
+    "description": "Label for Liner Name"
+  },
+  "panelNameOptional": "Panel Name (optional)",
+  "@panelNameOptional": {
+    "description": "Label for optional panel name"
+  },
+  "panelWidth": "Panel Width (ft)",
+  "@panelWidth": {
+    "description": "Label for Panel Width"
+  },
+  "panelLength": "Panel Length (ft)",
+  "@panelLength": {
+    "description": "Label for Panel Length"
+  },
+  "sequenceNoOptional": "Sequence No. (optional)",
+  "@sequenceNoOptional": {
+    "description": "Label for optional Sequence No."
+  },
+  "rollStockWidth": "Roll Stock Width (ft)",
+  "@rollStockWidth": {
+    "description": "Label for Roll Stock Width"
+  },
+  "widthIncrement": "Width Increment (ft)",
+  "@widthIncrement": {
+    "description": "Label for Width Increment"
+  },
+  "tableHdrInfo": "Info",
+  "@tableHdrInfo": {
+    "description": "Table column header"
+  },
+  "tableHdrLFt": "L (ft)",
+  "@tableHdrLFt": {
+    "description": "Table column header"
+  },
+  "tableHdrLiner": "Liner",
+  "@tableHdrLiner": {
+    "description": "Table column header"
+  },
+  "tableHdrName": "Name",
+  "@tableHdrName": {
+    "description": "Table column header"
+  },
+  "tableHdrPanelName": "Panel Name",
+  "@tableHdrPanelName": {
+    "description": "Table column header"
+  },
+  "tableHdrPasses": "Passes",
+  "@tableHdrPasses": {
+    "description": "Table column header"
+  },
+  "tableHdrQcNumber": "QC#",
+  "@tableHdrQcNumber": {
+    "description": "Table column header"
+  },
+  "tableHdrRollWidthFt": "Roll Width (ft)",
+  "@tableHdrRollWidthFt": {
+    "description": "Table column header"
+  },
+  "tableHdrSqft": "SqFt",
+  "@tableHdrSqft": {
+    "description": "Table column header"
+  },
+  "tableHdrWFt": "W (ft)",
+  "@tableHdrWFt": {
+    "description": "Table column header"
+  },
+  "tableHdrWeightLbSqft": "Weight (lb/sqft)",
+  "@tableHdrWeightLbSqft": {
+    "description": "Table column header"
+  },
+  "tableHdrWidthIncFt": "Width Inc. (ft)",
+  "@tableHdrWidthIncFt": {
+    "description": "Table column header"
+  },
+  "tableHdrWtLb": "Wt (lb)",
+  "@tableHdrWtLb": {
+    "description": "Table column header"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "@@locale": "es",
+  "landingPage": "Landing Page",
+  "@landingPage": {
+    "description": "Title of the landing page."
+  },
+  "welcomeToGrowerpLandingPage": "Welcome to GrowERP Landing Page",
+  "@welcomeToGrowerpLandingPage": {
+    "description": "Welcome text on the landing page."
+  },
+  "discoverYourBusinessPotential": "Discover your business potential with our comprehensive assessment.",
+  "@discoverYourBusinessPotential": {
+    "description": "Subtitle text on the landing page."
+  },
+  "startAssessment": "Start Assessment",
+  "@startAssessment": {
+    "description": "Button text to start the assessment."
+  },
+  "clickTheButtonAboveToBegin": "Click the button above to begin your assessment journey.",
+  "@clickTheButtonAboveToBegin": {
+    "description": "Instruction text below the start button."
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "@@locale": "es",
+  "resetDemoTitle": "Reset Demo?",
+  "@resetDemoTitle": {
+    "description": "Title of the reset demo dialog"
+  },
+  "resetDemoContent": "This will reset your progress to step 0.\nDemo data already created in the system will remain.",
+  "@resetDemoContent": {
+    "description": "Content of the reset demo dialog"
+  },
+  "cancelButton": "Cancel",
+  "@cancelButton": {
+    "description": "Cancel button label"
+  },
+  "resetButton": "Reset",
+  "@resetButton": {
+    "description": "Reset button label"
+  },
+  "resetDemoProgressTooltip": "Reset demo progress",
+  "@resetDemoProgressTooltip": {
+    "description": "Tooltip for the refresh icon button to reset demo progress"
+  },
+  "allStepsComplete": "All {count} steps complete",
+  "@allStepsComplete": {
+    "description": "Message showing all steps are complete",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stepProgress": "Step {current} of {total}",
+  "@stepProgress": {
+    "description": "Message showing current step progress",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "demoCompleteMessage": "Demo complete — all phases finished!",
+  "@demoCompleteMessage": {
+    "description": "Message displayed when the demo finishes all phases"
+  },
+  "showingPhase": "Showing: {phaseName}",
+  "@showingPhase": {
+    "description": "Label indicating which phase is currently shown",
+    "placeholders": {
+      "phaseName": {
+        "type": "String"
+      }
+    }
+  },
+  "resetToRunAgainButton": "Reset to Run Again",
+  "@resetToRunAgainButton": {
+    "description": "Label for button to reset and run the demo again"
+  },
+  "runningStep": "Running step {step}…",
+  "@runningStep": {
+    "description": "Label for button while running a step",
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
+  "retryStep": "Retry Step {step}",
+  "@retryStep": {
+    "description": "Label for button to retry a step",
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
+  "runStep": "Run Step {current} of {total}",
+  "@runStep": {
+    "description": "Label for button to run the current step",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "progressSavedMessage": "Progress saved — you can close and resume later.",
+  "@progressSavedMessage": {
+    "description": "Message indicating progress is saved"
+  },
+  "demoFeaturesNotAvail": "Demo features are not available in production.",
+  "@demoFeaturesNotAvail": {
+    "description": "Message showing demo is not available in production mode"
+  },
+  "devEnvDemosHidden": "Development environment — demos are hidden in production builds.",
+  "@devEnvDemosHidden": {
+    "description": "Message showing demos are hidden in prod builds"
+  },
+  "growerpDemosTitle": "GrowERP Demos",
+  "@growerpDemosTitle": {
+    "description": "Title for the GrowERP demos screen"
+  },
+  "noDemosRegistered": "No demos registered.",
+  "@noDemosRegistered": {
+    "description": "Message showing no demos are registered"
+  },
+  "resetDemoListTitle": "Reset demo?",
+  "@resetDemoListTitle": {
+    "description": "Title of the reset demo dialog from the list screen"
+  },
+  "resetDemoListContent": "Progress will be reset to step 0.\nData already created in the system is kept.",
+  "@resetDemoListContent": {
+    "description": "Content of the reset demo dialog from the list screen"
+  }
+}
