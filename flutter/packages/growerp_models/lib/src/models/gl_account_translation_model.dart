@@ -17,9 +17,10 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'gl_account_translation_model.freezed.dart';
 part 'gl_account_translation_model.g.dart';
 
-/// The GL account names translated into one language. There is no translation
-/// record on the backend: a language is described by how many of the account
-/// names it covers, so this is a progress row, refreshed while a run is busy.
+/// The ledger texts - GL account names, account class and type descriptions -
+/// translated into one language. There is no translation record on the backend:
+/// a language is described by how many of those texts it covers, so this is a
+/// progress row, refreshed while a run is busy.
 @freezed
 abstract class GlAccountTranslation with _$GlAccountTranslation {
   factory GlAccountTranslation({

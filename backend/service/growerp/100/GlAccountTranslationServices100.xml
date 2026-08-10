@@ -13,18 +13,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <!--
-GL account name translation, run on demand from the support app.
+Ledger text translation, run on demand from the support app: the GL account names plus the
+account class and account type descriptions the ledger screens show.
 
     get#GlAccountTranslations    one row per supported language with its progress
     create#GlAccountTranslation  validate + queue, returns immediately
-    process#GlAccountTranslation background worker, one Gemini batch call per 50 names
+    process#GlAccountTranslation background worker, one Gemini batch call per 50 texts
     delete#GlAccountTranslation  remove the translations of one language
 
-The translations are moqui.basic.LocalizedMessage rows keyed on the English account name, not
+The translations are moqui.basic.LocalizedMessage rows keyed on the text itself, not
 LocalizedEntityField rows keyed on the glAccountId: every company clones the same chart of
 accounts (init#PartyAccountingConfiguration), so the same ~500 names occur once per company and
-one text keyed row serves all of them. AccountingServices100 resolves them with
-ec.l10n.localize(), which reads for ec.user.locale, set from the app language at login.
+one text keyed row serves all of them. The class and type descriptions are shared enumerations,
+text keyed by nature. AccountingServices100 resolves them all with ec.l10n.localize(), which
+reads for ec.user.locale, set from the app language at login.
 
 Translating is system support work: the rows are shared by every tenant.
 -->
@@ -32,8 +34,8 @@ Translating is system support work: the rows are shared by every tenant.
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
 
     <service verb="get" noun="GlAccountTranslations">
-        <description>Progress per language: how many distinct GL account names exist and how many
-            of them have a translation. There is no translation entity, the counts are the
+        <description>Progress per language: how many distinct ledger texts exist and how many of
+            them have a translation. There is no translation entity, the counts are the
             status.</description>
         <in-parameters>
             <parameter name="locale">
@@ -57,7 +59,7 @@ Translating is system support work: the rows are shared by every tenant.
         <actions>
             <service-call name="growerp.100.GlAccountTranslationServices100.get#SupportAccess"
                 out-map="context" />
-            <service-call name="growerp.100.GlAccountTranslationServices100.get#GlAccountNames"
+            <service-call name="growerp.100.GlAccountTranslationServices100.get#LedgerTexts"
                 out-map="context" />
             <script><![CDATA[
                 List locales = locale ? [locale] :
@@ -67,21 +69,21 @@ Translating is system support work: the rows are shared by every tenant.
                     LANGUAGES[it].toLowerCase().contains(search.toLowerCase())
                 }
                 context.glAccountTranslations = locales.collect { String loc ->
-                    int translated = accountNames ? ec.entity.find('moqui.basic.LocalizedMessage')
+                    int translated = ledgerTexts ? ec.entity.find('moqui.basic.LocalizedMessage')
                         .condition('locale', loc)
-                        .condition('original', org.moqui.entity.EntityCondition.IN, accountNames)
+                        .condition('original', org.moqui.entity.EntityCondition.IN, ledgerTexts)
                         .disableAuthz().count() as int : 0
                     [locale: loc, language: LANGUAGES[loc],
-                     nameCount: accountNames.size(), translatedCount: translated,
+                     nameCount: ledgerTexts.size(), translatedCount: translated,
                      status: translated == 0 ? 'not translated' :
-                             translated < accountNames.size() ? 'partial' : 'translated']
+                             translated < ledgerTexts.size() ? 'partial' : 'translated']
                 }
             ]]></script>
         </actions>
     </service>
 
     <service verb="create" noun="GlAccountTranslation">
-        <description>Queue the translation of the GL account names into one language.</description>
+        <description>Queue the translation of the ledger texts into one language.</description>
         <in-parameters>
             <parameter name="sourceLocale" default-value="en" />
             <parameter name="targetLocale" required="true">
@@ -94,10 +96,10 @@ Translating is system support work: the rows are shared by every tenant.
         <actions>
             <service-call name="growerp.100.GlAccountTranslationServices100.get#SupportAccess"
                 out-map="context" />
-            <service-call name="growerp.100.GlAccountTranslationServices100.get#GlAccountNames"
+            <service-call name="growerp.100.GlAccountTranslationServices100.get#LedgerTexts"
                 out-map="context" />
-            <if condition="!accountNames">
-                <return error="true" message="There are no GL account names to translate" />
+            <if condition="!ledgerTexts">
+                <return error="true" message="There are no ledger texts to translate" />
             </if>
             <if condition="!LANGUAGES.containsKey(targetLocale)">
                 <return error="true"
@@ -105,7 +107,7 @@ Translating is system support work: the rows are shared by every tenant.
             </if>
             <if condition="targetLocale == sourceLocale">
                 <return error="true"
-                    message="${targetLocale} is the language the account names are written in" />
+                    message="${targetLocale} is the language the ledger is written in" />
             </if>
 
             <!-- an AI key has to be available or the worker would die silently -->
@@ -118,7 +120,7 @@ Translating is system support work: the rows are shared by every tenant.
                     message="No Gemini API key configured: set it in System Setup or in the GEMINI_API_KEY environment variable" />
             </if>
 
-            <!-- translating ~500 names takes minutes, run it in the background -->
+            <!-- translating ~500 texts takes minutes, run it in the background -->
             <script>
                 ec.service.async()
                     .name('growerp.100.GlAccountTranslationServices100.process#GlAccountTranslation')
@@ -134,7 +136,7 @@ Translating is system support work: the rows are shared by every tenant.
 
     <service verb="process" noun="GlAccountTranslation" authenticate="anonymous"
         transaction="ignore">
-        <description>Background worker: translate the distinct GL account names into the target
+        <description>Background worker: translate the ledger texts into the target
             language and store them as LocalizedMessage rows. Each batch commits on its own, so
             the counts of get#GlAccountTranslations follow the progress.</description>
         <in-parameters>
@@ -185,7 +187,7 @@ Translating is system support work: the rows are shared by every tenant.
     </service>
 
     <service verb="translate" noun="GlAccountNames" transaction-timeout="3600">
-        <description>Translate the distinct GL account names with Gemini and store them as
+        <description>Translate the ledger texts with Gemini and store them as
             moqui.basic.LocalizedMessage rows.</description>
         <in-parameters>
             <parameter name="sourceLocale" default-value="en" />
@@ -202,19 +204,19 @@ Translating is system support work: the rows are shared by every tenant.
     </service>
 
     <service verb="delete" noun="GlAccountTranslation">
-        <description>Remove the GL account name translations of one language, so a run can be
-            redone. The account names themselves are not touched.</description>
+        <description>Remove the ledger text translations of one language, so a run can be
+            redone. The account names and class descriptions themselves are not touched.</description>
         <in-parameters>
             <parameter name="locale" required="true" />
         </in-parameters>
         <actions>
             <service-call name="growerp.100.GlAccountTranslationServices100.get#SupportAccess"
                 out-map="context" />
-            <service-call name="growerp.100.GlAccountTranslationServices100.get#GlAccountNames"
+            <service-call name="growerp.100.GlAccountTranslationServices100.get#LedgerTexts"
                 out-map="context" />
             <script><![CDATA[
                 int removed = 0
-                accountNames.collate(200).each { batch ->
+                ledgerTexts.collate(200).each { batch ->
                     ec.entity.find('moqui.basic.LocalizedMessage')
                         .condition('locale', locale)
                         .condition('original', org.moqui.entity.EntityCondition.IN, batch)
@@ -238,7 +240,7 @@ Translating is system support work: the rows are shared by every tenant.
             <if
                 condition="!ec.user.isInGroup('GROWERP_M_SYSTEM') &amp;&amp; !ec.user.isInGroup('GROWERP_M_ADMIN')">
                 <return error="true"
-                    message="GL account name translation is only available to system support" />
+                    message="Ledger translation is only available to system support" />
             </if>
             <!-- the languages the Flutter apps support, see growerp_core top_app.dart -->
             <set field="LANGUAGES"
@@ -247,17 +249,30 @@ Translating is system support work: the rows are shared by every tenant.
         </actions>
     </service>
 
-    <service verb="get" noun="GlAccountNames">
-        <description>The distinct GL account names of every company: one translation row serves
-            them all because every company clones the same chart of accounts.</description>
+    <service verb="get" noun="LedgerTexts">
+        <description>Everything the ledger screens show as text: the distinct GL account names of
+            every company, plus the account class and account type descriptions. One translation
+            row serves every company, because they all clone the same chart of accounts and share
+            the class and type enumerations.</description>
         <out-parameters>
-            <parameter name="accountNames" type="List" />
+            <parameter name="ledgerTexts" type="List" />
         </out-parameters>
         <actions>
+            <entity-find entity-name="moqui.basic.Enumeration" list="classAndTypeEnums">
+                <econdition field-name="enumTypeId" operator="in"
+                    value="GlAccountClass,GlAccountType" />
+                <select-field field-name="description" />
+            </entity-find>
             <script><![CDATA[
-                context.accountNames = ec.entity.find('mantle.ledger.account.GlAccount')
+                // the enum descriptions are localized fields: read them in the language they are
+                // stored in, or a second run would key the rows on its own translation
+                List enumTexts = classAndTypeEnums
+                    .collect { (it.getNoCheckSimple('description') ?: '').toString().trim() }
+                    .findAll { it }
+                List accountNames = ec.entity.find('mantle.ledger.account.GlAccount')
                     .selectField('accountName').disableAuthz().list()
-                    .collect { (it.accountName ?: '').trim() }.findAll { it }.unique()
+                    .collect { (it.accountName ?: '').toString().trim() }.findAll { it }
+                context.ledgerTexts = (accountNames + enumTexts).unique()
             ]]></script>
         </actions>
     </service>

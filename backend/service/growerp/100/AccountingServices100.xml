@@ -1247,15 +1247,19 @@ limitations under the License.
                     String own = glAccount.glAccountClassEnumId
                     int level = own == cls.detailClassId ? 4 : own == cls.classId ? 3 :
                                 own == cls.parentClassId ? 2 : 1
+                    // the view aliases the Enumeration description, and an alias does not carry
+                    // its enable-localization: translate the class names on the way out
                     def levelClass = [
                         topClassId: cls.topClassId ?: '',
-                        topDescription: cls.topDescription ?: '',
+                        topDescription: ec.l10n.localize(cls.topDescription ?: ''),
                         parentClassId: level >= 2 ? (cls.parentClassId ?: '') : '',
-                        parentDescription: level >= 2 ? (cls.parentDescription ?: '') : '',
+                        parentDescription: level >= 2 ?
+                            ec.l10n.localize(cls.parentDescription ?: '') : '',
                         classId: level >= 3 ? (cls.classId ?: '') : '',
-                        description: level >= 3 ? (cls.description ?: '') : '',
+                        description: level >= 3 ? ec.l10n.localize(cls.description ?: '') : '',
                         detailClassId: level >= 4 ? (cls.detailClassId ?: '') : '',
-                        detailDescription: level >= 4 ? (cls.detailDescription ?: '') : '',
+                        detailDescription: level >= 4 ?
+                            ec.l10n.localize(cls.detailDescription ?: '') : '',
                         contra: cls.detailContra == 'Y' ? true : false,
                     ]
                     glAccounts.add(
@@ -1264,7 +1268,7 @@ limitations under the License.
                         accountName: ec.l10n.localize(glAccount.accountName),
                         accountClass: levelClass,
                         accountType: [accountTypeId: glAccount.glAccountTypeEnumId,
-                            description: glAccount.typeDescription],
+                            description: ec.l10n.localize(glAccount.typeDescription ?: '')],
                         isDebit: glAccount.isDebit == 'Y' ? true : false,
                         postedBalance: glAccount.postedBalance?.toString(),
                         )
@@ -1591,15 +1595,17 @@ limitations under the License.
             <set field="accountClasses" from="[]" />
             <iterate list="enums" entry="enumEntry">
                 <script>
+                    // the view aliases the Enumeration description, and an alias does not carry
+                    // its enable-localization: translate the class names on the way out
                     accountClasses.add(
                         topClassId: enumEntry.topClassId?:'',
-                        topDescription: enumEntry.topDescription?:'',
+                        topDescription: ec.l10n.localize(enumEntry.topDescription?:''),
                         parentClassId: enumEntry.parentClassId?:'',
-                        parentDescription: enumEntry.parentDescription?:'',
+                        parentDescription: ec.l10n.localize(enumEntry.parentDescription?:''),
                         accountClassId: enumEntry.classId?:'',
-                        description: enumEntry.description?:'',
+                        description: ec.l10n.localize(enumEntry.description?:''),
                         detailClassId: enumEntry.detailClassId?:'',
-                        detailDescription: enumEntry.detailDescription?:'',
+                        detailDescription: ec.l10n.localize(enumEntry.detailDescription?:''),
                     );
                 </script>
             </iterate>

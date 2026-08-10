@@ -103,18 +103,18 @@ class GlAccountTranslationDialogState
         children: [
           const SizedBox(height: 20),
           const Text(
-            'The ledger account names of every company are translated with AI '
-            'and stored per language. An app shows them in the language the '
-            'user logged in with, and falls back to the stored name where '
-            'there is no translation. This takes a few minutes and uses AI '
-            'credits.',
+            'The ledger account names of every company, and the account class '
+            'and type descriptions, are translated with AI and stored per '
+            'language. An app shows them in the language the user logged in '
+            'with, and falls back to the stored text where there is no '
+            'translation. This takes a few minutes and uses AI credits.',
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
             key: const Key('sourceLocale'),
             decoration: const InputDecoration(
               labelText: 'Written in',
-              helperText: 'the language the stored account names are in',
+              helperText: 'the language the stored ledger texts are in',
             ),
             initialValue: _sourceLocale,
             items: GlAccountTranslation.localeNames.entries
@@ -174,7 +174,7 @@ class GlAccountTranslationDialogState
           const Padding(
             padding: EdgeInsets.only(top: 8),
             child: Text(
-              'Names that already have a translation are kept: remove the '
+              'Texts that already have a translation are kept: remove the '
               'language first to redo it.',
               style: TextStyle(fontSize: 12),
             ),
@@ -196,7 +196,7 @@ class GlAccountTranslationDialogState
           const SizedBox(height: 20),
           _row('Language', '${t.language} (${t.locale})'),
           _row('Status', t.status),
-          _row('Names', '${t.translatedCount} / ${t.nameCount}'),
+          _row('Texts', '${t.translatedCount} / ${t.nameCount}'),
           if (t.nameCount > 0)
             Padding(
               padding: const EdgeInsets.only(top: 8),
@@ -237,7 +237,7 @@ class GlAccountTranslationDialogState
             const Padding(
               padding: EdgeInsets.only(top: 8),
               child: Text(
-                'Removing only clears the translations, the account names '
+                'Removing only clears the translations, the ledger texts '
                 'themselves stay as they are.',
                 style: TextStyle(fontSize: 12),
               ),

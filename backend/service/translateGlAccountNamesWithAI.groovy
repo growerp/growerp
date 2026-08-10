@@ -13,13 +13,14 @@
  */
 
 /**
- * Translate the distinct GL account names into the target locales and write them as
- * moqui.basic.LocalizedMessage rows, keyed on the account name itself. AccountingServices100
- * reads them back with ec.l10n.localize().
+ * Translate the ledger texts - the distinct GL account names plus the account class and account
+ * type descriptions - into the target locale and write them as moqui.basic.LocalizedMessage rows,
+ * keyed on the text itself. AccountingServices100 reads them back with ec.l10n.localize().
  *
  * Text keyed rather than per glAccountId: every company clones the same chart of accounts, and
  * a company that uploaded its own chart stored those names in the language it was working in,
- * so one row per distinct name serves every company that uses that name.
+ * so one row per distinct name serves every company that uses that name. The class and type
+ * descriptions are shared enumerations, so they are text keyed by nature.
  *
  * Names already having a row for a locale are skipped, so a rerun only fills the gaps and
  * names uploaded later cost one batch instead of the whole chart.
@@ -40,9 +41,9 @@ final int BATCH_SIZE = 50
 
 def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
 
-List names = ec.entity.find('mantle.ledger.account.GlAccount')
-    .selectField('accountName').disableAuthz().list()
-    .collect { (it.accountName ?: '').trim() }.findAll { it }.unique()
+List names = ec.service.sync()
+    .name('growerp.100.GlAccountTranslationServices100.get#LedgerTexts')
+    .disableAuthz().call()?.ledgerTexts ?: []
 
 if (!names) {
     translatedCount = 0
@@ -68,9 +69,10 @@ todo.collate(BATCH_SIZE).each { batch ->
     batch.eachWithIndex { name, index -> toTranslate["${index}".toString()] = name }
 
     String prompt = """
-Translate these ${sourceName} general ledger account names into ${targetName}.
+Translate these ${sourceName} general ledger labels into ${targetName}.
 
-They are the accounts of a chart of accounts, so use the wording an accountant in the
+They are the account names of a chart of accounts and the classifications those accounts are
+grouped by, such as Assets, Current Assets or Revenue, so use the wording an accountant in the
 ${targetName} language would find in a standard chart of accounts, not a literal translation.
 
 Leave account code fragments, abbreviations and legal or product names as they are: 401k,

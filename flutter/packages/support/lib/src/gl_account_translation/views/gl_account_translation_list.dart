@@ -87,7 +87,7 @@ class GlAccountTranslationListState extends State<GlAccountTranslationList> {
           floatingActionButton: FloatingActionButton(
             key: const Key('addNewGlAccountTranslation'),
             onPressed: () => _openDialog(null),
-            tooltip: 'Translate the ledger account names',
+            tooltip: 'Translate the ledger texts',
             child: const Icon(Icons.add),
           ),
           body: Column(
@@ -108,10 +108,11 @@ class GlAccountTranslationListState extends State<GlAccountTranslationList> {
                         child: Padding(
                           padding: EdgeInsets.all(24),
                           child: Text(
-                            'No ledger account names found.\n\n'
-                            'Press + to translate the account names of the '
-                            'chart of accounts with AI: the apps then show them '
-                            'in the language the user logged in with.',
+                            'No ledger texts found.\n\n'
+                            'Press + to translate the account names and the '
+                            'class descriptions of the chart of accounts with '
+                            'AI: the apps then show them in the language the '
+                            'user logged in with.',
                             textAlign: TextAlign.center,
                           ),
                         ),
