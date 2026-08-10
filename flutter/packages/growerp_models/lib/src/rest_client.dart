@@ -72,6 +72,7 @@ abstract class RestClient {
     @Field() bool? demoData,
     @Field() required String applicationId,
     @Field() String? timeZoneOffset,
+    @Field() String? locale,
     @Field() int? testDaysOffset,
   });
 
@@ -213,6 +214,25 @@ abstract class RestClient {
   Future<void> deleteWebsiteTranslation({
     @Field() required String translationId,
   });
+
+  // GL account name translation: system support only, the translations are
+  // shared by every tenant
+  @GET("rest/s1/growerp/100/GlAccountTranslation")
+  Future<GlAccountTranslations> getGlAccountTranslation({
+    @Query('locale') String? locale,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('search') String? search,
+  });
+
+  @POST("rest/s1/growerp/100/GlAccountTranslation")
+  Future<GlAccountTranslations> createGlAccountTranslation({
+    @Field() String? sourceLocale,
+    @Field() required String targetLocale,
+  });
+
+  @DELETE("rest/s1/growerp/100/GlAccountTranslation")
+  Future<void> deleteGlAccountTranslation({@Field() required String locale});
 
   // email templates
   @GET("rest/s1/growerp/100/EmailTemplate")

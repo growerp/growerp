@@ -32,5 +32,8 @@
   "tableHdrVersion": "Versie",
   "tableHdrWebsite": "Website",
   "searchHintWebsiteConversion": "Zoek website, bedrijf of status...",
-  "searchHintWebsiteTranslation": "Zoek eigenaar, winkel of status..."
+  "searchHintWebsiteTranslation": "Zoek eigenaar, winkel of status...",
+  "tableHdrLanguage": "Taal",
+  "tableHdrNames": "Namen",
+  "searchHintGlAccountTranslation": "Zoek taal of status..."
 }

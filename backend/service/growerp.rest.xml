@@ -1026,6 +1026,21 @@ limitations under the License.
                 <service name="growerp.100.WebsiteTranslationServices100.delete#WebsiteTranslation" />
             </method>
         </resource>
+        <resource name="GlAccountTranslation"
+            description="Translate the GL account names into the languages the apps support">
+            <method type="get">
+                <service
+                    name="growerp.100.GlAccountTranslationServices100.get#GlAccountTranslations" />
+            </method>
+            <method type="post">
+                <service
+                    name="growerp.100.GlAccountTranslationServices100.create#GlAccountTranslation" />
+            </method>
+            <method type="delete">
+                <service
+                    name="growerp.100.GlAccountTranslationServices100.delete#GlAccountTranslation" />
+            </method>
+        </resource>
         <resource name="WebsiteContent">
             <method type="get">
                 <service name="growerp.100.WebsiteServices100.get#WebsiteContent" />

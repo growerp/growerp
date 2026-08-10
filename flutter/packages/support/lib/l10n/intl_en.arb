@@ -149,5 +149,17 @@
   "searchHintWebsiteTranslation": "Search owner, store or status...",
   "@searchHintWebsiteTranslation": {
     "description": "Search field hint"
+  },
+  "tableHdrLanguage": "Language",
+  "@tableHdrLanguage": {
+    "description": "Table column header"
+  },
+  "tableHdrNames": "Names",
+  "@tableHdrNames": {
+    "description": "Table column header"
+  },
+  "searchHintGlAccountTranslation": "Search language or status...",
+  "@searchHintGlAccountTranslation": {
+    "description": "Search field hint"
   }
 }

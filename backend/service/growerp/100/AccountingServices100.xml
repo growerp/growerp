@@ -439,7 +439,7 @@ limitations under the License.
                                 postedCredits: el.postedCredits?.toString(),
                                 postedDebits: el.postedDebits?.toString(),
                                 accountCode: accountCodeFormatter != null ? accountCodeFormatter.valueToString(el.accountCode) : el.accountCode,
-                                accountName: el.accountName,
+                                accountName: ec.l10n.localize(el.accountName),
                                 ];
                     ledgerReport.glAccounts.add(temp);
                 }
@@ -796,7 +796,7 @@ limitations under the License.
                             from="[itemTypeId: itemType.enumId,
                             itemTypeName: itemType.description,
                             accountCode: newItemType?.accountCode,
-                            accountName: newItemType?.accountName,
+                            accountName: newItemType?.accountName ? ec.l10n.localize(newItemType.accountName) : null,
                             direction: inOut,
                         ]" />
                         <script>itemTypes.add(itemTypeOut)</script>
@@ -868,7 +868,7 @@ limitations under the License.
                                     glAccountId: accounts[0].glAccountId]" />
                     </else>
                 </if>
-                <set field="itemType.accountName" from="accounts[0].accountName" />
+                <set field="itemType.accountName" from="ec.l10n.localize(accounts[0].accountName)" />
             </if>
             <if condition="delete">
                 <entity-delete value-field="itemTypeGlAccount" />
@@ -929,7 +929,7 @@ limitations under the License.
                                 isApplied: applied,
                                 isPayable: payable,
                                 accountCode: newPaymentType?.accountCode,
-                                accountName: newPaymentType?.accountName,
+                                accountName: newPaymentType?.accountName ? ec.l10n.localize(newPaymentType.accountName) : null,
                                 ]" />
                             <script>paymentTypes.add(paymentTypeOut)</script>
                         </if>
@@ -1007,7 +1007,7 @@ limitations under the License.
                                     glAccountId: accounts[0].glAccountId]" />
                     </else>
                 </if>
-                <set field="paymentType.accountName" from="accounts[0].accountName" />
+                <set field="paymentType.accountName" from="ec.l10n.localize(accounts[0].accountName)" />
             </if>
             <if condition="delete">
                 <entity-delete value-field="paymentTypeGlAccount" />
@@ -1224,47 +1224,58 @@ limitations under the License.
             <set field="totalCredit" from="BigDecimal.ZERO" type="BigDecimal" />
             <set field="totalDebit" from="BigDecimal.ZERO" type="BigDecimal" />
             <iterate list="glAccountList" entry="glAccount">
+                <!-- match on the class id, not on its description: Enumeration.description is a
+                     localized field, so in another language it no longer equals what is stored -->
                 <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels"
                     list="classes">
                     <econditions combine="or">
-                        <econdition field-name="detailDescription" from="glAccount.classDescription" />
-                        <econdition field-name="description" from="glAccount.classDescription" />
-                        <econdition field-name="parentDescription" from="glAccount.classDescription" />
-                        <econdition field-name="topDescription" from="glAccount.classDescription" />
+                        <econdition field-name="detailClassId"
+                            from="glAccount.glAccountClassEnumId" />
+                        <econdition field-name="classId" from="glAccount.glAccountClassEnumId" />
+                        <econdition field-name="parentClassId"
+                            from="glAccount.glAccountClassEnumId" />
+                        <econdition field-name="topClassId" from="glAccount.glAccountClassEnumId" />
                     </econditions>
                     <order-by
                         field-name="[topDescription,parentDescription,description,detailDescription]" />
                 </entity-find>
-                <script>
+                <script><![CDATA[
+                    // the account sits somewhere in the chain, and the levels below it belong to
+                    // other classes: leave them out, or the dialog shows a deeper class than the
+                    // account has and saves that back
+                    def cls = classes[0]
+                    String own = glAccount.glAccountClassEnumId
+                    int level = own == cls.detailClassId ? 4 : own == cls.classId ? 3 :
+                                own == cls.parentClassId ? 2 : 1
+                    def levelClass = [
+                        topClassId: cls.topClassId ?: '',
+                        topDescription: cls.topDescription ?: '',
+                        parentClassId: level >= 2 ? (cls.parentClassId ?: '') : '',
+                        parentDescription: level >= 2 ? (cls.parentDescription ?: '') : '',
+                        classId: level >= 3 ? (cls.classId ?: '') : '',
+                        description: level >= 3 ? (cls.description ?: '') : '',
+                        detailClassId: level >= 4 ? (cls.detailClassId ?: '') : '',
+                        detailDescription: level >= 4 ? (cls.detailDescription ?: '') : '',
+                        contra: cls.detailContra == 'Y' ? true : false,
+                    ]
                     glAccounts.add(
                         glAccountId: glAccount.glAccountId,
                         accountCode: glAccount.accountCode,
-                        accountName: glAccount.accountName,
-                        accountClass: [
-                            topClassId: classes[0].topClassId?:'',
-                            topDescription: classes[0].topDescription?:'',
-                            parentClassId: classes[0].parentClassId?:'',
-                            parentDescription: classes[0].parentDescription?:'',
-                            classId: classes[0].classId?:'',
-                            description: classes[0].description?:'',
-                            detailClassId: classes[0].detailClassId?:'',
-                            detailDescription: classes[0].detailDescription?:'',
-                            contra: classes[0].detailContra == 'Y' ? true : false,
-                        ],
+                        accountName: ec.l10n.localize(glAccount.accountName),
+                        accountClass: levelClass,
                         accountType: [accountTypeId: glAccount.glAccountTypeEnumId,
                             description: glAccount.typeDescription],
                         isDebit: glAccount.isDebit == 'Y' ? true : false,
                         postedBalance: glAccount.postedBalance?.toString(),
                         )
-                    if (glAccount.postedBalance != null &amp;&amp; trialBalance == true) {
+                    if (glAccount.postedBalance != null && trialBalance == true) {
                         if (glAccount.isDebit == 'Y') {
                             totalDebit += glAccount.postedBalance;
                         } else {
                             totalCredit += glAccount.postedBalance;
                         }
                     }
-                    
-                </script>
+                ]]></script>
             </iterate>
             <if
                 condition="trialBalance == true">
@@ -1324,21 +1335,9 @@ limitations under the License.
                 <return error="true"
                     message="Account class missing for account ${glAccount.accountCode}" />
             </if>
-            <!-- get class from description -->
-            <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels"
-                list="classes">
-                <econditions combine="or">
-                    <econdition field-name="detailDescription"
-                        from="glAccount.accountClass.description" />
-                    <econdition field-name="description" from="glAccount.accountClass.description" />
-                    <econdition field-name="parentDescription"
-                        from="glAccount.accountClass.description" />
-                    <econdition field-name="topDescription"
-                        from="glAccount.accountClass.description" />
-                </econditions>
-                <order-by
-                    field-name="[topDescription,parentDescription,description,detailDescription]" />
-            </entity-find>
+            <!-- get class from the id the app sends; a csv upload only has the description -->
+            <service-call name="growerp.100.AccountingServices100.get#GlAccountClasses"
+                in-map="[accountClass: glAccount.accountClass]" out-map="context" />
             <if condition="!classes">
                 <return error="true"
                     message="accountId: $glAccount.accountCode has an invalid class: ${glAccount.accountClass?.description}" />
@@ -1351,8 +1350,7 @@ limitations under the License.
                 in-map="[   accountCode: glAccount.accountCode,
                             parentGlAccountId: parentGlAccountId,
                             accountName: glAccount.accountName,
-                            glAccountClassEnumId: classes[0].detailClassId ?: classes[0].classId 
-                                                    ?: classes[0].parentClassId ?: classes[0].topClassId,
+                            glAccountClassEnumId: classEnumId,
                             glAccountTypeEnumId: glAccount.accountType?.accountTypeId,
                             isTemporary: 'N',
                             disallowPosting: 'N',
@@ -1458,36 +1456,96 @@ limitations under the License.
             <service-call name="growerp.100.AccountingServices100.get#AccountParent"
                 in-map="[accountCode: glAccount.accountCode]"
                 out-map="context" />
-            <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels"
-                list="classes">
-                <econditions combine="or">
-                    <econdition field-name="detailDescription"
-                        from="glAccount.accountClass.description" />
-                    <econdition field-name="description" from="glAccount.accountClass.description" />
-                    <econdition field-name="parentDescription"
-                        from="glAccount.accountClass.description" />
-                    <econdition field-name="topDescription"
-                        from="glAccount.accountClass.description" />
-                </econditions>
-                <order-by
-                    field-name="[topDescription,parentDescription,description,detailDescription]" />
-            </entity-find>
+            <!-- get class from the id the app sends; a csv upload only has the description -->
+            <service-call name="growerp.100.AccountingServices100.get#GlAccountClasses"
+                in-map="[accountClass: glAccount.accountClass]" out-map="context" />
             <if condition="!classes">
                 <return error="true"
                     message="accountId: $glAccount.accountCode has an invalid class: ${glAccount.accountClass?.description}" />
+            </if>
+            <!-- the list and the dialog show the localized name, so an unchanged name comes back
+                 translated: keep the stored original in that case, only a real edit overwrites it -->
+            <entity-find-one entity-name="mantle.ledger.account.GlAccount" value-field="dbGlAccount">
+                <field-map field-name="glAccountId" from="glAccount.glAccountId" />
+            </entity-find-one>
+            <set field="newAccountName" from="glAccount.accountName" />
+            <if
+                condition="dbGlAccount &amp;&amp; newAccountName == ec.l10n.localize(dbGlAccount.accountName)">
+                <set field="newAccountName" from="dbGlAccount.accountName" />
             </if>
             <service-call name="update#mantle.ledger.account.GlAccount"
                 in-map="[   glAccountId: glAccount.glAccountId,
                             parentGlAccountId: parentGlAccountId,
                             accountCode: glAccount.accountCode,
-                            accountName: glAccount.accountName,
-                            glAccountClassEnumId: classes[0].detailClassId ?: classes[0].classId 
-                                                    ?: classes[0].parentClassId ?: classes[0].topClassId,
+                            accountName: newAccountName,
+                            glAccountClassEnumId: classEnumId,
                             glAccountTypeEnumId: glAccount.accountType.accountTypeId,
                         ]" />
             <service-call name="growerp.100.AccountingServices100.get#GlAccount"
                 in-map="[glAccountId: glAccount.glAccountId]" out-map="context" />
             <set field="glAccount" from="glAccounts[0]" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="GlAccountClasses">
+        <description>The class rows an account class refers to. The app sends the class id; only a
+            csv upload has just the description, which can only be matched when it is in the
+            language the classes are stored in: Enumeration.description is a localized field.</description>
+        <in-parameters>
+            <parameter name="accountClass" type="Map">
+                <parameter name="classId" />
+                <parameter name="description" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="classes" type="List" />
+            <parameter name="classEnumId">
+                <description>the class the account gets: the level that matched, not the deepest
+                    level of the chain it happens to sit in</description>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <if condition="accountClass?.classId">
+                <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels"
+                    list="classes">
+                    <econditions combine="or">
+                        <econdition field-name="detailClassId" from="accountClass.classId" />
+                        <econdition field-name="classId" from="accountClass.classId" />
+                        <econdition field-name="parentClassId" from="accountClass.classId" />
+                        <econdition field-name="topClassId" from="accountClass.classId" />
+                    </econditions>
+                    <order-by
+                        field-name="[topDescription,parentDescription,description,detailDescription]" />
+                </entity-find>
+                <if condition="classes">
+                    <set field="classEnumId" from="accountClass.classId" />
+                </if>
+            </if>
+            <if condition="!classes &amp;&amp; accountClass?.description">
+                <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels"
+                    list="classes">
+                    <econditions combine="or">
+                        <econdition field-name="detailDescription" from="accountClass.description" />
+                        <econdition field-name="description" from="accountClass.description" />
+                        <econdition field-name="parentDescription" from="accountClass.description" />
+                        <econdition field-name="topDescription" from="accountClass.description" />
+                    </econditions>
+                    <order-by
+                        field-name="[topDescription,parentDescription,description,detailDescription]" />
+                </entity-find>
+                <!-- the id of the level the description matched on -->
+                <if condition="classes">
+                    <script><![CDATA[
+                        def row = classes[0]
+                        String wanted = accountClass.description
+                        context.classEnumId =
+                            wanted == row.detailDescription ? row.detailClassId :
+                            wanted == row.description ? row.classId :
+                            wanted == row.parentDescription ? row.parentClassId :
+                            row.topClassId
+                    ]]></script>
+                </if>
+            </if>
         </actions>
     </service>
 

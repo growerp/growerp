@@ -311,6 +311,15 @@ class GlAccountDialogState extends State<GlAccountDialog> {
                   accountCode: _accountCodeController.text,
                   isDebit: debitSelected,
                   accountClass: AccountClass(
+                    // the id too: the descriptions are translated on the
+                    // backend, so they no longer match what is stored there
+                    classId: classSelected!.detailClassId?.isNotEmpty == true
+                        ? classSelected?.detailClassId
+                        : classSelected!.classId?.isNotEmpty == true
+                        ? classSelected?.classId
+                        : classSelected!.parentClassId?.isNotEmpty == true
+                        ? classSelected?.parentClassId
+                        : classSelected?.topClassId,
                     description: classSelected!.detailDescription!.isNotEmpty
                         ? classSelected?.detailDescription
                         : classSelected!.description!.isNotEmpty

@@ -41,6 +41,15 @@ class LocaleState {
 class LocaleBloc extends Bloc<LocaleEvent, LocaleState> {
   static const String _localeKey = 'selected_locale';
 
+  /// The language the app is running in, for code without a build context.
+  /// Sent to the backend at login, where it is saved on the user account:
+  /// backend messages, emails and localized data like the GL account names
+  /// resolve through it.
+  static Future<String> savedLanguageCode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_localeKey) ?? 'en';
+  }
+
   LocaleBloc() : super(const LocaleState(locale: Locale('en'))) {
     on<LocaleLoaded>(_onLocaleLoaded);
     on<LocaleChanged>(_onLocaleChanged);

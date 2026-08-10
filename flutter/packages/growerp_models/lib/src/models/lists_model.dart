@@ -129,6 +129,17 @@ abstract class WebsiteTranslations with _$WebsiteTranslations {
 }
 
 @freezed
+abstract class GlAccountTranslations with _$GlAccountTranslations {
+  factory GlAccountTranslations({
+    @Default([]) List<GlAccountTranslation> glAccountTranslations,
+  }) = _GlAccountTranslations;
+  GlAccountTranslations._();
+
+  factory GlAccountTranslations.fromJson(Map<String, dynamic> json) =>
+      _$GlAccountTranslationsFromJson(json);
+}
+
+@freezed
 abstract class Users with _$Users {
   factory Users({@Default([]) List<User> users}) = _Users;
   Users._();

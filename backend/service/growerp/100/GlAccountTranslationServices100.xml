@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!--
+GL account name translation, run on demand from the support app.
+
+    get#GlAccountTranslations    one row per supported language with its progress
+    create#GlAccountTranslation  validate + queue, returns immediately
+    process#GlAccountTranslation background worker, one Gemini batch call per 50 names
+    delete#GlAccountTranslation  remove the translations of one language
+
+The translations are moqui.basic.LocalizedMessage rows keyed on the English account name, not
+LocalizedEntityField rows keyed on the glAccountId: every company clones the same chart of
+accounts (init#PartyAccountingConfiguration), so the same ~500 names occur once per company and
+one text keyed row serves all of them. AccountingServices100 resolves them with
+ec.l10n.localize(), which reads for ec.user.locale, set from the app language at login.
+
+Translating is system support work: the rows are shared by every tenant.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="get" noun="GlAccountTranslations">
+        <description>Progress per language: how many distinct GL account names exist and how many
+            of them have a translation. There is no translation entity, the counts are the
+            status.</description>
+        <in-parameters>
+            <parameter name="locale">
+                <description>a single language, empty for all supported ones</description>
+            </parameter>
+            <parameter name="search" default="null" />
+            <parameter name="start" type="Integer" default-value="0" />
+            <parameter name="limit" type="Integer" default-value="20" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="glAccountTranslations" type="List">
+                <parameter name="glAccountTranslation" type="Map">
+                    <parameter name="locale" />
+                    <parameter name="language" />
+                    <parameter name="nameCount" type="Integer" />
+                    <parameter name="translatedCount" type="Integer" />
+                    <parameter name="status" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GlAccountTranslationServices100.get#SupportAccess"
+                out-map="context" />
+            <service-call name="growerp.100.GlAccountTranslationServices100.get#GlAccountNames"
+                out-map="context" />
+            <script><![CDATA[
+                List locales = locale ? [locale] :
+                    LANGUAGES.keySet().findAll({ it != 'en' }).toList()
+                if (search) locales = locales.findAll {
+                    it.contains(search.toLowerCase()) ||
+                    LANGUAGES[it].toLowerCase().contains(search.toLowerCase())
+                }
+                context.glAccountTranslations = locales.collect { String loc ->
+                    int translated = accountNames ? ec.entity.find('moqui.basic.LocalizedMessage')
+                        .condition('locale', loc)
+                        .condition('original', org.moqui.entity.EntityCondition.IN, accountNames)
+                        .disableAuthz().count() as int : 0
+                    [locale: loc, language: LANGUAGES[loc],
+                     nameCount: accountNames.size(), translatedCount: translated,
+                     status: translated == 0 ? 'not translated' :
+                             translated < accountNames.size() ? 'partial' : 'translated']
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="create" noun="GlAccountTranslation">
+        <description>Queue the translation of the GL account names into one language.</description>
+        <in-parameters>
+            <parameter name="sourceLocale" default-value="en" />
+            <parameter name="targetLocale" required="true">
+                <description>one of th, zh, de, fr, nl</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="glAccountTranslations" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GlAccountTranslationServices100.get#SupportAccess"
+                out-map="context" />
+            <service-call name="growerp.100.GlAccountTranslationServices100.get#GlAccountNames"
+                out-map="context" />
+            <if condition="!accountNames">
+                <return error="true" message="There are no GL account names to translate" />
+            </if>
+            <if condition="!LANGUAGES.containsKey(targetLocale)">
+                <return error="true"
+                    message="${targetLocale} is not one of the supported languages ${LANGUAGES.keySet().join(', ')}" />
+            </if>
+            <if condition="targetLocale == sourceLocale">
+                <return error="true"
+                    message="${targetLocale} is the language the account names are written in" />
+            </if>
+
+            <!-- an AI key has to be available or the worker would die silently -->
+            <service-call out-map="ownerOut"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.WebsiteTranslationServices100.get#TranslationApiKey"
+                in-map="[ownerPartyId: ownerOut.ownerPartyId]" out-map="keyOut" />
+            <if condition="!keyOut.apiKey">
+                <return error="true"
+                    message="No Gemini API key configured: set it in System Setup or in the GEMINI_API_KEY environment variable" />
+            </if>
+
+            <!-- translating ~500 names takes minutes, run it in the background -->
+            <script>
+                ec.service.async()
+                    .name('growerp.100.GlAccountTranslationServices100.process#GlAccountTranslation')
+                    .parameters([targetLocale: targetLocale, sourceLocale: sourceLocale,
+                                 ownerPartyId: ownerOut.ownerPartyId,
+                                 notifyUserId: ec.user.userId, username: ec.user.username])
+                    .call()
+            </script>
+            <service-call name="growerp.100.GlAccountTranslationServices100.get#GlAccountTranslations"
+                in-map="[locale: targetLocale]" out-map="context" />
+        </actions>
+    </service>
+
+    <service verb="process" noun="GlAccountTranslation" authenticate="anonymous"
+        transaction="ignore">
+        <description>Background worker: translate the distinct GL account names into the target
+            language and store them as LocalizedMessage rows. Each batch commits on its own, so
+            the counts of get#GlAccountTranslations follow the progress.</description>
+        <in-parameters>
+            <parameter name="targetLocale" required="true" />
+            <parameter name="sourceLocale" default-value="en" />
+            <parameter name="ownerPartyId" />
+            <parameter name="notifyUserId" />
+            <parameter name="username" />
+        </in-parameters>
+        <actions>
+            <!-- the async worker has no web session: log in as the submitting user for authz -->
+            <if condition="!ec.user.userId &amp;&amp; username">
+                <script>ec.user.internalLoginUser(username)</script>
+            </if>
+            <script><![CDATA[
+                String apiKey = ec.service.sync()
+                    .name('growerp.100.WebsiteTranslationServices100.get#TranslationApiKey')
+                    .parameters([ownerPartyId: ownerPartyId]).call()?.apiKey
+                try {
+                    def out = ec.service.sync()
+                        .name('growerp.100.GlAccountTranslationServices100.translate#GlAccountNames')
+                        .parameters([targetLocale: targetLocale, sourceLocale: sourceLocale,
+                                     apiKey: apiKey, ownerPartyId: ownerPartyId])
+                        .call()
+                    if (ec.message.hasError()) throw new Exception(ec.message.getErrorsString())
+                    ec.logger.info("process#GlAccountTranslation stored ${out?.translatedCount} names for ${targetLocale}")
+                    if (notifyUserId) {
+                        ec.makeNotificationMessage().topic('glAccountTranslation')
+                            .userId(notifyUserId as String).title('GL account names translated')
+                            .message([targetLocale: targetLocale, status: 'COMPLETED',
+                                      translatedCount: out?.translatedCount,
+                                      message: "GL account names translated into ${targetLocale}"])
+                            .send()
+                    }
+                } catch (Throwable t) {
+                    ec.logger.error("process#GlAccountTranslation failed: ${t.message}", t)
+                    ec.message.clearErrors()
+                    if (notifyUserId) {
+                        ec.makeNotificationMessage().topic('glAccountTranslation')
+                            .userId(notifyUserId as String).title('GL account translation failed')
+                            .message([targetLocale: targetLocale, status: 'FAILED',
+                                      message: (t.message ?: 'unknown error').take(4000)])
+                            .send()
+                    }
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="translate" noun="GlAccountNames" transaction-timeout="3600">
+        <description>Translate the distinct GL account names with Gemini and store them as
+            moqui.basic.LocalizedMessage rows.</description>
+        <in-parameters>
+            <parameter name="sourceLocale" default-value="en" />
+            <parameter name="targetLocale" required="true" />
+            <parameter name="apiKey" />
+            <parameter name="ownerPartyId" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="translatedCount" type="Integer" />
+        </out-parameters>
+        <actions>
+            <script location="component://growerp/service/translateGlAccountNamesWithAI.groovy" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="GlAccountTranslation">
+        <description>Remove the GL account name translations of one language, so a run can be
+            redone. The account names themselves are not touched.</description>
+        <in-parameters>
+            <parameter name="locale" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.GlAccountTranslationServices100.get#SupportAccess"
+                out-map="context" />
+            <service-call name="growerp.100.GlAccountTranslationServices100.get#GlAccountNames"
+                out-map="context" />
+            <script><![CDATA[
+                int removed = 0
+                accountNames.collate(200).each { batch ->
+                    ec.entity.find('moqui.basic.LocalizedMessage')
+                        .condition('locale', locale)
+                        .condition('original', org.moqui.entity.EntityCondition.IN, batch)
+                        .disableAuthz().deleteAll()
+                    removed += batch.size()
+                }
+                ec.logger.info("delete#GlAccountTranslation removed the ${locale} translations")
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- ============================ helpers ============================ -->
+
+    <service verb="get" noun="SupportAccess">
+        <description>The translations are shared by every tenant, so only system support may
+            change or list them. Returns the supported languages.</description>
+        <out-parameters>
+            <parameter name="LANGUAGES" type="Map" />
+        </out-parameters>
+        <actions>
+            <if
+                condition="!ec.user.isInGroup('GROWERP_M_SYSTEM') &amp;&amp; !ec.user.isInGroup('GROWERP_M_ADMIN')">
+                <return error="true"
+                    message="GL account name translation is only available to system support" />
+            </if>
+            <!-- the languages the Flutter apps support, see growerp_core top_app.dart -->
+            <set field="LANGUAGES"
+                from="[en: 'English', th: 'Thai', zh: 'Simplified Chinese', de: 'German',
+                       fr: 'French', nl: 'Dutch']" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="GlAccountNames">
+        <description>The distinct GL account names of every company: one translation row serves
+            them all because every company clones the same chart of accounts.</description>
+        <out-parameters>
+            <parameter name="accountNames" type="List" />
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                context.accountNames = ec.entity.find('mantle.ledger.account.GlAccount')
+                    .selectField('accountName').disableAuthz().list()
+                    .collect { (it.accountName ?: '').trim() }.findAll { it }.unique()
+            ]]></script>
+        </actions>
+    </service>
+
+</services>

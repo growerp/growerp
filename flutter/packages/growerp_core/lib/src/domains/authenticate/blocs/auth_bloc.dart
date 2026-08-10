@@ -27,6 +27,7 @@ import '../../../services/ws_client.dart';
 import '../../../services/build_dio_client.dart';
 import '../../../services/get_dio_error.dart';
 import '../../../services/startup_credentials.dart';
+import '../../common/bloc/locale_bloc.dart';
 import '../../common/functions/functions.dart';
 
 part 'auth_event.dart';
@@ -253,8 +254,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         // otherwise debug builds default to qqqqqq9!, release emails a temp one.
         newPassword: event.newPassword ?? (kReleaseMode ? null : 'qqqqqq9!'),
         timeZoneOffset: DateTime.now().timeZoneOffset.toString(),
-        locale: (event.locale ?? PlatformDispatcher.instance.locale)
-            .toLanguageTag(),
+        // language code only: the backend does new Locale(locale), which takes a
+        // full tag like en-US as one language code
+        locale: (event.locale ?? PlatformDispatcher.instance.locale).languageCode,
       );
       await PersistFunctions.persistAuthenticate(result);
       emit(
@@ -343,6 +345,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         plan: event.plan,
         applicationId: applicationId,
         timeZoneOffset: DateTime.now().timeZoneOffset.toString(),
+        locale: await LocaleBloc.savedLanguageCode(),
         testDaysOffset: event.testDaysOffset,
       );
 

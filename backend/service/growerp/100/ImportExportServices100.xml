@@ -127,7 +127,10 @@ limitations under the License.
     </service>
 
     <service verb="import" noun="GlAccounts">
-        <description> Import GlAccounts</description>
+        <description> Import GlAccounts. The file has a single account name column and the name is
+            stored as it is uploaded, so it is in the language the user is working in. Other
+            languages come from the support app, which translates the stored names into
+            moqui.basic.LocalizedMessage rows, see GlAccountTranslationServices100.</description>
         <in-parameters>
             <parameter name="glAccounts" type="List" required="true">
                 <parameter name="glAccount" type="Map">

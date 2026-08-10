@@ -959,6 +959,10 @@ limitations under the License.
             <parameter name="currencyId"/>
             <parameter name="demoData" type="Boolean" default="false"/>
             <parameter name="timeZoneOffset"/>
+            <parameter name="locale">
+                <description>language code of the app, stored on the UserAccount so backend
+                    messages, emails and localized data follow the language of the app</description>
+            </parameter>
             <!-- Parameters for renewing an expired subscription -->
             <parameter name="plan">
                 <description>productId of the GROWERP subscription plan</description>
@@ -1064,6 +1068,10 @@ limitations under the License.
             <!-- Special handling for AppSupport classification - handle early -->
             <if condition="applicationId == 'AppSupport'">
                 <script>ec.user.loginUser(username, password)</script>
+                <!-- ec.user.setLocale saves on the UserAccount, so only after loginUser -->
+                <if condition="locale &amp;&amp; ec.user.locale?.language != locale">
+                    <script>ec.user.setLocale(new Locale(locale))</script>
+                </if>
                 <service-call name="growerp.100.GeneralServices100.get#Authenticate"
                     in-map="[applicationId: applicationId]"
                     out-map="context"/>
@@ -1201,6 +1209,10 @@ limitations under the License.
                         <script>ec.user.loginUser(username, password)</script>
                     </if>
                 </else>
+            </if>
+            <!-- ec.user.setLocale saves on the UserAccount, so only after loginUser -->
+            <if condition="locale &amp;&amp; ec.user.locale?.language != locale">
+                <script>ec.user.setLocale(new Locale(locale))</script>
             </if>
             <service-call name="growerp.100.GeneralServices100.get#Authenticate"
                 in-map="[applicationId: applicationId]"

@@ -485,6 +485,10 @@ limitations under the License.
         title="Website Translation" route="/websiteTranslation" iconName="translate"
         widgetName="WebsiteTranslationList"
         userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="35"/>
+    <growerp.menu.MenuItem menuItemId="SUPPORT_GLACCOUNT_TRANS" menuConfigurationId="SUPPORT_DEFAULT"
+        title="Ledger Translation" route="/glAccountTranslation" iconName="translate"
+        widgetName="GlAccountTranslationList"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="SUPPORT_LLM_USAGE" menuConfigurationId="SUPPORT_DEFAULT"
         title="LLM Usage" route="/llm-usage" iconName="assessment" widgetName="AdkSystemUsageView" sequenceNum="50"/>
     <growerp.menu.MenuItem menuItemId="SUPPORT_STATISTICS" menuConfigurationId="SUPPORT_DEFAULT"

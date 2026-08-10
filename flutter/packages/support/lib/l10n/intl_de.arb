@@ -32,5 +32,8 @@
   "tableHdrVersion": "Version",
   "tableHdrWebsite": "Website",
   "searchHintWebsiteConversion": "Website, Firma oder Status suchen...",
-  "searchHintWebsiteTranslation": "Eigentümer, Shop oder Status suchen..."
+  "searchHintWebsiteTranslation": "Eigentümer, Shop oder Status suchen...",
+  "tableHdrLanguage": "Sprache",
+  "tableHdrNames": "Namen",
+  "searchHintGlAccountTranslation": "Sprache oder Status suchen..."
 }
