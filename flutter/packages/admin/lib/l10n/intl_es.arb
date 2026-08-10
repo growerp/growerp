@@ -1,11 +1,5 @@
 {
   "@@locale": "es",
   "noPlansAvailable": "No plans available",
-  "@noPlansAvailable": {
-    "description": "Text displayed when no plans are available."
-  },
-  "noSubscriptionFound": "No subscription found",
-  "@noSubscriptionFound": {
-    "description": "Text displayed when no subscription is found."
-  }
+  "noSubscriptionFound": "No subscription found"
 }

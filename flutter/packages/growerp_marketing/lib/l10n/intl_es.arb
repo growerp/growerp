@@ -1,335 +1,86 @@
 {
   "@@locale": "es",
   "selectAnAssessmentToTake": "Select an Assessment to Take",
-  "@selectAnAssessmentToTake": {
-    "description": "Select an Assessment to Take"
-  },
   "deleteContentPlan": "Delete Content Plan",
-  "@deleteContentPlan": {
-    "description": "Delete Content Plan"
-  },
   "cancel": "Cancel",
-  "@cancel": {
-    "description": "Cancel"
-  },
   "none": "None",
-  "@none": {
-    "description": "None"
-  },
   "addContent": "Add Content",
-  "@addContent": {
-    "description": "Add Content"
-  },
   "delete": "Delete",
-  "@delete": {
-    "description": "Delete"
-  },
   "assessmentNotAvailableForThisLandingPage": "Assessment not available for this landing page",
-  "@assessmentNotAvailableForThisLandingPage": {
-    "description": "Assessment not available for this landing page"
-  },
   "backToLandingPage": "Back to Landing Page",
-  "@backToLandingPage": {
-    "description": "Back to Landing Page"
-  },
   "viewDetailedResults": "View Detailed Results",
-  "@viewDetailedResults": {
-    "description": "View Detailed Results"
-  },
   "noPipelineData": "No pipeline data",
-  "@noPipelineData": {
-    "description": "No pipeline data"
-  },
   "selectStatus": "Select status",
-  "@selectStatus": {
-    "description": "Select status"
-  },
   "questions": "Questions",
-  "@questions": {
-    "description": "Questions"
-  },
   "deleteAssessment": "Delete Assessment",
-  "@deleteAssessment": {
-    "description": "Delete Assessment"
-  },
   "save": "Save",
-  "@save": {
-    "description": "Save"
-  },
   "generate": "Generate",
-  "@generate": {
-    "description": "Generate"
-  },
   "active": "Active",
-  "@active": {
-    "description": "Active"
-  },
   "addStep": "Add step",
-  "@addStep": {
-    "description": "Add step"
-  },
   "deleteQuestion": "Delete Question",
-  "@deleteQuestion": {
-    "description": "Delete Question"
-  },
   "deleteSection": "Delete Section",
-  "@deleteSection": {
-    "description": "Delete Section"
-  },
   "deleteLandingPage": "Delete Landing Page",
-  "@deleteLandingPage": {
-    "description": "Delete Landing Page"
-  },
   "selectHookType": "Select hook type",
-  "@selectHookType": {
-    "description": "Select hook type"
-  },
   "frustration": "Frustration",
-  "@frustration": {
-    "description": "Frustration"
-  },
   "results": "Results",
-  "@results": {
-    "description": "Results"
-  },
   "custom": "Custom",
-  "@custom": {
-    "description": "Custom"
-  },
   "advancedOptions": "Advanced Options",
-  "@advancedOptions": {
-    "description": "Advanced Options"
-  },
   "deletePersona": "Delete Persona",
-  "@deletePersona": {
-    "description": "Delete Persona"
-  },
   "assessmentStep2": "Assessment - Step 2",
-  "@assessmentStep2": {
-    "description": "Assessment - Step 2"
-  },
   "errorLoadingAssessment": "Error loading assessment",
-  "@errorLoadingAssessment": {
-    "description": "Error loading assessment"
-  },
   "goBack": "Go Back",
-  "@goBack": {
-    "description": "Go Back"
-  },
   "adaptToSelectedPlatforms": "Adapt to selected platforms",
-  "@adaptToSelectedPlatforms": {
-    "description": "Adapt to selected platforms"
-  },
   "noPlatformVariantsYetAdaptToCreateThem": "No platform variants yet — adapt to create them.",
-  "@noPlatformVariantsYetAdaptToCreateThem": {
-    "description": "No platform variants yet — adapt to create them."
-  },
   "addRow": "Add row",
-  "@addRow": {
-    "description": "Add row"
-  },
   "assessment": "Assessment",
-  "@assessment": {
-    "description": "Assessment"
-  },
   "url": "Url",
-  "@url": {
-    "description": "Url"
-  },
   "form": "Form",
-  "@form": {
-    "description": "Form"
-  },
   "sections": "Sections",
-  "@sections": {
-    "description": "Sections"
-  },
   "credibility": "Credibility",
-  "@credibility": {
-    "description": "Credibility"
-  },
   "requiredQuestion": "Required Question",
-  "@requiredQuestion": {
-    "description": "Required Question"
-  },
   "addOption": "Add Option",
-  "@addOption": {
-    "description": "Add Option"
-  },
   "deleteMasterContent": "Delete Master Content",
-  "@deleteMasterContent": {
-    "description": "Delete Master Content"
-  },
   "deleteSocialPost": "Delete Social Post",
-  "@deleteSocialPost": {
-    "description": "Delete Social Post"
-  },
   "recordEngagement": "Record engagement",
-  "@recordEngagement": {
-    "description": "Record engagement"
-  },
   "convert": "Convert",
-  "@convert": {
-    "description": "Convert"
-  },
   "toLead": "To lead",
-  "@toLead": {
-    "description": "To lead"
-  },
   "copyOpenX": "Copy & Open X",
-  "@copyOpenX": {
-    "description": "Copy & Open X"
-  },
   "assessmentLandingPage": "Assessment Landing Page",
-  "@assessmentLandingPage": {
-    "description": "Assessment Landing Page"
-  },
   "retry": "Retry",
-  "@retry": {
-    "description": "Retry"
-  },
   "landingPageNotFound": "Landing page not found",
-  "@landingPageNotFound": {
-    "description": "Landing page not found"
-  },
   "tableHdrNumber": "#",
-  "@tableHdrNumber": {
-    "description": "Table column header"
-  },
   "tableHdrCompleted": "Completed",
-  "@tableHdrCompleted": {
-    "description": "Table column header"
-  },
   "tableHdrDemographics": "Demographics",
-  "@tableHdrDemographics": {
-    "description": "Table column header"
-  },
   "tableHdrDescription": "Description",
-  "@tableHdrDescription": {
-    "description": "Table column header"
-  },
   "tableHdrGoals": "Goals",
-  "@tableHdrGoals": {
-    "description": "Table column header"
-  },
   "tableHdrHeadline": "Headline",
-  "@tableHdrHeadline": {
-    "description": "Table column header"
-  },
   "tableHdrHookType": "Hook Type",
-  "@tableHdrHookType": {
-    "description": "Table column header"
-  },
   "tableHdrId": "ID",
-  "@tableHdrId": {
-    "description": "Table column header"
-  },
   "tableHdrInfo": "Info",
-  "@tableHdrInfo": {
-    "description": "Table column header"
-  },
   "tableHdrModified": "Modified",
-  "@tableHdrModified": {
-    "description": "Table column header"
-  },
   "tableHdrName": "Name",
-  "@tableHdrName": {
-    "description": "Table column header"
-  },
   "tableHdrOption": "Option",
-  "@tableHdrOption": {
-    "description": "Table column header"
-  },
   "tableHdrOptionText": "Option Text",
-  "@tableHdrOptionText": {
-    "description": "Table column header"
-  },
   "tableHdrOptions": "Options",
-  "@tableHdrOptions": {
-    "description": "Table column header"
-  },
   "tableHdrPnp": "PNP",
-  "@tableHdrPnp": {
-    "description": "Table column header"
-  },
   "tableHdrPainPoints": "Pain Points",
-  "@tableHdrPainPoints": {
-    "description": "Table column header"
-  },
   "tableHdrPersona": "Persona",
-  "@tableHdrPersona": {
-    "description": "Table column header"
-  },
   "tableHdrPlatform": "Platform",
-  "@tableHdrPlatform": {
-    "description": "Table column header"
-  },
   "tableHdrQuestionText": "Question Text",
-  "@tableHdrQuestionText": {
-    "description": "Table column header"
-  },
   "tableHdrScheduled": "Scheduled",
-  "@tableHdrScheduled": {
-    "description": "Table column header"
-  },
   "tableHdrScore": "Score",
-  "@tableHdrScore": {
-    "description": "Table column header"
-  },
   "tableHdrStatus": "Status",
-  "@tableHdrStatus": {
-    "description": "Table column header"
-  },
   "tableHdrSteps": "Steps",
-  "@tableHdrSteps": {
-    "description": "Table column header"
-  },
   "tableHdrTheme": "Theme",
-  "@tableHdrTheme": {
-    "description": "Table column header"
-  },
   "tableHdrTitle": "Title",
-  "@tableHdrTitle": {
-    "description": "Table column header"
-  },
   "tableHdrType": "Type",
-  "@tableHdrType": {
-    "description": "Table column header"
-  },
   "tableHdrWeekStart": "Week Start",
-  "@tableHdrWeekStart": {
-    "description": "Table column header"
-  },
   "searchHintQuestions": "Search questions...",
-  "@searchHintQuestions": {
-    "description": "Search field hint"
-  },
   "searchHintSocialPosts": "Search social posts...",
-  "@searchHintSocialPosts": {
-    "description": "Search field hint"
-  },
   "searchHintPersonas": "Search personas...",
-  "@searchHintPersonas": {
-    "description": "Search field hint"
-  },
   "searchHintLandingPages": "Search landing pages...",
-  "@searchHintLandingPages": {
-    "description": "Search field hint"
-  },
   "searchHintAssessments": "Search assessments...",
-  "@searchHintAssessments": {
-    "description": "Search field hint"
-  },
   "searchHintName": "Search in name...",
-  "@searchHintName": {
-    "description": "Search field hint"
-  },
   "searchHintContentPlans": "Search content plans...",
-  "@searchHintContentPlans": {
-    "description": "Search field hint"
-  },
-  "searchHintMasterContent": "Search master content...",
-  "@searchHintMasterContent": {
-    "description": "Search field hint"
-  }
+  "searchHintMasterContent": "Search master content..."
 }
