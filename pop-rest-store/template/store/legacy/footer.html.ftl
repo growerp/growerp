@@ -8,7 +8,7 @@
             <!-- Company Info -->
             <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
                 <div class="d-flex align-items-center mb-3">
-                    <img src="/getLogo" alt="Logo" class="footer-logo">
+                    <img src="${logoUrl!'/getLogo'}" alt="Logo" class="footer-logo">
                     <span class="footer-brand-name">${storeInfo.productStore.storeName!''}</span>
                 </div>
                 <div class="social-links mt-4">

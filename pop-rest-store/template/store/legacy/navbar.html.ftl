@@ -7,11 +7,11 @@
         <div class="container d-flex flex-row main-navbar justify-content-between">
             <!-- Logo and Brand -->
             <a href="${up}/" class="navbar-brand d-none d-sm-flex align-items-center">
-                <img class="moqui-dynamic" src="/getLogo" alt="Home">
+                <img class="moqui-dynamic" src="${logoUrl!'/getLogo'}" alt="Home">
                 <span class="navbar-title">${storeInfo.productStore.storeName}</span>
             </a>
             <a class="navbar-brand d-flex d-sm-none align-items-center" href="${up}/">
-                <img class="moqui-dynamic" src="/getLogo" alt="Home" style="width: 40px; height: 40px;">
+                <img class="moqui-dynamic" src="${logoUrl!'/getLogo'}" alt="Home" style="width: 40px; height: 40px;">
                 <span class="navbar-title">${storeInfo.productStore.storeName}</span>
             </a>
             

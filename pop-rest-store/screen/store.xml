@@ -377,6 +377,16 @@ var storeInfo = ${storeInfoJson};
             </entity-find-one>
         </if>
 
+        <!-- company logo, uploaded in the app's company dialog and served by the /getLogo
+             transition above. The version query defeats the 24h browser cache on the image,
+             so a newly uploaded logo shows immediately instead of a day later -->
+        <entity-find entity-name="mantle.party.PartyContent" list="logoContentList" limit="1">
+            <econdition field-name="partyId" from="productStore.organizationPartyId"/>
+            <econdition field-name="partyContentTypeEnumId" value="PcntLogoImage"/>
+        </entity-find>
+        <set field="logoUrl"
+            from="'/getLogo?v=' + (logoContentList ? logoContentList[0].lastUpdatedStamp.time : 0)"/>
+
         <!-- get settings used in subscreens -->
         <set field="templateId" from="storeInfo.settings.PsstTemplateId" default-value="legacy"/>
         <set field="template_server_root" from="storeInfo.settings.template_server_root" default-value="component://PopRestStore/template/store/${templateId}/root.html.ftl"/>
