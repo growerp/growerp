@@ -1344,5 +1344,33 @@
         "type": "String"
       }
     }
+  },
+  "searchHintTimePeriods": "Search time periods...",
+  "@searchHintTimePeriods": {
+    "description": "Search field hint"
+  },
+  "searchHintAccountCodeName": "Search account code or name...",
+  "@searchHintAccountCodeName": {
+    "description": "Search field hint"
+  },
+  "searchHintItemType": "Search item type or account...",
+  "@searchHintItemType": {
+    "description": "Search field hint"
+  },
+  "searchHintPaymentType": "Search payment type or account...",
+  "@searchHintPaymentType": {
+    "description": "Search field hint"
+  },
+  "searchHintFinDoc": "Search {salesPurchase} {docType}...",
+  "@searchHintFinDoc": {
+    "description": "Search field hint for financial document lists",
+    "placeholders": {
+      "salesPurchase": {
+        "type": "String"
+      },
+      "docType": {
+        "type": "String"
+      }
+    }
   }
 }

@@ -26,6 +26,7 @@ import '../bloc/persona_event.dart';
 import '../bloc/persona_state.dart';
 import 'content_plan_detail_screen.dart';
 import 'content_plan_list_styled_data.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// List screen for Content Plans
 class ContentPlanList extends StatefulWidget {
@@ -62,6 +63,7 @@ class ContentPlanListState extends State<ContentPlanList> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = MarketingLocalizations.of(context)!;
     final isPhone = isAPhone(context);
     right = right ?? (isPhone ? 20 : 50);
 
@@ -146,7 +148,7 @@ class ContentPlanListState extends State<ContentPlanList> {
           children: [
             // Filter bar with search
             ListFilterBar(
-              searchHint: 'Search content plans...',
+              searchHint: localizations.searchHintContentPlans,
               searchController: _searchController,
               focusNode: _searchFocusNode,
               onSearchChanged: (value) {

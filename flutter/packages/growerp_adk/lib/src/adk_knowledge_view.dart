@@ -404,7 +404,7 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
     return Column(
       children: [
         ListFilterBar(
-          searchHint: 'Search knowledge...',
+          searchHint: AdkLocalizations.of(context)!.adk_searchHintKnowledge,
           searchController: _searchController,
           focusNode: _searchFocusNode,
           onSearchChanged: (value) {

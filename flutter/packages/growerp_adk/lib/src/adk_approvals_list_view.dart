@@ -225,7 +225,7 @@ class _AdkApprovalsListViewState extends State<AdkApprovalsListView> {
     return Column(
       children: [
         ListFilterBar(
-          searchHint: 'Search approvals...',
+          searchHint: AdkLocalizations.of(context)!.adk_searchHintApprovals,
           searchController: _searchController,
           focusNode: _searchFocusNode,
           onSearchChanged: (value) {

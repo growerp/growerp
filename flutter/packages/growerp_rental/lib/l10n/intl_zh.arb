@@ -7,5 +7,6 @@
   "cancel": "取消",
   "tableHdrFrom": "起",
   "tableHdrRate": "费率",
-  "tableHdrThru": "止"
+  "tableHdrThru": "止",
+  "searchHintReservations": "搜索预订编号、客户名称、日期..."
 }

@@ -162,7 +162,7 @@ class _AdkJobListViewState extends State<AdkJobListView> {
       child: Column(
         children: [
           ListFilterBar(
-            searchHint: 'Search jobs...',
+            searchHint: AdkLocalizations.of(context)!.adk_searchHintJobs,
             searchController: _searchController,
             focusNode: _searchFocusNode,
             onSearchChanged: (value) {

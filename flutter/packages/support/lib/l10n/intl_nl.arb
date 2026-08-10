@@ -30,5 +30,7 @@
   "tableHdrPages": "Pagina's",
   "tableHdrStatus": "Status",
   "tableHdrVersion": "Versie",
-  "tableHdrWebsite": "Website"
+  "tableHdrWebsite": "Website",
+  "searchHintWebsiteConversion": "Zoek website, bedrijf of status...",
+  "searchHintWebsiteTranslation": "Zoek eigenaar, winkel of status..."
 }

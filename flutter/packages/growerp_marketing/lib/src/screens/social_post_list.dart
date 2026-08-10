@@ -22,6 +22,7 @@ import '../bloc/social_post_event.dart';
 import '../bloc/social_post_state.dart';
 import 'social_post_detail_screen.dart';
 import 'social_post_list_styled_data.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// List screen for Social Posts
 class SocialPostList extends StatefulWidget {
@@ -136,7 +137,9 @@ class SocialPostListState extends State<SocialPostList> {
           children: [
             // Filter bar with search
             ListFilterBar(
-              searchHint: 'Search social posts...',
+              searchHint: MarketingLocalizations.of(
+                context,
+              )!.searchHintSocialPosts,
               searchController: _searchController,
               focusNode: _searchFocusNode,
               onSearchChanged: (value) {

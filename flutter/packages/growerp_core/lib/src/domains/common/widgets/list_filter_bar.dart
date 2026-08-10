@@ -14,6 +14,8 @@
 
 import 'package:flutter/material.dart';
 
+import 'package:growerp_core/l10n/generated/core_localizations.dart';
+
 /// A filter bar widget for list views following the Stitch design pattern.
 ///
 /// Features:
@@ -37,8 +39,8 @@ import 'package:flutter/material.dart';
 /// )
 /// ```
 class ListFilterBar extends StatelessWidget {
-  /// Hint text for the search field
-  final String searchHint;
+  /// Hint text for the search field, defaults to a localized 'Search...'
+  final String? searchHint;
 
   /// Callback when search text changes
   final ValueChanged<String>? onSearchChanged;
@@ -63,7 +65,7 @@ class ListFilterBar extends StatelessWidget {
 
   const ListFilterBar({
     super.key,
-    this.searchHint = 'Search...',
+    this.searchHint,
     this.onSearchChanged,
     this.searchValue,
     this.searchController,
@@ -98,7 +100,7 @@ class ListFilterBar extends StatelessWidget {
     return Row(
       children: [
         if (showSearch) ...[
-          Expanded(flex: 2, child: _buildSearchField(colorScheme)),
+          Expanded(flex: 2, child: _buildSearchField(context, colorScheme)),
           const SizedBox(width: 16),
         ],
         if (filters != null) ...[
@@ -124,7 +126,8 @@ class ListFilterBar extends StatelessWidget {
         // Search field + action buttons on one line (search shrinks to fit).
         Row(
           children: [
-            if (showSearch) Expanded(child: _buildSearchField(colorScheme)),
+            if (showSearch)
+              Expanded(child: _buildSearchField(context, colorScheme)),
             if (hasActions) ...actions!,
           ],
         ),
@@ -148,9 +151,12 @@ class ListFilterBar extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchField(ColorScheme colorScheme) {
+  Widget _buildSearchField(BuildContext context, ColorScheme colorScheme) {
     return _SearchField(
-      searchHint: searchHint,
+      searchHint:
+          searchHint ??
+          CoreLocalizations.of(context)?.searchHintDefault ??
+          'Search...',
       searchController: searchController,
       onSearchChanged: onSearchChanged,
       colorScheme: colorScheme,

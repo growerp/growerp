@@ -55,7 +55,11 @@ class SearchActivityState extends State<SearchActivityList> {
       builder: (context, state) {
         if (state.status == DataFetchStatus.failure) {
           return Center(
-            child: Text(ActivityLocalizations.of(context)!.activity_failedToFetchSearch(state.message.toString())),
+            child: Text(
+              ActivityLocalizations.of(
+                context,
+              )!.activity_failedToFetchSearch(state.message.toString()),
+            ),
           );
         }
         if (state.status == DataFetchStatus.success) {
@@ -104,7 +108,9 @@ class ActivitySearchDialog extends StatelessWidget {
         child: Column(
           children: [
             ListFilterBar(
-              searchHint: 'Search input',
+              searchHint: ActivityLocalizations.of(
+                context,
+              )!.activity_searchInput,
               onSearchChanged: (value) {
                 if (value.isNotEmpty) {
                   _activityBloc.add(
@@ -134,7 +140,10 @@ class ActivitySearchDialog extends StatelessWidget {
                       visible: activities.isEmpty,
                       child: Center(
                         heightFactor: 20,
-                        child: Text(ActivityLocalizations.of(context)!.activity_noSearchItemsFound,
+                        child: Text(
+                          ActivityLocalizations.of(
+                            context,
+                          )!.activity_noSearchItemsFound,
                           key: Key('empty'),
                           textAlign: TextAlign.center,
                         ),

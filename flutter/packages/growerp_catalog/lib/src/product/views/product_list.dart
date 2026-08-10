@@ -159,7 +159,9 @@ class ProductListState extends State<ProductList> {
           children: [
             // Filter bar with search
             ListFilterBar(
-              searchHint: 'Search ${entityName.toLowerCase()}s...',
+              searchHint: applicationId == 'AppHotel'
+                  ? catalogLocalizations.searchRoomTypes
+                  : catalogLocalizations.searchProducts,
               searchController: _searchController,
               focusNode: _searchFocusNode,
               onSearchChanged: (value) {

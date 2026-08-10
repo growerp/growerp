@@ -7,5 +7,6 @@
   "cancel": "Annuleren",
   "tableHdrFrom": "Van",
   "tableHdrRate": "Tarief",
-  "tableHdrThru": "Tot"
+  "tableHdrThru": "Tot",
+  "searchHintReservations": "Zoek reserveringsnummer, klantnaam, datum..."
 }

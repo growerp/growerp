@@ -81,5 +81,8 @@
   "tableHdrNounName": "{noun}名称",
   "tableHdrNounType": "{noun}类型",
   "assetNounEquipment": "设备",
-  "assetNounRoom": "房间"
+  "assetNounRoom": "房间",
+  "searchHintLocations": "搜索位置...",
+  "searchHintNoun": "搜索{noun}...",
+  "assetNounAsset": "资产"
 }

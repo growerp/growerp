@@ -141,5 +141,13 @@
   "tableHdrWebsite": "Website",
   "@tableHdrWebsite": {
     "description": "Table column header"
+  },
+  "searchHintWebsiteConversion": "Search website, company or status...",
+  "@searchHintWebsiteConversion": {
+    "description": "Search field hint"
+  },
+  "searchHintWebsiteTranslation": "Search owner, store or status...",
+  "@searchHintWebsiteTranslation": {
+    "description": "Search field hint"
   }
 }

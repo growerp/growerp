@@ -74,5 +74,6 @@
   "courses_tableHdrId": "ID",
   "courses_tableHdrInfo": "Info",
   "courses_tableHdrStatus": "Status",
-  "courses_tableHdrTitle": "Titel"
+  "courses_tableHdrTitle": "Titel",
+  "courses_searchHintCourses": "Kurse suchen..."
 }

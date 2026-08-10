@@ -129,5 +129,7 @@
   "tableHdrPrice": "价格",
   "tableHdrPurchFrom": "采购起",
   "tableHdrPurchThru": "采购止",
-  "tableHdrSubscriberEmail": "订阅者\n电子邮件"
+  "tableHdrSubscriberEmail": "订阅者\n电子邮件",
+  "searchCategories": "搜索类别...",
+  "searchRoomTypes": "搜索房型..."
 }

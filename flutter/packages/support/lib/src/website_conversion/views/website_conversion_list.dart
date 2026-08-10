@@ -153,7 +153,9 @@ class WebsiteConversionListState extends State<WebsiteConversionList> {
             children: [
               ListFilterBar(
                 key: const Key('websiteConversionSearch'),
-                searchHint: 'Search website, company or status...',
+                searchHint: SupportLocalizations.of(
+                  context,
+                )!.searchHintWebsiteConversion,
                 searchValue: state.searchString,
                 onSearchChanged: (value) => _bloc.add(
                   WebsiteConversionFetch(searchString: value, refresh: true),
@@ -172,7 +174,12 @@ class WebsiteConversionListState extends State<WebsiteConversionList> {
                     ? Center(
                         child: Padding(
                           padding: const EdgeInsets.all(24),
-                          child: Text(SupportLocalizations.of(context)!.noWebsitesConverted, textAlign: TextAlign.center),
+                          child: Text(
+                            SupportLocalizations.of(
+                              context,
+                            )!.noWebsitesConverted,
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       )
                     : StyledDataTable(

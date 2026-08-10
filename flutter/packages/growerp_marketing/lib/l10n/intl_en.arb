@@ -298,5 +298,37 @@
   "tableHdrWeekStart": "Week Start",
   "@tableHdrWeekStart": {
     "description": "Table column header"
+  },
+  "searchHintQuestions": "Search questions...",
+  "@searchHintQuestions": {
+    "description": "Search field hint"
+  },
+  "searchHintSocialPosts": "Search social posts...",
+  "@searchHintSocialPosts": {
+    "description": "Search field hint"
+  },
+  "searchHintPersonas": "Search personas...",
+  "@searchHintPersonas": {
+    "description": "Search field hint"
+  },
+  "searchHintLandingPages": "Search landing pages...",
+  "@searchHintLandingPages": {
+    "description": "Search field hint"
+  },
+  "searchHintAssessments": "Search assessments...",
+  "@searchHintAssessments": {
+    "description": "Search field hint"
+  },
+  "searchHintName": "Search in name...",
+  "@searchHintName": {
+    "description": "Search field hint"
+  },
+  "searchHintContentPlans": "Search content plans...",
+  "@searchHintContentPlans": {
+    "description": "Search field hint"
+  },
+  "searchHintMasterContent": "Search master content...",
+  "@searchHintMasterContent": {
+    "description": "Search field hint"
   }
 }

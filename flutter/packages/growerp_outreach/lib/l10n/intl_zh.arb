@@ -72,5 +72,7 @@
   "tableHdrSentDate": "发送日期",
   "tableHdrStatus": "状态",
   "tableHdrTargets": "目标",
-  "tableHdrTime": "时间"
+  "tableHdrTime": "时间",
+  "searchHintCampaigns": "搜索营销活动...",
+  "searchHintMessages": "搜索消息..."
 }

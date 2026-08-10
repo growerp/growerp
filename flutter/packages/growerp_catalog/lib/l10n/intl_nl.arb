@@ -129,5 +129,7 @@
   "tableHdrPrice": "Prijs",
   "tableHdrPurchFrom": "Aankoop vanaf",
   "tableHdrPurchThru": "Aankoop tot",
-  "tableHdrSubscriberEmail": "Abonnee\nE-mail"
+  "tableHdrSubscriberEmail": "Abonnee\nE-mail",
+  "searchCategories": "Zoek categorieën...",
+  "searchRoomTypes": "Zoek kamertypes..."
 }

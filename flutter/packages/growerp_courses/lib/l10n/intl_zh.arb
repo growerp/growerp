@@ -74,5 +74,6 @@
   "courses_tableHdrId": "ID",
   "courses_tableHdrInfo": "信息",
   "courses_tableHdrStatus": "状态",
-  "courses_tableHdrTitle": "标题"
+  "courses_tableHdrTitle": "标题",
+  "courses_searchHintCourses": "搜索课程..."
 }

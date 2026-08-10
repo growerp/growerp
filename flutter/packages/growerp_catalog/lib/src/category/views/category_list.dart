@@ -146,7 +146,7 @@ class CategoriesListState extends State<CategoryList> {
           children: [
             // Filter bar with search
             ListFilterBar(
-              searchHint: 'Search categories...',
+              searchHint: _localizations!.searchCategories,
               searchController: _searchController,
               focusNode: _searchFocusNode,
               onSearchChanged: (value) {

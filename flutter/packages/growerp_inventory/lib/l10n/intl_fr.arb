@@ -81,5 +81,8 @@
   "tableHdrNounName": "Nom {noun}",
   "tableHdrNounType": "Type {noun}",
   "assetNounEquipment": "Équipement",
-  "assetNounRoom": "Chambre"
+  "assetNounRoom": "Chambre",
+  "searchHintLocations": "Rechercher des emplacements...",
+  "searchHintNoun": "Rechercher {noun}...",
+  "assetNounAsset": "Actif"
 }

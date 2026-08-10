@@ -1041,5 +1041,26 @@
   "tableHdrUrl": "Url",
   "@tableHdrUrl": {
     "description": "Table column header"
+  },
+  "companies": "Companies",
+  "@companies": {
+    "description": "Plural noun: companies"
+  },
+  "users": "Users",
+  "@users": {
+    "description": "Plural noun: users"
+  },
+  "companiesUsers": "Companies/Users",
+  "@companiesUsers": {
+    "description": "Plural noun: companies and users"
+  },
+  "searchHintNoun": "Search {noun}...",
+  "@searchHintNoun": {
+    "description": "Search field hint with the entity noun",
+    "placeholders": {
+      "noun": {
+        "type": "String"
+      }
+    }
   }
 }

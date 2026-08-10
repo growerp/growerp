@@ -320,5 +320,10 @@
   "tableHdrQuantity": "Quantité",
   "tableHdrSubtotal": "Sous-total",
   "tableHdrTotal": "Total",
-  "tableHdrDocTypeId": "ID {docType}"
+  "tableHdrDocTypeId": "ID {docType}",
+  "searchHintTimePeriods": "Rechercher des périodes...",
+  "searchHintAccountCodeName": "Rechercher un code ou un nom de compte...",
+  "searchHintItemType": "Rechercher un type d'article ou un compte...",
+  "searchHintPaymentType": "Rechercher un type de paiement ou un compte...",
+  "searchHintFinDoc": "Rechercher {salesPurchase} {docType}..."
 }

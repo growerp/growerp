@@ -97,5 +97,12 @@
   "adk_tableHdrTransport": "传输",
   "adk_tableHdrType": "类型",
   "adk_tableHdrUrl": "网址",
-  "adk_tableHdrWhen": "时间"
+  "adk_tableHdrWhen": "时间",
+  "adk_searchHintUsageLogs": "搜索使用日志...",
+  "adk_searchHintActions": "搜索操作...",
+  "adk_searchHintJobs": "搜索作业...",
+  "adk_searchHintKnowledge": "搜索知识...",
+  "adk_searchHintAgents": "搜索代理...",
+  "adk_searchHintApprovals": "搜索审批...",
+  "adk_searchHintMcpServers": "搜索外部 MCP 服务器..."
 }

@@ -82,5 +82,6 @@
   "courses_tableHdrId": "รหัส",
   "courses_tableHdrInfo": "ข้อมูล",
   "courses_tableHdrStatus": "สถานะ",
-  "courses_tableHdrTitle": "หัวข้อ"
+  "courses_tableHdrTitle": "หัวข้อ",
+  "courses_searchHintCourses": "ค้นหาคอร์ส..."
 }

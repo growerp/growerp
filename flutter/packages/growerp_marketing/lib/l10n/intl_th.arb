@@ -73,5 +73,13 @@
   "tableHdrTheme": "ธีม",
   "tableHdrTitle": "หัวข้อ",
   "tableHdrType": "ประเภท",
-  "tableHdrWeekStart": "เริ่มสัปดาห์"
+  "tableHdrWeekStart": "เริ่มสัปดาห์",
+  "searchHintQuestions": "ค้นหาคำถาม...",
+  "searchHintSocialPosts": "ค้นหาโพสต์โซเชียล...",
+  "searchHintPersonas": "ค้นหาเพอร์โซนา...",
+  "searchHintLandingPages": "ค้นหาแลนดิงเพจ...",
+  "searchHintAssessments": "ค้นหาแบบประเมิน...",
+  "searchHintName": "ค้นหาตามชื่อ...",
+  "searchHintContentPlans": "ค้นหาแผนเนื้อหา...",
+  "searchHintMasterContent": "ค้นหาเนื้อหาหลัก..."
 }

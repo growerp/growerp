@@ -97,5 +97,12 @@
   "adk_tableHdrTransport": "การรับส่งข้อมูล",
   "adk_tableHdrType": "ประเภท",
   "adk_tableHdrUrl": "URL",
-  "adk_tableHdrWhen": "เมื่อ"
+  "adk_tableHdrWhen": "เมื่อ",
+  "adk_searchHintUsageLogs": "ค้นหาบันทึกการใช้งาน...",
+  "adk_searchHintActions": "ค้นหาการดำเนินการ...",
+  "adk_searchHintJobs": "ค้นหางาน...",
+  "adk_searchHintKnowledge": "ค้นหาความรู้...",
+  "adk_searchHintAgents": "ค้นหาเอเจนต์...",
+  "adk_searchHintApprovals": "ค้นหาการอนุมัติ...",
+  "adk_searchHintMcpServers": "ค้นหาเซิร์ฟเวอร์ MCP ภายนอก..."
 }

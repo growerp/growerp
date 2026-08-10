@@ -58,5 +58,7 @@
   "activity_tableHdrAssignee": "Toegewezen aan",
   "activity_tableHdrThirdParty": "Derde partij",
   "activity_tableHdrEstFrom": "Gepl. vanaf",
-  "activity_tableHdrActFrom": "Werk. vanaf"
+  "activity_tableHdrActFrom": "Werk. vanaf",
+  "activity_searchHintActivities": "Zoek op ID...",
+  "activity_searchInput": "Zoekinvoer"
 }

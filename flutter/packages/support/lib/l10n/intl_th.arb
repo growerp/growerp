@@ -111,5 +111,7 @@
   "tableHdrPages": "หน้า",
   "tableHdrStatus": "สถานะ",
   "tableHdrVersion": "เวอร์ชัน",
-  "tableHdrWebsite": "เว็บไซต์"
+  "tableHdrWebsite": "เว็บไซต์",
+  "searchHintWebsiteConversion": "ค้นหาเว็บไซต์ บริษัท หรือสถานะ...",
+  "searchHintWebsiteTranslation": "ค้นหาเจ้าของ ร้านค้า หรือสถานะ..."
 }

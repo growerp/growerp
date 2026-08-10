@@ -58,5 +58,7 @@
   "activity_tableHdrAssignee": "Assigné à",
   "activity_tableHdrThirdParty": "Tiers",
   "activity_tableHdrEstFrom": "Prév. du",
-  "activity_tableHdrActFrom": "Réel du"
+  "activity_tableHdrActFrom": "Réel du",
+  "activity_searchHintActivities": "Rechercher par ID...",
+  "activity_searchInput": "Saisie de recherche"
 }

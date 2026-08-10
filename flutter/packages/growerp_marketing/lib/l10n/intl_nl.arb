@@ -74,5 +74,13 @@
   "tableHdrTheme": "Thema",
   "tableHdrTitle": "Titel",
   "tableHdrType": "Type",
-  "tableHdrWeekStart": "Weekstart"
+  "tableHdrWeekStart": "Weekstart",
+  "searchHintQuestions": "Zoek vragen...",
+  "searchHintSocialPosts": "Zoek social posts...",
+  "searchHintPersonas": "Zoek persona's...",
+  "searchHintLandingPages": "Zoek landingspagina's...",
+  "searchHintAssessments": "Zoek assessments...",
+  "searchHintName": "Zoek op naam...",
+  "searchHintContentPlans": "Zoek contentplannen...",
+  "searchHintMasterContent": "Zoek mastercontent..."
 }

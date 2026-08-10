@@ -6,5 +6,6 @@
   "cancel": "ยกเลิก",
   "tableHdrFrom": "จาก",
   "tableHdrRate": "อัตรา",
-  "tableHdrThru": "ถึง"
+  "tableHdrThru": "ถึง",
+  "searchHintReservations": "ค้นหารหัสการจอง ชื่อลูกค้า วันที่..."
 }

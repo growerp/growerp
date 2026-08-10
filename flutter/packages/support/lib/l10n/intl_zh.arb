@@ -30,5 +30,7 @@
   "tableHdrPages": "页面",
   "tableHdrStatus": "状态",
   "tableHdrVersion": "版本",
-  "tableHdrWebsite": "网站"
+  "tableHdrWebsite": "网站",
+  "searchHintWebsiteConversion": "搜索网站、公司或状态...",
+  "searchHintWebsiteTranslation": "搜索所有者、商店或状态..."
 }

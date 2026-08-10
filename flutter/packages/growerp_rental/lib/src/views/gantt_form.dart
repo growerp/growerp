@@ -83,6 +83,7 @@ class _GanttFormState extends State<GanttForm> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = RentalLocalizations.of(context)!;
     screenWidth = MediaQuery.of(context).size.width;
     right = right ?? (isAPhone(context) ? 20 : 50);
 
@@ -300,7 +301,7 @@ class _GanttFormState extends State<GanttForm> {
                           if (isAPhone(context))
                             ListFilterBar(
                               searchHint:
-                                  'Search reservation ID, customer name, date...',
+                                  localizations.searchHintReservations,
                               searchController: _searchController,
                               focusNode: _searchFocusNode,
                               onSearchChanged: (value) {

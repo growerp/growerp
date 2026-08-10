@@ -302,5 +302,13 @@
   "activity_tableHdrActFrom": "Act. From",
   "@activity_tableHdrActFrom": {
     "description": "Table column header"
+  },
+  "activity_searchHintActivities": "Search by ID...",
+  "@activity_searchHintActivities": {
+    "description": "Search field hint"
+  },
+  "activity_searchInput": "Search input",
+  "@activity_searchInput": {
+    "description": "Search field hint"
   }
 }

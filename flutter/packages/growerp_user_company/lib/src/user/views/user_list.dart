@@ -181,7 +181,9 @@ class UserListState extends State<UserList> {
             children: [
               // Filter bar with search
               ListFilterBar(
-                searchHint: 'Search ${widget.role?.name ?? 'users'}...',
+                searchHint: _localizations.searchHintNoun(
+                  roleNoun(_localizations, widget.role, _localizations.users),
+                ),
                 searchController: _searchController,
                 focusNode: _searchFocusNode,
                 onSearchChanged: (value) {

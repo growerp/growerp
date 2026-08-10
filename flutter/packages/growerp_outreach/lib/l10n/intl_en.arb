@@ -290,5 +290,13 @@
   "tableHdrTime": "Time",
   "@tableHdrTime": {
     "description": "Table column header"
+  },
+  "searchHintCampaigns": "Search campaigns...",
+  "@searchHintCampaigns": {
+    "description": "Search field hint"
+  },
+  "searchHintMessages": "Search messages...",
+  "@searchHintMessages": {
+    "description": "Search field hint"
   }
 }

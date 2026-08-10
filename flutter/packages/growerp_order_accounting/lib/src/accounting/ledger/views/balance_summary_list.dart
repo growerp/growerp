@@ -286,7 +286,9 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                   ),
                 ),
                 ListFilterBar(
-                  searchHint: 'Search account code or name...',
+                  searchHint: OrderAccountingLocalizations.of(
+                    context,
+                  )!.searchHintAccountCodeName,
                   searchController: _searchController,
                   focusNode: _searchFocusNode,
                   onSearchChanged: (value) {

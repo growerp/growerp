@@ -7,5 +7,6 @@
   "cancel": "Annuler",
   "tableHdrFrom": "Du",
   "tableHdrRate": "Tarif",
-  "tableHdrThru": "Au"
+  "tableHdrThru": "Au",
+  "searchHintReservations": "Rechercher un ID de réservation, un nom de client, une date..."
 }

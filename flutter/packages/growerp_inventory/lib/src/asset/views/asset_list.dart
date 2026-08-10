@@ -64,6 +64,11 @@ class AssetListState extends State<AssetList> {
   @override
   Widget build(BuildContext context) {
     _localizations = InventoryLocalizations.of(context)!;
+    final noun = applicationId == 'AppHotel'
+        ? _localizations.assetNounRoom
+        : applicationId == 'AppRental'
+            ? _localizations.assetNounEquipment
+            : _localizations.assetNounAsset;
     final isPhone = ResponsiveBreakpoints.of(context).isMobile;
     right = right ?? (isPhone ? 20 : 50);
 
@@ -161,7 +166,7 @@ class AssetListState extends State<AssetList> {
           children: [
             // Filter bar with search
             ListFilterBar(
-              searchHint: 'Search ${entityName.toLowerCase()}s...',
+              searchHint: _localizations.searchHintNoun(noun),
               searchController: _searchController,
               focusNode: _searchFocusNode,
               onSearchChanged: (value) {

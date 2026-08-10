@@ -130,7 +130,9 @@ class ItemTypeListState extends State<ItemTypeList> {
                 children: [
                   // Filter bar with search and showAll toggle
                   ListFilterBar(
-                    searchHint: 'Search item type or account...',
+                    searchHint: OrderAccountingLocalizations.of(
+                      context,
+                    )!.searchHintItemType,
                     searchController: _searchController,
                     focusNode: _searchFocusNode,
                     onSearchChanged: (value) {

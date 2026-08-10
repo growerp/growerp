@@ -7,5 +7,6 @@
   "cancel": "Abbrechen",
   "tableHdrFrom": "Von",
   "tableHdrRate": "Satz",
-  "tableHdrThru": "Bis"
+  "tableHdrThru": "Bis",
+  "searchHintReservations": "Reservierungs-ID, Kundenname, Datum suchen..."
 }

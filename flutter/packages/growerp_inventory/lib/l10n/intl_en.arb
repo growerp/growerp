@@ -382,5 +382,22 @@
   "assetNounRoom": "Room",
   "@assetNounRoom": {
     "description": "Table column header"
+  },
+  "searchHintLocations": "Search locations...",
+  "@searchHintLocations": {
+    "description": "Search field hint"
+  },
+  "searchHintNoun": "Search {noun}...",
+  "@searchHintNoun": {
+    "description": "Search field hint with the entity noun",
+    "placeholders": {
+      "noun": {
+        "type": "String"
+      }
+    }
+  },
+  "assetNounAsset": "Asset",
+  "@assetNounAsset": {
+    "description": "Entity noun used when the app is not hotel or rental"
   }
 }

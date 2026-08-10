@@ -320,5 +320,10 @@
   "tableHdrQuantity": "จำนวน",
   "tableHdrSubtotal": "ยอดรวมย่อย",
   "tableHdrTotal": "รวม",
-  "tableHdrDocTypeId": "รหัส{docType}"
+  "tableHdrDocTypeId": "รหัส{docType}",
+  "searchHintTimePeriods": "ค้นหาช่วงเวลา...",
+  "searchHintAccountCodeName": "ค้นหารหัสบัญชีหรือชื่อ...",
+  "searchHintItemType": "ค้นหาประเภทรายการหรือบัญชี...",
+  "searchHintPaymentType": "ค้นหาประเภทการชำระเงินหรือบัญชี...",
+  "searchHintFinDoc": "ค้นหา {salesPurchase} {docType}..."
 }

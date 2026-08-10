@@ -22,6 +22,7 @@ import '../bloc/outreach_message_event.dart';
 import '../bloc/outreach_message_state.dart';
 import 'outreach_message_detail_screen.dart';
 import 'outreach_message_list_styled_data.dart';
+import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
 
 /// List screen for Outreach Messages
 class OutreachMessageList extends StatefulWidget {
@@ -138,7 +139,7 @@ class OutreachMessageListState extends State<OutreachMessageList> {
           children: [
             // Filter bar with search
             ListFilterBar(
-              searchHint: 'Search messages...',
+              searchHint: OutreachLocalizations.of(context)!.searchHintMessages,
               searchController: _searchController,
               focusNode: _searchFocusNode,
               onSearchChanged: (value) {
@@ -266,7 +267,7 @@ class SearchOutreachMessageListState extends State<SearchOutreachMessageList> {
         child: Column(
           children: [
             ListFilterBar(
-              searchHint: 'Search messages',
+              searchHint: OutreachLocalizations.of(context)!.searchHintMessages,
               searchController: searchBoxController,
               focusNode: searchFocusNode,
               onSearchChanged: (value) {

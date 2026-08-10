@@ -117,5 +117,6 @@
   "formUpdateSuccess": "Formulier {name} bijgewerkt",
   "formAddSuccess": "Formulier {name} toegevoegd",
   "formDeleteSuccess": "Formulier {name} verwijderd",
-  "tableHdrSubmissions": "Inzendingen"
+  "tableHdrSubmissions": "Inzendingen",
+  "searchHintForms": "Zoek op naam, titel..."
 }

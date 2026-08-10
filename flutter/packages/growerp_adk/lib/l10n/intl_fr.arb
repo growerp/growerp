@@ -97,5 +97,12 @@
   "adk_tableHdrTransport": "Transport",
   "adk_tableHdrType": "Type",
   "adk_tableHdrUrl": "URL",
-  "adk_tableHdrWhen": "Quand"
+  "adk_tableHdrWhen": "Quand",
+  "adk_searchHintUsageLogs": "Rechercher les journaux d'utilisation...",
+  "adk_searchHintActions": "Rechercher des actions...",
+  "adk_searchHintJobs": "Rechercher des tâches...",
+  "adk_searchHintKnowledge": "Rechercher des connaissances...",
+  "adk_searchHintAgents": "Rechercher des agents...",
+  "adk_searchHintApprovals": "Rechercher des approbations...",
+  "adk_searchHintMcpServers": "Rechercher des serveurs MCP externes..."
 }

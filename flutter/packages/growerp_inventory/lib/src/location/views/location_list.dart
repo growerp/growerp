@@ -146,7 +146,7 @@ class LocationListState extends State<LocationList> {
           children: [
             // Filter bar with search
             ListFilterBar(
-              searchHint: 'Search locations...',
+              searchHint: _localizations.searchHintLocations,
               searchController: _searchController,
               focusNode: _searchFocusNode,
               onSearchChanged: (value) {

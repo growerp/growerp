@@ -74,5 +74,13 @@
   "tableHdrTheme": "主题",
   "tableHdrTitle": "标题",
   "tableHdrType": "类型",
-  "tableHdrWeekStart": "周起始"
+  "tableHdrWeekStart": "周起始",
+  "searchHintQuestions": "搜索问题...",
+  "searchHintSocialPosts": "搜索社交帖子...",
+  "searchHintPersonas": "搜索用户画像...",
+  "searchHintLandingPages": "搜索着陆页...",
+  "searchHintAssessments": "搜索评估...",
+  "searchHintName": "按名称搜索...",
+  "searchHintContentPlans": "搜索内容计划...",
+  "searchHintMasterContent": "搜索主内容..."
 }

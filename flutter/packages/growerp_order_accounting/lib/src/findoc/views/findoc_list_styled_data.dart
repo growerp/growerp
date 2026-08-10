@@ -44,7 +44,7 @@ List<StyledColumn> getFinDocListColumns(
   List<StyledColumn> columns = [
     StyledColumn(
       header: localizations.tableHdrDocTypeId(
-        _docTypeLabel(localizations, docType),
+        docTypeLabel(localizations, docType),
       ),
       flex: 1,
     ),
@@ -310,7 +310,7 @@ List<Widget> getFinDocListRow({
   return cells;
 }
 
-String _docTypeLabel(
+String docTypeLabel(
   OrderAccountingLocalizations localizations,
   FinDocType docType,
 ) {

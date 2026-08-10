@@ -670,5 +670,13 @@
   "tableHdrSubscriberEmail": "Subscriber\nEmail",
   "@tableHdrSubscriberEmail": {
     "description": "Table column header"
+  },
+  "searchCategories": "Search categories...",
+  "@searchCategories": {
+    "description": "Search field hint"
+  },
+  "searchRoomTypes": "Search room types...",
+  "@searchRoomTypes": {
+    "description": "Search field hint"
   }
 }

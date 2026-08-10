@@ -129,5 +129,7 @@
   "tableHdrPrice": "ราคา",
   "tableHdrPurchFrom": "ซื้อจาก",
   "tableHdrPurchThru": "ซื้อถึง",
-  "tableHdrSubscriberEmail": "ผู้สมัคร\nอีเมล"
+  "tableHdrSubscriberEmail": "ผู้สมัคร\nอีเมล",
+  "searchCategories": "ค้นหาหมวดหมู่...",
+  "searchRoomTypes": "ค้นหาประเภทห้อง..."
 }

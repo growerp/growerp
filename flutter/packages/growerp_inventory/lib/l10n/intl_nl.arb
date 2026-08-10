@@ -81,5 +81,8 @@
   "tableHdrNounName": "{noun}-naam",
   "tableHdrNounType": "{noun}-type",
   "assetNounEquipment": "Apparatuur",
-  "assetNounRoom": "Kamer"
+  "assetNounRoom": "Kamer",
+  "searchHintLocations": "Zoek locaties...",
+  "searchHintNoun": "Zoek {noun}...",
+  "assetNounAsset": "Bedrijfsmiddel"
 }

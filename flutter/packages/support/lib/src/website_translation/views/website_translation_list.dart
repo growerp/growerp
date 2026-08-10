@@ -18,6 +18,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../website_translation.dart';
+import '../../../l10n/generated/support_localizations.dart';
 
 /// Website translation: translate an owner's website into the languages the
 /// apps support. Each row is one run; the ones still running refresh themselves.
@@ -93,7 +94,9 @@ class WebsiteTranslationListState extends State<WebsiteTranslationList> {
             children: [
               ListFilterBar(
                 key: const Key('websiteTranslationSearch'),
-                searchHint: 'Search owner, store or status...',
+                searchHint: SupportLocalizations.of(
+                  context,
+                )!.searchHintWebsiteTranslation,
                 searchValue: state.searchString,
                 onSearchChanged: (value) => _bloc.add(
                   WebsiteTranslationFetch(searchString: value, refresh: true),

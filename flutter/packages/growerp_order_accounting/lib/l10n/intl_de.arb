@@ -320,5 +320,10 @@
   "tableHdrQuantity": "Menge",
   "tableHdrSubtotal": "Zwischensumme",
   "tableHdrTotal": "Gesamt",
-  "tableHdrDocTypeId": "{docType}-ID"
+  "tableHdrDocTypeId": "{docType}-ID",
+  "searchHintTimePeriods": "Zeiträume suchen...",
+  "searchHintAccountCodeName": "Kontonummer oder Name suchen...",
+  "searchHintItemType": "Positionsart oder Konto suchen...",
+  "searchHintPaymentType": "Zahlungsart oder Konto suchen...",
+  "searchHintFinDoc": "{salesPurchase} {docType} suchen..."
 }

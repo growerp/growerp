@@ -129,5 +129,7 @@
   "tableHdrPrice": "Preis",
   "tableHdrPurchFrom": "Kauf ab",
   "tableHdrPurchThru": "Kauf bis",
-  "tableHdrSubscriberEmail": "Abonnent\nE-Mail"
+  "tableHdrSubscriberEmail": "Abonnent\nE-Mail",
+  "searchCategories": "Kategorien suchen...",
+  "searchRoomTypes": "Zimmertypen suchen..."
 }

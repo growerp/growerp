@@ -30,5 +30,7 @@
   "tableHdrPages": "Seiten",
   "tableHdrStatus": "Status",
   "tableHdrVersion": "Version",
-  "tableHdrWebsite": "Website"
+  "tableHdrWebsite": "Website",
+  "searchHintWebsiteConversion": "Website, Firma oder Status suchen...",
+  "searchHintWebsiteTranslation": "Eigentümer, Shop oder Status suchen..."
 }

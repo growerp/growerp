@@ -124,7 +124,9 @@ class TimePeriodListState extends State<TimePeriodList> {
                 children: [
                   // Filter bar with search
                   ListFilterBar(
-                    searchHint: 'Search time periods...',
+                    searchHint: OrderAccountingLocalizations.of(
+                      context,
+                    )!.searchHintTimePeriods,
                     searchController: _searchController,
                     onSearchChanged: (value) {
                       setState(() {

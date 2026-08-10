@@ -58,5 +58,7 @@
   "activity_tableHdrAssignee": "Zugewiesen an",
   "activity_tableHdrThirdParty": "Dritte",
   "activity_tableHdrEstFrom": "Gepl. ab",
-  "activity_tableHdrActFrom": "Ist ab"
+  "activity_tableHdrActFrom": "Ist ab",
+  "activity_searchHintActivities": "Nach ID suchen...",
+  "activity_searchInput": "Sucheingabe"
 }

@@ -20,6 +20,7 @@ import 'package:growerp_models/growerp_models.dart';
 import '../bloc/assessment_bloc.dart';
 import 'assessment_detail_screen.dart';
 import 'assessment_list_styled_data.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// List screen for Assessments
 class AssessmentList extends StatefulWidget {
@@ -134,7 +135,9 @@ class AssessmentListState extends State<AssessmentList> {
           children: [
             // Filter bar with search
             ListFilterBar(
-              searchHint: 'Search assessments...',
+              searchHint: MarketingLocalizations.of(
+                context,
+              )!.searchHintAssessments,
               searchController: _searchController,
               focusNode: _searchFocusNode,
               onSearchChanged: (value) {

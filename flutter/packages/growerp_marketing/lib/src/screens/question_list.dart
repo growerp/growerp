@@ -22,6 +22,7 @@ import '../bloc/question_event.dart';
 import '../bloc/question_state.dart';
 import 'question_detail_screen.dart';
 import 'question_list_styled_data.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 class QuestionListScreen extends StatefulWidget {
   final String assessmentId;
@@ -140,7 +141,9 @@ class QuestionListScreenState extends State<QuestionListScreen> {
           return Column(
             children: [
               ListFilterBar(
-                searchHint: 'Search questions...',
+                searchHint: MarketingLocalizations.of(
+                  context,
+                )!.searchHintQuestions,
                 searchController: _searchController,
                 focusNode: _searchFocusNode,
                 onSearchChanged: (value) {

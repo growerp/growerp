@@ -30,5 +30,7 @@
   "tableHdrPages": "Pages",
   "tableHdrStatus": "Statut",
   "tableHdrVersion": "Version",
-  "tableHdrWebsite": "Site web"
+  "tableHdrWebsite": "Site web",
+  "searchHintWebsiteConversion": "Rechercher un site web, une entreprise ou un statut...",
+  "searchHintWebsiteTranslation": "Rechercher un propriétaire, une boutique ou un statut..."
 }

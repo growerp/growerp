@@ -72,5 +72,7 @@
   "tableHdrSentDate": "Verzenddatum",
   "tableHdrStatus": "Status",
   "tableHdrTargets": "Doelen",
-  "tableHdrTime": "Tijd"
+  "tableHdrTime": "Tijd",
+  "searchHintCampaigns": "Zoek campagnes...",
+  "searchHintMessages": "Zoek berichten..."
 }

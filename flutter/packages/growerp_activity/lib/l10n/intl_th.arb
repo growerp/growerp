@@ -58,5 +58,7 @@
   "activity_tableHdrAssignee": "ผู้รับผิดชอบ",
   "activity_tableHdrThirdParty": "บุคคลที่สาม",
   "activity_tableHdrEstFrom": "ประมาณจาก",
-  "activity_tableHdrActFrom": "จริงจาก"
+  "activity_tableHdrActFrom": "จริงจาก",
+  "activity_searchHintActivities": "ค้นหาตามรหัส...",
+  "activity_searchInput": "ช่องค้นหา"
 }

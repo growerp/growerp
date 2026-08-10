@@ -130,7 +130,7 @@ class WebsiteFormListState extends State<WebsiteFormList> {
         return Column(
           children: [
             ListFilterBar(
-              searchHint: 'search in name, title...',
+              searchHint: localizations.searchHintForms,
               searchController: _searchController,
               focusNode: _searchFocusNode,
               onSearchChanged: (value) {

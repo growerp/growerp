@@ -74,5 +74,13 @@
   "tableHdrTheme": "Thema",
   "tableHdrTitle": "Titel",
   "tableHdrType": "Typ",
-  "tableHdrWeekStart": "Wochenbeginn"
+  "tableHdrWeekStart": "Wochenbeginn",
+  "searchHintQuestions": "Fragen suchen...",
+  "searchHintSocialPosts": "Social-Media-Beiträge suchen...",
+  "searchHintPersonas": "Personas suchen...",
+  "searchHintLandingPages": "Landingpages suchen...",
+  "searchHintAssessments": "Bewertungen suchen...",
+  "searchHintName": "Nach Namen suchen...",
+  "searchHintContentPlans": "Content-Pläne suchen...",
+  "searchHintMasterContent": "Master-Content suchen..."
 }

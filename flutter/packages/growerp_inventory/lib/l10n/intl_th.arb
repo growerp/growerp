@@ -81,5 +81,8 @@
   "tableHdrNounName": "ชื่อ{noun}",
   "tableHdrNounType": "ประเภท{noun}",
   "assetNounEquipment": "อุปกรณ์",
-  "assetNounRoom": "ห้อง"
+  "assetNounRoom": "ห้อง",
+  "searchHintLocations": "ค้นหาสถานที่...",
+  "searchHintNoun": "ค้นหา{noun}...",
+  "assetNounAsset": "สินทรัพย์"
 }

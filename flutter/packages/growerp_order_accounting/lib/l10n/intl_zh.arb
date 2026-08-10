@@ -320,5 +320,10 @@
   "tableHdrQuantity": "数量",
   "tableHdrSubtotal": "小计",
   "tableHdrTotal": "合计",
-  "tableHdrDocTypeId": "{docType} ID"
+  "tableHdrDocTypeId": "{docType} ID",
+  "searchHintTimePeriods": "搜索会计期间...",
+  "searchHintAccountCodeName": "搜索科目代码或名称...",
+  "searchHintItemType": "搜索项目类型或科目...",
+  "searchHintPaymentType": "搜索付款类型或科目...",
+  "searchHintFinDoc": "搜索{salesPurchase}{docType}..."
 }

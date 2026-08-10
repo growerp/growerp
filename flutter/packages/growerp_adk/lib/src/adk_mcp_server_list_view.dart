@@ -163,7 +163,7 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
     return Column(
       children: [
         ListFilterBar(
-          searchHint: 'Search external MCP servers...',
+          searchHint: AdkLocalizations.of(context)!.adk_searchHintMcpServers,
           searchController: _searchController,
           focusNode: _searchFocusNode,
           onSearchChanged: (value) {

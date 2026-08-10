@@ -20,6 +20,7 @@ import 'package:growerp_models/growerp_models.dart';
 import '../bloc/outreach_campaign_bloc.dart';
 import 'campaign_detail_screen.dart';
 import 'campaign_list_styled_data.dart';
+import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
 
 class CampaignListScreen extends StatefulWidget {
   const CampaignListScreen({super.key});
@@ -50,6 +51,7 @@ class CampaignListScreenState extends State<CampaignListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = OutreachLocalizations.of(context)!;
     final isPhone = isAPhone(context);
     right = right ?? (isPhone ? 20 : 50);
 
@@ -136,7 +138,7 @@ class CampaignListScreenState extends State<CampaignListScreen> {
           children: [
             // Filter bar with search
             ListFilterBar(
-              searchHint: 'Search campaigns...',
+              searchHint: localizations.searchHintCampaigns,
               searchController: _searchController,
               onSearchChanged: (value) {
                 _campaignBloc.add(OutreachCampaignFetch(

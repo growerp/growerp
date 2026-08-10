@@ -134,7 +134,9 @@ class PaymentTypeListState extends State<PaymentTypeList> {
                 children: [
                   // Filter bar with search
                   ListFilterBar(
-                    searchHint: 'Search payment type or account...',
+                    searchHint: OrderAccountingLocalizations.of(
+                      context,
+                    )!.searchHintPaymentType,
                     searchController: _searchController,
                     focusNode: _searchFocusNode,
                     onSearchChanged: (value) {

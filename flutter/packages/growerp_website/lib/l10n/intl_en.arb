@@ -496,5 +496,9 @@
   "tableHdrSubmissions": "Submissions",
   "@tableHdrSubmissions": {
     "description": "Table column header"
+  },
+  "searchHintForms": "Search in name, title...",
+  "@searchHintForms": {
+    "description": "Search field hint"
   }
 }

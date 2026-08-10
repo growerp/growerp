@@ -23,6 +23,7 @@ import '../bloc/landing_page_state.dart';
 import 'generate_landing_page_dialog.dart';
 import 'landing_page_detail_screen.dart';
 import 'landing_page_list_styled_data.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// List screen for Landing Pages
 class LandingPageList extends StatefulWidget {
@@ -141,7 +142,9 @@ class LandingPageListState extends State<LandingPageList> {
           children: [
             // Filter bar with search
             ListFilterBar(
-              searchHint: 'Search landing pages...',
+              searchHint: MarketingLocalizations.of(
+                context,
+              )!.searchHintLandingPages,
               searchController: _searchController,
               focusNode: _searchFocusNode,
               onSearchChanged: (value) {

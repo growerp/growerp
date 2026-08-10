@@ -58,5 +58,7 @@
   "activity_tableHdrAssignee": "负责人",
   "activity_tableHdrThirdParty": "第三方",
   "activity_tableHdrEstFrom": "预计起",
-  "activity_tableHdrActFrom": "实际起"
+  "activity_tableHdrActFrom": "实际起",
+  "activity_searchHintActivities": "按 ID 搜索...",
+  "activity_searchInput": "搜索输入"
 }

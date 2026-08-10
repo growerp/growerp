@@ -135,7 +135,9 @@ class LedgerJournalsState extends State<LedgerJournalList> {
               children: [
                 // Filter bar with search
                 ListFilterBar(
-                  searchHint: 'Search in ID, name...',
+                  searchHint: OrderAccountingLocalizations.of(
+                    context,
+                  )!.searchGlAccountHint,
                   searchController: _searchController,
                   focusNode: _searchFocusNode,
                   onSearchChanged: (value) {

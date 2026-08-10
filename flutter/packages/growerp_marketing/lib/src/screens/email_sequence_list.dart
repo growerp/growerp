@@ -136,7 +136,7 @@ class EmailSequenceListState extends State<EmailSequenceList> {
         return Column(
           children: [
             ListFilterBar(
-              searchHint: 'search in name...',
+              searchHint: localizations.searchHintName,
               searchController: _searchController,
               focusNode: _searchFocusNode,
               onSearchChanged: (value) {

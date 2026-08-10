@@ -72,5 +72,7 @@
   "tableHdrSentDate": "Date d'envoi",
   "tableHdrStatus": "Statut",
   "tableHdrTargets": "Cibles",
-  "tableHdrTime": "Heure"
+  "tableHdrTime": "Heure",
+  "searchHintCampaigns": "Rechercher des campagnes...",
+  "searchHintMessages": "Rechercher des messages..."
 }

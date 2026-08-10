@@ -30,5 +30,9 @@
   "tableHdrThru": "Thru",
   "@tableHdrThru": {
     "description": "Table column header"
+  },
+  "searchHintReservations": "Search reservation ID, customer name, date...",
+  "@searchHintReservations": {
+    "description": "Search field hint"
   }
 }

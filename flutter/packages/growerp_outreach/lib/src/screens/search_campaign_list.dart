@@ -17,6 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 
 import '../bloc/outreach_campaign_bloc.dart';
+import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
 
 /// Formats backend status for display
 /// 'MKTG_CAMP_PLANNED' -> 'Planned'
@@ -53,6 +54,7 @@ class SearchCampaignListState extends State<SearchCampaignList> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = OutreachLocalizations.of(context)!;
     return Dialog(
       key: const Key('SearchCampaignDialog'),
       insetPadding: const EdgeInsets.all(20),
@@ -63,7 +65,7 @@ class SearchCampaignListState extends State<SearchCampaignList> {
         child: Column(
           children: [
             ListFilterBar(
-              searchHint: 'Search campaigns',
+              searchHint: localizations.searchHintCampaigns,
               searchController: searchBoxController,
               focusNode: searchFocusNode,
               onSearchChanged: (value) {

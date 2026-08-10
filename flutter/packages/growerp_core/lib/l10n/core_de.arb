@@ -1311,5 +1311,6 @@
   "websiteGenerator": "Website-Generator",
   "websiteTranslation": "Website-Übersetzung",
   "wiki": "Wiki",
-  "workOrders": "Arbeitsaufträge"
+  "workOrders": "Arbeitsaufträge",
+  "searchHintDefault": "Suchen..."
 }

@@ -1311,5 +1311,6 @@
   "websiteGenerator": "Websitegenerator",
   "websiteTranslation": "Websitevertaling",
   "wiki": "Wiki",
-  "workOrders": "Werkorders"
+  "workOrders": "Werkorders",
+  "searchHintDefault": "Zoeken..."
 }

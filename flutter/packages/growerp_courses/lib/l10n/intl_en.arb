@@ -402,5 +402,9 @@
   "courses_tableHdrTitle": "Title",
   "@courses_tableHdrTitle": {
     "description": "Table column header"
+  },
+  "courses_searchHintCourses": "Search courses...",
+  "@courses_searchHintCourses": {
+    "description": "Search field hint"
   }
 }

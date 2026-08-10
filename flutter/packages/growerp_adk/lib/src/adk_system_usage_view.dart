@@ -164,7 +164,7 @@ class _AdkSystemUsageViewState extends State<AdkSystemUsageView> {
       body: Column(
         children: [
           ListFilterBar(
-            searchHint: 'Search usage logs...',
+            searchHint: AdkLocalizations.of(context)!.adk_searchHintUsageLogs,
             searchController: _searchController,
             focusNode: _searchFocusNode,
             onSearchChanged: (value) {

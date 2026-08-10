@@ -168,7 +168,13 @@ class CompanyListState extends State<CompanyList> {
             children: [
               // Filter bar with search
               ListFilterBar(
-                searchHint: 'Search ${widget.role?.name ?? 'companies'}...',
+                searchHint: _localizations.searchHintNoun(
+                  roleNoun(
+                    _localizations,
+                    widget.role,
+                    _localizations.companies,
+                  ),
+                ),
                 searchController: _searchController,
                 focusNode: _searchFocusNode,
                 onSearchChanged: (value) {

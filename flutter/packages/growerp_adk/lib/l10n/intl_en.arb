@@ -502,5 +502,33 @@
   "adk_tableHdrWhen": "When",
   "@adk_tableHdrWhen": {
     "description": "Table column header"
+  },
+  "adk_searchHintUsageLogs": "Search usage logs...",
+  "@adk_searchHintUsageLogs": {
+    "description": "Search field hint"
+  },
+  "adk_searchHintActions": "Search actions...",
+  "@adk_searchHintActions": {
+    "description": "Search field hint"
+  },
+  "adk_searchHintJobs": "Search jobs...",
+  "@adk_searchHintJobs": {
+    "description": "Search field hint"
+  },
+  "adk_searchHintKnowledge": "Search knowledge...",
+  "@adk_searchHintKnowledge": {
+    "description": "Search field hint"
+  },
+  "adk_searchHintAgents": "Search agents...",
+  "@adk_searchHintAgents": {
+    "description": "Search field hint"
+  },
+  "adk_searchHintApprovals": "Search approvals...",
+  "@adk_searchHintApprovals": {
+    "description": "Search field hint"
+  },
+  "adk_searchHintMcpServers": "Search external MCP servers...",
+  "@adk_searchHintMcpServers": {
+    "description": "Search field hint"
   }
 }

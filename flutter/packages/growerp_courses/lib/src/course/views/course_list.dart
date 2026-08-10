@@ -20,6 +20,7 @@ import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_bloc.dart';
 import 'course_dialog.dart';
 import 'course_list_styled_data.dart';
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
 class CourseList extends StatelessWidget {
   const CourseList({super.key});
@@ -148,7 +149,9 @@ class _CourseListViewState extends State<CourseListView> {
           children: [
             // Filter bar with search
             ListFilterBar(
-              searchHint: 'Search courses...',
+              searchHint: CoursesLocalizations.of(
+                context,
+              )!.courses_searchHintCourses,
               searchController: _searchController,
               focusNode: _searchFocusNode,
               onSearchChanged: (value) {

@@ -246,8 +246,11 @@ class FinDocListState extends State<FinDocList> {
     }
 
     String getSearchHint() {
-      final docName = widget.docType.name.toLowerCase();
-      return 'Search ${widget.sales ? 'sales' : 'purchase'} ${docName}s...';
+      final localizations = OrderAccountingLocalizations.of(context)!;
+      return localizations.searchHintFinDoc(
+        widget.sales ? localizations.sales : localizations.purchase,
+        docTypeLabel(localizations, widget.docType),
+      );
     }
 
     return Builder(

@@ -117,5 +117,6 @@
   "formUpdateSuccess": "Formular {name} aktualisiert",
   "formAddSuccess": "Formular {name} hinzugefügt",
   "formDeleteSuccess": "Formular {name} gelöscht",
-  "tableHdrSubmissions": "Einsendungen"
+  "tableHdrSubmissions": "Einsendungen",
+  "searchHintForms": "In Name, Titel suchen..."
 }

@@ -164,7 +164,7 @@ class _AdkActionsListViewState extends State<AdkActionsListView> {
     return Column(
       children: [
         ListFilterBar(
-          searchHint: 'Search actions...',
+          searchHint: AdkLocalizations.of(context)!.adk_searchHintActions,
           searchController: _searchController,
           focusNode: _searchFocusNode,
           onSearchChanged: (value) {

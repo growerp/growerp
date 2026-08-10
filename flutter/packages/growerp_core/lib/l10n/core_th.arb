@@ -1311,5 +1311,6 @@
   "websiteGenerator": "ตัวสร้างเว็บไซต์",
   "websiteTranslation": "การแปลเว็บไซต์",
   "wiki": "วิกิ",
-  "workOrders": "ใบสั่งงาน"
+  "workOrders": "ใบสั่งงาน",
+  "searchHintDefault": "ค้นหา..."
 }

@@ -320,5 +320,10 @@
   "tableHdrQuantity": "Hoeveelheid",
   "tableHdrSubtotal": "Subtotaal",
   "tableHdrTotal": "Totaal",
-  "tableHdrDocTypeId": "{docType}-ID"
+  "tableHdrDocTypeId": "{docType}-ID",
+  "searchHintTimePeriods": "Zoek periodes...",
+  "searchHintAccountCodeName": "Zoek rekeningcode of naam...",
+  "searchHintItemType": "Zoek itemtype of rekening...",
+  "searchHintPaymentType": "Zoek betalingstype of rekening...",
+  "searchHintFinDoc": "Zoek {salesPurchase} {docType}..."
 }

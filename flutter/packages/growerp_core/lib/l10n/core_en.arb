@@ -1612,5 +1612,9 @@
   "workOrders": "Work Orders",
   "@workOrders": {
     "description": "Menu item title: Work Orders"
+  },
+  "searchHintDefault": "Search...",
+  "@searchHintDefault": {
+    "description": "Default search field hint"
   }
 }

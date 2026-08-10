@@ -126,7 +126,6 @@ class _PlatformConfigListScreenState extends State<PlatformConfigListScreen> {
             children: [
               // Header bar
               const ListFilterBar(
-                searchHint: 'Platform configurations',
                 showSearch: false,
               ),
               // Main content area with StyledDataTable

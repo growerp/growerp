@@ -137,7 +137,9 @@ class PersonaListState extends State<PersonaList> {
           children: [
             // Filter bar with search
             ListFilterBar(
-              searchHint: 'Search personas...',
+              searchHint: MarketingLocalizations.of(
+                context,
+              )!.searchHintPersonas,
               searchController: _searchController,
               focusNode: _searchFocusNode,
               onSearchChanged: (value) {

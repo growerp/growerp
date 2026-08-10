@@ -71,5 +71,7 @@
   "tableHdrSentDate": "วันที่ส่ง",
   "tableHdrStatus": "สถานะ",
   "tableHdrTargets": "เป้าหมาย",
-  "tableHdrTime": "เวลา"
+  "tableHdrTime": "เวลา",
+  "searchHintCampaigns": "ค้นหาแคมเปญ...",
+  "searchHintMessages": "ค้นหาข้อความ..."
 }

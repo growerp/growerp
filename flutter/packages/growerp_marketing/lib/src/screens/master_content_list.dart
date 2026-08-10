@@ -22,6 +22,7 @@ import '../bloc/master_content_event.dart';
 import '../bloc/master_content_state.dart';
 import 'master_content_detail_screen.dart';
 import 'master_content_list_styled_data.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// List screen for platform-neutral Master Content
 class MasterContentList extends StatefulWidget {
@@ -58,6 +59,7 @@ class MasterContentListState extends State<MasterContentList> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = MarketingLocalizations.of(context)!;
     final isPhone = isAPhone(context);
     right = right ?? (isPhone ? 20 : 50);
 
@@ -136,7 +138,7 @@ class MasterContentListState extends State<MasterContentList> {
         return Column(
           children: [
             ListFilterBar(
-              searchHint: 'Search master content...',
+              searchHint: localizations.searchHintMasterContent,
               searchController: _searchController,
               focusNode: _searchFocusNode,
               onSearchChanged: (value) {

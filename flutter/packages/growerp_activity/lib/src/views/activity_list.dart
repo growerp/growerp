@@ -126,7 +126,7 @@ class ActivityListState extends State<ActivityList> {
         return Column(
           children: [
             ListFilterBar(
-              searchHint: 'Search by ID...',
+              searchHint: _localizations.activity_searchHintActivities,
               searchController: _searchController,
               focusNode: _searchFocusNode,
               onSearchChanged: (value) {
