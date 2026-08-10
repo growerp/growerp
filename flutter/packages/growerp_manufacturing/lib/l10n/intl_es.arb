@@ -46,5 +46,13 @@
   "tableHdrInfo": "Información",
   "tableHdrProduct": "Producto",
   "tableHdrRoutingName": "Nombre de ruta",
-  "tableHdrTasks": "Tareas"
+  "tableHdrTasks": "Tareas",
+  "dashTotal": "total",
+  "dashOnHold": "en espera",
+  "dashCancelled": "cancelados",
+  "dashBomItems": "artículos BOM",
+  "dashStagePlanning": "Planificación",
+  "dashStageApproved": "Aprobado",
+  "dashStageInProgress": "En curso",
+  "dashStageComplete": "Completado"
 }

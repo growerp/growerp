@@ -88,7 +88,11 @@ class _AgentControlDashboardChartMiniState
                   SizedBox(
                     width: 86,
                     child: Text(
-                      item.stageName,
+                      _stageLabel(
+                        context,
+                        item.stageId,
+                        item.stageName,
+                      ),
                       overflow: TextOverflow.ellipsis,
                       style: labelStyle,
                     ),
@@ -136,6 +140,7 @@ class _AgentControlDashboardChartMiniState
 
   @override
   Widget build(BuildContext context) {
+    final l = AdkLocalizations.of(context)!;
     if (error != null) {
       return Center(
         child: Text(error!, style: const TextStyle(color: Colors.red)),
@@ -155,10 +160,10 @@ class _AgentControlDashboardChartMiniState
       ),
     );
     final counters = [
-      counter('agents', dashboard!.totalAgents),
-      counter('enabled', dashboard!.enabledAgents),
-      counter('scheduled', dashboard!.scheduledAgents),
-      counter('mcp', dashboard!.mcpServers),
+      counter(l.adk_dashAgents, dashboard!.totalAgents),
+      counter(l.adk_dashEnabled, dashboard!.enabledAgents),
+      counter(l.adk_dashScheduled, dashboard!.scheduledAgents),
+      counter(l.adk_dashMcp, dashboard!.mcpServers),
     ];
     // Phones show the logo as a horizontal top-left strip, desktop as a
     // vertical badge on the left: inset the funnel accordingly.
@@ -204,5 +209,23 @@ class _AgentControlDashboardChartMiniState
         ],
       ),
     );
+  }
+}
+
+/// The backend sends each stage with an English name; show the translation for
+/// the ids it knows and fall back to the server text for anything added later.
+String _stageLabel(BuildContext context, String stageId, String fallback) {
+  final l = AdkLocalizations.of(context)!;
+  switch (stageId) {
+    case 'pending':
+      return l.adk_dashStagePending;
+    case 'approved':
+      return l.adk_dashStageApproved;
+    case 'rejected':
+      return l.adk_dashStageRejected;
+    case 'expired':
+      return l.adk_dashStageExpired;
+    default:
+      return fallback;
   }
 }

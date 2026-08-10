@@ -190,7 +190,7 @@ class _RevenueExpenseChartMiniBody extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'No data found',
+                    CoreLocalizations.of(context)!.noDataFound,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: cs.onSurface,
                       fontWeight: FontWeight.w700,
@@ -198,7 +198,9 @@ class _RevenueExpenseChartMiniBody extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Post transactions to see\nrevenue & expense trends',
+                    OrderAccountingLocalizations.of(
+                      context,
+                    )!.dashPostTransactionsHint,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: cs.onSurface.withValues(alpha: 0.55),

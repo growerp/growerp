@@ -60,5 +60,12 @@
   "activity_tableHdrEstFrom": "预计起",
   "activity_tableHdrActFrom": "实际起",
   "activity_searchHintActivities": "按 ID 搜索...",
-  "activity_searchInput": "搜索输入"
+  "activity_searchInput": "搜索输入",
+  "activity_dashAllTasks": "全部任务",
+  "activity_dashToDo": "待办",
+  "activity_dashEvents": "事件",
+  "activity_dashUnInvoiced": "未开票",
+  "activity_dashBarAll": "全部",
+  "activity_dashBarToDo": "待办",
+  "activity_dashBarEvents": "事件"
 }

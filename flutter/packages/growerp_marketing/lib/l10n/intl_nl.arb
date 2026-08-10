@@ -82,5 +82,16 @@
   "searchHintAssessments": "Zoek assessments...",
   "searchHintName": "Zoek op naam...",
   "searchHintContentPlans": "Zoek contentplannen...",
-  "searchHintMasterContent": "Zoek mastercontent..."
+  "searchHintMasterContent": "Zoek mastercontent...",
+  "dashLeads": "leads",
+  "dashAssessments": "beoordelingen",
+  "dashNurturing": "in nurture",
+  "dashNurtured": "genurtured",
+  "dashStageProspecting": "Prospectie",
+  "dashStageQualification": "Kwalificatie",
+  "dashStageDemoMeeting": "Demo/Afspraak",
+  "dashStageProposal": "Voorstel",
+  "dashStageQuote": "Offerte",
+  "dashStageClosedWon": "Gewonnen",
+  "dashStageClosedLost": "Verloren"
 }

@@ -74,5 +74,13 @@
   "tableHdrTargets": "目标",
   "tableHdrTime": "时间",
   "searchHintCampaigns": "搜索营销活动...",
-  "searchHintMessages": "搜索消息..."
+  "searchHintMessages": "搜索消息...",
+  "dashCampaigns": "活动",
+  "dashActive": "进行中",
+  "dashSent": "已发送",
+  "dashReplies": "回复",
+  "dashStatusPending": "待处理",
+  "dashStatusSent": "已发送",
+  "dashStatusResponded": "已回复",
+  "dashStatusFailed": "失败"
 }

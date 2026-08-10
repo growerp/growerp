@@ -61,5 +61,12 @@
   "opportunityDownloadFailure": "การดาวน์โหลดโอกาสล้มเหลว",
   "noPipelineData": "ไม่มีข้อมูลท่อส่ง",
   "convertToQuote": "แปลงเป็นใบเสนอราคา",
-  "opportunityConvertSuccess": "ใบเสนอราคา #{id} สร้างสำเร็จแล้ว"
+  "opportunityConvertSuccess": "ใบเสนอราคา #{id} สร้างสำเร็จแล้ว",
+  "dashContacts": "ผู้ติดต่อ",
+  "dashSuppliers": "ซัพพลายเออร์",
+  "dashEmployees": "พนักงาน",
+  "dashAdmins": "ผู้ดูแลระบบ",
+  "dashStageAssigned": "มอบหมาย",
+  "dashStageQualified": "ผ่านเกณฑ์",
+  "dashStageConverted": "แปลงแล้ว"
 }

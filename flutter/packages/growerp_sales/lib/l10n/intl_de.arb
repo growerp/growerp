@@ -61,5 +61,12 @@
   "opportunityDownloadFailure": "Herunterladen der Opportunities fehlgeschlagen",
   "noPipelineData": "Keine Pipeline-Daten",
   "convertToQuote": "In Angebot umwandeln",
-  "opportunityConvertSuccess": "Angebot Nr. {id} erfolgreich erstellt"
+  "opportunityConvertSuccess": "Angebot Nr. {id} erfolgreich erstellt",
+  "dashContacts": "Kontakte",
+  "dashSuppliers": "Lieferanten",
+  "dashEmployees": "Mitarbeiter",
+  "dashAdmins": "Administratoren",
+  "dashStageAssigned": "Zugewiesen",
+  "dashStageQualified": "Qualifiziert",
+  "dashStageConverted": "Konvertiert"
 }

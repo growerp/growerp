@@ -389,5 +389,16 @@
   "websiteTranslation": "Traducción de sitios web",
   "wiki": "wiki",
   "workOrders": "Órdenes de trabajo",
-  "searchHintDefault": "Buscar..."
+  "searchHintDefault": "Buscar...",
+  "greetingMorning": "Buenos días",
+  "greetingAfternoon": "Buenas tardes",
+  "greetingEvening": "Buenas noches",
+  "purchase": "Compras",
+  "incoming": "Entrantes",
+  "outgoing": "Salientes",
+  "admins": "Administradores",
+  "hours": "Horas",
+  "toDo": "Por hacer",
+  "events": "Eventos",
+  "open": "Abiertas"
 }

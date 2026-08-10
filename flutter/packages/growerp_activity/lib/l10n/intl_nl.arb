@@ -60,5 +60,12 @@
   "activity_tableHdrEstFrom": "Gepl. vanaf",
   "activity_tableHdrActFrom": "Werk. vanaf",
   "activity_searchHintActivities": "Zoek op ID...",
-  "activity_searchInput": "Zoekinvoer"
+  "activity_searchInput": "Zoekinvoer",
+  "activity_dashAllTasks": "alle taken",
+  "activity_dashToDo": "te doen",
+  "activity_dashEvents": "afspraken",
+  "activity_dashUnInvoiced": "niet gefactureerd",
+  "activity_dashBarAll": "Alle",
+  "activity_dashBarToDo": "Te doen",
+  "activity_dashBarEvents": "Afspraken"
 }

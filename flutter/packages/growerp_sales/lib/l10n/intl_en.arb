@@ -294,5 +294,33 @@
         "type": "String"
       }
     }
+  },
+  "dashContacts": "contacts",
+  "@dashContacts": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashSuppliers": "suppliers",
+  "@dashSuppliers": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashEmployees": "employees",
+  "@dashEmployees": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashAdmins": "admins",
+  "@dashAdmins": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashStageAssigned": "Assigned",
+  "@dashStageAssigned": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageQualified": "Qualified",
+  "@dashStageQualified": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageConverted": "Converted",
+  "@dashStageConverted": {
+    "description": "Dashboard tile funnel stage label"
   }
 }

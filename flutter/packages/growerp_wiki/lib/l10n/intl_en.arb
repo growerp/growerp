@@ -27,5 +27,17 @@
   "markdownTextYamlFrontmatterAllowed": "Markdown text (YAML frontmatter allowed)",
   "@markdownTextYamlFrontmatterAllowed": {
     "description": "Markdown text (YAML frontmatter allowed)"
+  },
+  "dashSpaces": "spaces",
+  "@dashSpaces": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashPages": "pages",
+  "@dashPages": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashNoWikiSpaces": "No wiki spaces",
+  "@dashNoWikiSpaces": {
+    "description": "Dashboard tile empty-state message"
   }
 }

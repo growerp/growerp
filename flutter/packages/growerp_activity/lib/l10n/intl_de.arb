@@ -60,5 +60,12 @@
   "activity_tableHdrEstFrom": "Gepl. ab",
   "activity_tableHdrActFrom": "Ist ab",
   "activity_searchHintActivities": "Nach ID suchen...",
-  "activity_searchInput": "Sucheingabe"
+  "activity_searchInput": "Sucheingabe",
+  "activity_dashAllTasks": "alle Aufgaben",
+  "activity_dashToDo": "zu erledigen",
+  "activity_dashEvents": "Termine",
+  "activity_dashUnInvoiced": "nicht fakturiert",
+  "activity_dashBarAll": "Alle",
+  "activity_dashBarToDo": "Aufgaben",
+  "activity_dashBarEvents": "Termine"
 }

@@ -88,7 +88,11 @@ class _ManufacturingDashboardChartMiniState
                   SizedBox(
                     width: 86,
                     child: Text(
-                      item.stageName,
+                      _stageLabel(
+                        context,
+                        item.stageId,
+                        item.stageName,
+                      ),
                       overflow: TextOverflow.ellipsis,
                       style: labelStyle,
                     ),
@@ -136,6 +140,7 @@ class _ManufacturingDashboardChartMiniState
 
   @override
   Widget build(BuildContext context) {
+    final l = ManufacturingLocalizations.of(context)!;
     if (error != null) {
       return Center(
         child: Text(error!, style: const TextStyle(color: Colors.red)),
@@ -155,10 +160,10 @@ class _ManufacturingDashboardChartMiniState
       ),
     );
     final counters = [
-      counter('total', dashboard!.totalWorkOrders),
-      counter('on hold', dashboard!.onHold),
-      counter('cancelled', dashboard!.cancelled),
-      counter('bom items', dashboard!.bomItems),
+      counter(l.dashTotal, dashboard!.totalWorkOrders),
+      counter(l.dashOnHold, dashboard!.onHold),
+      counter(l.dashCancelled, dashboard!.cancelled),
+      counter(l.dashBomItems, dashboard!.bomItems),
     ];
     // Phones show the logo as a horizontal top-left strip, desktop as a
     // vertical badge on the left: inset the funnel accordingly.
@@ -204,5 +209,23 @@ class _ManufacturingDashboardChartMiniState
         ],
       ),
     );
+  }
+}
+
+/// The backend sends each stage with an English name; show the translation for
+/// the ids it knows and fall back to the server text for anything added later.
+String _stageLabel(BuildContext context, String stageId, String fallback) {
+  final l = ManufacturingLocalizations.of(context)!;
+  switch (stageId) {
+    case 'WeInPlanning':
+      return l.dashStagePlanning;
+    case 'WeApproved':
+      return l.dashStageApproved;
+    case 'WeInProgress':
+      return l.dashStageInProgress;
+    case 'WeComplete':
+      return l.dashStageComplete;
+    default:
+      return fallback;
   }
 }

@@ -61,5 +61,12 @@
   "opportunityDownloadFailure": "No se pudieron descargar las oportunidades",
   "noPipelineData": "No hay datos del embudo",
   "convertToQuote": "Convertir en cotización",
-  "opportunityConvertSuccess": "Cita #{id} creada exitosamente"
+  "opportunityConvertSuccess": "Cita #{id} creada exitosamente",
+  "dashContacts": "contactos",
+  "dashSuppliers": "proveedores",
+  "dashEmployees": "empleados",
+  "dashAdmins": "administradores",
+  "dashStageAssigned": "Asignados",
+  "dashStageQualified": "Calificados",
+  "dashStageConverted": "Convertidos"
 }

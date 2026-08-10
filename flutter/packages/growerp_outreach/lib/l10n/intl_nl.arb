@@ -74,5 +74,13 @@
   "tableHdrTargets": "Doelen",
   "tableHdrTime": "Tijd",
   "searchHintCampaigns": "Zoek campagnes...",
-  "searchHintMessages": "Zoek berichten..."
+  "searchHintMessages": "Zoek berichten...",
+  "dashCampaigns": "campagnes",
+  "dashActive": "actief",
+  "dashSent": "verzonden",
+  "dashReplies": "antwoorden",
+  "dashStatusPending": "In afwachting",
+  "dashStatusSent": "Verzonden",
+  "dashStatusResponded": "Beantwoord",
+  "dashStatusFailed": "Mislukt"
 }

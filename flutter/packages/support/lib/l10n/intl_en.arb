@@ -149,5 +149,81 @@
   "searchHintWebsiteTranslation": "Search owner, store or status...",
   "@searchHintWebsiteTranslation": {
     "description": "Search field hint"
+  },
+  "dashNoApplications": "No applications",
+  "@dashNoApplications": {
+    "description": "Dashboard tile empty-state message"
+  },
+  "dashNoOwnerActivity": "No owner activity",
+  "@dashNoOwnerActivity": {
+    "description": "Dashboard tile empty-state message"
+  },
+  "dashNoLlmUsage": "No system LLM usage",
+  "@dashNoLlmUsage": {
+    "description": "Dashboard tile empty-state message"
+  },
+  "dashNoRestActivity": "No REST activity",
+  "@dashNoRestActivity": {
+    "description": "Dashboard tile empty-state message"
+  },
+  "dashApps": "apps",
+  "@dashApps": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashInstalls": "installs",
+  "@dashInstalls": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashAssessed": "assessed",
+  "@dashAssessed": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashPlain": "plain",
+  "@dashPlain": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashOwners": "owners",
+  "@dashOwners": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashActive": "active",
+  "@dashActive": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashUsers": "users",
+  "@dashUsers": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashCompanies": "companies",
+  "@dashCompanies": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashTenants": "tenants",
+  "@dashTenants": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashActions": "actions",
+  "@dashActions": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashTokensIn": "tokens in",
+  "@dashTokensIn": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashTokensOut": "tokens out",
+  "@dashTokensOut": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashCalls": "calls",
+  "@dashCalls": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashAvgPerDay": "avg/day",
+  "@dashAvgPerDay": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashPeakDay": "peak day",
+  "@dashPeakDay": {
+    "description": "Dashboard tile counter label"
   }
 }

@@ -149,5 +149,13 @@
   "tableHdrInfo": "ข้อมูล",
   "tableHdrProduct": "สินค้า",
   "tableHdrRoutingName": "ชื่อเส้นทางผลิต",
-  "tableHdrTasks": "งาน"
+  "tableHdrTasks": "งาน",
+  "dashTotal": "รวม",
+  "dashOnHold": "พักไว้",
+  "dashCancelled": "ยกเลิก",
+  "dashBomItems": "รายการ BOM",
+  "dashStagePlanning": "วางแผน",
+  "dashStageApproved": "อนุมัติ",
+  "dashStageInProgress": "กำลังดำเนินการ",
+  "dashStageComplete": "เสร็จสิ้น"
 }

@@ -74,5 +74,13 @@
   "tableHdrTargets": "Ziele",
   "tableHdrTime": "Zeit",
   "searchHintCampaigns": "Kampagnen suchen...",
-  "searchHintMessages": "Nachrichten suchen..."
+  "searchHintMessages": "Nachrichten suchen...",
+  "dashCampaigns": "Kampagnen",
+  "dashActive": "aktiv",
+  "dashSent": "gesendet",
+  "dashReplies": "Antworten",
+  "dashStatusPending": "Ausstehend",
+  "dashStatusSent": "Gesendet",
+  "dashStatusResponded": "Beantwortet",
+  "dashStatusFailed": "Fehlgeschlagen"
 }

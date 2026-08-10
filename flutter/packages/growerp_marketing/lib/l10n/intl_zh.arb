@@ -82,5 +82,16 @@
   "searchHintAssessments": "搜索评估...",
   "searchHintName": "按名称搜索...",
   "searchHintContentPlans": "搜索内容计划...",
-  "searchHintMasterContent": "搜索主内容..."
+  "searchHintMasterContent": "搜索主内容...",
+  "dashLeads": "线索",
+  "dashAssessments": "评估",
+  "dashNurturing": "培育中",
+  "dashNurtured": "已培育",
+  "dashStageProspecting": "潜在客户",
+  "dashStageQualification": "资格审核",
+  "dashStageDemoMeeting": "演示/会议",
+  "dashStageProposal": "提案",
+  "dashStageQuote": "报价",
+  "dashStageClosedWon": "成交",
+  "dashStageClosedLost": "流失"
 }

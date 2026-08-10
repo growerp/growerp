@@ -60,5 +60,12 @@
   "activity_tableHdrEstFrom": "Est. De",
   "activity_tableHdrActFrom": "Acto. De",
   "activity_searchHintActivities": "Buscar por ID...",
-  "activity_searchInput": "Entrada de búsqueda"
+  "activity_searchInput": "Entrada de búsqueda",
+  "activity_dashAllTasks": "todas las tareas",
+  "activity_dashToDo": "por hacer",
+  "activity_dashEvents": "eventos",
+  "activity_dashUnInvoiced": "sin facturar",
+  "activity_dashBarAll": "Todas",
+  "activity_dashBarToDo": "Por hacer",
+  "activity_dashBarEvents": "Eventos"
 }

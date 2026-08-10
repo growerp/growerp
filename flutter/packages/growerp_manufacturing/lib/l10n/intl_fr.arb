@@ -149,5 +149,13 @@
   "tableHdrInfo": "Infos",
   "tableHdrProduct": "Produit",
   "tableHdrRoutingName": "Nom de la gamme",
-  "tableHdrTasks": "Tâches"
+  "tableHdrTasks": "Tâches",
+  "dashTotal": "total",
+  "dashOnHold": "en attente",
+  "dashCancelled": "annulés",
+  "dashBomItems": "articles nomencl.",
+  "dashStagePlanning": "Planification",
+  "dashStageApproved": "Approuvé",
+  "dashStageInProgress": "En cours",
+  "dashStageComplete": "Terminé"
 }

@@ -61,5 +61,12 @@
   "opportunityDownloadFailure": "Échec du téléchargement des opportunités",
   "noPipelineData": "Aucune donnée de pipeline",
   "convertToQuote": "Convertir en devis",
-  "opportunityConvertSuccess": "Devis n° {id} créé avec succès"
+  "opportunityConvertSuccess": "Devis n° {id} créé avec succès",
+  "dashContacts": "contacts",
+  "dashSuppliers": "fournisseurs",
+  "dashEmployees": "employés",
+  "dashAdmins": "admins",
+  "dashStageAssigned": "Attribué",
+  "dashStageQualified": "Qualifié",
+  "dashStageConverted": "Converti"
 }

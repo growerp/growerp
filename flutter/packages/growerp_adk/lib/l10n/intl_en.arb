@@ -530,5 +530,117 @@
   "adk_searchHintMcpServers": "Search external MCP servers...",
   "@adk_searchHintMcpServers": {
     "description": "Search field hint"
+  },
+  "adk_dashAgents": "agents",
+  "@adk_dashAgents": {
+    "description": "Dashboard tile counter label"
+  },
+  "adk_dashEnabled": "enabled",
+  "@adk_dashEnabled": {
+    "description": "Dashboard tile counter label"
+  },
+  "adk_dashScheduled": "scheduled",
+  "@adk_dashScheduled": {
+    "description": "Dashboard tile counter label"
+  },
+  "adk_dashMcp": "mcp",
+  "@adk_dashMcp": {
+    "description": "Dashboard tile counter label"
+  },
+  "adk_dashStagePending": "Pending",
+  "@adk_dashStagePending": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "adk_dashStageApproved": "Approved",
+  "@adk_dashStageApproved": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "adk_dashStageRejected": "Rejected",
+  "@adk_dashStageRejected": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "adk_dashStageExpired": "Expired",
+  "@adk_dashStageExpired": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "adk_dashNoJobs": "No jobs",
+  "@adk_dashNoJobs": {
+    "description": "Dashboard tile empty-state message"
+  },
+  "adk_dashNoApprovals": "No approvals",
+  "@adk_dashNoApprovals": {
+    "description": "Dashboard tile empty-state message"
+  },
+  "adk_dashNoActions": "No actions",
+  "@adk_dashNoActions": {
+    "description": "Dashboard tile empty-state message"
+  },
+  "adk_dashNoServers": "No servers",
+  "@adk_dashNoServers": {
+    "description": "Dashboard tile empty-state message"
+  },
+  "adk_dashNoDocuments": "No documents",
+  "@adk_dashNoDocuments": {
+    "description": "Dashboard tile empty-state message"
+  },
+  "adk_dashBarActive": "Active",
+  "@adk_dashBarActive": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "adk_dashBarPaused": "Paused",
+  "@adk_dashBarPaused": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "adk_dashBarLocked": "Locked",
+  "@adk_dashBarLocked": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "adk_dashBarAllowed": "Allowed",
+  "@adk_dashBarAllowed": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "adk_dashBarBlocked": "Blocked",
+  "@adk_dashBarBlocked": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "adk_dashBarDisabled": "Disabled",
+  "@adk_dashBarDisabled": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "adk_dashJobs": "jobs",
+  "@adk_dashJobs": {
+    "description": "Dashboard tile counter label"
+  },
+  "adk_dashLocked": "locked",
+  "@adk_dashLocked": {
+    "description": "Dashboard tile counter label"
+  },
+  "adk_dashTotal": "total",
+  "@adk_dashTotal": {
+    "description": "Dashboard tile counter label"
+  },
+  "adk_dashPending": "pending",
+  "@adk_dashPending": {
+    "description": "Dashboard tile counter label"
+  },
+  "adk_dashActions": "actions",
+  "@adk_dashActions": {
+    "description": "Dashboard tile counter label"
+  },
+  "adk_dashTokens": "tokens",
+  "@adk_dashTokens": {
+    "description": "Dashboard tile counter label"
+  },
+  "adk_dashServers": "servers",
+  "@adk_dashServers": {
+    "description": "Dashboard tile counter label"
+  },
+  "adk_dashDocs": "docs",
+  "@adk_dashDocs": {
+    "description": "Dashboard tile counter label"
+  },
+  "adk_dashChunks": "chunks",
+  "@adk_dashChunks": {
+    "description": "Dashboard tile counter label"
   }
 }

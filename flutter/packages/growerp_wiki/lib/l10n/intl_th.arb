@@ -6,5 +6,8 @@
   "addPage": "เพิ่มหน้า",
   "cancel": "ยกเลิก",
   "pagePathHint": "เส้นทางหน้า (เช่น 'notes/my-page' - หลีกเลี่ยงคำนำหน้า tables/ และ datasets/ ที่สร้างขึ้นอัตโนมัติ)",
-  "markdownTextYamlFrontmatterAllowed": "ข้อความ Markdown (อนุญาตให้ใช้ YAML frontmatter)"
+  "markdownTextYamlFrontmatterAllowed": "ข้อความ Markdown (อนุญาตให้ใช้ YAML frontmatter)",
+  "dashSpaces": "พื้นที่",
+  "dashPages": "หน้า",
+  "dashNoWikiSpaces": "ไม่มีพื้นที่วิกิ"
 }

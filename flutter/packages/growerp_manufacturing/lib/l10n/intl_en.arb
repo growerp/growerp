@@ -212,5 +212,37 @@
   "tableHdrTasks": "Tasks",
   "@tableHdrTasks": {
     "description": "Table column header"
+  },
+  "dashTotal": "total",
+  "@dashTotal": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashOnHold": "on hold",
+  "@dashOnHold": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashCancelled": "cancelled",
+  "@dashCancelled": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashBomItems": "bom items",
+  "@dashBomItems": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashStagePlanning": "Planning",
+  "@dashStagePlanning": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageApproved": "Approved",
+  "@dashStageApproved": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageInProgress": "In Progress",
+  "@dashStageInProgress": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageComplete": "Complete",
+  "@dashStageComplete": {
+    "description": "Dashboard tile funnel stage label"
   }
 }

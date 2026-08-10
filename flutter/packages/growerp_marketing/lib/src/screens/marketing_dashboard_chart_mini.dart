@@ -82,7 +82,7 @@ class _MarketingDashboardChartMiniState
                   SizedBox(
                     width: 86,
                     child: Text(
-                      item.stageId,
+                      _stageLabel(context, item.stageId),
                       overflow: TextOverflow.ellipsis,
                       style: labelStyle,
                     ),
@@ -130,6 +130,7 @@ class _MarketingDashboardChartMiniState
 
   @override
   Widget build(BuildContext context) {
+    final l = MarketingLocalizations.of(context)!;
     if (error != null) {
       return Center(
         child: Text(error!, style: const TextStyle(color: Colors.red)),
@@ -149,10 +150,10 @@ class _MarketingDashboardChartMiniState
       ),
     );
     final counters = [
-      counter('leads', dashboard!.totalLeads),
-      counter('assessments', dashboard!.assessmentCompletions),
-      counter('nurturing', dashboard!.activeEnrollments),
-      counter('nurtured', dashboard!.completedEnrollments),
+      counter(l.dashLeads, dashboard!.totalLeads),
+      counter(l.dashAssessments, dashboard!.assessmentCompletions),
+      counter(l.dashNurturing, dashboard!.activeEnrollments),
+      counter(l.dashNurtured, dashboard!.completedEnrollments),
     ];
     // Phones show the logo as a horizontal top-left strip, desktop as a
     // vertical badge on the left: inset the funnel accordingly.
@@ -198,5 +199,29 @@ class _MarketingDashboardChartMiniState
         ],
       ),
     );
+  }
+}
+
+/// Opportunity stage ids are the English stage names as seeded; translate the
+/// standard ones and show the raw id for stages a company added itself.
+String _stageLabel(BuildContext context, String stageId) {
+  final l = MarketingLocalizations.of(context)!;
+  switch (stageId) {
+    case 'Prospecting':
+      return l.dashStageProspecting;
+    case 'Qualification':
+      return l.dashStageQualification;
+    case 'Demo/Meeting':
+      return l.dashStageDemoMeeting;
+    case 'Proposal':
+      return l.dashStageProposal;
+    case 'Quote':
+      return l.dashStageQuote;
+    case 'Closed Won':
+      return l.dashStageClosedWon;
+    case 'Closed Lost':
+      return l.dashStageClosedLost;
+    default:
+      return stageId;
   }
 }

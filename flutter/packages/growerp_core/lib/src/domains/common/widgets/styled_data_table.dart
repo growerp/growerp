@@ -13,6 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:growerp_core/l10n/generated/core_localizations.dart';
 import 'skeleton_loader.dart';
 
 /// A styled data table following the Stitch Orders Management design pattern.
@@ -76,7 +77,7 @@ class StyledDataTable extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'No data found',
+              CoreLocalizations.of(context)!.noDataFound,
               style: TextStyle(
                 fontSize: 16,
                 color: colorScheme.onSurfaceVariant,

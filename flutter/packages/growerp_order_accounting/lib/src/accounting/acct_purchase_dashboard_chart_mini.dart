@@ -88,7 +88,11 @@ class _AcctPurchaseDashboardChartMiniState
                   SizedBox(
                     width: 86,
                     child: Text(
-                      item.stageName,
+                      _stageLabel(
+                        context,
+                        item.stageId,
+                        item.stageName,
+                      ),
                       overflow: TextOverflow.ellipsis,
                       style: labelStyle,
                     ),
@@ -136,6 +140,7 @@ class _AcctPurchaseDashboardChartMiniState
 
   @override
   Widget build(BuildContext context) {
+    final l = OrderAccountingLocalizations.of(context)!;
     if (error != null) {
       return Center(
         child: Text(error!, style: const TextStyle(color: Colors.red)),
@@ -155,10 +160,10 @@ class _AcctPurchaseDashboardChartMiniState
       ),
     );
     final counters = [
-      counter('total', dashboard!.totalInvoices),
-      counter('unpaid', dashboard!.unpaidInvoices),
-      counter('paid', dashboard!.paidInvoices),
-      counter('cancelled', dashboard!.cancelledInvoices),
+      counter(l.dashTotal, dashboard!.totalInvoices),
+      counter(l.dashUnpaid, dashboard!.unpaidInvoices),
+      counter(l.dashPaid, dashboard!.paidInvoices),
+      counter(l.dashCancelled, dashboard!.cancelledInvoices),
     ];
     // Phones show the logo as a horizontal top-left strip, desktop as a
     // vertical badge on the left: inset the funnel accordingly.
@@ -204,5 +209,21 @@ class _AcctPurchaseDashboardChartMiniState
         ],
       ),
     );
+  }
+}
+
+/// The backend sends each stage with an English name; show the translation for
+/// the ids it knows and fall back to the server text for anything added later.
+String _stageLabel(BuildContext context, String stageId, String fallback) {
+  final l = OrderAccountingLocalizations.of(context)!;
+  switch (stageId) {
+    case 'InvoiceReceived':
+      return l.dashStageReceived;
+    case 'InvoiceApproved':
+      return l.dashStageApproved;
+    case 'InvoicePmtSent':
+      return l.dashStagePaid;
+    default:
+      return fallback;
   }
 }

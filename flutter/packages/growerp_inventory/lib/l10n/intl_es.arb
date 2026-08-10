@@ -84,5 +84,13 @@
   "assetNounRoom": "Habitación",
   "searchHintLocations": "Buscar ubicaciones...",
   "searchHintNoun": "Buscar {noun}...",
-  "assetNounAsset": "Activo"
+  "assetNounAsset": "Activo",
+  "dashLocations": "ubicaciones",
+  "dashIncoming": "entrantes",
+  "dashOutgoing": "salientes",
+  "dashTotal": "total",
+  "dashStageInput": "Entrada",
+  "dashStagePicked": "Preparado",
+  "dashStagePacked": "Embalado",
+  "dashStageShipped": "Enviado"
 }

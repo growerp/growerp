@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import '../l10n/generated/support_localizations.dart';
 import 'support_chart_mini.dart';
 
 /// The four support dashboard tile charts. All data comes from a single
@@ -28,12 +29,12 @@ class ApplicationsDashboardChartMini extends StatelessWidget {
   Widget build(BuildContext context) => SupportChartMini(
     name: 'applications',
     bars: stats.bars,
-    emptyMessage: 'No applications',
+    emptyMessage: SupportLocalizations.of(context)!.dashNoApplications,
     counters: [
-      MapEntry('apps', stats.applications),
-      MapEntry('installs', stats.installs),
-      MapEntry('assessed', stats.withAssessment),
-      MapEntry('plain', stats.withoutAssessment),
+      MapEntry(SupportLocalizations.of(context)!.dashApps, stats.applications),
+      MapEntry(SupportLocalizations.of(context)!.dashInstalls, stats.installs),
+      MapEntry(SupportLocalizations.of(context)!.dashAssessed, stats.withAssessment),
+      MapEntry(SupportLocalizations.of(context)!.dashPlain, stats.withoutAssessment),
     ],
   );
 }
@@ -46,12 +47,12 @@ class OwnersDashboardChartMini extends StatelessWidget {
   Widget build(BuildContext context) => SupportChartMini(
     name: 'owners',
     bars: stats.bars,
-    emptyMessage: 'No owner activity',
+    emptyMessage: SupportLocalizations.of(context)!.dashNoOwnerActivity,
     counters: [
-      MapEntry('owners', stats.owners),
-      MapEntry('active', stats.active),
-      MapEntry('users', stats.users),
-      MapEntry('companies', stats.companies),
+      MapEntry(SupportLocalizations.of(context)!.dashOwners, stats.owners),
+      MapEntry(SupportLocalizations.of(context)!.dashActive, stats.active),
+      MapEntry(SupportLocalizations.of(context)!.dashUsers, stats.users),
+      MapEntry(SupportLocalizations.of(context)!.dashCompanies, stats.companies),
     ],
   );
 }
@@ -64,12 +65,12 @@ class LlmUsageDashboardChartMini extends StatelessWidget {
   Widget build(BuildContext context) => SupportChartMini(
     name: 'llmUsage',
     bars: stats.bars,
-    emptyMessage: 'No system LLM usage',
+    emptyMessage: SupportLocalizations.of(context)!.dashNoLlmUsage,
     counters: [
-      MapEntry('tenants', stats.tenants),
-      MapEntry('actions', stats.actions),
-      MapEntry('tokens in', stats.tokensIn),
-      MapEntry('tokens out', stats.tokensOut),
+      MapEntry(SupportLocalizations.of(context)!.dashTenants, stats.tenants),
+      MapEntry(SupportLocalizations.of(context)!.dashActions, stats.actions),
+      MapEntry(SupportLocalizations.of(context)!.dashTokensIn, stats.tokensIn),
+      MapEntry(SupportLocalizations.of(context)!.dashTokensOut, stats.tokensOut),
     ],
   );
 }
@@ -82,12 +83,12 @@ class RestUsageDashboardChartMini extends StatelessWidget {
   Widget build(BuildContext context) => SupportChartMini(
     name: 'restUsage',
     bars: stats.bars,
-    emptyMessage: 'No REST activity',
+    emptyMessage: SupportLocalizations.of(context)!.dashNoRestActivity,
     counters: [
-      MapEntry('users', stats.users),
-      MapEntry('calls', stats.calls),
-      MapEntry('avg/day', stats.avgPerDay),
-      MapEntry('peak day', stats.peakDay),
+      MapEntry(SupportLocalizations.of(context)!.dashUsers, stats.users),
+      MapEntry(SupportLocalizations.of(context)!.dashCalls, stats.calls),
+      MapEntry(SupportLocalizations.of(context)!.dashAvgPerDay, stats.avgPerDay),
+      MapEntry(SupportLocalizations.of(context)!.dashPeakDay, stats.peakDay),
     ],
   );
 }

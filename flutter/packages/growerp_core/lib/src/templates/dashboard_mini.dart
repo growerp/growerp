@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/l10n/generated/core_localizations.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import 'dashboard_card.dart';
@@ -41,13 +42,13 @@ class DashboardMini extends StatelessWidget {
     required this.tileKey,
     required this.bars,
     required this.counters,
-    this.emptyMessage = 'No data',
+    this.emptyMessage,
   });
 
   final Key tileKey;
   final List<DashboardBar> bars;
   final List<DashboardCounter> counters;
-  final String emptyMessage;
+  final String? emptyMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +109,9 @@ class DashboardMini extends StatelessWidget {
   Widget _bars(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     if (bars.isEmpty) {
-      return Center(child: Text(emptyMessage));
+      return Center(
+        child: Text(emptyMessage ?? CoreLocalizations.of(context)!.noDataFound),
+      );
     }
     int maxCount = 1;
     for (final b in bars) {
@@ -189,12 +192,12 @@ class DashboardMiniLoader extends StatefulWidget {
     super.key,
     required this.tileKey,
     required this.load,
-    this.emptyMessage = 'No data',
+    this.emptyMessage,
   });
 
   final Key tileKey;
   final Future<DashboardMiniData> Function(RestClient) load;
-  final String emptyMessage;
+  final String? emptyMessage;
 
   @override
   State<DashboardMiniLoader> createState() => _DashboardMiniLoaderState();

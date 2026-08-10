@@ -36,13 +36,6 @@ class _OutreachDashboardChartMiniState
   OutreachDashboard? dashboard;
   String? error;
 
-  static const statusLabels = {
-    'PENDING': 'Pending',
-    'SENT': 'Sent',
-    'RESPONDED': 'Responded',
-    'FAILED': 'Failed',
-  };
-
   @override
   void initState() {
     super.initState();
@@ -93,7 +86,7 @@ class _OutreachDashboardChartMiniState
                   SizedBox(
                     width: 86,
                     child: Text(
-                      statusLabels[item.status] ?? item.status,
+                      _statusLabel(context, item.status),
                       overflow: TextOverflow.ellipsis,
                       style: labelStyle,
                     ),
@@ -141,6 +134,7 @@ class _OutreachDashboardChartMiniState
 
   @override
   Widget build(BuildContext context) {
+    final l = OutreachLocalizations.of(context)!;
     if (error != null) {
       return Center(
         child: Text(error!, style: const TextStyle(color: Colors.red)),
@@ -160,10 +154,10 @@ class _OutreachDashboardChartMiniState
       ),
     );
     final counters = [
-      counter('campaigns', dashboard!.totalCampaigns),
-      counter('active', dashboard!.activeCampaigns),
-      counter('sent', dashboard!.messagesSent),
-      counter('replies', dashboard!.responsesReceived),
+      counter(l.dashCampaigns, dashboard!.totalCampaigns),
+      counter(l.dashActive, dashboard!.activeCampaigns),
+      counter(l.dashSent, dashboard!.messagesSent),
+      counter(l.dashReplies, dashboard!.responsesReceived),
     ];
     // Phones show the logo as a horizontal top-left strip, desktop as a
     // vertical badge on the left: inset the funnel accordingly.
@@ -209,5 +203,23 @@ class _OutreachDashboardChartMiniState
         ],
       ),
     );
+  }
+}
+
+/// Message statuses arrive as backend codes; an unknown code falls back to the
+/// code itself so a newly added status still shows on the tile.
+String _statusLabel(BuildContext context, String status) {
+  final l = OutreachLocalizations.of(context)!;
+  switch (status) {
+    case 'PENDING':
+      return l.dashStatusPending;
+    case 'SENT':
+      return l.dashStatusSent;
+    case 'RESPONDED':
+      return l.dashStatusResponded;
+    case 'FAILED':
+      return l.dashStatusFailed;
+    default:
+      return status;
   }
 }

@@ -298,5 +298,37 @@
   "searchHintMessages": "Search messages...",
   "@searchHintMessages": {
     "description": "Search field hint"
+  },
+  "dashCampaigns": "campaigns",
+  "@dashCampaigns": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashActive": "active",
+  "@dashActive": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashSent": "sent",
+  "@dashSent": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashReplies": "replies",
+  "@dashReplies": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashStatusPending": "Pending",
+  "@dashStatusPending": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStatusSent": "Sent",
+  "@dashStatusSent": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStatusResponded": "Responded",
+  "@dashStatusResponded": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStatusFailed": "Failed",
+  "@dashStatusFailed": {
+    "description": "Dashboard tile funnel stage label"
   }
 }

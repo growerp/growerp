@@ -310,5 +310,33 @@
   "activity_searchInput": "Search input",
   "@activity_searchInput": {
     "description": "Search field hint"
+  },
+  "activity_dashAllTasks": "all tasks",
+  "@activity_dashAllTasks": {
+    "description": "Dashboard tile counter label"
+  },
+  "activity_dashToDo": "to-do",
+  "@activity_dashToDo": {
+    "description": "Dashboard tile counter label"
+  },
+  "activity_dashEvents": "events",
+  "@activity_dashEvents": {
+    "description": "Dashboard tile counter label"
+  },
+  "activity_dashUnInvoiced": "un-invoiced",
+  "@activity_dashUnInvoiced": {
+    "description": "Dashboard tile counter label"
+  },
+  "activity_dashBarAll": "All",
+  "@activity_dashBarAll": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "activity_dashBarToDo": "To-Do",
+  "@activity_dashBarToDo": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "activity_dashBarEvents": "Events",
+  "@activity_dashBarEvents": {
+    "description": "Dashboard tile funnel stage label"
   }
 }

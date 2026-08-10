@@ -82,5 +82,16 @@
   "searchHintAssessments": "Buscar valoraciones...",
   "searchHintName": "Buscar por nombre...",
   "searchHintContentPlans": "Buscar planes de contenido...",
-  "searchHintMasterContent": "Buscar contenido maestro..."
+  "searchHintMasterContent": "Buscar contenido maestro...",
+  "dashLeads": "clientes pot.",
+  "dashAssessments": "evaluaciones",
+  "dashNurturing": "en seguimiento",
+  "dashNurtured": "seguidos",
+  "dashStageProspecting": "Prospección",
+  "dashStageQualification": "Calificación",
+  "dashStageDemoMeeting": "Demo/Reunión",
+  "dashStageProposal": "Propuesta",
+  "dashStageQuote": "Cotización",
+  "dashStageClosedWon": "Ganada",
+  "dashStageClosedLost": "Perdida"
 }
