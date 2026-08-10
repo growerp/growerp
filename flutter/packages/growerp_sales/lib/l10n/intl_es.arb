@@ -5,8 +5,8 @@
   "tableHdrName": "Nombre",
   "tableHdrAmount": "Cantidad",
   "tableHdrProbability": "Probabilidad",
-  "tableHdrLead": "Nombre principal/empresa",
-  "tableHdrLeadEmail": "Correo electrónico principal",
+  "tableHdrLead": "Nombre/empresa del cliente potencial",
+  "tableHdrLeadEmail": "Correo del cliente potencial",
   "tableHdrStage": "Escenario",
   "tableHdrNextStep": "Siguiente paso",
   "tableHdrDelete": "",
@@ -31,7 +31,7 @@
   "fieldRequired": "El campo es obligatorio",
   "leadSearch": "Búsqueda de clientes potenciales",
   "selectLead": "Seleccionar cliente potencial",
-  "lead": "Dirigir",
+  "lead": "Cliente potencial",
   "employeeSearch": "Búsqueda de empleados",
   "selectEmployee": "Seleccionar empleado",
   "accountEmployee": "Empleado de cuenta",
@@ -59,7 +59,7 @@
   "opportunityUploadFailure": "No se pudieron cargar oportunidades",
   "opportunityDownloadSuccess": "Descarga de oportunidad programada; el correo electrónico se enviará en breve",
   "opportunityDownloadFailure": "No se pudieron descargar las oportunidades",
-  "noPipelineData": "No hay datos de tubería",
+  "noPipelineData": "No hay datos del embudo",
   "convertToQuote": "Convertir en cotización",
   "opportunityConvertSuccess": "Cita #{id} creada exitosamente"
 }

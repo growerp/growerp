@@ -44,7 +44,7 @@
   "activityAddFailure": "No se pudo agregar actividad",
   "activityFetchFailure": "No se pudieron recuperar las actividades",
   "activity_noTaskData": "Sin datos de tarea",
-  "activity_fromToParty": "Desde/hasta la fiesta",
+  "activity_fromToParty": "Desde/Hasta tercero",
   "activity_failedToFetchSearch": "no se pudieron recuperar los elementos de búsqueda: {statemessage}",
   "activity_searchResults": "Resultados de la búsqueda",
   "activity_noSearchItemsFound": "No se encontraron elementos de búsqueda (aún)",

@@ -19,7 +19,7 @@
   "retry": "Rever",
   "logout": "Cerrar sesión",
   "loadingMenuConfiguration": "Cargando configuración del menú...",
-  "login": "Acceso",
+  "login": "Iniciar sesión",
   "growerpSupport": "Soporte de GrowERP",
   "tableHdrAssessmentId": "ID de evaluación",
   "tableHdrBackendUrl": "URL de fondo",
@@ -32,5 +32,8 @@
   "tableHdrVersion": "Versión",
   "tableHdrWebsite": "Sitio web",
   "searchHintWebsiteConversion": "Buscar sitio web, empresa o estado...",
-  "searchHintWebsiteTranslation": "Buscar propietario, tienda o estado..."
+  "searchHintWebsiteTranslation": "Buscar propietario, tienda o estado...",
+  "tableHdrLanguage": "Idioma",
+  "tableHdrNames": "Nombres",
+  "searchHintGlAccountTranslation": "Buscar idioma o estado..."
 }
