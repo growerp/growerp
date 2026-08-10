@@ -1,8 +1,8 @@
 {
   "@@locale": "es",
-  "landingPage": "Landing Page",
-  "welcomeToGrowerpLandingPage": "Welcome to GrowERP Landing Page",
-  "discoverYourBusinessPotential": "Discover your business potential with our comprehensive assessment.",
-  "startAssessment": "Start Assessment",
-  "clickTheButtonAboveToBegin": "Click the button above to begin your assessment journey."
+  "landingPage": "Página de destino",
+  "welcomeToGrowerpLandingPage": "Bienvenido a la página de inicio de GrowERP",
+  "discoverYourBusinessPotential": "Descubra su potencial de negocio con nuestra evaluación integral.",
+  "startAssessment": "Iniciar evaluación",
+  "clickTheButtonAboveToBegin": "Haga clic en el botón de arriba para comenzar su viaje de evaluación."
 }
