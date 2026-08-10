@@ -1754,9 +1754,14 @@ limitations under the License.
                     <if condition="finDoc.isPosted == true">
                         <service-call name="mantle.ledger.LedgerServices.post#AcctgTrans"
                             in-map="[acctgTransId: acctgTransId]" />
-                        <if condition="ec.message.getMessageInfos().toString().contains('[danger]')">
-                            <return error="true"
-                                message="${ec.message.getMessagesString()}" />
+                        <!-- when post#AcctgTrans refuses to post it parks the transaction in the
+                            organization error journal, so do not return an error here: that would
+                            roll back the transaction we are told to look at in that journal.
+                            Report it as a warning and leave the data in place for correction. -->
+                        <entity-find-one entity-name="mantle.ledger.transaction.AcctgTrans"
+                            value-field="postedAcctgTrans" />
+                        <if condition="postedAcctgTrans?.isPosted != 'Y'">
+                            <message public="true" type="warning">Transaction ${acctgTransId} could not be posted and was saved in error journal ${postedAcctgTrans?.glJournalId} for correction.</message>
                         </if>
                     </if>
                 </else-if>
@@ -2458,9 +2463,14 @@ limitations under the License.
                     <if condition="finDoc.isPosted == true &amp;&amp; transaction.isPosted == 'N'">
                         <service-call name="mantle.ledger.LedgerServices.post#AcctgTrans"
                             in-map="[acctgTransId: finDoc.transactionId]" />
-                        <if condition="ec.message.getMessageInfos().toString().contains('[danger]')">
-                            <return error="true"
-                                message="${ec.message.getMessagesString()}" />
+                        <!-- see create#FinDoc: a refused posting is parked in the error journal,
+                            returning an error here would roll that away again -->
+                        <entity-find-one entity-name="mantle.ledger.transaction.AcctgTrans"
+                            value-field="postedAcctgTrans">
+                            <field-map field-name="acctgTransId" from="finDoc.transactionId" />
+                        </entity-find-one>
+                        <if condition="postedAcctgTrans?.isPosted != 'Y'">
+                            <message public="true" type="warning">Transaction ${finDoc.transactionId} could not be posted and was saved in error journal ${postedAcctgTrans?.glJournalId} for correction.</message>
                         </if>
                     </if>
                     <!-- remove physically unposted transaction with status cancelled -->

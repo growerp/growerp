@@ -152,21 +152,27 @@ limitations under the License.
             <set field="glAccountsUpdated" type="Integer" value="0" />
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="relComp" />
-            <!-- delete existing transactions only initial if present-->
+            <!-- replace the initial balance transaction(s) of an earlier import; a ledger
+                holding any other transaction must not be overwritten. Note a failed import
+                leaves its initial balance in the error journal, which has to be replaceable
+                too, so match on the description instead of counting the transactions. -->
+            <set field="initialBalanceDescription" value="Initial balance" />
             <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transList">
                 <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
             </entity-find>
-            <if condition="transList.size() &gt; 1">
+            <set field="initialTransIds"
+                from="transList.findAll { it.description == initialBalanceDescription }.acctgTransId" />
+            <if condition="transList.size() &gt; initialTransIds.size()">
                 <return error="true"
-                    message="Can only delete ledger when when not more than the initial settiung of posted balance." />
+                    message="Cannot replace the ledger: it holds accounting transactions other than the initial balance." />
             </if>
-            <if condition="!transList.isEmpty()">
+            <if condition="initialTransIds">
                 <entity-delete-by-condition
                     entity-name="mantle.ledger.transaction.AcctgTransEntry">
-                    <econdition field-name="acctgTransId" from="transList[0].acctgTransId" />
+                    <econdition field-name="acctgTransId" operator="in" from="initialTransIds" />
                 </entity-delete-by-condition>
                 <entity-delete-by-condition entity-name="mantle.ledger.transaction.AcctgTrans">
-                    <econdition field-name="acctgTransId" from="transList[0].acctgTransId" />
+                    <econdition field-name="acctgTransId" operator="in" from="initialTransIds" />
                 </entity-delete-by-condition>
             </if>
             <!-- delete existing ledger only if input file has account description and class 
@@ -178,13 +184,16 @@ limitations under the License.
                     <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
                     <select-field field-name="glAccountId" />
                 </entity-find>
-                <entity-delete-by-condition
-                    entity-name="mantle.ledger.account.GlAccountOrganization">
+                <set field="oldGlAccountIds" from="glAccountsOrg.glAccountId" />
+                <!-- the whole chart is replaced, so the GL configuration built on it goes too:
+                    it points at accounts that will no longer exist, and its foreign keys block
+                    the account delete. The configuration created by
+                    init#PartyAccountingConfiguration has to be set up again after the import. -->
+                <entity-delete-by-condition entity-name="mantle.ledger.config.GlAccountTypeDefault">
                     <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
                 </entity-delete-by-condition>
-                <entity-delete-by-condition
-                    entity-name="mantle.ledger.account.GlAccount">
-                    <econdition field-name="glAccountId" operator="in" from="glAccountsOrg" />
+                <entity-delete-by-condition entity-name="mantle.ledger.config.InvoiceTypeTransType">
+                    <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
                 </entity-delete-by-condition>
                 <!-- delete item types-->
                 <entity-delete-by-condition entity-name="mantle.ledger.config.ItemTypeGlAccount">
@@ -194,6 +203,44 @@ limitations under the License.
                 <entity-delete-by-condition entity-name="mantle.ledger.config.PaymentTypeGlAccount">
                     <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
                 </entity-delete-by-condition>
+                <entity-delete-by-condition
+                    entity-name="mantle.ledger.config.PaymentInstrumentGlAccount">
+                    <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
+                </entity-delete-by-condition>
+                <entity-delete-by-condition
+                    entity-name="mantle.ledger.config.FinancialAccountTypeGlAccount">
+                    <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
+                </entity-delete-by-condition>
+                <entity-delete-by-condition entity-name="mantle.ledger.config.AssetTypeGlAccount">
+                    <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
+                </entity-delete-by-condition>
+                <!-- posted summaries per fiscal period, rebuilt by
+                    recalculate#GlAccountOrgSummaries at the end of this service -->
+                <entity-delete-by-condition
+                    entity-name="mantle.ledger.account.GlAccountOrgTimePeriod">
+                    <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
+                </entity-delete-by-condition>
+                <entity-delete-by-condition
+                    entity-name="mantle.ledger.account.GlAccountOrganization">
+                    <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
+                </entity-delete-by-condition>
+                <if condition="oldGlAccountIds">
+                    <!-- break the parent self reference, a single delete of the whole set would
+                        trip that foreign key -->
+                    <entity-find entity-name="mantle.ledger.account.GlAccount"
+                        list="parentedGlAccounts" for-update="true">
+                        <econdition field-name="glAccountId" operator="in" from="oldGlAccountIds" />
+                        <econdition field-name="parentGlAccountId" operator="is-not-null" />
+                    </entity-find>
+                    <iterate list="parentedGlAccounts" entry="oldGlAccount">
+                        <set field="oldGlAccount.parentGlAccountId" from="null" />
+                        <entity-update value-field="oldGlAccount" />
+                    </iterate>
+                    <entity-delete-by-condition
+                        entity-name="mantle.ledger.account.GlAccount">
+                        <econdition field-name="glAccountId" operator="in" from="oldGlAccountIds" />
+                    </entity-delete-by-condition>
+                </if>
             </if>
             <!-- create new accounts and collect posted balances for new transactions-->
             <set field="transactions" from="[]" />
@@ -213,11 +260,8 @@ limitations under the License.
                         out-map="createdGlAccount" />
                     <script>glAccountsImported++</script>
                     <set field="newGlAccountId" from="createdGlAccount.glAccount.glAccountId" />
-                    <set field="isDebit" from="createdGlAccount.glAccount.isDebit" />
                     <else>
                         <set field="newGlAccountId" from="glAccountsOrg[0].glAccountId" />
-                        <set field="isDebit" from="glAccountsOrg[0].isDebit == 'Y' ? true : false"
-                            type="Boolean" />
                         <script>System.out.println(">>>>importing existing GlAccount: ${newGlAccount?.glAccountId}")</script>
                         <script>glAccountsUpdated++</script>
                     </else>
@@ -228,9 +272,12 @@ limitations under the License.
                     <if condition="newGlAccount.postedBalance.startsWith('-')">
                         <set field="isPositive" value="false" type="Boolean" />
                     </if>
+                    <!-- postedBalance is a signed trial balance, not a balance relative to the
+                        natural side of the account: a debit balance is positive, a credit balance
+                        negative, and the column sums to zero over the whole file. So the sign
+                        alone decides the side; the account's own isDebit plays no part. -->
                     <script>transactions.add([
-                        isDebit: isDebit == isPositive 
-                            ? isDebit : !isDebit,
+                        isDebit: isPositive,
                         price: new BigDecimal(newGlAccount.postedBalance.replace('-','')),
                         glAccount: [glAccountId: newGlAccountId],
                         ])</script>
@@ -239,8 +286,8 @@ limitations under the License.
             <!-- create posted balance in initial transaction-->
             <if condition="!transactions.isEmpty()">
                 <service-call name="growerp.100.FinDocServices100.create#FinDoc"
-                    in-map="finDoc: [docType: 'transaction', sales: 'true', isPosted: true,
-                                            description: 'Initial balance',
+                    in-map="finDoc: [docType: 'transaction', sales: true, isPosted: true,
+                                            description: initialBalanceDescription,
                                             items: transactions]"
                     out-map="context" />
             </if>
@@ -2165,12 +2212,41 @@ limitations under the License.
                 CSVPrinter printer = CSVFormat.DEFAULT.withHeader(
                     "id", "name", "isDebit", "class", "type","postedBalance").print(outSb)
                 for (Map item in glAccounts) {
+                    // GlAccountOrganization.postedBalance is stored relative to the natural side
+                    // of the account: positive is a debit balance on a debit account but a credit
+                    // balance on a credit account. import#GlAccounts reads the column as a signed
+                    // trial balance (debit positive, credit negative), so flip credit accounts
+                    // here to keep export and import on the same convention.
+                    String postedBalance = ''
+                    if (item.postedBalance) {
+                        BigDecimal balance = new BigDecimal(item.postedBalance)
+                        if (item.isDebit != true) balance = balance.negate()
+                        postedBalance = balance.toPlainString()
+                    }
+                    // get#GlAccount reports the class at the level the account sits on, so
+                    // only one of these four ids is filled: take the most specific one, or the
+                    // class column comes out empty and the file cannot be uploaded again
+                    // ("Account class missing for account ...").
+                    String classEnumId = item.accountClass?.detailClassId ?:
+                        item.accountClass?.classId ?:
+                        item.accountClass?.parentClassId ?:
+                        item.accountClass?.topClassId ?: ''
+                    // The descriptions get#GlAccount returns are localized for display, while
+                    // import#GlAccounts matches the stored value, so an export made while
+                    // working in one language could not be uploaded back. Read the raw
+                    // description: a plain entity read localizes it again.
+                    String accountClass = ''
+                    if (classEnumId) {
+                        def classEnum = ec.entity.find("moqui.basic.Enumeration")
+                            .condition("enumId", classEnumId).useCache(true).one()
+                        accountClass = (String) classEnum?.getNoCheckSimple("description") ?: ''
+                    }
                     printer.printRecord(item.accountCode,
                                         item.accountName,
                                         item.isDebit,
-                                        item.accountClass.description,
-                                        item.accountType.description,
-                                        item.posteBalance,
+                                        accountClass,
+                                        item.accountType?.description,
+                                        postedBalance,
                                         )}
                 fileText = outSb.toString()
             ]]></script>
@@ -2190,42 +2266,35 @@ limitations under the License.
         <actions>
             <set field="applicationId" from="applicationId ?: classificationId" />
             <set field="emailAddress" from="ec.user.userAccount.emailAddress" />
-            <set field="userAccount" from="ec.user.userAccount" />
             <set field="bodyParameters" from="[applicationId: applicationId]" />
             <if condition="entityName == 'Category'">
-                <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true"
-                    in-map="[emailTemplateId: 'GrowerpExportCategories',
-                        toAddresses: emailAddress, bodyParameters: bodyParameters]"
-                    out-map="context" />
-                <message public="true" type="success">A Categories CSV file was sent by email to ${userAccount.emailAddress}.</message>
+                <set field="emailTemplateId" value="GrowerpExportCategories" />
+                <set field="exportLabel" value="Categories" />
                 <else-if condition="entityName == 'Product'">
-                    <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
-                        async="true"
-                        in-map="[emailTemplateId: 'GrowerpExportProducts',
-                        toAddresses: emailAddress, bodyParameters: bodyParameters]"
-                        out-map="context" />
-                    <message public="true" type="success">A Products CSV file was sent by email to ${userAccount.emailAddress}.</message>
+                    <set field="emailTemplateId" value="GrowerpExportProducts" />
+                    <set field="exportLabel" value="Products" />
                 </else-if>
                 <else-if condition="entityName == 'GlAccount'">
-                    <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
-                        async="true"
-                        in-map="[emailTemplateId: 'GrowerpExportGlAccounts',
-                        toAddresses: emailAddress, bodyParameters: bodyParameters]"
-                        out-map="context" />
-                    <message public="true" type="success">A GlAccount CSV file was sent by email to ${userAccount.emailAddress}.</message>
+                    <set field="emailTemplateId" value="GrowerpExportGlAccounts" />
+                    <set field="exportLabel" value="GlAccount" />
                 </else-if>
                 <else-if condition="entityName == 'CompanyUser'">
-                    <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
-                        async="true"
-                        in-map="[emailTemplateId: 'GrowerpExportCompanyUsers',
-                        toAddresses: emailAddress, bodyParameters: bodyParameters]"
-                        out-map="context" />
-                    <message public="true" type="success">A Company/User CSV file was sent by email to ${userAccount.emailAddress}.</message>
+                    <set field="emailTemplateId" value="GrowerpExportCompanyUsers" />
+                    <set field="exportLabel" value="Company/User" />
                 </else-if>
                 <else>
                     <return error="true"
                         message="Entity name [${entityName}] not supported for export." />
                 </else>
+            </if>
+            <!-- these templates all send through the SYSTEM server, so no ownerPartyId -->
+            <service-call name="growerp.100.GeneralServices100.send#CheckedEmailTemplate"
+                out-map="context"
+                in-map="[emailTemplateId: emailTemplateId, toAddresses: emailAddress,
+                    bodyParameters: bodyParameters,
+                    sendDescription: exportLabel + ' CSV file']" />
+            <if condition="emailSent">
+                <message public="true" type="success">A ${exportLabel} CSV file was sent by email to ${emailAddress}.</message>
             </if>
         </actions>
     </service>

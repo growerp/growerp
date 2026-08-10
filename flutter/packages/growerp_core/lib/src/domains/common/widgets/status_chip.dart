@@ -100,13 +100,20 @@ class StatusChip extends StatelessWidget {
             Icon(icon, size: dimensions.iconSize, color: colors.foreground),
             SizedBox(width: dimensions.iconSpacing),
           ],
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: dimensions.fontSize,
-              fontWeight: FontWeight.w500,
-              color: colors.foreground,
-              letterSpacing: 0.2,
+          // the chip hugs its label, but a long status in a narrow table
+          // column has to give way instead of overflowing the cell
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: dimensions.fontSize,
+                fontWeight: FontWeight.w500,
+                color: colors.foreground,
+                letterSpacing: 0.2,
+              ),
             ),
           ),
         ],

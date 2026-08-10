@@ -107,7 +107,8 @@ List<String> convertRow(
         // general layout
         columnsTo.add(columnsFrom[0]); //0 accountCode
         columnsTo.add(columnsFrom[1]); //1 account name
-        columnsTo.add(convertClass[columnsFrom[2]]); //class
+        columnsTo.add(''); //2 isDebit, derived from the class by the backend
+        columnsTo.add(convertClass[columnsFrom[2]]); //3 class
         return columnsTo;
       }
       return [];

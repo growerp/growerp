@@ -12,7 +12,6 @@
  * limitations under the License.
  */
 
-import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -36,9 +35,9 @@ class GlAccountListItem extends StatelessWidget {
         glAccount.postedBalance == null ||
             glAccount.postedBalance.toString() == '0'
         ? ''
-        : Constant.numberFormat.format(
-            Decimal.parse(glAccount.postedBalance!.toString()),
-          );
+        // NumberFormat needs a num: a Decimal reaches it as an untyped argument
+        // and only fails at runtime, on its isNegative call
+        : Constant.numberFormat.format(glAccount.postedBalance!.toDouble());
     return ListTile(
       leading: CircleAvatar(
         child: Text(

@@ -43,9 +43,11 @@ abstract class GlAccount with _$GlAccount {
       _$GlAccountFromJson(json['glAccount'] ?? json);
 }
 
+// same column layout as the backend get#ExportGlAccounts service and the
+// admin app upload, so an exported file can be edited and uploaded again.
 String glAccountCsvFormat =
-    'Account Code*, Account Name*, Class Description*, Type Description,'
-    ' Posted Balance, itemType in, itemType out \r\n';
+    'Account Code*, Account Name*, Is Debit, Class Description*,'
+    ' Type Description, Posted Balance \r\n';
 int glAccountCsvLength = glAccountCsvFormat.split(',').length;
 
 // import
@@ -58,9 +60,10 @@ List<GlAccount> csvToGlAccounts(String csvFile) {
       GlAccount(
         accountCode: row[0],
         accountName: row[1],
-        accountClass: row[2] != '' ? AccountClass(description: row[2]) : null,
-        accountType: row[3] != '' ? AccountType(description: row[3]) : null,
-        postedBalance: row[4] != '' ? Decimal.parse(row[4]) : null,
+        isDebit: row[2] == 'true',
+        accountClass: row[3] != '' ? AccountClass(description: row[3]) : null,
+        accountType: row[4] != '' ? AccountType(description: row[4]) : null,
+        postedBalance: row[5] != '' ? Decimal.parse(row[5]) : null,
       ),
     );
   }
@@ -75,6 +78,7 @@ String csvFromGlAccounts(List<GlAccount> glAccounts) {
       createCsvRow([
         glAccount.accountCode ?? '',
         glAccount.accountName ?? '',
+        glAccount.isDebit == null ? '' : glAccount.isDebit.toString(),
         glAccount.accountClass!.description ?? '',
         glAccount.accountType!.description ?? '',
         glAccount.postedBalance == null

@@ -1525,29 +1525,50 @@ limitations under the License.
                     <set field="classEnumId" from="accountClass.classId" />
                 </if>
             </if>
+            <!-- Enumeration.description is localized: an econdition compares the stored value,
+                but reading the field back returns it in the user's language. So the level that
+                matched cannot be found by comparing the read values against what was asked for -
+                that only ever succeeded for classes with no translation, and every other account
+                silently fell back to the top class (all accounts ending up plain Debit/Credit).
+                Ask per level instead, deepest first, and let the econdition do the matching. -->
             <if condition="!classes &amp;&amp; accountClass?.description">
                 <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels"
                     list="classes">
-                    <econditions combine="or">
-                        <econdition field-name="detailDescription" from="accountClass.description" />
-                        <econdition field-name="description" from="accountClass.description" />
-                        <econdition field-name="parentDescription" from="accountClass.description" />
-                        <econdition field-name="topDescription" from="accountClass.description" />
-                    </econditions>
-                    <order-by
-                        field-name="[topDescription,parentDescription,description,detailDescription]" />
+                    <econdition field-name="detailDescription" from="accountClass.description" />
+                    <order-by field-name="detailDescription" />
                 </entity-find>
-                <!-- the id of the level the description matched on -->
                 <if condition="classes">
-                    <script><![CDATA[
-                        def row = classes[0]
-                        String wanted = accountClass.description
-                        context.classEnumId =
-                            wanted == row.detailDescription ? row.detailClassId :
-                            wanted == row.description ? row.classId :
-                            wanted == row.parentDescription ? row.parentClassId :
-                            row.topClassId
-                    ]]></script>
+                    <set field="classEnumId" from="classes[0].detailClassId" />
+                </if>
+            </if>
+            <if condition="!classes &amp;&amp; accountClass?.description">
+                <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels"
+                    list="classes">
+                    <econdition field-name="description" from="accountClass.description" />
+                    <order-by field-name="description" />
+                </entity-find>
+                <if condition="classes">
+                    <set field="classEnumId" from="classes[0].classId" />
+                </if>
+            </if>
+            <if condition="!classes &amp;&amp; accountClass?.description">
+                <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels"
+                    list="classes">
+                    <econdition field-name="parentDescription" from="accountClass.description" />
+                    <order-by field-name="parentDescription" />
+                </entity-find>
+                <if condition="classes">
+                    <set field="classEnumId" from="classes[0].parentClassId" />
+                </if>
+            </if>
+            <if condition="!classes &amp;&amp; accountClass?.description">
+                <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels"
+                    list="classes">
+                    <econdition field-name="topDescription" from="accountClass.description" />
+                    <order-by field-name="topDescription" />
+                </entity-find>
+                <if condition="classes">
+                    <set field="classEnumId" from="classes[0].topClassId" />
                 </if>
             </if>
         </actions>

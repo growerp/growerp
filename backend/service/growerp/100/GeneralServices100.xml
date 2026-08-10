@@ -2341,5 +2341,47 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="send" noun="CheckedEmailTemplate">
+        <description>Send an email template, but check first that there is somewhere to send it
+            and something to send it with. A missing address or an unconfigured mail server is
+            reported as a warning message and emailSent comes back false; it is not an error,
+            because the caller's own work (an export, a registration) did succeed. Use this
+            instead of calling org.moqui.impl.EmailServices.send#EmailTemplate directly: that
+            service is normally called async, so a bad configuration surfaces as an
+            EmailException on a worker thread that no user ever sees.</description>
+        <in-parameters>
+            <parameter name="emailTemplateId" required="true"/>
+            <parameter name="toAddresses" required="true"/>
+            <parameter name="bodyParameters" type="Map"/>
+            <parameter name="ownerPartyId">
+                <description>Set for a tenant send, so the owner company's own SMTP settings are
+                    checked instead of the SYSTEM server.</description>
+            </parameter>
+            <parameter name="sendDescription" default-value="email">
+                <description>What is being sent, used in the warning message.</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="emailSent" type="Boolean"/>
+        </out-parameters>
+        <actions>
+            <set field="emailSent" from="false"/>
+            <if condition="!toAddresses">
+                <message public="true" type="warning">No email address available, so the ${sendDescription} could not be sent.</message>
+                <return/>
+            </if>
+            <service-call name="growerp.100.GeneralServices100.get#ActiveEmailServer"
+                in-map="[ownerPartyId: ownerPartyId]" out-map="context"/>
+            <if condition="!emailConfigured">
+                <message public="true" type="warning">No email server is configured, so the ${sendDescription} could not be sent to ${toAddresses}.</message>
+                <return/>
+            </if>
+            <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true"
+                in-map="[emailTemplateId: emailTemplateId, toAddresses: toAddresses,
+                    bodyParameters: bodyParameters]"/>
+            <set field="emailSent" from="true"/>
+        </actions>
+    </service>
+
 </services>
  

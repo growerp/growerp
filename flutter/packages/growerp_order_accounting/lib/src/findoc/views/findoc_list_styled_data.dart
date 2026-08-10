@@ -65,7 +65,8 @@ List<StyledColumn> getFinDocListColumns(
     columns.add(StyledColumn(header: localizations.tableHdrTotal, flex: 1));
   }
 
-  columns.add(StyledColumn(header: localizations.status, flex: 1));
+  // status labels are words, not numbers, so give them room to fit the chip
+  columns.add(StyledColumn(header: localizations.status, flex: 2));
   columns.add(StyledColumn(header: localizations.tableHdrEmail, flex: 2));
   columns.add(const StyledColumn(header: '', flex: 1)); // Actions
 

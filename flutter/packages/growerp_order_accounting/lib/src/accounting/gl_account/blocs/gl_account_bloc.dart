@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:decimal/decimal.dart';
 import 'package:dio/dio.dart';
@@ -231,29 +232,37 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
       emit(state.copyWith(status: GlAccountStatus.loading));
       List<GlAccount> glAccounts = [];
       final result = fast_csv.parse(event.file);
-      // import csv into glAccounts
+      // The email attachment renderer wraps the exported file in whitespace
+      // lines, so the header is not necessarily the first row: recognise the
+      // header and the blank lines by content rather than by position.
       for (final row in result) {
-        if (row == result.first || row[0] == "        ") continue;
+        if (row.length < 6) continue;
+        final code = row[0].trim();
+        if (code.isEmpty || code == 'id') continue;
+        final balance = row[5].trim();
         glAccounts.add(
           GlAccount(
-            accountCode: row[0],
+            accountCode: code,
             accountName: row[1],
-            isDebit: row[2] == 'true' ? true : false,
+            isDebit: row[2].trim().toLowerCase() == 'true',
             accountClass: row[3] != ''
                 ? AccountClass(description: row[3])
                 : null,
             accountType: row[4] != '' ? AccountType(description: row[4]) : null,
-            postedBalance: row[5].isNotEmpty ? Decimal.parse(row[5]) : null,
+            postedBalance: balance.isEmpty ? null : Decimal.tryParse(balance),
           ),
         );
       }
 
-      await restClient.importGlAccounts(glAccounts);
+      final response = await restClient.importGlAccounts(glAccounts);
+      // the backend reports a not posted initial balance as a warning message
+      // instead of an error, so the accounts are kept: show it to the user.
+      final backendMessage = _backendMessage(response);
       return emit(
         state.copyWith(
           status: GlAccountStatus.success,
           glAccounts: state.glAccounts,
-          message: 'glAccountUploadSuccess',
+          message: backendMessage ?? 'glAccountUploadSuccess',
         ),
       );
     } on DioException catch (e) {
@@ -261,6 +270,14 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
         state.copyWith(
           status: GlAccountStatus.failure,
           message: await getDioError(e),
+        ),
+      );
+    } catch (e) {
+      // a bad file must not leave the list spinning on loading forever
+      emit(
+        state.copyWith(
+          status: GlAccountStatus.failure,
+          message: 'Could not read the CSV file: $e',
         ),
       );
     }
@@ -272,12 +289,16 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
   ) async {
     try {
       emit(state.copyWith(status: GlAccountStatus.loading));
-      await restClient.exportGlAccounts();
+      final response = await restClient.exportGlAccounts();
+      // a missing address or unconfigured mail server comes back as a warning
+      // message, so the export never silently claims an email is on its way
+      final backendMessage = _backendMessage(response);
       return emit(
         state.copyWith(
           status: GlAccountStatus.success,
           glAccounts: state.glAccounts,
           message:
+              backendMessage ??
               "The request is scheduled and the email will be sent shortly",
         ),
       );
@@ -290,5 +311,21 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
         ),
       );
     }
+  }
+
+  /// Moqui adds any messages a service emitted to the response as `messages`.
+  /// Returns null when the response carries none, so the caller can fall back
+  /// to its own text.
+  String? _backendMessage(String response) {
+    try {
+      final decoded = jsonDecode(response);
+      if (decoded is Map && decoded['messages'] != null) {
+        final message = decoded['messages'].toString().trim();
+        if (message.isNotEmpty) return message;
+      }
+    } catch (_) {
+      // not JSON, or no messages: fall back to the caller's own text
+    }
+    return null;
   }
 }

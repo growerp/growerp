@@ -53,7 +53,7 @@ String websiteCsvFormat =
     'content path4, title4, text4, image4, seqId4,'
     'content path5, title5, text5, image5, seqId5,'
     ' \r\n';
-int websiteCsvLength = glAccountCsvFormat.split(',').length;
+int websiteCsvLength = websiteCsvFormat.split(',').length;
 
 // import
 Website csvToWebsite(String csvFile) {
