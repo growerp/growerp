@@ -224,5 +224,13 @@
   "companies": "Firmen",
   "users": "Benutzer",
   "companiesUsers": "Firmen/Benutzer",
-  "searchHintNoun": "{noun} suchen..."
+  "searchHintNoun": "{noun} suchen...",
+  "accountingYearStarts": "Geschäftsjahr beginnt",
+  "@accountingYearStarts": {
+    "description": "Label of the month the accounting year starts"
+  },
+  "acctPeriodLocked": "Nicht mehr änderbar: es wurden Buchungen erfasst",
+  "@acctPeriodLocked": {
+    "description": "Currency and accounting year can no longer be changed"
+  }
 }

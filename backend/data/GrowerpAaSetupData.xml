@@ -65,9 +65,11 @@ limitations under the License.
         serviceName="growerp.100.ChatServices100.send#UnansweredChatEmails"
         cronExpression="0 * * * * ?" paused="N" transactionTimeout="600" />
 
-    <!-- format time period name -->
+    <!-- format time period name: the year is the fiscal year the period belongs to, which is
+        the year the period started in when counting back to the first period of the year,
+        so a fiscal year starting in april names january of the next calendar year Y2026m10 -->
     <moqui.basic.LocalizedMessage locale="default" original="TimePeriodBaseNameTemplate"
-        localized="Y${fromLocalDate.getYear()}${timePeriodType?.lengthUomId!='TF_yr'?(timePeriodType.description.split('(?=[A-Z])')[1][0].toLowerCase())+(periodNum as String).padLeft(2,'0'):''}" />
+        localized="Y${timePeriodType?.lengthUomId=='TF_yr'?fromLocalDate.getYear():fromLocalDate.minusMonths((timePeriodType.periodLength*(periodNum-1)).longValue()).getYear()}${timePeriodType?.lengthUomId!='TF_yr'?(timePeriodType.description.split('(?=[A-Z])')[1][0].toLowerCase())+(periodNum as String).padLeft(2,'0'):''}" />
 
     <!-- growerp initial products -->
     <mantle.party.Party partyId="GROWERP" partyTypeEnumId="PtyOwner" disabled="Y" />

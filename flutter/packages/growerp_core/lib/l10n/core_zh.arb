@@ -1323,5 +1323,13 @@
   "hours": "小时",
   "toDo": "待办",
   "events": "事件",
-  "open": "未结"
+  "open": "未结",
+  "accountingYearStarts": "会计年度开始",
+  "@accountingYearStarts": {
+    "description": "Label of the month the accounting year starts"
+  },
+  "acctPeriodLocked": "无法更改：已过账交易",
+  "@acctPeriodLocked": {
+    "description": "Currency and accounting year can no longer be changed"
+  }
 }

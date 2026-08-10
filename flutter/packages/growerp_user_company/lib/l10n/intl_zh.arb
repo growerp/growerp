@@ -224,5 +224,13 @@
   "companies": "公司",
   "users": "用户",
   "companiesUsers": "公司/用户",
-  "searchHintNoun": "搜索{noun}..."
+  "searchHintNoun": "搜索{noun}...",
+  "accountingYearStarts": "会计年度开始",
+  "@accountingYearStarts": {
+    "description": "Label of the month the accounting year starts"
+  },
+  "acctPeriodLocked": "无法更改：已过账交易",
+  "@acctPeriodLocked": {
+    "description": "Currency and accounting year can no longer be changed"
+  }
 }

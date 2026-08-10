@@ -67,7 +67,7 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
     _controller = TreeController(allNodesExpanded: false);
     _ledgerBloc = context.read<LedgerBloc>();
     _selectedPeriod = TimePeriod(
-      periodName: 'Y${DateTime.now().year}',
+      periodName: currentFiscalYearName(context),
       periodType: 'Y',
     );
     _ledgerBloc.add(
@@ -335,7 +335,7 @@ class BalanceSheetFormState extends State<BalanceSheetListForm> {
 
                                     // Go to next year (but don't exceed current year)
                                     int nextYear = year + 1;
-                                    int currentYear = DateTime.now().year;
+                                    int currentYear = currentFiscalYear(context);
                                     if (nextYear > currentYear) {
                                       nextYear = currentYear;
                                     }

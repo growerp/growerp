@@ -55,7 +55,7 @@ class RevenueExpenseChartState extends State<RevenueExpenseForm> {
     super.initState();
     _ledgerBloc = context.read<LedgerBloc>();
     _selectedPeriod = TimePeriod(
-      periodName: 'Y${DateTime.now().year}',
+      periodName: currentFiscalYearName(context),
       periodType: 'Y',
     );
     _ledgerBloc.add(
@@ -113,6 +113,12 @@ class RevenueExpenseChartState extends State<RevenueExpenseForm> {
               _localizations.oct,
               _localizations.nov,
               _localizations.dec,
+            ];
+            // the chart shows the fiscal year, which can start at another quarter
+            final startMonth = fiscalYearStartMonth(context);
+            months = [
+              ...months.sublist(startMonth - 1),
+              ...months.sublist(0, startMonth - 1),
             ];
             // calculate maxY and minY
             double maxY = 0.0, minY = 0.0;
@@ -283,7 +289,7 @@ class RevenueExpenseChartState extends State<RevenueExpenseForm> {
 
                               // Go to next year (but don't exceed current year)
                               int nextYear = year + 1;
-                              int currentYear = DateTime.now().year;
+                              int currentYear = currentFiscalYear(context);
                               if (nextYear > currentYear) {
                                 nextYear = currentYear;
                               }

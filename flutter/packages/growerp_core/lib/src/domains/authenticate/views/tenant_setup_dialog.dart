@@ -36,6 +36,7 @@ class TenantSetupDialog extends StatefulWidget {
 class TenantSetupDialogState extends State<TenantSetupDialog> {
   final _formKey = GlobalKey<FormBuilderState>();
   Currency? _currencySelected;
+  int _fiscalYearStartMonth = 1;
   late bool _demoData;
   bool _isSubmitting = false;
   bool _isLoadingCurrencies = true;
@@ -172,6 +173,18 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
                         ),
                       SizedBox(height: 20),
 
+                      // Accounting year start
+                      FiscalYearStartDropdown(
+                        value: _fiscalYearStartMonth,
+                        label:
+                            localizations?.accountingYearStarts ??
+                            'Accounting year starts',
+                        onChanged: (value) => setState(
+                          () => _fiscalYearStartMonth = value ?? 1,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+
                       // Demo Data Checkbox (only in debug mode or if explicitly shown)
                       if ((!kReleaseMode ||
                               widget.authenticate.user?.userGroup ==
@@ -258,6 +271,7 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
             widget.authenticate.moquiSessionToken!,
             companyName: companyName,
             currency: currency,
+            fiscalYearStartMonth: _fiscalYearStartMonth,
             demoData: demoData,
           ),
         );

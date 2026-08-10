@@ -1660,5 +1660,13 @@
   "open": "Open",
   "@open": {
     "description": "Dashboard tile statistic label for open documents"
+  },
+  "accountingYearStarts": "Accounting year starts",
+  "@accountingYearStarts": {
+    "description": "Label of the month the accounting year starts"
+  },
+  "acctPeriodLocked": "Cannot be changed: transactions have been posted",
+  "@acctPeriodLocked": {
+    "description": "Currency and accounting year can no longer be changed"
   }
 }

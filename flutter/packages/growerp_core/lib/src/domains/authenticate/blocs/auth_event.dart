@@ -47,6 +47,7 @@ class AuthLogin extends AuthEvent {
   // for registration continuation
   final String? companyName;
   final Currency? currency;
+  final int? fiscalYearStartMonth; // accounting year start: 1, 4, 7 or 10
   final String? creditCardNumber;
   final String? nameOnCard;
   final String? cVC;
@@ -61,6 +62,7 @@ class AuthLogin extends AuthEvent {
     this.password, {
     this.companyName,
     this.currency,
+    this.fiscalYearStartMonth,
     this.demoData,
     this.creditCardNumber,
     this.nameOnCard,

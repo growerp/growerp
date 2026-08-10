@@ -56,6 +56,10 @@ limitations under the License.
                     message="Could not find PartyAcctgPreference for source party [${sourcePartyId}]" />
             </if>
             <set field="partyAcctgPreference" from="sourcePartyAcctgPreference.cloneValue()" />
+            <!-- the fiscal year always starts on the first day of a quarter -->
+            <if condition="fiscalYearStartMonth">
+                <set field="fiscalYearStartDay" from="1" type="Integer" />
+            </if>
             <entity-set value-field="partyAcctgPreference" include="nonpk" set-if-empty="false" />
             <service-call name="create#mantle.ledger.config.PartyAcctgPreference"
                 in-map="partyAcctgPreference + [organizationPartyId:organizationPartyId, errorGlJournalId:errorGlJournalId]" />
@@ -160,38 +164,138 @@ limitations under the License.
             </iterate>
 
             <!-- setup mantle.party.time.TimePeriod for FiscalMonth, FiscalQuarter, FiscalYear -->
+            <service-call name="growerp.100.AccountingServices100.create#FiscalTimePeriods"
+                in-map="[organizationPartyId:organizationPartyId, startYear:startYear,
+                        fiscalYearStartMonth:fiscalYearStartMonth]" />
+        </actions>
+    </service>
+
+    <service verb="create" noun="FiscalTimePeriods">
+        <description>Create the fiscal year, quarter and month periods for a company, starting at
+            the fiscal year start month(1, 4, 7 or 10) of its accounting preference and running
+            through the next fiscal year.</description>
+        <in-parameters>
+            <parameter name="organizationPartyId" required="true" />
+            <parameter name="fiscalYearStartMonth" type="Integer">
+                <description>1, 4, 7 or 10, when not provided taken from the PartyAcctgPreference</description>
+            </parameter>
+            <parameter name="startYear" format="0000">
+                <description>Year of the first fiscal year to create, default the current fiscal year</description>
+            </parameter>
+            <parameter name="startDate" type="Date">
+                <description>Alternative for startYear: start with the fiscal year containing this date</description>
+            </parameter>
+        </in-parameters>
+        <actions>
+            <if condition="!fiscalYearStartMonth">
+                <entity-find-one entity-name="mantle.ledger.config.PartyAcctgPreference"
+                    value-field="acctgPreference">
+                    <field-map field-name="organizationPartyId" />
+                </entity-find-one>
+                <set field="fiscalYearStartMonth"
+                    from="acctgPreference?.fiscalYearStartMonth ?: 1" type="Integer" />
+            </if>
+            <if condition="![1, 4, 7, 10].contains(fiscalYearStartMonth)">
+                <return error="true"
+                    message="Fiscal year start month: ${fiscalYearStartMonth} should be 1, 4, 7 or 10" />
+            </if>
+
+            <set field="today" from="java.time.LocalDate.now()" />
+            <!-- the fiscal year we are in now: started this calendar year or the one before -->
+            <set field="currentYearFrom"
+                from="java.time.LocalDate.of(today.getMonthValue() &lt; fiscalYearStartMonth ?
+                        today.getYear() - 1 : today.getYear(), fiscalYearStartMonth, 1)" />
+            <set field="lastYearFrom" from="currentYearFrom.plusYears(1)" />
             <if condition="startYear">
                 <then>
-                    <set field="nextYearInt"
-                        from="((Calendar) ec.user.nowCalendar).get(Calendar.YEAR) + 1" />
-                    <set field="lastYear" from="ec.l10n.format(nextYearInt, '0000')" />
-
-                    <set field="curYear" from="startYear" />
-                    <set field="prevPeriodId" from="null" />
-                    <while condition="curYear &lt;= lastYear">
-                        <set field="fromDate"
-                            from="ec.l10n.parseDate(curYear + '-01-01', 'yyyy-MM-dd')" />
-                        <service-call name="mantle.party.TimeServices.getOrCreate#TimePeriod"
-                            out-map="curYearOut"
-                            in-map="[partyId:organizationPartyId, timePeriodTypeId:'FiscalYear', fromDate:fromDate, previousPeriodId:prevPeriodId]" />
-                        <service-call name="mantle.party.TimeServices.get#DescendantPeriods"
-                            out-map="quartersOut"
-                            in-map="[parentPeriodId:curYearOut.timePeriodId, timePeriodTypeId:'FiscalQuarter', createMissing:true]" />
-                        <iterate list="quartersOut.timePeriodList" entry="quarterPeriod">
-                            <service-call name="mantle.party.TimeServices.get#DescendantPeriods"
-                                out-map="quartersOut"
-                                in-map="[parentPeriodId:quarterPeriod.timePeriodId, timePeriodTypeId:'FiscalMonth', createMissing:true]" />
-                        </iterate>
-
-                        <set field="prevPeriodId" from="curYearOut.timePeriodId" />
-                        <set field="curYear" from="((curYear as int) + 1) as String" />
-                    </while>
+                    <set field="yearFrom"
+                        from="java.time.LocalDate.of(startYear as int, fiscalYearStartMonth, 1)" />
                 </then>
-                <else>
-                    <service-call name="mantle.ledger.LedgerServices.check#NextFiscalTimePeriods"
-                        in-map="[organizationPartyId:organizationPartyId]" />
-                </else>
+                <else-if condition="startDate">
+                    <!-- the fiscal year containing the start date -->
+                    <set field="startLocalDate" from="startDate.toLocalDate()" />
+                    <set field="yearFrom"
+                        from="java.time.LocalDate.of(startLocalDate.getMonthValue() &lt; fiscalYearStartMonth ?
+                                startLocalDate.getYear() - 1 : startLocalDate.getYear(), fiscalYearStartMonth, 1)" />
+                </else-if>
+                <else><set field="yearFrom" from="currentYearFrom" /></else>
             </if>
+
+            <set field="prevPeriodId" from="null" />
+            <set field="firstYear" from="true" />
+            <while condition="!yearFrom.isAfter(lastYearFrom)">
+                <set field="fromDate" from="java.sql.Date.valueOf(yearFrom)" />
+                <service-call name="mantle.party.TimeServices.getOrCreate#TimePeriod"
+                    out-map="curYearOut"
+                    in-map="[partyId:organizationPartyId, timePeriodTypeId:'FiscalYear', fromDate:fromDate, previousPeriodId:prevPeriodId]" />
+                <if condition="firstYear">
+                    <!-- a period without a previous period is numbered from the calendar month,
+                        so create the first quarter and month with an explicit number to start
+                        the chain at 1, all following periods count on from these -->
+                    <service-call name="mantle.party.TimeServices.getOrCreate#TimePeriod"
+                        out-map="firstQuarterOut"
+                        in-map="[partyId:organizationPartyId, timePeriodTypeId:'FiscalQuarter', fromDate:fromDate,
+                                parentPeriodId:curYearOut.timePeriodId, periodNum:1]" />
+                    <service-call name="mantle.party.TimeServices.getOrCreate#TimePeriod"
+                        in-map="[partyId:organizationPartyId, timePeriodTypeId:'FiscalMonth', fromDate:fromDate,
+                                parentPeriodId:firstQuarterOut.timePeriodId, periodNum:1]" />
+                    <set field="firstYear" from="false" />
+                </if>
+                <service-call name="mantle.party.TimeServices.get#DescendantPeriods"
+                    out-map="quartersOut"
+                    in-map="[parentPeriodId:curYearOut.timePeriodId, timePeriodTypeId:'FiscalQuarter', createMissing:true]" />
+                <iterate list="quartersOut.timePeriodList" entry="quarterPeriod">
+                    <service-call name="mantle.party.TimeServices.get#DescendantPeriods"
+                        out-map="monthsOut"
+                        in-map="[parentPeriodId:quarterPeriod.timePeriodId, timePeriodTypeId:'FiscalMonth', createMissing:true]" />
+                </iterate>
+
+                <set field="prevPeriodId" from="curYearOut.timePeriodId" />
+                <set field="yearFrom" from="yearFrom.plusYears(1)" />
+            </while>
+        </actions>
+    </service>
+
+    <service verb="check" noun="AcctgPeriodChangeAllowed">
+        <description>The currency and the fiscal year start of a company can only be changed
+            as long as nothing has been posted: no posted transactions and no closed periods.</description>
+        <in-parameters>
+            <parameter name="organizationPartyId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="allowed" type="Boolean" />
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="postedTrans"
+                limit="1">
+                <econdition field-name="organizationPartyId" />
+                <econdition field-name="isPosted" value="Y" />
+            </entity-find>
+            <entity-find entity-name="mantle.party.time.TimePeriod" list="closedPeriods" limit="1">
+                <econdition field-name="partyId" from="organizationPartyId" />
+                <econdition field-name="isClosed" value="Y" />
+            </entity-find>
+            <set field="allowed" from="!postedTrans &amp;&amp; !closedPeriods" type="Boolean" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="FiscalTimePeriods">
+        <description>Remove all time periods of a company, newest first so the period chain
+            and the parent periods are removed after their children.</description>
+        <in-parameters>
+            <parameter name="organizationPartyId" required="true" />
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
+                <econdition field-name="partyId" from="organizationPartyId" />
+                <order-by field-name="-timePeriodId" />
+            </entity-find>
+            <iterate list="periods.timePeriodId" entry="id">
+                <entity-delete-by-condition entity-name="mantle.party.time.TimePeriod">
+                    <econdition field-name="partyId" from="organizationPartyId" />
+                    <econdition field-name="timePeriodId" from="id" />
+                </entity-delete-by-condition>
+            </iterate>
         </actions>
     </service>
 

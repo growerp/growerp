@@ -224,5 +224,13 @@
   "companies": "Entreprises",
   "users": "Utilisateurs",
   "companiesUsers": "Entreprises/Utilisateurs",
-  "searchHintNoun": "Rechercher {noun}..."
+  "searchHintNoun": "Rechercher {noun}...",
+  "accountingYearStarts": "L'exercice comptable commence",
+  "@accountingYearStarts": {
+    "description": "Label of the month the accounting year starts"
+  },
+  "acctPeriodLocked": "Non modifiable : des écritures ont été comptabilisées",
+  "@acctPeriodLocked": {
+    "description": "Currency and accounting year can no longer be changed"
+  }
 }

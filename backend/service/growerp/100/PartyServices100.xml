@@ -336,6 +336,13 @@ limitations under the License.
                         <parameter name="description" />
                     </parameter>
                     <parameter name="currencyName" />
+                    <parameter name="fiscalYearStartMonth" type="Integer">
+                        <description>Month the accounting year starts: 1, 4, 7 or 10</description>
+                    </parameter>
+                    <parameter name="acctPeriodChangeAllowed" type="Boolean">
+                        <description>False when transactions have been posted, then currency and
+                            fiscal year start can no longer be changed</description>
+                    </parameter>
                     <parameter name="vatPerc">
                         <description>Percentage used for VAT if applicable</description>
                     </parameter>
@@ -484,6 +491,16 @@ limitations under the License.
                                 currencyId: item.baseCurrencyUomId,
                                 description: item.curDescription]" />
                     </if>
+                    <!-- accounting period: only the main company keeps a ledger -->
+                    <set field="acctPeriodChangeAllowed" from="true" type="Boolean" />
+                    <if condition="item.companyRole == 'OrgInternal'">
+                        <service-call
+                            name="growerp.100.AccountingServices100.check#AcctgPeriodChangeAllowed"
+                            in-map="[organizationPartyId: item.companyPartyId]"
+                            out-map="changeAllowedOut" />
+                        <set field="acctPeriodChangeAllowed" from="changeAllowedOut.allowed"
+                            type="Boolean" />
+                    </if>
                     <!-- image -->
                     <entity-find entity-name="mantle.party.PartyContent" list="contents">
                         <econdition field-name="partyId" from="item.companyPartyId" />
@@ -551,6 +568,8 @@ limitations under the License.
                                     email: item.companyEmail ?:'',
                                     url: item.webAddress,
                                     currency: currency,
+                                    fiscalYearStartMonth: item.fiscalYearStartMonth as Integer,
+                                    acctPeriodChangeAllowed: acctPeriodChangeAllowed,
                                     image: imageFile,
                                     address: address,
                                     vatPerc: item.vatPerc?item.vatPerc.toString():'0',
@@ -605,6 +624,8 @@ limitations under the License.
                     <parameter name="currencyId" />
                 </parameter>
                 <parameter name="currencyName" />
+                <parameter name="fiscalYearStartMonth" type="Integer" />
+                <parameter name="acctPeriodChangeAllowed" type="Boolean" />
                 <parameter name="vatPerc">
                     <description>Percentage used for VAT if applicable</description>
                 </parameter>
@@ -648,6 +669,8 @@ limitations under the License.
                     <parameter name="description" />
                 </parameter>
                 <parameter name="currencyName" />
+                <parameter name="fiscalYearStartMonth" type="Integer" />
+                <parameter name="acctPeriodChangeAllowed" type="Boolean" />
                 <parameter name="vatPerc">
                     <description>Percentage used for VAT if applicable</description>
                 </parameter>
@@ -855,6 +878,9 @@ limitations under the License.
                 <parameter name="currency" type="Map">
                     <parameter name="currencyId" />
                 </parameter>
+                <parameter name="fiscalYearStartMonth" type="Integer">
+                    <description>Month the accounting year starts: 1, 4, 7 or 10</description>
+                </parameter>
                 <parameter name="vatPerc">
                     <description>Percentage used for VAT if applicable</description>
                 </parameter>
@@ -899,6 +925,8 @@ limitations under the License.
                     <parameter name="description" />
                 </parameter>
                 <parameter name="currencyName" />
+                <parameter name="fiscalYearStartMonth" type="Integer" />
+                <parameter name="acctPeriodChangeAllowed" type="Boolean" />
                 <parameter name="vatPerc">
                     <description>Percentage used for VAT if applicable</description>
                 </parameter>
@@ -1018,22 +1046,51 @@ limitations under the License.
                         contactMechPurposeId: 'WebUrlPrimary', webAddress: company.url]" />
                 </if>
             </if>
-            <!-- update currency -->
-            <if
-                condition="oldValue.companies[0].currency?.currencyId != company.currency?.currencyId">
+            <!-- update currency and fiscal year start, both only while nothing is posted -->
+            <set field="currencyChanged"
+                from="company.currency?.currencyId != null
+                        &amp;&amp; oldValue.companies[0].currency?.currencyId != company.currency.currencyId" />
+            <set field="fiscalYearChanged"
+                from="company.fiscalYearStartMonth != null
+                        &amp;&amp; (oldValue.companies[0].fiscalYearStartMonth as Integer)
+                            != (company.fiscalYearStartMonth as Integer)" />
+            <if condition="currencyChanged || fiscalYearChanged">
+                <service-call
+                    name="growerp.100.AccountingServices100.check#AcctgPeriodChangeAllowed"
+                    in-map="[organizationPartyId: company.partyId]" out-map="changeAllowedOut" />
+                <if condition="!changeAllowedOut.allowed">
+                    <return error="true"
+                        message="Currency and accounting year cannot be changed anymore: transactions have been posted" />
+                </if>
+                <set field="prefUpdate" from="[organizationPartyId: company.partyId]"
+                    type="NewMap" />
+                <if condition="currencyChanged">
+                    <set field="prefUpdate.baseCurrencyUomId" from="company.currency.currencyId" />
+                </if>
+                <if condition="fiscalYearChanged">
+                    <set field="prefUpdate.fiscalYearStartMonth"
+                        from="company.fiscalYearStartMonth" />
+                    <set field="prefUpdate.fiscalYearStartDay" from="1" />
+                </if>
                 <entity-find-one entity-name="mantle.ledger.config.PartyAcctgPreference"
                     value-field="pref">
                     <field-map field-name="organizationPartyId" from="company.partyId" />
                 </entity-find-one>
                 <if condition="pref">
                     <service-call name="update#mantle.ledger.config.PartyAcctgPreference"
-                        in-map="[organizationPartyId: company.partyId,
-                            baseCurrencyUomId: company.currency?.currencyId]" />
+                        in-map="prefUpdate" />
                     <else>
                         <service-call name="create#mantle.ledger.config.PartyAcctgPreference"
-                            in-map="[organizationPartyId: company.partyId,
-                                    baseCurrencyUomId: company.currency?.currencyId]" />
+                            in-map="prefUpdate" />
                     </else>
+                </if>
+                <if condition="fiscalYearChanged">
+                    <!-- recreate the periods with the new start month -->
+                    <service-call name="growerp.100.AccountingServices100.delete#FiscalTimePeriods"
+                        in-map="[organizationPartyId: company.partyId]" />
+                    <service-call name="growerp.100.AccountingServices100.create#FiscalTimePeriods"
+                        in-map="[organizationPartyId: company.partyId,
+                                fiscalYearStartMonth: company.fiscalYearStartMonth]" />
                 </if>
             </if>
             <!-- update image: non-empty base64 = upload, empty string = delete -->

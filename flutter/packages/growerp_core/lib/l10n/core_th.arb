@@ -1323,5 +1323,13 @@
   "hours": "ชั่วโมง",
   "toDo": "สิ่งที่ต้องทำ",
   "events": "กิจกรรม",
-  "open": "เปิด"
+  "open": "เปิด",
+  "accountingYearStarts": "ปีบัญชีเริ่ม",
+  "@accountingYearStarts": {
+    "description": "Label of the month the accounting year starts"
+  },
+  "acctPeriodLocked": "ไม่สามารถเปลี่ยนได้: มีการบันทึกรายการแล้ว",
+  "@acctPeriodLocked": {
+    "description": "Currency and accounting year can no longer be changed"
+  }
 }

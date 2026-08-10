@@ -1679,6 +1679,7 @@ limitations under the License.
         <alias name="companyName" field="organizationName" entity-alias="ORGCOMPANY" />
         <alias name="companyRole" field="roleTypeId" entity-alias="ORGCOMPANYROLE" />
         <alias name="baseCurrencyUomId" entity-alias="PP" />
+        <alias name="fiscalYearStartMonth" entity-alias="PP" />
         <alias name="curDescription" field="description" entity-alias="CURTYPE" />
         <alias name="customerStatusId" entity-alias="ORGCOMPANYPARTY" />
         <alias name="logoLocation" field="contentLocation" entity-alias="LOGO" />

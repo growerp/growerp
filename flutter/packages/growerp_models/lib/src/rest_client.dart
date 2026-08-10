@@ -69,6 +69,7 @@ abstract class RestClient {
     @Field() String? plan,
     @Field() String? companyName,
     @Field() String? currencyId,
+    @Field() int? fiscalYearStartMonth,
     @Field() bool? demoData,
     @Field() required String applicationId,
     @Field() String? timeZoneOffset,

@@ -51,17 +51,13 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
       _searchFocusNode.requestFocus();
     });
     _selectedPeriod = TimePeriod(
-      periodName: 'Y${DateTime.now().year}',
+      periodName: currentFiscalYearName(context),
       periodType: 'Y',
     );
     _ledgerBloc = context.read<LedgerBloc>()
       ..add(
         LedgerFetch(ReportType.summary, periodName: _selectedPeriod.periodName),
       );
-    _selectedPeriod = TimePeriod(
-      periodName: 'Y${DateTime.now().year}',
-      periodType: 'Y',
-    );
     bottom = 50;
   }
 
@@ -219,7 +215,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
 
                               // Go to next year (but don't exceed current year)
                               int nextYear = year + 1;
-                              int currentYear = DateTime.now().year;
+                              int currentYear = currentFiscalYear(context);
                               if (nextYear > currentYear) {
                                 nextYear = currentYear;
                               }

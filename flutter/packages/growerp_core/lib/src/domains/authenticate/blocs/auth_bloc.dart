@@ -335,6 +335,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         password: event.password,
         companyName: event.companyName,
         currencyId: event.currency?.currencyId,
+        fiscalYearStartMonth: event.fiscalYearStartMonth,
         demoData: event.demoData,
         creditCardNumber: event.creditCardNumber,
         creditCardType: creditCardType,

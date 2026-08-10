@@ -128,6 +128,9 @@ class CompanyFormState extends State<CompanyDialog> {
   late CompanyBloc companyBloc;
   late AuthBloc authBloc;
   late UserCompanyLocalizations _localizations;
+  // the accounting year start only applies to the company owning the ledger
+  late bool _isMainCompany;
+  int? _fiscalYearStartMonth;
 
   @override
   void initState() {
@@ -146,6 +149,10 @@ class CompanyFormState extends State<CompanyDialog> {
         company = widget.company;
     }
     _selectedRole = company.role ?? Role.unknown;
+    _isMainCompany =
+        company.partyId != null &&
+        company.partyId == authenticate.company?.partyId;
+    _fiscalYearStartMonth = company.fiscalYearStartMonth ?? 1;
     employees = List.of(company.employees);
     if (company.currency != null && currencies.isNotEmpty) {
       _selectedCurrency = currencies.firstWhere(
@@ -441,6 +448,7 @@ class CompanyFormState extends State<CompanyDialog> {
             child: AutocompleteLabel<Currency>(
               key: const Key('currency'),
               label: _localizations.currency,
+              readOnly: !company.acctPeriodChangeAllowed,
               initialValue: _selectedCurrency,
               optionsBuilder: (TextEditingValue textEditingValue) {
                 if (textEditingValue.text.isEmpty) return currencies;
@@ -462,6 +470,17 @@ class CompanyFormState extends State<CompanyDialog> {
           ),
         ],
       ),
+      if (_isMainCompany)
+        FiscalYearStartDropdown(
+          value: _fiscalYearStartMonth,
+          label: _localizations.accountingYearStarts,
+          helperText: company.acctPeriodChangeAllowed
+              ? null
+              : _localizations.acctPeriodLocked,
+          onChanged: company.acctPeriodChangeAllowed
+              ? (value) => setState(() => _fiscalYearStartMonth = value ?? 1)
+              : null,
+        ),
       TextFormField(
         readOnly: !isAdmin,
         key: const Key('email'),
@@ -699,6 +718,9 @@ class CompanyFormState extends State<CompanyDialog> {
                           role: _selectedRole,
                           telephoneNr: _telephoneController.text,
                           currency: _selectedCurrency,
+                          fiscalYearStartMonth: _isMainCompany
+                              ? _fiscalYearStartMonth
+                              : null,
                           address: company.address,
                           paymentMethod: company.paymentMethod,
                           vatPerc: Decimal.parse(

@@ -909,41 +909,13 @@ limitations under the License.
                 <if condition="!periods">
                     <script>System.out.println(">>>Creating time periods starting with ${finDocs[0].creationDate.substring(0,4)} for company $companyPartyId")</script>
                     <!-- delete existing timeperiods-->
-                    <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
-                        <econdition field-name="partyId" from="companyPartyId" />
-                        <order-by field-name="-timePeriodId" />
-                    </entity-find>
-                    <iterate list="periods.timePeriodId" entry="id">
-                        <entity-delete-by-condition entity-name="mantle.party.time.TimePeriod">
-                            <econdition field-name="partyId" from="companyPartyId" />
-                            <econdition field-name="timePeriodId" from="id" />
-                        </entity-delete-by-condition>
-                    </iterate>
-                    <!-- create new yearly, quartely, monthly periods until next year-->
-                    <set field="nextYearInt"
-                        from="((Calendar) ec.user.nowCalendar).get(Calendar.YEAR) + 1" />
-                    <set field="lastYear" from="ec.l10n.format(nextYearInt, '0000')" />
-
-                    <!-- start year from first tranaction ordered by date -->
-                    <set field="curYear" from="finDocs[0].creationDate.substring(0,4)" />
-                    <set field="prevPeriodId" from="null" />
-                    <while condition="curYear &lt;= lastYear">
-                        <set field="fromDate"
-                            from="ec.l10n.parseDate(curYear + '-01-01', 'yyyy-MM-dd')" />
-                        <service-call name="mantle.party.TimeServices.getOrCreate#TimePeriod"
-                            out-map="curYearOut"
-                            in-map="[partyId:companyPartyId, timePeriodTypeId:'FiscalYear', fromDate:fromDate, previousPeriodId:prevPeriodId]" />
-                        <service-call name="mantle.party.TimeServices.get#DescendantPeriods"
-                            out-map="quartersOut"
-                            in-map="[parentPeriodId:curYearOut.timePeriodId, timePeriodTypeId:'FiscalQuarter', createMissing:true]" />
-                        <iterate list="quartersOut.timePeriodList" entry="quarterPeriod">
-                            <service-call name="mantle.party.TimeServices.get#DescendantPeriods"
-                                out-map="quartersOut"
-                                in-map="[parentPeriodId:quarterPeriod.timePeriodId, timePeriodTypeId:'FiscalMonth', createMissing:true]" />
-                        </iterate>
-                        <set field="prevPeriodId" from="curYearOut.timePeriodId" />
-                        <set field="curYear" from="((curYear as int) + 1) as String" />
-                    </while>
+                    <service-call name="growerp.100.AccountingServices100.delete#FiscalTimePeriods"
+                        in-map="[organizationPartyId: companyPartyId]" />
+                    <!-- create new yearly, quartely, monthly periods until next year,
+                        starting the fiscal year of the first transaction ordered by date -->
+                    <service-call name="growerp.100.AccountingServices100.create#FiscalTimePeriods"
+                        in-map="[organizationPartyId: companyPartyId,
+                                startDate: ec.l10n.parseDate(finDocs[0].creationDate.substring(0,10), 'yyyy-MM-dd')]" />
                     <entity-find-count entity-name="mantle.party.time.TimePeriod"
                         count-field="periods">
                         <econdition field-name="partyId" from="companyPartyId" />

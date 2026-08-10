@@ -121,6 +121,7 @@ limitations under the License.
             <parameter name="companyPartyId" required="true"/>
             <parameter name="companyName" required="true"/>
             <parameter name="currencyId" required="true"/>
+            <parameter name="fiscalYearStartMonth" type="Integer" default="1"/><!-- 1, 4, 7 or 10 -->
             <parameter name="demoData" type="Boolean" default="false"/>
             <parameter name="applicationId" required="true"/>
             <parameter name="userPartyId" required="true"/>
@@ -147,7 +148,8 @@ limitations under the License.
 
             <!-- Initialize accounting configuration -->
             <service-call name="growerp.100.AccountingServices100.init#PartyAccountingConfiguration"
-                in-map="[sourcePartyId: 'DefaultSettings', organizationPartyId: companyPartyId, baseCurrencyUomId: currencyId]"/>
+                in-map="[sourcePartyId: 'DefaultSettings', organizationPartyId: companyPartyId, baseCurrencyUomId: currencyId,
+                         fiscalYearStartMonth: fiscalYearStartMonth]"/>
 
             <!-- Setup main organization (product store, warehouse, wiki, etc.) -->
             <service-call name="growerp.100.PartyServices100.setup#MainOrganization"

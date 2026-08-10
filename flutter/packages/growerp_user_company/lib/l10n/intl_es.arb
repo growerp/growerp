@@ -224,5 +224,13 @@
   "companies": "Empresas",
   "users": "Usuarios",
   "companiesUsers": "Empresas/Usuarios",
-  "searchHintNoun": "Buscar {noun}..."
+  "searchHintNoun": "Buscar {noun}...",
+  "accountingYearStarts": "El año contable empieza",
+  "@accountingYearStarts": {
+    "description": "Label of the month the accounting year starts"
+  },
+  "acctPeriodLocked": "No se puede cambiar: ya se han contabilizado transacciones",
+  "@acctPeriodLocked": {
+    "description": "Currency and accounting year can no longer be changed"
+  }
 }

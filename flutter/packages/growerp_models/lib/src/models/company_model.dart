@@ -39,6 +39,8 @@ abstract class Company with _$Company {
     String? url,
     String? telephoneNr,
     Currency? currency,
+    int? fiscalYearStartMonth, // month the accounting year starts: 1, 4, 7 or 10
+    @Default(true) bool acctPeriodChangeAllowed,
     @Uint8ListConverter() Uint8List? image,
     Address? address,
     PaymentMethod? paymentMethod,
