@@ -40,6 +40,7 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
   final _searchFocusNode = FocusNode();
   final _scrollController = ScrollController();
   String _search = '';
+  int _loadRequestId = 0;
 
   @override
   void initState() {
@@ -56,6 +57,7 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
   }
 
   Future<void> _load() async {
+    final requestId = ++_loadRequestId;
     setState(() {
       _loading = true;
       _error = null;
@@ -70,16 +72,20 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
       try {
         settings = await svc.getSystemSettings();
       } catch (_) {}
-      if (mounted) {
+      if (mounted && requestId == _loadRequestId) {
         setState(() {
           _servers = list;
           _settings = settings;
         });
       }
     } catch (e) {
-      if (mounted) setState(() => _error = e.toString());
+      if (mounted && requestId == _loadRequestId) {
+        setState(() => _error = e.toString());
+      }
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted && requestId == _loadRequestId) {
+        setState(() => _loading = false);
+      }
     }
   }
 
