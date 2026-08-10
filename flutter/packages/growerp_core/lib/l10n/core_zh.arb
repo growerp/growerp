@@ -1312,5 +1312,16 @@
   "websiteTranslation": "网站翻译",
   "wiki": "维基",
   "workOrders": "工单",
-  "searchHintDefault": "搜索..."
+  "searchHintDefault": "搜索...",
+  "greetingMorning": "早上好",
+  "greetingAfternoon": "下午好",
+  "greetingEvening": "晚上好",
+  "purchase": "采购",
+  "incoming": "入库",
+  "outgoing": "出库",
+  "admins": "管理员",
+  "hours": "小时",
+  "toDo": "待办",
+  "events": "事件",
+  "open": "未结"
 }

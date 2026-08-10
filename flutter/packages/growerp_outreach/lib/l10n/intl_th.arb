@@ -73,5 +73,13 @@
   "tableHdrTargets": "เป้าหมาย",
   "tableHdrTime": "เวลา",
   "searchHintCampaigns": "ค้นหาแคมเปญ...",
-  "searchHintMessages": "ค้นหาข้อความ..."
+  "searchHintMessages": "ค้นหาข้อความ...",
+  "dashCampaigns": "แคมเปญ",
+  "dashActive": "ใช้งาน",
+  "dashSent": "ส่งแล้ว",
+  "dashReplies": "ตอบกลับ",
+  "dashStatusPending": "รอดำเนินการ",
+  "dashStatusSent": "ส่งแล้ว",
+  "dashStatusResponded": "ตอบกลับแล้ว",
+  "dashStatusFailed": "ล้มเหลว"
 }

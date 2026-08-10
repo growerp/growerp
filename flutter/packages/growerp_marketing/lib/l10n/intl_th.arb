@@ -81,5 +81,16 @@
   "searchHintAssessments": "ค้นหาแบบประเมิน...",
   "searchHintName": "ค้นหาตามชื่อ...",
   "searchHintContentPlans": "ค้นหาแผนเนื้อหา...",
-  "searchHintMasterContent": "ค้นหาเนื้อหาหลัก..."
+  "searchHintMasterContent": "ค้นหาเนื้อหาหลัก...",
+  "dashLeads": "ลูกค้าเป้าหมาย",
+  "dashAssessments": "แบบประเมิน",
+  "dashNurturing": "กำลังดูแล",
+  "dashNurtured": "ดูแลแล้ว",
+  "dashStageProspecting": "หาลูกค้า",
+  "dashStageQualification": "คัดกรอง",
+  "dashStageDemoMeeting": "สาธิต/ประชุม",
+  "dashStageProposal": "ข้อเสนอ",
+  "dashStageQuote": "ใบเสนอราคา",
+  "dashStageClosedWon": "ปิดการขายสำเร็จ",
+  "dashStageClosedLost": "ปิดการขายไม่สำเร็จ"
 }

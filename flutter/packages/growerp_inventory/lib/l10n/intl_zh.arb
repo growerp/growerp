@@ -84,5 +84,13 @@
   "assetNounRoom": "房间",
   "searchHintLocations": "搜索位置...",
   "searchHintNoun": "搜索{noun}...",
-  "assetNounAsset": "资产"
+  "assetNounAsset": "资产",
+  "dashLocations": "库位",
+  "dashIncoming": "入库",
+  "dashOutgoing": "出库",
+  "dashTotal": "合计",
+  "dashStageInput": "录入",
+  "dashStagePicked": "已拣货",
+  "dashStagePacked": "已包装",
+  "dashStageShipped": "已发货"
 }

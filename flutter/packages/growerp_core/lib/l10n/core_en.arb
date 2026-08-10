@@ -1616,5 +1616,49 @@
   "searchHintDefault": "Search...",
   "@searchHintDefault": {
     "description": "Default search field hint"
+  },
+  "greetingMorning": "Good morning",
+  "@greetingMorning": {
+    "description": "Dashboard greeting before noon"
+  },
+  "greetingAfternoon": "Good afternoon",
+  "@greetingAfternoon": {
+    "description": "Dashboard greeting in the afternoon"
+  },
+  "greetingEvening": "Good evening",
+  "@greetingEvening": {
+    "description": "Dashboard greeting in the evening"
+  },
+  "purchase": "Purchase",
+  "@purchase": {
+    "description": "Dashboard tile statistic label"
+  },
+  "incoming": "Incoming",
+  "@incoming": {
+    "description": "Dashboard tile statistic label for incoming shipments"
+  },
+  "outgoing": "Outgoing",
+  "@outgoing": {
+    "description": "Dashboard tile statistic label for outgoing shipments"
+  },
+  "admins": "Admins",
+  "@admins": {
+    "description": "Dashboard tile statistic label for administrators"
+  },
+  "hours": "Hours",
+  "@hours": {
+    "description": "Dashboard tile statistic label for hours"
+  },
+  "toDo": "To Do",
+  "@toDo": {
+    "description": "Dashboard tile statistic label for to-do activities"
+  },
+  "events": "Events",
+  "@events": {
+    "description": "Dashboard tile statistic label for event activities"
+  },
+  "open": "Open",
+  "@open": {
+    "description": "Dashboard tile statistic label for open documents"
   }
 }

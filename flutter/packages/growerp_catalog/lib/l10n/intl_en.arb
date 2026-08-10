@@ -678,5 +678,37 @@
   "searchRoomTypes": "Search room types...",
   "@searchRoomTypes": {
     "description": "Search field hint"
+  },
+  "dashCategories": "categories",
+  "@dashCategories": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashActive": "active",
+  "@dashActive": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashAssets": "assets",
+  "@dashAssets": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashDiscontinued": "discontinued",
+  "@dashDiscontinued": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashStageGoods": "Goods",
+  "@dashStageGoods": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageServices": "Services",
+  "@dashStageServices": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageRental": "Rental",
+  "@dashStageRental": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageDigital": "Digital",
+  "@dashStageDigital": {
+    "description": "Dashboard tile funnel stage label"
   }
 }

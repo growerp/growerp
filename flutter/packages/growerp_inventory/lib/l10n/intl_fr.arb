@@ -84,5 +84,13 @@
   "assetNounRoom": "Chambre",
   "searchHintLocations": "Rechercher des emplacements...",
   "searchHintNoun": "Rechercher {noun}...",
-  "assetNounAsset": "Actif"
+  "assetNounAsset": "Actif",
+  "dashLocations": "emplacements",
+  "dashIncoming": "entrants",
+  "dashOutgoing": "sortants",
+  "dashTotal": "total",
+  "dashStageInput": "Saisie",
+  "dashStagePicked": "Prélevé",
+  "dashStagePacked": "Emballé",
+  "dashStageShipped": "Expédié"
 }

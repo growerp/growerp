@@ -6,5 +6,8 @@
   "addPage": "添加页面",
   "cancel": "取消",
   "pagePathHint": "页面路径（例如 'notes/my-page' - 请避免使用自动生成的 tables/ 和 datasets/ 前缀）",
-  "markdownTextYamlFrontmatterAllowed": "Markdown 文本（允许 YAML frontmatter）"
+  "markdownTextYamlFrontmatterAllowed": "Markdown 文本（允许 YAML frontmatter）",
+  "dashSpaces": "空间",
+  "dashPages": "页面",
+  "dashNoWikiSpaces": "无 Wiki 空间"
 }

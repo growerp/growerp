@@ -85,7 +85,11 @@ class _CatalogDashboardChartMiniState
                   SizedBox(
                     width: 86,
                     child: Text(
-                      item.stageName,
+                      _stageLabel(
+                        context,
+                        item.stageId,
+                        item.stageName,
+                      ),
                       overflow: TextOverflow.ellipsis,
                       style: labelStyle,
                     ),
@@ -133,6 +137,7 @@ class _CatalogDashboardChartMiniState
 
   @override
   Widget build(BuildContext context) {
+    final l = CatalogLocalizations.of(context)!;
     if (error != null) {
       return Center(
         child: Text(error!, style: const TextStyle(color: Colors.red)),
@@ -152,10 +157,10 @@ class _CatalogDashboardChartMiniState
       ),
     );
     final counters = [
-      counter('categories', dashboard!.categories),
-      counter('active', dashboard!.activeProducts),
-      counter('assets', dashboard!.assets),
-      counter('discontinued', dashboard!.discontinuedProducts),
+      counter(l.dashCategories, dashboard!.categories),
+      counter(l.dashActive, dashboard!.activeProducts),
+      counter(l.dashAssets, dashboard!.assets),
+      counter(l.dashDiscontinued, dashboard!.discontinuedProducts),
     ];
     // Phones show the logo as a horizontal top-left strip, desktop as a
     // vertical badge on the left: inset the funnel accordingly.
@@ -201,5 +206,23 @@ class _CatalogDashboardChartMiniState
         ],
       ),
     );
+  }
+}
+
+/// The backend sends each stage with an English name; show the translation for
+/// the ids it knows and fall back to the server text for anything added later.
+String _stageLabel(BuildContext context, String stageId, String fallback) {
+  final l = CatalogLocalizations.of(context)!;
+  switch (stageId) {
+    case 'GOODS':
+      return l.dashStageGoods;
+    case 'SERVICES':
+      return l.dashStageServices;
+    case 'RENTAL':
+      return l.dashStageRental;
+    case 'DIGITAL':
+      return l.dashStageDigital;
+    default:
+      return fallback;
   }
 }

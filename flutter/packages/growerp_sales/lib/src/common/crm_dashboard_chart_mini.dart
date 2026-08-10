@@ -80,7 +80,11 @@ class _CrmDashboardChartMiniState extends State<CrmDashboardChartMini> {
                   SizedBox(
                     width: 86,
                     child: Text(
-                      item.stageName,
+                      _stageLabel(
+                        context,
+                        item.stageId,
+                        item.stageName,
+                      ),
                       overflow: TextOverflow.ellipsis,
                       style: labelStyle,
                     ),
@@ -128,6 +132,7 @@ class _CrmDashboardChartMiniState extends State<CrmDashboardChartMini> {
 
   @override
   Widget build(BuildContext context) {
+    final l = SalesLocalizations.of(context)!;
     if (error != null) {
       return Center(
         child: Text(error!, style: const TextStyle(color: Colors.red)),
@@ -147,10 +152,10 @@ class _CrmDashboardChartMiniState extends State<CrmDashboardChartMini> {
       ),
     );
     final counters = [
-      counter('contacts', dashboard!.totalContacts),
-      counter('suppliers', dashboard!.suppliers),
-      counter('employees', dashboard!.employees),
-      counter('admins', dashboard!.admins),
+      counter(l.dashContacts, dashboard!.totalContacts),
+      counter(l.dashSuppliers, dashboard!.suppliers),
+      counter(l.dashEmployees, dashboard!.employees),
+      counter(l.dashAdmins, dashboard!.admins),
     ];
     // Phones show the logo as a horizontal top-left strip, desktop as a
     // vertical badge on the left: inset the funnel accordingly.
@@ -196,5 +201,21 @@ class _CrmDashboardChartMiniState extends State<CrmDashboardChartMini> {
         ],
       ),
     );
+  }
+}
+
+/// The backend sends each stage with an English name; show the translation for
+/// the ids it knows and fall back to the server text for anything added later.
+String _stageLabel(BuildContext context, String stageId, String fallback) {
+  final l = SalesLocalizations.of(context)!;
+  switch (stageId) {
+    case 'CUSTOMER_ASSIGNED':
+      return l.dashStageAssigned;
+    case 'CUSTOMER_QUALIFIED':
+      return l.dashStageQualified;
+    case 'CUSTOMER_CONVERTED':
+      return l.dashStageConverted;
+    default:
+      return fallback;
   }
 }

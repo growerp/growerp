@@ -891,7 +891,7 @@ class _DashboardGridState extends State<DashboardGrid> {
             tileType: et,
             compactGraphic: compact,
             isMinimized: false,
-            stats: getStatsForRoute(item.route, widget.stats),
+            stats: getStatsForRoute(context, item.route, widget.stats),
             chartWidget: chartWidget,
             animationIndex: 0,
           ),
@@ -904,8 +904,8 @@ class _DashboardGridState extends State<DashboardGrid> {
 
   // ── Greeting helpers ──────────────────────────────────────────────────────
 
-  String _greeting() => _greetingText();
-  String _formattedDate() => _formattedDateText();
+  String _greeting(BuildContext context) => _greetingText(context);
+  String _formattedDate(BuildContext context) => _formattedDateText(context);
 
   Widget _buildGreetingHeader(
     BuildContext context,
@@ -928,7 +928,7 @@ class _DashboardGridState extends State<DashboardGrid> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${_greeting()}$name 👋',
+                '${_greeting(context)}$name 👋',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
@@ -938,7 +938,7 @@ class _DashboardGridState extends State<DashboardGrid> {
               ),
               const SizedBox(height: 2),
               Text(
-                _formattedDate(),
+                _formattedDate(context),
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w400,
@@ -953,7 +953,7 @@ class _DashboardGridState extends State<DashboardGrid> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search…',
+                hintText: CoreLocalizations.of(context)!.searchHintDefault,
                 hintStyle: TextStyle(
                   color: colorScheme.onSurface.withValues(alpha: 0.4),
                   fontSize: 14,
@@ -1043,7 +1043,7 @@ class _DashboardGridState extends State<DashboardGrid> {
     String effectiveType(MenuItem m) {
       if (m.isMinimized) return m.tileType;
       if (m.route != null && chartWidgets.containsKey(m.route)) return 'graphic';
-      if (getStatsForRoute(m.route, widget.stats) != null) return 'statistic';
+      if (getStatsForRoute(context, m.route, widget.stats) != null) return 'statistic';
       return m.tileType;
     }
 
@@ -1130,7 +1130,7 @@ class _DashboardGridState extends State<DashboardGrid> {
                             tileType: et,
                             compactGraphic: isCompactGraphic(item),
                             isMinimized: false,
-                            stats: getStatsForRoute(item.route, widget.stats),
+                            stats: getStatsForRoute(context, item.route, widget.stats),
                             chartWidget: chartWidget,
                             onToggleMinimize:
                                 item.menuItemId != null &&
@@ -1216,7 +1216,7 @@ class _DashboardGridState extends State<DashboardGrid> {
                             tileType: item.tileType,
                             isMinimized: true,
                             stats:
-                                getStatsForRoute(item.route, widget.stats),
+                                getStatsForRoute(context, item.route, widget.stats),
                             chartWidget: null,
                             onToggleMinimize:
                                 item.menuItemId != null &&
@@ -1267,39 +1267,49 @@ class _DashboardGridState extends State<DashboardGrid> {
 /// Maps menu option routes to their corresponding statistics from the Stats model.
 ///
 /// Returns null if no matching stats are found for the route.
-String? getStatsForRoute(String? route, Stats? stats) {
+String? getStatsForRoute(BuildContext context, String? route, Stats? stats) {
   if (stats == null || route == null) return null;
+  final l = CoreLocalizations.of(context)!;
 
   switch (route) {
     case '/orders':
-      return 'Sales: ${stats.openSlsOrders}\nPurchase: ${stats.openPurOrders}';
+      return '${l.sales}: ${stats.openSlsOrders}\n'
+          '${l.purchase}: ${stats.openPurOrders}';
     case '/accounting':
-      return 'Sales Invoices: ${stats.salesInvoicesNotPaidCount}\nPurchase: ${stats.purchInvoicesNotPaidCount}';
+      return '${l.salesInvoices}: ${stats.salesInvoicesNotPaidCount}\n'
+          '${l.purchase}: ${stats.purchInvoicesNotPaidCount}';
     case '/shipments':
-      return 'Incoming: ${stats.incomingShipments}\nOutgoing: ${stats.outgoingShipments}';
+      return '${l.incoming}: ${stats.incomingShipments}\n'
+          '${l.outgoing}: ${stats.outgoingShipments}';
     case '/inventory':
-      return 'WH Locations: ${stats.whLocations}';
+      return '${l.whLocations}: ${stats.whLocations}';
     case '/requests':
-      return 'Requests: ${stats.requests}';
+      return '${l.requests}: ${stats.requests}';
     case '/catalog':
-      return 'Categories: ${stats.categories}\nProducts: ${stats.products}';
+      return '${l.categories}: ${stats.categories}\n'
+          '${l.products}: ${stats.products}';
     case '/crm':
-      return 'Customers: ${stats.customers}\nLeads: ${stats.leads}\nSuppliers: ${stats.suppliers}';
+      return '${l.customers}: ${stats.customers}\n'
+          '${l.leads}: ${stats.leads}\n'
+          '${l.suppliers}: ${stats.suppliers}';
     case '/users':
-      return 'Admins: ${stats.admins}\nEmployees: ${stats.employees}';
+      return '${l.admins}: ${stats.admins}\n'
+          '${l.employees}: ${stats.employees}';
     case '/opportunities':
-      return 'Opportunities: ${stats.opportunities}';
+      return '${l.opportunities}: ${stats.opportunities}';
     case '/tasks':
-      return 'Tasks: ${stats.allTasks}\nHours: ${stats.notInvoicedHours}';
+      return '${l.tasks}: ${stats.allTasks}\n'
+          '${l.hours}: ${stats.notInvoicedHours}';
     case '/activities':
-      return 'To Do: ${stats.todoActivities}\nEvents: ${stats.eventActivities}';
+      return '${l.toDo}: ${stats.todoActivities}\n'
+          '${l.events}: ${stats.eventActivities}';
     case '/assets':
-      return 'Assets: ${stats.assets}';
+      return '${l.assets}: ${stats.assets}';
     // Accounting sub-routes
     case '/accounting/sales':
-      return 'Open: ${stats.salesInvoicesNotPaidCount}';
+      return '${l.open}: ${stats.salesInvoicesNotPaidCount}';
     case '/accounting/purchase':
-      return 'Open: ${stats.purchInvoicesNotPaidCount}';
+      return '${l.open}: ${stats.purchInvoicesNotPaidCount}';
     default:
       return null;
   }
@@ -1309,21 +1319,19 @@ String? getStatsForRoute(String? route, Stats? stats) {
 // Standalone greeting header — reusable outside DashboardGrid
 // ---------------------------------------------------------------------------
 
-String _greetingText() {
+String _greetingText(BuildContext context) {
+  final l = CoreLocalizations.of(context)!;
   final hour = DateTime.now().hour;
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  return 'Good evening';
+  if (hour < 12) return l.greetingMorning;
+  if (hour < 17) return l.greetingAfternoon;
+  return l.greetingEvening;
 }
 
-String _formattedDateText() {
-  final now = DateTime.now();
-  const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  ];
-  return '${months[now.month - 1]} ${now.day}, ${now.year}';
-}
+/// MaterialLocalizations formats the date in the app language: it ships with
+/// flutter_localizations for every supported locale, so no intl date symbols
+/// need to be initialized.
+String _formattedDateText(BuildContext context) =>
+    MaterialLocalizations.of(context).formatFullDate(DateTime.now());
 
 /// Time-of-day greeting with user first name, date, and theme toggle.
 /// Typically placed at the top of a page on tablet/desktop only.
@@ -1353,7 +1361,7 @@ class GreetingHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${_greetingText()}$name 👋',
+                '${_greetingText(context)}$name 👋',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
@@ -1363,7 +1371,7 @@ class GreetingHeader extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                _formattedDateText(),
+                _formattedDateText(context),
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w400,

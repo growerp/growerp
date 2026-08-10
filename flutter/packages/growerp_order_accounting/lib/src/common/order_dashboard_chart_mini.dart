@@ -83,7 +83,11 @@ class _OrderDashboardChartMiniState extends State<OrderDashboardChartMini> {
                   SizedBox(
                     width: 86,
                     child: Text(
-                      item.stageName,
+                      _stageLabel(
+                        context,
+                        item.stageId,
+                        item.stageName,
+                      ),
                       overflow: TextOverflow.ellipsis,
                       style: labelStyle,
                     ),
@@ -131,6 +135,7 @@ class _OrderDashboardChartMiniState extends State<OrderDashboardChartMini> {
 
   @override
   Widget build(BuildContext context) {
+    final l = OrderAccountingLocalizations.of(context)!;
     if (error != null) {
       return Center(
         child: Text(error!, style: const TextStyle(color: Colors.red)),
@@ -150,10 +155,10 @@ class _OrderDashboardChartMiniState extends State<OrderDashboardChartMini> {
       ),
     );
     final counters = [
-      counter('sales', dashboard!.salesOrders),
-      if (widget.showPurchase) counter('purchase', dashboard!.purchaseOrders),
-      counter('sls unpaid', dashboard!.salesInvoicesNotPaidCount),
-      if (widget.showPurchase) counter('pur unpaid', dashboard!.purchInvoicesNotPaidCount),
+      counter(l.dashSalesOrders, dashboard!.salesOrders),
+      if (widget.showPurchase) counter(l.dashPurchaseOrders, dashboard!.purchaseOrders),
+      counter(l.dashSlsUnpaid, dashboard!.salesInvoicesNotPaidCount),
+      if (widget.showPurchase) counter(l.dashPurUnpaid, dashboard!.purchInvoicesNotPaidCount),
     ];
     // Phones show the logo as a horizontal top-left strip, desktop as a
     // vertical badge on the left: inset the funnel accordingly.
@@ -199,5 +204,23 @@ class _OrderDashboardChartMiniState extends State<OrderDashboardChartMini> {
         ],
       ),
     );
+  }
+}
+
+/// The backend sends each stage with an English name; show the translation for
+/// the ids it knows and fall back to the server text for anything added later.
+String _stageLabel(BuildContext context, String stageId, String fallback) {
+  final l = OrderAccountingLocalizations.of(context)!;
+  switch (stageId) {
+    case 'OrderPlaced':
+      return l.dashStagePlaced;
+    case 'OrderApproved':
+      return l.dashStageApproved;
+    case 'OrderCompleted':
+      return l.dashStageCompleted;
+    case 'OrderCancelled':
+      return l.dashStageCancelled;
+    default:
+      return fallback;
   }
 }

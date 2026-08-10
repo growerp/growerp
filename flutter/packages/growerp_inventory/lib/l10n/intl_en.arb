@@ -399,5 +399,37 @@
   "assetNounAsset": "Asset",
   "@assetNounAsset": {
     "description": "Entity noun used when the app is not hotel or rental"
+  },
+  "dashLocations": "locations",
+  "@dashLocations": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashIncoming": "incoming",
+  "@dashIncoming": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashOutgoing": "outgoing",
+  "@dashOutgoing": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashTotal": "total",
+  "@dashTotal": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashStageInput": "Input",
+  "@dashStageInput": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStagePicked": "Picked",
+  "@dashStagePicked": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStagePacked": "Packed",
+  "@dashStagePacked": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageShipped": "Shipped",
+  "@dashStageShipped": {
+    "description": "Dashboard tile funnel stage label"
   }
 }

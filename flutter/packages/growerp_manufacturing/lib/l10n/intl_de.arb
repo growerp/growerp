@@ -149,5 +149,13 @@
   "tableHdrInfo": "Info",
   "tableHdrProduct": "Produkt",
   "tableHdrRoutingName": "Arbeitsplanname",
-  "tableHdrTasks": "Aufgaben"
+  "tableHdrTasks": "Aufgaben",
+  "dashTotal": "gesamt",
+  "dashOnHold": "wartend",
+  "dashCancelled": "storniert",
+  "dashBomItems": "Stücklistenpos.",
+  "dashStagePlanning": "Planung",
+  "dashStageApproved": "Genehmigt",
+  "dashStageInProgress": "In Arbeit",
+  "dashStageComplete": "Abgeschlossen"
 }

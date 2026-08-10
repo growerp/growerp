@@ -84,5 +84,13 @@
   "assetNounRoom": "Zimmer",
   "searchHintLocations": "Standorte suchen...",
   "searchHintNoun": "{noun} suchen...",
-  "assetNounAsset": "Anlage"
+  "assetNounAsset": "Anlage",
+  "dashLocations": "Lagerorte",
+  "dashIncoming": "eingehend",
+  "dashOutgoing": "ausgehend",
+  "dashTotal": "gesamt",
+  "dashStageInput": "Eingabe",
+  "dashStagePicked": "Kommissioniert",
+  "dashStagePacked": "Verpackt",
+  "dashStageShipped": "Versendet"
 }

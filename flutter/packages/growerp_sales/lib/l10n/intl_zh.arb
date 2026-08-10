@@ -61,5 +61,12 @@
   "opportunityDownloadFailure": "机会下载失败",
   "noPipelineData": "无管道数据",
   "convertToQuote": "转换为报价",
-  "opportunityConvertSuccess": "报价 #{id} 创建成功"
+  "opportunityConvertSuccess": "报价 #{id} 创建成功",
+  "dashContacts": "联系人",
+  "dashSuppliers": "供应商",
+  "dashEmployees": "员工",
+  "dashAdmins": "管理员",
+  "dashStageAssigned": "已分配",
+  "dashStageQualified": "已确认",
+  "dashStageConverted": "已转化"
 }

@@ -84,5 +84,13 @@
   "assetNounRoom": "ห้อง",
   "searchHintLocations": "ค้นหาสถานที่...",
   "searchHintNoun": "ค้นหา{noun}...",
-  "assetNounAsset": "สินทรัพย์"
+  "assetNounAsset": "สินทรัพย์",
+  "dashLocations": "ตำแหน่ง",
+  "dashIncoming": "ขาเข้า",
+  "dashOutgoing": "ขาออก",
+  "dashTotal": "รวม",
+  "dashStageInput": "ป้อนข้อมูล",
+  "dashStagePicked": "หยิบแล้ว",
+  "dashStagePacked": "บรรจุแล้ว",
+  "dashStageShipped": "จัดส่งแล้ว"
 }

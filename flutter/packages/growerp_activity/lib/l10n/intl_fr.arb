@@ -60,5 +60,12 @@
   "activity_tableHdrEstFrom": "Prév. du",
   "activity_tableHdrActFrom": "Réel du",
   "activity_searchHintActivities": "Rechercher par ID...",
-  "activity_searchInput": "Saisie de recherche"
+  "activity_searchInput": "Saisie de recherche",
+  "activity_dashAllTasks": "toutes tâches",
+  "activity_dashToDo": "à faire",
+  "activity_dashEvents": "événements",
+  "activity_dashUnInvoiced": "non facturé",
+  "activity_dashBarAll": "Tous",
+  "activity_dashBarToDo": "À faire",
+  "activity_dashBarEvents": "Événements"
 }

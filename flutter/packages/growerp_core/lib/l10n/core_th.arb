@@ -1312,5 +1312,16 @@
   "websiteTranslation": "การแปลเว็บไซต์",
   "wiki": "วิกิ",
   "workOrders": "ใบสั่งงาน",
-  "searchHintDefault": "ค้นหา..."
+  "searchHintDefault": "ค้นหา...",
+  "greetingMorning": "อรุณสวัสดิ์",
+  "greetingAfternoon": "สวัสดีตอนบ่าย",
+  "greetingEvening": "สวัสดีตอนเย็น",
+  "purchase": "การซื้อ",
+  "incoming": "ขาเข้า",
+  "outgoing": "ขาออก",
+  "admins": "ผู้ดูแลระบบ",
+  "hours": "ชั่วโมง",
+  "toDo": "สิ่งที่ต้องทำ",
+  "events": "กิจกรรม",
+  "open": "เปิด"
 }

@@ -82,7 +82,11 @@ class _LedgerDashboardChartMiniState extends State<LedgerDashboardChartMini> {
                   SizedBox(
                     width: 86,
                     child: Text(
-                      item.stageName,
+                      _stageLabel(
+                        context,
+                        item.stageId,
+                        item.stageName,
+                      ),
                       overflow: TextOverflow.ellipsis,
                       style: labelStyle,
                     ),
@@ -130,6 +134,7 @@ class _LedgerDashboardChartMiniState extends State<LedgerDashboardChartMini> {
 
   @override
   Widget build(BuildContext context) {
+    final l = OrderAccountingLocalizations.of(context)!;
     if (error != null) {
       return Center(
         child: Text(error!, style: const TextStyle(color: Colors.red)),
@@ -149,10 +154,10 @@ class _LedgerDashboardChartMiniState extends State<LedgerDashboardChartMini> {
       ),
     );
     final counters = [
-      counter('accounts', dashboard!.accounts),
-      counter('posted', dashboard!.posted),
-      counter('unposted', dashboard!.unposted),
-      counter('total', dashboard!.totalTransactions),
+      counter(l.dashAccounts, dashboard!.accounts),
+      counter(l.dashPostedCount, dashboard!.posted),
+      counter(l.dashUnposted, dashboard!.unposted),
+      counter(l.dashTotal, dashboard!.totalTransactions),
     ];
     // Phones show the logo as a horizontal top-left strip, desktop as a
     // vertical badge on the left: inset the funnel accordingly.
@@ -198,5 +203,23 @@ class _LedgerDashboardChartMiniState extends State<LedgerDashboardChartMini> {
         ],
       ),
     );
+  }
+}
+
+/// The backend sends each stage with an English name; show the translation for
+/// the ids it knows and fall back to the server text for anything added later.
+String _stageLabel(BuildContext context, String stageId, String fallback) {
+  final l = OrderAccountingLocalizations.of(context)!;
+  switch (stageId) {
+    case 'AttSalesInvoice':
+      return l.dashStageSalesInv;
+    case 'AttPurchaseInvoice':
+      return l.dashStagePurchInv;
+    case 'AttIncomingPayment':
+      return l.dashStageIncoming;
+    case 'AttOutgoingPayment':
+      return l.dashStageOutgoing;
+    default:
+      return fallback;
   }
 }

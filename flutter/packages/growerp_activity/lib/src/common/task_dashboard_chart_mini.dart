@@ -112,15 +112,18 @@ class TaskDashboardChartMini extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
+        final l = ActivityLocalizations.of(context)!;
         final stats = state.authenticate?.stats;
         if (stats == null) {
           return const Center(child: CircularProgressIndicator());
         }
 
         final summary = [
-          _TaskStageSummaryItem('All', stats.allTasks),
-          _TaskStageSummaryItem('To-Do', stats.todoActivities),
-          _TaskStageSummaryItem('Events', stats.eventActivities),
+          _TaskStageSummaryItem(l.activity_dashBarAll, stats.allTasks),
+          _TaskStageSummaryItem(l.activity_dashBarToDo,
+              stats.todoActivities),
+          _TaskStageSummaryItem(l.activity_dashBarEvents,
+              stats.eventActivities),
         ];
 
         Widget counter(String label, int value) => Padding(
@@ -135,10 +138,10 @@ class TaskDashboardChartMini extends StatelessWidget {
         );
         
         final counters = [
-          counter('all tasks', stats.allTasks),
-          counter('to-do', stats.todoActivities),
-          counter('events', stats.eventActivities),
-          counter('un-invoiced', stats.notInvoicedHours),
+          counter(l.activity_dashAllTasks, stats.allTasks),
+          counter(l.activity_dashToDo, stats.todoActivities),
+          counter(l.activity_dashEvents, stats.eventActivities),
+          counter(l.activity_dashUnInvoiced, stats.notInvoicedHours),
         ];
 
         // Phones show the logo as a horizontal top-left strip, desktop as a

@@ -86,7 +86,11 @@ class _InventoryDashboardChartMiniState
                   SizedBox(
                     width: 86,
                     child: Text(
-                      item.stageName,
+                      _stageLabel(
+                        context,
+                        item.stageId,
+                        item.stageName,
+                      ),
                       overflow: TextOverflow.ellipsis,
                       style: labelStyle,
                     ),
@@ -134,6 +138,7 @@ class _InventoryDashboardChartMiniState
 
   @override
   Widget build(BuildContext context) {
+    final l = InventoryLocalizations.of(context)!;
     if (error != null) {
       return Center(
         child: Text(error!, style: const TextStyle(color: Colors.red)),
@@ -153,10 +158,10 @@ class _InventoryDashboardChartMiniState
       ),
     );
     final counters = [
-      counter('locations', dashboard!.whLocations),
-      counter('incoming', dashboard!.incomingShipments),
-      counter('outgoing', dashboard!.outgoingShipments),
-      counter('total', dashboard!.totalShipments),
+      counter(l.dashLocations, dashboard!.whLocations),
+      counter(l.dashIncoming, dashboard!.incomingShipments),
+      counter(l.dashOutgoing, dashboard!.outgoingShipments),
+      counter(l.dashTotal, dashboard!.totalShipments),
     ];
     // Phones show the logo as a horizontal top-left strip, desktop as a
     // vertical badge on the left: inset the funnel accordingly.
@@ -202,5 +207,23 @@ class _InventoryDashboardChartMiniState
         ],
       ),
     );
+  }
+}
+
+/// The backend sends each stage with an English name; show the translation for
+/// the ids it knows and fall back to the server text for anything added later.
+String _stageLabel(BuildContext context, String stageId, String fallback) {
+  final l = InventoryLocalizations.of(context)!;
+  switch (stageId) {
+    case 'ShipInput':
+      return l.dashStageInput;
+    case 'ShipPicked':
+      return l.dashStagePicked;
+    case 'ShipPacked':
+      return l.dashStagePacked;
+    case 'ShipShipped':
+      return l.dashStageShipped;
+    default:
+      return fallback;
   }
 }

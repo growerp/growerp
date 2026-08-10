@@ -84,5 +84,13 @@
   "assetNounRoom": "Kamer",
   "searchHintLocations": "Zoek locaties...",
   "searchHintNoun": "Zoek {noun}...",
-  "assetNounAsset": "Bedrijfsmiddel"
+  "assetNounAsset": "Bedrijfsmiddel",
+  "dashLocations": "locaties",
+  "dashIncoming": "inkomend",
+  "dashOutgoing": "uitgaand",
+  "dashTotal": "totaal",
+  "dashStageInput": "Invoer",
+  "dashStagePicked": "Verzameld",
+  "dashStagePacked": "Verpakt",
+  "dashStageShipped": "Verzonden"
 }

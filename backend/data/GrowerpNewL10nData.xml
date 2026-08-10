@@ -26,10 +26,18 @@
     <!-- Chinese (zh) translations -->
     <moqui.basic.LocalizedMessage locale="zh" original="MoquiUsernameAlreadyInUse"
         localized="用户名 [${username}] 已被使用。请选择另一个。" />
+    <moqui.basic.LocalizedMessage locale="es" original="MoquiUsernameAlreadyInUse"
+      localized="El nombre de usuario [${username}] ya está en uso. Elija otro." />
     <moqui.basic.LocalizedMessage locale="zh" original="MoquiEmailAlreadyInUse"
         localized="电子邮件 ${emailAddress} 已被使用。请使用用户名 ${existingUsername} 登录" />
+    <moqui.basic.LocalizedMessage locale="es" original="MoquiEmailAlreadyInUse"
+      localized="El correo electrónico ${emailAddress} ya está en uso. Inicie sesión con el nombre de usuario ${existingUsername}" />
     <moqui.basic.LocalizedMessage locale="zh" original="MoquiAccountCreatedSuccess"
         localized="已创建用户名为 ${username} 的账户" />
+    <moqui.basic.LocalizedMessage locale="es" original="MoquiAccountCreatedSuccess"
+      localized="Cuenta creada con el nombre de usuario ${username}" />
     <moqui.basic.LocalizedMessage locale="zh" original="MoquiPasswordIncorrect"
         localized="用户 ${username} 的密码不正确" />
+    <moqui.basic.LocalizedMessage locale="es" original="MoquiPasswordIncorrect"
+      localized="Contraseña incorrecta para el usuario ${username}" />
 </entity-facade-xml>

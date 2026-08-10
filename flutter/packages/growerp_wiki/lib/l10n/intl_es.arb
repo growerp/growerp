@@ -1,0 +1,13 @@
+{
+  "@@locale": "es",
+  "wikiSpace": "espacio wiki",
+  "noPagesFound": "No se encontraron páginas",
+  "searchPagePath": "Ruta de la página de búsqueda",
+  "addPage": "Agregar página",
+  "cancel": "Cancelar",
+  "pagePathHint": "Ruta de la página (por ejemplo, 'notas/mi-página'; evite las tablas/y conjuntos de datos/prefijos generados)",
+  "markdownTextYamlFrontmatterAllowed": "Texto de rebajas (se permite contenido frontal de YAML)",
+  "dashSpaces": "espacios",
+  "dashPages": "páginas",
+  "dashNoWikiSpaces": "No hay espacios wiki"
+}

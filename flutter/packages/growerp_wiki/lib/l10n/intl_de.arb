@@ -6,5 +6,8 @@
   "addPage": "Seite hinzufügen",
   "cancel": "Abbrechen",
   "pagePathHint": "Seitenpfad (z. B. 'notes/my-page' - vermeiden Sie die generierten Präfixe tables/ und datasets/)",
-  "markdownTextYamlFrontmatterAllowed": "Markdown-Text (YAML-Frontmatter erlaubt)"
+  "markdownTextYamlFrontmatterAllowed": "Markdown-Text (YAML-Frontmatter erlaubt)",
+  "dashSpaces": "Bereiche",
+  "dashPages": "Seiten",
+  "dashNoWikiSpaces": "Keine Wiki-Bereiche"
 }

@@ -60,5 +60,12 @@
   "activity_tableHdrEstFrom": "ประมาณจาก",
   "activity_tableHdrActFrom": "จริงจาก",
   "activity_searchHintActivities": "ค้นหาตามรหัส...",
-  "activity_searchInput": "ช่องค้นหา"
+  "activity_searchInput": "ช่องค้นหา",
+  "activity_dashAllTasks": "งานทั้งหมด",
+  "activity_dashToDo": "สิ่งที่ต้องทำ",
+  "activity_dashEvents": "กิจกรรม",
+  "activity_dashUnInvoiced": "ยังไม่วางบิล",
+  "activity_dashBarAll": "ทั้งหมด",
+  "activity_dashBarToDo": "สิ่งที่ต้องทำ",
+  "activity_dashBarEvents": "กิจกรรม"
 }

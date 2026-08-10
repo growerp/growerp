@@ -1312,5 +1312,16 @@
   "websiteTranslation": "Traduction du site web",
   "wiki": "Wiki",
   "workOrders": "Ordres de travail",
-  "searchHintDefault": "Rechercher..."
+  "searchHintDefault": "Rechercher...",
+  "greetingMorning": "Bonjour",
+  "greetingAfternoon": "Bon après-midi",
+  "greetingEvening": "Bonsoir",
+  "purchase": "Achat",
+  "incoming": "Entrant",
+  "outgoing": "Sortant",
+  "admins": "Administrateurs",
+  "hours": "Heures",
+  "toDo": "À faire",
+  "events": "Événements",
+  "open": "Ouvert"
 }

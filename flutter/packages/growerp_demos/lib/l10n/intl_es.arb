@@ -1,0 +1,23 @@
+{
+  "@@locale": "es",
+  "resetDemoTitle": "¿Restablecer demostración?",
+  "resetDemoContent": "Esto restablecerá su progreso al paso 0.\nLos datos de demostración ya creados en el sistema permanecerán.",
+  "cancelButton": "Cancelar",
+  "resetButton": "Reiniciar",
+  "resetDemoProgressTooltip": "Restablecer el progreso de la demostración",
+  "allStepsComplete": "Todos los pasos {count} completados",
+  "stepProgress": "Paso {current} de {total}",
+  "demoCompleteMessage": "Demostración completa: ¡todas las fases terminadas!",
+  "showingPhase": "Mostrando: {phaseName}",
+  "resetToRunAgainButton": "Restablecer para ejecutar de nuevo",
+  "runningStep": "Ejecutando el paso {step}…",
+  "retryStep": "Reintentar el paso {step}",
+  "runStep": "Ejecute el paso {current} de {total}",
+  "progressSavedMessage": "Progreso guardado: puedes cerrarlo y reanudarlo más tarde.",
+  "demoFeaturesNotAvail": "Las funciones de demostración no están disponibles en producción.",
+  "devEnvDemosHidden": "Entorno de desarrollo: las demostraciones están ocultas en las versiones de producción.",
+  "growerpDemosTitle": "Demostraciones de GrowERP",
+  "noDemosRegistered": "No hay demostraciones registradas.",
+  "resetDemoListTitle": "¿Restablecer demostración?",
+  "resetDemoListContent": "El progreso se restablecerá al paso 0.\nSe conservan los datos ya creados en el sistema."
+}

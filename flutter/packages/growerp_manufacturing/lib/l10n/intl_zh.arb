@@ -149,5 +149,13 @@
   "tableHdrInfo": "信息",
   "tableHdrProduct": "产品",
   "tableHdrRoutingName": "工艺路线名称",
-  "tableHdrTasks": "任务"
+  "tableHdrTasks": "任务",
+  "dashTotal": "合计",
+  "dashOnHold": "暂停",
+  "dashCancelled": "已取消",
+  "dashBomItems": "BOM 项",
+  "dashStagePlanning": "计划中",
+  "dashStageApproved": "已批准",
+  "dashStageInProgress": "进行中",
+  "dashStageComplete": "已完成"
 }

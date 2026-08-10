@@ -149,5 +149,13 @@
   "tableHdrInfo": "Info",
   "tableHdrProduct": "Product",
   "tableHdrRoutingName": "Routingnaam",
-  "tableHdrTasks": "Taken"
+  "tableHdrTasks": "Taken",
+  "dashTotal": "totaal",
+  "dashOnHold": "in wacht",
+  "dashCancelled": "geannuleerd",
+  "dashBomItems": "bom-items",
+  "dashStagePlanning": "Planning",
+  "dashStageApproved": "Goedgekeurd",
+  "dashStageInProgress": "In uitvoering",
+  "dashStageComplete": "Voltooid"
 }

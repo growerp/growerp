@@ -1372,5 +1372,105 @@
         "type": "String"
       }
     }
+  },
+  "dashSalesOrders": "sales",
+  "@dashSalesOrders": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashPurchaseOrders": "purchase",
+  "@dashPurchaseOrders": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashSlsUnpaid": "sls unpaid",
+  "@dashSlsUnpaid": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashPurUnpaid": "pur unpaid",
+  "@dashPurUnpaid": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashTotal": "total",
+  "@dashTotal": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashUnpaid": "unpaid",
+  "@dashUnpaid": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashPaid": "paid",
+  "@dashPaid": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashCancelled": "cancelled",
+  "@dashCancelled": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashAccounts": "accounts",
+  "@dashAccounts": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashPostedCount": "posted",
+  "@dashPostedCount": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashUnposted": "unposted",
+  "@dashUnposted": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashStagePlaced": "Placed",
+  "@dashStagePlaced": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageApproved": "Approved",
+  "@dashStageApproved": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageCompleted": "Completed",
+  "@dashStageCompleted": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageCancelled": "Cancelled",
+  "@dashStageCancelled": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageInProcess": "In Process",
+  "@dashStageInProcess": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageFinalized": "Finalized",
+  "@dashStageFinalized": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageSent": "Sent",
+  "@dashStageSent": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStagePaid": "Paid",
+  "@dashStagePaid": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageReceived": "Received",
+  "@dashStageReceived": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageSalesInv": "Sales Inv",
+  "@dashStageSalesInv": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStagePurchInv": "Purch Inv",
+  "@dashStagePurchInv": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageIncoming": "Incoming",
+  "@dashStageIncoming": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageOutgoing": "Outgoing",
+  "@dashStageOutgoing": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashPostTransactionsHint": "Post transactions to see revenue & expense trends",
+  "@dashPostTransactionsHint": {
+    "description": "Empty-state hint on the revenue/expense dashboard chart"
   }
 }

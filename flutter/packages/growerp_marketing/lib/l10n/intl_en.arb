@@ -330,5 +330,49 @@
   "searchHintMasterContent": "Search master content...",
   "@searchHintMasterContent": {
     "description": "Search field hint"
+  },
+  "dashLeads": "leads",
+  "@dashLeads": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashAssessments": "assessments",
+  "@dashAssessments": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashNurturing": "nurturing",
+  "@dashNurturing": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashNurtured": "nurtured",
+  "@dashNurtured": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashStageProspecting": "Prospecting",
+  "@dashStageProspecting": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageQualification": "Qualification",
+  "@dashStageQualification": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageDemoMeeting": "Demo/Meeting",
+  "@dashStageDemoMeeting": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageProposal": "Proposal",
+  "@dashStageProposal": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageQuote": "Quote",
+  "@dashStageQuote": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageClosedWon": "Closed Won",
+  "@dashStageClosedWon": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageClosedLost": "Closed Lost",
+  "@dashStageClosedLost": {
+    "description": "Dashboard tile funnel stage label"
   }
 }

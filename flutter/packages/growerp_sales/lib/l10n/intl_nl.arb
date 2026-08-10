@@ -61,5 +61,12 @@
   "opportunityDownloadFailure": "Downloaden van kansen mislukt",
   "noPipelineData": "Geen pipelinegegevens",
   "convertToQuote": "Omzetten naar offerte",
-  "opportunityConvertSuccess": "Offerte #{id} succesvol aangemaakt"
+  "opportunityConvertSuccess": "Offerte #{id} succesvol aangemaakt",
+  "dashContacts": "contacten",
+  "dashSuppliers": "leveranciers",
+  "dashEmployees": "medewerkers",
+  "dashAdmins": "beheerders",
+  "dashStageAssigned": "Toegewezen",
+  "dashStageQualified": "Gekwalificeerd",
+  "dashStageConverted": "Geconverteerd"
 }

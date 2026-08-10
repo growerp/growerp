@@ -1,0 +1,6 @@
+{
+  "@@locale": "es",
+  "pageHomeWelcome": "Bienvenido {name}",
+  "screenNotFound": "Pantalla {screen} no encontrada",
+  "applicationNotDefined": "No se encontró ninguna empresa {applicationId} en el sistema\n ¡Vaya a la aplicación de administración para crear una!"
+}

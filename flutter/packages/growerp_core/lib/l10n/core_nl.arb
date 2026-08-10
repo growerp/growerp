@@ -1312,5 +1312,16 @@
   "websiteTranslation": "Websitevertaling",
   "wiki": "Wiki",
   "workOrders": "Werkorders",
-  "searchHintDefault": "Zoeken..."
+  "searchHintDefault": "Zoeken...",
+  "greetingMorning": "Goedemorgen",
+  "greetingAfternoon": "Goedemiddag",
+  "greetingEvening": "Goedenavond",
+  "purchase": "Inkoop",
+  "incoming": "Inkomend",
+  "outgoing": "Uitgaand",
+  "admins": "Beheerders",
+  "hours": "Uren",
+  "toDo": "Te doen",
+  "events": "Afspraken",
+  "open": "Open"
 }
