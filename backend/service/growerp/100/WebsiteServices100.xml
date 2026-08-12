@@ -103,7 +103,8 @@ limitations under the License.
                 </else>
             </if>
             <if condition="hostName == '10.0.2.2'">
-                <set field="hostName" value="${stores[0].productStoreId}.localhost:8080" />
+                <set field="hostName"
+                    value="${stores[0].productStoreId}.localhost:${ec.web?.request?.getServerPort() ?: 8080}" />
             </if>
             <set field="website"
                 from="[

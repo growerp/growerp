@@ -3257,7 +3257,8 @@ limitations under the License.
                 <set field="hostName" value="localhost" />
             </if>
             <if condition="hostName == 'localhost'">
-                <set field="hostName" value="localhost:8080" />
+                <set field="hostName"
+                    value="localhost:${ec.web?.request?.getServerPort() ?: 8080}" />
             </if>
             <if condition="hostName.indexOf('.', hostName.indexOf('.') + 1) != -1"><!-- two
                     dots? -->

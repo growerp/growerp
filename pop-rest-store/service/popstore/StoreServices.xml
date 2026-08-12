@@ -30,11 +30,11 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="settingTypeEnumId" value="PsstHostname"/>
                 <date-filter/><order-by field-name="-fromDate"/>
             </entity-find>
-            <if condition="requestHostName.contains('localhost')">
-                <set field="requestHostName" value="$requestHostName:8080"/>
-            </if>
+            <!-- host names are stored with or without a port (:8080, :8081, ...); the port
+                 never selects a store, so match on the host name only -->
+            <set field="requestHostName" from="((String) requestHostName).replaceFirst(':\\d+$', '')"/>
             <iterate list="hostSettingList" entry="hostSetting">
-                <set field="hostPattern" from="hostSetting.settingValue"/>
+                <set field="hostPattern" from="hostSetting.settingValue?.replaceFirst(':\\d+$', '')"/>
                 <if condition="hostPattern != null &amp;&amp; ((String) requestHostName).matches((String) hostPattern)">
                     <set field="productStoreId" from="hostSetting.productStoreId"/></if>
             </iterate>
