@@ -45,6 +45,7 @@ class WsClient {
   String? _userId;
   bool _closedByUser = false;
   Timer? _reconnectTimer;
+  StreamSubscription? _subscription;
 
   bool get isConnected => _channel != null;
 
@@ -96,6 +97,10 @@ class WsClient {
     _userId = userId;
     _closedByUser = false;
     _reconnectTimer?.cancel();
+    // Cancel the previous listener first so its onDone doesn't fire from this
+    // intentional close and re-arm a spurious reconnect.
+    _subscription?.cancel();
+    _subscription = null;
     // Close previous connection gracefully; ignore errors (connection may already be dead).
     try { _channel?.sink.close(status.normalClosure); } catch (_) {}
     _channel = null;
@@ -120,7 +125,7 @@ class WsClient {
       _scheduleReconnect();
       return;
     }
-    _channel!.stream.listen(
+    _subscription = _channel!.stream.listen(
       (data) => _streamController.add(data),
       onError: (e) {
         logger.w('Websocket stream error: $e');
@@ -169,6 +174,8 @@ class WsClient {
   void close() {
     _closedByUser = true;
     _reconnectTimer?.cancel();
+    _subscription?.cancel();
+    _subscription = null;
     _channel?.sink.close(status.normalClosure);
     _channel = null;
   }
