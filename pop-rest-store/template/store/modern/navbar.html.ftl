@@ -10,7 +10,7 @@
         <div class="max-w-container mx-auto px-4 md:px-12 h-16 flex items-center justify-between gap-4">
             <!-- Logo and Brand -->
             <a href="${up}/" class="flex items-center gap-3 shrink-0">
-                <img src="${logoUrl!'/getLogo'}" alt="Home" class="h-9 w-9 object-contain rounded">
+                <img src="${logoUrl!'/getLogo'}" alt="Home" class="${isMarketing?then('h-9 w-9', 'h-[72px] w-[72px]')} object-contain rounded">
                 <span class="font-display font-bold text-lg tracking-tight text-on-primary-container truncate max-w-[8ch] sm:max-w-none">${storeInfo.productStore.storeName}</span>
             </a>
 

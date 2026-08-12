@@ -9,7 +9,7 @@
             <!-- Company Info -->
             <div>
                 <div class="flex items-center gap-3 mb-4">
-                    <img src="${logoUrl!'/getLogo'}" alt="Logo" class="h-8 w-8 object-contain rounded opacity-80">
+                    <img src="${logoUrl!'/getLogo'}" alt="Logo" class="${isMarketing?then('h-8 w-8', 'h-[64px] w-[64px]')} object-contain rounded opacity-80">
                     <span class="font-display font-bold text-lg text-on-primary-container">${storeInfo.productStore.storeName!''}</span>
                 </div>
                 <#if (TwitterUrl!'')?has_content || (FacebookUrl!'')?has_content || (InstagramUrl!'')?has_content || (YouTubeUrl!'')?has_content || (LinkedInUrl!'')?has_content || (SubstackUrl!'')?has_content>
