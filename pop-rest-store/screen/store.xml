@@ -337,10 +337,15 @@ var storeInfo = ${storeInfoJson};
             // get target filepath
             newRef = ec.resource.getLocationReference("component://PopRestStore/screen/store/components/styles/${storeInfo.productStore.productStoreId}.css")
             String newFilePath = newRef.getUrl().toExternalForm().substring(5)
+            File newFile = new File(newFilePath)
+            // the styles directory holds only generated output and is git-ignored, so it is
+            // absent in a fresh checkout or image; mkdirs does nothing when another render
+            // already created it
+            newFile.getParentFile().mkdirs()
             // render ftl file
             String location = "component://PopRestStore/screen/store/components/styles.css.ftl"
             css = ec.resource.getTemplateRendererByLocation(location)
-            Writer fw = new FileWriter(newFilePath)
+            Writer fw = new FileWriter(newFile)
             css.render(location, fw)
             fw.close()
       </script>
