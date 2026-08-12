@@ -15,6 +15,13 @@ analyzer:
     - "**.freezed.dart"
     - "**/build/**"
     - "**/docs/examples/**"
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
   errors:
     invalid_annotation_target: ignore
     depend_on_referenced_packages: ignore
