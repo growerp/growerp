@@ -99,12 +99,6 @@ RUN bash setup-backend.sh
 RUN if [ "$DOCKER_TAG" != "NOTSET1" ]; then \
     sed -i "s|name=\"growerp\" version=\"[^\"]*\"|name=\"growerp\" version=\"$DOCKER_TAG\"|" backend/component.xml; fi
 
-# AntWebsystems website (public repo — no PAT required)
-RUN git clone --depth 1 https://github.com/AntWebsystems-Co-Ltd/vueWebsite.git /root/vueWebsite
-RUN cp /root/vueWebsite/AWSSetupAaaWebSiteData.xml moqui/runtime/component/growerp/data
-RUN mkdir -p moqui/runtime/component/growerp/service/growerp/website
-RUN cp /root/vueWebsite/WebSiteRestServices.xml moqui/runtime/component/growerp/service/growerp/website
-
 # Copy Flutter web build artifacts from stage 1 into PopRestStore
 # (write to pop-rest-store directly, which is sym-linked as PopRestStore)
 COPY --from=build-flutter /root/growerp/flutter/packages/admin/build/web \
