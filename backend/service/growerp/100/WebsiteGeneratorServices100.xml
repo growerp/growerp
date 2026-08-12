@@ -95,7 +95,7 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
     <service verb="get" noun="WebsiteHostName">
         <description>The host name this website gets on THIS installation:
         the first label of its own domain, on the domain this backend is reached at.
-        www.antwebsystems.com on admin.growerp.org becomes antwebsystems.growerp.org.
+        www.xxxx.com becomes xxxx.growerp.org.
 
         Follows the same rule as setup#MainOrganization: a host with two or more dots loses
         its first label, so admin/staging prefixes do not end up in the name. Returns empty

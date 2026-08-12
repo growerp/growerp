@@ -1672,30 +1672,5 @@ limitations under the License.
             </resource>
         </resource>
     </resource>
-    <!-- Antwebsystems website -->
-    <resource name="storecontents" require-authentication="anonymous-view">
-        <id name="productStoreId">
-            <resource name="info">
-                <method type="get">
-                    <service
-                        name="growerp.website.WebSiteRestServices.get#ProductStoreWikiContentInfo" />
-                </method>
-            </resource>
-            <resource name="BlogInfo">
-                <method type="get">
-                    <service name="growerp.website.WebSiteRestServices.get#BlogInfo" />
-                </method>
-            </resource>
-            <resource name="BlogPost">
-                <method type="get">
-                    <service name="growerp.website.WebSiteRestServices.get#PublishedBlogPost" />
-                </method>
-            </resource>
-            <resource name="PublishedWikiPageText">
-                <method type="get">
-                    <service name="growerp.website.WebSiteRestServices.get#PublishedWikiPageText" />
-                </method>
-            </resource>
-        </id>
-    </resource>
+
 </resource>
