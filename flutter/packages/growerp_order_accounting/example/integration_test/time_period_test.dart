@@ -46,12 +46,16 @@ void main() {
     // a new company starts its accounting year in january
     await TimePeriodTest.checkFiscalPeriods(tester, 1);
 
-    // the accounting year can start at any quarter
+    // the accounting year can start in any month, its quarters then run in
+    // three month blocks from there
     await TimePeriodTest.setFiscalYearStart(tester, 4);
     await TimePeriodTest.checkFiscalPeriods(tester, 4);
 
     await TimePeriodTest.setFiscalYearStart(tester, 10);
     await TimePeriodTest.checkFiscalPeriods(tester, 10);
+
+    await TimePeriodTest.setFiscalYearStart(tester, 2);
+    await TimePeriodTest.checkFiscalPeriods(tester, 2);
 
     // once a period is closed the accounting year cannot be changed anymore
     await TimePeriodTest.closeFirstMonth(tester);

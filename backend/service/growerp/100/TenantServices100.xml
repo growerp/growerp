@@ -121,7 +121,7 @@ limitations under the License.
             <parameter name="companyPartyId" required="true"/>
             <parameter name="companyName" required="true"/>
             <parameter name="currencyId" required="true"/>
-            <parameter name="fiscalYearStartMonth" type="Integer" default="1"/><!-- 1, 4, 7 or 10 -->
+            <parameter name="fiscalYearStartMonth" type="Integer" default="1"/><!-- any month 1..12 -->
             <parameter name="demoData" type="Boolean" default="false"/>
             <parameter name="applicationId" required="true"/>
             <parameter name="userPartyId" required="true"/>

@@ -143,7 +143,7 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
             <parameter name="adminLastName" default-value="Administrator" />
             <parameter name="currencyId" required="true" />
             <parameter name="fiscalYearStartMonth" type="Integer" default-value="1">
-                <description>month the accounting year starts in: 1, 4, 7 or 10</description>
+                <description>month the accounting year starts in: any month 1..12</description>
             </parameter>
             <parameter name="applicationId" default-value="AppAdmin" />
             <parameter name="hostNames">
@@ -165,9 +165,9 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
                 <set field="sourceUrl" value="https://${sourceUrl}" />
             </if>
 
-            <if condition="![1, 4, 7, 10].contains(fiscalYearStartMonth)">
+            <if condition="fiscalYearStartMonth &lt; 1 || fiscalYearStartMonth &gt; 12">
                 <return error="true"
-                    message="Fiscal year start month: ${fiscalYearStartMonth} should be 1, 4, 7 or 10" />
+                    message="Fiscal year start month: ${fiscalYearStartMonth} should be a month 1..12" />
             </if>
 
             <!-- the admin email becomes a login, it may not exist yet -->

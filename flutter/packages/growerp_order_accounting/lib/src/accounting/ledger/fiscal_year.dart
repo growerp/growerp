@@ -17,7 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 
 /// Name of the fiscal year we are in now, like Y2026.
-/// The accounting year can start at any quarter, so in the months before its
+/// The accounting year can start in any month, so in the months before its
 /// start month the current fiscal year is named after the previous calendar year.
 String currentFiscalYearName(BuildContext context) =>
     'Y${currentFiscalYear(context)}';
@@ -28,7 +28,7 @@ int currentFiscalYear(BuildContext context) {
   return now.month < fiscalYearStartMonth(context) ? now.year - 1 : now.year;
 }
 
-/// Month the accounting year of the logged in company starts: 1, 4, 7 or 10.
+/// Month the accounting year of the logged in company starts: any month 1..12.
 int fiscalYearStartMonth(BuildContext context) =>
     context
         .read<AuthBloc>()

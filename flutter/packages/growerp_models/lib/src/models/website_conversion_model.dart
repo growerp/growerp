@@ -32,7 +32,7 @@ abstract class WebsiteConversion with _$WebsiteConversion {
     @Default('') String adminFirstName,
     @Default('') String adminLastName,
     @Default('') String currencyId,
-    int? fiscalYearStartMonth, // 1, 4, 7 or 10
+    int? fiscalYearStartMonth, // any month 1..12
     @Default('') String applicationId,
     @Default('') String hostNames, // comma separated
     int? maxPages,

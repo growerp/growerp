@@ -47,7 +47,7 @@ class AuthLogin extends AuthEvent {
   // for registration continuation
   final String? companyName;
   final Currency? currency;
-  final int? fiscalYearStartMonth; // accounting year start: 1, 4, 7 or 10
+  final int? fiscalYearStartMonth; // accounting year start: any month 1..12
   final String? creditCardNumber;
   final String? nameOnCard;
   final String? cVC;

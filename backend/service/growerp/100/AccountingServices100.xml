@@ -56,7 +56,7 @@ limitations under the License.
                     message="Could not find PartyAcctgPreference for source party [${sourcePartyId}]" />
             </if>
             <set field="partyAcctgPreference" from="sourcePartyAcctgPreference.cloneValue()" />
-            <!-- the fiscal year always starts on the first day of a quarter -->
+            <!-- the fiscal year always starts on the first day of its start month -->
             <if condition="fiscalYearStartMonth">
                 <set field="fiscalYearStartDay" from="1" type="Integer" />
             </if>
@@ -172,12 +172,13 @@ limitations under the License.
 
     <service verb="create" noun="FiscalTimePeriods">
         <description>Create the fiscal year, quarter and month periods for a company, starting at
-            the fiscal year start month(1, 4, 7 or 10) of its accounting preference and running
-            through the next fiscal year.</description>
+            the fiscal year start month(any month 1..12) of its accounting preference and running
+            through the next fiscal year. The quarters are three month blocks counted from that
+            start month, so they only line up with the calendar quarters when it is 1, 4, 7 or 10.</description>
         <in-parameters>
             <parameter name="organizationPartyId" required="true" />
             <parameter name="fiscalYearStartMonth" type="Integer">
-                <description>1, 4, 7 or 10, when not provided taken from the PartyAcctgPreference</description>
+                <description>any month 1..12, when not provided taken from the PartyAcctgPreference</description>
             </parameter>
             <parameter name="startYear" format="0000">
                 <description>Year of the first fiscal year to create, default the current fiscal year</description>
@@ -195,9 +196,9 @@ limitations under the License.
                 <set field="fiscalYearStartMonth"
                     from="acctgPreference?.fiscalYearStartMonth ?: 1" type="Integer" />
             </if>
-            <if condition="![1, 4, 7, 10].contains(fiscalYearStartMonth)">
+            <if condition="fiscalYearStartMonth &lt; 1 || fiscalYearStartMonth &gt; 12">
                 <return error="true"
-                    message="Fiscal year start month: ${fiscalYearStartMonth} should be 1, 4, 7 or 10" />
+                    message="Fiscal year start month: ${fiscalYearStartMonth} should be a month 1..12" />
             </if>
 
             <set field="today" from="java.time.LocalDate.now()" />

@@ -76,7 +76,7 @@
         <field name="adminFirstName" type="text-medium" />
         <field name="adminLastName" type="text-medium" />
         <field name="currencyId" type="id" />
-        <field name="fiscalYearStartMonth" type="number-integer" /><!-- 1, 4, 7 or 10 -->
+        <field name="fiscalYearStartMonth" type="number-integer" /><!-- any month 1..12 -->
         <field name="applicationId" type="id" />
         <field name="hostNames" type="text-medium" /><!-- comma separated -->
         <field name="maxPages" type="number-integer" />

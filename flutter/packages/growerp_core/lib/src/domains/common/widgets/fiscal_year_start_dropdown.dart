@@ -15,10 +15,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-/// The accounting year always starts on the first day of a quarter.
-const List<int> fiscalYearStartMonths = [1, 4, 7, 10];
+/// The accounting year starts on the first day of any month.
+const List<int> fiscalYearStartMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-/// Select the month the accounting year starts in: january, april, july or october.
+/// Select the month the accounting year starts in: any month of the year, its
+/// quarters then run in three month blocks from there.
 /// Pass a null [onChanged] to show the current value read only, which is needed
 /// when transactions have been posted.
 class FiscalYearStartDropdown extends StatelessWidget {

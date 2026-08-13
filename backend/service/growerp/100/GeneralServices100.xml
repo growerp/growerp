@@ -957,7 +957,7 @@ limitations under the License.
             <!-- Parameters for completing tenant setup -->
             <parameter name="companyName"/>
             <parameter name="currencyId"/>
-            <parameter name="fiscalYearStartMonth" type="Integer" default="1"/><!-- 1, 4, 7 or 10 -->
+            <parameter name="fiscalYearStartMonth" type="Integer" default="1"/><!-- any month 1..12 -->
             <parameter name="demoData" type="Boolean" default="false"/>
             <parameter name="timeZoneOffset"/>
             <parameter name="locale">

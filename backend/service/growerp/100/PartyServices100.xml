@@ -337,7 +337,7 @@ limitations under the License.
                     </parameter>
                     <parameter name="currencyName" />
                     <parameter name="fiscalYearStartMonth" type="Integer">
-                        <description>Month the accounting year starts: 1, 4, 7 or 10</description>
+                        <description>Month the accounting year starts: any month 1..12</description>
                     </parameter>
                     <parameter name="acctPeriodChangeAllowed" type="Boolean">
                         <description>False when transactions have been posted, then currency and
@@ -879,7 +879,7 @@ limitations under the License.
                     <parameter name="currencyId" />
                 </parameter>
                 <parameter name="fiscalYearStartMonth" type="Integer">
-                    <description>Month the accounting year starts: 1, 4, 7 or 10</description>
+                    <description>Month the accounting year starts: any month 1..12</description>
                 </parameter>
                 <parameter name="vatPerc">
                     <description>Percentage used for VAT if applicable</description>
