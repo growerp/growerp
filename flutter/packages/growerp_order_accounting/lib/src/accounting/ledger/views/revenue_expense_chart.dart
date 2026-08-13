@@ -100,63 +100,26 @@ class RevenueExpenseChartState extends State<RevenueExpenseForm> {
           case LedgerStatus.failure:
             _selectedPeriod = state.ledgerReport!.period!;
 
-            var months = [
-              _localizations.jan,
-              _localizations.feb,
-              _localizations.mar,
-              _localizations.apr,
-              _localizations.may,
-              _localizations.jun,
-              _localizations.jul,
-              _localizations.aug,
-              _localizations.sep,
-              _localizations.oct,
-              _localizations.nov,
-              _localizations.dec,
-            ];
-            // the chart shows the fiscal year, which can start at another quarter
-            final startMonth = fiscalYearStartMonth(context);
-            months = [
-              ...months.sublist(startMonth - 1),
-              ...months.sublist(0, startMonth - 1),
-            ];
-            // calculate maxY and minY
+            // the backend sends the fiscal months of the selected period, oldest first,
+            // each row starting with its label like 'Jul 2024'
             double maxY = 0.0, minY = 0.0;
             List<List<double>> newCsvRows = [];
-            int row = 1;
-            if (state.ledgerReport?.csvRows != null) {
-              for (int i = 1; i < 13; i++) {
+            List<String> periodLabels = [];
+            final csvRows = state.ledgerReport?.csvRows;
+            if (csvRows != null) {
+              for (int row = 1; row < csvRows.length; row++) {
                 List<double> newRow = [];
-                if (months.indexWhere(
-                          (month) =>
-                              state.ledgerReport?.csvRows?[row][0].substring(
-                                0,
-                                3,
-                              ) ==
-                              month,
-                        ) ==
-                        i - 1 &&
-                    row < state.ledgerReport!.csvRows!.length - 1) {
-                  for (
-                    int cell = 1;
-                    cell < state.ledgerReport!.csvRows![row].length;
-                    cell++
-                  ) {
-                    double doubleCell = double.parse(
-                      state.ledgerReport!.csvRows![row][cell],
-                    );
-                    if (doubleCell < minY) {
-                      minY = doubleCell;
-                    }
-                    if (doubleCell > maxY) {
-                      maxY = doubleCell;
-                    }
-                    newRow.add(doubleCell);
+                for (int cell = 1; cell < csvRows[row].length; cell++) {
+                  double doubleCell = double.parse(csvRows[row][cell]);
+                  if (doubleCell < minY) {
+                    minY = doubleCell;
                   }
-                  row++;
-                } else {
-                  newRow = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+                  if (doubleCell > maxY) {
+                    maxY = doubleCell;
+                  }
+                  newRow.add(doubleCell);
                 }
+                periodLabels.add(csvRows[row][0]);
                 newCsvRows.add(newRow);
               }
             }
@@ -375,24 +338,27 @@ class RevenueExpenseChartState extends State<RevenueExpenseForm> {
                               axisNameWidget: Text('\$'),
                             ),
                             bottomTitles: AxisTitles(
-                              axisNameSize: 50,
-                              axisNameWidget: Padding(
-                                padding: const EdgeInsets.all(15.0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children:
-                                      [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-                                          .map(
-                                            (e) => Text(
-                                              e.toString(),
-                                              style: const TextStyle(
-                                                fontSize: 15,
-                                              ),
-                                            ),
-                                          )
-                                          .toList(),
-                                ),
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                interval: 1,
+                                reservedSize: 30,
+                                getTitlesWidget: (value, meta) {
+                                  final idx = value.toInt() - 1;
+                                  if (idx < 0 || idx >= periodLabels.length) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  // every other label, else they overlap
+                                  if (idx % 2 != 0) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 6),
+                                    child: Text(
+                                      periodLabels[idx],
+                                      style: const TextStyle(fontSize: 11),
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           ),

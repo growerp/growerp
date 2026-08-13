@@ -226,32 +226,37 @@ limitations under the License.
             </if>
 
             <set field="prevPeriodId" from="null" />
-            <set field="firstYear" from="true" />
+            <set field="prevQuarterId" from="null" />
+            <set field="prevMonthId" from="null" />
             <while condition="!yearFrom.isAfter(lastYearFrom)">
                 <set field="fromDate" from="java.sql.Date.valueOf(yearFrom)" />
                 <service-call name="mantle.party.TimeServices.getOrCreate#TimePeriod"
                     out-map="curYearOut"
                     in-map="[partyId:organizationPartyId, timePeriodTypeId:'FiscalYear', fromDate:fromDate, previousPeriodId:prevPeriodId]" />
-                <if condition="firstYear">
-                    <!-- a period without a previous period is numbered from the calendar month,
-                        so create the first quarter and month with an explicit number to start
-                        the chain at 1, all following periods count on from these -->
+                <!-- create the quarters and months of this year one by one with their own
+                    number: mantle get#DescendantPeriods starts a missing chain at the most
+                    recent period of the type of the company, so for a year before that one
+                    it creates nothing and the year is left without quarters and months -->
+                <iterate list="[1, 2, 3, 4]" entry="quarterNum">
+                    <set field="quarterFrom" from="yearFrom.plusMonths(((quarterNum - 1) * 3) as long)" />
                     <service-call name="mantle.party.TimeServices.getOrCreate#TimePeriod"
-                        out-map="firstQuarterOut"
-                        in-map="[partyId:organizationPartyId, timePeriodTypeId:'FiscalQuarter', fromDate:fromDate,
-                                parentPeriodId:curYearOut.timePeriodId, periodNum:1]" />
-                    <service-call name="mantle.party.TimeServices.getOrCreate#TimePeriod"
-                        in-map="[partyId:organizationPartyId, timePeriodTypeId:'FiscalMonth', fromDate:fromDate,
-                                parentPeriodId:firstQuarterOut.timePeriodId, periodNum:1]" />
-                    <set field="firstYear" from="false" />
-                </if>
-                <service-call name="mantle.party.TimeServices.get#DescendantPeriods"
-                    out-map="quartersOut"
-                    in-map="[parentPeriodId:curYearOut.timePeriodId, timePeriodTypeId:'FiscalQuarter', createMissing:true]" />
-                <iterate list="quartersOut.timePeriodList" entry="quarterPeriod">
-                    <service-call name="mantle.party.TimeServices.get#DescendantPeriods"
-                        out-map="monthsOut"
-                        in-map="[parentPeriodId:quarterPeriod.timePeriodId, timePeriodTypeId:'FiscalMonth', createMissing:true]" />
+                        out-map="quarterOut"
+                        in-map="[partyId:organizationPartyId, timePeriodTypeId:'FiscalQuarter',
+                                fromDate:java.sql.Date.valueOf(quarterFrom),
+                                parentPeriodId:curYearOut.timePeriodId, periodNum:quarterNum,
+                                previousPeriodId:prevQuarterId]" />
+                    <iterate list="[1, 2, 3]" entry="monthInQuarter">
+                        <set field="monthFrom" from="quarterFrom.plusMonths((monthInQuarter - 1) as long)" />
+                        <service-call name="mantle.party.TimeServices.getOrCreate#TimePeriod"
+                            out-map="monthOut"
+                            in-map="[partyId:organizationPartyId, timePeriodTypeId:'FiscalMonth',
+                                    fromDate:java.sql.Date.valueOf(monthFrom),
+                                    parentPeriodId:quarterOut.timePeriodId,
+                                    periodNum:((quarterNum - 1) * 3) + monthInQuarter,
+                                    previousPeriodId:prevMonthId]" />
+                        <set field="prevMonthId" from="monthOut.timePeriodId" />
+                    </iterate>
+                    <set field="prevQuarterId" from="quarterOut.timePeriodId" />
                 </iterate>
 
                 <set field="prevPeriodId" from="curYearOut.timePeriodId" />
@@ -304,24 +309,19 @@ limitations under the License.
                 from="acctgPreference?.fiscalYearStartMonth ?: 1" type="Integer" />
             <set field="yearFromDate"
                 from="java.sql.Date.valueOf(java.time.LocalDate.of(year as int, fiscalYearStartMonth, 1))" />
+            <!-- always run, the creation is by getOrCreate: a year created earlier can still
+                miss quarters or months, which leaves the reports without their periods -->
+            <service-call name="growerp.100.AccountingServices100.create#FiscalTimePeriods"
+                in-map="[organizationPartyId: organizationPartyId, startYear: year,
+                        fiscalYearStartMonth: fiscalYearStartMonth]" />
             <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
                 <econdition field-name="partyId" from="organizationPartyId" />
                 <econdition field-name="timePeriodTypeId" value="FiscalYear" />
                 <econdition field-name="fromDate" from="yearFromDate" />
             </entity-find>
             <if condition="!periods">
-                <service-call name="growerp.100.AccountingServices100.create#FiscalTimePeriods"
-                    in-map="[organizationPartyId: organizationPartyId, startYear: year,
-                            fiscalYearStartMonth: fiscalYearStartMonth]" />
-                <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
-                    <econdition field-name="partyId" from="organizationPartyId" />
-                    <econdition field-name="timePeriodTypeId" value="FiscalYear" />
-                    <econdition field-name="fromDate" from="yearFromDate" />
-                </entity-find>
-                <if condition="!periods">
-                    <return error="true"
-                        message="Could not create the fiscal year ${year} for company ${organizationPartyId}" />
-                </if>
+                <return error="true"
+                    message="Could not create the fiscal year ${year} for company ${organizationPartyId}" />
             </if>
             <set field="timePeriodId" from="periods[0].timePeriodId" />
             <set field="fromDate" from="periods[0].fromDate" />
@@ -822,12 +822,17 @@ limitations under the License.
                 first character is a Y for all three -->
             <set field="periodTypeChar"
                 from="periodName.length() &gt; 5 ? periodName.substring(5, 6) : 'Y'" />
+            <!-- the chart runs by month: report the fiscal months the requested period is made
+                up of, 12 for a year, 3 for a quarter and the month itself for a month -->
+            <set field="monthCount"
+                from="periodTypeChar == 'q' ? 3 : (periodTypeChar == 'm' ? 1 : 12)"
+                type="Integer" />
             <service-call name="mantle.party.TimeServices.find#PartyTimePeriodGroups"
                 out-map="periodsOut"
                 in-map="[partyId:companyPartyId,
-                        timePeriodTypeId: typeConvert[periodTypeChar],
+                        timePeriodTypeId: 'FiscalMonth',
                         thruDate: timePeriods[0].thruDate,
-                        groups:(periods?:13)]" />
+                        groups:(periods?:monthCount)]" />
             <if condition="periodsOut.timePeriodGroups">
                 <service-call name="mantle.ledger.LedgerReportServices.get#PeriodSeriesSummary"
                     out-map="context"

@@ -37,7 +37,7 @@ class RevenueExpenseChartMini extends StatelessWidget {
         ..add(
           LedgerFetch(
             ReportType.revenueExpense,
-            periodName: 'Y${DateTime.now().year}',
+            periodName: currentFiscalYearName(context),
           ),
         ),
       child: const _RevenueExpenseChartMiniBody(),
@@ -249,31 +249,21 @@ class _RevenueExpenseChartMiniBody extends StatelessWidget {
           return _buildEmptyChart(context, months, showLabel: showLabel);
         }
 
+        // the backend sends the fiscal months of the current fiscal year, oldest
+        // first, each row starting with its label like 'Jul 2024'
         final csvRows = state.ledgerReport!.csvRows!;
         double maxY = 0.0, minY = 0.0;
         final List<List<double>> data = [];
-        int row = 1;
-        for (int i = 0; i < 12; i++) {
+        final List<String> periodLabels = [];
+        for (int row = 1; row < csvRows.length; row++) {
           List<double> newRow = [];
-          if (row < csvRows.length - 1 &&
-              months.indexWhere(
-                    (m) => csvRows[row][0].length >= 3 &&
-                        csvRows[row][0].substring(0, 3) == m,
-                  ) ==
-                  i) {
-            for (int cell = 1; cell < csvRows[row].length; cell++) {
-              final v = double.tryParse(csvRows[row][cell]) ?? 0.0;
-              if (v < minY) minY = v;
-              if (v > maxY) maxY = v;
-              newRow.add(v);
-            }
-            row++;
-          } else {
-            newRow = List.filled(
-              csvRows[0].length > 1 ? csvRows[0].length - 1 : 6,
-              0.0,
-            );
+          for (int cell = 1; cell < csvRows[row].length; cell++) {
+            final v = double.tryParse(csvRows[row][cell]) ?? 0.0;
+            if (v < minY) minY = v;
+            if (v > maxY) maxY = v;
+            newRow.add(v);
           }
+          periodLabels.add(csvRows[row][0]);
           data.add(newRow);
         }
 
@@ -311,13 +301,13 @@ class _RevenueExpenseChartMiniBody extends StatelessWidget {
                     reservedSize: 20,
                     getTitlesWidget: (value, meta) {
                       final idx = value.toInt() - 1;
-                      if (idx < 0 || idx >= months.length) {
+                      if (idx < 0 || idx >= periodLabels.length) {
                         return const SizedBox.shrink();
                       }
                       // Show only every 3rd month to avoid overlap
                       if (idx % 3 != 0) return const SizedBox.shrink();
                       return Text(
-                        months[idx],
+                        periodLabels[idx],
                         style: TextStyle(
                           fontSize: 9,
                           color: Theme.of(
