@@ -220,6 +220,10 @@ limitations under the License.
                 </else-if>
                 <else><set field="yearFrom" from="currentYearFrom" /></else>
             </if>
+            <!-- a start year further out than next year would otherwise create nothing -->
+            <if condition="yearFrom.isAfter(lastYearFrom)">
+                <set field="lastYearFrom" from="yearFrom" />
+            </if>
 
             <set field="prevPeriodId" from="null" />
             <set field="firstYear" from="true" />
@@ -276,6 +280,91 @@ limitations under the License.
                 <econdition field-name="isClosed" value="Y" />
             </entity-find>
             <set field="allowed" from="!postedTrans &amp;&amp; !closedPeriods" type="Boolean" />
+        </actions>
+    </service>
+
+    <service verb="getOrCreate" noun="FiscalYearPeriod">
+        <description>The fiscal year period of a company for a calendar year, created when it
+            does not exist yet: the year can well be in the past.</description>
+        <in-parameters>
+            <parameter name="organizationPartyId" required="true" />
+            <parameter name="year" format="0000" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="timePeriodId" />
+            <parameter name="fromDate" type="Date" />
+            <parameter name="thruDate" type="Date" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.ledger.config.PartyAcctgPreference"
+                value-field="acctgPreference">
+                <field-map field-name="organizationPartyId" />
+            </entity-find-one>
+            <set field="fiscalYearStartMonth"
+                from="acctgPreference?.fiscalYearStartMonth ?: 1" type="Integer" />
+            <set field="yearFromDate"
+                from="java.sql.Date.valueOf(java.time.LocalDate.of(year as int, fiscalYearStartMonth, 1))" />
+            <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
+                <econdition field-name="partyId" from="organizationPartyId" />
+                <econdition field-name="timePeriodTypeId" value="FiscalYear" />
+                <econdition field-name="fromDate" from="yearFromDate" />
+            </entity-find>
+            <if condition="!periods">
+                <service-call name="growerp.100.AccountingServices100.create#FiscalTimePeriods"
+                    in-map="[organizationPartyId: organizationPartyId, startYear: year,
+                            fiscalYearStartMonth: fiscalYearStartMonth]" />
+                <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
+                    <econdition field-name="partyId" from="organizationPartyId" />
+                    <econdition field-name="timePeriodTypeId" value="FiscalYear" />
+                    <econdition field-name="fromDate" from="yearFromDate" />
+                </entity-find>
+                <if condition="!periods">
+                    <return error="true"
+                        message="Could not create the fiscal year ${year} for company ${organizationPartyId}" />
+                </if>
+            </if>
+            <set field="timePeriodId" from="periods[0].timePeriodId" />
+            <set field="fromDate" from="periods[0].fromDate" />
+            <set field="thruDate" from="periods[0].thruDate" />
+        </actions>
+    </service>
+
+    <service verb="check" noun="InitialUploadAllowed">
+        <description>The initial GlAccount upload replaces the whole ledger, so it is only
+            allowed as long as the ledger holds nothing but the initial balance of an earlier
+            upload. Note a failed import leaves its initial balance in the error journal, which
+            has to be replaceable too, so match on the description instead of counting the
+            transactions.</description>
+        <in-parameters>
+            <parameter name="organizationPartyId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="allowed" type="Boolean" />
+            <parameter name="initialTransIds" type="List" />
+            <parameter name="initialBalanceDescription">
+                <description>Description marking the transaction as an initial balance, so the
+                    caller creates its own initial balance with the same description</description>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <set field="initialBalanceDescription" value="Initial balance" />
+            <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="otherTrans"
+                limit="1">
+                <econdition field-name="organizationPartyId" />
+                <econditions combine="or">
+                    <econdition field-name="description" operator="not-equals"
+                        from="initialBalanceDescription" />
+                    <econdition field-name="description" from="null" />
+                </econditions>
+                <select-field field-name="acctgTransId" />
+            </entity-find>
+            <set field="allowed" from="!otherTrans" type="Boolean" />
+            <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="initialTrans">
+                <econdition field-name="organizationPartyId" />
+                <econdition field-name="description" from="initialBalanceDescription" />
+                <select-field field-name="acctgTransId" />
+            </entity-find>
+            <set field="initialTransIds" from="initialTrans.acctgTransId" />
         </actions>
     </service>
 
@@ -704,7 +793,7 @@ limitations under the License.
         </out-parameters>
         <actions>
             <set field="typeConvert"
-                from="['q':'FiscalQuarter','m':'FiscalMonth',
+                from="['Y':'FiscalYear','q':'FiscalQuarter','m':'FiscalMonth',
                     'FiscalYear': 'Y','FiscalQuarter':'Q','FiscalMonth':'M']"
                 type="NewMap" />
             <service-call out-map="context"
@@ -728,10 +817,15 @@ limitations under the License.
                 [classGroupEnumId:'EngGlcNetOpIncome', type:'line', fill:false]
                 ]
             </script>
+            <!-- a period name is Ynnnn for a year, Ynnnnqnn or Ynnnnmnn for a quarter or a
+                month: the character telling the type apart is the one after the year, the
+                first character is a Y for all three -->
+            <set field="periodTypeChar"
+                from="periodName.length() &gt; 5 ? periodName.substring(5, 6) : 'Y'" />
             <service-call name="mantle.party.TimeServices.find#PartyTimePeriodGroups"
                 out-map="periodsOut"
                 in-map="[partyId:companyPartyId,
-                        timePeriodTypeId: typeConvert[periodName.substring(0,1)],
+                        timePeriodTypeId: typeConvert[periodTypeChar],
                         thruDate: timePeriods[0].thruDate,
                         groups:(periods?:13)]" />
             <if condition="periodsOut.timePeriodGroups">
@@ -1285,10 +1379,20 @@ limitations under the License.
                 <parameter name="postedCredits" />
                 <parameter name="postedBalance" />
             </parameter>
+            <parameter name="initialUploadAllowed" type="Boolean">
+                <description>False when the ledger holds transactions other than the initial
+                    balance: the initial upload replaces the ledger and is refused then</description>
+            </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="initialUploadAllowed" value="true" type="Boolean" />
+            <if condition="companyPartyId">
+                <service-call name="growerp.100.AccountingServices100.check#InitialUploadAllowed"
+                    in-map="[organizationPartyId: companyPartyId]" out-map="uploadCheck" />
+                <set field="initialUploadAllowed" from="uploadCheck.allowed" type="Boolean" />
+            </if>
             <if condition="search">
                 <set field="search" value="%$search%" />
             </if>
@@ -1450,6 +1554,19 @@ limitations under the License.
                 <return error="true"
                     message="accountId: $glAccount.accountCode has an invalid class: ${glAccount.accountClass?.description}" />
             </if>
+            <!-- same for the type: the app sends the id, a csv upload only the description -->
+            <set field="typeEnumId" from="glAccount.accountType?.accountTypeId" />
+            <if condition="!typeEnumId &amp;&amp; glAccount.accountType?.description">
+                <entity-find entity-name="moqui.basic.Enumeration" list="typeEnums" limit="1">
+                    <econdition field-name="enumTypeId" value="GlAccountType" />
+                    <econdition field-name="description" from="glAccount.accountType.description" />
+                </entity-find>
+                <if condition="!typeEnums">
+                    <return error="true"
+                        message="accountId: $glAccount.accountCode has an invalid type: ${glAccount.accountType.description}" />
+                </if>
+                <set field="typeEnumId" from="typeEnums[0].enumId" />
+            </if>
             <service-call name="growerp.100.AccountingServices100.get#AccountParent"
                 in-map="[accountCode: glAccount.accountCode]"
                 out-map="context" />
@@ -1459,7 +1576,7 @@ limitations under the License.
                             parentGlAccountId: parentGlAccountId,
                             accountName: glAccount.accountName,
                             glAccountClassEnumId: classEnumId,
-                            glAccountTypeEnumId: glAccount.accountType?.accountTypeId,
+                            glAccountTypeEnumId: typeEnumId,
                             isTemporary: 'N',
                             disallowPosting: 'N',
                         ]"
@@ -1859,7 +1976,193 @@ limitations under the License.
                 name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgTimePeriodAmounts"
                 in-map="[timePeriodId:timePeriodId]" />
 
+            <!-- a fiscal year that closes has to empty its profit and loss accounts into the
+                net income account, without it their balances carry into the next year and the
+                balance sheet stays out by the result of the year -->
+            <if condition="timePeriod.timePeriodTypeId == 'FiscalYear'">
+                <service-call
+                    name="growerp.100.AccountingServices100.create#PeriodCloseAcctgTrans"
+                    in-map="[timePeriodId: timePeriodId]" />
+            </if>
+
             <message>Closed period ${timePeriod.periodName} and verified summary totals</message>
+        </actions>
+    </service>
+
+    <service verb="create" noun="PeriodCloseAcctgTrans" transaction-timeout="1800">
+        <description>Move the balances of the profit and loss accounts of a closed period into
+            the net income account. Same purpose as
+            mantle.ledger.LedgerServices.create#PeriodCloseAcctgTrans, but every query is
+            limited to the organization: a single growerp database holds the ledgers of all
+            tenants, so a lookup by account class alone returns another company's account.</description>
+        <in-parameters>
+            <parameter name="timePeriodId" required="true" />
+            <parameter name="postTransactions" type="Boolean" default="true" />
+            <parameter name="glJournalId" />
+            <parameter name="netIncomeGlAccountId" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="acctgTransIdByClassId" type="Map" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.party.time.TimePeriod" value-field="timePeriod" />
+            <set field="organizationPartyId" from="timePeriod.partyId" />
+            <!-- the owner of the company, for the transaction pseudoId sequence: take it from
+                the company the period belongs to, not from the logged in user, so the service
+                also runs from a scheduled job or from the tools service runner -->
+            <entity-find-one entity-name="mantle.party.Party" value-field="organizationParty">
+                <field-map field-name="partyId" from="organizationPartyId" />
+            </entity-find-one>
+            <set field="ownerPartyId" from="organizationParty?.ownerPartyId" />
+            <service-call name="mantle.party.TimeServices.get#TimePeriodInfo"
+                in-map="[timePeriod:timePeriod]" out-map="periodInfo" />
+            <set field="transactionDate" from="periodInfo.thruTimestampLate" />
+
+            <!-- the net income account of this company, not of whichever tenant happens to
+                have the lowest account code -->
+            <if condition="!netIncomeGlAccountId">
+                <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
+                    list="niGlAccounts">
+                    <econdition field-name="organizationPartyId" />
+                    <econdition field-name="glAccountClassEnumId" value="NET_INCOME" />
+                    <order-by field-name="accountCode" />
+                </entity-find>
+                <set field="netIncomeGlAccountId"
+                    from="niGlAccounts ? niGlAccounts[0].glAccountId : null" />
+            </if>
+            <if condition="!netIncomeGlAccountId">
+                <return error="true"
+                    message="The ledger of company ${organizationPartyId} has no account with class 'Net Income', cannot close period ${timePeriod.periodName}" />
+            </if>
+
+            <set field="acctgTransIdByClassId" from="[:]" />
+            <set field="tempAccountClasses"
+                from="['REVENUE', 'COST_OF_SALES', 'EXPENSE', 'INCOME', 'NON_OP_EXPENSE']" />
+            <iterate list="tempAccountClasses" entry="tempAccountClass">
+                <entity-find-one entity-name="moqui.basic.Enumeration" value-field="classEnum"
+                    cache="true">
+                    <field-map field-name="enumId" from="tempAccountClass" />
+                </entity-find-one>
+                <service-call name="org.moqui.impl.BasicServices.find#EnumerationByParent"
+                    out-map="nestedEnumOut"
+                    in-map="[parentEnumId:tempAccountClass, includeNested:true]" />
+                <service-call name="mantle.ledger.LedgerServices.find#RootGlAccountClassEnum"
+                    out-map="rootEnumOut" in-map="[glAccountClassEnumId:tempAccountClass]" />
+                <set field="isDebit" from="'DEBIT'.equals(rootEnumOut.rootGlAccountClassEnumId)" />
+                <if condition="rootEnumOut.isContra == 'Y'">
+                    <set field="isDebit" from="!isDebit" />
+                </if>
+
+                <entity-find entity-name="mantle.ledger.report.GlAccountOrgTimePeriodDetail"
+                    list="glAccountDetailList">
+                    <econdition field-name="organizationPartyId" />
+                    <econdition field-name="timePeriodId" />
+                    <econdition field-name="glAccountClassEnumId" operator="in"
+                        from="nestedEnumOut.enumIdSet" />
+                    <select-field field-name="glAccountId,isDebit,endingBalance" />
+                </entity-find>
+
+                <!-- nothing to close when every account of the class is at zero -->
+                <set field="hasEndingBalances" from="false" />
+                <iterate list="glAccountDetailList" entry="glAccountDetail">
+                    <if condition="glAccountDetail.endingBalance">
+                        <set field="hasEndingBalances" from="true" />
+                        <break />
+                    </if>
+                </iterate>
+                <if condition="!hasEndingBalances">
+                    <continue />
+                </if>
+
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']"
+                    out-map="context" />
+                <set field="txDescription"
+                    value="${classEnum.description} closing for period ${timePeriod.periodName}" />
+                <service-call name="mantle.ledger.LedgerServices.create#AcctgTrans"
+                    out-map="createOut"
+                    in-map="[   acctgTransTypeEnumId: 'AttNetIncomeClosing',
+                                organizationPartyId: organizationPartyId,
+                                transactionDate: transactionDate,
+                                pseudoId: seqNum,
+                                description: txDescription,
+                                glJournalId: glJournalId]" />
+                <set field="acctgTransId" from="createOut.acctgTransId" />
+                <script>acctgTransIdByClassId.put(tempAccountClass, acctgTransId)</script>
+
+                <!-- an entry reversing the balance of every account of the class -->
+                <set field="balanceTotal" from="0.0" />
+                <iterate list="glAccountDetailList" entry="glAccountDetail">
+                    <if condition="!glAccountDetail.endingBalance">
+                        <continue />
+                    </if>
+                    <set field="isCurDebit" from="glAccountDetail.isDebit == 'Y'" />
+                    <service-call name="mantle.ledger.LedgerServices.create#AcctgTransEntry"
+                        in-map="[   acctgTransId: acctgTransId,
+                                    glAccountId: glAccountDetail.glAccountId,
+                                    debitCreditFlag: (isCurDebit ? 'C' : 'D'),
+                                    amount: glAccountDetail.endingBalance]" />
+                    <!-- a contra account within the class moves the total the other way -->
+                    <set field="balanceTotal"
+                        from="isDebit != isCurDebit ? balanceTotal - glAccountDetail.endingBalance :
+                                balanceTotal + glAccountDetail.endingBalance" />
+                </iterate>
+
+                <!-- balancing entry on the net income account -->
+                <service-call name="mantle.ledger.LedgerServices.create#AcctgTransEntry"
+                    in-map="[   acctgTransId: acctgTransId,
+                                glAccountId: netIncomeGlAccountId,
+                                debitCreditFlag: (isDebit ? 'D' : 'C'),
+                                amount: balanceTotal]" />
+
+                <message>Created transaction ${acctgTransId} for ${classEnum.description}, total balance ${ec.l10n.format(balanceTotal, '#,##0.00')}</message>
+
+                <if condition="postTransactions">
+                    <service-call name="mantle.ledger.LedgerServices.post#AcctgTrans"
+                        in-map="[acctgTransId: acctgTransId]" />
+                </if>
+            </iterate>
+
+            <!-- the closing entries change the balances of this period and of every period
+                that holds it, and through those the opening balances of the next year -->
+            <entity-find entity-name="mantle.party.time.TimePeriodAndType"
+                list="otherTimePeriodList">
+                <econdition field-name="timePeriodId" operator="not-equals" from="timePeriodId" />
+                <econdition field-name="fromDate" operator="less-equals" from="timePeriod.thruDate" />
+                <econdition field-name="thruDate" operator="greater-equals"
+                    from="timePeriod.thruDate" />
+                <econdition field-name="periodPurposeEnumId" value="Fiscal" />
+                <econdition field-name="partyId" from="organizationPartyId" />
+            </entity-find>
+            <set field="recalcPeriodIds" from="[timePeriodId]" />
+            <iterate list="otherTimePeriodList" entry="otherTimePeriod">
+                <script>recalcPeriodIds.add(otherTimePeriod.timePeriodId)</script>
+            </iterate>
+            <iterate list="recalcPeriodIds" entry="recalcPeriodId">
+                <!-- recalculate#GlAccountOrgTimePeriodAmounts only refreshes the summary rows
+                    that are already there, and posting does not create them unless the company
+                    runs a real time gl summary. Without a row for the net income account the
+                    result of the year is left out of the summaries and the trial balance of the
+                    period stays off by that amount. -->
+                <entity-find-one entity-name="mantle.ledger.account.GlAccountOrgTimePeriod"
+                    value-field="netIncomeSummary">
+                    <field-map field-name="glAccountId" from="netIncomeGlAccountId" />
+                    <field-map field-name="organizationPartyId" from="organizationPartyId" />
+                    <field-map field-name="timePeriodId" from="recalcPeriodId" />
+                </entity-find-one>
+                <if condition="netIncomeSummary == null">
+                    <service-call name="create#mantle.ledger.account.GlAccountOrgTimePeriod"
+                        in-map="[   glAccountId: netIncomeGlAccountId,
+                                    organizationPartyId: organizationPartyId,
+                                    timePeriodId: recalcPeriodId,
+                                    beginningBalance: 0.0, endingBalance: 0.0,
+                                    postedDebits: 0.0, postedCredits: 0.0,
+                                    postedDebitsNoClosing: 0.0, postedCreditsNoClosing: 0.0]" />
+                </if>
+                <service-call
+                    name="mantle.ledger.LedgerServices.recalculate#GlAccountOrgTimePeriodAmounts"
+                    in-map="[timePeriodId:recalcPeriodId]" />
+            </iterate>
         </actions>
     </service>
 

@@ -75,6 +75,9 @@ class GlAccountDownload extends GlAccountEvent {}
 
 /// start a [GlAccount] import
 class GlAccountUpload extends GlAccountEvent {
-  const GlAccountUpload(this.file);
+  const GlAccountUpload(this.file, this.periodYear);
   final String file;
+
+  /// fiscal year the initial balance belongs to, posted on its last day
+  final String periodYear;
 }

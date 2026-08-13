@@ -14,7 +14,15 @@
 
 part of 'gl_account_bloc.dart';
 
-enum GlAccountStatus { initial, glAccountLoading, loading, success, failure }
+enum GlAccountStatus {
+  initial,
+  glAccountLoading,
+  loading,
+  success,
+  // the CSV of the ledger is in the state, waiting to be saved as a file
+  downloaded,
+  failure,
+}
 
 class GlAccountState extends Equatable {
   const GlAccountState({
@@ -25,6 +33,8 @@ class GlAccountState extends Equatable {
     this.message,
     this.hasReachedMax = false,
     this.searchString = '',
+    this.initialUploadAllowed = true,
+    this.csvFile,
   });
 
   final GlAccountStatus status;
@@ -35,6 +45,12 @@ class GlAccountState extends Equatable {
   final bool hasReachedMax;
   final String searchString;
 
+  /// false when the ledger holds postings other than the initial balance
+  final bool initialUploadAllowed;
+
+  /// CSV of the ledger accounts, set when a download has been requested
+  final String? csvFile;
+
   GlAccountState copyWith({
     GlAccountStatus? status,
     String? message,
@@ -43,6 +59,8 @@ class GlAccountState extends Equatable {
     List<AccountType>? accountTypes,
     bool? hasReachedMax,
     String? searchString,
+    bool? initialUploadAllowed,
+    String? csvFile,
   }) {
     return GlAccountState(
       status: status ?? this.status,
@@ -52,6 +70,8 @@ class GlAccountState extends Equatable {
       message: message,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       searchString: searchString ?? this.searchString,
+      initialUploadAllowed: initialUploadAllowed ?? this.initialUploadAllowed,
+      csvFile: csvFile,
     );
   }
 
@@ -63,6 +83,8 @@ class GlAccountState extends Equatable {
     accountTypes,
     status,
     hasReachedMax,
+    initialUploadAllowed,
+    csvFile,
   ];
 
   @override

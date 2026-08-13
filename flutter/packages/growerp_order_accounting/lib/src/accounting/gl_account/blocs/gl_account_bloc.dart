@@ -107,6 +107,7 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
                 hasReachedMax: true,
                 status: GlAccountStatus.success,
                 glAccounts: current,
+                initialUploadAllowed: glAccounts.initialUploadAllowed,
               ),
             )
           : emit(
@@ -114,6 +115,7 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
                 status: GlAccountStatus.success,
                 glAccounts: current..addAll(glAccounts.glAccounts),
                 hasReachedMax: glAccounts.glAccounts.length < event.limit,
+                initialUploadAllowed: glAccounts.initialUploadAllowed,
               ),
             );
     } catch (e) {
@@ -254,7 +256,10 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
         );
       }
 
-      final response = await restClient.importGlAccounts(glAccounts);
+      final response = await restClient.importGlAccounts(
+        glAccounts,
+        periodYear: event.periodYear,
+      );
       // the backend reports a not posted initial balance as a warning message
       // instead of an error, so the accounts are kept: show it to the user.
       final backendMessage = _backendMessage(response);
@@ -289,17 +294,21 @@ class GlAccountBloc extends Bloc<GlAccountEvent, GlAccountState> {
   ) async {
     try {
       emit(state.copyWith(status: GlAccountStatus.loading));
-      final response = await restClient.exportGlAccounts();
-      // a missing address or unconfigured mail server comes back as a warning
-      // message, so the export never silently claims an email is on its way
-      final backendMessage = _backendMessage(response);
+      final response = await restClient.downloadGlAccounts();
+      final csvFile = jsonDecode(response)['fileText'] as String?;
+      if (csvFile == null || csvFile.isEmpty) {
+        return emit(
+          state.copyWith(
+            status: GlAccountStatus.failure,
+            message: _backendMessage(response) ?? 'No GL accounts to download',
+          ),
+        );
+      }
       return emit(
         state.copyWith(
-          status: GlAccountStatus.success,
+          status: GlAccountStatus.downloaded,
           glAccounts: state.glAccounts,
-          message:
-              backendMessage ??
-              "The request is scheduled and the email will be sent shortly",
+          csvFile: csvFile,
         ),
       );
     } on DioException catch (e) {

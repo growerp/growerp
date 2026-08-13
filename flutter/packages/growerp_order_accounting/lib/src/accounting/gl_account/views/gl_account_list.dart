@@ -191,26 +191,30 @@ class GlAccountsState extends State<GlAccountList> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            FloatingActionButton(
-                              heroTag: 'glAccountFiles',
-                              key: const Key("upDownload"),
-                              onPressed: () async {
-                                await showDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return BlocProvider.value(
-                                      value: _glAccountBloc,
-                                      child: const GlAccountFilesDialog(),
-                                    );
-                                  },
-                                );
-                                _searchFocusNode.requestFocus();
-                              },
-                              tooltip: localizations.glAccountFiles,
-                              child: const Icon(Icons.file_copy),
-                            ),
-                            const SizedBox(height: 10),
+                            // the initial upload replaces the ledger, so it is only
+                            // offered as long as nothing else has been posted
+                            if (state.initialUploadAllowed) ...[
+                              FloatingActionButton(
+                                heroTag: 'glAccountFiles',
+                                key: const Key("upDownload"),
+                                onPressed: () async {
+                                  await showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return BlocProvider.value(
+                                        value: _glAccountBloc,
+                                        child: const GlAccountFilesDialog(),
+                                      );
+                                    },
+                                  );
+                                  _searchFocusNode.requestFocus();
+                                },
+                                tooltip: localizations.initialUpload,
+                                child: const Icon(Icons.file_copy),
+                              ),
+                              const SizedBox(height: 10),
+                            ],
                             FloatingActionButton(
                               heroTag: "trialBalance",
                               key: const Key("tb"),

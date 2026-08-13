@@ -11,10 +11,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import 'package:universal_io/io.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_models/growerp_models.dart';
+
+import 'test_file_picker.dart';
 
 class GlAccountTest {
   static Future<void> selectLedger(WidgetTester tester) async {
@@ -93,6 +97,60 @@ class GlAccountTest {
         ),
       );
     }
+  }
+
+  /// Download the ledger CSV, put the given balances in it and upload it back
+  /// as the initial balance of [periodYear]. [balances] maps an account code
+  /// to a signed trial balance amount, debit positive and credit negative.
+  static Future<void> initialUpload(
+    WidgetTester tester, {
+    required String periodYear,
+    required Map<String, String> balances,
+  }) async {
+    final tempDir = await Directory.systemTemp.createTemp('glAccountTest');
+    final csvPath = '${tempDir.path}/GlAccounts.csv';
+    FilePicker.platform = TestFilePicker(csvPath);
+
+    await CommonTest.tapByKey(tester, 'upDownload');
+    await CommonTest.tapByKey(tester, 'download', seconds: CommonTest.waitTime);
+    final csvFile = File(csvPath);
+    expect(csvFile.existsSync(), true, reason: 'downloaded CSV not saved');
+
+    // put the balances in the last column of the accounts they belong to
+    final lines = await csvFile.readAsLines();
+    for (int i = 0; i < lines.length; i++) {
+      final columns = lines[i].split(',');
+      if (columns.length < 6) continue;
+      final balance = balances[columns[0].trim()];
+      if (balance == null) continue;
+      columns[5] = balance;
+      lines[i] = columns.join(',');
+    }
+    await csvFile.writeAsString(lines.join('\n'));
+
+    await CommonTest.enterText(tester, 'periodYear', periodYear);
+    await CommonTest.tapByKey(tester, 'upload', seconds: CommonTest.waitTime);
+    await CommonTest.waitForSnackbarToGo(tester);
+    await tempDir.delete(recursive: true);
+  }
+
+  /// Check the posted balance the initial upload created for every account.
+  static Future<void> checkPostedBalances(
+    WidgetTester tester,
+    Map<String, String> balances,
+  ) async {
+    for (final entry in balances.entries) {
+      await CommonTest.doNewSearch(tester, searchString: entry.key);
+      expect(find.byKey(const Key('GlAccountDialog')), findsOneWidget);
+      expect(
+        CommonTest.getTextFormField('postedBalance'),
+        equals(entry.value),
+        reason: 'posted balance of account ${entry.key}',
+      );
+      await CommonTest.tapByKey(tester, 'cancel');
+    }
+    await CommonTest.tapByKey(tester, 'clearSearch');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
   }
 
   static Future<void> enterGlAccountData(

@@ -42,7 +42,12 @@ abstract class Uoms with _$Uoms {
 
 @freezed
 abstract class GlAccounts with _$GlAccounts {
-  factory GlAccounts({@Default([]) List<GlAccount> glAccounts}) = _GlAccounts;
+  factory GlAccounts({
+    @Default([]) List<GlAccount> glAccounts,
+    // false when the ledger holds postings other than the initial balance:
+    // the initial upload replaces the ledger and is refused then.
+    @Default(true) bool initialUploadAllowed,
+  }) = _GlAccounts;
   GlAccounts._();
 
   factory GlAccounts.fromJson(Map<String, dynamic> json) =>

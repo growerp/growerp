@@ -923,12 +923,14 @@ abstract class RestClient {
   Future<String> importPaymentTypes(@Field() List<PaymentType> paymentTypes);
 
   @POST("rest/s1/growerp/100/ImportExport/glAccounts")
-  Future<String> importGlAccounts(@Field() List<GlAccount> glAccounts);
-
-  @GET("rest/s1/growerp/100/ImportExport")
-  Future<String> exportGlAccounts({
-    @Query('entityName') String entityName = 'GlAccount',
+  Future<String> importGlAccounts(
+    @Field() List<GlAccount> glAccounts, {
+    @Field() String? periodYear,
   });
+
+  /// the GlAccount CSV itself, to be saved as a file by the caller
+  @GET("rest/s1/growerp/100/ImportExport/glAccounts")
+  Future<String> downloadGlAccounts();
 
   @POST("rest/s1/growerp/100/ImportExport/companies")
   Future<void> importCompanies(@Field() List<Company> companies);

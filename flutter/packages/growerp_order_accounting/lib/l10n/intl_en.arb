@@ -701,6 +701,22 @@
   "@glAccountUpDown": {
     "description": "Label for GL Account Up/Download"
   },
+  "downloadCsv": "Download CSV file",
+  "@downloadCsv": {
+    "description": "Button to save the GL account CSV file"
+  },
+  "initialUpload": "Initial upload",
+  "@initialUpload": {
+    "description": "Label for the initial GL Account upload"
+  },
+  "accountingPeriodYear": "Accounting period year",
+  "@accountingPeriodYear": {
+    "description": "Label for the fiscal year the initial balance is posted in"
+  },
+  "accountingPeriodYearError": "Please enter the accounting period year as 4 digits",
+  "@accountingPeriodYearError": {
+    "description": "Error when the accounting period year is not a 4 digit year"
+  },
   "downloadFirst": "Download first to obtain the format",
   "@downloadFirst": {
     "description": "Instruction to download format first"

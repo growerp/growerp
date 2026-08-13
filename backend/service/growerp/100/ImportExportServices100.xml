@@ -145,6 +145,10 @@ limitations under the License.
                 </parameter>
             </parameter>
             <parameter name="applicationId" />
+            <parameter name="periodYear" format="0000">
+                <description>Fiscal year the initial balance belongs to: it is posted on the
+                    last day of that year. When not provided the balance is posted today.</description>
+            </parameter>
         </in-parameters>
         <actions>
             <script>System.out.println(">>>>importing ${glAccounts?.size()} GL Accounts")</script>
@@ -153,16 +157,12 @@ limitations under the License.
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="relComp" />
             <!-- replace the initial balance transaction(s) of an earlier import; a ledger
-                holding any other transaction must not be overwritten. Note a failed import
-                leaves its initial balance in the error journal, which has to be replaceable
-                too, so match on the description instead of counting the transactions. -->
-            <set field="initialBalanceDescription" value="Initial balance" />
-            <entity-find entity-name="mantle.ledger.transaction.AcctgTrans" list="transList">
-                <econdition field-name="organizationPartyId" from="relComp.companyPartyId" />
-            </entity-find>
-            <set field="initialTransIds"
-                from="transList.findAll { it.description == initialBalanceDescription }.acctgTransId" />
-            <if condition="transList.size() &gt; initialTransIds.size()">
+                holding any other transaction must not be overwritten. -->
+            <service-call name="growerp.100.AccountingServices100.check#InitialUploadAllowed"
+                in-map="[organizationPartyId: relComp.companyPartyId]" out-map="uploadCheck" />
+            <set field="initialBalanceDescription" from="uploadCheck.initialBalanceDescription" />
+            <set field="initialTransIds" from="uploadCheck.initialTransIds" />
+            <if condition="uploadCheck.allowed != true">
                 <return error="true"
                     message="Cannot replace the ledger: it holds accounting transactions other than the initial balance." />
             </if>
@@ -285,11 +285,25 @@ limitations under the License.
             </iterate>
             <!-- create posted balance in initial transaction-->
             <if condition="!transactions.isEmpty()">
+                <!-- the initial balance closes a fiscal year, so post it on the last day of
+                    that year. create#AcctgTrans takes its transactionDate from the effective
+                    time, the same route import#FinDocs uses to date its documents. -->
+                <if condition="periodYear">
+                    <service-call
+                        name="growerp.100.AccountingServices100.getOrCreate#FiscalYearPeriod"
+                        in-map="[organizationPartyId: relComp.companyPartyId, year: periodYear]"
+                        out-map="yearPeriod" />
+                    <check-errors />
+                    <script>ec.user.setEffectiveTime(new java.sql.Timestamp(yearPeriod.thruDate.getTime()))</script>
+                </if>
                 <service-call name="growerp.100.FinDocServices100.create#FinDoc"
                     in-map="finDoc: [docType: 'transaction', sales: true, isPosted: true,
                                             description: initialBalanceDescription,
                                             items: transactions]"
                     out-map="context" />
+                <if condition="periodYear">
+                    <script>ec.user.setEffectiveTime(null)</script>
+                </if>
             </if>
             <!-- recalculate posted summary-->
             <service-call name="growerp.100.AccountingServices100.recalculate#GlAccountOrgSummaries"
