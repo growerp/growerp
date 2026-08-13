@@ -55,6 +55,7 @@ class WebsiteConversionCreate extends WebsiteConversionEvent {
     this.adminFirstName,
     this.adminLastName,
     required this.currencyId,
+    this.fiscalYearStartMonth,
     this.applicationId,
     this.hostNames,
     this.maxPages,
@@ -66,6 +67,7 @@ class WebsiteConversionCreate extends WebsiteConversionEvent {
   final String? adminFirstName;
   final String? adminLastName;
   final String currencyId;
+  final int? fiscalYearStartMonth;
   final String? applicationId;
   final String? hostNames;
   final int? maxPages;

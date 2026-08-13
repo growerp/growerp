@@ -380,6 +380,7 @@ fence, no explanation before or after.
     Map spec = [adminEmail: adminEmail, adminFirstName: adminFirstName ?: 'Site',
                 adminLastName: adminLastName ?: 'Administrator',
                 companyName: companyName, currencyId: currencyId,
+                fiscalYearStartMonth: (fiscalYearStartMonth ?: 1) as Integer,
                 applicationId: applicationId ?: 'AppAdmin',
                 hostNames: hostNames ?: [], sourceUrl: site.homeUrl]
     if (logo) spec.logoPath = "images/${logo.name}"

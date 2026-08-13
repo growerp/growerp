@@ -39,6 +39,7 @@ class WebsiteConversionDialogState extends State<WebsiteConversionDialog> {
   final _lastNameController = TextEditingController();
   final _hostNamesController = TextEditingController();
   String _currencyId = 'USD';
+  int _fiscalYearStartMonth = 1;
   int _maxPages = 12;
   late WebsiteConversionBloc _bloc;
 
@@ -219,6 +220,12 @@ class WebsiteConversionDialogState extends State<WebsiteConversionDialog> {
                 ),
               ],
             ),
+            FiscalYearStartDropdown(
+              value: _fiscalYearStartMonth,
+              label: 'Accounting year starts',
+              onChanged: (value) =>
+                  setState(() => _fiscalYearStartMonth = value ?? 1),
+            ),
             TextFormField(
               key: const Key('hostNames'),
               decoration: const InputDecoration(
@@ -246,6 +253,7 @@ class WebsiteConversionDialogState extends State<WebsiteConversionDialog> {
                             ? null
                             : _lastNameController.text,
                         currencyId: _currencyId,
+                        fiscalYearStartMonth: _fiscalYearStartMonth,
                         hostNames: _hostNamesController.text.isEmpty
                             ? null
                             : _hostNamesController.text,

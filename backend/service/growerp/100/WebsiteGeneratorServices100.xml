@@ -72,6 +72,7 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
                     adminFirstName: conversion.adminFirstName,
                     adminLastName: conversion.adminLastName,
                     currencyId: conversion.currencyId, applicationId: conversion.applicationId,
+                    fiscalYearStartMonth: conversion.fiscalYearStartMonth,
                     hostNames: conversion.hostNames, maxPages: conversion.maxPages,
                     status: conversion.status, statusMessage: conversion.statusMessage,
                     pageCount: conversion.pageCount, imageCount: conversion.imageCount,
@@ -141,6 +142,9 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
             <parameter name="adminFirstName" default-value="Site" />
             <parameter name="adminLastName" default-value="Administrator" />
             <parameter name="currencyId" required="true" />
+            <parameter name="fiscalYearStartMonth" type="Integer" default-value="1">
+                <description>month the accounting year starts in: 1, 4, 7 or 10</description>
+            </parameter>
             <parameter name="applicationId" default-value="AppAdmin" />
             <parameter name="hostNames">
                 <description>comma separated; when empty they are derived from the source url</description>
@@ -159,6 +163,11 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
             <set field="sourceUrl" from="sourceUrl.trim()" />
             <if condition="!sourceUrl.startsWith('http')">
                 <set field="sourceUrl" value="https://${sourceUrl}" />
+            </if>
+
+            <if condition="![1, 4, 7, 10].contains(fiscalYearStartMonth)">
+                <return error="true"
+                    message="Fiscal year start month: ${fiscalYearStartMonth} should be 1, 4, 7 or 10" />
             </if>
 
             <!-- the admin email becomes a login, it may not exist yet -->
@@ -259,6 +268,7 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
                                  companyName: companyName, adminEmail: adminEmail,
                                  adminFirstName: adminFirstName, adminLastName: adminLastName,
                                  currencyId: currencyId, applicationId: applicationId,
+                                 fiscalYearStartMonth: fiscalYearStartMonth,
                                  hostNames: hostNameList.join(','), maxPages: maxPages,
                                  status: 'QUEUED', statusMessage: 'Waiting to start',
                                  createdDate: ec.user.nowTimestamp])
@@ -399,6 +409,7 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
                                      adminFirstName: conversion.adminFirstName,
                                      adminLastName: conversion.adminLastName,
                                      currencyId: conversion.currencyId,
+                                     fiscalYearStartMonth: conversion.fiscalYearStartMonth,
                                      applicationId: conversion.applicationId,
                                      hostNames: (conversion.hostNames ?: '').split(',').collect { it.trim() }.findAll { it },
                                      apiKey: apiKey, ownerPartyId: conversion.ownerPartyId])
@@ -473,6 +484,7 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
             <parameter name="adminFirstName" />
             <parameter name="adminLastName" />
             <parameter name="currencyId" required="true" />
+            <parameter name="fiscalYearStartMonth" type="Integer" default-value="1" />
             <parameter name="applicationId" />
             <parameter name="hostNames" type="List" />
             <parameter name="apiKey" />

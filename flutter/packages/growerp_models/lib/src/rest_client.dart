@@ -165,6 +165,7 @@ abstract class RestClient {
     @Field() String? adminFirstName,
     @Field() String? adminLastName,
     @Field() required String currencyId,
+    @Field() int? fiscalYearStartMonth,
     @Field() String? applicationId,
     @Field() String? hostNames,
     @Field() int? maxPages,

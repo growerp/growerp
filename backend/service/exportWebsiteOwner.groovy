@@ -263,6 +263,7 @@ try {
                 adminLastName: adminLastName ?: 'Administrator',
                 companyName: companyName,
                 currencyId: acctg?.baseCurrencyUomId ?: store.defaultCurrencyUomId ?: 'USD',
+                fiscalYearStartMonth: (acctg?.fiscalYearStartMonth ?: 1) as Integer,
                 applicationId: 'AppAdmin', hostNames: hosts]
     if (logoPath) spec.logoPath = logoPath
     if (contact) spec.contact = contact

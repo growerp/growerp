@@ -2448,6 +2448,7 @@ limitations under the License.
             <service-call name="growerp.100.TenantServices100.complete#TenantSetup"
                 in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId,
                         companyName: spec.companyName, currencyId: spec.currencyId,
+                        fiscalYearStartMonth: spec.fiscalYearStartMonth ?: 1,
                         applicationId: applicationId, userPartyId: adminPartyId,
                         hostName: 'localhost']" />
 
