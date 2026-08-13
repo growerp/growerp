@@ -30,7 +30,7 @@ RUN apt-get update && \
     add-apt-repository universe && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
-    git zip gdb libstdc++6 fonts-noto nano sed \
+    git zip gdb libstdc++6 fonts-noto nano sed curl \
     xvfb libgtk-3-dev ninja-build cmake clang lld llvm pkgconf liblzma-dev \
     libglu1-mesa binutils \
     libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev && \
@@ -73,6 +73,23 @@ RUN /root/.pub-cache/bin/melos clean && \
     /root/.pub-cache/bin/melos bootstrap && \
     /root/.pub-cache/bin/melos build --no-select && \
     /root/.pub-cache/bin/melos l10n --no-select
+
+# Vendor pdfium so the Linux desktop build never downloads it at cmake time.
+# The printing plugin fetches pdfium from GitHub on every cmake configure, and
+# every package depends on it via growerp_core — ~30 downloads per test job,
+# with no retry, so a single hiccup fails a whole package with
+# "Build step for pdfium failed: 1 / Unable to generate build files".
+# The pub cache lives in the image (the workspace volume mount does not shadow
+# it), so patching the cached plugin here holds for every test run.
+RUN set -eux; \
+    CMAKE_FILE=$(ls /root/.pub-cache/hosted/pub.dev/printing-*/linux/CMakeLists.txt); \
+    PDFIUM_VERSION=$(sed -n 's/^set(PDFIUM_VERSION "\([0-9]*\)".*/\1/p' "$CMAKE_FILE"); \
+    [ -n "$PDFIUM_VERSION" ]; \
+    mkdir -p /opt/pdfium; \
+    curl -fsSL -o /opt/pdfium/pdfium-linux-x64.tgz \
+      "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/${PDFIUM_VERSION}/pdfium-linux-x64.tgz"; \
+    sed -i 's|\${PDFIUM_URL}|/opt/pdfium/pdfium-linux-x64.tgz|' "$CMAKE_FILE"; \
+    grep -q '/opt/pdfium/pdfium-linux-x64.tgz' "$CMAKE_FILE"
 
 # No sed patching needed — backend URL is injected at test time via
 # --dart-define=BACKEND_URL and --dart-define=CHAT_URL
