@@ -32,6 +32,7 @@
             "request": "launch",
             "cwd": "flutter/packages/agents",
             "program": "lib/main.dart",
+            "deviceId": "emulator-",
             "toolArgs": [
                 "--dart-define=BACKEND_PORT=8080"
             ]
@@ -66,6 +67,7 @@
             "request": "launch",
             "cwd": "flutter/packages/support",
             "program": "lib/main.dart",
+            "deviceId": "emulator-",
             "toolArgs": [
                 "--dart-define=BACKEND_PORT=8080"
             ]
@@ -111,6 +113,7 @@
             "request": "launch",
             "cwd": "flutter/packages/admin",
             "program": "lib/main.dart",
+            "deviceId": "emulator-",
             "toolArgs": [
                 "--dart-define=BACKEND_PORT=8080"
             ]
@@ -121,6 +124,7 @@
             "request": "launch",
             "cwd": "flutter/packages/rental",
             "program": "lib/main.dart",
+            "deviceId": "emulator-",
             "toolArgs": [
                 "--dart-define=BACKEND_PORT=8080"
             ]
@@ -155,6 +159,7 @@
             "request": "launch",
             "cwd": "flutter/packages/freelance",
             "program": "lib/main.dart",
+            "deviceId": "emulator-",
             "toolArgs": [
                 "--dart-define=BACKEND_PORT=8080"
             ]
@@ -189,6 +194,7 @@
             "request": "launch",
             "cwd": "flutter/packages/hotel",
             "program": "lib/main.dart",
+            "deviceId": "emulator-",
             "toolArgs": [
                 "--dart-define=BACKEND_PORT=8080"
             ]
