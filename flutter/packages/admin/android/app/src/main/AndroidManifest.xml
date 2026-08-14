@@ -1,7 +1,6 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.growerp.admin">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
    <application
-        android:label="admin"
+        android:label="GrowERP Administrator"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity

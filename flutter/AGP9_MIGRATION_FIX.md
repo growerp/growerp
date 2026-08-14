@@ -1,70 +1,73 @@
-# AGP 9+ Migration Fix for GrowERP Flutter Packages
+# AGP 9 / Gradle 9 build configuration
 
-## Problem
-Starting with Android Gradle Plugin (AGP) 9.0+, the new DSL interface is enforced by default. This causes build failures when applying the Flutter Gradle plugin because Flutter doesn't yet fully support the new AGP 9+ DSL.
+## Current stack
 
-Error message:
+All Android projects under `flutter/packages/*/android` (apps and package examples)
+run the same stack:
+
+| Item | Version |
+|---|---|
+| Gradle wrapper | 9.1.0 |
+| `com.android.application` (AGP) | 9.0.1 |
+| `org.jetbrains.kotlin.android` (KGP) | 2.3.20 |
+| Java / `jvmTarget` | 17 |
+
+Flutter (3.47) drops support for Gradle < 9.1.0, which forced this upgrade.
+Build scripts are Kotlin DSL only — `settings.gradle.kts`, `build.gradle.kts`,
+`app/build.gradle.kts`. The groovy variants were removed.
+
+## Why `android.newDsl=false` is still set
+
+Starting with AGP 9, only the new DSL interface is read, and the Flutter Gradle
+plugin does not yet support it:
+
 ```
-[!] Starting AGP 9+, only the new DSL interface will be read. This results in a build failure when applying the Flutter Gradle plugin
+[!] Starting AGP 9+, only the new DSL interface will be read. This results in a
+    build failure when applying the Flutter Gradle plugin
 ```
 
-## Solution
-The recommended workaround is to opt out of the new DSL by setting the `android.newDsl=false` flag in `gradle.properties`. This allows the project to continue using the old DSL interfaces while maintaining compatibility with AGP 9+.
+So every `android/gradle.properties` keeps:
 
-## Changes Made
-
-### 1. Added `android.newDsl=false` to all `gradle.properties` files
-Location: `*/android/gradle.properties`
-
-Added the following line after `android.useAndroidX=true`:
 ```properties
 android.newDsl=false
+android.builtInKotlin=false
 ```
 
-This flag tells AGP 9+ to use the old DSL interfaces, which are compatible with the current Flutter Gradle plugin.
+`builtInKotlin=false` keeps KGP in charge of Kotlin compilation; with it off,
+the Flutter Gradle plugin applies `kotlin-android` itself, which is why the app
+build files do not declare that plugin.
 
-### 2. Maintained Old DSL Configuration
-- Kept `id "kotlin-android"` plugin in the plugins block
-- Kept `kotlinOptions` block instead of migrating to `kotlin { compilerOptions {} }`
+Remove both flags only once Flutter supports the new DSL and built-in Kotlin
+(tracked in [Issue #180137](https://github.com/flutter/flutter/issues/180137)).
 
-## Files Modified
-All Android build configuration files across the GrowERP packages:
-- 14 Groovy DSL files (`build.gradle`)
-- 5 Kotlin DSL files (`build.gradle.kts`)
-- 17 `gradle.properties` files
+## What AGP 9 required changing
+
+- `rootProject.buildDir` → `rootProject.layout.buildDirectory` (removed in Gradle 9)
+- `compileSdkVersion` / `targetSdkVersion` methods → `compileSdk =` / `targetSdk =`
+- `kotlinOptions {}` → `kotlin { compilerOptions { jvmTarget = …JvmTarget.JVM_17 } }`
+- `android.enableJetifier=true` dropped — Jetifier is gone in AGP 9
+- `multiDexEnabled` + `com.android.support:multidex` dropped — minSdk 24 has
+  native multidex, and the support-library artifact needed Jetifier. The stale
+  `FlutterMultiDexApplication.java` copies were deleted with it.
+- `package="…"` removed from every `AndroidManifest.xml`; `namespace` in the
+  build file is authoritative
+- `aaptOptions { noCompress "bin" }` → `androidResources { noCompress += "bin" }`
+  (Patrol setup in `growerp_order_accounting/example`)
+- the `androidx.glance` / `androidx.compose.remote` `resolutionStrategy` pin (an
+  AGP 8 workaround for `home_widget`) is no longer needed and was removed
+
+The inert `flutter.compileSdkVersion` / `flutter.minSdkVersion` lines in
+`gradle.properties` were also dropped — the Flutter Gradle plugin never read
+them; SDK levels come from `flutter.compileSdkVersion` / `flutter.minSdkVersion`
+/ `flutter.targetSdkVersion` in the build file.
 
 ## Verification
-Tested with the `support` package:
-```bash
-cd /home/hans/growerp/flutter/packages/support
-flutter clean
-flutter pub get
-flutter build apk --debug
-```
-✅ Build succeeded!
 
-## Future Migration
-When Flutter adds full support for AGP 9+ new DSL (tracked in [Issue #180137](https://github.com/flutter/flutter/issues/180137)), you can migrate to the new DSL by:
-
-1. Removing `android.newDsl=false` from `gradle.properties`
-2. Removing `id "kotlin-android"` plugin
-3. Replacing `kotlinOptions` with:
-   ```gradle
-   kotlin {
-       compilerOptions {
-           jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8
-       }
-   }
-   ```
-
-## References
-- [Flutter AGP 9 Migration Guide](https://docs.flutter.dev/release/breaking-changes/migrate-to-agp-9)
-- [Flutter Issue #180137](https://github.com/flutter/flutter/issues/180137)
-- [Android Gradle Plugin Release Notes](https://developer.android.com/build/releases/gradle-plugin)
-
-## Scripts Created
-- `fix_agp9_migration.sh` - Initial migration script (attempted new DSL)
-- `revert_to_old_dsl.sh` - Revert script (final solution using old DSL with flag)
+`flutter build apk --debug` passes for all Android projects except
+`packages/website`, whose `lib/main.dart` imports `flutter_web_plugins`
+(web-only) and therefore cannot compile for Android — a pre-existing condition
+unrelated to Gradle; `website` ships web-only.
 
 ## Date
-2026-02-11
+
+2026-08-14 (previous revision 2026-02-11)

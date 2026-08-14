@@ -1,7 +1,6 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.growerp.freelance">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="freelance"
+        android:label="GrowERP Freelance"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
