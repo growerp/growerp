@@ -10,8 +10,11 @@
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="context"/>
+            <if condition="!ownerPartyId">
+                <return error="true" message="Cannot determine your company, please log in again."/>
+            </if>
             <entity-find entity-name="moqui.adk.AdkAgentConfig" list="cfgList">
-                <econdition field-name="ownerPartyId" from="ownerPartyId" ignore-if-empty="true"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
                 <econdition field-name="agentName" operator="like" ignore-case="true"
                     from="search ? ('%' + search + '%') : null" ignore-if-empty="true"/>
                 <order-by field-name="agentName"/>
@@ -190,9 +193,17 @@
             <parameter name="adkAgentConfigId" required="true"/>
         </in-parameters>
         <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <if condition="!ownerPartyId">
+                <return error="true" message="Cannot determine your company, please log in again."/>
+            </if>
             <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
                 auto-field-map="[adkAgentConfigId: adkAgentConfigId]"/>
-            <if condition="!cfg"><return/></if>
+            <!-- never report success for a delete that did not happen -->
+            <if condition="!cfg || cfg.ownerPartyId != ownerPartyId">
+                <log level="warn" message="delete#AdkAgentConfig refused: id=${adkAgentConfigId} found=${cfg != null} recordOwner=${cfg?.ownerPartyId} callerOwner=${ownerPartyId} user=${ec.user.username}"/>
+                <return error="true" message="Agent ${adkAgentConfigId} not found for your company."/>
+            </if>
             <set field="jobName" value="adk_scheduled_${adkAgentConfigId}"/>
             <entity-find entity-name="moqui.service.job.ServiceJobParameter" list="jobParams">
                 <econdition field-name="jobName" from="jobName"/>
@@ -229,9 +240,12 @@
         <out-parameters><parameter name="members" type="List"/></out-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <if condition="!ownerPartyId">
+                <return error="true" message="Cannot determine your company, please log in again."/>
+            </if>
             <entity-find entity-name="moqui.adk.AdkAgentTeamMember" list="rows">
                 <econdition field-name="coordinatorConfigId"/>
-                <econdition field-name="ownerPartyId" from="ownerPartyId" ignore-if-empty="true"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
                 <order-by field-name="sequenceNum"/>
             </entity-find>
             <set field="members" from="[]"/>
@@ -297,8 +311,11 @@
         <out-parameters><parameter name="adkMcpServers" type="List"/></out-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <if condition="!ownerPartyId">
+                <return error="true" message="Cannot determine your company, please log in again."/>
+            </if>
             <entity-find entity-name="moqui.adk.AdkMcpServer" list="rows">
-                <econdition field-name="ownerPartyId" from="ownerPartyId" ignore-if-empty="true"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
                 <econdition field-name="serverName" operator="like" ignore-case="true"
                     from="search ? ('%' + search + '%') : null" ignore-if-empty="true"/>
                 <order-by field-name="serverName"/>
@@ -377,9 +394,16 @@
         <in-parameters><parameter name="adkMcpServerId" required="true"/></in-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <if condition="!ownerPartyId">
+                <return error="true" message="Cannot determine your company, please log in again."/>
+            </if>
             <entity-find-one entity-name="moqui.adk.AdkMcpServer" value-field="srv"
                 auto-field-map="[adkMcpServerId: adkMcpServerId]"/>
-            <if condition="!srv || srv.ownerPartyId != ownerPartyId"><return/></if>
+            <!-- never report success for a delete that did not happen -->
+            <if condition="!srv || srv.ownerPartyId != ownerPartyId">
+                <log level="warn" message="delete#AdkMcpServer refused: id=${adkMcpServerId} found=${srv != null} recordOwner=${srv?.ownerPartyId} callerOwner=${ownerPartyId} user=${ec.user.username}"/>
+                <return error="true" message="MCP server ${adkMcpServerId} not found for your company."/>
+            </if>
             <!-- detach from every agent, then rebuild those agents -->
             <entity-find entity-name="moqui.adk.AdkAgentMcpServer" list="links">
                 <econdition field-name="adkMcpServerId"/>
@@ -400,9 +424,12 @@
         <out-parameters><parameter name="servers" type="List"/></out-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <if condition="!ownerPartyId">
+                <return error="true" message="Cannot determine your company, please log in again."/>
+            </if>
             <entity-find entity-name="moqui.adk.AdkAgentMcpServer" list="rows">
                 <econdition field-name="configId"/>
-                <econdition field-name="ownerPartyId" from="ownerPartyId" ignore-if-empty="true"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
                 <order-by field-name="sequenceNum"/>
             </entity-find>
             <set field="servers" from="[]"/>
@@ -632,8 +659,11 @@
         <out-parameters><parameter name="adkActions" type="List"/></out-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <if condition="!ownerPartyId">
+                <return error="true" message="Cannot determine your company, please log in again."/>
+            </if>
             <entity-find entity-name="moqui.adk.AdkActionLog" list="rows">
-                <econdition field-name="ownerPartyId" from="ownerPartyId" ignore-if-empty="true"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
                 <econdition field-name="configId" from="configId" ignore-if-empty="true"/>
                 <econditions combine="or">
                     <econdition field-name="serviceName" operator="like" ignore-case="true"
@@ -757,8 +787,11 @@
         <out-parameters><parameter name="adkApprovals" type="List"/></out-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <if condition="!ownerPartyId">
+                <return error="true" message="Cannot determine your company, please log in again."/>
+            </if>
             <entity-find entity-name="moqui.adk.AdkApproval" list="rows">
-                <econdition field-name="ownerPartyId" from="ownerPartyId" ignore-if-empty="true"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
                 <econdition field-name="status" from="status" ignore-if-empty="true"/>
                 <econdition field-name="serviceName" operator="like" ignore-case="true"
                     from="search ? ('%' + search + '%') : null" ignore-if-empty="true"/>
@@ -824,8 +857,11 @@
         <out-parameters><parameter name="adkKnowledgeDocs" type="List"/></out-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <if condition="!ownerPartyId">
+                <return error="true" message="Cannot determine your company, please log in again."/>
+            </if>
             <entity-find entity-name="moqui.adk.AdkKnowledgeDoc" list="docs">
-                <econdition field-name="ownerPartyId" from="ownerPartyId" ignore-if-empty="true"/>
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
                 <econdition field-name="title" operator="like" ignore-case="true"
                     from="search ? ('%' + search + '%') : null" ignore-if-empty="true"/>
                 <order-by field-name="-createdDate"/>
@@ -854,7 +890,9 @@
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
             <entity-find-one entity-name="moqui.adk.AdkKnowledgeDoc" value-field="doc"
                 auto-field-map="[adkKnowledgeDocId: adkKnowledgeDocId]"/>
-            <if condition="!doc || doc.ownerPartyId != ownerPartyId"><return/></if>
+            <if condition="!doc || doc.ownerPartyId != ownerPartyId">
+                <return error="true" message="Document ${adkKnowledgeDocId} not found for your company."/>
+            </if>
             <set field="title" from="doc.title"/>
             <set field="sourceType" from="doc.sourceType"/>
             <entity-find entity-name="moqui.adk.AdkKnowledgeChunk" list="chs">

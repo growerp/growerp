@@ -368,6 +368,23 @@ jobs:
           path: /tmp/test_output.log
           retention-days: 7
 
+      # The sut log only shows what the client saw; backend-side warnings
+      # (owner mismatch, refused delete, stack traces) live in the moqui log.
+      - name: Dump Moqui backend log
+        if: always()
+        working-directory: flutter
+        run: |
+          docker compose -f ci/docker-compose-test.yml logs --no-color moqui \
+            > /tmp/moqui.log 2>&1 || true
+
+      - name: Upload Moqui log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: moqui-log-${{ matrix.slice }}-${{ matrix.format }}
+          path: /tmp/moqui.log
+          retention-days: 7
+
       # Fail the job on test failures. Done after the summary/upload steps so
       # the log artifact is always kept.
       - name: Fail on test failures

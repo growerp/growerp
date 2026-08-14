@@ -168,4 +168,13 @@ else
 fi
 rm -f "$LOG_FILE"
 
+# On failure keep the backend log too: the client log only shows the response,
+# backend warnings (refused delete, owner mismatch, stack traces) are in moqui.
+if [ "$TEST_EXIT_CODE" != "0" ]; then
+  MOQUI_LOG=/tmp/growerp_moqui.log
+  docker compose -f ci/docker-compose-test.yml logs --no-color moqui \
+    > "$MOQUI_LOG" 2>&1 || true
+  echo "Moqui backend log written to $MOQUI_LOG"
+fi
+
 exit $TEST_EXIT_CODE
