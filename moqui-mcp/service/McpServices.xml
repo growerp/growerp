@@ -261,17 +261,38 @@
                     def names = org.moqui.mcp.adapter.McpToolAdapter.getCachedGroWerpServiceNames(ec)
                     // tokens from the tail (after last '.'), camelCase-split, drop '#', lowercase
                     def tail = badName.contains('.') ? badName.substring(badName.lastIndexOf('.') + 1) : badName
+                    // The package path of a guessed name is usually RIGHT even when the tail is
+                    // wrong or truncated to a bare verb ("...OutreachServices100.list", an LLM
+                    // dropping the #Noun). Offer that same file's services — same verb first —
+                    // ahead of token scoring, which on a verb-only tail matches pure noise.
+                    def prefixMatches = []
+                    if (badName.contains('.')) {
+                        def prefix = badName.substring(0, badName.lastIndexOf('.') + 1).toLowerCase()
+                        def verbTok = (tail.contains('#') ? tail.substring(0, tail.indexOf('#')) : tail).toLowerCase()
+                        def inFile = names.findAll { it.toLowerCase().startsWith(prefix) }
+                        prefixMatches = inFile.findAll {
+                            it.substring(it.lastIndexOf('.') + 1).toLowerCase().startsWith(verbTok + '#')
+                        } ?: inFile
+                    }
                     def raw = tail.replace('#',' ')
                         .replaceAll(/([a-z])([A-Z])/, '$1 $2')
                         .toLowerCase().split(/\s+/).findAll { it.length() > 2 } as List
                     // prefer noun tokens; verbs like get/create match too many services and add noise
                     def nouns = raw.findAll { !suggestVerbs.contains(it) }
+                    // Verb-only tail leaves no noun at all: take the noun from the service FILE
+                    // ("OutreachServices100" → "outreach") so a guess with a wrong package still
+                    // scores on its domain instead of on every service containing 'list'.
+                    if (!nouns && badName.contains('.')) {
+                        def file = badName.substring(0, badName.lastIndexOf('.'))
+                        if (file.contains('.')) file = file.substring(file.lastIndexOf('.') + 1)
+                        def fileTok = file.replaceAll(/Services\d*$/, '').toLowerCase()
+                        if (fileTok.length() > 2) nouns = [fileTok]
+                    }
                     def base = (nouns ?: raw) as List
                     // add singular forms so 'orders' matches 'Order' and
                     // 'opportunities' matches 'Opportunity'
                     def toks = (base + base.collect { normalizeNoun(it) }) as Set
-                    if (!toks) return []
-                    def scored = names.collect { n ->
+                    def scored = !toks ? [] : names.collect { n ->
                             def low = n.toLowerCase()
                             // also score against the singularized noun of the service itself
                             def nounPart = n.contains('#') ? normalizeNoun(n.substring(n.indexOf('#') + 1)) : ''
@@ -281,7 +302,7 @@
                         .sort { -it.score }
                         .collect { it.name }
                     // Surface domain-alias services (e.g. get#FinDoc for 'order') first.
-                    (aliases + scored.findAll { !aliases.contains(it) }).take(max)
+                    (aliases + prefixMatches + scored).unique().take(max)
                 }
                 // Fix up common LLM service-name mistakes; returns the resolved name or the
                 // original (still-undefined) name so the caller's error path can suggest.
@@ -351,6 +372,23 @@
                         def lastDot = svcName.lastIndexOf('.')
                         if (lastDot > 0) {
                             def tail = svcName.substring(lastDot + 1)
+                            // Verb-only tail: the LLM dropped the "#Noun"
+                            // ("growerp.100.OutreachServices100.list"). The package path is still
+                            // there, so resolve inside that file when its verb names exactly one
+                            // service. Verb-exact by construction, so list# can never become delete#.
+                            if (suggestVerbs.contains(tail.toLowerCase())) {
+                                def prefix = svcName.substring(0, lastDot + 1).toLowerCase()
+                                def want = tail.toLowerCase() + '#'
+                                def inFile = org.moqui.mcp.adapter.McpToolAdapter
+                                    .getCachedGroWerpServiceNames(ec).findAll { n ->
+                                        n.toLowerCase().startsWith(prefix) &&
+                                        n.substring(n.lastIndexOf('.') + 1).toLowerCase().startsWith(want)
+                                    }
+                                if (inFile.size() == 1) {
+                                    ec.logger.info("MCP: resolved verb-only service name '${svcName}' → '${inFile[0]}'")
+                                    return inFile[0]
+                                }
+                            }
                             for (v in suggestVerbs) {
                                 if (tail.startsWith(v) && tail.length() > v.length() &&
                                         Character.isUpperCase(tail.charAt(v.length()))) {
