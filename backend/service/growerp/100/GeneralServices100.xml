@@ -15,6 +15,16 @@ limitations under the License.
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
 
+    <service verb="check" noun="SupportUser">
+        <description>Error out unless the logged-in user is a GrowERP system support user.
+            Used to restrict the support app (AppSupport) services to system support.</description>
+        <actions>
+            <if condition="!ec.user.isInGroup('GROWERP_M_SYSTEM')">
+                <return error="true" message="Only available to GrowERP system support"/>
+            </if>
+        </actions>
+    </service>
+
     <service verb="get" noun="BackendUrl">
         <description>Get the backend url (list) for a given applicationId and version.
             Also returns force update information when app version is below minimum required version.</description>
@@ -192,6 +202,7 @@ limitations under the License.
             </parameter>
         </out-parameters>
         <actions>
+            <service-call name="growerp.100.GeneralServices100.check#SupportUser"/>
             <entity-find entity-name="growerp.Application" list="apps"
                 for-update="true">
                 <econdition field-name="applicationId"
@@ -227,6 +238,7 @@ limitations under the License.
             </parameter>
         </out-parameters>
         <actions>
+            <service-call name="growerp.100.GeneralServices100.check#SupportUser"/>
             <entity-find entity-name="growerp.Application" list="apps"
                 for-update="true">
                 <econdition field-name="applicationId"
@@ -1068,6 +1080,16 @@ limitations under the License.
 
             <!-- Special handling for AppSupport classification - handle early -->
             <if condition="applicationId == 'AppSupport'">
+                <!-- the support app is restricted to system support users: check before
+                     loginUser so an unauthorized user never gets a session -->
+                <entity-find entity-name="moqui.security.UserGroupMember" list="supportAccess">
+                    <econdition field-name="userId" from="userAccount.userId"/>
+                    <econdition field-name="userGroupId" value="GROWERP_M_SYSTEM"/>
+                    <date-filter/>
+                </entity-find>
+                <if condition="!supportAccess">
+                    <return error="true" message="Not authorized for the support application"/>
+                </if>
                 <script>ec.user.loginUser(username, password)</script>
                 <!-- ec.user.setLocale saves on the UserAccount, so only after loginUser -->
                 <if condition="locale &amp;&amp; ec.user.locale?.language != locale">
@@ -1574,6 +1596,7 @@ limitations under the License.
             </parameter>
         </out-parameters>
         <actions>
+            <service-call name="growerp.100.GeneralServices100.check#SupportUser"/>
             <set field="thruDateTime" from="endDateTime ?: ec.user.nowTimestamp"/>
             <set field="fromDateTime"
                 from="startDateTime ?: new java.sql.Timestamp(thruDateTime.time - 30L*24*60*60*1000)"/>
@@ -1674,6 +1697,7 @@ limitations under the License.
             </parameter>
         </out-parameters>
         <actions>
+            <service-call name="growerp.100.GeneralServices100.check#SupportUser"/>
             <set field="thruDateTime" from="ec.user.nowTimestamp"/>
             <set field="fromDateTime"
                 from="new java.sql.Timestamp(thruDateTime.time - (periodDays as long)*24*60*60*1000)"/>
