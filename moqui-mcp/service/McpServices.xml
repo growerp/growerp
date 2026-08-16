@@ -201,6 +201,46 @@
                     if (!o) o = adkHdrs?.owner
                     return o
                 }
+                // Calling agent's own serviceAllowlist, used to disambiguate a truncated
+                // service name when the same-file/same-verb candidates are otherwise tied.
+                // Only 'scoped' agents carry an authorization-bearing allowlist; a stale list
+                // left on a full/readOnly row is not a grant and must not steer resolution.
+                // Cached in a Map holder (not a bare null) so an empty allowlist is a valid
+                // cached value and repeat calls in one tool invocation do one entity read.
+                def _agentGlobCache = [loaded: false, globs: [] as List<String>]
+                def agentAllowGlobs = { ->
+                    if (_agentGlobCache.loaded) return _agentGlobCache.globs
+                    _agentGlobCache.loaded = true
+                    try {
+                        def cid = resolveAdkConfigId()
+                        if (cid) {
+                            def cfg = ec.entity.find('moqui.adk.AdkAgentConfig')
+                                    .condition('adkAgentConfigId', cid).disableAuthz().one()
+                            if (cfg?.toolMode == 'scoped')
+                                _agentGlobCache.globs = ((cfg.serviceAllowlist ?: '') as String)
+                                    .split(/[,\s]+/).findAll { it } as List<String>
+                        }
+                    } catch (ignore) { }   // moqui-adk not installed → entity undefined
+                    return _agentGlobCache.globs
+                }
+                // glob → regex, mirrors AdkGovernanceServices.xml:99-118 (canonical copy).
+                // Do NOT Pattern.quote() the whole glob first: quote() wraps in \Q..\E so the
+                // '*' is never found as '\*' and stays literal, matching nothing.
+                def matchesAllowGlob = { String n ->
+                    agentAllowGlobs().any { g ->
+                        def rx = '^' + g.split(/\*/, -1).collect {
+                            it ? java.util.regex.Pattern.quote(it) : ''
+                        }.join('.*') + '$'
+                        n ==~ rx
+                    }
+                }
+                // Narrow an ambiguous candidate list to the one the calling agent is allowed
+                // to call, if there's exactly one.
+                def narrowByAllowlist = { List cands ->
+                    if (cands == null || cands.size() < 2) return null
+                    def hits = cands.findAll { matchesAllowGlob(it) }
+                    hits.size() == 1 ? hits[0] : null
+                }
                 // returns [allowed:bool, decision:String, args:Map, logId:String, message:String]
                 def applyGate = { String svcName, Map svcArgs ->
                     if (!ec.service.isServiceDefined(GOV_SVC)) return [allowed: true, args: svcArgs, logId: null]
@@ -302,7 +342,13 @@
                         .sort { -it.score }
                         .collect { it.name }
                     // Surface domain-alias services (e.g. get#FinDoc for 'order') first.
-                    (aliases + prefixMatches + scored).unique().take(max)
+                    def ordered = (aliases + prefixMatches + scored).unique()
+                    // When the caller is a scoped agent, prefer suggestions it's actually
+                    // allowed to call — pointless to hand it names applyGate will just block.
+                    // Fall back to the unfiltered list when nothing survives, so a mis-scoped
+                    // agent still produces a diagnosable message for a human reading the log.
+                    def pref = agentAllowGlobs() ? ordered.findAll { matchesAllowGlob(it) } : []
+                    (pref ?: ordered).take(max)
                 }
                 // Fix up common LLM service-name mistakes; returns the resolved name or the
                 // original (still-undefined) name so the caller's error path can suggest.
@@ -388,6 +434,19 @@
                                     ec.logger.info("MCP: resolved verb-only service name '${svcName}' → '${inFile[0]}'")
                                     return inFile[0]
                                 }
+                                // Still ambiguous (e.g. three list# services in the same file):
+                                // the calling agent's own scoped allowlist may name exactly one
+                                // of them. Read verbs only — a narrowed name matches the
+                                // allowlist by definition, so this can never manufacture a
+                                // permission the admin did not grant, but auto-resolving a
+                                // truncated write is a bigger leap than this fix takes.
+                                if (readVerbs.contains(tail.toLowerCase())) {
+                                    def narrowed = narrowByAllowlist(inFile)
+                                    if (narrowed) {
+                                        ec.logger.info("MCP: resolved verb-only service name '${svcName}' → '${narrowed}' (allowlist-narrowed)")
+                                        return narrowed
+                                    }
+                                }
                             }
                             for (v in suggestVerbs) {
                                 if (tail.startsWith(v) && tail.length() > v.length() &&
@@ -466,7 +525,7 @@
                         // service, entity reads through the read-only moqui_rest_call e1/ API.
                         if (!knownGrowerp(svcName)) {
                             def sugg = suggestServices(svcName, 5)
-                            def hint = sugg ? " Did you mean: ${sugg.join(', ')}?"
+                            def hint = sugg ? " Retry now with one of these exact names: ${sugg.join(', ')}."
                                 : " Use moqui_search_services to find valid names."
                             def msg = "Unknown service name: ${svcName}. Only growerp.* services are callable.${hint}"
                             ec.logger.warn("MCP: ${msg}")
@@ -657,7 +716,7 @@
                         def sd = knownGrowerp(svcName) ? ec.service.getServiceDefinition(svcName) : null
                         if (!sd) {
                             def sugg = suggestServices(svcName, 5)
-                            def hint = sugg ? " Did you mean: ${sugg.join(', ')}?"
+                            def hint = sugg ? " Retry now with one of these exact names: ${sugg.join(', ')}."
                                 : " Use moqui_search_services to find valid names."
                             def msg = "Unknown service: ${svcName}. Only growerp.* services are callable.${hint}"
                             ec.logger.warn("MCP: ${msg}")
@@ -1563,7 +1622,7 @@
                         inputSchema: [
                             type: "object",
                             properties: [
-                                "serviceName": [type: "string", description: "Fully-qualified service name in the form package.path.ServiceFile.verb#Noun (e.g. 'growerp.100.CatalogServices100.get#Products'). Get the exact name from moqui_search_services — do not guess."]
+                                "serviceName": [type: "string", description: "Fully-qualified service name in the form package.path.ServiceFile.verb#Noun (e.g. 'growerp.100.CatalogServices100.get#Products'). Must contain '#' — a name without it (e.g. 'growerp.100.OutreachServices100.list') is invalid. Get the exact name from moqui_search_services — do not guess."]
                             ],
                             required: ["serviceName"]
                         ]
@@ -1575,7 +1634,7 @@
                         inputSchema: [
                             type: "object",
                             properties: [
-                                "serviceName": [type: "string", description: "Fully-qualified service name in the form package.path.ServiceFile.verb#Noun (e.g. 'growerp.100.CatalogServices100.get#Products'). Get the exact name from moqui_search_services — do not guess."],
+                                "serviceName": [type: "string", description: "Fully-qualified service name in the form package.path.ServiceFile.verb#Noun (e.g. 'growerp.100.CatalogServices100.get#Products'). Must contain '#' — a name without it (e.g. 'growerp.100.OutreachServices100.list') is invalid. Get the exact name from moqui_search_services — do not guess."],
                                 "parameters": [type: "object", description: "Input parameters for the service (required params must be provided)"]
                             ],
                             required: ["serviceName"]
