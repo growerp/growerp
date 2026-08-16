@@ -1281,7 +1281,7 @@
   "@settingUpYourCompany": {
     "description": "Title of the dialog shown while demo data loads in the background"
   },
-  "demoDataLoading": "Your demo data is being created. This takes a few minutes, you can leave this open.",
+  "demoDataLoading": "Your demo data is being created. This takes a minute or so, you can leave this open.",
   "@demoDataLoading": {
     "description": "Explanation shown while the background demo data load runs"
   },
