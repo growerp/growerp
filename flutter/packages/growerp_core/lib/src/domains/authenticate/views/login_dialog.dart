@@ -19,6 +19,7 @@ import 'package:flutter/foundation.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:go_router/go_router.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:universal_io/io.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
@@ -97,12 +98,16 @@ class LoginDialogState extends State<LoginDialog> {
                 if (context.mounted &&
                     !isGrowERP &&
                     (auth.user?.appsUsed.isEmpty ?? false)) {
-                  await showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (ctx) =>
-                        TrialWelcomeDialog(authenticate: auth),
-                  );
+                  // Apple rejects trial/subscription messaging outside IAP,
+                  // so the trial welcome is not shown on iOS.
+                  if (!Platform.isIOS) {
+                    await showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (ctx) =>
+                          TrialWelcomeDialog(authenticate: auth),
+                    );
+                  }
                   // Replace the old onboarding assistant with the
                   // "Do you need an ERP system?" assessment.
                   if (context.mounted) {
