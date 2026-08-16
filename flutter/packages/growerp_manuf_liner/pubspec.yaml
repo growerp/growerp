@@ -39,7 +39,7 @@ dependencies:
   flutter_form_builder: ^10.1.0
   form_builder_validators: ^11.2.0
   pdf: ^3.11.2
-  printing: ^5.14.2
+  printing: ^5.14.3
   flutter_test:
     sdk: flutter
 
