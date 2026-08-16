@@ -170,6 +170,9 @@ class LoginDialogState extends State<LoginDialog> {
                     'setupRequired' => TenantSetupDialog(
                       authenticate: state.authenticate!,
                     ),
+                    'setupInProgress' => SetupInProgressDialog(
+                      authenticate: state.authenticate!,
+                    ),
                     'subscriptionExpired' => PaymentSubscriptionDialog(
                       authenticate: state.authenticate!,
                     ),

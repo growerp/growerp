@@ -35,6 +35,11 @@ import '../../../../test_data.dart';
 class CommonTest {
   static const int waitTime = 2;
 
+  /// Outer bound for waiting on the background demo data load. Well above the
+  /// 3 minutes after which SetupInProgressDialog offers to continue anyway, so
+  /// that button is what normally ends the wait if the backend goes quiet.
+  static const int demoDataWaitSeconds = 600;
+
   /// Overlays a full-screen info card for [seconds] real seconds, then removes it.
   ///
   /// Use this in integration-test demos to narrate each phase to viewers.
@@ -382,6 +387,28 @@ class CommonTest {
         );
         await PersistFunctions.persistTest(test);
         // Use pump instead of pumpAndSettle to avoid hanging on animations
+        await tester.pump(const Duration(seconds: 2));
+        continue;
+      }
+
+      // Check for SetupInProgressDialog - demo data is created on a backend
+      // worker after login returns, and this dialog waits for the notification
+      // saying it finished. Only appears when demoData was requested.
+      if (await doesExistKey(tester, 'setupInProgress')) {
+        debugPrint('Login: SetupInProgressDialog detected, waiting for demo data...');
+        int demoWait = 0;
+        while (await doesExistKey(tester, 'setupInProgress') &&
+            demoWait < demoDataWaitSeconds) {
+          // the dialog offers a way out if the backend never reports back
+          if (await doesExistKey(tester, 'continueWithoutDemoData')) {
+            debugPrint('Login: demo data slow or failed, continuing without it');
+            await tapByKey(tester, 'continueWithoutDemoData', settle: false);
+            break;
+          }
+          await tester.pump(const Duration(seconds: 1));
+          demoWait++;
+        }
+        debugPrint('Login: demo data wait ended after $demoWait seconds');
         await tester.pump(const Duration(seconds: 2));
         continue;
       }

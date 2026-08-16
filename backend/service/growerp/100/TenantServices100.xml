@@ -130,6 +130,10 @@ limitations under the License.
         </in-parameters>
         <out-parameters>
             <parameter name="success" type="Boolean"/>
+            <parameter name="demoDataLoading" type="Boolean">
+                <description>true when demo data is being loaded in the background, so login#User
+                    can return 'setupInProgress' and the frontend can wait for it</description>
+            </parameter>
         </out-parameters>
         <actions>
             <!-- Special handling for GROWERP system administrator -->
@@ -156,12 +160,13 @@ limitations under the License.
                 in-map="[ownerPartyId: ownerPartyId, userPartyId: userPartyId, companyPartyId: companyPartyId, 
                          applicationId: applicationId, hostName: hostName]"/>
 
-            <!-- App-specific setup -->
+            <!-- App-specific setup; out-map for demoDataLoading, see the out-parameter -->
             <service-call name="growerp.100.PartyServices100.setup#SpecificApp"
                 in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId,
                          userPartyId: userPartyId, applicationId: applicationId,
                          demoData: demoData,
-                         currencyId: currencyId, timeZoneOffset: timeZoneOffset]"/>
+                         currencyId: currencyId, timeZoneOffset: timeZoneOffset]"
+                out-map="context"/>
 
             <!-- Create trial subscription for new tenants (not GROWERP) -->
             <log message="=======creating subscription for ${ownerPartyId}"/>

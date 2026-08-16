@@ -427,6 +427,207 @@ void main() {
       // Cleanup
       await CommonTest.logout(tester);
     });
+
+    testWidgets('TC-SETUP-002: Demo Data Loads In Background After Setup', (
+      WidgetTester tester,
+    ) async {
+      // Demo data is created on a backend worker after login returns, not
+      // inside the login request. login#User comes back 'setupInProgress' with
+      // a real apiKey, the app shows SetupInProgressDialog and waits for the
+      // DemoDataLoad notification over the websocket before entering the app.
+      //
+      // Unlike every other test here this one leaves the demo data checkbox
+      // ticked, which is what makes it the only coverage of that path.
+      final restClient = RestClient(await buildDioClient());
+      final router = createDynamicCoreRouter([
+        coreMenuConfig,
+      ], rootNavigatorKey: GlobalKey<NavigatorState>());
+
+      await CommonTest.startTestApp(
+        tester,
+        router,
+        coreMenuConfig,
+        CoreLocalizations.localizationsDelegates,
+        restClient: restClient,
+        clear: true,
+        title: "TC-SETUP-002: Demo Data Background Load",
+      );
+
+      // --- Registration (mirrors TC-TRIAL-001) ---
+      SaveTest test = await PersistFunctions.getTest();
+      int seq = test.sequence + 1;
+      bool emailExists = true;
+      while (emailExists) {
+        try {
+          final result = await restClient.checkEmail(
+            email: 'demodata$seq@example.com',
+          );
+          emailExists = result['ok'] as bool;
+          if (emailExists) seq++;
+        } catch (_) {
+          break;
+        }
+      }
+      final email = 'demodata$seq@example.com';
+
+      await CommonTest.logout(tester);
+      for (int i = 0; i < 150; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+        if (tester.any(find.byKey(const Key('newUserButton')))) break;
+      }
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+      await CommonTest.tapByKey(tester, 'newUserButton');
+      await CommonTest.enterText(tester, 'firstName', 'Demo');
+      await CommonTest.enterText(tester, 'lastName', 'Data');
+      await CommonTest.enterText(tester, 'email', email);
+      await CommonTest.tapByKey(
+        tester,
+        'newUserButton',
+        seconds: CommonTest.waitTime,
+      );
+      await CommonTest.waitForSnackbarToGo(tester);
+      await PersistFunctions.persistTest(
+        SaveTest(
+          sequence: seq + 1,
+          nowDate: DateTime.now(),
+          admin: User(
+            email: email,
+            loginName: email,
+            firstName: 'Demo',
+            lastName: 'Data',
+          ),
+        ),
+      );
+
+      // --- Login, completing tenant setup WITH demo data ---
+      await CommonTest.pressLoginButton(tester);
+      await CommonTest.enterText(tester, 'username', email);
+      await CommonTest.enterText(tester, 'password', testPassword);
+      await CommonTest.pressLogin(tester);
+      await CommonTest.waitForSnackbarToGo(tester);
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      bool sawSetupInProgress = false;
+      bool hadToContinueManually = false;
+      bool tenantSetupDone = false;
+
+      for (int attempt = 0; attempt < 40; attempt++) {
+        await tester.pump(const Duration(seconds: 1));
+
+        // The dialog under test.
+        if (await CommonTest.doesExistKey(tester, 'setupInProgress')) {
+          sawSetupInProgress = true;
+          int waited = 0;
+          while (await CommonTest.doesExistKey(tester, 'setupInProgress') &&
+              waited < CommonTest.demoDataWaitSeconds) {
+            // Only appears if the load failed or outran the dialog's patience;
+            // taking it means the notification never did its job.
+            if (await CommonTest.doesExistKey(
+              tester,
+              'continueWithoutDemoData',
+            )) {
+              hadToContinueManually = true;
+              await CommonTest.tapByKey(
+                tester,
+                'continueWithoutDemoData',
+                settle: false,
+              );
+              break;
+            }
+            await tester.pump(const Duration(seconds: 1));
+            waited++;
+          }
+          debugPrint('TC-SETUP-002: demo data wait ended after $waited seconds');
+          continue;
+        }
+
+        if (await CommonTest.doesExistKey(tester, 'startTrial')) break;
+        if (tester.any(find.byKey(const Key('HomeFormAuth')))) break;
+
+        // TenantSetupDialog
+        if (await CommonTest.doesExistKey(tester, 'submit') &&
+            await CommonTest.doesExistKey(tester, 'companyName')) {
+          final existingName = CommonTest.getFormBuilderTextFieldByName(
+            tester,
+            'companyName',
+          );
+          if (existingName == 'GrowERP') {
+            // Master-tenant first-run setup — submit then re-login.
+            await tester.tap(find.byKey(const Key('submit')));
+            await tester.pump();
+            for (
+              int w = 0;
+              w < 120 && await CommonTest.doesExistKey(tester, 'submit');
+              w++
+            ) {
+              await tester.pump(const Duration(seconds: 1));
+            }
+            await CommonTest.logout(tester);
+            await tester.pumpAndSettle(const Duration(seconds: 2));
+            await CommonTest.pressLoginButton(tester);
+            await CommonTest.enterText(tester, 'username', email);
+            await CommonTest.enterText(tester, 'password', testPassword);
+            await CommonTest.pressLogin(tester);
+            await CommonTest.waitForSnackbarToGo(tester);
+            await tester.pumpAndSettle(const Duration(seconds: 2));
+            continue;
+          }
+          if (tenantSetupDone) continue;
+          await CommonTest.enterText(
+            tester,
+            'companyName',
+            'TC-SETUP-002 Co $seq',
+          );
+          await CommonTest.enterDropDownSearch(
+            tester,
+            'currency',
+            'United States Dollar',
+          );
+          // NOTE: demo data checkbox deliberately left checked (default in debug).
+          await tester.tap(find.byKey(const Key('submit')));
+          await tester.pump();
+          for (
+            int w = 0;
+            w < 120 && await CommonTest.doesExistKey(tester, 'submit');
+            w++
+          ) {
+            await tester.pump(const Duration(seconds: 1));
+          }
+          tenantSetupDone = true;
+          continue;
+        }
+      }
+
+      expect(
+        sawSetupInProgress,
+        isTrue,
+        reason:
+            'Login with demo data must return setupInProgress and show the '
+            '"setting up" dialog instead of blocking the login request',
+      );
+      expect(
+        hadToContinueManually,
+        isFalse,
+        reason:
+            'The DemoDataLoad websocket notification must end the wait; having '
+            'to press Continue means it never arrived or reported a failure',
+      );
+
+      // Trial welcome sits on top on first login; dismiss to reach the dashboard.
+      if (await CommonTest.doesExistKey(tester, 'startTrial')) {
+        await EvaluationTest.startTrial(tester);
+      }
+      expect(
+        find.byKey(const Key('HomeFormAuth')),
+        findsOneWidget,
+        reason: 'Dashboard must be reached once the demo data load finishes',
+      );
+
+      debugPrint('✓ TC-SETUP-002: Demo data background load verified');
+      await CommonTest.skipOnboardingIfPresent(tester);
+      await CommonTest.logout(tester);
+    });
   });
 
   group('Trial Welcome Tests', () {

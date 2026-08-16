@@ -68,6 +68,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
     on<AuthResetPassword>(_onAuthResetPassword);
     on<AuthChangePassword>(_onAuthChangePassword);
+    on<AuthSetupCompleted>(_onAuthSetupCompleted);
   }
 
   final RestClient restClient;
@@ -309,6 +310,36 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  /// Promote a 'setupInProgress' session to authenticated once the background demo
+  /// data load has finished. The session was already fully authenticated by the
+  /// backend, so there is nothing to re-send: drop the holding status, connect the
+  /// chat socket that the login path skipped, and persist as a normal login.
+  Future<void> _onAuthSetupCompleted(
+    AuthSetupCompleted event,
+    Emitter<AuthState> emit,
+  ) async {
+    final authenticate = state.authenticate;
+    if (authenticate?.apiKey == null) return;
+    // the demo data landed after login, so drop cached GETs taken before it
+    await clearRestCache();
+    final completed = authenticate!.copyWith(loginStatus: null);
+    if (completed.user?.userId != null) {
+      await chat.connect(completed.apiKey!, completed.user!.userId!);
+    }
+    emit(
+      state.copyWith(
+        status: AuthStatus.authenticated,
+        authenticate: completed,
+      ),
+    );
+    await PersistFunctions.persistAuthenticate(completed);
+    await PersistFunctions.persistKeyValue('apiKey', completed.apiKey ?? '');
+    await PersistFunctions.persistKeyValue(
+      'moquiSessionToken',
+      completed.moquiSessionToken ?? '',
+    );
+  }
+
   Future<void> _onAuthLogin(AuthLogin event, Emitter<AuthState> emit) async {
     try {
       String? creditCardType;
@@ -323,11 +354,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(state.copyWith(status: AuthStatus.loading));
       PersistFunctions.removeAuthenticate();
 
-      // Use extended timeout for demo data creation as it involves heavy database operations
+      // The demo data itself no longer loads inside this request (the backend runs it
+      // after commit and reports completion over the notification socket), but this is
+      // still the tenant setup call: chart of accounts, product store, warehouse and
+      // wiki are all created synchronously, which outruns the default 60s on a slow
+      // machine. Keep the headroom.
       final clientToUse = event.demoData == true
           ? RestClient(
               await buildDioClient(timeout: const Duration(seconds: 900)),
-            ) // 15 minutes for demo data
+            )
           : restClient;
 
       Authenticate authenticate = await clientToUse.login(
@@ -353,11 +388,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (authenticate.loginStatus == null ||
           ![
             'setupRequired', // Admin needs to provide company info
+            'setupInProgress', // Logged in, but demo data still loading
             'subscriptionExpired', // Subscription expired, payment required
             'registered', // User registered for existing company
             'passwordChange', // Password reset required
           ].contains(authenticate.loginStatus)) {
-        
+
         if (authenticate.user?.userId != null) {
           await chat.connect(
             authenticate.apiKey!,
@@ -385,6 +421,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           authenticate.moquiSessionToken ?? '',
         );
       } else {
+        // 'setupInProgress' is the one in-process status that comes back with a real
+        // apiKey: the login itself succeeded and only the demo data is still loading.
+        // Connect the notification socket here so SetupInProgressDialog is already
+        // listening when the backend reports the load finished.
+        if (authenticate.loginStatus == 'setupInProgress' &&
+            authenticate.user?.userId != null) {
+          await notification.connect(
+            authenticate.apiKey!,
+            authenticate.user!.userId!,
+          );
+        }
         // login in process
         emit(
           state.copyWith(

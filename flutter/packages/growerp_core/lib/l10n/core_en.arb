@@ -1277,6 +1277,22 @@
   "@pleaseProvideYourCompanyInformationToCom": {
     "description": "Please provide your company information to complete setup text"
   },
+  "settingUpYourCompany": "Setting up your company",
+  "@settingUpYourCompany": {
+    "description": "Title of the dialog shown while demo data loads in the background"
+  },
+  "demoDataLoading": "Your demo data is being created. This takes a few minutes, you can leave this open.",
+  "@demoDataLoading": {
+    "description": "Explanation shown while the background demo data load runs"
+  },
+  "demoDataFailed": "The demo data could not be created. Your company is set up and you can continue without it.",
+  "@demoDataFailed": {
+    "description": "Shown when the background demo data load reported a failure"
+  },
+  "demoDataTakingLong": "This is taking longer than expected. You can keep waiting or continue now, the data will appear as it is created.",
+  "@demoDataTakingLong": {
+    "description": "Shown when the demo data load has not reported back within the expected time"
+  },
   "selectAPlan": "Select a Plan",
   "@selectAPlan": {
     "description": "Select a Plan text"

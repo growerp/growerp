@@ -954,6 +954,10 @@ limitations under the License.
             Returns apiKey to indicate what the frontend should do next:
             - 'authenticated': Normal login, user can proceed
             - 'setupRequired': Admin needs to provide company name/currency
+            - 'setupInProgress': Setup is done and login succeeded, but demo data is still
+              loading in the background; wait for the DemoDataLoad notification. Unlike the
+              other statuses this one carries a real apiKey, because the frontend needs it to
+              connect the notification websocket it is going to wait on.
             - 'subscriptionExpired': Subscription expired, payment required
             - 'passwordChange': User must change password
         </description>
@@ -1127,6 +1131,7 @@ limitations under the License.
                     <!-- Admin user - check if completing setup now -->
                     <if condition="companyName &amp;&amp; currencyId">
                         <!-- Complete tenant setup -->
+                        <!-- out-map for demoDataLoading, used at the end of this service -->
                         <service-call name="growerp.100.TenantServices100.complete#TenantSetup"
                             in-map="[
                                 ownerPartyId: ownerPartyId,
@@ -1139,7 +1144,8 @@ limitations under the License.
                                 userPartyId: userAccount.partyId,
                                 hostName: ec.web?.getHostName(false),
                                 timeZoneOffset: timeZoneOffset
-                            ]"/>
+                            ]"
+                            out-map="context"/>
                         <!-- Continue to subscription check below -->
                         <else>
                             <!-- Request company info from admin -->
@@ -1241,6 +1247,14 @@ limitations under the License.
             <service-call name="growerp.100.GeneralServices100.get#Authenticate"
                 in-map="[applicationId: applicationId]"
                 out-map="context"/>
+
+            <!-- Demo data is still being loaded on a worker thread (see setup#SpecificApp).
+                 Keep the real apiKey from get#Authenticate so the frontend can connect its
+                 notification websocket, but flag the login so it waits on the 'setting up'
+                 screen until the DemoDataLoad notification says the data is there. -->
+            <if condition="demoDataLoading">
+                <script>authenticate.loginStatus = 'setupInProgress'</script>
+            </if>
         </actions>
     </service>
 

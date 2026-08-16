@@ -90,3 +90,9 @@ class AuthLoggedOut extends AuthEvent {
   final Authenticate? authenticate;
   const AuthLoggedOut({this.authenticate});
 }
+
+/// Finish a login that returned 'setupInProgress': the background demo data load
+/// has ended, so the session held in state can be promoted to authenticated.
+class AuthSetupCompleted extends AuthEvent {
+  const AuthSetupCompleted();
+}

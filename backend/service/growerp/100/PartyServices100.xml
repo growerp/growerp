@@ -3459,6 +3459,10 @@ limitations under the License.
         </in-parameters>
         <out-parameters>
             <parameter name="partyClassification" />
+            <parameter name="demoDataLoading" type="Boolean">
+                <description>true when a demo data load was scheduled to run after commit, so
+                    login#User can tell the frontend to wait for it</description>
+            </parameter>
         </out-parameters>
         <actions>
             <!-- check for specific application -->
@@ -3496,13 +3500,41 @@ limitations under the License.
                             productCategoryId: productCategoryId]" />
                 </if>
 
-                <!-- Load demo data if requested -->
+                <!-- Load demo data if requested. Runs async, and only once the current
+                     transaction has committed:
+                     - it takes minutes, and the login request's transaction is begun by the
+                       REST transition with the global timeout. Holding it open that long
+                       makes Bitronix mark it rollback-only, after which every further find
+                       fails with "transaction not in operable status".
+                     - it must wait for the commit because the first thing load#DemoData does
+                       is look up the ProductStore that setup#MainOrganization created earlier
+                       in this same transaction; another thread cannot see it until commit. -->
                 <if condition="demoData">
-                    <log message="Loading demo data for ownerPartyId: ${ownerPartyId}" />
-                    <service-call name="growerp.100.PartyServices100.load#DemoData"
-                        in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId,
-                                 userPartyId: userPartyId, applicationId: applicationId,
-                                 currencyId: currencyId, timeZoneOffset: timeZoneOffset]" />
+                    <log message="Scheduling demo data load for ownerPartyId: ${ownerPartyId}" />
+                    <set field="demoDataLoading" from="true" type="Boolean" />
+                    <script><![CDATA[
+                        def demoParms = [ownerPartyId: ownerPartyId, companyPartyId: companyPartyId,
+                                userPartyId: userPartyId, applicationId: applicationId,
+                                currencyId: currencyId, timeZoneOffset: timeZoneOffset]
+                        // Build the runnable now, and keep the hook itself to nothing but a pool
+                        // submit. afterCompletion runs inside Bitronix's commit, where beginning a
+                        // transaction throws "nested transactions not supported" - and the normal
+                        // ServiceCallAsync.call() would do exactly that, because its artifact authz
+                        // check is itself a service call. getRunnable() skips that check.
+                        // Locals, not context lookups: the closure runs later, during commit.
+                        def demoRunnable = ec.service.async()
+                                .name('growerp.100.PartyServices100.load#DemoDataAsync')
+                                .parameters(demoParms).getRunnable()
+                        def demoPool = ec.factory.workerPool
+                        ec.transaction.registerSynchronization([
+                            beforeCompletion: { -> },
+                            afterCompletion: { int txStatus ->
+                                if (txStatus == jakarta.transaction.Status.STATUS_COMMITTED) {
+                                    demoPool.execute(demoRunnable)
+                                }
+                            }
+                        ] as jakarta.transaction.Synchronization)
+                    ]]></script>
                 </if>
 
                 <!-- any other specific app setup here -->
@@ -3511,7 +3543,73 @@ limitations under the License.
         </actions>
     </service>
 
-    <!-- internal service used in register to run async-->
+    <service verb="load" noun="DemoDataAsync" transaction="ignore">
+        <description>
+            Runs load#DemoData off the login request (scheduled by setup#SpecificApp, see the
+            comment there) and tells the user over the notification websocket when it ends, so
+            the frontend can leave its 'setting up' screen.
+
+            transaction=ignore so this begins no transaction of its own. The two steps then get
+            one each, which is what makes the sequence correct: load#DemoData commits (under its
+            own transaction-timeout) before the notification goes out, so the frontend does not
+            refetch into an empty company, and the notification is sent from a live transaction
+            of its own, which it needs because delivery reads NotificationTopic and
+            NotificationTopicUser.
+
+            A failure is caught and reported rather than thrown: by the time this runs the tenant
+            setup has committed and the user is already logged in, so an error raised here would
+            go nowhere and leave the frontend waiting for a message that never comes.
+        </description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="companyPartyId" required="true" />
+            <parameter name="userPartyId" required="true" />
+            <parameter name="currencyId" />
+            <parameter name="applicationId" />
+            <parameter name="timeZoneOffset" />
+        </in-parameters>
+        <actions>
+            <script><![CDATA[
+                boolean loaded = true
+                try {
+                    ec.service.sync().name('growerp.100.PartyServices100.load#DemoData')
+                        .parameters([ownerPartyId: ownerPartyId, companyPartyId: companyPartyId,
+                            userPartyId: userPartyId, applicationId: applicationId,
+                            currencyId: currencyId, timeZoneOffset: timeZoneOffset]).call()
+                    if (ec.message.hasError()) {
+                        loaded = false
+                        ec.logger.error("Demo data load failed for ownerPartyId ${ownerPartyId}: " +
+                            ec.message.errorsString)
+                        // cleared so the notification below can still be sent
+                        ec.message.clearErrors()
+                    }
+                } catch (Throwable t) {
+                    loaded = false
+                    ec.logger.error("Demo data load failed for ownerPartyId ${ownerPartyId}", t)
+                }
+
+                ec.transaction.runRequireNew(60, "Error notifying demo data load result", {
+                    // notifications are addressed by userId, this chain only carries partyId
+                    def notifyAccounts = ec.entity.find("moqui.security.UserAccount")
+                        .condition("partyId", userPartyId).disableAuthz().list()
+                    if (!notifyAccounts) {
+                        ec.logger.warn("No UserAccount for partyId ${userPartyId}, cannot tell " +
+                            "the frontend the demo data load finished")
+                        return
+                    }
+                    ec.makeNotificationMessage().userId((String) notifyAccounts[0].userId)
+                        .topic('DemoDataLoad')
+                        .message([ownerPartyId: ownerPartyId, loaded: loaded])
+                        .title(loaded ? 'Demo data is ready' : 'Demo data could not be loaded')
+                        .type(loaded ? 'success' : 'danger')
+                        .send(false)
+                })
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- called by load#DemoDataAsync, which begins no transaction of its own, so this one does
+         and the transaction-timeout below is the one that applies -->
     <service verb="load" noun="DemoData" transaction-timeout="3600">
         <description>
         General setup of demo data independent of specfic app demo data which is 
@@ -3998,10 +4096,13 @@ limitations under the License.
                         ]" />
                     <service-call name="growerp.100.ActivityServices100.create#TimeEntry"
                         in-map="[timeEntry: teIn]" out-map="context" />
+                    <!-- userPartyId, not ec.user: this now runs on a worker thread whose
+                         logged-in user depends on the caller, while userPartyId is the
+                         admin this demo data is being built for either way -->
                     <set field="teIn"
                         from="[
                             activityId: activity.activityId,
-                            partyId: ec.user.userAccount.partyId,
+                            partyId: userPartyId,
                             hours: index,
                             date: nowDate.plus(3),
                         ]" />

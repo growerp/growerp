@@ -8,6 +8,14 @@
     <default-property name="default_time_zone" value="UTC" />
     <default-property name="database_time_zone" value="UTC" />
 
+    <!-- Bitronix defaults to 60s (see bitronix-default-config.properties in moqui-framework), which
+         is not enough for the demo data load that runs as one transaction in the
+         login#User -> complete#TenantSetup -> setup#SpecificApp -> load#DemoData chain. On expiry the
+         transaction is marked rollback-only and the next entity find fails with a misleading
+         "Cannot get connection, transaction not in operable status" error. Read by Bitronix as a
+         System property, which default-property sets before the transaction facade initialises. -->
+    <default-property name="bitronix.tm.timer.defaultTransactionTimeout" value="600" />
+
     <server-stats bin-length-seconds="900" visit-enabled="false" visit-ip-info-on-login="true"
         visitor-enabled="false">
         <artifact-stats type="AT_XML_SCREEN" persist-bin="false" persist-hit="false" />
