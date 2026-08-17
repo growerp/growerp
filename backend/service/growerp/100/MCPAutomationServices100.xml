@@ -163,6 +163,12 @@
             <set field="dailyLimit" from="campaign.dailyLimitPerPlatform ?: 50" type="Integer"/>
 
             <iterate list="platformList" entry="plat">
+                <!-- The server can only send EMAIL. Browser/assisted platforms (LINKEDIN) are
+                     sent from the Flutter client - LinkedIn from the assisted send-queue
+                     screen - so draining them here would both fail and steal messages out of
+                     that queue. -->
+                <if condition="plat != 'EMAIL'"><continue/></if>
+
                 <!-- How many already went out today for this platform -->
                 <entity-find-count entity-name="growerp.marketing.OutreachMessage"
                     count-field="sentToday">
@@ -337,13 +343,15 @@
 
     <service verb="send" noun="OutreachMessage">
         <description>
-            Send a single outreach message on its platform: LINKEDIN goes through browser
-            automation (browsermcp MCP server), EMAIL through the company's own SMTP server.
+            Send a single outreach message. Only EMAIL is sent here, through the company's own
+            SMTP server. Every other platform (LINKEDIN) is sent from the Flutter client and is
+            left untouched: LinkedIn messages stay PENDING for the assisted send-queue screen.
         </description>
         <in-parameters>
             <parameter name="messageId" required="true"/>
             <parameter name="platform" required="true">
-                <description>LINKEDIN or EMAIL</description>
+                <description>EMAIL is sent; anything else returns success=false and leaves the
+                    message alone</description>
             </parameter>
             <parameter name="ownerPartyId">
                 <description>Pass explicitly from the headless scheduler; derived from the
@@ -381,88 +389,91 @@
                 <return error="true" message="Message not found: ${messageId}"/>
             </if>
 
-            <!-- Route to platform-specific automation -->
-            <if condition="platform == 'LINKEDIN'">
-                <service-call name="growerp.100.LinkedInAutomationServices100.send#LinkedInMessage"
-                    in-map="[message: message, ownerPartyId: ownerPartyId]" out-map="sendResult"/>
-                <else-if condition="platform == 'EMAIL'">
-                    <!-- Send via the tenant's active email server using the campaign subject +
-                         this message body. Operates on the existing PENDING message; status
-                         update happens below. -->
-                    <if condition="!message.recipientEmail">
-                        <!-- permanent: retrying cannot invent an address -->
+            <!-- Only EMAIL is sent by the server. Not an error return: the caller must not
+                 roll back, and the message must stay PENDING (keeping its attemptCount) so
+                 the assisted send-queue screen still shows it. The out-parameters are set
+                 explicitly, a bare return would look like a silent success. -->
+            <if condition="platform != 'EMAIL'">
+                <set field="success" from="false"/>
+                <set field="errorMessage"
+                    value="${platform} messages are sent from the app send queue, not by the server"/>
+                <set field="messageStatus" from="message.status"/>
+                <set field="attemptCount" from="message.attemptCount ?: 0" type="Integer"/>
+                <return/>
+            </if>
+
+            <!-- Send via the tenant's active email server using the campaign subject +
+                 this message body. Operates on the existing PENDING message; status
+                 update happens below. -->
+            <if condition="!message.recipientEmail">
+                <!-- permanent: retrying cannot invent an address -->
+                <set field="sendResult"
+                    from="[success: false, permanent: true,
+                           errorMessage: 'Recipient has no email address']"/>
+                <else>
+                    <!-- tenant-only email server, no SYSTEM fallback; check first so an
+                         unconfigured tenant becomes a FAILED message, not a service error -->
+                    <service-call name="growerp.100.GeneralServices100.get#ActiveEmailServer"
+                        in-map="[ownerPartyId: ownerPartyId]" out-map="emailServerOut"/>
+                    <if condition="!emailServerOut.emailConfigured">
+                        <!-- permanent: a missing configuration is not a transient
+                             glitch, retrying it hourly only hides the real problem -->
                         <set field="sendResult"
                             from="[success: false, permanent: true,
-                                   errorMessage: 'Recipient has no email address']"/>
+                                   errorMessage: 'No SMTP email server configured for this company, please enter the SMTP settings in the company settings']"/>
                         <else>
-                            <!-- tenant-only email server, no SYSTEM fallback; check first so an
-                                 unconfigured tenant becomes a FAILED message, not a service error -->
-                            <service-call name="growerp.100.GeneralServices100.get#ActiveEmailServer"
-                                in-map="[ownerPartyId: ownerPartyId]" out-map="emailServerOut"/>
-                            <if condition="!emailServerOut.emailConfigured">
-                                <!-- permanent: a missing configuration is not a transient
-                                     glitch, retrying it hourly only hides the real problem -->
-                                <set field="sendResult"
-                                    from="[success: false, permanent: true,
-                                           errorMessage: 'No SMTP email server configured for this company, please enter the SMTP settings in the company settings']"/>
-                                <else>
-                                    <entity-find-one entity-name="mantle.marketing.campaign.MarketingCampaign"
-                                        value-field="campaign">
-                                        <field-map field-name="marketingCampaignId" from="message.marketingCampaignId"/>
-                                    </entity-find-one>
-                                    <!-- unsubscribe served by pop-rest-store /nurture screen -->
-                                    <service-call name="growerp.100.NurtureServices100.get#TenantBaseUrl"
-                                        in-map="[ownerPartyId: ownerPartyId]" out-map="context"/>
-                                    <set field="unsubscribeUrl"
-                                        value="${baseUrl}/nurture/unsubscribe?email=${message.recipientEmail}&amp;campaign=${message.marketingCampaignId}"/>
-                                    <!-- Substitute placeholders here, not only when the message
-                                         was imported: a hand-written subject, an edited body or
-                                         one rewritten by the personalizer agent never passed
-                                         through the import-time substitution. -->
-                                    <service-call name="growerp.100.OutreachServices100.personalize#OutreachText"
-                                        out-map="subjectOut"
-                                        in-map="[text: message.emailSubject ?: campaign?.emailSubject
-                                                     ?: 'Hello from GrowERP',
-                                                 recipientName: message.recipientName,
-                                                 recipientCompany: message.recipientCompany,
-                                                 recipientTitle: message.recipientTitle]"/>
-                                    <service-call name="growerp.100.OutreachServices100.personalize#OutreachText"
-                                        out-map="bodyOut"
-                                        in-map="[text: message.messageContent,
-                                                 recipientName: message.recipientName,
-                                                 recipientCompany: message.recipientCompany,
-                                                 recipientTitle: message.recipientTitle]"/>
-                                    <service-call name="growerp.100.OutreachServices100.render#OutreachEmailBody"
-                                        out-map="renderOut"
-                                        in-map="[bodyText: bodyOut.text,
-                                                 unsubscribeUrl: unsubscribeUrl]"/>
-                                    <set field="emailBody" from="renderOut.bodyHtml"/>
-                                    <!-- ignore-error + force-new: a send failure must not abort or
-                                         poison this service's transaction; failure is recorded on
-                                         the message -->
-                                    <service-call name="growerp.100.GeneralServices100.send#DirectEmail"
-                                        ignore-error="true" transaction="force-new" out-map="emailResult">
-                                        <field-map field-name="ownerPartyId"/>
-                                        <field-map field-name="toAddresses" from="message.recipientEmail"/>
-                                        <!-- per-message override wins over the campaign subject,
-                                             placeholders already substituted above -->
-                                        <field-map field-name="subject" from="subjectOut.text"/>
-                                        <field-map field-name="bodyHtml" from="emailBody"/>
-                                    </service-call>
-                                    <!-- Success is the SMTP message id, NOT emailMessageId:
-                                         emailMessageId only means the EmailMessage row was
-                                         created, and Moqui's sendEmailMessage swallows SMTP
-                                         errors, so an unreachable server would look sent. -->
-                                    <set field="sendResult"
-                                        from="emailResult?.messageId ? [success: true] :
-                                            [success: false, errorMessage: 'Email send failed, see server log']"/>
-                                </else>
-                            </if>
+                            <entity-find-one entity-name="mantle.marketing.campaign.MarketingCampaign"
+                                value-field="campaign">
+                                <field-map field-name="marketingCampaignId" from="message.marketingCampaignId"/>
+                            </entity-find-one>
+                            <!-- unsubscribe served by pop-rest-store /nurture screen -->
+                            <service-call name="growerp.100.NurtureServices100.get#TenantBaseUrl"
+                                in-map="[ownerPartyId: ownerPartyId]" out-map="context"/>
+                            <set field="unsubscribeUrl"
+                                value="${baseUrl}/nurture/unsubscribe?email=${message.recipientEmail}&amp;campaign=${message.marketingCampaignId}"/>
+                            <!-- Substitute placeholders here, not only when the message
+                                 was imported: a hand-written subject, an edited body or
+                                 one rewritten by the personalizer agent never passed
+                                 through the import-time substitution. -->
+                            <service-call name="growerp.100.OutreachServices100.personalize#OutreachText"
+                                out-map="subjectOut"
+                                in-map="[text: message.emailSubject ?: campaign?.emailSubject
+                                             ?: 'Hello from GrowERP',
+                                         recipientName: message.recipientName,
+                                         recipientCompany: message.recipientCompany,
+                                         recipientTitle: message.recipientTitle]"/>
+                            <service-call name="growerp.100.OutreachServices100.personalize#OutreachText"
+                                out-map="bodyOut"
+                                in-map="[text: message.messageContent,
+                                         recipientName: message.recipientName,
+                                         recipientCompany: message.recipientCompany,
+                                         recipientTitle: message.recipientTitle]"/>
+                            <service-call name="growerp.100.OutreachServices100.render#OutreachEmailBody"
+                                out-map="renderOut"
+                                in-map="[bodyText: bodyOut.text,
+                                         unsubscribeUrl: unsubscribeUrl]"/>
+                            <set field="emailBody" from="renderOut.bodyHtml"/>
+                            <!-- ignore-error + force-new: a send failure must not abort or
+                                 poison this service's transaction; failure is recorded on
+                                 the message -->
+                            <service-call name="growerp.100.GeneralServices100.send#DirectEmail"
+                                ignore-error="true" transaction="force-new" out-map="emailResult">
+                                <field-map field-name="ownerPartyId"/>
+                                <field-map field-name="toAddresses" from="message.recipientEmail"/>
+                                <!-- per-message override wins over the campaign subject,
+                                     placeholders already substituted above -->
+                                <field-map field-name="subject" from="subjectOut.text"/>
+                                <field-map field-name="bodyHtml" from="emailBody"/>
+                            </service-call>
+                            <!-- Success is the SMTP message id, NOT emailMessageId:
+                                 emailMessageId only means the EmailMessage row was
+                                 created, and Moqui's sendEmailMessage swallows SMTP
+                                 errors, so an unreachable server would look sent. -->
+                            <set field="sendResult"
+                                from="emailResult?.messageId ? [success: true] :
+                                    [success: false, errorMessage: 'Email send failed, see server log']"/>
                         </else>
                     </if>
-                </else-if>
-                <else>
-                    <return error="true" message="Unsupported platform: ${platform}"/>
                 </else>
             </if>
 
