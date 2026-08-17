@@ -42,6 +42,9 @@
                 <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="existing" for-update="true">
                     <field-map field-name="adkAgentConfigId"/>
                 </entity-find-one>
+                <if condition="!existing">
+                    <return error="true" message="Agent config ${adkAgentConfigId} not found."/>
+                </if>
                 <else>
                     <entity-find entity-name="moqui.adk.AdkAgentConfig" list="existingList" for-update="true">
                         <econdition field-name="agentName"   from="agentName"   ignore-if-empty="true"/>

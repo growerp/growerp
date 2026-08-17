@@ -101,7 +101,12 @@ class AdkTest {
       await CommonTest.tapByKey(tester, 'deleteAdkAgent0');
       await CommonTest.tapByKey(tester, 'confirmDeleteAgent',
           seconds: CommonTest.waitTime);
-      expect(await CommonTest.doesExistKey(tester, 'name0'), isFalse,
+      bool gone = !await CommonTest.doesExistKey(tester, 'name0');
+      for (int attempt = 0; !gone && attempt < 5; attempt++) {
+        await tester.pumpAndSettle(const Duration(seconds: 1));
+        gone = !await CommonTest.doesExistKey(tester, 'name0');
+      }
+      expect(gone, isTrue,
           reason: 'deleted agent "${cfg.agentName}" should no longer be listed');
       await CommonTest.enterText(tester, 'searchField', '');
     }
