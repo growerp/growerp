@@ -35,7 +35,7 @@ Full entity name: `growerp.general.SystemSettings`
 | `githubToken` | text-medium |  |  |
 | `githubRepository` | text-medium |  |  |
 | `llmSystemTokenLimit` | number-integer |  |  |
-| `aiModelName` | text-short |  | Tenant-wide default Gemini model for AI content generation (e.g. gemini-2.5-flash-lite); empty uses the system default. |
+| `aiModelName` | text-short |  | Tenant-wide default Gemini model for AI content generation (e.g. gemini-3.5-flash-lite); empty uses the system default. |
 | `googleClientId` | text-medium |  |  |
 | `googleClientSecret` | text-medium |  |  |
 | `googleRefreshToken` | text-medium |  |  |

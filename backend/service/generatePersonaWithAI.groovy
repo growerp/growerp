@@ -77,7 +77,7 @@ Generate the persona now.
     
     // Step 4: Call Gemini API
     def tenantModel = ec.entity.find("growerp.general.SystemSettings").condition("ownerPartyId", ownerPartyId).one()?.aiModelName
-    def model = tenantModel ?: ec.user.getPreference("GEMINI_MODEL") ?: System.getenv("GEMINI_MODEL") ?: System.getProperty("GEMINI_MODEL") ?: "gemini-2.5-flash-lite"
+    def model = tenantModel ?: ec.user.getPreference("GEMINI_MODEL") ?: System.getenv("GEMINI_MODEL") ?: System.getProperty("GEMINI_MODEL") ?: "gemini-3.5-flash-lite"
     def geminiUrl = "https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}"
     def connection = new URL(geminiUrl).openConnection() as HttpURLConnection
     connection.setRequestMethod("POST")

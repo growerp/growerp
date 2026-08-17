@@ -70,7 +70,11 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   List<AdkMcpServer> _allServers = [];
   bool _mcpLoading = false;
 
-  static const _geminiModels = ['gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+  static const _geminiModels = [
+    'gemini-3.5-flash-lite',
+    'gemini-2.5-flash',
+    'gemini-2.5-flash-lite',
+  ];
 
   static const _cronHints = [
     ('Every minute', '0 * * * * ?'),
@@ -85,7 +89,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     final e = widget.existing;
     if (e != null) {
       _nameCtrl.text = e.agentName ?? '';
-      _modelCtrl.text = e.modelName ?? 'gemini-2.5-flash-lite';
+      _modelCtrl.text = e.modelName ?? 'gemini-3.5-flash-lite';
       _llmProviderCtrl.text = e.llmProvider ?? 'gemini';
       _instructionCtrl.text = e.instruction ?? '';
       _descriptionCtrl.text = e.description ?? '';
@@ -104,7 +108,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       if (_agentRole != 'specialist' && e.adkAgentConfigId != null) _loadTeam();
       if (e.adkAgentConfigId != null) _loadMcpServers();
     } else {
-      _modelCtrl.text = 'gemini-2.5-flash-lite';
+      _modelCtrl.text = 'gemini-3.5-flash-lite';
       _llmProviderCtrl.text = 'gemini';
     }
   }
@@ -521,7 +525,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                         controller: _modelCtrl,
                         decoration: InputDecoration(
                           labelText: 'Model',
-                          hintText: 'gemini-2.5-flash-lite',
+                          hintText: 'gemini-3.5-flash-lite',
                           suffixIcon: PopupMenuButton<String>(
                             key: Key('modelNameMenu'),
                             tooltip: 'Pick a Gemini model',

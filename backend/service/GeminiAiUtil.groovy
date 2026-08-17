@@ -32,7 +32,7 @@ import groovy.json.JsonOutput
 
 class GeminiAiUtil {
     
-    static final String DEFAULT_MODEL = "gemini-2.5-flash-lite"
+    static final String DEFAULT_MODEL = "gemini-3.5-flash-lite"
     static final String API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
 
     /**

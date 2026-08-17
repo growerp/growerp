@@ -276,7 +276,7 @@ def callGeminiApiDirect(def ec, String prompt, int retryCount = 0) {
     }
     
     // Default model, overridable via user preference or environment
-    def model = ec.user.getPreference("GEMINI_MODEL") ?: System.getenv("GEMINI_MODEL") ?: System.getProperty("GEMINI_MODEL") ?: "gemini-2.5-flash-lite"
+    def model = ec.user.getPreference("GEMINI_MODEL") ?: System.getenv("GEMINI_MODEL") ?: System.getProperty("GEMINI_MODEL") ?: "gemini-3.5-flash-lite"
     def apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}"
     
     ec.logger.info("Calling Gemini API (${model}) - attempt ${retryCount + 1}")

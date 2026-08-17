@@ -49,16 +49,17 @@ one.
 
 | Subsystem | Config field | Precedence | Default |
 |---|---|---|---|
-| ADK | `AdkAgentConfig.modelName` (per-agent) | explicit value on the agent row → `gemini-2.5-flash-lite` | `gemini-2.5-flash-lite` |
-| Content-gen | `SystemSettings.aiModelName` (per-tenant) | explicit override → tenant `SystemSettings.aiModelName` → per-user Moqui preference (`GEMINI_MODEL`) → env var → system property → `DEFAULT_MODEL` | `gemini-2.5-flash-lite` |
+| ADK | `AdkAgentConfig.modelName` (per-agent) | explicit value on the agent row → `gemini-3.5-flash-lite` | `gemini-3.5-flash-lite` |
+| Content-gen | `SystemSettings.aiModelName` (per-tenant) | explicit override → tenant `SystemSettings.aiModelName` → per-user Moqui preference (`GEMINI_MODEL`) → env var → system property → `DEFAULT_MODEL` | `gemini-3.5-flash-lite` |
 
 Content-gen resolution is `GeminiAiUtil.resolveModel(ec, ownerPartyId, explicitModel)`
 (`GeminiAiUtil.groovy:43-52`), called from `callGeminiApi()`
 (`GeminiAiUtil.groovy:74`) and duplicated inline in each `generate*WithAI.groovy`
 script (they don't share the util class, they copy the same fallback chain).
 
-**UI:** both `gemini-2.5-flash` and `gemini-2.5-flash-lite` are offered as menu
-choices — a dropdown on the System Setup screen (tenant-wide default,
+**UI:** `gemini-3.5-flash-lite` (the default), `gemini-2.5-flash` and
+`gemini-2.5-flash-lite` are offered as menu choices — a dropdown on the System
+Setup screen (tenant-wide default,
 `system_setup_dialog.dart`) and a preset picker on the per-agent config dialog
 (`adk_agent_config_dialog.dart`, which still allows free text for non-Gemini
 providers). No other Gemini model tier ships as a menu option today.

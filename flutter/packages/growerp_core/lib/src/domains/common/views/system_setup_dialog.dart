@@ -63,7 +63,11 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
   // AI — dynamic list of {providerCtrl, apiKeyCtrl, obscure, apiKeyIsSet}
   final List<Map<String, dynamic>> _llmRows = [];
   final _llmTokenLimitCtrl = TextEditingController();
-  static const _geminiModels = ['gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+  static const _geminiModels = [
+    'gemini-3.5-flash-lite',
+    'gemini-2.5-flash',
+    'gemini-2.5-flash-lite',
+  ];
   String? _aiModelName;
 
   RestClient? _restClient;

@@ -91,7 +91,7 @@ Both build on the shared scaffold `DashboardMini` / `DashboardBar` / `DashboardC
 
 ### 3.1 Basic
 - **Agent Name** — required, unique per company.
-- **Model** — e.g. `gemini-2.5-flash`, `gemini-2.5-flash-lite` (the platform default).
+- **Model** — e.g. `gemini-2.5-flash`, `gemini-3.5-flash-lite` (the platform default).
 - **LLM Provider** — `gemini` (default), `openai`, `anthropic`.
 - **Instruction (system prompt)** — the agent's operating manual. Be exhaustive.
 - **Description** — *matters more than it looks*: for a coordinator's team members, routing is
