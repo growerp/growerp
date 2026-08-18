@@ -1000,12 +1000,20 @@
          is idempotent. Schedules are cloned disabled except the Ops Digest so a fresh
          tenant does not immediately start consuming LLM tokens. -->
     <service verb="enable" noun="MarketingAgentTeam" transaction-timeout="600">
+        <in-parameters>
+            <!-- only honoured for an internal call: the tenant setup demo load runs on a worker
+                 thread with no request to resolve an owner from. A call over REST (ec.web) always
+                 uses its own owner, so no tenant can clone agents into another one. -->
+            <parameter name="ownerPartyId"/>
+        </in-parameters>
         <out-parameters>
             <parameter name="enabledCount" type="Integer"/>
         </out-parameters>
         <actions>
-            <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <if condition="!ownerPartyId || ec.web">
+                <service-call out-map="context"
+                    name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            </if>
             <if condition="ownerPartyId == 'GROWERP'">
                 <return error="true"
                     message="The GROWERP owner already has the marketing team"/>
