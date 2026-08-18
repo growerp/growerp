@@ -5,6 +5,7 @@ export 'src/bloc/outreach_message_bloc.dart';
 export 'src/bloc/platform_config_bloc.dart';
 
 // Screen exports
+export 'src/screens/outreach_setup_guide_screen.dart';
 export 'src/screens/campaign_list_screen.dart';
 export 'src/screens/campaign_detail_screen.dart';
 export 'src/screens/campaign_execution_dialog.dart';

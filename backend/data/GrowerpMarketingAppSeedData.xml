@@ -69,6 +69,8 @@ limitations under the License.
         title="Assessments" iconName="quiz" widgetName="AssessmentList" sequenceNum="50"/>
 
     <!-- ====================== Outreach children ====================== -->
+    <growerp.menu.MenuItem menuItemId="MKTAPP_OUT_GUIDE" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_OUTREACH"
+        title="Guide" iconName="checklist" widgetName="OutreachSetupGuideScreen" sequenceNum="5"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_OUT_CAMPAIGNS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_OUTREACH"
         title="Campaigns" iconName="list" widgetName="CampaignListScreen" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_OUT_AUTO" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_OUTREACH"

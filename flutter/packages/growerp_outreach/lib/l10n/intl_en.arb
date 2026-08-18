@@ -330,5 +330,93 @@
   "dashStatusFailed": "Failed",
   "@dashStatusFailed": {
     "description": "Dashboard tile funnel stage label"
+  },
+  "guideTitle": "Outreach Setup Guide",
+  "@guideTitle": {
+    "description": "Outreach setup guide: guideTitle"
+  },
+  "guideStep1Title": "System Setup",
+  "@guideStep1Title": {
+    "description": "Outreach setup guide: guideStep1Title"
+  },
+  "guideStep1Desc": "Configure your email server (SMTP) and AI API key",
+  "@guideStep1Desc": {
+    "description": "Outreach setup guide: guideStep1Desc"
+  },
+  "guideStep2Title": "Enable Platforms",
+  "@guideStep2Title": {
+    "description": "Outreach setup guide: guideStep2Title"
+  },
+  "guideStep2Desc": "Enable outreach channels, set daily limits and credentials",
+  "@guideStep2Desc": {
+    "description": "Outreach setup guide: guideStep2Desc"
+  },
+  "guideStep3Title": "Define Audience",
+  "@guideStep3Title": {
+    "description": "Outreach setup guide: guideStep3Title"
+  },
+  "guideStep3Desc": "Create personas, content and landing pages in Marketing",
+  "@guideStep3Desc": {
+    "description": "Outreach setup guide: guideStep3Desc"
+  },
+  "guideStep4Title": "Create a Campaign",
+  "@guideStep4Title": {
+    "description": "Outreach setup guide: guideStep4Title"
+  },
+  "guideStep4Desc": "Choose platforms, message template and target audience",
+  "@guideStep4Desc": {
+    "description": "Outreach setup guide: guideStep4Desc"
+  },
+  "guideStep5Title": "Add Recipients",
+  "@guideStep5Title": {
+    "description": "Outreach setup guide: guideStep5Title"
+  },
+  "guideStep5Desc": "Import from CSV/Apollo or add messages manually in the campaign",
+  "@guideStep5Desc": {
+    "description": "Outreach setup guide: guideStep5Desc"
+  },
+  "guideStep6Title": "Start Automation",
+  "@guideStep6Title": {
+    "description": "Outreach setup guide: guideStep6Title"
+  },
+  "guideStep6Desc": "Activate the campaign to send and schedule messages",
+  "@guideStep6Desc": {
+    "description": "Outreach setup guide: guideStep6Desc"
+  },
+  "guideStep7Title": "Process Send Queue",
+  "@guideStep7Title": {
+    "description": "Outreach setup guide: guideStep7Title"
+  },
+  "guideStep7Desc": "Send LinkedIn messages with the assisted 1-click queue",
+  "@guideStep7Desc": {
+    "description": "Outreach setup guide: guideStep7Desc"
+  },
+  "guideStep8Title": "Monitor Responses",
+  "@guideStep8Title": {
+    "description": "Outreach setup guide: guideStep8Title"
+  },
+  "guideStep8Desc": "Track sent messages, replies and failures",
+  "@guideStep8Desc": {
+    "description": "Outreach setup guide: guideStep8Desc"
+  },
+  "guideStep9Title": "Convert to Leads",
+  "@guideStep9Title": {
+    "description": "Outreach setup guide: guideStep9Title"
+  },
+  "guideStep9Desc": "Move responders into the CRM as leads",
+  "@guideStep9Desc": {
+    "description": "Outreach setup guide: guideStep9Desc"
+  },
+  "guideOptional": "Optional",
+  "@guideOptional": {
+    "description": "Outreach setup guide: guideOptional"
+  },
+  "guideNotAvailable": "Not available in this app",
+  "@guideNotAvailable": {
+    "description": "Outreach setup guide: guideNotAvailable"
+  },
+  "guideBackToGuide": "Back to guide",
+  "@guideBackToGuide": {
+    "description": "Outreach setup guide: guideBackToGuide"
   }
 }

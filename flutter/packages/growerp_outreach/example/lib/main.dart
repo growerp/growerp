@@ -40,6 +40,11 @@ Future main() async {
       notificationClient: notificationClient,
       title: 'GrowERP Outreach Example',
       router: createOutreachExampleRouter(),
+      widgetRegistrations: [
+        getOutreachWidgets(),
+        getUserCompanyWidgets(),
+        getMarketingWidgets(),
+      ],
       extraDelegates: const [
         UserCompanyLocalizations.delegate,
         OutreachLocalizations.delegate,

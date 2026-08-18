@@ -18,6 +18,7 @@ import '../growerp_outreach.dart';
 /// Returns widget mappings for the outreach package
 Map<String, GrowerpWidgetBuilder> getOutreachWidgets() {
   return {
+    'OutreachSetupGuideScreen': (args) => const OutreachSetupGuideScreen(),
     'CampaignListScreen': (args) => const CampaignListScreen(),
     'AutomationScreen': (args) => const AutomationScreen(),
     'PlatformConfigListScreen': (args) => const PlatformConfigListScreen(),
@@ -29,6 +30,13 @@ Map<String, GrowerpWidgetBuilder> getOutreachWidgets() {
 /// Returns widget metadata with icons for the outreach package
 List<WidgetMetadata> getOutreachWidgetsWithMetadata() {
   return [
+    WidgetMetadata(
+      widgetName: 'OutreachSetupGuideScreen',
+      description: 'Step-by-step outreach setup guide',
+      iconName: 'checklist',
+      keywords: ['guide', 'setup', 'checklist', 'outreach', 'onboarding'],
+      builder: (args) => const OutreachSetupGuideScreen(),
+    ),
     WidgetMetadata(
       widgetName: 'CampaignListScreen',
       description: 'List of outreach campaigns',

@@ -38,6 +38,14 @@ const outreachMenuConfig = MenuConfiguration(
       widgetName: 'OutreachDashboard',
     ),
     MenuItem(
+      menuItemId: 'OUT_GUIDE',
+      title: 'Guide',
+      route: '/guide',
+      iconName: 'checklist',
+      sequenceNum: 15,
+      widgetName: 'OutreachSetupGuideScreen',
+    ),
+    MenuItem(
       menuItemId: 'OUT_CAMPAIGNS',
       title: 'Campaigns',
       route: '/campaigns',
@@ -112,6 +120,8 @@ GoRouter createOutreachExampleRouter() {
     appTitle: 'GrowERP Outreach Example',
     dashboard: const OutreachDashboard(),
     widgetBuilder: (route) => switch (route) {
+      '/guide' =>
+        const OutreachSetupGuideScreen(staticMenuConfig: outreachMenuConfig),
       '/campaigns' => const CampaignListScreen(),
       '/messages' => const OutreachMessageList(),
       '/sendQueue' => const LinkedInSendQueueScreen(),
