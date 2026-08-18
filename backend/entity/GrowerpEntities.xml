@@ -444,8 +444,12 @@ limitations under the License.
         <field name="githubToken"      type="text-medium" encrypt="true" enable-audit-log="true"/>
         <field name="githubRepository" type="text-medium"/>
         <field name="aiModelName" type="text-short">
-            <description>Tenant-wide default Gemini model for AI content generation (e.g.
-                gemini-3.5-flash-lite); empty uses the system default.</description>
+            <description>Tenant-wide default model for AI content generation (e.g.
+                gemini-3.5-flash-lite, claude-sonnet-5); empty uses the system default.</description>
+        </field>
+        <field name="aiProvider" type="text-short">
+            <description>LLM provider serving aiModelName: gemini, anthropic or openai.
+                Selects both the API to call and the LlmConfig row holding the key.</description>
         </field>
         <field name="googleClientId"     type="text-medium"/>
         <field name="googleClientSecret" type="text-medium" encrypt="true" enable-audit-log="true"/>
@@ -466,6 +470,14 @@ limitations under the License.
         <field name="llmMonthlyTokenLimit" type="number-integer">
             <description>Max system LLM tokens a tenant without its own API key may use
                 per calendar month; 0/empty = unlimited</description>
+        </field>
+        <field name="aiModelName" type="text-short">
+            <description>GrowERP wide default model for AI content generation, used by
+                tenants that did not pick one of their own; empty falls back to the
+                built-in default.</description>
+        </field>
+        <field name="aiProvider" type="text-short">
+            <description>LLM provider serving aiModelName: gemini, anthropic or openai.</description>
         </field>
     </entity>
 

@@ -263,56 +263,13 @@ Return ONLY the prompt text, no explanations.
 }
 
 /**
- * Call Gemini API directly (simplified version for video generation).
- * Uses the direct Gemini API (ai.google.dev) not Vertex AI for separate quota.
+ * Call whichever LLM the tenant configured (gemini, anthropic or openai) through the shared
+ * helper, which resolves provider, model and API key and retries on a 429. This service has no
+ * ownerPartyId in scope, so resolution falls through to the system default and the environment.
  */
-def callGeminiApiDirect(def ec, String prompt, int retryCount = 0) {
-    def apiKey = ec.user.getPreference("GEMINI_API_KEY")
-    if (apiKey == null || apiKey.isEmpty()) {
-        apiKey = System.getenv("GEMINI_API_KEY") ?: System.getenv("GOOGLE_API_KEY")
-    }
-    if (apiKey == null || apiKey.isEmpty()) {
-        throw new Exception("GEMINI_API_KEY (or GOOGLE_API_KEY) not configured. Set it as environment variable or user preference.")
-    }
-    
-    // Default model, overridable via user preference or environment
-    def model = ec.user.getPreference("GEMINI_MODEL") ?: System.getenv("GEMINI_MODEL") ?: System.getProperty("GEMINI_MODEL") ?: "gemini-3.5-flash-lite"
-    def apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}"
-    
-    ec.logger.info("Calling Gemini API (${model}) - attempt ${retryCount + 1}")
-    
-    def requestBody = JsonOutput.toJson([
-        contents: [[parts: [[text: prompt]]]],
-        generationConfig: [temperature: 0.7, maxOutputTokens: 500]
-    ])
-    
-    def connection = new URL(apiUrl).openConnection() as HttpURLConnection
-    connection.setRequestMethod("POST")
-    connection.setRequestProperty("Content-Type", "application/json")
-    connection.setDoOutput(true)
-    connection.setConnectTimeout(30000)
-    connection.setReadTimeout(60000)
-    
-    connection.outputStream.withWriter("UTF-8") { writer ->
-        writer.write(requestBody)
-    }
-    
-    def responseCode = connection.responseCode
-    
-    if (responseCode == 200) {
-        def response = new JsonSlurper().parseText(connection.inputStream.text)
-        return response.candidates[0]?.content?.parts[0]?.text ?: ""
-    } else if (responseCode == 429 && retryCount < 3) {
-        // Rate limited - wait and retry with exponential backoff
-        def waitSeconds = (retryCount + 1) * 10  // 10s, 20s, 30s
-        ec.logger.info("Rate limited (429), waiting ${waitSeconds} seconds before retry...")
-        Thread.sleep(waitSeconds * 1000)
-        return callGeminiApiDirect(ec, prompt, retryCount + 1)
-    } else {
-        def errorText = connection.errorStream?.text ?: "No error details"
-        ec.logger.error("Gemini API error (${responseCode}): ${errorText}")
-        throw new Exception("Gemini API error (${responseCode}): ${errorText}")
-    }
+def callGeminiApiDirect(def ec, String prompt) {
+    def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
+    return GeminiAiUtil.callLlmApi(ec, prompt, [temperature: 0.7, maxOutputTokens: 500]) ?: ""
 }
 
 /**

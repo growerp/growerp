@@ -30,6 +30,11 @@ class SystemDefaultsDialog extends StatefulWidget {
 class _SystemDefaultsDialogState extends State<SystemDefaultsDialog> {
   final _formKey = GlobalKey<FormState>();
   final _tokenLimitCtrl = TextEditingController();
+  /// Dropdown value standing for a model id not in the shared list.
+  static const _customModel = '__custom__';
+  String? _aiModelName;
+  String _aiProvider = '';
+  final _customModelCtrl = TextEditingController();
   bool _isLoading = true;
   bool _isSaving = false;
 
@@ -47,6 +52,7 @@ class _SystemDefaultsDialogState extends State<SystemDefaultsDialog> {
   @override
   void dispose() {
     _tokenLimitCtrl.dispose();
+    _customModelCtrl.dispose();
     super.dispose();
   }
 
@@ -57,6 +63,25 @@ class _SystemDefaultsDialogState extends State<SystemDefaultsDialog> {
       final d = await _restClient!.getSystemDefault();
       if (!mounted) return;
       _tokenLimitCtrl.text = d.llmMonthlyTokenLimit?.toString() ?? '';
+      // a stored model outside the shared list (an OpenAI model, or one added
+      // after this release) is kept and edited through the custom field
+      if (d.aiModelName.isEmpty) {
+        _aiModelName = null;
+        _aiProvider = '';
+        _customModelCtrl.clear();
+      } else if (llmModels.any((m) => m.modelId == d.aiModelName)) {
+        _aiModelName = d.aiModelName;
+        _aiProvider = d.aiProvider.isNotEmpty
+            ? d.aiProvider
+            : providerForModel(d.aiModelName);
+        _customModelCtrl.clear();
+      } else {
+        _aiModelName = _customModel;
+        _aiProvider = d.aiProvider.isNotEmpty
+            ? d.aiProvider
+            : providerForModel(d.aiModelName);
+        _customModelCtrl.text = d.aiModelName;
+      }
     } catch (e) {
       if (mounted) {
         HelperFunctions.showMessage(
@@ -74,10 +99,13 @@ class _SystemDefaultsDialogState extends State<SystemDefaultsDialog> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isSaving = true);
     try {
+      final modelId = _selectedModelId();
       await _restClient!.updateSystemDefault({
         'llmMonthlyTokenLimit': _tokenLimitCtrl.text.isEmpty
             ? null
             : int.tryParse(_tokenLimitCtrl.text),
+        'aiModelName': modelId,
+        'aiProvider': modelId.isEmpty ? '' : _aiProvider,
       });
       if (mounted) {
         HelperFunctions.showMessage(
@@ -143,6 +171,30 @@ class _SystemDefaultsDialogState extends State<SystemDefaultsDialog> {
     );
   }
 
+  /// The model id to store: '' means "no system wide default".
+  String _selectedModelId() {
+    if (_aiModelName == null) return '';
+    if (_aiModelName == _customModel) return _customModelCtrl.text.trim();
+    return _aiModelName!;
+  }
+
+  /// The full model list: this screen is cross tenant, and API keys are per
+  /// tenant, so there is no key presence to filter on here.
+  List<DropdownMenuItem<String>> _modelItems() => [
+        const DropdownMenuItem<String>(
+          value: null,
+          child: Text('No system default'),
+        ),
+        ...llmModels.map((m) => DropdownMenuItem<String>(
+              value: m.modelId,
+              child: Text('${m.modelId}  (${m.provider})'),
+            )),
+        const DropdownMenuItem<String>(
+          value: _customModel,
+          child: Text('Other model…'),
+        ),
+      ];
+
   Widget _llmSection() {
     return GroupingDecorator(
       decoratorKey: const Key('llmDefaultsSection'),
@@ -158,6 +210,66 @@ class _SystemDefaultsDialogState extends State<SystemDefaultsDialog> {
               color: Theme.of(context).colorScheme.outline,
             ),
           ),
+          SizedBox(height: 16),
+          DropdownButtonFormField<String>(
+            key: const Key('aiModelName'),
+            initialValue: _aiModelName,
+            decoration: const InputDecoration(
+              labelText: 'Default AI Model',
+              helperText: 'Used by tenants that did not pick a model of their '
+                  'own. API keys stay per tenant.',
+            ),
+            items: _modelItems(),
+            onChanged: (v) => setState(() {
+              _aiModelName = v;
+              if (v == null) {
+                _aiProvider = '';
+              } else if (v != _customModel) {
+                _aiProvider = llmModels
+                    .firstWhere((m) => m.modelId == v,
+                        orElse: () => LlmModel(providerForModel(v), v))
+                    .provider;
+              } else if (_aiProvider.isEmpty) {
+                _aiProvider = llmProviders.first;
+              }
+            }),
+          ),
+          if (_aiModelName == _customModel) ...[
+            SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 130,
+                  child: DropdownButtonFormField<String>(
+                    key: const Key('customModelProvider'),
+                    initialValue:
+                        _aiProvider.isEmpty ? llmProviders.first : _aiProvider,
+                    decoration: const InputDecoration(labelText: 'Provider'),
+                    items: llmProviders
+                        .map((p) =>
+                            DropdownMenuItem<String>(value: p, child: Text(p)))
+                        .toList(),
+                    onChanged: (v) =>
+                        setState(() => _aiProvider = v ?? llmProviders.first),
+                  ),
+                ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: TextFormField(
+                    key: const Key('customModelName'),
+                    controller: _customModelCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Model id',
+                      hintText: 'gpt-5.1',
+                    ),
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  ),
+                ),
+              ],
+            ),
+          ],
           SizedBox(height: 16),
           TextFormField(
             key: const Key('llmMonthlyTokenLimit'),

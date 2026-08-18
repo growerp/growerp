@@ -70,11 +70,10 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   List<AdkMcpServer> _allServers = [];
   bool _mcpLoading = false;
 
-  static const _geminiModels = [
-    'gemini-3.5-flash-lite',
-    'gemini-2.5-flash',
-    'gemini-2.5-flash-lite',
-  ];
+  /// Providers this tenant has an API key for, loaded from System Setup. A
+  /// provider without a key cannot serve an agent, so it is not offered.
+  Set<String> _providersWithKey = {};
+  bool _providersLoading = true;
 
   static const _cronHints = [
     ('Every minute', '0 * * * * ?'),
@@ -111,6 +110,37 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       _modelCtrl.text = 'gemini-3.5-flash-lite';
       _llmProviderCtrl.text = 'gemini';
     }
+    _loadProvidersWithKey();
+  }
+
+  /// Which providers have an API key configured for this tenant. The backend
+  /// masks keys to '****', so presence is all that can be checked here.
+  Future<void> _loadProvidersWithKey() async {
+    try {
+      final svc = await AdkConfigService.create();
+      final settings = await svc.systemSettings();
+      if (!mounted) return;
+      setState(() {
+        _providersWithKey = settings.llmConfigs
+            .where((c) => (c.apiKey ?? '').isNotEmpty)
+            .map((c) => c.llmProvider)
+            .where((p) => p.isNotEmpty)
+            .toSet();
+        _providersLoading = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _providersLoading = false);
+    }
+  }
+
+  /// Providers to offer: those with a key, plus the one this agent was saved
+  /// with, so editing an existing agent never rewrites its provider.
+  List<String> _providerOptions() {
+    final saved = _llmProviderCtrl.text.trim();
+    return [
+      ...llmProviders.where(_providersWithKey.contains),
+      if (saved.isNotEmpty && !_providersWithKey.contains(saved)) saved,
+    ];
   }
 
   /// Load this coordinator's members + the company's other agents (to add from).
@@ -520,20 +550,34 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                             (v == null || v.trim().isEmpty) ? 'Required' : null,
                       ),
                       SizedBox(height: 8),
+                      if (!_providersLoading && _providerOptions().isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Text(
+                            'No LLM API key configured yet. Add one in '
+                            'System Setup before creating an agent.',
+                            key: const Key('noLlmKeyWarning'),
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.error),
+                          ),
+                        ),
                       TextFormField(
                         key: Key('modelName'),
                         controller: _modelCtrl,
+                        enabled: _providerOptions().isNotEmpty,
                         decoration: InputDecoration(
                           labelText: 'Model',
                           hintText: 'gemini-3.5-flash-lite',
                           suffixIcon: PopupMenuButton<String>(
                             key: Key('modelNameMenu'),
-                            tooltip: 'Pick a Gemini model',
+                            tooltip: 'Pick a model',
                             icon: Icon(Icons.arrow_drop_down),
-                            itemBuilder: (context) => _geminiModels
+                            itemBuilder: (context) => llmModels
+                                .where((m) =>
+                                    m.provider == _llmProviderCtrl.text.trim())
                                 .map((m) => PopupMenuItem<String>(
-                                      value: m,
-                                      child: Text(m),
+                                      value: m.modelId,
+                                      child: Text(m.modelId),
                                     ))
                                 .toList(),
                             onSelected: (m) =>
@@ -542,16 +586,53 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                         ),
                       ),
                       SizedBox(height: 8),
-                      TextFormField(
+                      DropdownButtonFormField<String>(
                         key: Key('llmProvider'),
-                        controller: _llmProviderCtrl,
+                        initialValue: _providerOptions()
+                                .contains(_llmProviderCtrl.text.trim())
+                            ? _llmProviderCtrl.text.trim()
+                            : null,
                         decoration: InputDecoration(
                           labelText: 'LLM Provider',
-                          hintText: 'gemini',
                           helperText:
-                              'Provider configured in System Setup (gemini, openai, anthropic, …)',
+                              'Only providers with an API key in System Setup',
                         ),
+                        items: _providerOptions()
+                            .map((p) => DropdownMenuItem<String>(
+                                  value: p,
+                                  child: Text(_providersWithKey.contains(p)
+                                      ? p
+                                      : '$p  (no API key)'),
+                                ))
+                            .toList(),
+                        onChanged: _providerOptions().isEmpty
+                            ? null
+                            : (v) => setState(() {
+                                  _llmProviderCtrl.text = v ?? '';
+                                  // keep model and provider consistent
+                                  final first = llmModels
+                                      .where((m) => m.provider == v)
+                                      .toList();
+                                  if (first.isNotEmpty &&
+                                      !llmModels.any((m) =>
+                                          m.provider == v &&
+                                          m.modelId == _modelCtrl.text)) {
+                                    _modelCtrl.text = first.first.modelId;
+                                  }
+                                }),
                       ),
+                      if (_llmProviderCtrl.text.trim().isNotEmpty &&
+                          _llmProviderCtrl.text.trim() != 'gemini')
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            'The ADK runtime routes Gemini only; an agent on '
+                            'this provider is registered but will not answer.',
+                            key: const Key('providerNotRoutedWarning'),
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.error),
+                          ),
+                        ),
                       SizedBox(height: 8),
                       TextFormField(
                         key: Key('instruction'),

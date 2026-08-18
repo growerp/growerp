@@ -3,6 +3,7 @@ export 'bloc/locale_bloc.dart';
 export 'bloc/theme_bloc.dart';
 export 'bloc/menu_config_bloc.dart';
 export 'constant.dart';
+export 'llm_models.dart';
 export 'functions/functions.dart';
 export 'widgets/widgets.dart';
 export 'views/views.dart';

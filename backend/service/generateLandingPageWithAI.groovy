@@ -40,15 +40,8 @@ try {
     
     ec.logger.info("Owner party ID: ${ownerPartyId}")
     
-    // Step 2: Get Gemini API key
-    def apiKey = ec.user.getPreference("GEMINI_API_KEY")
-    if (apiKey == null || apiKey.isEmpty()) {
-        apiKey = System.getenv("GEMINI_API_KEY") ?: System.getenv("GOOGLE_API_KEY")
-    }
-    if (apiKey == null || apiKey.isEmpty()) {
-        ec.message.addError("Gemini API key not found. Please set GEMINI_API_KEY (or GOOGLE_API_KEY) in user preferences or environment.")
-        return
-    }
+    // Load the shared LLM helper; it resolves provider, model and key per tenant
+    def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
     
     // Step 3: Construct comprehensive prompt for ALL landing page components in single call
     def generationPrompt = """
@@ -148,318 +141,249 @@ RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this ex
 }
 """
     
-    // Step 4: Call Gemini API
-    def tenantModel = ec.entity.find("growerp.general.SystemSettings").condition("ownerPartyId", ownerPartyId).one()?.aiModelName
-    def modelName = tenantModel ?: ec.user.getPreference("GEMINI_MODEL") ?: System.getenv("GEMINI_MODEL") ?: System.getProperty("GEMINI_MODEL") ?: "gemini-3.5-flash-lite"
-    def apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}"
+    // Step 4: Call the tenant's LLM (gemini, anthropic or openai)
+    ec.logger.info("Calling the configured LLM API for landing page generation...")
+    def jsonSlurper = new JsonSlurper()
+    def generatedText = GeminiAiUtil.callLlmApi(ec, generationPrompt,
+        [ownerPartyId: ownerPartyId, maxOutputTokens: 8192])
+    def contentData = jsonSlurper.parseText(generatedText)
     
-    def requestBody = [
-        contents: [
-            [
-                parts: [
-                    [text: generationPrompt]
-                ]
-            ]
-        ]
+    ec.logger.info("AI generated content with title: ${contentData.title}")
+    
+    // Step 5: Generate pseudoId for the landing page
+    def pseudoIdResult = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
+        .parameters([ownerPartyId: ownerPartyId, seqName: 'landingPage'])
+        .call()
+    def pseudoId = pseudoIdResult.seqNum
+    
+    // Step 6: Create landing page directly in database
+    def landingPageData = [
+        title: contentData.title ?: 'Generated Landing Page',
+        headline: contentData.headline ?: '',
+        subheading: contentData.subheading ?: '',
+        hookType: contentData.hookType ?: 'results',
+        status: 'DRAFT',
+        ownerPartyId: ownerPartyId,
+        companyPartyId: companyPartyId,
+        pseudoId: pseudoId,
+        ctaActionType: 'assessment' // Default to assessment for this flow (lowercase to match FTL template)
     ]
     
-    ec.logger.info("Calling Gemini API for landing page generation...")
+    def createPageResult = ec.service.sync().name("create#growerp.landing.LandingPage")
+        .parameters(landingPageData)
+        .call()
     
-    def jsonRequest = JsonOutput.toJson(requestBody)
-    int maxRetries = 3
-    boolean apiSuccess = false
-
-    for (int attempt = 0; attempt <= maxRetries; attempt++) {
-    URL url = new URL(apiUrl)
-    HttpURLConnection conn = (HttpURLConnection) url.openConnection()
-    conn.setRequestMethod("POST")
-    conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-    conn.setRequestProperty("Accept", "application/json")
-    conn.setDoOutput(true)
-    conn.setDoInput(true)
+    def landingPageId = createPageResult.landingPageId
+    ec.logger.info("Created landing page: ID=${landingPageId}, pseudoId=${pseudoId}")
     
-    // Set timeouts to prevent hanging indefinitely
-    // Gemini can take 30-60 seconds for complex prompts
-    conn.setConnectTimeout(30000)  // 30 seconds to establish connection
-    conn.setReadTimeout(90000)     // 90 seconds to read response
+    // Step 7: Create page sections
+    def sectionCount = 0
+    def sectionSequence = 1
     
-    conn.outputStream.withWriter { writer ->
-        writer.write(jsonRequest)
+    // Hero section
+    if (contentData.hero) {
+        def heroPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
+            .parameters([ownerPartyId: ownerPartyId, seqName: 'pageSection'])
+            .call().seqNum
+        
+        ec.service.sync().name("create#growerp.landing.PageSection")
+            .parameters([
+                landingPageId: landingPageId,
+                pseudoId: heroPseudoId,
+                sectionTitle: contentData.hero.title ?: 'Hero',
+                sectionDescription: contentData.hero.description ?: '',
+                sectionSequence: sectionSequence++
+            ])
+            .call()
+        sectionCount++
     }
     
-    def responseCode = conn.responseCode
-    ec.logger.info("Gemini API Response Code: ${responseCode}${attempt > 0 ? ' (attempt ' + (attempt + 1) + ')' : ''}")
-
-    if (responseCode == 429 && attempt < maxRetries) {
-        def waitSeconds = (attempt + 1) * 10  // 10s, 20s, 30s
-        ec.logger.warn("Gemini API rate limited (429), waiting ${waitSeconds}s before retry ${attempt + 1}/${maxRetries}...")
-        conn.disconnect()
-        Thread.sleep(waitSeconds * 1000L)
-        continue
-    }
-
-    if (responseCode == 200) {
-        apiSuccess = true
-        def responseText = conn.inputStream.text
-        def jsonSlurper = new JsonSlurper()
-        def response = jsonSlurper.parseText(responseText)
-        
-        // Extract the generated text
-        def generatedText = response.candidates[0].content.parts[0].text
-        
-        // Clean up JSON markdown if present
-        def cleanedJson = generatedText.replaceAll("```json", "").replaceAll("```", "").trim()
-        
-        // Parse the cleaned JSON
-        def contentData = jsonSlurper.parseText(cleanedJson)
-        
-        ec.logger.info("Gemini generated content with title: ${contentData.title}")
-        
-        // Step 5: Generate pseudoId for the landing page
-        def pseudoIdResult = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
-            .parameters([ownerPartyId: ownerPartyId, seqName: 'landingPage'])
-            .call()
-        def pseudoId = pseudoIdResult.seqNum
-        
-        // Step 6: Create landing page directly in database
-        def landingPageData = [
-            title: contentData.title ?: 'Generated Landing Page',
-            headline: contentData.headline ?: '',
-            subheading: contentData.subheading ?: '',
-            hookType: contentData.hookType ?: 'results',
-            status: 'DRAFT',
-            ownerPartyId: ownerPartyId,
-            companyPartyId: companyPartyId,
-            pseudoId: pseudoId,
-            ctaActionType: 'assessment' // Default to assessment for this flow (lowercase to match FTL template)
-        ]
-        
-        def createPageResult = ec.service.sync().name("create#growerp.landing.LandingPage")
-            .parameters(landingPageData)
-            .call()
-        
-        def landingPageId = createPageResult.landingPageId
-        ec.logger.info("Created landing page: ID=${landingPageId}, pseudoId=${pseudoId}")
-        
-        // Step 7: Create page sections
-        def sectionCount = 0
-        def sectionSequence = 1
-        
-        // Hero section
-        if (contentData.hero) {
-            def heroPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
+    // Regular sections
+    if (contentData.sections && contentData.sections instanceof List) {
+        contentData.sections.each { section ->
+            def sectionPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
                 .parameters([ownerPartyId: ownerPartyId, seqName: 'pageSection'])
                 .call().seqNum
             
             ec.service.sync().name("create#growerp.landing.PageSection")
                 .parameters([
                     landingPageId: landingPageId,
-                    pseudoId: heroPseudoId,
-                    sectionTitle: contentData.hero.title ?: 'Hero',
-                    sectionDescription: contentData.hero.description ?: '',
+                    pseudoId: sectionPseudoId,
+                    sectionTitle: section.title ?: '',
+                    sectionDescription: section.description ?: '',
                     sectionSequence: sectionSequence++
                 ])
                 .call()
             sectionCount++
         }
+    }
+    
+    // Features section - stored as a typed 'cards' section (one card per
+    // value proposition) instead of flattening propositions into one text
+    // blob, so the public renderer can show them as the outline-card grid
+    if (contentData.features) {
+        def featuresPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
+            .parameters([ownerPartyId: ownerPartyId, seqName: 'pageSection'])
+            .call().seqNum
+
+        def cardsJson = contentData.features.propositions instanceof List
+            ? JsonOutput.toJson(contentData.features.propositions.collect { prop ->
+                [title: prop.title ?: '', description: prop.description ?: '']
+              })
+            : null
+
+        ec.service.sync().name("create#growerp.landing.PageSection")
+            .parameters([
+                landingPageId: landingPageId,
+                pseudoId: featuresPseudoId,
+                sectionTitle: contentData.features.title ?: 'Features',
+                sectionDescription: '',
+                sectionType: cardsJson ? 'cards' : null,
+                contentJson: cardsJson,
+                sectionSequence: sectionSequence++
+            ])
+            .call()
+        sectionCount++
+    }
+    
+    ec.logger.info("Created ${sectionCount} page sections")
+    
+    // Step 8: Create credibility info
+    if (contentData.credibility) {
+        def credibilityPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
+            .parameters([ownerPartyId: ownerPartyId, seqName: 'credibilityInfo'])
+            .call().seqNum
         
-        // Regular sections
-        if (contentData.sections && contentData.sections instanceof List) {
-            contentData.sections.each { section ->
-                def sectionPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
-                    .parameters([ownerPartyId: ownerPartyId, seqName: 'pageSection'])
+        def credResult = ec.service.sync().name("create#growerp.landing.CredibilityInfo")
+            .parameters([
+                landingPageId: landingPageId,
+                pseudoId: credibilityPseudoId,
+                creatorBio: contentData.credibility.description ?: '',
+                backgroundText: contentData.credibility.backgroundText ?: ''
+            ])
+            .call()
+        
+        def credibilityInfoId = credResult.credibilityInfoId
+        
+        // Create stats
+        if (contentData.credibility.stats) {
+            contentData.credibility.stats.eachWithIndex { stat, index ->
+                 def statPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
+                    .parameters([ownerPartyId: ownerPartyId, seqName: 'credibilityStatistic'])
                     .call().seqNum
-                
-                ec.service.sync().name("create#growerp.landing.PageSection")
+                    
+                 ec.service.sync().name("create#growerp.landing.CredibilityStatistic")
                     .parameters([
-                        landingPageId: landingPageId,
-                        pseudoId: sectionPseudoId,
-                        sectionTitle: section.title ?: '',
-                        sectionDescription: section.description ?: '',
-                        sectionSequence: sectionSequence++
+                        credibilityInfoId: credibilityInfoId,
+                        pseudoId: statPseudoId,
+                        statistic: "${stat.label}: ${stat.value}",
+                        sequence: index + 1
                     ])
                     .call()
-                sectionCount++
             }
         }
         
-        // Features section - stored as a typed 'cards' section (one card per
-        // value proposition) instead of flattening propositions into one text
-        // blob, so the public renderer can show them as the outline-card grid
-        if (contentData.features) {
-            def featuresPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
-                .parameters([ownerPartyId: ownerPartyId, seqName: 'pageSection'])
-                .call().seqNum
-
-            def cardsJson = contentData.features.propositions instanceof List
-                ? JsonOutput.toJson(contentData.features.propositions.collect { prop ->
-                    [title: prop.title ?: '', description: prop.description ?: '']
-                  })
-                : null
-
-            ec.service.sync().name("create#growerp.landing.PageSection")
-                .parameters([
-                    landingPageId: landingPageId,
-                    pseudoId: featuresPseudoId,
-                    sectionTitle: contentData.features.title ?: 'Features',
-                    sectionDescription: '',
-                    sectionType: cardsJson ? 'cards' : null,
-                    contentJson: cardsJson,
-                    sectionSequence: sectionSequence++
-                ])
-                .call()
-            sectionCount++
-        }
+        ec.logger.info("Created credibility info")
+    }
+    
+    // Step 9: Create Assessment
+    if (contentData.assessment) {
+        def assessmentPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
+            .parameters([ownerPartyId: ownerPartyId, seqName: 'assessment'])
+            .call().seqNum
+            
+        def assessmentResult = ec.service.sync().name("create#growerp.assessment.Assessment")
+            .parameters([
+                pseudoId: assessmentPseudoId,
+                ownerPartyId: ownerPartyId,
+                assessmentName: contentData.assessment.title ?: 'Business Readiness Assessment',
+                description: contentData.assessment.description ?: '',
+                status: 'Active'
+            ])
+            .call()
         
-        ec.logger.info("Created ${sectionCount} page sections")
+        def assessmentId = assessmentResult.assessmentId
         
-        // Step 8: Create credibility info
-        if (contentData.credibility) {
-            def credibilityPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
-                .parameters([ownerPartyId: ownerPartyId, seqName: 'credibilityInfo'])
-                .call().seqNum
+        // Link Assessment to Landing Page
+        ec.service.sync().name("update#growerp.landing.LandingPage")
+            .parameters([landingPageId: landingPageId, ctaAssessmentId: assessmentId])
+            .call()
             
-            def credResult = ec.service.sync().name("create#growerp.landing.CredibilityInfo")
-                .parameters([
-                    landingPageId: landingPageId,
-                    pseudoId: credibilityPseudoId,
-                    creatorBio: contentData.credibility.description ?: '',
-                    backgroundText: contentData.credibility.backgroundText ?: ''
-                ])
-                .call()
-            
-            def credibilityInfoId = credResult.credibilityInfoId
-            
-            // Create stats
-            if (contentData.credibility.stats) {
-                contentData.credibility.stats.eachWithIndex { stat, index ->
-                     def statPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
-                        .parameters([ownerPartyId: ownerPartyId, seqName: 'credibilityStatistic'])
-                        .call().seqNum
-                        
-                     ec.service.sync().name("create#growerp.landing.CredibilityStatistic")
-                        .parameters([
-                            credibilityInfoId: credibilityInfoId,
-                            pseudoId: statPseudoId,
-                            statistic: "${stat.label}: ${stat.value}",
-                            sequence: index + 1
-                        ])
-                        .call()
-                }
-            }
-            
-            ec.logger.info("Created credibility info")
-        }
-        
-        // Step 9: Create Assessment
-        if (contentData.assessment) {
-            def assessmentPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
-                .parameters([ownerPartyId: ownerPartyId, seqName: 'assessment'])
-                .call().seqNum
-                
-            def assessmentResult = ec.service.sync().name("create#growerp.assessment.Assessment")
-                .parameters([
-                    pseudoId: assessmentPseudoId,
-                    ownerPartyId: ownerPartyId,
-                    assessmentName: contentData.assessment.title ?: 'Business Readiness Assessment',
-                    description: contentData.assessment.description ?: '',
-                    status: 'Active'
-                ])
-                .call()
-            
-            def assessmentId = assessmentResult.assessmentId
-            
-            // Link Assessment to Landing Page
-            ec.service.sync().name("update#growerp.landing.LandingPage")
-                .parameters([landingPageId: landingPageId, ctaAssessmentId: assessmentId])
-                .call()
-                
-            // Create Questions
-            if (contentData.assessment.questions) {
-                contentData.assessment.questions.each { q ->
-                    def questionPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
-                        .parameters([ownerPartyId: ownerPartyId, seqName: 'assessmentQuestion'])
-                        .call().seqNum
-                        
-                    def questionResult = ec.service.sync().name("create#growerp.assessment.AssessmentQuestion")
-                        .parameters([
-                            assessmentId: assessmentId,
-                            pseudoId: questionPseudoId,
-                            questionSequence: q.sequence,
-                            questionType: q.type ?: 'MultipleChoice',
-                            questionText: q.text,
-                            questionDescription: q.description,
-                            isRequired: 'Y'
-                        ])
-                        .call()
-                        
-                    def questionId = questionResult.assessmentQuestionId
+        // Create Questions
+        if (contentData.assessment.questions) {
+            contentData.assessment.questions.each { q ->
+                def questionPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
+                    .parameters([ownerPartyId: ownerPartyId, seqName: 'assessmentQuestion'])
+                    .call().seqNum
                     
-                    // Create Options
-                    if (q.options) {
-                        q.options.each { opt ->
-                            def optionPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
-                                .parameters([ownerPartyId: ownerPartyId, seqName: 'assessmentQuestionOption'])
-                                .call().seqNum
-                                
-                            ec.service.sync().name("create#growerp.assessment.AssessmentQuestionOption")
-                                .parameters([
-                                    assessmentQuestionId: questionId,
-                                    assessmentId: assessmentId,
-                                    pseudoId: optionPseudoId,
-                                    optionSequence: opt.sequence,
-                                    optionText: opt.text,
-                                    optionScore: opt.score
-                                ])
-                                .call()
-                        }
+                def questionResult = ec.service.sync().name("create#growerp.assessment.AssessmentQuestion")
+                    .parameters([
+                        assessmentId: assessmentId,
+                        pseudoId: questionPseudoId,
+                        questionSequence: q.sequence,
+                        questionType: q.type ?: 'MultipleChoice',
+                        questionText: q.text,
+                        questionDescription: q.description,
+                        isRequired: 'Y'
+                    ])
+                    .call()
+                    
+                def questionId = questionResult.assessmentQuestionId
+                
+                // Create Options
+                if (q.options) {
+                    q.options.each { opt ->
+                        def optionPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
+                            .parameters([ownerPartyId: ownerPartyId, seqName: 'assessmentQuestionOption'])
+                            .call().seqNum
+                            
+                        ec.service.sync().name("create#growerp.assessment.AssessmentQuestionOption")
+                            .parameters([
+                                assessmentQuestionId: questionId,
+                                assessmentId: assessmentId,
+                                pseudoId: optionPseudoId,
+                                optionSequence: opt.sequence,
+                                optionText: opt.text,
+                                optionScore: opt.score
+                            ])
+                            .call()
                     }
                 }
             }
-            
-            // Create Scoring Thresholds
-            if (contentData.assessment.scoringThresholds) {
-                contentData.assessment.scoringThresholds.each { threshold ->
-                    def thresholdPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
-                        .parameters([ownerPartyId: ownerPartyId, seqName: 'scoringThreshold'])
-                        .call().seqNum
-                        
-                    ec.service.sync().name("create#growerp.assessment.ScoringThreshold")
-                        .parameters([
-                            assessmentId: assessmentId,
-                            pseudoId: thresholdPseudoId,
-                            minScore: threshold.minScore,
-                            maxScore: threshold.maxScore,
-                            leadStatus: threshold.status,
-                            description: threshold.description
-                        ])
-                        .call()
-                }
-            }
-            ec.logger.info("Created assessment with ${contentData.assessment.questions?.size() ?: 0} questions")
         }
         
-        // Step 10: Get the complete landing page with all relationships
-        def getLandingPageResult = ec.service.sync().name("growerp.100.LandingPageServices100.get#LandingPage")
-            .parameters([landingPageId: landingPageId, ownerPartyId: ownerPartyId])
-            .call()
-        
-        // Set output parameters
-        context.landingPage = getLandingPageResult.landingPage
-        context.sectionsCreated = sectionCount
-        
-        ec.logger.info("Service complete - returning landing page with ${sectionCount} sections")
-        conn.disconnect()
-        break
-
-    } else {
-        def errorText = conn.errorStream?.text ?: "Unknown error"
-        ec.logger.error("Gemini API error (${responseCode}): ${errorText}")
-        ec.message.addError("Failed to generate landing page content: ${errorText}")
-        conn.disconnect()
-        break
+        // Create Scoring Thresholds
+        if (contentData.assessment.scoringThresholds) {
+            contentData.assessment.scoringThresholds.each { threshold ->
+                def thresholdPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
+                    .parameters([ownerPartyId: ownerPartyId, seqName: 'scoringThreshold'])
+                    .call().seqNum
+                    
+                ec.service.sync().name("create#growerp.assessment.ScoringThreshold")
+                    .parameters([
+                        assessmentId: assessmentId,
+                        pseudoId: thresholdPseudoId,
+                        minScore: threshold.minScore,
+                        maxScore: threshold.maxScore,
+                        leadStatus: threshold.status,
+                        description: threshold.description
+                    ])
+                    .call()
+            }
+        }
+        ec.logger.info("Created assessment with ${contentData.assessment.questions?.size() ?: 0} questions")
     }
-    } // end retry loop
+    
+    // Step 10: Get the complete landing page with all relationships
+    def getLandingPageResult = ec.service.sync().name("growerp.100.LandingPageServices100.get#LandingPage")
+        .parameters([landingPageId: landingPageId, ownerPartyId: ownerPartyId])
+        .call()
+    
+    // Set output parameters
+    context.landingPage = getLandingPageResult.landingPage
+    context.sectionsCreated = sectionCount
+    
+    ec.logger.info("Service complete - returning landing page with ${sectionCount} sections")
 
 } catch (Exception e) {
     ec.logger.error("Error in landing page AI generation", e)

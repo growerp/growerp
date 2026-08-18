@@ -2088,6 +2088,7 @@ limitations under the License.
             <parameter name="githubToken"/>
             <parameter name="githubRepository"/>
             <parameter name="aiModelName"/>
+            <parameter name="aiProvider"/>
             <parameter name="googleClientId"/>
             <parameter name="googleClientSecret"/>
             <parameter name="googleRefreshToken"/>
@@ -2141,6 +2142,7 @@ limitations under the License.
                 <script>System.setProperty('growerp.github.repo', githubRepository.take(255))</script>
             </if>
             <if condition="aiModelName != null"><set field="ss.aiModelName" from="aiModelName"/></if>
+            <if condition="aiProvider != null"><set field="ss.aiProvider" from="aiProvider"/></if>
             <if condition="googleClientId != null"><set field="ss.googleClientId" from="googleClientId"/></if>
             <if condition="googleClientSecret &amp;&amp; googleClientSecret != '****'">
                 <set field="ss.googleClientSecret" from="googleClientSecret"/>
@@ -2251,7 +2253,8 @@ limitations under the License.
             </entity-find-one>
             <if condition="sd == null">
                 <!-- installs upgraded before the seed row existed -->
-                <set field="systemDefault" from="[defaultId: 'SYSTEM', llmMonthlyTokenLimit: 100000]"/>
+                <set field="systemDefault"
+                    from="[defaultId: 'SYSTEM', llmMonthlyTokenLimit: 100000, aiModelName: '', aiProvider: '']"/>
                 <return/>
             </if>
             <set field="systemDefault" from="sd.getMap()"/>
@@ -2262,6 +2265,8 @@ limitations under the License.
         <description>Create or update the GrowERP wide defaults, system support only.</description>
         <in-parameters>
             <parameter name="llmMonthlyTokenLimit" type="Integer"/>
+            <parameter name="aiModelName"/>
+            <parameter name="aiProvider"/>
         </in-parameters>
         <out-parameters>
             <parameter name="systemDefault" type="Map"/>
@@ -2283,6 +2288,9 @@ limitations under the License.
             </if>
             <!-- set unconditionally: null clears the limit, 0 means unlimited -->
             <set field="sd.llmMonthlyTokenLimit" from="llmMonthlyTokenLimit"/>
+            <!-- also unconditional: an empty model means 'no system wide default' -->
+            <set field="sd.aiModelName" from="aiModelName ?: null"/>
+            <set field="sd.aiProvider" from="aiProvider ?: null"/>
             <if condition="isNew"><then><script>sd.create()</script></then>
                 <else><script>sd.update()</script></else>
             </if>

@@ -34,118 +34,227 @@ class GeminiAiUtil {
     
     static final String DEFAULT_MODEL = "gemini-3.5-flash-lite"
     static final String API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
+    static final String ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
+    static final String ANTHROPIC_VERSION = "2023-06-01"
+    static final String OPENAI_URL = "https://api.openai.com/v1/chat/completions"
+    static final int MAX_RETRIES = 3
 
-    /**
-     * Resolve which Gemini model to use. Precedence: an explicit model (caller override) >
-     * the tenant's SystemSettings.aiModelName (set via System Setup) > a per-user Moqui
-     * preference > env var / system property > DEFAULT_MODEL.
-     */
-    static String resolveModel(def ec, String ownerPartyId, String explicitModel = null) {
-        if (explicitModel) return explicitModel
-        if (ownerPartyId) {
-            def settings = ec.entity.find("growerp.general.SystemSettings")
-                .condition("ownerPartyId", ownerPartyId).one()
-            if (settings?.aiModelName) return settings.aiModelName as String
-        }
-        return ec.user.getPreference("GEMINI_MODEL") ?: System.getenv("GEMINI_MODEL") ?:
-            System.getProperty("GEMINI_MODEL") ?: DEFAULT_MODEL
+    /** Provider serving a model id, for rows stored before aiProvider existed. */
+    static String providerForModel(String model) {
+        if (!model) return "gemini"
+        if (model.startsWith("claude")) return "anthropic"
+        if (model.startsWith("gpt") || model ==~ /^o\d.*/) return "openai"
+        return "gemini"
     }
 
     /**
-     * Call Gemini API with a prompt and optional configuration.
+     * Resolve which model to use and which provider serves it. Both always come from the SAME
+     * level: a tenant that picked only a model must not inherit the system default's provider,
+     * or its model gets posted to the wrong endpoint. Precedence: an explicit model (caller
+     * override) > the tenant's SystemSettings (System Setup) > the GrowERP wide SystemDefault
+     * (Support app -> System Defaults) > a per-user Moqui preference / env var / system
+     * property > DEFAULT_MODEL.
+     */
+    static Map resolveModelConfig(def ec, String ownerPartyId, String explicitModel = null,
+            String explicitProvider = null) {
+        if (explicitModel) {
+            return [model: explicitModel, provider: explicitProvider ?: providerForModel(explicitModel)]
+        }
+        if (ownerPartyId) {
+            def settings = ec.entity.find("growerp.general.SystemSettings")
+                .condition("ownerPartyId", ownerPartyId).one()
+            if (settings?.aiModelName) {
+                String tenantModel = settings.aiModelName as String
+                return [model: tenantModel,
+                        provider: (settings.aiProvider ?: providerForModel(tenantModel)) as String]
+            }
+        }
+        def sysDefault = ec.entity.find("growerp.general.SystemDefault")
+            .condition("defaultId", "SYSTEM").one()
+        if (sysDefault?.aiModelName) {
+            String defaultModel = sysDefault.aiModelName as String
+            return [model: defaultModel,
+                    provider: (sysDefault.aiProvider ?: providerForModel(defaultModel)) as String]
+        }
+        String envModel = ec.user.getPreference("GEMINI_MODEL") ?: System.getenv("GEMINI_MODEL") ?:
+            System.getProperty("GEMINI_MODEL") ?: DEFAULT_MODEL
+        return [model: envModel, provider: explicitProvider ?: providerForModel(envModel)]
+    }
+
+    /** Model name only; see resolveModelConfig for the full precedence. */
+    static String resolveModel(def ec, String ownerPartyId, String explicitModel = null) {
+        return resolveModelConfig(ec, ownerPartyId, explicitModel).model as String
+    }
+
+    /**
+     * The API key for [provider]: an explicit key (batch/cron callers) > this tenant's LlmConfig
+     * row for that provider (entered in System Setup) > the environment. Returns '' when none.
+     */
+    static String resolveApiKey(def ec, String ownerPartyId, String provider, String explicitKey = null) {
+        if (explicitKey) return explicitKey
+        if (ownerPartyId) {
+            def llmConfig = ec.entity.find("growerp.general.LlmConfig")
+                .condition("ownerPartyId", ownerPartyId).condition("llmProvider", provider).one()
+            if (llmConfig?.apiKey) return llmConfig.apiKey as String
+        }
+        switch (provider) {
+            case "anthropic": return System.getenv("ANTHROPIC_API_KEY") ?: ""
+            case "openai": return System.getenv("OPENAI_API_KEY") ?: ""
+            default:
+                return ec.user.getPreference("GEMINI_API_KEY") ?: System.getenv("GEMINI_API_KEY") ?:
+                    System.getenv("GOOGLE_API_KEY") ?: ""
+        }
+    }
+
+    /**
+     * Send a prompt to whichever LLM the tenant configured.
      *
      * @param ec ExecutionContext from Moqui
-     * @param prompt The text prompt to send to Gemini
-     * @param options Optional map with: apiKey, model, ownerPartyId, temperature, topK, topP, maxOutputTokens, jsonMode
-     * @return The generated text response (cleaned of markdown code blocks if JSON)
-     * @throws Exception if API key not found or API call fails
+     * @param prompt The text prompt to send
+     * @param options Optional map with: apiKey, model, provider, ownerPartyId, temperature,
+     *        topK, topP, maxOutputTokens, jsonMode
+     * @return The generated text (markdown code fences stripped)
+     * @throws Exception if no API key is configured or the API call fails
      */
-    static String callGeminiApi(def ec, String prompt, Map options = [:]) {
-        // Get API key from options (batch/cron callers), user preference or environment
-        def apiKey = options.apiKey ?: ec.user.getPreference("GEMINI_API_KEY")
-        if (apiKey == null || apiKey.isEmpty()) {
-            apiKey = System.getenv("GEMINI_API_KEY") ?: System.getenv("GOOGLE_API_KEY")
-        }
-        if (apiKey == null || apiKey.isEmpty()) {
-            throw new Exception("GEMINI_API_KEY (or GOOGLE_API_KEY) not configured. Set in user preferences or environment.")
+    static String callLlmApi(def ec, String prompt, Map options = [:]) {
+        String ownerPartyId = options.ownerPartyId as String
+        Map modelConfig = resolveModelConfig(ec, ownerPartyId, options.model as String,
+            options.provider as String)
+        String model = modelConfig.model as String
+        String provider = modelConfig.provider as String
+        String apiKey = resolveApiKey(ec, ownerPartyId, provider, options.apiKey as String)
+        if (!apiKey) {
+            throw new Exception("No API key configured for LLM provider '${provider}'. " +
+                "Add it in System Setup -> AI Settings.")
         }
 
-        // Configuration with defaults
-        def model = resolveModel(ec, options.ownerPartyId as String, options.model as String)
-        def temperature = options.temperature ?: 0.7
-        def topK = options.topK ?: 40
-        def topP = options.topP ?: 0.95
-        def maxOutputTokens = options.maxOutputTokens ?: 4096
-        def jsonMode = options.jsonMode ?: false
-        
-        // Build API URL
-        def apiUrl = "${API_BASE_URL}/${model}:generateContent?key=${apiKey}"
-        
-        ec.logger.info("Calling Gemini API with model: ${model}")
-        
-        // Build request body
-        def requestMap = [
-            contents: [
-                [
-                    parts: [
-                        [text: prompt]
-                    ]
-                ]
-            ],
-            generationConfig: [
-                temperature: temperature,
-                topK: topK,
-                topP: topP,
-                maxOutputTokens: maxOutputTokens
-            ]
-        ]
-        
-        // Add JSON mode if requested (for newer models that support it)
-        if (jsonMode) {
-            requestMap.generationConfig.responseMimeType = "application/json"
+        ec.logger.info("Calling ${provider} API with model: ${model}")
+        String generatedText
+        switch (provider) {
+            case "anthropic": generatedText = callAnthropic(ec, prompt, model, apiKey, options); break
+            case "openai": generatedText = callOpenAi(ec, prompt, model, apiKey, options); break
+            default: generatedText = callGemini(ec, prompt, model, apiKey, options)
         }
-        
-        def requestBody = JsonOutput.toJson(requestMap)
-        
-        // Make HTTP request
-        def connection = new URL(apiUrl).openConnection() as HttpURLConnection
-        connection.setRequestMethod("POST")
-        connection.setRequestProperty("Content-Type", "application/json")
-        connection.setDoOutput(true)
-        connection.setConnectTimeout(30000)  // 30 seconds
-        connection.setReadTimeout(120000)    // 2 minutes for complex prompts
-        
-        connection.outputStream.withWriter("UTF-8") { writer ->
-            writer.write(requestBody)
-        }
-        
-        def responseCode = connection.responseCode
-        ec.logger.info("Gemini API response code: ${responseCode}")
-        
-        if (responseCode != 200) {
+        ec.logger.info("Generated ${generatedText.length()} characters from ${provider}")
+
+        // Clean up markdown code blocks if present (common in JSON responses)
+        return cleanJsonResponse(generatedText)
+    }
+
+    /**
+     * Historical entry point, kept so the existing callers keep working. Dispatches on the
+     * tenant's configured provider, which is not necessarily Gemini.
+     */
+    static String callGeminiApi(def ec, String prompt, Map options = [:]) {
+        return callLlmApi(ec, prompt, options)
+    }
+
+    /**
+     * POST a JSON body and return the response text, throwing with the API's own error message
+     * on a non-200. A 429 (rate limited) is retried up to MAX_RETRIES times with a growing wait.
+     */
+    private static String postJson(def ec, String urlText, Map headers, String requestBody, String label) {
+        for (int attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+            def connection = new URL(urlText).openConnection() as HttpURLConnection
+            connection.setRequestMethod("POST")
+            connection.setRequestProperty("Content-Type", "application/json")
+            headers.each { key, value -> connection.setRequestProperty(key as String, value as String) }
+            connection.setDoOutput(true)
+            connection.setConnectTimeout(30000)  // 30 seconds
+            connection.setReadTimeout(120000)    // 2 minutes for complex prompts
+
+            connection.outputStream.withWriter("UTF-8") { writer -> writer.write(requestBody) }
+
+            def responseCode = connection.responseCode
+            ec.logger.info("${label} API response code: ${responseCode}")
+            if (responseCode == 200) return connection.inputStream.text
+
             def errorStream = connection.errorStream
             def errorText = errorStream ? errorStream.text : "No error details available"
-            ec.logger.error("Gemini API error (${responseCode}): ${errorText}")
-            throw new Exception("Gemini API error (${responseCode}): ${errorText}")
+            connection.disconnect()
+            if (responseCode == 429 && attempt < MAX_RETRIES) {
+                int waitSeconds = (attempt + 1) * 10  // 10s, 20s, 30s
+                ec.logger.warn("${label} API rate limited (429), waiting ${waitSeconds}s before " +
+                    "retry ${attempt + 1}/${MAX_RETRIES}")
+                Thread.sleep(waitSeconds * 1000L)
+                continue
+            }
+            ec.logger.error("${label} API error (${responseCode}): ${errorText}")
+            throw new Exception("${label} API error (${responseCode}): ${errorText}")
         }
-        
-        def responseText = connection.inputStream.text
-        def jsonSlurper = new JsonSlurper()
-        def geminiResponse = jsonSlurper.parseText(responseText)
-        
-        // Extract generated text
+        throw new Exception("${label} API still rate limited after ${MAX_RETRIES} retries")
+    }
+
+    private static String callGemini(def ec, String prompt, String model, String apiKey, Map options) {
+        def requestMap = [
+            contents: [[parts: [[text: prompt]]]],
+            generationConfig: [
+                temperature: options.temperature ?: 0.7,
+                topK: options.topK ?: 40,
+                topP: options.topP ?: 0.95,
+                maxOutputTokens: options.maxOutputTokens ?: 4096
+            ]
+        ]
+        // JSON mode, for the newer models that support it
+        if (options.jsonMode) requestMap.generationConfig.responseMimeType = "application/json"
+
+        def responseText = postJson(ec, "${API_BASE_URL}/${model}:generateContent?key=${apiKey}",
+            [:], JsonOutput.toJson(requestMap), "Gemini")
+        def geminiResponse = new JsonSlurper().parseText(responseText)
         def generatedText = geminiResponse.candidates[0]?.content?.parts[0]?.text
-        
         if (generatedText == null) {
             ec.logger.error("No content generated by Gemini API")
             throw new Exception("Gemini API returned no content")
         }
-        
-        ec.logger.info("Generated ${generatedText.length()} characters from Gemini")
-        
-        // Clean up markdown code blocks if present (common in JSON responses)
-        generatedText = cleanJsonResponse(generatedText)
-        
+        return generatedText
+    }
+
+    private static String callAnthropic(def ec, String prompt, String model, String apiKey, Map options) {
+        // No temperature/topP/topK: the current Claude models reject them with a 400, so the
+        // options the Gemini callers pass are deliberately dropped here.
+        def requestMap = [
+            model: model,
+            max_tokens: options.maxOutputTokens ?: 4096,
+            messages: [[role: "user", content: prompt]]
+        ]
+        def responseText = postJson(ec, ANTHROPIC_URL,
+            ["x-api-key": apiKey, "anthropic-version": ANTHROPIC_VERSION],
+            JsonOutput.toJson(requestMap), "Anthropic")
+        def response = new JsonSlurper().parseText(responseText)
+
+        // A declined request is a 200 with an empty content list, not an error status
+        if (response.stop_reason == "refusal") {
+            String category = response.stop_details?.category ?: "unspecified"
+            ec.logger.error("Anthropic declined the request, category: ${category}")
+            throw new Exception("Anthropic declined this request (category ${category}). " +
+                "Rephrase the prompt or use another model.")
+        }
+        def textBlock = response.content?.find { it.type == "text" }
+        if (textBlock?.text == null) {
+            ec.logger.error("No content generated by Anthropic API, stop reason: ${response.stop_reason}")
+            throw new Exception("Anthropic API returned no content")
+        }
+        return textBlock.text
+    }
+
+    private static String callOpenAi(def ec, String prompt, String model, String apiKey, Map options) {
+        def requestMap = [
+            model: model,
+            messages: [[role: "user", content: prompt]],
+            temperature: options.temperature ?: 0.7,
+            max_tokens: options.maxOutputTokens ?: 4096,
+            stream: false
+        ]
+        if (options.jsonMode) requestMap.response_format = [type: "json_object"]
+
+        def responseText = postJson(ec, OPENAI_URL, ["Authorization": "Bearer ${apiKey}".toString()],
+            JsonOutput.toJson(requestMap), "OpenAI")
+        def response = new JsonSlurper().parseText(responseText)
+        def generatedText = response.choices[0]?.message?.content
+        if (generatedText == null) {
+            ec.logger.error("No content generated by OpenAI API")
+            throw new Exception("OpenAI API returned no content")
+        }
         return generatedText
     }
     

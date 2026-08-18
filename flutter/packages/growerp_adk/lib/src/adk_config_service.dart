@@ -27,6 +27,9 @@ class AdkConfigService {
     return AdkConfigService._(client);
   }
 
+  /// Tenant settings, used to see which LLM providers have an API key.
+  Future<SystemSettings> systemSettings() => _client.getSystemSettings();
+
   Future<List<AdkAgentConfig>> list({String? search}) async {
     final result = await _client.getAdkAgentConfigs(search: search);
     return result.adkAgentConfigs;

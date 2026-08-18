@@ -23,6 +23,11 @@ abstract class SystemDefault with _$SystemDefault {
   factory SystemDefault({
     // Free system LLM tokens per tenant per calendar month; empty/0 = unlimited
     int? llmMonthlyTokenLimit,
+    // GrowERP wide default model for AI content generation, used by tenants that
+    // did not pick one of their own; empty falls back to the built-in default.
+    @Default('') String aiModelName,
+    // Provider serving aiModelName: gemini, anthropic or openai.
+    @Default('') String aiProvider,
   }) = _SystemDefault;
   SystemDefault._();
 
@@ -30,5 +35,6 @@ abstract class SystemDefault with _$SystemDefault {
       _$SystemDefaultFromJson(json['systemDefault'] ?? json);
 
   @override
-  String toString() => 'SystemDefault llmMonthlyTokenLimit: $llmMonthlyTokenLimit';
+  String toString() => 'SystemDefault llmMonthlyTokenLimit: $llmMonthlyTokenLimit '
+      'aiModelName: $aiModelName aiProvider: $aiProvider';
 }

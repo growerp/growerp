@@ -54,8 +54,10 @@ abstract class SystemSettings with _$SystemSettings {
     String? googleCalendarId,
     // Hotel: lodging/tourist tax charged per room per night
     @JsonKey(fromJson: _decimalFromJson) Decimal? touristTaxPerNight,
-    // Tenant-wide default Gemini model for AI content generation; empty uses the system default.
+    // Tenant-wide default model for AI content generation; empty uses the system default.
     String? aiModelName,
+    // Provider serving aiModelName: gemini, anthropic or openai.
+    String? aiProvider,
   }) = _SystemSettings;
   SystemSettings._();
 

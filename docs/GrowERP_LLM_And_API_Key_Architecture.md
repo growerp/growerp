@@ -20,13 +20,18 @@ runtime, and (with one exception, see §3) they do not share API-key resolution:
 | Subsystem | Where | What it's for | Provider wired up |
 |---|---|---|---|
 | **ADK agent runtime** | `moqui-adk/` (`AdkManager.groovy`) | Chat agents, scheduled agents, tool-using agents (Agent Control Center) | Gemini only |
-| **Backend content-gen scripts** | `backend/service/GeminiAiUtil.groovy` + 7 `generate*WithAI.groovy` scripts | One-shot marketing/CRM content generation | Gemini only |
+| **Backend content-gen scripts** | `backend/service/GeminiAiUtil.groovy` + 7 `generate*WithAI.groovy` scripts | One-shot marketing/CRM content generation | Gemini, Anthropic, OpenAI |
 | **moqui-mcp agent tasks** | `moqui-mcp/service/AgentServices.xml` | Storefront/product AI tasks (`ProductStoreAiConfig`) | OpenAI-compatible HTTP (Bearer auth) |
 
-Both the ADK runtime and the content-gen scripts call Gemini's `generateContent`
-REST API directly — no SDK wrapper on the content-gen side (raw
-`HttpURLConnection`), the ADK side uses the `google-adk` Java library
-(`com.google.adk.models.Gemini`).
+The ADK runtime calls Gemini's `generateContent` REST API through the `google-adk`
+Java library (`com.google.adk.models.Gemini`). The content-gen scripts all go
+through `GeminiAiUtil.callLlmApi()`, which dispatches on the configured provider
+to Gemini `generateContent`, the Anthropic Messages API
+(`POST /v1/messages`, `x-api-key` + `anthropic-version` headers) or the OpenAI
+chat completions API (`POST /v1/chat/completions`, `Authorization: Bearer`) —
+raw `HttpURLConnection` in every case, no SDK and no extra jars. The file keeps
+its historical name; `callGeminiApi()` is retained as a delegate so existing
+callers did not have to change.
 
 The moqui-mcp path is entirely separate: `call#OpenAiChatCompletion`
 (`AgentServices.xml:52-116`) reads `apiKey`/`endpointUrl`/`modelName` straight off a
@@ -34,9 +39,10 @@ The moqui-mcp path is entirely separate: `call#OpenAiChatCompletion`
 endpoint with a Bearer token. It does not touch `LlmConfig`, `SystemSettings`, or
 `GeminiAiUtil` at all — a fully independent key store.
 
-**Multi-provider note:** `AdkAgentConfig.llmProvider` and the Agent Control Center's
-"LLM Provider" field accept free text (`gemini`, `openai`, `anthropic`, …), but only
-`gemini` is wired to a working runner. In `AdkManager.initConfig()`
+**Multi-provider note:** the Agent Control Center's "LLM Provider" field is a
+dropdown over the providers that have an API key in System Setup, but only
+`gemini` is wired to a working runner — picking another provider shows a warning
+in the dialog saying the agent will register but not answer. In `AdkManager.initConfig()`
 (`AdkManager.groovy:200-215`), any non-`gemini` value is stored in a side
 `providerRegistry` map and the function returns without building an agent — the
 log line even says so: *"HTTP routing not yet implemented"*. Setting `llmProvider`
@@ -50,19 +56,30 @@ one.
 | Subsystem | Config field | Precedence | Default |
 |---|---|---|---|
 | ADK | `AdkAgentConfig.modelName` (per-agent) | explicit value on the agent row → `gemini-3.5-flash-lite` | `gemini-3.5-flash-lite` |
-| Content-gen | `SystemSettings.aiModelName` (per-tenant) | explicit override → tenant `SystemSettings.aiModelName` → per-user Moqui preference (`GEMINI_MODEL`) → env var → system property → `DEFAULT_MODEL` | `gemini-3.5-flash-lite` |
+| Content-gen | `SystemSettings.aiModelName` + `aiProvider` (per-tenant), `SystemDefault.aiModelName` + `aiProvider` (GrowERP wide) | explicit override → tenant `SystemSettings` → `SystemDefault` (`defaultId='SYSTEM'`) → per-user Moqui preference (`GEMINI_MODEL`) → env var → system property → `DEFAULT_MODEL` | `gemini-3.5-flash-lite` |
 
-Content-gen resolution is `GeminiAiUtil.resolveModel(ec, ownerPartyId, explicitModel)`
-(`GeminiAiUtil.groovy:43-52`), called from `callGeminiApi()`
-(`GeminiAiUtil.groovy:74`) and duplicated inline in each `generate*WithAI.groovy`
-script (they don't share the util class, they copy the same fallback chain).
+Content-gen resolution is `GeminiAiUtil.resolveModelConfig(ec, ownerPartyId,
+explicitModel, explicitProvider)`, called from `callLlmApi()`. It returns the model
+**and** its provider, always taken from the same level — a tenant that picked only a
+model must not inherit the system default's provider, or its model would be posted to
+the wrong vendor's endpoint. When a stored row has no `aiProvider` (written before the
+field existed) the provider is inferred from the model id by `providerForModel()`:
+`claude*` → anthropic, `gpt*`/`o<digit>*` → openai, everything else → gemini. All seven
+`generate*WithAI.groovy` scripts now call the util instead of duplicating the chain.
 
-**UI:** `gemini-3.5-flash-lite` (the default), `gemini-2.5-flash` and
-`gemini-2.5-flash-lite` are offered as menu choices — a dropdown on the System
-Setup screen (tenant-wide default,
-`system_setup_dialog.dart`) and a preset picker on the per-agent config dialog
-(`adk_agent_config_dialog.dart`, which still allows free text for non-Gemini
-providers). No other Gemini model tier ships as a menu option today.
+**UI:** one shared model list, `llmModels` in
+`growerp_core/lib/src/domains/common/llm_models.dart` — three Gemini and three Claude
+ids, plus an "Other model…" entry that reveals a provider dropdown and a free-text
+model id (this is how an OpenAI model is picked). It drives three screens:
+
+- **System Setup** (tenant default, `system_setup_dialog.dart`) — the dropdown only
+  offers models whose provider has an API key row in the form; a saved model whose key
+  row was removed stays selectable, marked `(no API key)`.
+- **System Defaults** (GrowERP wide, support app,
+  `system_defaults_dialog.dart`) — the full list, since keys are per tenant and there
+  is nothing to filter on.
+- **ADK agent config** (`adk_agent_config_dialog.dart`) — provider dropdown limited to
+  providers with a key, model presets limited to that provider.
 
 ---
 
@@ -107,23 +124,25 @@ own `LlmConfig` row; after that, the system falls back to *any* available Gemini
 key in the system (by design, so a single admin-entered key can serve every tenant
 until they bring their own).
 
-### Content-gen key resolution (simpler, and NOT tenant-aware)
+### Content-gen key resolution
 
-Every `generate*WithAI.groovy` script and `GeminiAiUtil.callGeminiApi()` itself
-resolve the key the same way:
+`GeminiAiUtil.resolveApiKey(ec, ownerPartyId, provider, explicitKey)` is the single
+entry point; every `generate*WithAI.groovy` script reaches it through `callLlmApi()`:
 
 ```
-options.apiKey ?: ec.user.getPreference("GEMINI_API_KEY") ?: env GEMINI_API_KEY ?: throw
+options.apiKey                                   (batch/cron callers)
+  ?: LlmConfig(ownerPartyId, provider).apiKey     (System Setup, per provider)
+  ?: gemini:    user preference GEMINI_API_KEY / env GEMINI_API_KEY / GOOGLE_API_KEY
+     anthropic: env ANTHROPIC_API_KEY
+     openai:    env OPENAI_API_KEY
+  ?: throw "No API key configured for LLM provider '<provider>'"
 ```
 
-This is a **per-user** Moqui preference, not a tenant setting — unlike model
-selection (§2), which now has a tenant-wide `SystemSettings.aiModelName` override,
-the API key on this path has no tenant-wide config. Two XML services break this
-pattern by resolving the key themselves before calling `GeminiAiUtil`:
-`GoogleCalendarServices100.xml` (`extract#FollowUpTodos`) checks tenant `LlmConfig`
-then `SystemSettings.geminiApiKey` and passes the result in as `options.apiKey`.
-This inconsistency (some callers tenant-aware, most not) is a known gap, not a
-deliberate design.
+The tenant `LlmConfig` step closes an earlier gap: content-gen used to read only the
+per-user `GEMINI_API_KEY` preference and ignore the tenant key store entirely, so keys
+entered in System Setup were unused unless a caller passed them in explicitly.
+`GoogleCalendarServices100.xml` (`extract#FollowUpTodos`) still resolves the key itself
+and passes it as `options.apiKey`, which is harmless — an explicit key always wins.
 
 ---
 
@@ -186,15 +205,17 @@ call Gemini regardless of `llmMonthlyTokenLimit`.
 |---|---|---|
 | `GOOGLE_API_KEY` | `AdkManager.groovy` (multiple entry points) | Highest-precedence Gemini key for the ADK runtime |
 | `GOOGLE_GENAI_API_KEY` | `AdkManager.groovy` | Alternate name for the same, checked second |
-| `GEMINI_API_KEY` | `AdkManager.groovy`; `GeminiAiUtil.groovy:49`; each `generate*WithAI.groovy` | Gemini key fallback for both ADK and content-gen paths |
-| `GEMINI_MODEL` | `AdkManager.groovy:230`; `GeminiAiUtil.groovy:50`; each `generate*WithAI.groovy` | Env-level model override, below tenant/per-agent config in precedence |
+| `GEMINI_API_KEY` | `AdkManager.groovy`; `GeminiAiUtil.resolveApiKey` | Gemini key fallback for both ADK and content-gen paths |
+| `ANTHROPIC_API_KEY` | `GeminiAiUtil.resolveApiKey` | Anthropic key fallback when the tenant has no `LlmConfig` row (content-gen only) |
+| `OPENAI_API_KEY` | `GeminiAiUtil.resolveApiKey` | OpenAI key fallback when the tenant has no `LlmConfig` row (content-gen only) |
+| `GEMINI_MODEL` | `AdkManager.groovy:230`; `GeminiAiUtil.resolveModelConfig` | Env-level model override, below tenant/system-default config in precedence |
 
 **Entities**
 
 | Entity | PK | Key fields | Notes |
 |---|---|---|---|
-| `growerp.general.SystemSettings` | `ownerPartyId` | `geminiApiKey` (deprecated), `aiModelName` | Tenant-wide settings row |
-| `growerp.general.SystemDefault` | `defaultId` (`SYSTEM`) | `llmMonthlyTokenLimit` | GrowERP wide defaults; system support only |
+| `growerp.general.SystemSettings` | `ownerPartyId` | `geminiApiKey` (deprecated), `aiModelName`, `aiProvider` | Tenant-wide settings row |
+| `growerp.general.SystemDefault` | `defaultId` (`SYSTEM`) | `llmMonthlyTokenLimit`, `aiModelName`, `aiProvider` | GrowERP wide defaults; system support only |
 | `growerp.general.LlmConfig` | `ownerPartyId` + `llmProvider` | `apiKey` (encrypted) | Current per-tenant, per-provider key store |
 | `moqui.adk.AdkAgentConfig` | `adkAgentConfigId` | `ownerPartyId`, `modelName`, `apiKey`, `llmProvider` | One row per ADK agent; `apiKey`/`modelName` override the tenant default |
 | `moqui.adk.AdkActionLog` | `adkActionLogId` | `ownerPartyId`, `tokensIn`, `tokensOut`, `tokensTotal`, `decision` | Audit trail; source of truth for the monthly quota sum |

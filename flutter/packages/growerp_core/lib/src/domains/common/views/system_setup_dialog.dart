@@ -64,12 +64,12 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
 
   // AI — dynamic list of {providerCtrl, apiKeyCtrl, obscure, apiKeyIsSet}
   final List<Map<String, dynamic>> _llmRows = [];
-  static const _geminiModels = [
-    'gemini-3.5-flash-lite',
-    'gemini-2.5-flash',
-    'gemini-2.5-flash-lite',
-  ];
+  /// Dropdown value standing for "a model id not in the shared list", e.g. an
+  /// OpenAI model. The real id then lives in _customModelCtrl.
+  static const _customModel = '__custom__';
   String? _aiModelName;
+  String _aiProvider = '';
+  final _customModelCtrl = TextEditingController();
 
   // Email — same fields as EmailSettingsDialog (ADK Tools & integrations),
   // shown here too because this is the screen the outreach setup guide sends
@@ -113,6 +113,7 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
     _storeHostCtrl.dispose();
     _storePortCtrl.dispose();
     _storeFolderCtrl.dispose();
+    _customModelCtrl.dispose();
     super.dispose();
   }
 
@@ -172,8 +173,27 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
       _llmRows
         ..clear()
         ..addAll(newRows);
-      _aiModelName =
-          _geminiModels.contains(s.aiModelName) ? s.aiModelName : null;
+      // A stored model that is not in the shared list (an OpenAI model, or one
+      // added after this release) is kept and shown through the custom field
+      // rather than silently reset.
+      final storedModel = s.aiModelName ?? '';
+      if (storedModel.isEmpty) {
+        _aiModelName = null;
+        _aiProvider = '';
+        _customModelCtrl.clear();
+      } else if (llmModels.any((m) => m.modelId == storedModel)) {
+        _aiModelName = storedModel;
+        _aiProvider = s.aiProvider?.isNotEmpty == true
+            ? s.aiProvider!
+            : providerForModel(storedModel);
+        _customModelCtrl.clear();
+      } else {
+        _aiModelName = _customModel;
+        _aiProvider = s.aiProvider?.isNotEmpty == true
+            ? s.aiProvider!
+            : providerForModel(storedModel);
+        _customModelCtrl.text = storedModel;
+      }
     } catch (e) {
       if (mounted) {
         HelperFunctions.showMessage(
@@ -209,7 +229,8 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
       // backend-side.
       final pass = _mailPassCtrl.text;
       final payload = <String, dynamic>{'llmConfigs': llmConfigs};
-      payload['aiModelName'] = _aiModelName ?? '';
+      payload['aiModelName'] = _selectedModelId();
+      payload['aiProvider'] = _selectedModelId().isEmpty ? '' : _aiProvider;
       payload.addAll({
         'smtpHost': _smtpHostCtrl.text,
         'smtpPort': _smtpPortCtrl.text,
@@ -472,6 +493,54 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
 
   // ── AI settings ─────────────────────────────────────────────────────────────
 
+  /// The model id to store: '' for "system default", the typed id when the
+  /// custom entry is picked, otherwise the selected list entry.
+  String _selectedModelId() {
+    if (_aiModelName == null) return '';
+    if (_aiModelName == _customModel) return _customModelCtrl.text.trim();
+    return _aiModelName!;
+  }
+
+  /// Providers that currently have an API key row in the form. Read from live
+  /// form state, not the last server load, so adding a key immediately makes
+  /// that provider's models selectable.
+  Set<String> _providersWithKey() => _llmRows
+      .map((r) => (r['providerCtrl'] as TextEditingController).text.trim())
+      .where((p) => p.isNotEmpty)
+      .toSet();
+
+  List<DropdownMenuItem<String>> _modelItems() {
+    final withKey = _providersWithKey();
+    final items = <DropdownMenuItem<String>>[
+      DropdownMenuItem<String>(
+        value: null,
+        child: Text(CoreLocalizations.of(context)!.systemDefault),
+      ),
+    ];
+    for (final model in llmModels.where((m) => withKey.contains(m.provider))) {
+      items.add(DropdownMenuItem<String>(
+        value: model.modelId,
+        child: Text('${model.modelId}  (${model.provider})'),
+      ));
+    }
+    // a saved model whose key row was removed stays selectable, so opening this
+    // screen never silently rewrites the stored setting
+    final saved = _aiModelName;
+    if (saved != null &&
+        saved != _customModel &&
+        !items.any((i) => i.value == saved)) {
+      items.add(DropdownMenuItem<String>(
+        value: saved,
+        child: Text('$saved  (no API key)'),
+      ));
+    }
+    items.add(const DropdownMenuItem<String>(
+      value: _customModel,
+      child: Text('Other model…'),
+    ));
+    return items;
+  }
+
   Widget _aiSettingsSection() {
     return GroupingDecorator(
       decoratorKey: const Key('aiSettingsSection'),
@@ -481,7 +550,8 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Configure LLM provider API keys (gemini, openai, anthropic, …).',
+            'Configure LLM provider API keys (gemini, openai, anthropic, …). '
+            'Only models of a provider with a key can be selected.',
             style: TextStyle(
               fontSize: 14,
               color: Theme.of(context).colorScheme.outline,
@@ -493,19 +563,61 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
             initialValue: _aiModelName,
             decoration: const InputDecoration(
               labelText: 'Default AI Model',
-              helperText: 'Gemini model used for AI content generation across this tenant.',
+              helperText:
+                  'Model used for AI content generation across this tenant.',
             ),
-            items: [
-              DropdownMenuItem<String>(
-                value: null,
-                child: Text(CoreLocalizations.of(context)!.systemDefault),
-              ),
-              ..._geminiModels.map(
-                (m) => DropdownMenuItem<String>(value: m, child: Text(m)),
-              ),
-            ],
-            onChanged: (v) => setState(() => _aiModelName = v),
+            items: _modelItems(),
+            onChanged: (v) => setState(() {
+              _aiModelName = v;
+              if (v == null) {
+                _aiProvider = '';
+              } else if (v != _customModel) {
+                _aiProvider = llmModels
+                    .firstWhere((m) => m.modelId == v,
+                        orElse: () => LlmModel(providerForModel(v), v))
+                    .provider;
+              } else if (_aiProvider.isEmpty) {
+                _aiProvider = llmProviders.first;
+              }
+            }),
           ),
+          if (_aiModelName == _customModel) ...[
+            SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 130,
+                  child: DropdownButtonFormField<String>(
+                    key: const Key('customModelProvider'),
+                    initialValue:
+                        _aiProvider.isEmpty ? llmProviders.first : _aiProvider,
+                    decoration: const InputDecoration(labelText: 'Provider'),
+                    items: llmProviders
+                        .map((p) =>
+                            DropdownMenuItem<String>(value: p, child: Text(p)))
+                        .toList(),
+                    onChanged: (v) =>
+                        setState(() => _aiProvider = v ?? llmProviders.first),
+                  ),
+                ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: TextFormField(
+                    key: const Key('customModelName'),
+                    controller: _customModelCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Model id',
+                      hintText: 'gpt-5.1',
+                    ),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Required'
+                        : null,
+                  ),
+                ),
+              ],
+            ),
+          ],
           SizedBox(height: 16),
           ..._llmRows.asMap().entries.map((e) => _llmProviderRow(e.key)),
           SizedBox(height: 8),
@@ -515,7 +627,7 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
             label: Text(CoreLocalizations.of(context)!.addProvider),
             onPressed: () => setState(() {
               _llmRows.add({
-                'providerCtrl': TextEditingController(),
+                'providerCtrl': TextEditingController(text: llmProviders.first),
                 'apiKeyCtrl': TextEditingController(),
                 'obscure': true,
                 'apiKeyIsSet': false,
@@ -532,22 +644,31 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
     final providerCtrl = row['providerCtrl'] as TextEditingController;
     final apiKeyCtrl = row['apiKeyCtrl'] as TextEditingController;
     final obscure = row['obscure'] as bool;
+    // a row loaded with a provider we do not know about keeps its value rather
+    // than being silently rewritten to another provider
+    final providers = [
+      ...llmProviders,
+      if (providerCtrl.text.isNotEmpty && !llmProviders.contains(providerCtrl.text))
+        providerCtrl.text,
+    ];
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 110,
-            child: TextFormField(
+            width: 130,
+            child: DropdownButtonFormField<String>(
               key: Key('llmProvider_$index'),
-              controller: providerCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Provider',
-                hintText: 'gemini',
-              ),
-              validator: (v) =>
-                  (v == null || v.isEmpty) ? 'Required' : null,
+              initialValue:
+                  providerCtrl.text.isEmpty ? null : providerCtrl.text,
+              decoration: const InputDecoration(labelText: 'Provider'),
+              items: providers
+                  .map((p) =>
+                      DropdownMenuItem<String>(value: p, child: Text(p)))
+                  .toList(),
+              validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+              onChanged: (v) => setState(() => providerCtrl.text = v ?? ''),
             ),
           ),
           SizedBox(width: 8),

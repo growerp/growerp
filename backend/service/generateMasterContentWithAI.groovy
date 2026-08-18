@@ -13,7 +13,6 @@
  */
 
 import groovy.json.JsonSlurper
-import groovy.json.JsonOutput
 import org.moqui.context.ExecutionContext
 
 // Get ExecutionContext
@@ -40,13 +39,8 @@ try {
     def theType = (contentType ?: 'POSTING').toUpperCase()
     def thePnp = (pnpType ?: 'OTHER').toUpperCase()
 
-    // Step 3: API key
-    def apiKey = ec.user.getPreference("GEMINI_API_KEY")
-    if (apiKey == null || apiKey.isEmpty()) apiKey = System.getenv("GEMINI_API_KEY") ?: System.getenv("GOOGLE_API_KEY")
-    if (apiKey == null || apiKey.isEmpty()) {
-        ec.message.addError("Gemini API key not found. Please set GEMINI_API_KEY (or GOOGLE_API_KEY) in user preferences or environment.")
-        return
-    }
+    // Load the shared LLM helper; it resolves provider, model and key per tenant
+    def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
 
     // Step 4: Prompt — produce ONE platform-neutral canonical piece
     def personaBlock = persona ? """
@@ -91,34 +85,10 @@ RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this ex
 Write the content now.
 """
 
-    // Step 5: Call Gemini
-    def tenantModel = ec.entity.find("growerp.general.SystemSettings").condition("ownerPartyId", ownerPartyId).one()?.aiModelName
-    def model = tenantModel ?: ec.user.getPreference("GEMINI_MODEL") ?: System.getenv("GEMINI_MODEL") ?: System.getProperty("GEMINI_MODEL") ?: "gemini-3.5-flash-lite"
-    def geminiUrl = "https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}"
-    def connection = new URL(geminiUrl).openConnection() as HttpURLConnection
-    connection.setRequestMethod("POST")
-    connection.setRequestProperty("Content-Type", "application/json")
-    connection.setDoOutput(true)
-
-    def requestBody = JsonOutput.toJson([
-        contents: [[ parts: [[text: generationPrompt]] ]],
-        generationConfig: [temperature: 0.85, topK: 40, topP: 0.95, maxOutputTokens: 4096]
-    ])
-    connection.outputStream.withWriter("UTF-8") { writer -> writer.write(requestBody) }
-
-    def responseCode = connection.responseCode
-    ec.logger.info("Gemini API response code: ${responseCode}")
-    if (responseCode != 200) {
-        def errorStream = connection.errorStream
-        def errorText = errorStream ? errorStream.text : "No error details available"
-        ec.logger.error("Gemini API error: ${errorText}")
-        ec.message.addError("Failed to generate master content: ${errorText}")
-        return
-    }
-
+    // Call the tenant's LLM (gemini, anthropic or openai)
     def jsonSlurper = new JsonSlurper()
-    def geminiResponse = jsonSlurper.parseText(connection.inputStream.text)
-    def generatedText = geminiResponse.candidates[0].content.parts[0].text
+    def generatedText = GeminiAiUtil.callLlmApi(ec, generationPrompt,
+        [ownerPartyId: ownerPartyId, temperature: 0.85, maxOutputTokens: 4096])
     generatedText = generatedText.replaceAll(/```json\s*/, '').replaceAll(/```\s*$/, '').replaceAll(/^```\s*/, '').trim()
     def data = jsonSlurper.parseText(generatedText)
 
