@@ -25,6 +25,12 @@ class LlmModel {
 /// to group the model list below.
 const List<String> llmProviders = ['gemini', 'anthropic', 'openai'];
 
+/// Providers the ADK agent runtime can actually run an agent on. google-adk ships
+/// a Gemini and a Claude model implementation; an agent on any other provider
+/// registers but has no runner to answer with.
+/// Mirrors AdkManager.SUPPORTED_PROVIDERS.
+const List<String> adkRoutedProviders = ['gemini', 'anthropic'];
+
 /// The models offered in the System Setup, System Defaults and ADK agent
 /// screens. A model not listed here can still be used by picking "Other model"
 /// and typing its id — that is also how an OpenAI model is selected until

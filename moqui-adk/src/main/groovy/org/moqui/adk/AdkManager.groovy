@@ -76,8 +76,42 @@ class AdkManager {
         try { return Math.max(1, Integer.parseInt(System.getenv('ADK_SUMMARIZE_EVERY') ?: '2')) }
         catch (Exception ignore) { return 2 }
     }()
-    // configId → {provider, apiKey} for non-Google providers (future HTTP runners)
+    // configId → {provider, apiKey} for providers we cannot build a model for yet
     private static final Map<String, Map>      providerRegistry = new ConcurrentHashMap<>()
+
+    /** Providers with a BaseLlm implementation on the classpath. openai has none: google-adk
+     *  ships Gemini and Claude only, so an openai agent still registers without a runner. */
+    static final List<String> SUPPORTED_PROVIDERS = ['gemini', 'anthropic']
+
+    /** Model used when an agent row names no model. */
+    static String defaultModelFor(String provider) {
+        if (provider == 'anthropic') {
+            return System.getenv('ANTHROPIC_MODEL') ?: System.getProperty('ANTHROPIC_MODEL') ?:
+                'claude-sonnet-5'
+        }
+        return System.getenv('GEMINI_MODEL') ?: System.getProperty('GEMINI_MODEL') ?:
+            'gemini-3.5-flash-lite'
+    }
+
+    /** The provider's key from the environment, for agents configured without one. */
+    static String envKeyFor(String provider) {
+        if (provider == 'anthropic') return System.getenv('ANTHROPIC_API_KEY') ?: ''
+        return System.getenv('GOOGLE_API_KEY') ?: System.getenv('GOOGLE_GENAI_API_KEY') ?:
+            System.getenv('GEMINI_API_KEY') ?: ''
+    }
+
+    /** The model to hand LlmAgent.model(): a BaseLlm carrying the key, or - for Gemini without
+     *  a key - the plain model name, which LlmRegistry resolves using the environment. */
+    private static def buildModel(String provider, String modelId, String apiKey) {
+        if (provider == 'anthropic') {
+            def client = com.anthropic.client.okhttp.AnthropicOkHttpClient.builder()
+                .apiKey(apiKey ?: envKeyFor('anthropic')).build()
+            return new com.google.adk.models.Claude(modelId, client)
+        }
+        return apiKey ?
+            com.google.adk.models.Gemini.builder().modelName(modelId).apiKey(apiKey).build() :
+            modelId
+    }
 
     private static volatile MoquiSessionService sharedSessionService
     // ADK ArtifactService backed by the AdkArtifact entity: large binaries (PDFs/images)
@@ -212,22 +246,25 @@ pre-filled dialog. Order/shipment specifics still work: "enter a sales order" �
                                         String description = null) {
         String effectiveProvider = llmProvider ?: 'gemini'
 
-        // Non-Google providers: store in side registry for future HTTP runner; skip Google ADK init
-        if (effectiveProvider != 'gemini') {
+        // Providers without a BaseLlm implementation: register in the side registry so the
+        // agent is at least visible, but there is no runner to answer with.
+        if (!SUPPORTED_PROVIDERS.contains(effectiveProvider)) {
             providerRegistry[configId] = [provider: effectiveProvider, apiKey: apiKey ?: '']
             // Only a general (unnamed) interactive agent claims the tenant's chat route;
             // named/scheduled agents (e.g. CI Monitor) must not hijack interactive chat.
             if (ownerPartyId && !agentName) tenantRegistry[ownerPartyId] = configId
-            logger.info("Non-Google provider '${effectiveProvider}' registered for configId='${configId}' (tenant='${ownerPartyId ?: 'global'}') — HTTP routing not yet implemented")
+            logger.info("Provider '${effectiveProvider}' registered for configId='${configId}' (tenant='${ownerPartyId ?: 'global'}') — no runner, routing not implemented")
             return
         }
 
-        if (!apiKey && !System.getenv('GOOGLE_API_KEY') && !System.getenv('GEMINI_API_KEY')) {
-            logger.warn("No API key provided or found in environment. Disabling ADK agent configId='${configId}'.")
+        if (!apiKey && !envKeyFor(effectiveProvider)) {
+            logger.warn("No ${effectiveProvider} API key provided or found in environment. Disabling ADK agent configId='${configId}'.")
             return
         }
 
-        if (apiKey) System.setProperty('GOOGLE_API_KEY', apiKey)
+        // google-genai reads the key from the environment, so a key from System Setup has to
+        // reach it another way; the Anthropic client takes its key directly.
+        if (apiKey && effectiveProvider == 'gemini') System.setProperty('GOOGLE_API_KEY', apiKey)
 
         try {
             // Per-agent MCP toolset: identical to the shared one but tagged with this config's
@@ -235,14 +272,8 @@ pre-filled dialog. Order/shipment specifics still work: "enter a sales order" �
             // calling agent and its tenant.
             def agentMcpToolset = buildMcpToolset(configId, ownerPartyId)
 
-            String envModel = System.getenv('GEMINI_MODEL') ?: System.getProperty('GEMINI_MODEL') ?: 'gemini-3.5-flash-lite'
-            String modelId = modelName ?: envModel
-            // google-genai reads the key from the GOOGLE_API_KEY/GEMINI_API_KEY *environment*
-            // variable (not a System property), so a key from System Setup must be passed to the
-            // Gemini model explicitly. Fall back to the model-name String (env-based) when no key.
-            def modelArg = apiKey ?
-                    com.google.adk.models.Gemini.builder().modelName(modelId).apiKey(apiKey).build() :
-                    modelId
+            String modelId = modelName ?: defaultModelFor(effectiveProvider)
+            def modelArg = buildModel(effectiveProvider, modelId, apiKey)
             LlmAgent agent
 
             // Read this agent's scoping so the in-process FunctionTools (Email/GitHub) honour it
@@ -399,7 +430,9 @@ CRITICAL tool-use rules — follow exactly:
         String defaultKey = System.getenv('GOOGLE_API_KEY') ?:
                             System.getenv('GOOGLE_GENAI_API_KEY') ?:
                             System.getenv('GEMINI_API_KEY') ?: ''
-        String defaultModel = 'gemini-3.5-flash-lite'
+        // left null unless a key (and model) is borrowed from a gemini agent below, so a
+        // tenant with only an anthropic key does not get a Gemini model name forced on it
+        String defaultModel = null
 
         if (cfgList) {
             // getExecutionContext() returns the CALLER's thread-local EC when one exists
@@ -445,40 +478,49 @@ CRITICAL tool-use rules — follow exactly:
         ensureInteractiveDefault(ecf, defaultKey, defaultModel)
     }
 
-    /// Register the shared DEFAULT_CONFIG runner used for interactive chat, deriving
-    /// its key from (in order) the gemini growerp.general.LlmConfig, env vars, then [seedKey].
-    /// No-op when the runner already exists. Called by lazyInit and reloadInteractive.
+    /// Register the shared DEFAULT_CONFIG runner used for interactive chat, deriving its key
+    /// from (in order) growerp.general.LlmConfig for each supported provider, env vars, then
+    /// [seedKey]. No-op when the runner already exists. Called by lazyInit and reloadInteractive.
     private static void ensureInteractiveDefault(ExecutionContextFactory ecf, String seedKey = null,
-                                                 String model = 'gemini-3.5-flash-lite') {
+                                                 String model = null) {
         if (registry.containsKey(DEFAULT_CONFIG)) return
         // Precedence for the shared interactive runner: key saved via System Setup
         // (growerp.general.LlmConfig) → explicit env var → key borrowed from a specialised
         // agent (seedKey). The System Setup key must win over the env var so an admin/tenant
         // can always override a stale or server-wide key without a restart.
         String defaultKey = ''
+        String provider = 'gemini'
         try {
             def ec = ecf.getExecutionContext()
             boolean wasDisabled = ec.artifactExecution.disableAuthz()
             try {
-                def lcList = ec.entity.find('growerp.general.LlmConfig')
-                        .condition('llmProvider', 'gemini').list()
-                for (def lc in lcList) {
-                    String k = lc.getString('apiKey')
-                    if (k) { defaultKey = k; break }
+                for (String candidate in SUPPORTED_PROVIDERS) {
+                    def lcList = ec.entity.find('growerp.general.LlmConfig')
+                            .condition('llmProvider', candidate).list()
+                    for (def lc in lcList) {
+                        String k = lc.getString('apiKey')
+                        if (k) { defaultKey = k; provider = candidate; break }
+                    }
+                    logger.info("ensureInteractiveDefault: LlmConfig {} rows={}, keyFound={}",
+                            candidate, lcList?.size() ?: 0, (defaultKey ? true : false))
+                    if (defaultKey) break
                 }
-                logger.info("ensureInteractiveDefault: LlmConfig gemini rows={}, keyFound={}",
-                        lcList?.size() ?: 0, (defaultKey ? true : false))
             } finally { if (!wasDisabled) ec.artifactExecution.enableAuthz() }
         } catch (Exception e) {
             logger.error("ensureInteractiveDefault: LlmConfig lookup failed: ${e.message}", e)
         }
-        if (!defaultKey) defaultKey = System.getenv('GOOGLE_API_KEY') ?:
-                            System.getenv('GOOGLE_GENAI_API_KEY') ?:
-                            System.getenv('GEMINI_API_KEY') ?: ''
+        for (String candidate in SUPPORTED_PROVIDERS) {
+            if (defaultKey) break
+            String envKey = envKeyFor(candidate)
+            if (envKey) { defaultKey = envKey; provider = candidate }
+        }
         if (!defaultKey) defaultKey = seedKey ?: ''
-        logger.info("ensureInteractiveDefault: registering __default__ hasKey={} (seedKeyPresent={})",
-                (defaultKey ? true : false), (seedKey ? true : false))
-        initConfig(DEFAULT_CONFIG, null, null, model, '', defaultKey)
+        // the borrowed seed key and its model both come from a gemini agent (see lazyInit)
+        String modelId = model ?:
+                (provider == 'gemini' ? 'gemini-3.5-flash-lite' : defaultModelFor(provider))
+        logger.info("ensureInteractiveDefault: registering __default__ provider={} hasKey={} (seedKeyPresent={})",
+                provider, (defaultKey ? true : false), (seedKey ? true : false))
+        initConfig(DEFAULT_CONFIG, null, null, modelId, '', defaultKey, provider)
     }
 
     /// Ensure a general per-tenant interactive runner exists for [ownerPartyId] and owns
@@ -492,21 +534,23 @@ CRITICAL tool-use rules — follow exactly:
         // A coordinator (or already-built interactive agent) may already own this tenant's chat
         // route — don't shadow it with the generic interactive default.
         if (tenantRegistry.containsKey(ownerPartyId)) return
-        String key = resolveTenantKey(ownerPartyId)
-        if (!key) {
-            logger.warn("ensureInteractiveForTenant: no gemini key for owner=${ownerPartyId}; " +
+        Map llm = resolveTenantLlm(ownerPartyId)
+        if (!llm) {
+            logger.warn("ensureInteractiveForTenant: no LLM key for owner=${ownerPartyId}; " +
                     "interactive chat will use the global default (no tenant knowledge access)")
             return
         }
         // agentName=null → builds the general 'growerp-agent'; ownerPartyId set + unnamed →
         // claims tenantRegistry[owner] and its McpToolset carries adk_owner_party_id.
-        initConfig(cid, ownerPartyId, null, 'gemini-3.5-flash-lite', '', key)
+        initConfig(cid, ownerPartyId, null, defaultModelFor(llm.provider as String), '',
+                llm.key as String, llm.provider as String)
         logger.info("Registered per-tenant interactive agent configId='${cid}' (owner=${ownerPartyId})")
     }
 
-    /// Resolve a gemini API key for [ownerPartyId]: this owner's LlmConfig → any gemini
-    /// LlmConfig → a key borrowed from an AdkAgentConfig → env vars. Returns '' when none found.
-    private static String resolveTenantKey(String ownerPartyId) {
+    /// Resolve an API key for [ownerPartyId] and [provider]: this owner's LlmConfig → any
+    /// LlmConfig for that provider → a key borrowed from an AdkAgentConfig → env vars.
+    /// Returns '' when none found.
+    private static String resolveTenantKey(String ownerPartyId, String provider = 'gemini') {
         String key = ''
         try {
             def ec = sharedSessionService.ecf.getExecutionContext()
@@ -514,39 +558,47 @@ CRITICAL tool-use rules — follow exactly:
             try {
                 def lc = ec.entity.find('growerp.general.LlmConfig')
                         .condition('ownerPartyId', ownerPartyId)
-                        .condition('llmProvider', 'gemini').one()
+                        .condition('llmProvider', provider).one()
                 key = lc?.getString('apiKey') ?: ''
                 if (!key) {
                     for (def row in ec.entity.find('growerp.general.LlmConfig')
-                            .condition('llmProvider', 'gemini').list()) {
+                            .condition('llmProvider', provider).list()) {
                         String k = row.getString('apiKey')
                         if (k) { key = k; break }
                     }
                 }
                 // Fall back to a key stored directly on an AdkAgentConfig (this owner first,
-                // then any gemini agent) — mirrors lazyInit's key-borrowing so the interactive
-                // agent works even when only a scheduled agent (e.g. CI Monitor) holds the key.
+                // then any agent on that provider) — mirrors lazyInit's key-borrowing so the
+                // interactive agent works even when only a scheduled agent holds the key.
                 if (!key) {
                     def ac = ec.entity.find('moqui.adk.AdkAgentConfig')
                             .condition('ownerPartyId', ownerPartyId)
-                            .condition('llmProvider', 'gemini').list()
+                            .condition('llmProvider', provider).list()
                     for (def row in ac) { String k = row.getString('apiKey'); if (k) { key = k; break } }
                 }
                 if (!key) {
                     for (def row in ec.entity.find('moqui.adk.AdkAgentConfig')
-                            .condition('llmProvider', 'gemini').list()) {
+                            .condition('llmProvider', provider).list()) {
                         String k = row.getString('apiKey')
                         if (k) { key = k; break }
                     }
                 }
             } finally { if (!wasDisabled) ec.artifactExecution.enableAuthz() }
         } catch (Exception e) {
-            logger.warn("resolveTenantKey(${ownerPartyId}) failed: ${e.message}")
+            logger.warn("resolveTenantKey(${ownerPartyId}, ${provider}) failed: ${e.message}")
         }
-        if (!key) key = System.getenv('GOOGLE_API_KEY') ?:
-                         System.getenv('GOOGLE_GENAI_API_KEY') ?:
-                         System.getenv('GEMINI_API_KEY') ?: ''
+        if (!key) key = envKeyFor(provider)
         return key
+    }
+
+    /// The provider and key to serve [ownerPartyId] with: the supported providers in order,
+    /// first one that has a key anywhere. Returns null when nothing is configured.
+    private static Map resolveTenantLlm(String ownerPartyId) {
+        for (String provider in SUPPORTED_PROVIDERS) {
+            String key = resolveTenantKey(ownerPartyId, provider)
+            if (key) return [provider: provider, key: key]
+        }
+        return null
     }
 
     /// Drop the shared interactive/default runner and re-create it so a key change
@@ -1179,7 +1231,8 @@ CRITICAL tool-use rules — follow exactly:
             } finally { if (!wasDisabled) ec.artifactExecution.enableAuthz() }
             if (!cfg) return null
             String provider = cfg.llmProvider ?: 'gemini'
-            String key = (cfg.apiKey as String) ?: resolveTenantKey(cfg.ownerPartyId as String)
+            String key = (cfg.apiKey as String) ?:
+                    resolveTenantKey(cfg.ownerPartyId as String, provider)
             initConfig(configId, cfg.ownerPartyId as String, cfg.agentName as String,
                     cfg.modelName as String, cfg.instruction as String, key, provider,
                     cfg.description as String)

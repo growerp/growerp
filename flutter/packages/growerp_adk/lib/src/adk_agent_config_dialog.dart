@@ -622,12 +622,14 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                                 }),
                       ),
                       if (_llmProviderCtrl.text.trim().isNotEmpty &&
-                          _llmProviderCtrl.text.trim() != 'gemini')
+                          !adkRoutedProviders
+                              .contains(_llmProviderCtrl.text.trim()))
                         Padding(
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
-                            'The ADK runtime routes Gemini only; an agent on '
-                            'this provider is registered but will not answer.',
+                            'The ADK runtime has no model implementation for '
+                            'this provider; an agent on it is registered but '
+                            'will not answer.',
                             key: const Key('providerNotRoutedWarning'),
                             style: TextStyle(
                                 color: Theme.of(context).colorScheme.error),

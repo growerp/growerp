@@ -19,12 +19,16 @@ runtime, and (with one exception, see §3) they do not share API-key resolution:
 
 | Subsystem | Where | What it's for | Provider wired up |
 |---|---|---|---|
-| **ADK agent runtime** | `moqui-adk/` (`AdkManager.groovy`) | Chat agents, scheduled agents, tool-using agents (Agent Control Center) | Gemini only |
+| **ADK agent runtime** | `moqui-adk/` (`AdkManager.groovy`) | Chat agents, scheduled agents, tool-using agents (Agent Control Center) | Gemini, Anthropic |
 | **Backend content-gen scripts** | `backend/service/GeminiAiUtil.groovy` + 7 `generate*WithAI.groovy` scripts | One-shot marketing/CRM content generation | Gemini, Anthropic, OpenAI |
 | **moqui-mcp agent tasks** | `moqui-mcp/service/AgentServices.xml` | Storefront/product AI tasks (`ProductStoreAiConfig`) | OpenAI-compatible HTTP (Bearer auth) |
 
-The ADK runtime calls Gemini's `generateContent` REST API through the `google-adk`
-Java library (`com.google.adk.models.Gemini`). The content-gen scripts all go
+The ADK runtime goes through the `google-adk` Java library:
+`AdkManager.buildModel()` returns `com.google.adk.models.Gemini` or
+`com.google.adk.models.Claude` (wrapping an `AnthropicOkHttpClient` built with the
+tenant's key) and hands it to `LlmAgent.model()`. Both ship inside `moqui.war`
+already — `google-adk` pulls `anthropic-java` transitively — so Anthropic support
+needed no new dependency. The content-gen scripts all go
 through `GeminiAiUtil.callLlmApi()`, which dispatches on the configured provider
 to Gemini `generateContent`, the Anthropic Messages API
 (`POST /v1/messages`, `x-api-key` + `anthropic-version` headers) or the OpenAI
@@ -40,9 +44,14 @@ endpoint with a Bearer token. It does not touch `LlmConfig`, `SystemSettings`, o
 `GeminiAiUtil` at all — a fully independent key store.
 
 **Multi-provider note:** the Agent Control Center's "LLM Provider" field is a
-dropdown over the providers that have an API key in System Setup, but only
-`gemini` is wired to a working runner — picking another provider shows a warning
-in the dialog saying the agent will register but not answer. In `AdkManager.initConfig()`
+dropdown over the providers that have an API key in System Setup.
+`AdkManager.SUPPORTED_PROVIDERS` (`gemini`, `anthropic`) lists the ones with a model
+implementation on the classpath; anything else — `openai` today, since google-adk
+ships no OpenAI `BaseLlm` — still lands in the side `providerRegistry` with no
+runner, and the dialog warns that such an agent registers but will not answer.
+Key resolution (`resolveTenantKey`, `resolveTenantLlm`, `ensureInteractiveDefault`)
+is parameterised by provider and tries `SUPPORTED_PROVIDERS` in order, so a tenant
+holding only an Anthropic key gets a working interactive agent. In `AdkManager.initConfig()`
 (`AdkManager.groovy:200-215`), any non-`gemini` value is stored in a side
 `providerRegistry` map and the function returns without building an agent — the
 log line even says so: *"HTTP routing not yet implemented"*. Setting `llmProvider`
@@ -55,7 +64,7 @@ one.
 
 | Subsystem | Config field | Precedence | Default |
 |---|---|---|---|
-| ADK | `AdkAgentConfig.modelName` (per-agent) | explicit value on the agent row → `gemini-3.5-flash-lite` | `gemini-3.5-flash-lite` |
+| ADK | `AdkAgentConfig.modelName` + `llmProvider` (per-agent) | explicit value on the agent row → `AdkManager.defaultModelFor(provider)` (env `GEMINI_MODEL` / `ANTHROPIC_MODEL` first) | `gemini-3.5-flash-lite`, `claude-sonnet-5` |
 | Content-gen | `SystemSettings.aiModelName` + `aiProvider` (per-tenant), `SystemDefault.aiModelName` + `aiProvider` (GrowERP wide) | explicit override → tenant `SystemSettings` → `SystemDefault` (`defaultId='SYSTEM'`) → per-user Moqui preference (`GEMINI_MODEL`) → env var → system property → `DEFAULT_MODEL` | `gemini-3.5-flash-lite` |
 
 Content-gen resolution is `GeminiAiUtil.resolveModelConfig(ec, ownerPartyId,
@@ -98,30 +107,29 @@ model id (this is how an OpenAI model is picked). It drives three screens:
 Multiple entry points in `AdkManager.groovy` each resolve a key, with slightly
 different precedence depending on context:
 
-- **`initConfig()`** (`AdkManager.groovy:200-323`) — takes an already-resolved
-  `apiKey` param; only checks `apiKey ?: env GOOGLE_API_KEY ?: env GEMINI_API_KEY`
-  (line 217) and disables the agent if all are empty. Callers are responsible for
-  resolving the key before calling this.
-- **`lazyInit()`** (`AdkManager.groovy:370-436`) — on startup, for each enabled
-  `AdkAgentConfig` row: `cfg.apiKey` → tenant `LlmConfig` (lines 401-409). Separately
-  computes a *default* key for the shared interactive agent: env vars → first
-  `gemini`-provider config's borrowed key (lines 390-413).
-- **`ensureInteractiveDefault()`** (`AdkManager.groovy:441-473`) — the shared
-  interactive-chat runner's key: env vars (`GOOGLE_API_KEY`/`GOOGLE_GENAI_API_KEY`/
-  `GEMINI_API_KEY`) → any tenant's `gemini` `LlmConfig` row → a seed key borrowed
-  from a specialised agent (e.g. the CI Monitor).
-- **`resolveTenantKey()`** (`AdkManager.groovy:500-541`) — used for per-tenant
-  interactive agents: env vars → this tenant's `LlmConfig` → **any** tenant's
-  `gemini` `LlmConfig` → this tenant's `AdkAgentConfig.apiKey` → **any** tenant's
-  `AdkAgentConfig.apiKey`. (The "any tenant" fallbacks exist so a single shared
-  system key, entered once, lights up chat for every tenant that hasn't configured
-  their own.)
-- **`ensureAgentBuilt()`** (`AdkManager.groovy:1160-1181`) — lazy per-config build:
-  `cfg.apiKey` → `resolveTenantKey(cfg.ownerPartyId)`.
+- **`initConfig()`** — takes an already-resolved `apiKey` param; only checks
+  `apiKey ?: AdkManager.envKeyFor(provider)` and disables the agent if both are empty.
+  Callers are responsible for resolving the key before calling this.
+- **`lazyInit()`** — on startup, for each enabled `AdkAgentConfig` row:
+  `cfg.apiKey` → tenant `LlmConfig` **for that agent's provider**. Separately computes a
+  *default* key for the shared interactive agent: env vars → a key borrowed from a
+  `gemini` config.
+- **`ensureInteractiveDefault()`** — the shared interactive-chat runner: for each entry in
+  `SUPPORTED_PROVIDERS`, any tenant's `LlmConfig` row for it → that provider's env vars →
+  a seed key borrowed from a specialised agent (e.g. the CI Monitor). The first provider
+  with a key wins and sets the runner's model.
+- **`resolveTenantKey(ownerPartyId, provider)`** — used for per-tenant interactive agents:
+  this tenant's `LlmConfig` → **any** tenant's `LlmConfig` for that provider → this
+  tenant's `AdkAgentConfig.apiKey` → **any** agent's key on that provider → env vars.
+  `resolveTenantLlm()` wraps it, trying `SUPPORTED_PROVIDERS` in order and returning the
+  provider alongside the key. (The "any tenant" fallbacks exist so a single shared system
+  key, entered once, lights up chat for every tenant that hasn't configured their own.)
+- **`ensureAgentBuilt()`** — lazy per-config build: `cfg.apiKey` →
+  `resolveTenantKey(cfg.ownerPartyId, cfg.llmProvider)`.
 
 Net effect: an explicit key on the agent row always wins; after that, the tenant's
-own `LlmConfig` row; after that, the system falls back to *any* available Gemini
-key in the system (by design, so a single admin-entered key can serve every tenant
+own `LlmConfig` row for that agent's provider; after that, the system falls back to
+*any* available key for that provider (by design, so a single admin-entered key can serve every tenant
 until they bring their own).
 
 ### Content-gen key resolution
@@ -163,8 +171,8 @@ own key configured. Checked in `AdkGovernanceServices.xml` (`govern#AgentAction`
 lines 113-121):
 
 ```
-hasCustomLlm = AdkAgentConfig.apiKey present?  OR  tenant LlmConfig(gemini) row present?
-if hasCustomLlm → skip the quota check entirely (tenant pays their own Google bill)
+hasCustomLlm = AdkAgentConfig.apiKey present?  OR  tenant LlmConfig(<agent's provider>) row present?
+if hasCustomLlm → skip the quota check entirely (tenant pays their own vendor bill)
 ```
 
 **Enforcement:** `govern#AgentAction` (`AdkGovernanceServices.xml:16`) runs before
@@ -206,8 +214,9 @@ call Gemini regardless of `llmMonthlyTokenLimit`.
 | `GOOGLE_API_KEY` | `AdkManager.groovy` (multiple entry points) | Highest-precedence Gemini key for the ADK runtime |
 | `GOOGLE_GENAI_API_KEY` | `AdkManager.groovy` | Alternate name for the same, checked second |
 | `GEMINI_API_KEY` | `AdkManager.groovy`; `GeminiAiUtil.resolveApiKey` | Gemini key fallback for both ADK and content-gen paths |
-| `ANTHROPIC_API_KEY` | `GeminiAiUtil.resolveApiKey` | Anthropic key fallback when the tenant has no `LlmConfig` row (content-gen only) |
-| `OPENAI_API_KEY` | `GeminiAiUtil.resolveApiKey` | OpenAI key fallback when the tenant has no `LlmConfig` row (content-gen only) |
+| `ANTHROPIC_API_KEY` | `GeminiAiUtil.resolveApiKey`; `AdkManager.envKeyFor` | Anthropic key fallback when the tenant has no `LlmConfig` row |
+| `ANTHROPIC_MODEL` | `AdkManager.defaultModelFor` | Env-level model override for Anthropic ADK agents |
+| `OPENAI_API_KEY` | `GeminiAiUtil.resolveApiKey` | OpenAI key fallback when the tenant has no `LlmConfig` row (content-gen only; the ADK runtime cannot run OpenAI) |
 | `GEMINI_MODEL` | `AdkManager.groovy:230`; `GeminiAiUtil.resolveModelConfig` | Env-level model override, below tenant/system-default config in precedence |
 
 **Entities**

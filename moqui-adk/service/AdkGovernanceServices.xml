@@ -117,10 +117,12 @@
                     if (decision == 'allowed') {
                         def hasCustomLlm = false
                         if (cfg?.apiKey) hasCustomLlm = true
-                        if (!hasCustomLlm && ownerPartyId) {
+                        if (!hasCustomLlm &amp;&amp; ownerPartyId) {
+                            // a key for the provider this agent actually runs on: a tenant
+                            // paying its own Anthropic bill is exempt just like a Gemini one
                             def lc = ec.entity.find('growerp.general.LlmConfig')
                                 .condition('ownerPartyId', ownerPartyId)
-                                .condition('llmProvider', 'gemini').one()
+                                .condition('llmProvider', cfg?.llmProvider ?: 'gemini').one()
                             if (lc?.apiKey) hasCustomLlm = true
                         }
                         if (!hasCustomLlm && ownerPartyId) {
