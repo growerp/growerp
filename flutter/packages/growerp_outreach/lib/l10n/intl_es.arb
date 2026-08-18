@@ -104,5 +104,21 @@
   "guideStep9Desc": "Mueva a quienes responden al CRM como leads",
   "guideOptional": "Opcional",
   "guideNotAvailable": "No disponible en esta aplicación",
-  "guideBackToGuide": "Volver a la guía"
+  "guideBackToGuide": "Volver a la guía",
+  "guideStatusSystemOk": "Servidor de correo y clave de IA configurados",
+  "guideStatusSystemNoSmtp": "Clave de IA definida, falta el servidor de correo (SMTP)",
+  "guideStatusSystemNoLlm": "Servidor de correo definido, falta la clave de IA",
+  "guideStatusSystemNothing": "Faltan el servidor de correo (SMTP) y la clave de IA",
+  "guideStatusPlatforms": "{count} plataforma(s) habilitada(s)",
+  "guideStatusNoPlatforms": "Ninguna plataforma habilitada",
+  "guideStatusCampaigns": "{count} campaña(s) creada(s)",
+  "guideStatusNoCampaigns": "Ninguna campaña creada",
+  "guideStatusRecipients": "{count} mensaje(s) de destinatario preparados",
+  "guideStatusNoRecipients": "Ningún destinatario añadido",
+  "guideStatusRunning": "{count} campaña(s) en curso",
+  "guideStatusNotRunning": "Ninguna campaña iniciada",
+  "guideStatusMessages": "{sent} enviados, {responded} respondidos",
+  "guideStatusNoMessages": "Ningún mensaje enviado",
+  "guideStatusOpened": "Marcado como hecho",
+  "guideStatusNotOpened": "Aún no abierto"
 }

@@ -418,5 +418,97 @@
   "guideBackToGuide": "Back to guide",
   "@guideBackToGuide": {
     "description": "Outreach setup guide: guideBackToGuide"
+  },
+  "guideStatusSystemOk": "Email server and AI key configured",
+  "@guideStatusSystemOk": {
+    "description": "Outreach setup guide: guideStatusSystemOk"
+  },
+  "guideStatusSystemNoSmtp": "AI key set, email server (SMTP) missing",
+  "@guideStatusSystemNoSmtp": {
+    "description": "Outreach setup guide: guideStatusSystemNoSmtp"
+  },
+  "guideStatusSystemNoLlm": "Email server set, AI key missing",
+  "@guideStatusSystemNoLlm": {
+    "description": "Outreach setup guide: guideStatusSystemNoLlm"
+  },
+  "guideStatusSystemNothing": "Email server (SMTP) and AI key still missing",
+  "@guideStatusSystemNothing": {
+    "description": "Outreach setup guide: guideStatusSystemNothing"
+  },
+  "guideStatusPlatforms": "{count} platform(s) enabled",
+  "@guideStatusPlatforms": {
+    "description": "Outreach setup guide: guideStatusPlatforms",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "guideStatusNoPlatforms": "No platform enabled yet",
+  "@guideStatusNoPlatforms": {
+    "description": "Outreach setup guide: guideStatusNoPlatforms"
+  },
+  "guideStatusCampaigns": "{count} campaign(s) created",
+  "@guideStatusCampaigns": {
+    "description": "Outreach setup guide: guideStatusCampaigns",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "guideStatusNoCampaigns": "No campaign created yet",
+  "@guideStatusNoCampaigns": {
+    "description": "Outreach setup guide: guideStatusNoCampaigns"
+  },
+  "guideStatusRecipients": "{count} recipient message(s) prepared",
+  "@guideStatusRecipients": {
+    "description": "Outreach setup guide: guideStatusRecipients",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "guideStatusNoRecipients": "No recipients added yet",
+  "@guideStatusNoRecipients": {
+    "description": "Outreach setup guide: guideStatusNoRecipients"
+  },
+  "guideStatusRunning": "{count} campaign(s) running",
+  "@guideStatusRunning": {
+    "description": "Outreach setup guide: guideStatusRunning",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "guideStatusNotRunning": "No campaign started yet",
+  "@guideStatusNotRunning": {
+    "description": "Outreach setup guide: guideStatusNotRunning"
+  },
+  "guideStatusMessages": "{sent} sent, {responded} responded",
+  "@guideStatusMessages": {
+    "description": "Outreach setup guide: guideStatusMessages",
+    "placeholders": {
+      "sent": {
+        "type": "int"
+      },
+      "responded": {
+        "type": "int"
+      }
+    }
+  },
+  "guideStatusNoMessages": "No message sent yet",
+  "@guideStatusNoMessages": {
+    "description": "Outreach setup guide: guideStatusNoMessages"
+  },
+  "guideStatusOpened": "Marked as done",
+  "@guideStatusOpened": {
+    "description": "Outreach setup guide: guideStatusOpened"
+  },
+  "guideStatusNotOpened": "Not opened yet",
+  "@guideStatusNotOpened": {
+    "description": "Outreach setup guide: guideStatusNotOpened"
   }
 }

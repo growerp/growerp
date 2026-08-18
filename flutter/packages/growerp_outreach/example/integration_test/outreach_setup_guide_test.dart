@@ -59,20 +59,18 @@ void main() {
     expect(find.byKey(const Key('guideStep1')), findsOneWidget,
         reason: 'platform step should be present');
 
-    // The last step is reachable by scrolling
-    await CommonTest.dragUntil(tester, key: 'guideStep8');
-    expect(find.byKey(const Key('guideStep8')), findsOneWidget,
-        reason: 'last guide step should be reachable');
+    // Every step tells what is missing or what its current state is
+    expect(find.byKey(const Key('guideStatus1')), findsOneWidget,
+        reason: 'platform step should show a status line');
 
     // Tapping the platform step shows the platform list inside the app frame
-    await CommonTest.dragUntil(tester, key: 'guideStep1');
     await CommonTest.tapByKey(tester, 'guideStep1');
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
     await CommonTest.checkWidgetKey(tester, 'guideStepPage');
     await CommonTest.checkWidgetKey(tester, 'PlatformConfigListScreen');
 
-    // The back bar returns to the guide, which reloads its state:
-    // no platform enabled yet, so the step is still unchecked
+    // The back bar returns to the guide, which reloads its state: no platform
+    // is enabled, so the step with a live check is not marked done
     await CommonTest.tapByKey(tester, 'backToGuide');
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
     await CommonTest.checkWidgetKey(tester, 'OutreachSetupGuide');
@@ -84,6 +82,29 @@ void main() {
       findsNothing,
       reason: 'platform step should not be marked done without a platform',
     );
+
+    // A step that cannot be checked from data is completed by opening it and
+    // stays completed after returning to the list
+    await CommonTest.dragUntil(tester, key: 'guideStep6');
+    await CommonTest.tapByKey(tester, 'guideStep6');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+    await CommonTest.checkWidgetKey(tester, 'guideStepPage');
+    await CommonTest.tapByKey(tester, 'backToGuide');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+    await CommonTest.dragUntil(tester, key: 'guideStep6');
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('guideStep6')),
+        matching: find.byIcon(Icons.check),
+      ),
+      findsOneWidget,
+      reason: 'opened step should be marked as done',
+    );
+
+    // The last step is reachable by scrolling
+    await CommonTest.dragUntil(tester, key: 'guideStep8');
+    expect(find.byKey(const Key('guideStep8')), findsOneWidget,
+        reason: 'last guide step should be reachable');
 
     await CommonTest.logout(tester);
   });

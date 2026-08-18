@@ -12,6 +12,8 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -28,24 +30,32 @@ import '../bloc/platform_config_bloc.dart';
 /// One step in the outreach setup guide.
 class _GuideStep {
   const _GuideStep({
+    required this.id,
     required this.icon,
     required this.title,
     required this.description,
+    required this.status,
     this.targetWidgetName,
     this.optional = false,
-    this.done,
+    this.checked,
   });
 
+  /// Stable id, used to remember steps the user completed by hand.
+  final String id;
   final IconData icon;
   final String title;
   final String description;
+
+  /// What is missing, or what the current state of this step is.
+  final String status;
 
   /// Widget name of the destination screen, looked up in the app menu.
   final String? targetWidgetName;
   final bool optional;
 
-  /// null when the step has no live completion check.
-  final bool? done;
+  /// Live completion check, null when the step cannot be checked from data
+  /// and is completed by opening it instead.
+  final bool? checked;
 }
 
 /// Step-by-step guide showing how to run outreach, with live completion
@@ -62,7 +72,12 @@ class OutreachSetupGuideScreen extends StatefulWidget {
 }
 
 class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
-  bool _systemConfigured = false;
+  bool _smtpConfigured = false;
+  bool _llmConfigured = false;
+
+  /// Ids of the steps without a live check that the user opened, kept on this
+  /// device so the guide shows the same progress on the next visit.
+  Set<String> _completed = {};
 
   /// Step whose screen is currently shown instead of the step list.
   _GuideStep? _openStep;
@@ -78,6 +93,7 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
     context.read<PlatformConfigBloc>().add(const PlatformConfigFetch());
     context.read<OutreachCampaignBloc>().add(const OutreachCampaignFetch());
     context.read<OutreachMessageBloc>().add(const OutreachMessageLoad());
+    _loadCompleted();
     _fetchSystemSettings();
   }
 
@@ -86,8 +102,8 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
       final settings = await context.read<RestClient>().getSystemSettings();
       if (!mounted) return;
       setState(() {
-        _systemConfigured = (settings.smtpHost ?? '').isNotEmpty &&
-            settings.llmConfigs.isNotEmpty;
+        _smtpConfigured = (settings.smtpHost ?? '').isNotEmpty;
+        _llmConfigured = settings.llmConfigs.isNotEmpty;
       });
     } catch (_) {
       // leave the step unchecked when the settings cannot be read
@@ -119,9 +135,36 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
     );
   }
 
+  /// Storage key of the completed steps, per company and user.
+  String get _completedKey {
+    final authenticate = context.read<AuthBloc>().state.authenticate;
+    return 'outreachGuide_${authenticate?.company?.partyId ?? ''}'
+        '_${authenticate?.user?.userId ?? ''}';
+  }
+
+  Future<void> _loadCompleted() async {
+    final stored = await PersistFunctions.getKeyValue(_completedKey);
+    if (!mounted || stored == null) return;
+    setState(
+      () => _completed = (jsonDecode(stored) as List).cast<String>().toSet(),
+    );
+  }
+
   /// Shows the screen of [step] in place of the step list, keeping the app
-  /// frame (navigation rail / drawer, app bar) of the guide.
-  void _showStep(_GuideStep step) => setState(() => _openStep = step);
+  /// frame (navigation rail / drawer, app bar) of the guide. Steps without a
+  /// live check count as completed once they have been opened.
+  void _showStep(_GuideStep step) {
+    setState(() {
+      _openStep = step;
+      if (step.checked == null) _completed.add(step.id);
+    });
+    if (step.checked == null) {
+      PersistFunctions.persistKeyValue(
+        _completedKey,
+        jsonEncode(_completed.toList()),
+      );
+    }
+  }
 
   /// Returns to the step list and refreshes the completion state.
   void _backToGuide() {
@@ -135,76 +178,120 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
     OutreachCampaignState campaignState,
     OutreachMessageState messageState,
   ) {
+    final enabledPlatforms = platformState.configs.where((c) => c.isEnabled);
+    final campaigns = campaignState.campaigns;
+    final running = campaigns.where(
+      (c) =>
+          c.status == 'MKTG_CAMP_INPROGRESS' || c.status == 'MKTG_CAMP_APPROVED',
+    );
+    final messages = messageState.messages;
+    final sent = messages.where((m) => m.status == 'SENT');
+    final responded = messages.where((m) => m.status == 'RESPONDED');
+
     return [
       _GuideStep(
+        id: 'systemSetup',
         icon: Icons.settings,
         title: localizations.guideStep1Title,
         description: localizations.guideStep1Desc,
         targetWidgetName: 'SystemSetupDialog',
-        done: _systemConfigured,
+        checked: _smtpConfigured && _llmConfigured,
+        status: _smtpConfigured && _llmConfigured
+            ? localizations.guideStatusSystemOk
+            : _llmConfigured
+                ? localizations.guideStatusSystemNoSmtp
+                : _smtpConfigured
+                    ? localizations.guideStatusSystemNoLlm
+                    : localizations.guideStatusSystemNothing,
       ),
       _GuideStep(
+        id: 'platforms',
         icon: Icons.public,
         title: localizations.guideStep2Title,
         description: localizations.guideStep2Desc,
         targetWidgetName: 'PlatformConfigListScreen',
-        done: platformState.configs.any((c) => c.isEnabled),
+        checked: enabledPlatforms.isNotEmpty,
+        status: enabledPlatforms.isEmpty
+            ? localizations.guideStatusNoPlatforms
+            : localizations.guideStatusPlatforms(enabledPlatforms.length),
       ),
       _GuideStep(
+        id: 'audience',
         icon: Icons.people,
         title: localizations.guideStep3Title,
         description: localizations.guideStep3Desc,
         targetWidgetName: 'PersonaList',
         optional: true,
+        status: _statusOfOpened('audience', localizations),
       ),
       _GuideStep(
+        id: 'campaign',
         icon: Icons.campaign,
         title: localizations.guideStep4Title,
         description: localizations.guideStep4Desc,
         targetWidgetName: 'CampaignListScreen',
-        done: campaignState.campaigns.isNotEmpty,
+        checked: campaigns.isNotEmpty,
+        status: campaigns.isEmpty
+            ? localizations.guideStatusNoCampaigns
+            : localizations.guideStatusCampaigns(campaigns.length),
       ),
       _GuideStep(
+        id: 'recipients',
         icon: Icons.group_add,
         title: localizations.guideStep5Title,
         description: localizations.guideStep5Desc,
         targetWidgetName: 'CampaignListScreen',
-        done: messageState.messages.isNotEmpty,
+        checked: messages.isNotEmpty,
+        status: messages.isEmpty
+            ? localizations.guideStatusNoRecipients
+            : localizations.guideStatusRecipients(messages.length),
       ),
       _GuideStep(
+        id: 'automation',
         icon: Icons.play_circle_outline,
         title: localizations.guideStep6Title,
         description: localizations.guideStep6Desc,
         targetWidgetName: 'AutomationScreen',
-        done: campaignState.campaigns.any(
-          (c) =>
-              c.status == 'MKTG_CAMP_INPROGRESS' ||
-              c.status == 'MKTG_CAMP_APPROVED',
-        ),
+        checked: running.isNotEmpty,
+        status: running.isEmpty
+            ? localizations.guideStatusNotRunning
+            : localizations.guideStatusRunning(running.length),
       ),
       _GuideStep(
+        id: 'sendQueue',
         icon: Icons.send,
         title: localizations.guideStep7Title,
         description: localizations.guideStep7Desc,
         targetWidgetName: 'LinkedInSendQueueScreen',
+        status: _statusOfOpened('sendQueue', localizations),
       ),
       _GuideStep(
+        id: 'responses',
         icon: Icons.message,
         title: localizations.guideStep8Title,
         description: localizations.guideStep8Desc,
         targetWidgetName: 'OutreachMessageList',
-        done: messageState.messages.any(
-          (m) => m.status == 'SENT' || m.status == 'RESPONDED',
-        ),
+        checked: sent.isNotEmpty || responded.isNotEmpty,
+        status: sent.isEmpty && responded.isEmpty
+            ? localizations.guideStatusNoMessages
+            : localizations.guideStatusMessages(sent.length, responded.length),
       ),
       _GuideStep(
+        id: 'leads',
         icon: Icons.person_add,
         title: localizations.guideStep9Title,
         description: localizations.guideStep9Desc,
         targetWidgetName: 'UserListLead',
+        status: _statusOfOpened('leads', localizations),
       ),
     ];
   }
+
+  /// Status of a step that is completed by opening it.
+  String _statusOfOpened(String id, OutreachLocalizations localizations) =>
+      _completed.contains(id)
+          ? localizations.guideStatusOpened
+          : localizations.guideStatusNotOpened;
 
   @override
   Widget build(BuildContext context) {
@@ -312,7 +399,7 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
   }) {
     final theme = Theme.of(context);
     final available = _isAvailable(step.targetWidgetName);
-    final done = step.done == true;
+    final done = step.checked ?? _completed.contains(step.id);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -370,6 +457,14 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
                         Text(
                           step.description,
                           style: theme.textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          step.status,
+                          key: Key('guideStatus$index'),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: done ? Colors.green : Colors.orange,
+                          ),
                         ),
                       ],
                     ),

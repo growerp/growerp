@@ -40,6 +40,11 @@ class PersistFunctions {
     await prefs.setString(key, value);
   }
 
+  static Future<String?> getKeyValue(String key) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString(key);
+  }
+
   static Future<void> removeKey(String key) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove(key);

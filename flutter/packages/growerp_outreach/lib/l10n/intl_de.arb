@@ -104,5 +104,21 @@
   "guideStep9Desc": "Antwortende als Leads ins CRM übernehmen",
   "guideOptional": "Optional",
   "guideNotAvailable": "In dieser App nicht verfügbar",
-  "guideBackToGuide": "Zurück zur Anleitung"
+  "guideBackToGuide": "Zurück zur Anleitung",
+  "guideStatusSystemOk": "E-Mail-Server und KI-Schlüssel konfiguriert",
+  "guideStatusSystemNoSmtp": "KI-Schlüssel gesetzt, E-Mail-Server (SMTP) fehlt",
+  "guideStatusSystemNoLlm": "E-Mail-Server gesetzt, KI-Schlüssel fehlt",
+  "guideStatusSystemNothing": "E-Mail-Server (SMTP) und KI-Schlüssel fehlen noch",
+  "guideStatusPlatforms": "{count} Plattform(en) aktiviert",
+  "guideStatusNoPlatforms": "Noch keine Plattform aktiviert",
+  "guideStatusCampaigns": "{count} Kampagne(n) erstellt",
+  "guideStatusNoCampaigns": "Noch keine Kampagne erstellt",
+  "guideStatusRecipients": "{count} Empfängernachricht(en) vorbereitet",
+  "guideStatusNoRecipients": "Noch keine Empfänger hinzugefügt",
+  "guideStatusRunning": "{count} Kampagne(n) laufen",
+  "guideStatusNotRunning": "Noch keine Kampagne gestartet",
+  "guideStatusMessages": "{sent} gesendet, {responded} beantwortet",
+  "guideStatusNoMessages": "Noch keine Nachricht gesendet",
+  "guideStatusOpened": "Als erledigt markiert",
+  "guideStatusNotOpened": "Noch nicht geöffnet"
 }

@@ -104,5 +104,21 @@
   "guideStep9Desc": "Zet respondenten als leads in het CRM",
   "guideOptional": "Optioneel",
   "guideNotAvailable": "Niet beschikbaar in deze app",
-  "guideBackToGuide": "Terug naar de gids"
+  "guideBackToGuide": "Terug naar de gids",
+  "guideStatusSystemOk": "E-mailserver en AI-sleutel ingesteld",
+  "guideStatusSystemNoSmtp": "AI-sleutel ingesteld, e-mailserver (SMTP) ontbreekt",
+  "guideStatusSystemNoLlm": "E-mailserver ingesteld, AI-sleutel ontbreekt",
+  "guideStatusSystemNothing": "E-mailserver (SMTP) en AI-sleutel ontbreken nog",
+  "guideStatusPlatforms": "{count} platform(s) ingeschakeld",
+  "guideStatusNoPlatforms": "Nog geen platform ingeschakeld",
+  "guideStatusCampaigns": "{count} campagne(s) aangemaakt",
+  "guideStatusNoCampaigns": "Nog geen campagne aangemaakt",
+  "guideStatusRecipients": "{count} ontvangerbericht(en) klaargezet",
+  "guideStatusNoRecipients": "Nog geen ontvangers toegevoegd",
+  "guideStatusRunning": "{count} campagne(s) actief",
+  "guideStatusNotRunning": "Nog geen campagne gestart",
+  "guideStatusMessages": "{sent} verzonden, {responded} beantwoord",
+  "guideStatusNoMessages": "Nog geen bericht verzonden",
+  "guideStatusOpened": "Gemarkeerd als gereed",
+  "guideStatusNotOpened": "Nog niet geopend"
 }

@@ -103,5 +103,21 @@
   "guideStep9Desc": "ย้ายผู้ตอบกลับเข้า CRM เป็นลีด",
   "guideOptional": "ไม่บังคับ",
   "guideNotAvailable": "ไม่มีในแอปนี้",
-  "guideBackToGuide": "กลับไปที่คู่มือ"
+  "guideBackToGuide": "กลับไปที่คู่มือ",
+  "guideStatusSystemOk": "ตั้งค่าเซิร์ฟเวอร์อีเมลและคีย์ AI แล้ว",
+  "guideStatusSystemNoSmtp": "ตั้งคีย์ AI แล้ว ยังไม่มีเซิร์ฟเวอร์อีเมล (SMTP)",
+  "guideStatusSystemNoLlm": "ตั้งเซิร์ฟเวอร์อีเมลแล้ว ยังไม่มีคีย์ AI",
+  "guideStatusSystemNothing": "ยังไม่มีเซิร์ฟเวอร์อีเมล (SMTP) และคีย์ AI",
+  "guideStatusPlatforms": "เปิดใช้งาน {count} แพลตฟอร์ม",
+  "guideStatusNoPlatforms": "ยังไม่ได้เปิดใช้งานแพลตฟอร์ม",
+  "guideStatusCampaigns": "สร้างแคมเปญแล้ว {count} รายการ",
+  "guideStatusNoCampaigns": "ยังไม่ได้สร้างแคมเปญ",
+  "guideStatusRecipients": "เตรียมข้อความผู้รับแล้ว {count} รายการ",
+  "guideStatusNoRecipients": "ยังไม่ได้เพิ่มผู้รับ",
+  "guideStatusRunning": "แคมเปญกำลังทำงาน {count} รายการ",
+  "guideStatusNotRunning": "ยังไม่ได้เริ่มแคมเปญ",
+  "guideStatusMessages": "ส่งแล้ว {sent} ตอบกลับ {responded}",
+  "guideStatusNoMessages": "ยังไม่ได้ส่งข้อความ",
+  "guideStatusOpened": "ทำเครื่องหมายว่าเสร็จแล้ว",
+  "guideStatusNotOpened": "ยังไม่ได้เปิด"
 }

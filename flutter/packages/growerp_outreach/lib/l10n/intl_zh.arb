@@ -104,5 +104,21 @@
   "guideStep9Desc": "将回复者作为线索移入 CRM",
   "guideOptional": "可选",
   "guideNotAvailable": "此应用中不可用",
-  "guideBackToGuide": "返回指南"
+  "guideBackToGuide": "返回指南",
+  "guideStatusSystemOk": "已配置邮件服务器和 AI 密钥",
+  "guideStatusSystemNoSmtp": "已设置 AI 密钥，缺少邮件服务器 (SMTP)",
+  "guideStatusSystemNoLlm": "已设置邮件服务器，缺少 AI 密钥",
+  "guideStatusSystemNothing": "仍缺少邮件服务器 (SMTP) 和 AI 密钥",
+  "guideStatusPlatforms": "已启用 {count} 个平台",
+  "guideStatusNoPlatforms": "尚未启用平台",
+  "guideStatusCampaigns": "已创建 {count} 个营销活动",
+  "guideStatusNoCampaigns": "尚未创建营销活动",
+  "guideStatusRecipients": "已准备 {count} 条收件人消息",
+  "guideStatusNoRecipients": "尚未添加收件人",
+  "guideStatusRunning": "{count} 个营销活动正在运行",
+  "guideStatusNotRunning": "尚未启动营销活动",
+  "guideStatusMessages": "已发送 {sent} 条，已回复 {responded} 条",
+  "guideStatusNoMessages": "尚未发送消息",
+  "guideStatusOpened": "已标记为完成",
+  "guideStatusNotOpened": "尚未打开"
 }
