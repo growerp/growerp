@@ -51,7 +51,20 @@ ships no OpenAI `BaseLlm` — still lands in the side `providerRegistry` with no
 runner, and the dialog warns that such an agent registers but will not answer.
 Key resolution (`resolveTenantKey`, `resolveTenantLlm`, `ensureInteractiveDefault`)
 is parameterised by provider and tries `SUPPORTED_PROVIDERS` in order, so a tenant
-holding only an Anthropic key gets a working interactive agent. In `AdkManager.initConfig()`
+holding only an Anthropic key gets a working interactive agent.
+
+**Embeddings are a separate capability.** Knowledge search (`AdkKnowledgeServices`)
+needs an embedding model, and Anthropic has no embeddings API — so
+`get#TenantEmbedKey` resolves a `gemini` key first, then `openai`, ignoring the
+tenant's chat provider entirely. `embed#Text` calls Gemini `embedContent` or the
+OpenAI `/v1/embeddings` endpoint accordingly (`GEMINI_EMBED_MODEL` /
+`OPENAI_EMBED_MODEL` override the model). Vectors from different models are not
+comparable, so `AdkKnowledgeChunk.embeddingModel` is stored per chunk and
+`search#AdkKnowledge` only scores chunks embedded by the same model as the query —
+switching embedding provider means re-ingesting the documents, and the log says so
+when an index is left stranded. A tenant with only an Anthropic key gets working
+chat and content generation but no knowledge search until a Gemini or OpenAI key
+is added. In `AdkManager.initConfig()`
 (`AdkManager.groovy:200-215`), any non-`gemini` value is stored in a side
 `providerRegistry` map and the function returns without building an agent — the
 log line even says so: *"HTTP routing not yet implemented"*. Setting `llmProvider`
@@ -216,7 +229,8 @@ call Gemini regardless of `llmMonthlyTokenLimit`.
 | `GEMINI_API_KEY` | `AdkManager.groovy`; `GeminiAiUtil.resolveApiKey` | Gemini key fallback for both ADK and content-gen paths |
 | `ANTHROPIC_API_KEY` | `GeminiAiUtil.resolveApiKey`; `AdkManager.envKeyFor` | Anthropic key fallback when the tenant has no `LlmConfig` row |
 | `ANTHROPIC_MODEL` | `AdkManager.defaultModelFor` | Env-level model override for Anthropic ADK agents |
-| `OPENAI_API_KEY` | `GeminiAiUtil.resolveApiKey` | OpenAI key fallback when the tenant has no `LlmConfig` row (content-gen only; the ADK runtime cannot run OpenAI) |
+| `OPENAI_API_KEY` | `GeminiAiUtil.resolveApiKey`; `get#TenantEmbedKey` | OpenAI key fallback when the tenant has no `LlmConfig` row (content-gen and embeddings; the ADK agent runtime cannot run OpenAI) |
+| `GEMINI_EMBED_MODEL` / `OPENAI_EMBED_MODEL` | `AdkKnowledgeServices.embed#Text` | Embedding model override; defaults `gemini-embedding-001` / `text-embedding-3-small` |
 | `GEMINI_MODEL` | `AdkManager.groovy:230`; `GeminiAiUtil.resolveModelConfig` | Env-level model override, below tenant/system-default config in precedence |
 
 **Entities**

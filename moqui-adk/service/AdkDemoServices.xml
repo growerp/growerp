@@ -89,10 +89,11 @@
                 <script>org.moqui.adk.AdkManager.reloadConfig(cid as String)</script>
             </iterate>
 
-            <!-- 3. Ingest demo policy docs for the Support specialist's RAG — only when a
-                 Gemini key is available (embeddings need it). Failures here must never break
-                 tenant setup, so each ingest is best-effort. -->
-            <service-call name="AdkKnowledgeServices.get#TenantLlmKey" out-map="keyOut"
+            <!-- 3. Ingest demo policy docs for the Support specialist's RAG — only when an
+                 embedding-capable key is available (gemini or openai; Anthropic has no
+                 embeddings API). Failures here must never break tenant setup, so each ingest
+                 is best-effort. -->
+            <service-call name="AdkKnowledgeServices.get#TenantEmbedKey" out-map="keyOut"
                 in-map="[ownerPartyId: ownerPartyId]"/>
             <if condition="keyOut.apiKey">
                 <set field="demoDocs" from="[

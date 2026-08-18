@@ -6,25 +6,53 @@
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
 
-    <!-- Resolve the tenant's Gemini API key (per-owner LlmConfig, else env). -->
-    <service verb="get" noun="TenantLlmKey" authenticate="false">
+    <!-- Resolve a key for a provider that can produce EMBEDDINGS (per-owner LlmConfig, else
+         env). Anthropic has no embeddings API, so only gemini and openai qualify however the
+         tenant's chat/content models are configured. First provider with a key wins. -->
+    <service verb="get" noun="TenantEmbedKey" authenticate="false">
         <in-parameters><parameter name="ownerPartyId"/></in-parameters>
-        <out-parameters><parameter name="apiKey"/></out-parameters>
+        <out-parameters>
+            <parameter name="apiKey"/>
+            <parameter name="embedProvider"/>
+        </out-parameters>
         <actions>
             <entity-find-one entity-name="growerp.general.LlmConfig" value-field="llm">
                 <field-map field-name="ownerPartyId"/>
                 <field-map field-name="llmProvider" value="gemini"/>
             </entity-find-one>
-            <set field="apiKey" from="llm?.apiKey ?: System.getenv('GOOGLE_API_KEY') ?: System.getProperty('GOOGLE_API_KEY')"/>
+            <if condition="llm?.apiKey">
+                <set field="apiKey" from="llm.apiKey"/>
+                <set field="embedProvider" value="gemini"/>
+                <return/>
+            </if>
+            <entity-find-one entity-name="growerp.general.LlmConfig" value-field="openaiLlm">
+                <field-map field-name="ownerPartyId"/>
+                <field-map field-name="llmProvider" value="openai"/>
+            </entity-find-one>
+            <if condition="openaiLlm?.apiKey">
+                <set field="apiKey" from="openaiLlm.apiKey"/>
+                <set field="embedProvider" value="openai"/>
+                <return/>
+            </if>
+            <set field="apiKey" from="System.getenv('GOOGLE_API_KEY') ?: System.getProperty('GOOGLE_API_KEY')"/>
+            <if condition="apiKey">
+                <set field="embedProvider" value="gemini"/>
+                <return/>
+            </if>
+            <set field="apiKey" from="System.getenv('OPENAI_API_KEY')"/>
+            <if condition="apiKey"><set field="embedProvider" value="openai"/></if>
         </actions>
     </service>
 
-    <!-- Embed one text with Gemini text-embedding-004. Returns a List&lt;Double&gt;. -->
+    <!-- Embed one text with the tenant's embedding provider. Returns a List&lt;Double&gt; and
+         the model that produced it — chunks are only comparable to a query embedded by the
+         SAME model, so the model name is stored with every chunk and matched on search. -->
     <service verb="embed" noun="Text" authenticate="false" transaction-timeout="60">
         <in-parameters>
             <parameter name="text" required="true"/>
             <parameter name="ownerPartyId"/>
             <parameter name="apiKey"/>
+            <parameter name="embedProvider"/>
         </in-parameters>
         <out-parameters>
             <parameter name="embedding" type="List"/>
@@ -32,32 +60,45 @@
         </out-parameters>
         <actions>
             <if condition="!apiKey">
-                <service-call name="AdkKnowledgeServices.get#TenantLlmKey"
+                <service-call name="AdkKnowledgeServices.get#TenantEmbedKey"
                     in-map="[ownerPartyId: ownerPartyId]" out-map="context"/>
             </if>
-            <if condition="!apiKey"><return error="true" message="No Gemini API key configured for this company."/></if>
-            <!-- Embedding model (overridable via env). gemini-embedding-001 is the current
-                 GA model; older text-embedding-004 is rejected by some keys/API versions. -->
-            <set field="model" from="System.getenv('GEMINI_EMBED_MODEL') ?: System.getProperty('GEMINI_EMBED_MODEL') ?: 'gemini-embedding-001'"/>
+            <if condition="!apiKey">
+                <return error="true" message="No embedding-capable API key configured for this company. Add a gemini or openai key in System Setup (Anthropic has no embeddings API)."/>
+            </if>
+            <set field="embedProvider" from="embedProvider ?: 'gemini'"/>
             <script><![CDATA[
                 import groovy.json.JsonOutput
                 import groovy.json.JsonSlurper
-                String url = "https://generativelanguage.googleapis.com/v1beta/models/${model}:embedContent?key=${apiKey}"
-                String body = JsonOutput.toJson([content: [parts: [[text: text]]]])
+                String url, body
+                if (embedProvider == 'openai') {
+                    model = System.getenv('OPENAI_EMBED_MODEL') ?: System.getProperty('OPENAI_EMBED_MODEL') ?:
+                        'text-embedding-3-small'
+                    url = 'https://api.openai.com/v1/embeddings'
+                    body = JsonOutput.toJson([model: model, input: text])
+                } else {
+                    // gemini-embedding-001 is the current GA model; older text-embedding-004 is
+                    // rejected by some keys/API versions.
+                    model = System.getenv('GEMINI_EMBED_MODEL') ?: System.getProperty('GEMINI_EMBED_MODEL') ?:
+                        'gemini-embedding-001'
+                    url = "https://generativelanguage.googleapis.com/v1beta/models/${model}:embedContent?key=${apiKey}"
+                    body = JsonOutput.toJson([content: [parts: [[text: text]]]])
+                }
                 HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection()
                 conn.setRequestMethod('POST')
                 conn.setRequestProperty('Content-Type', 'application/json')
+                if (embedProvider == 'openai') conn.setRequestProperty('Authorization', "Bearer ${apiKey}")
                 conn.setConnectTimeout(15000); conn.setReadTimeout(30000)
                 conn.doOutput = true
                 conn.outputStream.withWriter('UTF-8') { it.write(body) }
                 int code = conn.responseCode
                 String resp = ((code >= 200 && code < 300) ? conn.inputStream : conn.errorStream)?.getText('UTF-8')
                 if (code < 200 || code >= 300) {
-                    ec.message.addError("Embedding request failed (${code}): ${resp?.take(300)}")
+                    ec.message.addError("Embedding request failed (${embedProvider}, ${code}): ${resp?.take(300)}")
                     return
                 }
                 def parsed = new JsonSlurper().parseText(resp)
-                embedding = parsed?.embedding?.values
+                embedding = (embedProvider == 'openai') ? parsed?.data?.getAt(0)?.embedding : parsed?.embedding?.values
                 if (embedding == null) ec.message.addError("No embedding in response: ${resp?.take(200)}")
             ]]></script>
         </actions>
@@ -264,9 +305,20 @@
         <actions>
             <service-call name="AdkKnowledgeServices.embed#Text"
                 in-map="[text: query, ownerPartyId: ownerPartyId]" out-map="qEmbed"/>
+            <!-- vectors from different embedding models are not comparable, so the index is
+                 searched with the model that embedded the query -->
             <entity-find entity-name="moqui.adk.AdkKnowledgeChunk" list="chunkList">
                 <econdition field-name="ownerPartyId"/>
+                <econdition field-name="embeddingModel" from="qEmbed.model"/>
             </entity-find>
+            <if condition="!chunkList">
+                <entity-find entity-name="moqui.adk.AdkKnowledgeChunk" list="otherModelList">
+                    <econdition field-name="ownerPartyId"/>
+                </entity-find>
+                <if condition="otherModelList">
+                    <log level="warn" message="Knowledge search for ${ownerPartyId} found ${otherModelList.size()} chunks, none embedded with ${qEmbed.model} — re-ingest the documents to rebuild the index with the current embedding model."/>
+                </if>
+            </if>
             <script><![CDATA[
                 import groovy.json.JsonSlurper
                 def q = qEmbed.embedding?.collect { (it as Number).doubleValue() }
@@ -314,35 +366,26 @@
     </service>
 
     <!-- ── Memory ──────────────────────────────────────────────────────────────
-         generate#Text — one-shot Gemini generateContent (used by summarisation). -->
+         generate#Text — one-shot generation (used by summarisation). Goes through the shared
+         GeminiAiUtil helper, so it follows the tenant's configured provider and model
+         (gemini, anthropic or openai) instead of always calling Gemini. -->
     <service verb="generate" noun="Text" authenticate="false" transaction-timeout="120">
         <in-parameters>
             <parameter name="prompt" required="true"/>
             <parameter name="ownerPartyId"/>
             <parameter name="apiKey"/>
-            <parameter name="model" default-value="gemini-3.5-flash-lite"/>
+            <parameter name="model"/>
         </in-parameters>
         <out-parameters><parameter name="text"/></out-parameters>
         <actions>
-            <if condition="!apiKey">
-                <service-call name="AdkKnowledgeServices.get#TenantLlmKey"
-                    in-map="[ownerPartyId: ownerPartyId]" out-map="context"/>
-            </if>
-            <if condition="!apiKey"><return error="true" message="No Gemini API key configured."/></if>
             <script><![CDATA[
-                import groovy.json.JsonOutput
-                import groovy.json.JsonSlurper
-                String url = "https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}"
-                String body = JsonOutput.toJson([contents: [[parts: [[text: prompt]]]]])
-                HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection()
-                conn.setRequestMethod('POST'); conn.setRequestProperty('Content-Type', 'application/json')
-                conn.setConnectTimeout(15000); conn.setReadTimeout(60000); conn.doOutput = true
-                conn.outputStream.withWriter('UTF-8') { it.write(body) }
-                int code = conn.responseCode
-                String resp = ((code >= 200 && code < 300) ? conn.inputStream : conn.errorStream)?.getText('UTF-8')
-                if (code < 200 || code >= 300) { ec.message.addError("generateContent failed (${code}): ${resp?.take(300)}"); return }
-                def p = new JsonSlurper().parseText(resp)
-                text = p?.candidates?.getAt(0)?.content?.parts?.getAt(0)?.text ?: ''
+                def aiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
+                try {
+                    text = aiUtil.callLlmApi(ec, prompt,
+                        [ownerPartyId: ownerPartyId, apiKey: apiKey, model: model, maxOutputTokens: 2048])
+                } catch (Exception e) {
+                    ec.message.addError("Text generation failed: ${e.message}")
+                }
             ]]></script>
         </actions>
     </service>
