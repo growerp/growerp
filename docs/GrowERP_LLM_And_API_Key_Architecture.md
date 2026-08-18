@@ -129,9 +129,15 @@ deliberate design.
 
 ## 4. Token limits — how they're set and enforced
 
-**Field:** `SystemSettings.llmSystemTokenLimit` (integer, per-tenant, monthly).
-Set via System Setup → "System LLM Monthly Token Limit"
-(`system_setup_dialog.dart:275`). Empty = unlimited.
+**Field:** `SystemDefault.llmMonthlyTokenLimit` (integer, GrowERP wide, monthly), on
+the single `defaultId='SYSTEM'` row. Set by system support only, in the Support App
+→ System Defaults (`support/lib/src/system_defaults/views/system_defaults_dialog.dart`,
+REST `SystemDefault`, service `update#SystemDefault` guarded by `check#SupportUser`).
+Empty or 0 = unlimited; seeded at 100000. The limit is applied *per tenant* — every
+tenant on the system key gets that many tokens per calendar month.
+
+Before Aug 2026 this lived on `SystemSettings.llmSystemTokenLimit`, which each tenant
+could edit for itself through System Setup — a cap the capped party could raise.
 
 **Who it applies to:** only tenants using the *shared system* Gemini key — i.e. no
 own key configured. Checked in `AdkGovernanceServices.xml` (`govern#AgentAction`,
@@ -150,7 +156,7 @@ applies (lines 121-146):
    cached counter).
 2. Sum `AdkActionLog.tokensTotal` for this tenant since that timestamp
    (`entity-find` iterator over all matching rows).
-3. If `totalUsed >= llmSystemTokenLimit` → `decision = 'blocked'`, message tells the
+3. If `totalUsed >= llmMonthlyTokenLimit` → `decision = 'blocked'`, message tells the
    agent/user to add their own API key.
 
 **Where the token counts come from:** `AdkManager.extractTokensFromEvents()`
@@ -168,7 +174,7 @@ close to their limit you'd sum the log yourself or wait for the block message.
 
 **Gap:** this quota only gates the ADK governance path. The backend content-gen
 scripts (`generate*WithAI.groovy`) have no token-quota check of any kind — they'll
-call Gemini regardless of `llmSystemTokenLimit`.
+call Gemini regardless of `llmMonthlyTokenLimit`.
 
 ---
 
@@ -187,7 +193,8 @@ call Gemini regardless of `llmSystemTokenLimit`.
 
 | Entity | PK | Key fields | Notes |
 |---|---|---|---|
-| `growerp.general.SystemSettings` | `ownerPartyId` | `geminiApiKey` (deprecated), `aiModelName`, `llmSystemTokenLimit` | Tenant-wide settings row |
+| `growerp.general.SystemSettings` | `ownerPartyId` | `geminiApiKey` (deprecated), `aiModelName` | Tenant-wide settings row |
+| `growerp.general.SystemDefault` | `defaultId` (`SYSTEM`) | `llmMonthlyTokenLimit` | GrowERP wide defaults; system support only |
 | `growerp.general.LlmConfig` | `ownerPartyId` + `llmProvider` | `apiKey` (encrypted) | Current per-tenant, per-provider key store |
 | `moqui.adk.AdkAgentConfig` | `adkAgentConfigId` | `ownerPartyId`, `modelName`, `apiKey`, `llmProvider` | One row per ADK agent; `apiKey`/`modelName` override the tenant default |
 | `moqui.adk.AdkActionLog` | `adkActionLogId` | `ownerPartyId`, `tokensIn`, `tokensOut`, `tokensTotal`, `decision` | Audit trail; source of truth for the monthly quota sum |

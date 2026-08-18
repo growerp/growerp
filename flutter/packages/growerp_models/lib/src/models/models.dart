@@ -36,6 +36,7 @@ export 'work_order_model.dart';
 export 'application_model.dart';
 export 'email_template_model.dart';
 export 'llm_config_model.dart';
+export 'system_default_model.dart';
 export 'system_settings_model.dart';
 export 'time_entry_model.dart';
 export 'time_entry_report_model.dart';

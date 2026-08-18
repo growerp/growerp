@@ -22,7 +22,7 @@ screens:
   - route: /owners         title: "Owners"
   - route: /restStatistics title: "Statistics"
 */
-// NOTE /websiteGenerator and /systemSetup are not walked here: both are restricted with
+// NOTE /websiteGenerator and /systemDefaults are not walked here: both are restricted with
 // userGroupsJson GROWERP_M_ADMIN, and display_menu_option._hasAccess hides them for the
 // SystemSupport account this test logs in with (it has no user group).
 

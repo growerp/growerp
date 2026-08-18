@@ -124,8 +124,13 @@
                             if (lc?.apiKey) hasCustomLlm = true
                         }
                         if (!hasCustomLlm && ownerPartyId) {
-                            def ss = ec.entity.find('growerp.general.SystemSettings').condition('ownerPartyId', ownerPartyId).one()
-                            if (ss?.llmSystemTokenLimit != null && ss.llmSystemTokenLimit > 0) {
+                            // GrowERP wide free allowance, maintained by system support in the
+                            // support app (System Defaults); 0/empty = unlimited
+                            def sysDefault = ec.entity.find('growerp.general.SystemDefault').condition('defaultId', 'SYSTEM').one()
+                            // no row at all (upgraded install, seed not loaded) → seed value;
+                            // a row with an empty/0 limit means unlimited
+                            def tokenLimit = sysDefault == null ? 100000 : (sysDefault.llmMonthlyTokenLimit ?: 0)
+                            if (tokenLimit > 0) {
                                 def cal = Calendar.getInstance()
                                 cal.set(Calendar.DAY_OF_MONTH, 1)
                                 cal.set(Calendar.HOUR_OF_DAY, 0)
@@ -144,9 +149,9 @@
                                 }
                                 iter.close()
                                 
-                                if (totalUsed >= ss.llmSystemTokenLimit) {
+                                if (totalUsed >= tokenLimit) {
                                     decision = 'blocked'
-                                    message = "System LLM token limit exceeded for this month (${totalUsed} >= ${ss.llmSystemTokenLimit}). Please add your own API Key."
+                                    message = "Free monthly LLM allowance used (${totalUsed} of ${tokenLimit} tokens). Please add your own API Key."
                                 }
                             }
                         }

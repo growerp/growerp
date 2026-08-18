@@ -257,6 +257,13 @@ abstract class RestClient {
   Future<SystemSettings> updateSystemSettings(
       @Body() Map<String, dynamic> systemSettings);
 
+  @GET("rest/s1/growerp/100/SystemDefault")
+  Future<SystemDefault> getSystemDefault();
+
+  @POST("rest/s1/growerp/100/SystemDefault")
+  Future<SystemDefault> updateSystemDefault(
+      @Body() Map<String, dynamic> systemDefault);
+
   // countries not used
   @GET("rest/s1/growerp/100/Countries")
   @Extra({'noApiKey': true})

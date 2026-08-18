@@ -303,7 +303,7 @@ a team's work reads as a tree.
       conflicting value supplied by the LLM ⇒ `blocked`.
    3. **Scope** — `readOnly` + write ⇒ blocked. `scoped` ⇒ match the allow-list globs.
    4. **Token budget** — if the company runs on the *system* LLM key, sum this month's
-      `tokensTotal`; over `SystemSettings.llmSystemTokenLimit` ⇒ blocked, with a "add your own API
+      `tokensTotal`; over `SystemDefault.llmMonthlyTokenLimit` ⇒ blocked, with a "add your own API
       key" message.
    5. **Write policy** — `block` ⇒ blocked, `approve` ⇒ `pending`.
 5. **An `AdkActionLog` row is always written**, whatever the decision. This is why blocked attempts

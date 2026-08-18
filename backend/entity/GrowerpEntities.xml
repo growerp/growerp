@@ -443,7 +443,6 @@ limitations under the License.
         <field name="mailPassword"  type="text-medium" encrypt="true" enable-audit-log="true"/>
         <field name="githubToken"      type="text-medium" encrypt="true" enable-audit-log="true"/>
         <field name="githubRepository" type="text-medium"/>
-        <field name="llmSystemTokenLimit" type="number-integer"/>
         <field name="aiModelName" type="text-short">
             <description>Tenant-wide default Gemini model for AI content generation (e.g.
                 gemini-3.5-flash-lite); empty uses the system default.</description>
@@ -456,6 +455,17 @@ limitations under the License.
         </field>
         <field name="touristTaxPerNight" type="currency-amount">
             <description>Hotel: lodging/tourist tax charged per room per night; 0/empty = none</description>
+        </field>
+    </entity>
+
+    <entity entity-name="SystemDefault" package="growerp.general"
+            table-name="GROWERP_SYSTEM_DEFAULT">
+        <description>GrowERP wide defaults, maintained by system support only, single
+            row with defaultId 'SYSTEM'.</description>
+        <field name="defaultId" type="id" is-pk="true"/>
+        <field name="llmMonthlyTokenLimit" type="number-integer">
+            <description>Max system LLM tokens a tenant without its own API key may use
+                per calendar month; 0/empty = unlimited</description>
         </field>
     </entity>
 

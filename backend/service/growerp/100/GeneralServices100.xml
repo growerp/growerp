@@ -2050,7 +2050,7 @@ limitations under the License.
                 <return/>
             </if>
             <set field="systemSettings" from="ss.getMap()"/>
-            <script>systemSettings.mailPassword = ss.mailPassword ? '****' : ''; systemSettings.githubToken = ss.githubToken ? '****' : ''; systemSettings.githubRepository = ss.githubRepository ?: ''; systemSettings.llmSystemTokenLimit = ss.llmSystemTokenLimit; systemSettings.googleClientSecret = ss.googleClientSecret ? '****' : ''; systemSettings.googleRefreshToken = ss.googleRefreshToken ? '****' : ''</script>
+            <script>systemSettings.mailPassword = ss.mailPassword ? '****' : ''; systemSettings.githubToken = ss.githubToken ? '****' : ''; systemSettings.githubRepository = ss.githubRepository ?: ''; systemSettings.googleClientSecret = ss.googleClientSecret ? '****' : ''; systemSettings.googleRefreshToken = ss.googleRefreshToken ? '****' : ''</script>
             <entity-find entity-name="growerp.general.LlmConfig" list="llmConfigList">
                 <econdition field-name="ownerPartyId"/>
                 <order-by field-name="llmProvider"/>
@@ -2087,7 +2087,6 @@ limitations under the License.
             <parameter name="mailPassword"/>
             <parameter name="githubToken"/>
             <parameter name="githubRepository"/>
-            <parameter name="llmSystemTokenLimit" type="Integer"/>
             <parameter name="aiModelName"/>
             <parameter name="googleClientId"/>
             <parameter name="googleClientSecret"/>
@@ -2141,7 +2140,6 @@ limitations under the License.
                 <set field="ss.githubRepository" from="githubRepository.take(255)"/>
                 <script>System.setProperty('growerp.github.repo', githubRepository.take(255))</script>
             </if>
-            <if condition="llmSystemTokenLimit != null"><set field="ss.llmSystemTokenLimit" from="llmSystemTokenLimit"/></if>
             <if condition="aiModelName != null"><set field="ss.aiModelName" from="aiModelName"/></if>
             <if condition="googleClientId != null"><set field="ss.googleClientId" from="googleClientId"/></if>
             <if condition="googleClientSecret &amp;&amp; googleClientSecret != '****'">
@@ -2237,6 +2235,59 @@ limitations under the License.
             </if>
 
             <service-call name="growerp.100.GeneralServices100.get#SystemSettings"
+                out-map="context"/>
+        </actions>
+    </service>
+
+    <service verb="get" noun="SystemDefault">
+        <description>GrowERP wide defaults. Readable by any logged-in user, only system
+            support can change them with update#SystemDefault.</description>
+        <out-parameters>
+            <parameter name="systemDefault" type="Map"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.general.SystemDefault" value-field="sd">
+                <field-map field-name="defaultId" value="SYSTEM"/>
+            </entity-find-one>
+            <if condition="sd == null">
+                <!-- installs upgraded before the seed row existed -->
+                <set field="systemDefault" from="[defaultId: 'SYSTEM', llmMonthlyTokenLimit: 100000]"/>
+                <return/>
+            </if>
+            <set field="systemDefault" from="sd.getMap()"/>
+        </actions>
+    </service>
+
+    <service verb="update" noun="SystemDefault">
+        <description>Create or update the GrowERP wide defaults, system support only.</description>
+        <in-parameters>
+            <parameter name="llmMonthlyTokenLimit" type="Integer"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="systemDefault" type="Map"/>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.check#SupportUser"/>
+
+            <entity-find-one entity-name="growerp.general.SystemDefault" value-field="sd"
+                    cache="false">
+                <field-map field-name="defaultId" value="SYSTEM"/>
+            </entity-find-one>
+            <if condition="sd == null">
+                <set field="sd" from="ec.entity.makeValue('growerp.general.SystemDefault')"/>
+                <set field="sd.defaultId" value="SYSTEM"/>
+                <set field="isNew" from="true"/>
+            <else>
+                <set field="isNew" from="false"/>
+            </else>
+            </if>
+            <!-- set unconditionally: null clears the limit, 0 means unlimited -->
+            <set field="sd.llmMonthlyTokenLimit" from="llmMonthlyTokenLimit"/>
+            <if condition="isNew"><then><script>sd.create()</script></then>
+                <else><script>sd.update()</script></else>
+            </if>
+
+            <service-call name="growerp.100.GeneralServices100.get#SystemDefault"
                 out-map="context"/>
         </actions>
     </service>

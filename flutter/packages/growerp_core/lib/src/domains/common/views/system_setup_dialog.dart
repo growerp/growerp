@@ -62,7 +62,6 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
 
   // AI — dynamic list of {providerCtrl, apiKeyCtrl, obscure, apiKeyIsSet}
   final List<Map<String, dynamic>> _llmRows = [];
-  final _llmTokenLimitCtrl = TextEditingController();
   static const _geminiModels = [
     'gemini-3.5-flash-lite',
     'gemini-2.5-flash',
@@ -87,7 +86,6 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
       (row['providerCtrl'] as TextEditingController).dispose();
       (row['apiKeyCtrl'] as TextEditingController).dispose();
     }
-    _llmTokenLimitCtrl.dispose();
     super.dispose();
   }
 
@@ -131,7 +129,6 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
       _llmRows
         ..clear()
         ..addAll(newRows);
-      _llmTokenLimitCtrl.text = s.llmSystemTokenLimit?.toString() ?? '';
       _aiModelName =
           _geminiModels.contains(s.aiModelName) ? s.aiModelName : null;
     } catch (e) {
@@ -166,11 +163,6 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
       // Only LLM keys are managed here. Email/GitHub credentials live in the ADK
       // Tools & integrations screen; omitting them leaves those fields unchanged.
       final payload = <String, dynamic>{'llmConfigs': llmConfigs};
-      if (_llmTokenLimitCtrl.text.isNotEmpty) {
-        payload['llmSystemTokenLimit'] = int.tryParse(_llmTokenLimitCtrl.text);
-      } else {
-        payload['llmSystemTokenLimit'] = null;
-      }
       payload['aiModelName'] = _aiModelName ?? '';
       await _restClient!.updateSystemSettings(payload);
       if (mounted) {
@@ -274,17 +266,6 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
               fontSize: 14,
               color: Theme.of(context).colorScheme.outline,
             ),
-          ),
-          SizedBox(height: 16),
-          TextFormField(
-            key: const Key('llmSystemTokenLimit'),
-            controller: _llmTokenLimitCtrl,
-            decoration: const InputDecoration(
-              labelText: 'System LLM Monthly Token Limit',
-              hintText: 'e.g. 5000000',
-              helperText: 'Leave empty for no limit. Applies only to tenants using the system LLM.',
-            ),
-            keyboardType: TextInputType.number,
           ),
           SizedBox(height: 16),
           DropdownButtonFormField<String>(

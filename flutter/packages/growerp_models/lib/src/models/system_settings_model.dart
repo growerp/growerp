@@ -54,8 +54,6 @@ abstract class SystemSettings with _$SystemSettings {
     String? googleCalendarId,
     // Hotel: lodging/tourist tax charged per room per night
     @JsonKey(fromJson: _decimalFromJson) Decimal? touristTaxPerNight,
-    // Quota
-    int? llmSystemTokenLimit,
     // Tenant-wide default Gemini model for AI content generation; empty uses the system default.
     String? aiModelName,
   }) = _SystemSettings;
@@ -69,8 +67,7 @@ abstract class SystemSettings with _$SystemSettings {
       'SystemSettings smtpHost: $smtpHost storeHost: $storeHost '
       'geminiApiKey: ${geminiApiKey != null ? "set" : "unset"} '
       'githubToken: ${githubToken != null ? "set" : "unset"} '
-      'githubRepository: ${githubRepository ?? "unset"} '
-      'llmSystemTokenLimit: $llmSystemTokenLimit';
+      'githubRepository: ${githubRepository ?? "unset"}';
 }
 
 Decimal? _decimalFromJson(dynamic value) {

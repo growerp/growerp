@@ -520,6 +520,9 @@ limitations under the License.
         description="Template Server Content" enumId="PsstContentLocation"
         enumTypeId="ProductStoreSettingType" />
 
+    <!-- GrowERP wide defaults, maintained in the support app -->
+    <growerp.general.SystemDefault defaultId="SYSTEM" llmMonthlyTokenLimit="100000"/>
+
     <dbResources resourceId="GROWERP_LOGO" filename="growerp_logo.jpg" isFile="Y"
         parentResourceId="growerp_images" />
     <moqui.resource.DbResourceFile resourceId="GROWERP_LOGO" rootVersionName="01"
