@@ -40,11 +40,14 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
   late bool _demoData;
   bool _isSubmitting = false;
   bool _isLoadingCurrencies = true;
+  // marketing/agents apps have no ledger: fixed USD and january
+  late bool _showAccounting;
 
   @override
   void initState() {
     super.initState();
     _demoData = kReleaseMode ? false : true; // Demo data in debug mode
+    _showAccounting = showAccountingSetup(context.read<String>());
     _loadCurrencies();
   }
 
@@ -55,7 +58,7 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
       if (mounted) {
         setState(() {
           _isLoadingCurrencies = false;
-          if (kDebugMode && _currencySelected == null) {
+          if ((!_showAccounting || kDebugMode) && _currencySelected == null) {
             _currencySelected = currencies.firstWhere(
               (c) => c.currencyId == 'USD',
               orElse: () => Currency(
@@ -68,7 +71,16 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
       }
     } catch (_) {
       if (mounted) {
-        setState(() => _isLoadingCurrencies = false);
+        setState(() {
+          _isLoadingCurrencies = false;
+          // no field to select one when hidden, so default it here as well
+          if (!_showAccounting) {
+            _currencySelected ??= Currency(
+              currencyId: 'USD',
+              description: 'United States Dollar',
+            );
+          }
+        });
       }
     }
   }
@@ -80,7 +92,7 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
     return popUp(
       context: context,
       title: 'Company Setup',
-      height: 550,
+      height: _showAccounting ? 550 : 400,
       width: 400,
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) async {
@@ -133,57 +145,59 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
                       ),
                       SizedBox(height: 20),
 
-                      // Currency Selection
-                      if (_isLoadingCurrencies)
-                        const Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: CircularProgressIndicator(),
-                        )
-                      else
-                        AutocompleteLabel<Currency>(
-                          key: const Key('currency'),
-                          label: localizations?.currency ?? 'Currency',
-                          initialValue: _currencySelected,
-                          optionsBuilder: (TextEditingValue textEditingValue) {
-                            if (textEditingValue.text.isEmpty) {
-                              return currencies;
-                            }
-                            return currencies.where(
-                              (Currency c) =>
-                                  '${c.description} [${c.currencyId}]'
-                                      .toLowerCase()
-                                      .contains(
-                                        textEditingValue.text.toLowerCase(),
-                                      ),
-                            );
-                          },
-                          displayStringForOption: (Currency c) =>
-                              '${c.description} [${c.currencyId}]',
-                          onSelected: (Currency? value) {
-                            if (value != null) {
-                              setState(() => _currencySelected = value);
-                            }
-                          },
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Currency is required';
-                            }
-                            return null;
-                          },
-                        ),
-                      SizedBox(height: 20),
+                      if (_showAccounting) ...[
+                        // Currency Selection
+                        if (_isLoadingCurrencies)
+                          const Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: CircularProgressIndicator(),
+                          )
+                        else
+                          AutocompleteLabel<Currency>(
+                            key: const Key('currency'),
+                            label: localizations?.currency ?? 'Currency',
+                            initialValue: _currencySelected,
+                            optionsBuilder: (TextEditingValue textEditingValue) {
+                              if (textEditingValue.text.isEmpty) {
+                                return currencies;
+                              }
+                              return currencies.where(
+                                (Currency c) =>
+                                    '${c.description} [${c.currencyId}]'
+                                        .toLowerCase()
+                                        .contains(
+                                          textEditingValue.text.toLowerCase(),
+                                        ),
+                              );
+                            },
+                            displayStringForOption: (Currency c) =>
+                                '${c.description} [${c.currencyId}]',
+                            onSelected: (Currency? value) {
+                              if (value != null) {
+                                setState(() => _currencySelected = value);
+                              }
+                            },
+                            validator: (value) {
+                              if (value == null) {
+                                return 'Currency is required';
+                              }
+                              return null;
+                            },
+                          ),
+                        SizedBox(height: 20),
 
-                      // Accounting year start
-                      FiscalYearStartDropdown(
-                        value: _fiscalYearStartMonth,
-                        label:
-                            localizations?.accountingYearStarts ??
-                            'Accounting year starts',
-                        onChanged: (value) => setState(
-                          () => _fiscalYearStartMonth = value ?? 1,
+                        // Accounting year start
+                        FiscalYearStartDropdown(
+                          value: _fiscalYearStartMonth,
+                          label:
+                              localizations?.accountingYearStarts ??
+                              'Accounting year starts',
+                          onChanged: (value) => setState(
+                            () => _fiscalYearStartMonth = value ?? 1,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 20),
+                        SizedBox(height: 20),
+                      ],
 
                       // Demo Data Checkbox (only in debug mode or if explicitly shown)
                       if ((!kReleaseMode ||

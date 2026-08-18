@@ -131,6 +131,9 @@ class CompanyFormState extends State<CompanyDialog> {
   // the accounting year start only applies to the company owning the ledger
   late bool _isMainCompany;
   int? _fiscalYearStartMonth;
+  // marketing/agents apps have no ledger: currency, accounting year, tax
+  // percentages and payment method are not shown
+  late bool _showAccounting;
 
   @override
   void initState() {
@@ -152,6 +155,7 @@ class CompanyFormState extends State<CompanyDialog> {
     _isMainCompany =
         company.partyId != null &&
         company.partyId == authenticate.company?.partyId;
+    _showAccounting = showAccountingSetup(context.read<String>());
     _fiscalYearStartMonth = company.fiscalYearStartMonth ?? 1;
     employees = List.of(company.employees);
     if (company.currency != null && currencies.isNotEmpty) {
@@ -443,34 +447,36 @@ class CompanyFormState extends State<CompanyDialog> {
               controller: _telephoneController,
             ),
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: AutocompleteLabel<Currency>(
-              key: const Key('currency'),
-              label: _localizations.currency,
-              readOnly: !company.acctPeriodChangeAllowed,
-              initialValue: _selectedCurrency,
-              optionsBuilder: (TextEditingValue textEditingValue) {
-                if (textEditingValue.text.isEmpty) return currencies;
-                return currencies.where(
-                  (Currency c) => '${c.description} [${c.currencyId}]'
-                      .toLowerCase()
-                      .contains(textEditingValue.text.toLowerCase()),
-                );
-              },
-              displayStringForOption: (Currency c) =>
-                  '${c.description} [${c.currencyId}]',
-              onSelected: (Currency? newValue) {
-                setState(() {
-                  _selectedCurrency = newValue ?? _selectedCurrency;
-                });
-              },
-              validator: (value) => null,
+          if (_showAccounting) ...[
+            const SizedBox(width: 10),
+            Expanded(
+              child: AutocompleteLabel<Currency>(
+                key: const Key('currency'),
+                label: _localizations.currency,
+                readOnly: !company.acctPeriodChangeAllowed,
+                initialValue: _selectedCurrency,
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  if (textEditingValue.text.isEmpty) return currencies;
+                  return currencies.where(
+                    (Currency c) => '${c.description} [${c.currencyId}]'
+                        .toLowerCase()
+                        .contains(textEditingValue.text.toLowerCase()),
+                  );
+                },
+                displayStringForOption: (Currency c) =>
+                    '${c.description} [${c.currencyId}]',
+                onSelected: (Currency? newValue) {
+                  setState(() {
+                    _selectedCurrency = newValue ?? _selectedCurrency;
+                  });
+                },
+                validator: (value) => null,
+              ),
             ),
-          ),
+          ],
         ],
       ),
-      if (_isMainCompany)
+      if (_isMainCompany && _showAccounting)
         FiscalYearStartDropdown(
           value: _fiscalYearStartMonth,
           label: _localizations.accountingYearStarts,
@@ -503,7 +509,7 @@ class CompanyFormState extends State<CompanyDialog> {
         decoration: InputDecoration(labelText: _localizations.webAddress),
         controller: _urlController,
       ),
-      if (company.role == Role.company)
+      if (company.role == Role.company && _showAccounting)
         Row(
           children: [
             Expanded(
@@ -599,72 +605,73 @@ class CompanyFormState extends State<CompanyDialog> {
           ],
         ),
       ),
-      GroupingDecorator(
-        labelText: _localizations.paymentMethod,
-        child: Row(
-          children: [
-            Expanded(
-              child: InkWell(
-                key: const Key('paymentMethod'),
-                onTap: isAdmin && company.address != null
-                    ? () async {
-                        var result = await showDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          builder: (BuildContext context) {
-                            return PaymentMethodDialog(
-                              paymentMethod: company.paymentMethod,
-                            );
-                          },
-                        );
-                        if (!mounted) return;
-                        if (result is PaymentMethod) {
-                          setState(() {
-                            company = company.copyWith(paymentMethod: result);
-                          });
+      if (_showAccounting)
+        GroupingDecorator(
+          labelText: _localizations.paymentMethod,
+          child: Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                  key: const Key('paymentMethod'),
+                  onTap: isAdmin && company.address != null
+                      ? () async {
+                          var result = await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return PaymentMethodDialog(
+                                paymentMethod: company.paymentMethod,
+                              );
+                            },
+                          );
+                          if (!mounted) return;
+                          if (result is PaymentMethod) {
+                            setState(() {
+                              company = company.copyWith(paymentMethod: result);
+                            });
+                          }
                         }
-                      }
-                    : null,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        company.paymentMethod != null &&
-                                company.paymentMethod?.ccDescription !=
-                                    "_DELETE_"
-                            ? "${company.paymentMethod?.ccDescription}"
-                            : "${_localizations.noPaymentMethod}"
-                                  "${company.address == null ? ", \n${_localizations.needPostalAddress}" : ""}",
-                        key: const Key('paymentMethodLabel'),
+                      : null,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          company.paymentMethod != null &&
+                                  company.paymentMethod?.ccDescription !=
+                                      "_DELETE_"
+                              ? "${company.paymentMethod?.ccDescription}"
+                              : "${_localizations.noPaymentMethod}"
+                                    "${company.address == null ? ", \n${_localizations.needPostalAddress}" : ""}",
+                          key: const Key('paymentMethodLabel'),
+                        ),
                       ),
-                    ),
-                    Row(
-                      children: [
-                        const Icon(Icons.arrow_drop_down),
-                        const SizedBox(width: 10),
-                        if (company.paymentMethod != null &&
-                            company.paymentMethod?.ccDescription != "_DELETE_")
-                          IconButton(
-                            key: const Key('deletePaymentMethod'),
-                            onPressed: isAdmin && company.paymentMethod != null
-                                ? () => setState(
-                                    () => company = company.copyWith(
-                                      paymentMethod: company.paymentMethod!
-                                          .copyWith(ccDescription: "_DELETE_"),
-                                    ),
-                                  )
-                                : null,
-                            icon: const Icon(Icons.clear),
-                          ),
-                      ],
-                    ),
-                  ],
+                      Row(
+                        children: [
+                          const Icon(Icons.arrow_drop_down),
+                          const SizedBox(width: 10),
+                          if (company.paymentMethod != null &&
+                              company.paymentMethod?.ccDescription != "_DELETE_")
+                            IconButton(
+                              key: const Key('deletePaymentMethod'),
+                              onPressed: isAdmin && company.paymentMethod != null
+                                  ? () => setState(
+                                      () => company = company.copyWith(
+                                        paymentMethod: company.paymentMethod!
+                                            .copyWith(ccDescription: "_DELETE_"),
+                                      ),
+                                    )
+                                  : null,
+                              icon: const Icon(Icons.clear),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       if (company.role == Role.company)
         Row(
           children: [

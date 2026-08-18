@@ -352,11 +352,14 @@ class CommonTest {
         }
 
         await enterText(tester, 'companyName', companyName);
-        await enterDropDownSearch(
-          tester,
-          'currency',
-          initialCompany.currency!.description!,
-        );
+        // marketing/agents apps do not show the currency field
+        if (await doesExistKey(tester, 'currency')) {
+          await enterDropDownSearch(
+            tester,
+            'currency',
+            initialCompany.currency!.description!,
+          );
+        }
         if (!demoData) {
           await tapByKey(tester, 'demoData', settle: false);
         }

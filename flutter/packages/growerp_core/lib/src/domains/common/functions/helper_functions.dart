@@ -405,3 +405,10 @@ class HelperFunctions {
     }
   }
 }
+
+/// Verticals without a ledger: currency / accounting-year start are hidden and
+/// defaulted to USD and January.
+const List<String> appsWithoutAccounting = ['AppMarketing', 'AppAgents'];
+
+bool showAccountingSetup(String applicationId) =>
+    !appsWithoutAccounting.contains(applicationId);
