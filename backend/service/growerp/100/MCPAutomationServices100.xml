@@ -271,9 +271,30 @@
                     <order-by field-name="userId"/>
                 </entity-find>
                 <set field="adminLogin" from="adminList ? adminList[0].loginName : null"/>
+                <!-- No admin means this job can never do anything: an error return would
+                     roll back, leave lastRunTime unwritten and repeat forever. Pause the
+                     job instead, so the condition is reported once. -->
                 <if condition="!adminLogin">
-                    <return error="true"
-                        message="No administrator user found for owner ${ownerPartyId}"/>
+                    <!-- Groovy: the job runs without a user, so the write needs authz off -->
+                    <script><![CDATA[
+                        boolean alreadyDisabled = ec.artifactExecution.disableAuthz()
+                        try {
+                            def ownJob = ec.entity.find('moqui.service.job.ServiceJob')
+                                .condition('jobName', 'CampaignAutomation_' + ownerPartyId)
+                                .useCache(false).one()
+                            if (ownJob != null && ownJob.paused != 'Y') {
+                                ownJob.paused = 'Y'
+                                ownJob.update()
+                            }
+                        } finally {
+                            if (!alreadyDisabled) ec.artifactExecution.enableAuthz()
+                        }
+                    ]]></script>
+                    <log level="warn"
+                        message="No administrator user found for owner ${ownerPartyId}, campaign send job paused"/>
+                    <set field="campaignsProcessed" from="0" type="Integer"/>
+                    <set field="messagesSent" from="0" type="Integer"/>
+                    <return/>
                 </if>
                 <script>ec.user.internalLoginUser(adminLogin)</script>
             </if>
@@ -317,6 +338,13 @@
             <parameter name="created" type="Boolean"/>
         </out-parameters>
         <actions>
+            <!-- _NA_ owns the parties that belong to no tenant (SYSTEM_SUPPORT). It is not
+                 a PtyOwner, so the administrator lookup in run#AllCampaignAutomation can
+                 never match it and the job would fail every hour forever. -->
+            <if condition="ownerPartyId == '_NA_'">
+                <set field="created" from="false"/>
+                <return/>
+            </if>
             <set field="jobName" from="'CampaignAutomation_' + ownerPartyId"/>
             <!-- cache=false: ServiceJob is cacheable and a cached value is not mutable -->
             <entity-find-one entity-name="moqui.service.job.ServiceJob" value-field="job"

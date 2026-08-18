@@ -32,7 +32,9 @@ try {
         .call()
     def ownerPartyId = ownerResult.ownerPartyId
 
-    if (!ownerPartyId) {
+    // _NA_ is the owner of parties belonging to no tenant (SYSTEM_SUPPORT): a campaign
+    // stored under it is invisible to every app and can never be sent.
+    if (!ownerPartyId || ownerPartyId == '_NA_') {
         ec.message.addError("Unable to determine owner party ID from authenticated user")
         return
     }

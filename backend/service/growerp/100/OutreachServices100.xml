@@ -310,6 +310,14 @@
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="context" />
 
+            <!-- _NA_ is the owner of parties belonging to no tenant (SYSTEM_SUPPORT).
+                 A campaign stored under it is invisible to every app and its hourly send
+                 job can never log in, so refuse it here rather than create the orphan. -->
+            <if condition="!ownerPartyId || ownerPartyId == '_NA_'">
+                <return error="true"
+                    message="Cannot create a campaign: the logged in user belongs to no company" />
+            </if>
+
             <!-- Extract fields from campaign map -->
             <set field="campaignName" from="campaign.campaignName" />
             <set field="platforms" from="campaign.platforms" />

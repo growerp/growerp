@@ -1317,9 +1317,18 @@ limitations under the License.
                     <set field="emailsSent" from="emailsSent + 1" />
                 </if>
             </iterate>
-            <if condition="ownersWithoutServer">
+            <!-- A tenant without a server is a real configuration problem, so it stays a
+                 warning. SYSTEM is not: an installation with no SMTP_USER/SMTP_PASSWORD in
+                 its environment can never send those, and this sweep runs every minute. -->
+            <set field="tenantsWithoutServer"
+                from="ownersWithoutServer.findAll { it != 'SYSTEM' }" />
+            <if condition="tenantsWithoutServer">
                 <log level="warn"
-                    message="No email server configured for ${ownersWithoutServer}: unread chat conversations were not emailed" />
+                    message="No email server configured for ${tenantsWithoutServer}: unread chat conversations were not emailed" />
+            </if>
+            <if condition="ownersWithoutServer.contains('SYSTEM')">
+                <log level="info"
+                    message="No email server configured for SYSTEM: unread chat conversations were not emailed" />
             </if>
         </actions>
     </service>
