@@ -24,6 +24,7 @@ class OutreachCampaignBloc
     on<OutreachRecentMessagesFetch>(_onRecentMessagesFetch);
     on<OutreachCampaignSearchRequested>(_onSearch);
     on<OutreachPublishScheduledSocialPosts>(_onPublishScheduledSocialPosts);
+    on<OutreachCampaignGenerateWithAI>(_onGenerateWithAI);
   }
 
   final RestClient restClient;
@@ -99,6 +100,35 @@ class OutreachCampaignBloc
           status: OutreachCampaignStatus.success,
           campaigns: result.campaigns,
           message: 'Campaign created successfully',
+        ),
+      );
+    } catch (error) {
+      emit(
+        state.copyWith(
+          status: OutreachCampaignStatus.failure,
+          message: await getDioError(error),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onGenerateWithAI(
+    OutreachCampaignGenerateWithAI event,
+    Emitter<OutreachCampaignState> emit,
+  ) async {
+    emit(state.copyWith(status: OutreachCampaignStatus.loading));
+    try {
+      final campaign = await restClient.generateOutreachCampaignWithAI(
+        campaignGoal: event.campaignGoal,
+        targetAudience: event.targetAudience,
+        platforms: event.platforms,
+      );
+
+      emit(
+        state.copyWith(
+          status: OutreachCampaignStatus.success,
+          campaigns: [campaign, ...state.campaigns],
+          message: 'Campaign generated successfully with AI',
         ),
       );
     } catch (error) {

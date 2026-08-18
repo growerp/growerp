@@ -709,6 +709,11 @@ limitations under the License.
                     <service name="growerp.100.MCPAutomationServices100.process#CampaignAutomation" />
                 </method>
             </resource>
+            <resource name="generateWithAI">
+                <method type="post">
+                    <service name="growerp.100.OutreachServices100.generate#OutreachCampaign" />
+                </method>
+            </resource>
         </resource>
         <resource name="OutreachMessage">
             <method type="get">

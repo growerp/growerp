@@ -432,6 +432,47 @@
         </actions>
     </service>
 
+    <service verb="generate" noun="OutreachCampaign" authenticate="true">
+        <description>Generate an outreach campaign with AI from a goal description</description>
+        <in-parameters>
+            <parameter name="campaignGoal" required="true">
+                <description>What the campaign should achieve, in the user's own words</description>
+            </parameter>
+            <parameter name="targetAudience" />
+            <parameter name="platforms">
+                <description>Comma separated platform names, e.g. EMAIL,LINKEDIN</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="campaign" type="Map">
+                <description>Created campaign map matching frontend OutreachCampaign model</description>
+                <parameter name="marketingCampaignId" />
+                <parameter name="pseudoId" />
+                <parameter name="campaignName" />
+                <parameter name="campaignSummary" />
+                <parameter name="platforms" />
+                <parameter name="targetAudience" />
+                <parameter name="landingPageId" />
+                <parameter name="messageTemplate" />
+                <parameter name="emailSubject" />
+                <parameter name="platformSettings" />
+                <parameter name="statusId" />
+                <parameter name="dailyLimitPerPlatform" type="Integer" />
+                <parameter name="sendFromHour" type="Integer" />
+                <parameter name="sendToHour" type="Integer" />
+                <parameter name="budgetedCost" type="BigDecimal" />
+                <parameter name="estimatedCost" type="BigDecimal" />
+                <parameter name="expectedRevenue" type="BigDecimal" />
+                <parameter name="expectedResponsePercent" type="BigDecimal" />
+                <parameter name="fromDate" />
+                <parameter name="startDate" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <script location="component://growerp/service/generateCampaignWithAI.groovy" />
+        </actions>
+    </service>
+
     <service verb="update" noun="OutreachCampaign">
         <description>Update an existing marketing campaign</description>
         <in-parameters>

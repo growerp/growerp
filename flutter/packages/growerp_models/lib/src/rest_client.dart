@@ -1651,6 +1651,13 @@ abstract class RestClient {
     @Field() required String marketingCampaignId,
   });
 
+  @POST("rest/s1/growerp/100/OutreachCampaign/generateWithAI")
+  Future<OutreachCampaign> generateOutreachCampaignWithAI({
+    @Field() required String campaignGoal,
+    @Field() String? targetAudience,
+    @Field() String? platforms,
+  });
+
   // Campaign Automation endpoints
   @POST("rest/s1/growerp/100/OutreachCampaign/start")
   Future<dynamic> startCampaignAutomation({

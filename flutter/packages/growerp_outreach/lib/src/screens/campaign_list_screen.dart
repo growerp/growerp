@@ -162,29 +162,54 @@ class CampaignListScreenState extends State<CampaignListScreen> {
                           bottom -= details.delta.dy;
                         });
                       },
-                      child: FloatingActionButton(
-                        key: const Key('addNew'),
-                        heroTag: 'campaignBtn1',
-                        onPressed: () async {
-                          await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (BuildContext context) {
-                              return BlocProvider.value(
-                                value: _campaignBloc,
-                                child: const CampaignDetailScreen(
-                                  campaign: OutreachCampaign(
-                                    name: '',
-                                    platforms: '[]',
-                                    status: 'MKTG_CAMP_PLANNED',
-                                  ),
-                                ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          FloatingActionButton(
+                            key: const Key('generateAICampaign'),
+                            heroTag: 'campaignBtn2',
+                            onPressed: () async {
+                              await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return BlocProvider.value(
+                                    value: _campaignBloc,
+                                    child: const GenerateCampaignDialog(),
+                                  );
+                                },
                               );
                             },
-                          );
-                        },
-                        tooltip: 'Add new campaign',
-                        child: const Icon(Icons.add),
+                            tooltip: 'Generate campaign with AI',
+                            child: const Icon(Icons.auto_awesome),
+                          ),
+                          const SizedBox(height: 10),
+                          FloatingActionButton(
+                            key: const Key('addNew'),
+                            heroTag: 'campaignBtn1',
+                            onPressed: () async {
+                              await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return BlocProvider.value(
+                                    value: _campaignBloc,
+                                    child: const CampaignDetailScreen(
+                                      campaign: OutreachCampaign(
+                                        name: '',
+                                        platforms: '[]',
+                                        status: 'MKTG_CAMP_PLANNED',
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                            tooltip: 'Add new campaign',
+                            child: const Icon(Icons.add),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -220,5 +245,163 @@ class CampaignListScreenState extends State<CampaignListScreen> {
       ..dispose();
     _searchController.dispose();
     super.dispose();
+  }
+}
+
+/// Collects a campaign goal and lets the backend build the whole campaign
+/// with AI. The generated campaign is created server side and appears at the
+/// top of the list.
+class GenerateCampaignDialog extends StatefulWidget {
+  const GenerateCampaignDialog({super.key});
+
+  @override
+  GenerateCampaignDialogState createState() => GenerateCampaignDialogState();
+}
+
+class GenerateCampaignDialogState extends State<GenerateCampaignDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _goalController = TextEditingController();
+  final _audienceController = TextEditingController();
+
+  /// same platforms the campaign detail screen supports
+  static const List<String> _availablePlatforms = ['EMAIL', 'LINKEDIN'];
+  final Set<String> _selectedPlatforms = {..._availablePlatforms};
+
+  late OutreachCampaignBloc _campaignBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _campaignBloc = context.read<OutreachCampaignBloc>();
+  }
+
+  @override
+  void dispose() {
+    _goalController.dispose();
+    _audienceController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      key: const Key('GenerateCampaignDialog'),
+      insetPadding: const EdgeInsets.all(20),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: popUp(
+        context: context,
+        title: 'Generate Campaign with AI',
+        height: 550,
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextFormField(
+                  key: const Key('campaignGoal'),
+                  controller: _goalController,
+                  maxLines: 4,
+                  decoration: const InputDecoration(
+                    labelText: 'Campaign goal *',
+                    hintText: 'What should this campaign achieve, and for whom? '
+                        'e.g. book demos for our warehouse app with wholesalers',
+                  ),
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Please describe the campaign goal'
+                      : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  key: const Key('targetAudience'),
+                  controller: _audienceController,
+                  decoration: const InputDecoration(
+                    labelText: 'Target audience (optional)',
+                    hintText: 'Left empty the AI infers it from the goal',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ..._availablePlatforms.map(
+                  (platform) => CheckboxListTile(
+                    key: Key('platform$platform'),
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(platform),
+                    value: _selectedPlatforms.contains(platform),
+                    onChanged: (checked) {
+                      setState(() {
+                        if (checked == true) {
+                          _selectedPlatforms.add(platform);
+                        } else {
+                          _selectedPlatforms.remove(platform);
+                        }
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(height: 24),
+                BlocConsumer<OutreachCampaignBloc, OutreachCampaignState>(
+                  listener: (context, state) {
+                    if (state.status == OutreachCampaignStatus.success &&
+                        (state.message ?? '').contains('AI')) {
+                      Navigator.of(context).pop();
+                    }
+                    if (state.status == OutreachCampaignStatus.failure) {
+                      HelperFunctions.showMessage(
+                        context,
+                        state.message ?? 'Failed to generate campaign',
+                        Colors.red,
+                      );
+                    }
+                  },
+                  builder: (context, state) {
+                    final isLoading =
+                        state.status == OutreachCampaignStatus.loading;
+                    return ElevatedButton.icon(
+                      key: const Key('generateButton'),
+                      onPressed: isLoading
+                          ? null
+                          : () {
+                              if (_formKey.currentState?.validate() != true) {
+                                return;
+                              }
+                              if (_selectedPlatforms.isEmpty) {
+                                HelperFunctions.showMessage(
+                                  context,
+                                  'Please select at least one platform',
+                                  Colors.red,
+                                );
+                                return;
+                              }
+                              _campaignBloc.add(
+                                OutreachCampaignGenerateWithAI(
+                                  campaignGoal: _goalController.text,
+                                  targetAudience:
+                                      _audienceController.text.isEmpty
+                                          ? null
+                                          : _audienceController.text,
+                                  platforms: _selectedPlatforms.join(','),
+                                ),
+                              );
+                            },
+                      icon: isLoading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.auto_awesome),
+                      label: Text(
+                        isLoading ? 'Generating...' : 'Generate Campaign',
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

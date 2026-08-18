@@ -183,3 +183,22 @@ class OutreachCampaignSearchRequested extends OutreachCampaignEvent {
 class OutreachPublishScheduledSocialPosts extends OutreachCampaignEvent {
   const OutreachPublishScheduledSocialPosts();
 }
+
+/// Ask the backend to build a complete campaign with AI from a short goal
+/// description. The campaign is created server side and returned.
+class OutreachCampaignGenerateWithAI extends OutreachCampaignEvent {
+  const OutreachCampaignGenerateWithAI({
+    required this.campaignGoal,
+    this.targetAudience,
+    this.platforms,
+  });
+
+  final String campaignGoal;
+  final String? targetAudience;
+
+  /// comma separated platform names, e.g. 'EMAIL,LINKEDIN'
+  final String? platforms;
+
+  @override
+  List<Object?> get props => [campaignGoal, targetAudience, platforms];
+}
