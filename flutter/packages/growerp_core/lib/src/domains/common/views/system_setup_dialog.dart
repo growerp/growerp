@@ -20,10 +20,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:growerp_core/growerp_core.dart';
 
-/// System Setup Screen — configures AI (LLM provider API keys).
+/// System Setup Screen — configures AI (LLM provider API keys) and the email
+/// server (SMTP/IMAP), the same email fields as EmailSettingsDialog on the ADK
+/// Tools & integrations screen.
 /// Settings are stored per-tenant in the backend via the SystemSettings REST endpoint.
-/// Email and GitHub credentials are configured from the ADK Tools & integrations
-/// screen (EmailSettingsDialog / GithubSettingsDialog).
+/// GitHub credentials are configured from the ADK Tools & integrations screen
+/// (GithubSettingsDialog).
 class SystemSetupDialog extends StatefulWidget {
   /// When shown modally (e.g. from the ADK chat as a Dialog) rather than as a
   /// full-screen menu route: adds a Cancel button and pops on a successful save.
@@ -69,6 +71,24 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
   ];
   String? _aiModelName;
 
+  // Email — same fields as EmailSettingsDialog (ADK Tools & integrations),
+  // shown here too because this is the screen the outreach setup guide sends
+  // people to for the email server.
+  final _smtpHostCtrl = TextEditingController();
+  final _smtpPortCtrl = TextEditingController();
+  String _smtpSecurity = 'none'; // none | starttls | ssl
+  final _mailUserCtrl = TextEditingController();
+  final _mailPassCtrl = TextEditingController();
+  bool _obscureMailPass = true;
+  bool _mailPassSet = false;
+  final _storeHostCtrl = TextEditingController();
+  final _storePortCtrl = TextEditingController();
+  String _storeProtocol = 'imaps';
+  final _storeFolderCtrl = TextEditingController();
+
+  /// Settings as last loaded, to preserve the fields not edited here.
+  SystemSettings? _settings;
+
   RestClient? _restClient;
 
   @override
@@ -86,6 +106,13 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
       (row['providerCtrl'] as TextEditingController).dispose();
       (row['apiKeyCtrl'] as TextEditingController).dispose();
     }
+    _smtpHostCtrl.dispose();
+    _smtpPortCtrl.dispose();
+    _mailUserCtrl.dispose();
+    _mailPassCtrl.dispose();
+    _storeHostCtrl.dispose();
+    _storePortCtrl.dispose();
+    _storeFolderCtrl.dispose();
     super.dispose();
   }
 
@@ -95,6 +122,22 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
     try {
       final s = await _restClient!.getSystemSettings();
       if (!mounted) return;
+      _settings = s;
+
+      _smtpHostCtrl.text = s.smtpHost ?? '';
+      _smtpPortCtrl.text = s.smtpPort ?? '';
+      _smtpSecurity = s.smtpSsl == 'Y'
+          ? 'ssl'
+          : s.smtpStartTls == 'Y'
+              ? 'starttls'
+              : 'none';
+      _mailUserCtrl.text = s.mailUsername ?? '';
+      _mailPassSet = (s.mailPassword ?? '').isNotEmpty;
+      _mailPassCtrl.text = _mailPassSet ? '****' : '';
+      _storeHostCtrl.text = s.storeHost ?? '';
+      _storePortCtrl.text = s.storePort ?? '';
+      _storeProtocol = s.storeProtocol.isNotEmpty ? s.storeProtocol : 'imaps';
+      _storeFolderCtrl.text = s.storeFolder.isNotEmpty ? s.storeFolder : 'INBOX';
 
       // Build LLM rows from llmConfigs list.
       // Fallback 1: pre-migration server returns geminiApiKey flat field.
@@ -160,10 +203,26 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
             return m;
           })
           .toList();
-      // Only LLM keys are managed here. Email/GitHub credentials live in the ADK
-      // Tools & integrations screen; omitting them leaves those fields unchanged.
+      // Read-modify-write for the email slice: update#SystemSettings has
+      // default-valued smtp/store params, so they must be sent together, with
+      // the github fields preserved. Secrets kept as '****' are skipped
+      // backend-side.
+      final pass = _mailPassCtrl.text;
       final payload = <String, dynamic>{'llmConfigs': llmConfigs};
       payload['aiModelName'] = _aiModelName ?? '';
+      payload.addAll({
+        'smtpHost': _smtpHostCtrl.text,
+        'smtpPort': _smtpPortCtrl.text,
+        'smtpStartTls': _smtpSecurity == 'starttls' ? 'Y' : 'N',
+        'smtpSsl': _smtpSecurity == 'ssl' ? 'Y' : 'N',
+        'mailUsername': _mailUserCtrl.text,
+        if (pass.isNotEmpty && pass != '****') 'mailPassword': pass,
+        'storeHost': _storeHostCtrl.text,
+        'storePort': _storePortCtrl.text,
+        'storeProtocol': _storeProtocol,
+        'storeFolder': _storeFolderCtrl.text,
+        'githubRepository': _settings?.githubRepository ?? '',
+      });
       await _restClient!.updateSystemSettings(payload);
       if (mounted) {
         HelperFunctions.showMessage(
@@ -209,7 +268,7 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'AI Settings',
+                  'System Settings',
                   style: Theme.of(context).textTheme.headlineMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -223,6 +282,8 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
                 ),
                 SizedBox(height: 32),
                 _aiSettingsSection(),
+                SizedBox(height: 24),
+                _emailSettingsSection(),
                 SizedBox(height: 32),
                 Center(
                   child: Row(
@@ -246,6 +307,165 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // ── Email settings ──────────────────────────────────────────────────────────
+
+  Widget _emailSettingsSection() {
+    final localizations = CoreLocalizations.of(context)!;
+    return GroupingDecorator(
+      decoratorKey: const Key('emailSettingsSection'),
+      labelText: 'Email Server',
+      icon: Icons.mail_outline,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            localizations.outgoingSmtp,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          SizedBox(height: 8),
+          Row(children: [
+            Expanded(
+              flex: 3,
+              child: TextFormField(
+                key: const Key('smtpHost'),
+                controller: _smtpHostCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'SMTP Host',
+                  hintText: 'smtp.example.com',
+                ),
+              ),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: TextFormField(
+                key: const Key('smtpPort'),
+                controller: _smtpPortCtrl,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Port'),
+                // port and security must match: sending plaintext into 465
+                // just times out
+                validator: (value) {
+                  final port = value?.trim() ?? '';
+                  if (port == '465' && _smtpSecurity != 'ssl') {
+                    return 'Port 465 needs SSL/TLS';
+                  }
+                  if (port == '587' && _smtpSecurity == 'ssl') {
+                    return 'Port 587 needs STARTTLS';
+                  }
+                  return null;
+                },
+              ),
+            ),
+          ]),
+          SizedBox(height: 12),
+          DropdownButtonFormField<String>(
+            key: const Key('smtpSecurity'),
+            initialValue: _smtpSecurity,
+            decoration: const InputDecoration(
+              labelText: 'Security',
+              helperText: '465: SSL/TLS, 587: STARTTLS',
+            ),
+            items: [
+              DropdownMenuItem(value: 'none', child: Text(localizations.none)),
+              DropdownMenuItem(
+                  value: 'starttls', child: Text(localizations.starttls)),
+              DropdownMenuItem(value: 'ssl', child: Text(localizations.ssltls)),
+            ],
+            onChanged: (v) {
+              setState(() => _smtpSecurity = v ?? 'none');
+              _formKey.currentState?.validate();
+            },
+          ),
+          SizedBox(height: 20),
+          Text(
+            localizations.credentials,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          SizedBox(height: 8),
+          TextFormField(
+            key: const Key('mailUsername'),
+            controller: _mailUserCtrl,
+            decoration: const InputDecoration(
+              labelText: 'Username / Email',
+              prefixIcon: Icon(Icons.person_outline),
+            ),
+          ),
+          SizedBox(height: 12),
+          TextFormField(
+            key: const Key('mailPassword'),
+            controller: _mailPassCtrl,
+            obscureText: _obscureMailPass,
+            decoration: InputDecoration(
+              labelText: 'Password',
+              hintText: _mailPassSet ? '(leave as **** to keep current)' : '',
+              prefixIcon: const Icon(Icons.lock_outline),
+              suffixIcon: IconButton(
+                icon: Icon(_obscureMailPass
+                    ? Icons.visibility
+                    : Icons.visibility_off),
+                onPressed: () =>
+                    setState(() => _obscureMailPass = !_obscureMailPass),
+              ),
+            ),
+            onTap: () {
+              if (_mailPassCtrl.text == '****') _mailPassCtrl.clear();
+            },
+          ),
+          SizedBox(height: 20),
+          Text(
+            localizations.incomingImapPop3,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          SizedBox(height: 8),
+          Row(children: [
+            Expanded(
+              flex: 3,
+              child: TextFormField(
+                key: const Key('storeHost'),
+                controller: _storeHostCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'IMAP Host',
+                  hintText: 'imap.example.com',
+                ),
+              ),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: TextFormField(
+                key: const Key('storePort'),
+                controller: _storePortCtrl,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Port'),
+              ),
+            ),
+          ]),
+          SizedBox(height: 12),
+          DropdownButtonFormField<String>(
+            key: const Key('storeProtocol'),
+            initialValue: _storeProtocol,
+            decoration: const InputDecoration(labelText: 'Protocol'),
+            items: [
+              DropdownMenuItem(
+                  value: 'imaps', child: Text(localizations.imapsSecure)),
+              DropdownMenuItem(value: 'imap', child: Text(localizations.imap)),
+              DropdownMenuItem(value: 'pop3', child: Text(localizations.pop3)),
+            ],
+            onChanged: (v) => setState(() => _storeProtocol = v ?? 'imaps'),
+          ),
+          SizedBox(height: 12),
+          TextFormField(
+            key: const Key('storeFolder'),
+            controller: _storeFolderCtrl,
+            decoration: const InputDecoration(
+              labelText: 'Folder',
+              hintText: 'INBOX',
+            ),
+          ),
+        ],
       ),
     );
   }

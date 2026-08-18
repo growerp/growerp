@@ -93,6 +93,32 @@ void main() {
         reason: 'GitHub save must not reset SMTP security to default');
     await CommonTest.tapByKey(tester, 'cancelEmailSettings');
 
+    // ── System Setup shows and saves the same email settings ────────────────
+    await CommonTest.selectOption(
+        tester, '/systemSetup', 'SystemSetupDialog');
+    expect(CommonTest.getTextFormField('smtpHost'), smtpHost,
+        reason: 'system setup should show the configured SMTP host');
+    await CommonTest.enterText(tester, 'storeHost', 'imap.example.com');
+    await CommonTest.tapByKey(tester, 'saveSettings',
+        seconds: CommonTest.waitTime);
+    await CommonTest.waitForSnackbarToGo(tester);
+
+    // Saving there keeps the email settings and the GitHub repository
+    await CommonTest.selectOption(
+        tester, '/adk-mcp-servers', 'AdkMcpServerListView');
+    await CommonTest.tapByKey(tester, 'configureEmailIntegration');
+    await CommonTest.checkWidgetKey(tester, 'EmailSettingsDialog');
+    expect(CommonTest.getTextFormField('smtpHost'), smtpHost,
+        reason: 'system setup save must keep the SMTP host');
+    expect(CommonTest.getTextFormField('storeHost'), 'imap.example.com',
+        reason: 'IMAP host entered in system setup should be saved');
+    await CommonTest.tapByKey(tester, 'cancelEmailSettings');
+    await CommonTest.tapByKey(tester, 'configureGithubIntegration');
+    await CommonTest.checkWidgetKey(tester, 'GithubSettingsDialog');
+    expect(CommonTest.getTextFormField('githubRepository'), githubRepo,
+        reason: 'system setup save must not clear the GitHub repository');
+    await CommonTest.tapByKey(tester, 'cancelGithubSettings');
+
     // ── The agent dialog shows the built-in Moqui server (read-only) ─────────
     await AdkTest.selectAgents(tester);
     await CommonTest.tapByKey(tester, 'addAdkAgent');

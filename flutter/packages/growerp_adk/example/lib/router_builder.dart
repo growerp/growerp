@@ -100,6 +100,15 @@ const adkMenuConfig = MenuConfiguration(
       sequenceNum: 65,
       widgetName: 'AdkKnowledgeView',
     ),
+    MenuItem(
+      menuItemId: 'ADK_SYSTEM_SETUP',
+      itemKey: 'ADK_SYSTEM_SETUP',
+      title: 'System Setup',
+      route: '/systemSetup',
+      iconName: 'settings',
+      sequenceNum: 70,
+      widgetName: 'SystemSetupDialog',
+    ),
   ],
 );
 
@@ -119,6 +128,7 @@ Widget _routeWidget(String route) => switch (route) {
       '/adk-approvals' => const AdkApprovalsListView(),
       '/adk-actions' => const AdkActionsListView(),
       '/adk-knowledge' => const AdkKnowledgeView(),
+      '/systemSetup' => const SystemSetupDialog(),
       _ => const AdkDashboard(),
     };
 
