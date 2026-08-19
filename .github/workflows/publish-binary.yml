@@ -985,6 +985,12 @@ jobs:
               f.write(f'PLAY_STATUS={status}\n')
           PYEOF
 
+      # Committing the edit fails with "Changes cannot be sent for review
+      # automatically" whenever the Console will not let the API self-submit
+      # (managed publishing on, or the app under enforcement). The edit is then
+      # discarded and the uploaded bundle is lost. Committing without sending
+      # for review always succeeds; the release is then submitted from
+      # Publishing overview → Send changes for review.
       - name: Upload to Play Store
         uses: r0adkll/upload-google-play@v1
         with:
@@ -994,6 +1000,7 @@ jobs:
             }}/build/app/outputs/bundle/release/app-release.aab
           track: ${{ inputs.track == 'stable' && 'production' || inputs.track }}
           status: ${{ env.PLAY_STATUS }}
+          changesNotSentForReview: true
 
   # ───────────────────────────────────────────────────────────────────────────
   # Commit the bumped pubspecs after all platform deploys complete.
