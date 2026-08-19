@@ -92,21 +92,30 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
       if (!mounted || _pendingRegisterHandled) return;
       if (_authBloc.state.pendingRegistrationEmail != null) {
         _pendingRegisterHandled = true;
-        showDialog(
-          barrierDismissible: true,
-          context: context,
-          builder: (BuildContext context) {
-            return BlocProvider.value(
-              value: _authBloc,
-              child: const RegisterUserDialog(true),
-            );
-          },
-        );
+        _showAuthDialog(const RegisterUserDialog(true));
       }
     });
   }
 
   bool _pendingRegisterHandled = false;
+
+  /// Auth dialogs (login/register) show their own progress indicator, so while
+  /// one is open this form must not swap to [AppLoadingScreen] underneath it:
+  /// that would stack two spinners on top of each other.
+  bool _authDialogOpen = false;
+
+  void _showAuthDialog(Widget dialog) {
+    setState(() => _authDialogOpen = true);
+    showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (BuildContext context) {
+        return BlocProvider.value(value: _authBloc, child: dialog);
+      },
+    ).then((_) {
+      if (mounted) setState(() => _authDialogOpen = false);
+    });
+  }
 
   @override
   void dispose() {
@@ -169,7 +178,12 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
         }
       },
       builder: (context, state) {
-        switch (state.status) {
+        // While an auth dialog is open it renders its own loading indicator;
+        // keep this form as-is behind it instead of showing a second spinner.
+        final status = state.status == AuthStatus.loading && _authDialogOpen
+            ? AuthStatus.unAuthenticated
+            : state.status;
+        switch (status) {
           case AuthStatus.authenticated:
             return const Text(
               "should never show because this form is only used for non authenticated",
@@ -323,16 +337,7 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
                                           ),
                                         ),
                                       );
-                                      showDialog(
-                                        barrierDismissible: true,
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return BlocProvider.value(
-                                            value: _authBloc,
-                                            child: const LoginDialog(),
-                                          );
-                                        },
-                                      );
+                                      _showAuthDialog(const LoginDialog());
                                     },
                                   ),
                                   const SizedBox(height: 50),
@@ -344,20 +349,9 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
                                           .registerNewCompanyAndAdmin,
                                       isPrimary: false,
                                       colorScheme: colorScheme,
-                                      onPressed: () {
-                                        showDialog(
-                                          barrierDismissible: true,
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return BlocProvider.value(
-                                              value: _authBloc,
-                                              child: const RegisterUserDialog(
-                                                true,
-                                              ),
-                                            );
-                                          },
-                                        );
-                                      },
+                                      onPressed: () => _showAuthDialog(
+                                        const RegisterUserDialog(true),
+                                      ),
                                     ),
                                   const SizedBox(height: 60),
                                 ],
