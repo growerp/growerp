@@ -28,6 +28,7 @@ import 'l10n/generated/assessment_localizations.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  installGlobalErrorHandlers();
   await GlobalConfiguration().loadFromAsset('app_settings');
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
   GlobalConfiguration().updateValue('appName', packageInfo.appName);

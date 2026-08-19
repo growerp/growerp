@@ -1,1 +1,13 @@
+GrowERP Freelance is a business administration app for freelancers. It connects
+to our hosted backend, so an internet connection is required.
 
+On launch the app shows a loading indicator and then the login screen.
+
+To sign in, use the demo account provided in the review information:
+  user:     test@example.com
+  password: qqqqqq9!
+
+After signing in you reach the dashboard, from where the menu gives access to
+customers, activities, time entries, products, orders and invoices.
+
+The app supports both iPhone and iPad in all orientations.

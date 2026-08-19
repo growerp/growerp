@@ -151,16 +151,6 @@ class _AppSplashScreenState extends State<AppSplashScreen> {
   }
 
   Widget _buildLoadingState(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const CircularProgressIndicator(),
-        SizedBox(height: 24),
-        Text(
-          'Loading Menu Configuration...',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-      ],
-    );
+    return const AppLoadingScreen(message: 'Loading Menu Configuration...');
   }
 }

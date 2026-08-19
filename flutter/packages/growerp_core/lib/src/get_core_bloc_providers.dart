@@ -23,9 +23,9 @@ List<BlocProvider> getCoreBlocProviders(
     BlocProvider<AuthBloc>(create: (context) => authBloc..add(AuthLoad())),
     BlocProvider<ChatRoomBloc>(create: (context) => chatRoomBloc),
     BlocProvider<ActivityBloc>(create: (context) => ActivityBloc(restClient)),
-    BlocProvider<ThemeBloc>(
-      create: (context) => ThemeBloc()..add(ThemeSwitch()),
-    ),
+    // no startup event: ThemeSwitch toggles, so dispatching it here flipped
+    // every cold start into dark mode. ThemeState already defaults to light.
+    BlocProvider<ThemeBloc>(create: (context) => ThemeBloc()),
     BlocProvider<LocaleBloc>(
       create: (context) => LocaleBloc()..add(LocaleLoaded()),
     ),

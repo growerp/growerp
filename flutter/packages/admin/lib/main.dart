@@ -45,6 +45,7 @@ import 'l10n/generated/admin_localizations.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  installGlobalErrorHandlers();
 
   // Set date offset for testing (rental, subscription expiration, etc.)
   // Change to non-zero value to test time-dependent features, e.g., 15

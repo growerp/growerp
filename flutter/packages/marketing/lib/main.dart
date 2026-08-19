@@ -37,6 +37,7 @@ import 'views/marketing_db_form.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  installGlobalErrorHandlers();
 
   await GlobalConfiguration().loadFromAsset('app_settings');
 

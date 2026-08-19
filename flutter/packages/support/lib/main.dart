@@ -39,6 +39,7 @@ import 'l10n/generated/support_localizations.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  installGlobalErrorHandlers();
 
   await GlobalConfiguration().loadFromAsset('app_settings');
 

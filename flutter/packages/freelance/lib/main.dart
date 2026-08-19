@@ -40,22 +40,39 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  installGlobalErrorHandlers();
+  // runApp() must always be reached: anything thrown on the way there leaves
+  // the app without a single frame, which is an unexplained black screen.
+  try {
+    await _startApp();
+  } catch (e, s) {
+    debugPrint('===freelance startup failed: $e\n$s');
+    runApp(StartupErrorScreen(message: e.toString()));
+  }
+}
 
-  await GlobalConfiguration().loadFromAsset('app_settings');
+Future<void> _startApp() async {
+  String version = '';
+  try {
+    await GlobalConfiguration().loadFromAsset('app_settings');
 
-  PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  GlobalConfiguration().updateValue('appName', packageInfo.appName);
-  GlobalConfiguration().updateValue('packageName', packageInfo.packageName);
-  GlobalConfiguration().updateValue('version', packageInfo.version);
-  GlobalConfiguration().updateValue('build', packageInfo.buildNumber);
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    GlobalConfiguration().updateValue('appName', packageInfo.appName);
+    GlobalConfiguration().updateValue('packageName', packageInfo.packageName);
+    GlobalConfiguration().updateValue('version', packageInfo.version);
+    GlobalConfiguration().updateValue('build', packageInfo.buildNumber);
+    version = packageInfo.version;
+  } catch (e) {
+    // config asset or platform channel unavailable: carry on with defaults so
+    // the user gets the login screen instead of nothing.
+    debugPrint('===freelance startup configuration error: $e');
+  }
 
-  String applicationId = GlobalConfiguration().get("applicationId");
+  String applicationId =
+      GlobalConfiguration().get("applicationId") ?? 'AppFreelance';
   // check if there is override for the production(now test) backend url
   // Also checks if force update is required
-  final forceUpdateInfo = await getBackendUrlOverride(
-    applicationId,
-    packageInfo.version,
-  );
+  final forceUpdateInfo = await getBackendUrlOverride(applicationId, version);
 
   Bloc.observer = AppBlocObserver();
   RestClient restClient = RestClient(await buildDioClient());
@@ -113,6 +130,10 @@ class FreelanceApp extends StatefulWidget {
 
 class _FreelanceAppState extends State<FreelanceApp> {
   late MenuConfigBloc _menuConfigBloc;
+  final GlobalKey<NavigatorState> _rootNavigatorKey =
+      GlobalKey<NavigatorState>();
+  GoRouter? _router;
+  MenuConfiguration? _routerMenuConfiguration;
 
   @override
   void initState() {
@@ -140,25 +161,33 @@ class _FreelanceAppState extends State<FreelanceApp> {
 
           if (state.status == MenuConfigStatus.success &&
               state.menuConfiguration != null) {
-            // Configuration loaded, build dynamic router using shared component
-            router = createDynamicAppRouter(
-              [state.menuConfiguration!],
-              config: DynamicRouterConfig(
-                mainConfigId: 'FREELANCE_DEFAULT',
-                dashboardBuilder: () => const FreelanceDbForm(),
-                widgetLoader: WidgetRegistry.getWidget,
-                appTitle: 'GrowERP Freelance',
-                dashboardFabBuilder: (_) => Builder(
-                  builder: (ctx) => FloatingActionButton(
-                    key: const Key('adkChatFab'),
-                    tooltip: 'AI Assistant',
-                    onPressed: () => AdkChatDialog.show(ctx),
-                    child: const Icon(Icons.smart_toy),
+            // Configuration loaded, build dynamic router using shared component.
+            // Rebuild it only when the configuration itself changed: a new
+            // router (and navigator key) on every build tears down the whole
+            // Navigator and leaks the previous router.
+            if (_router == null ||
+                _routerMenuConfiguration != state.menuConfiguration) {
+              _routerMenuConfiguration = state.menuConfiguration;
+              _router = createDynamicAppRouter(
+                [state.menuConfiguration!],
+                config: DynamicRouterConfig(
+                  mainConfigId: 'FREELANCE_DEFAULT',
+                  dashboardBuilder: () => const FreelanceDbForm(),
+                  widgetLoader: WidgetRegistry.getWidget,
+                  appTitle: 'GrowERP Freelance',
+                  dashboardFabBuilder: (_) => Builder(
+                    builder: (ctx) => FloatingActionButton(
+                      key: const Key('adkChatFab'),
+                      tooltip: 'AI Assistant',
+                      onPressed: () => AdkChatDialog.show(ctx),
+                      child: const Icon(Icons.smart_toy),
+                    ),
                   ),
                 ),
-              ),
-              rootNavigatorKey: GlobalKey<NavigatorState>(),
-            );
+                rootNavigatorKey: _rootNavigatorKey,
+              );
+            }
+            router = _router!;
           } else {
             // Loading or error, show splash screen using shared component
             // The wildcard route ensures deep-link paths are accepted and

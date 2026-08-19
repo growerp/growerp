@@ -139,14 +139,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           );
         }
         // Authenticated
+        final String? userId = authResult.user?.userId;
+        if (userId == null) {
+          return emit(
+            state.copyWith(
+              status: AuthStatus.unAuthenticated,
+              authenticate: defaultAuthenticate,
+            ),
+          );
+        }
         await PersistFunctions.persistAuthenticate(authResult);
         // chat
-        await chat.connect(authResult.apiKey!, authResult.user!.userId!);
+        await chat.connect(authResult.apiKey!, userId);
         // notification
-        await notification.connect(
-          authResult.apiKey!,
-          authResult.user!.userId!,
-        );
+        await notification.connect(authResult.apiKey!, userId);
         return emit(
           state.copyWith(
             status: AuthStatus.authenticated,
@@ -176,6 +182,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           status: AuthStatus.failure,
           authenticate: state.authenticate ?? defaultAuthenticate,
           message: await getDioError(e),
+        ),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(
+          status: AuthStatus.failure,
+          authenticate: state.authenticate ?? defaultAuthenticate,
+          message: e.toString(),
         ),
       );
     }

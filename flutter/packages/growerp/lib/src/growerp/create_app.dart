@@ -431,6 +431,7 @@ import 'views/${name}_db_form.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  installGlobalErrorHandlers();
 
   await GlobalConfiguration().loadFromAsset('app_settings');
 

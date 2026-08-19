@@ -19,6 +19,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
+import '../../../templates/templates.dart';
 import '../../domains.dart';
 
 /// Premium home screen with animated gradient background, entrance animations,
@@ -375,7 +376,9 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
               ),
             );
           default:
-            return Container();
+            // initial/loading: never render an empty widget here, it is the
+            // first thing shown at launch and reads as a dead (black) app.
+            return const AppLoadingScreen();
         }
       },
     );

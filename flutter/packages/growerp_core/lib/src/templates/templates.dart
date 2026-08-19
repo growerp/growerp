@@ -6,5 +6,6 @@ export 'display_menu_option.dart';
 export 'dynamic_router_builder.dart';
 export 'static_router_builder.dart';
 export 'app_splash_screen.dart';
+export 'app_loading_screen.dart';
 export 'dashboard_card.dart';
 export 'dashboard_mini.dart';

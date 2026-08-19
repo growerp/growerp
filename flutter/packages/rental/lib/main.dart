@@ -38,6 +38,7 @@ import 'package:growerp_adk/growerp_adk.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  installGlobalErrorHandlers();
 
   await GlobalConfiguration().loadFromAsset('app_settings');
 

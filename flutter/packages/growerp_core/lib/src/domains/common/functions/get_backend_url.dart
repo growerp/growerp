@@ -60,10 +60,12 @@ String _getCurrentPlatform() {
 ///
 /// [applicationId] - The application classification ID
 /// [version] - The application version
+/// [baseUrlOverride] - test only: address to query instead of the real backend
 Future<ForceUpdateInfo> getBackendUrlOverride(
   String applicationId,
-  String version,
-) async {
+  String version, {
+  @visibleForTesting String? baseUrlOverride,
+}) async {
   late http.Response response;
   late String backendBaseUrl, backendUrl, databaseUrl, chatUrl, secure;
   final String platform = _getCurrentPlatform();
@@ -89,10 +91,18 @@ Future<ForceUpdateInfo> getBackendUrlOverride(
       chatUrl = 'chatUrl';
       secure = 's';
     }
+    if (baseUrlOverride != null) backendBaseUrl = baseUrlOverride;
     backendUrl =
         '$backendBaseUrl/rest/s1/growerp/100/BackendUrl?version='
         '$version&applicationId=$applicationId&platform=$platform';
-    response = await http.get(Uri.parse(backendUrl));
+    // this runs before runApp(): an unbounded get() on a network that accepts
+    // but never answers leaves the app without a single frame (black screen).
+    response = await http
+        .get(Uri.parse(backendUrl))
+        .timeout(
+          const Duration(seconds: 5),
+          onTimeout: () => http.Response('', 408),
+        );
 
     if (response.statusCode == 200) {
       final responseBody = jsonDecode(response.body);
