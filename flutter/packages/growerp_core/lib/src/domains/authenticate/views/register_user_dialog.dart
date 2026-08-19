@@ -88,7 +88,7 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
               child: popUp(
                 context: context,
                 title: _localizations!.registration,
-                height: isPhone ? 350 : 300,
+                height: isPhone ? 360 : 310,
                 child: _registerForm(_authBloc.state.authenticate!),
               ),
             );
