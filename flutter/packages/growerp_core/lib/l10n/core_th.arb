@@ -1331,5 +1331,13 @@
   "acctPeriodLocked": "ไม่สามารถเปลี่ยนได้: มีการบันทึกรายการแล้ว",
   "@acctPeriodLocked": {
     "description": "Currency and accounting year can no longer be changed"
+  },
+  "showOutreachGuide": "แสดงคู่มือการตั้งค่า outreach",
+  "@showOutreachGuide": {
+    "description": "System setup: switch the outreach setup guide on or off"
+  },
+  "showOutreachGuideHelp": "เพิ่มแท็บคู่มือในเมนู outreach เฉพาะสำหรับคุณเท่านั้น",
+  "@showOutreachGuideHelp": {
+    "description": "System setup: help text for the outreach setup guide switch"
   }
 }

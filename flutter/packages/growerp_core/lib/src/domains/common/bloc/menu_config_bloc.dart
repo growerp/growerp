@@ -50,6 +50,7 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
       transformer: menuConfigDroppable(const Duration(milliseconds: 300)),
     );
     on<MenuItemToggleActive>(_onMenuItemToggleActive);
+    on<MenuWidgetVisibilitySet>(_onMenuWidgetVisibilitySet);
     on<MenuItemToggleMinimize>(_onMenuItemToggleMinimize);
     on<MenuItemLink>(_onMenuItemLink);
     on<MenuItemUnlink>(_onMenuItemUnlink);
@@ -330,6 +331,42 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
           status: MenuConfigStatus.success,
           menuConfiguration: menuConfig,
           message: 'Menu option visibility toggled',
+        ),
+      );
+    } on DioException catch (e) {
+      emit(
+        state.copyWith(
+          status: MenuConfigStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
+    }
+  }
+
+  /// Show or hide the menu item of a screen for this user in every app.
+  Future<void> _onMenuWidgetVisibilitySet(
+    MenuWidgetVisibilitySet event,
+    Emitter<MenuConfigState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: MenuConfigStatus.loading));
+
+      await restClient.setUserMenuWidgetVisibility(
+        widgetName: event.widgetName,
+        hidden: event.hidden,
+      );
+
+      await clearRestCache();
+      final menuConfig = await restClient.getMenuConfiguration(
+        appId: appId,
+        userVersion: true,
+      );
+
+      emit(
+        state.copyWith(
+          status: MenuConfigStatus.success,
+          menuConfiguration: menuConfig,
+          message: 'Menu option visibility changed',
         ),
       );
     } on DioException catch (e) {

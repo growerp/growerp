@@ -75,6 +75,14 @@ Service definitions for menu configuration and menu item management
 
       <set field="config" from="userConfigs[0]" />
 
+      <!-- Screens the user switched off; a user preference so it applies in
+           every app, not just the app of this configuration. -->
+      <entity-find entity-name="moqui.security.UserPreference" list="hiddenPrefs">
+        <econdition field-name="userId" from="ec.user.userId" />
+        <econdition field-name="preferenceKey" operator="like" value="growerp.menu.hidden.%" />
+        <econdition field-name="preferenceValue" value="Y" />
+      </entity-find>
+
       <!-- Get top-level menu items (those with no parent) for this configuration -->
       <entity-find entity-name="growerp.menu.MenuItem" list="topLevelItems">
         <econdition field-name="menuConfigurationId" from="config.menuConfigurationId" />
@@ -89,6 +97,13 @@ Service definitions for menu configuration and menu item management
         
         import groovy.json.JsonSlurper
         def jsonSlurper = new JsonSlurper()
+
+        // Widget names switched off by this user, in any app
+        String hiddenPrefix = 'growerp.menu.hidden.'
+        Set hiddenWidgets = new HashSet()
+        hiddenPrefs.each { pref ->
+          hiddenWidgets.add(pref.preferenceKey.toString().substring(hiddenPrefix.length()))
+        }
 
         // Parse userGroupsJson string into a proper list for Flutter model
         def parseUserGroups = { jsonStr ->
@@ -132,7 +147,7 @@ Service definitions for menu configuration and menu item management
             selectedImage: item.selectedImage,
             userGroups: parseUserGroups(item.userGroupsJson),
             sequenceNum: item.sequenceNum,
-            isActive: item.isActive == 'Y',
+            isActive: item.isActive == 'Y' &amp;&amp; !hiddenWidgets.contains(item.widgetName),
             isMinimized: item.isMinimized == 'Y',
             children: children
           ]
@@ -1005,6 +1020,58 @@ Service definitions for menu configuration and menu item management
       ]" />
 
       <set field="isActive" from="newIsActive" />
+    </actions>
+  </service>
+
+  <!-- setUserMenuWidgetVisibility: show/hide one screen in the menu of every
+       app of the current user. Kept as a user preference instead of a menu
+       item flag, because menu configurations are cloned per app. -->
+  <service verb="set" noun="UserMenuWidgetVisibility" authenticate="true">
+    <description>Show or hide the menu item of a screen for the current user, in every application.</description>
+    <in-parameters>
+      <parameter name="widgetName" required="true" />
+      <parameter name="hidden" type="Boolean" required="true" />
+    </in-parameters>
+    <out-parameters>
+      <parameter name="widgetName" />
+      <parameter name="hidden" type="Boolean" />
+    </out-parameters>
+    <actions>
+      <set field="userId" from="ec.user.userId" />
+      <set field="preferenceKey" from="'growerp.menu.hidden.' + widgetName" />
+      <set field="preferenceValue" from="hidden ? 'Y' : 'N'" />
+
+      <entity-find-one entity-name="moqui.security.UserPreference" value-field="pref">
+        <field-map field-name="userId" from="userId" />
+        <field-map field-name="preferenceKey" from="preferenceKey" />
+      </entity-find-one>
+      <if condition="pref">
+        <service-call name="update#moqui.security.UserPreference"
+          in-map="[userId: userId, preferenceKey: preferenceKey,
+                   preferenceValue: preferenceValue]" />
+        <else>
+          <service-call name="create#moqui.security.UserPreference"
+            in-map="[userId: userId, preferenceKey: preferenceKey,
+                     preferenceValue: preferenceValue]" />
+        </else>
+      </if>
+
+      <!-- Keep the menu copies the user already has in step with the
+           preference, they are what the menu editor works on. -->
+      <entity-find entity-name="growerp.menu.MenuConfiguration" list="userConfigs">
+        <econdition field-name="userId" from="userId" />
+      </entity-find>
+      <iterate list="userConfigs" entry="userConfig">
+        <entity-find entity-name="growerp.menu.MenuItem" list="widgetItems">
+          <econdition field-name="menuConfigurationId" from="userConfig.menuConfigurationId" />
+          <econdition field-name="widgetName" from="widgetName" />
+        </entity-find>
+        <iterate list="widgetItems" entry="widgetItem">
+          <service-call name="update#growerp.menu.MenuItem"
+            in-map="[menuItemId: widgetItem.menuItemId,
+                     isActive: hidden ? 'N' : 'Y']" />
+        </iterate>
+      </iterate>
     </actions>
   </service>
 

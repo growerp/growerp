@@ -1309,6 +1309,11 @@ limitations under the License.
                     <service name="growerp.100.MenuServices100.toggle#MenuItemActive" />
                 </method>
             </resource>
+            <resource name="visibility">
+                <method type="patch">
+                    <service name="growerp.100.MenuServices100.set#UserMenuWidgetVisibility" />
+                </method>
+            </resource>
         </resource>
 
         <resource name="MenuItems">

@@ -1946,6 +1946,13 @@ abstract class RestClient {
   @PATCH("rest/s1/growerp/100/MenuItem/toggle")
   Future<void> toggleMenuItemActive({@Field() required String menuItemId});
 
+  /// Show/hide the menu item of a screen for the current user, in every app
+  @PATCH("rest/s1/growerp/100/MenuItem/visibility")
+  Future<void> setUserMenuWidgetVisibility({
+    @Field() required String widgetName,
+    @Field() required bool hidden,
+  });
+
   // ========== Agent Manager ==========
 
   /// Get agent dashboard data

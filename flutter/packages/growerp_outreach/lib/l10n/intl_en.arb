@@ -419,6 +419,22 @@
   "@guideBackToGuide": {
     "description": "Outreach setup guide: guideBackToGuide"
   },
+  "guideHide": "Hide guide",
+  "@guideHide": {
+    "description": "Outreach setup guide: guideHide"
+  },
+  "guideHideConfirmTitle": "Hide the setup guide?",
+  "@guideHideConfirmTitle": {
+    "description": "Outreach setup guide: guideHideConfirmTitle"
+  },
+  "guideHideConfirmMessage": "The guide is removed from the outreach menu for you only. You can switch it back on with 'Show outreach setup guide' in System Setup.",
+  "@guideHideConfirmMessage": {
+    "description": "Outreach setup guide: guideHideConfirmMessage"
+  },
+  "guideHiddenMessage": "Guide hidden. Switch it back on in System Setup.",
+  "@guideHiddenMessage": {
+    "description": "Outreach setup guide: guideHiddenMessage"
+  },
   "guideStatusSystemOk": "Email server and AI key configured",
   "@guideStatusSystemOk": {
     "description": "Outreach setup guide: guideStatusSystemOk"

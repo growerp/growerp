@@ -1331,5 +1331,13 @@
   "acctPeriodLocked": "Nicht mehr änderbar: es wurden Buchungen erfasst",
   "@acctPeriodLocked": {
     "description": "Currency and accounting year can no longer be changed"
+  },
+  "showOutreachGuide": "Outreach-Setup-Anleitung anzeigen",
+  "@showOutreachGuide": {
+    "description": "System setup: switch the outreach setup guide on or off"
+  },
+  "showOutreachGuideHelp": "Fügt das Register „Anleitung“ nur für Sie zum Outreach-Menü hinzu.",
+  "@showOutreachGuideHelp": {
+    "description": "System setup: help text for the outreach setup guide switch"
   }
 }

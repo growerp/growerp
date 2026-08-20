@@ -408,5 +408,13 @@
   "acctPeriodLocked": "No se puede cambiar: ya se han contabilizado transacciones",
   "@acctPeriodLocked": {
     "description": "Currency and accounting year can no longer be changed"
+  },
+  "showOutreachGuide": "Mostrar la guía de configuración de outreach",
+  "@showOutreachGuide": {
+    "description": "System setup: switch the outreach setup guide on or off"
+  },
+  "showOutreachGuideHelp": "Añade la pestaña Guía al menú de outreach solo para usted.",
+  "@showOutreachGuideHelp": {
+    "description": "System setup: help text for the outreach setup guide switch"
   }
 }

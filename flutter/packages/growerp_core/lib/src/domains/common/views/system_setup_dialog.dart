@@ -26,6 +26,9 @@ import 'package:growerp_core/growerp_core.dart';
 /// Settings are stored per-tenant in the backend via the SystemSettings REST endpoint.
 /// GitHub credentials are configured from the ADK Tools & integrations screen
 /// (GithubSettingsDialog).
+/// Widget name of the outreach setup guide screen in the app menu.
+const String _guideWidgetName = 'OutreachSetupGuideScreen';
+
 class SystemSetupDialog extends StatefulWidget {
   /// When shown modally (e.g. from the ADK chat as a Dialog) rather than as a
   /// full-screen menu route: adds a Cancel button and pops on a successful save.
@@ -268,10 +271,53 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
     }
   }
 
+  /// Menu item of the outreach setup guide, when the running app has one and
+  /// a [MenuConfigBloc] is available. Used for the show/hide switch below.
+  MenuItem? _guideMenuItem(BuildContext context) {
+    MenuConfiguration? config;
+    try {
+      config = context.watch<MenuConfigBloc>().state.menuConfiguration;
+    } catch (_) {
+      return null;
+    }
+    for (final item in config?.menuItems ?? <MenuItem>[]) {
+      if (item.widgetName == _guideWidgetName) return item;
+      for (final child in item.children ?? <MenuItem>[]) {
+        if (child.widgetName == _guideWidgetName) return child;
+      }
+    }
+    return null;
+  }
+
+  /// Switch showing the outreach setup guide in the menu, per user. Applies
+  /// immediately, it is not part of the save below.
+  Widget _outreachGuideSection(MenuItem guideItem) {
+    final localizations = CoreLocalizations.of(context)!;
+    return GroupingDecorator(
+      decoratorKey: const Key('outreachGuideSection'),
+      labelText: 'Outreach Guide',
+      icon: Icons.checklist,
+      child: SwitchListTile(
+        key: const Key('showOutreachGuide'),
+        contentPadding: EdgeInsets.zero,
+        title: Text(localizations.showOutreachGuide),
+        subtitle: Text(localizations.showOutreachGuideHelp),
+        value: guideItem.isActive,
+        onChanged: (value) => context.read<MenuConfigBloc>().add(
+          MenuWidgetVisibilitySet(
+            widgetName: _guideWidgetName,
+            hidden: !value,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
 
     final isPhone = ResponsiveBreakpoints.of(context).isMobile;
+    final guideItem = _guideMenuItem(context);
 
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -305,6 +351,10 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
                 _aiSettingsSection(),
                 SizedBox(height: 24),
                 _emailSettingsSection(),
+                if (guideItem?.menuItemId != null) ...[
+                  SizedBox(height: 24),
+                  _outreachGuideSection(guideItem!),
+                ],
                 SizedBox(height: 32),
                 Center(
                   child: Row(

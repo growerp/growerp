@@ -1684,5 +1684,13 @@
   "acctPeriodLocked": "Cannot be changed: transactions have been posted",
   "@acctPeriodLocked": {
     "description": "Currency and accounting year can no longer be changed"
+  },
+  "showOutreachGuide": "Show outreach setup guide",
+  "@showOutreachGuide": {
+    "description": "System setup: switch the outreach setup guide on or off"
+  },
+  "showOutreachGuideHelp": "Adds the Guide tab to the outreach menu for you only.",
+  "@showOutreachGuideHelp": {
+    "description": "System setup: help text for the outreach setup guide switch"
   }
 }

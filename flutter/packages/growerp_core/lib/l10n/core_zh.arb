@@ -1331,5 +1331,13 @@
   "acctPeriodLocked": "无法更改：已过账交易",
   "@acctPeriodLocked": {
     "description": "Currency and accounting year can no longer be changed"
+  },
+  "showOutreachGuide": "显示推广设置指南",
+  "@showOutreachGuide": {
+    "description": "System setup: switch the outreach setup guide on or off"
+  },
+  "showOutreachGuideHelp": "仅为您在推广菜单中添加“指南”标签页。",
+  "@showOutreachGuideHelp": {
+    "description": "System setup: help text for the outreach setup guide switch"
   }
 }

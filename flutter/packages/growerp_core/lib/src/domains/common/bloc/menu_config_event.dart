@@ -105,6 +105,22 @@ class MenuItemToggleActive extends MenuConfigEvent {
   List<Object?> get props => [menuItemId];
 }
 
+/// Show or hide the menu item of a screen for this user, in every app.
+/// Unlike [MenuItemToggleActive] this is not limited to one app, because menu
+/// configurations are cloned per app.
+class MenuWidgetVisibilitySet extends MenuConfigEvent {
+  const MenuWidgetVisibilitySet({
+    required this.widgetName,
+    required this.hidden,
+  });
+
+  final String widgetName;
+  final bool hidden;
+
+  @override
+  List<Object?> get props => [widgetName, hidden];
+}
+
 /// Toggle menu item minimized state on the dashboard
 /// Minimized items are hidden from drawer/nav-rail and moved to end of dashboard
 class MenuItemToggleMinimize extends MenuConfigEvent {

@@ -71,6 +71,9 @@ class OutreachSetupGuideScreen extends StatefulWidget {
       _OutreachSetupGuideScreenState();
 }
 
+/// Widget name of this screen in the app menu, used to switch it off.
+const String _guideWidgetName = 'OutreachSetupGuideScreen';
+
 class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
   bool _smtpConfigured = false;
   bool _llmConfigured = false;
@@ -118,6 +121,57 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
     } catch (_) {
       return null;
     }
+  }
+
+  /// Menu item of the guide itself, used to switch the guide off. Null when
+  /// the app has no menu configuration (example app) or no guide menu item.
+  MenuItem? get _guideMenuItem {
+    for (final item in _menuConfig?.menuItems ?? <MenuItem>[]) {
+      if (item.widgetName == _guideWidgetName) return item;
+      for (final child in item.children ?? <MenuItem>[]) {
+        if (child.widgetName == _guideWidgetName) return child;
+      }
+    }
+    return null;
+  }
+
+  /// Switches the guide off for this user, in every app.
+  void _hideGuide(OutreachLocalizations localizations) {
+    // The menu reload disposes this screen, so take what is needed from the
+    // context before the event is added.
+    final messenger = ScaffoldMessenger.of(context);
+    context.read<MenuConfigBloc>().add(
+      const MenuWidgetVisibilitySet(
+        widgetName: _guideWidgetName,
+        hidden: true,
+      ),
+    );
+    messenger.showSnackBar(
+      SnackBar(content: Text(localizations.guideHiddenMessage)),
+    );
+  }
+
+  Future<void> _confirmHideGuide(OutreachLocalizations localizations) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        key: const Key('hideGuideDialog'),
+        title: Text(localizations.guideHideConfirmTitle),
+        content: Text(localizations.guideHideConfirmMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(localizations.cancel),
+          ),
+          TextButton(
+            key: const Key('hideGuideConfirm'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(localizations.guideHide),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) _hideGuide(localizations);
   }
 
   /// True when [widgetName] is both part of this app's menu and registered,
@@ -324,11 +378,26 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
             itemCount: steps.length + 1,
             itemBuilder: (context, index) {
               if (index == 0) {
+                final guideItem = _guideMenuItem;
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16),
-                  child: Text(
-                    localizations.guideTitle,
-                    style: Theme.of(context).textTheme.titleLarge,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          localizations.guideTitle,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ),
+                      if (widget.staticMenuConfig == null &&
+                          guideItem?.menuItemId != null)
+                        IconButton(
+                          key: const Key('hideGuide'),
+                          icon: const Icon(Icons.visibility_off),
+                          tooltip: localizations.guideHide,
+                          onPressed: () => _confirmHideGuide(localizations),
+                        ),
+                    ],
                   ),
                 );
               }
