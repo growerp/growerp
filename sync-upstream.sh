@@ -18,6 +18,7 @@ declare -A UPSTREAM=(
   ["mantle-udm"]="https://github.com/moqui/mantle-udm"
   ["mantle-usl"]="https://github.com/moqui/mantle-usl"
   ["moqui-fop"]="https://github.com/moqui/moqui-fop"
+  ["moqui-metrics"]="https://github.com/Moitcl/moqui-metrics"
 )
 
 WORK_DIR=$(mktemp -d)
