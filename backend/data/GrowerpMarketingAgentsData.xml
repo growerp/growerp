@@ -94,7 +94,9 @@ run their business today. When a visitor shows buying intent, asks for a person/
 messages (growerp.100.OutreachServices100.list#OutreachMessages) and new opportunities
 (growerp.100.CrmServices100.get#Opportunity), score them by fit (SMB on spreadsheets) and buying intent,
 and draft a concise tailored follow-up for the hottest few. Campaign reply rates come from
-growerp.100.OutreachServices100.get#CampaignProgress. Post your ranked summary + drafts to the team chat
+growerp.100.OutreachServices100.get#CampaignProgress: call it with no parameters for the owner-wide
+totals, and pass a marketingCampaignId from growerp.100.OutreachServices100.list#OutreachCampaigns only
+when you want one campaign. Post your ranked summary + drafts to the team chat
 with growerp.100.ChatServices100.create#ChatMessage; enrol a lead in a nurture sequence with
 growerp.100.NurtureServices100.enroll#EmailSequence and log follow-ups with
 growerp.100.ActivityServices100.create#Activity. You do not send anything to prospects yourself.
@@ -162,11 +164,12 @@ moqui_search_services with a single noun and use the exact name it returns."/>
         scheduleEnabled="Y"
         scheduleChatRoomId="GROWERP_OPS_DIGEST_ROOM"
         scheduleExpression="0 0 9 * * ?"
-        schedulePrompt="Daily GrowERP marketing digest, 5-7 bullets: messages sent today by channel (growerp.100.OutreachServices100.list#OutreachMessages), reply/response rate (growerp.100.OutreachServices100.get#CampaignProgress), pipeline by stage with weighted value (growerp.100.CrmServices100.get#OpportunitySummary), new and advancing opportunities (growerp.100.CrmServices100.get#Opportunity), and how many opportunities reached a won stage in that summary. Flag anything stalled."
+        schedulePrompt="Daily GrowERP marketing digest, 5-7 bullets: messages sent today by channel (growerp.100.OutreachServices100.list#OutreachMessages), reply/response rate (growerp.100.OutreachServices100.get#CampaignProgress, no parameters needed), pipeline by stage with weighted value (growerp.100.CrmServices100.get#OpportunitySummary), new and advancing opportunities (growerp.100.CrmServices100.get#Opportunity), and how many opportunities reached a won stage in that summary. Flag anything stalled."
         description="Daily marketing digest: sends, replies, pipeline, opportunities won."
         instruction="You write a short daily marketing operations digest for GrowERP's own campaign using
 read-only data: messages sent by channel (growerp.100.OutreachServices100.list#OutreachMessages), reply/response
-rate (growerp.100.OutreachServices100.get#CampaignProgress), campaigns
+rate (growerp.100.OutreachServices100.get#CampaignProgress — no parameters gives the owner-wide totals, a
+marketingCampaignId from list#OutreachCampaigns gives one campaign), campaigns
 (growerp.100.OutreachServices100.list#OutreachCampaigns), pipeline
 (growerp.100.CrmServices100.get#OpportunitySummary), new and advancing opportunities
 (growerp.100.CrmServices100.get#Opportunity) and overall marketing figures

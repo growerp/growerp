@@ -159,11 +159,12 @@
                     <econdition field-name="marketingCampaignId" ignore-if-empty="true" />
                     <econdition field-name="ownerPartyId" />
                 </entity-find>
-                <set field="campaignValue" from="campaignList?.first()" />
+                <set field="campaignValue" from="campaignList ? campaignList.get(0) : null" />
             </if>
 
             <if condition="!campaignValue">
-                <return error="true" message="Campaign not found" />
+                <return error="true"
+                    message="Campaign not found: pass marketingCampaignId or pseudoId, list them with growerp.100.OutreachServices100.list#OutreachCampaigns" />
             </if>
 
             <!-- Build campaign map matching frontend model -->
@@ -1118,7 +1119,7 @@
                 <econdition field-name="marketingCampaignId" ignore-if-empty="true" />
                 <econdition field-name="ownerPartyId" />
             </entity-find>
-            <set field="campaign" from="campaignList?.first()" />
+            <set field="campaign" from="campaignList ? campaignList.get(0) : null" />
             <if condition="!campaign">
                 <return error="true"
                     message="Campaign not found: ${pseudoId} or ${marketingCampaignId}" />
@@ -1728,9 +1729,13 @@
     </service>
 
     <service verb="get" noun="CampaignProgress">
-        <description>Get campaign automation progress and statistics</description>
+        <description>Get campaign automation progress and statistics. Without a
+            marketingCampaignId the figures cover all campaigns of the owner.</description>
         <in-parameters>
-            <parameter name="marketingCampaignId" required="true" />
+            <parameter name="marketingCampaignId">
+                <description>Optional: one campaign, from list#OutreachCampaigns. When empty
+                    the counts are owner-wide totals over all campaigns.</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="marketingCampaignId" />
@@ -1740,46 +1745,65 @@
             <parameter name="messagesFailed" type="Integer" />
             <parameter name="responsesReceived" type="Integer" />
             <parameter name="responseRate" type="BigDecimal" />
+            <parameter name="campaignCount" type="Integer">
+                <description>Number of campaigns the figures cover: 1 for a single campaign</description>
+            </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
 
-            <entity-find-one entity-name="mantle.marketing.campaign.MarketingCampaign"
-                value-field="campaign">
-                <field-map field-name="marketingCampaignId" />
-                <field-map field-name="ownerPartyId" />
-            </entity-find-one>
-            <if condition="!campaign">
-                <return error="true" message="Campaign not found: ${marketingCampaignId}" />
+            <if condition="marketingCampaignId">
+                <!-- list, not find-one: ownerPartyId is not part of the PK, so find-one
+                    would ignore it and return another tenant's campaign -->
+                <entity-find entity-name="mantle.marketing.campaign.MarketingCampaign"
+                    list="campaignList">
+                    <econdition field-name="marketingCampaignId" />
+                    <econdition field-name="ownerPartyId" />
+                </entity-find>
+                <set field="campaign" from="campaignList ? campaignList.get(0) : null" />
+                <if condition="!campaign">
+                    <return error="true" message="Campaign not found: ${marketingCampaignId}" />
+                </if>
+                <set field="statusId" from="campaign.statusId" />
+                <set field="campaignCount" from="1" />
+                <else>
+                    <!-- no id: totals over every campaign of the owner, no single status -->
+                    <entity-find-count entity-name="mantle.marketing.campaign.MarketingCampaign"
+                        count-field="campaignCount">
+                        <econdition field-name="ownerPartyId" />
+                    </entity-find-count>
+                </else>
             </if>
 
-            <set field="statusId" from="campaign.statusId" />
-
-            <!-- Count messages by status -->
-            <entity-find entity-name="growerp.marketing.OutreachMessage" list="sentMessages">
-                <econdition field-name="marketingCampaignId" />
+            <!-- Count messages by status, for the one campaign or owner-wide -->
+            <entity-find-count entity-name="growerp.marketing.OutreachMessageAndCampaign"
+                count-field="messagesSent">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="marketingCampaignId" ignore-if-empty="true" />
                 <econdition field-name="status" value="SENT" />
-            </entity-find>
-            <set field="messagesSent" from="sentMessages.size()" />
+            </entity-find-count>
 
-            <entity-find entity-name="growerp.marketing.OutreachMessage" list="pendingMessages">
-                <econdition field-name="marketingCampaignId" />
+            <entity-find-count entity-name="growerp.marketing.OutreachMessageAndCampaign"
+                count-field="messagesPending">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="marketingCampaignId" ignore-if-empty="true" />
                 <econdition field-name="status" value="PENDING" />
-            </entity-find>
-            <set field="messagesPending" from="pendingMessages.size()" />
+            </entity-find-count>
 
-            <entity-find entity-name="growerp.marketing.OutreachMessage" list="failedMessages">
-                <econdition field-name="marketingCampaignId" />
+            <entity-find-count entity-name="growerp.marketing.OutreachMessageAndCampaign"
+                count-field="messagesFailed">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="marketingCampaignId" ignore-if-empty="true" />
                 <econdition field-name="status" value="FAILED" />
-            </entity-find>
-            <set field="messagesFailed" from="failedMessages.size()" />
+            </entity-find-count>
 
-            <entity-find entity-name="growerp.marketing.OutreachMessage" list="respondedMessages">
-                <econdition field-name="marketingCampaignId" />
+            <entity-find-count entity-name="growerp.marketing.OutreachMessageAndCampaign"
+                count-field="responsesReceived">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="marketingCampaignId" ignore-if-empty="true" />
                 <econdition field-name="status" value="RESPONDED" />
-            </entity-find>
-            <set field="responsesReceived" from="respondedMessages.size()" />
+            </entity-find-count>
 
             <!-- Calculate response rate -->
             <set field="responseRate"

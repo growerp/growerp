@@ -350,6 +350,25 @@
                     def pref = agentAllowGlobs() ? ordered.findAll { matchesAllowGlob(it) } : []
                     (pref ?: ordered).take(max)
                 }
+                // In-parameter map of a service: {name: [type:.., required:.., description:..]}.
+                // Shared by moqui_get_service_details and the moqui_execute_service arg check.
+                def inParamInfo = { sd ->
+                    def inParams = [:]
+                    sd.getInParameterNames().each { pName ->
+                        def p = sd.getInParameter(pName)
+                        if (p) {
+                            def pInfo = [type: p.attribute("type") ?: "String", required: p.attribute("required") == "true"]
+                            def pDescNode = p.first("description")
+                            if (pDescNode?.text) pInfo.description = pDescNode.text.trim()
+                            inParams[pName] = pInfo
+                        }
+                    }
+                    return inParams
+                }
+                // "marketingCampaignId (required, String), pseudoId (String)" for error text.
+                def inParamSummary = { Map inParams ->
+                    inParams.collect { k, v -> "${k} (${v.required ? 'required, ' : ''}${v.type})" }.join(', ')
+                }
                 // Fix up common LLM service-name mistakes; returns the resolved name or the
                 // original (still-undefined) name so the caller's error path can suggest.
                 // Unique growerp.* service for a "verb#Noun" tail, or null.
@@ -540,12 +559,47 @@
                                       isError: (gate.decision == 'blocked')]
                             return
                         }
-                        def serviceResult = ec.service.sync().name(svcName).parameters(gate.args)
+                        // Moqui silently drops undeclared parameters and reports a missing
+                        // required one only as a validation error + rollback in the log, so an
+                        // LLM that guessed a name (campaignId for marketingCampaignId) loops on
+                        // an unexplained failure. Check the names here and say what is valid.
+                        def callArgs = gate.args ?: [:]
+                        def paramNote = ""
+                        def sd = ec.service.getServiceDefinition(svcName)
+                        if (sd != null) {
+                            def inParams = inParamInfo(sd)
+                            // ownerPartyId is the ambient tenant argument: services that do not
+                            // declare it resolve the owner themselves, so passing it is no error.
+                            def unknown = callArgs.keySet().findAll { !inParams.containsKey(it) && it != 'ownerPartyId' }
+                            if (unknown) {
+                                callArgs = callArgs.findAll { k, v -> !unknown.contains(k) }
+                                paramNote = "\n\nIgnored unknown parameter(s): ${unknown.join(', ')}." +
+                                    " Valid parameters: ${inParamSummary(inParams) ?: 'none'}."
+                            }
+                            def missing = inParams.findAll { k, v ->
+                                v.required && (callArgs.get(k) == null || callArgs.get(k).toString().isEmpty()) }.keySet()
+                            if (missing) {
+                                def msg = "Missing required parameter(s): ${missing.join(', ')} for ${svcName}." +
+                                    " Parameters: ${inParamSummary(inParams)}." +
+                                    " Get ids from the matching list#/get# service, or call" +
+                                    " moqui_get_service_details for the full schema.${paramNote}"
+                                ec.logger.warn("MCP: ${msg}")
+                                isError = true
+                                result = [content: [[type: "text", text: msg]], isError: true]
+                                return
+                            }
+                        }
+                        def serviceResult = ec.service.sync().name(svcName).parameters(callArgs)
                             .requireNewTransaction(true).call()
                         def callErr = errorResultIfFailed()
-                        if (callErr != null) { result = callErr; return }
+                        if (callErr != null) {
+                            if (paramNote) callErr.content[0].text = callErr.content[0].text + paramNote
+                            result = callErr
+                            return
+                        }
                         recordResult(gate.logId, serviceResult)
-                        result = [content: [[type: "text", text: new groovy.json.JsonBuilder(serviceResult).toString()]], isError: false]
+                        result = [content: [[type: "text",
+                            text: new groovy.json.JsonBuilder(serviceResult).toString() + paramNote]], isError: false]
                         return
                     }
 
@@ -725,16 +779,7 @@
                             return
                         }
                         def descNode = sd.serviceNode.first("description")
-                        def inParams = [:]
-                        sd.getInParameterNames().each { pName ->
-                            def p = sd.getInParameter(pName)
-                            if (p) {
-                                def pInfo = [type: p.attribute("type") ?: "String", required: p.attribute("required") == "true"]
-                                def pDescNode = p.first("description")
-                                if (pDescNode?.text) pInfo.description = pDescNode.text.trim()
-                                inParams[pName] = pInfo
-                            }
-                        }
+                        def inParams = inParamInfo(sd)
                         def outParams = [:]
                         sd.getOutParameterNames().each { pName ->
                             def p = sd.getOutParameter(pName)
