@@ -141,6 +141,9 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="firstName" required="true" />
             <parameter name="lastName" required="true" />
             <parameter name="email" required="true" />
+            <parameter name="productStoreId"><description>Store the visitor is registering
+                through, used to determine the owner of the new Party. Defaults to the store
+                on the session when not passed.</description></parameter>
         </in-parameters>
         <out-parameters>
             <!-- <parameter name="apiKey"/> -->
@@ -148,6 +151,27 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="customerInfo" type="Map" />
         </out-parameters>
         <actions>
+            <!-- Resolve the owner before creating anything: Party.ownerPartyId defaults to
+                 '_NA_' in mantle, so a Party created without it looks valid but is invisible
+                 to every owner scoped query in GrowERP. Chain is
+                 store -> organizationPartyId (the company) -> that company's ownerPartyId. -->
+            <if condition="!productStoreId">
+                <service-call name="popstore.CartServices.get#ActiveOrderAndCustomer"
+                    out-map="activeOrder" />
+                <set field="productStoreId" from="activeOrder.productStoreId" />
+            </if>
+            <if condition="productStoreId">
+                <entity-find-one entity-name="mantle.product.store.ProductStore"
+                    value-field="productStore" />
+                <entity-find-one entity-name="mantle.party.Party" value-field="storeOrganization">
+                    <field-map field-name="partyId" from="productStore?.organizationPartyId" />
+                </entity-find-one>
+                <set field="ownerPartyId" from="storeOrganization?.ownerPartyId" />
+            </if>
+            <if condition="!ownerPartyId || ownerPartyId == '_NA_'">
+                <return error="true"
+                    message="Cannot determine the owner for a new customer: no product store on the request or session, or its organization has no ownerPartyId" />
+            </if>
             <script>
                 import org.moqui.impl.context.UserFacadeImpl
                 import com.restfb.*
@@ -168,7 +192,8 @@ along with this software (see the LICENSE.md file). If not, see
                     Set partyIds = partiesByEmail.partyIds;
                     if (!partyIds) {
                         Map personRes = ec.service.sync().name("mantle.party.PartyServices.create#Person")
-                                .parameters([firstName: fbUser.firstName, lastName: fbUser.lastName, roleTypeId: "Customer"]).call()
+                                .parameters([firstName: fbUser.firstName, lastName: fbUser.lastName,
+                                             roleTypeId: "Customer", ownerPartyId: ownerPartyId]).call()
                         partyId = personRes.partyId
                         ec.service.sync().name("mantle.party.ContactServices.create#EmailAddress")
                                 .parameters(emailAddress: fbUser.email, partyId: partyId, contactMechPurposeId: "EmailPrimary").call()

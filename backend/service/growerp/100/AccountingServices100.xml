@@ -2218,6 +2218,12 @@ limitations under the License.
                 <field-map field-name="partyId" from="companyPartyId" />
             </entity-find-one>
             <set field="ownerPartyId" from="party.ownerPartyId" />
+            <!-- Party.ownerPartyId defaults to '_NA_' in mantle, so an unresolved owner would
+                 silently create a customer no tenant can see. Fail instead. -->
+            <if condition="!ownerPartyId || ownerPartyId == '_NA_'">
+                <return error="true"
+                    message="Company ${companyPartyId} of store ${productStoreId} has no ownerPartyId" />
+            </if>
             <!-- find person from email -->
             <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany" list="partyIds">
                 <econditions combine="or">

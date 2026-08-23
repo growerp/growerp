@@ -2161,6 +2161,14 @@ limitations under the License.
                     <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                         in-map="[ownerPartyId: relComp.ownerPartyId, seqName: 'party']"
                         out-map="context" />
+                    <!-- ownerPartyId is not an in-parameter of update#User and is never set
+                         here: the bare reference passed null, so the new Party fell back to
+                         mantle's '_NA_' default and became invisible to its own tenant. Use
+                         relComp, the same source as the getNext#PseudoId call above. -->
+                    <if condition="!relComp.ownerPartyId || relComp.ownerPartyId == '_NA_'">
+                        <return error="true"
+                            message="Owner company missing in update#user service for ${user.firstName} ${user.lastName}" />
+                    </if>
                     <service-call name="mantle.party.PartyServices.create#Account"
                         in-map="[roleTypeId: user.role, 
                                 loginAfterCreate: false, pseudoId: seqNum,
@@ -2168,7 +2176,7 @@ limitations under the License.
                                 emailAddress: user.email,
                                 username: user.loginName, newPassword: password,
                                 newPasswordVerify: password,
-                                ownerPartyId: ownerPartyId]"
+                                ownerPartyId: relComp.ownerPartyId]"
                         out-map="userAccount" />
                     <if condition="user.loginDisabled != null">
                         <service-call name="update#moqui.security.UserAccount"
@@ -2875,6 +2883,12 @@ limitations under the License.
             </entity-find-one>
             <if condition="!companyParty">
                 <return message="Not a valid companyId" />
+            </if>
+            <!-- Party.ownerPartyId defaults to '_NA_' in mantle, so an unresolved owner here
+                 would create a website user no tenant can see. Fail instead. -->
+            <if condition="!companyParty.ownerPartyId || companyParty.ownerPartyId == '_NA_'">
+                <return error="true"
+                    message="Company ${ownerPartyId} has no ownerPartyId, cannot register a website user" />
             </if>
             <entity-find-one entity-name="growerp.Application"
                 value-field="application">
@@ -4286,5 +4300,95 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="repair" noun="PartyOwner" authenticate="true">
+        <description>One shot repair of mantle.party.Party rows whose ownerPartyId is null or
+            '_NA_'. Party.ownerPartyId is the tenant boundary in GrowERP but mantle defaults it
+            to '_NA_', so any creation path that missed it produced a Party that looks valid and
+            is invisible to every owner scoped query. Resolution order:
+              - PtyPerson   : the owner of the company it is an Employee of
+              - other       : left alone and listed, never guessed at
+
+            PtyOwner rows are deliberately not touched: an owner cannot own itself because
+            mantle's unique PARTY_ID_PSEUDO index covers (pseudoId, ownerPartyId) and
+            Party.pseudoId defaults to partyId, which the per owner pseudoId sequence also
+            hands to the first party created inside the tenant.
+
+            Idempotent: rows already carrying a real owner are never touched. Run with
+            dryRun=true first to reconcile the counts before writing.
+
+            A populated 'unowned' list is normal, not a fault report. It holds the tenant owners
+            themselves plus the genuinely global parties mantle and moqui seed - shipping carriers
+            (UPS, FedEx, USPS, DHL), tax authorities (UsaIrs, CaEdd, CaDocss), DefaultSettings,
+            SYSTEM_SUPPORT and '_NA_' itself. Those must keep '_NA_'. Only an organization that
+            real tenant data points at is worth investigating.</description>
+        <in-parameters>
+            <parameter name="dryRun" type="Boolean" default-value="true">
+                <description>Report what would change without writing anything.</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="checkedCount" type="Integer" />
+            <parameter name="repairedCount" type="Integer" />
+            <parameter name="unownedCount" type="Integer" />
+            <parameter name="unowned" type="List">
+                <description>partyId/partyTypeEnumId of every row left without an owner. Expected
+                    to hold the global mantle seed parties; see the service description.</description>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <set field="repairedCount" from="0" />
+            <set field="unowned" from="[]" />
+
+            <entity-find entity-name="mantle.party.Party" list="orphanList">
+                <econditions combine="or">
+                    <econdition field-name="ownerPartyId" operator="is-null" />
+                    <econdition field-name="ownerPartyId" value="_NA_" />
+                </econditions>
+                <order-by field-name="partyId" />
+            </entity-find>
+            <set field="checkedCount" from="orphanList.size()" />
+
+            <iterate list="orphanList" entry="party">
+                <set field="newOwnerPartyId" from="null" />
+
+                <if condition="party.partyTypeEnumId == 'PtyPerson'">
+                    <!-- person -> employer company -> that company's owner, the relationship
+                         shape created by create#User -->
+                    <entity-find entity-name="mantle.party.PartyRelationship" list="relList">
+                        <econdition field-name="fromPartyId" from="party.partyId" />
+                        <econdition field-name="fromRoleTypeId" value="Employee" />
+                        <econdition field-name="relationshipTypeEnumId" value="PrtEmployee" />
+                        <order-by field-name="-fromDate" />
+                    </entity-find>
+                    <if condition="relList">
+                        <entity-find-one entity-name="mantle.party.Party" value-field="company">
+                            <field-map field-name="partyId" from="relList[0].toPartyId" />
+                        </entity-find-one>
+                        <if condition="company?.ownerPartyId &amp;&amp; company.ownerPartyId != '_NA_'">
+                            <set field="newOwnerPartyId" from="company.ownerPartyId" />
+                        </if>
+                    </if>
+                </if>
+
+                <if condition="newOwnerPartyId">
+                    <then>
+                        <if condition="!dryRun">
+                            <service-call name="update#mantle.party.Party"
+                                in-map="[partyId: party.partyId, ownerPartyId: newOwnerPartyId]" />
+                        </if>
+                        <set field="repairedCount" from="repairedCount + 1" />
+                        <log message="repair#PartyOwner${dryRun ? ' (dry run)' : ''}: ${party.partyId} (${party.partyTypeEnumId}) -> ${newOwnerPartyId}" />
+                    </then>
+                    <else>
+                        <set field="unowned"
+                            from="unowned + [[partyId: party.partyId, partyTypeEnumId: party.partyTypeEnumId]]" />
+                    </else>
+                </if>
+            </iterate>
+
+            <set field="unownedCount" from="unowned.size()" />
+            <message>repair#PartyOwner${dryRun ? ' (dry run, nothing written)' : ''}: checked ${checkedCount}, repaired ${repairedCount}, left unowned ${unownedCount}</message>
+        </actions>
+    </service>
+
 </services>
- 

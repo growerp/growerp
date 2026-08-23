@@ -72,7 +72,10 @@ limitations under the License.
         localized="Y${timePeriodType?.lengthUomId=='TF_yr'?fromLocalDate.getYear():fromLocalDate.minusMonths((timePeriodType.periodLength*(periodNum-1)).longValue()).getYear()}${timePeriodType?.lengthUomId!='TF_yr'?(timePeriodType.description.split('(?=[A-Z])')[1][0].toLowerCase())+(periodNum as String).padLeft(2,'0'):''}" />
 
     <!-- growerp initial products -->
-    <mantle.party.Party partyId="GROWERP" partyTypeEnumId="PtyOwner" disabled="Y" />
+    <!-- owners keep '_NA_': self owning collides with the unique PARTY_ID_PSEUDO index
+         on (pseudoId, ownerPartyId), see create#Tenant -->
+    <mantle.party.Party partyId="GROWERP" partyTypeEnumId="PtyOwner" disabled="Y"
+        ownerPartyId="_NA_" />
     <mantle.product.category.ProductCategory productCategoryId="GROWERP_SERVICES"
         ownerPartyId="GROWERP" productCategoryTypeEnumId="PctCatalog"
         categoryName="GrowERP Services" description="" />
