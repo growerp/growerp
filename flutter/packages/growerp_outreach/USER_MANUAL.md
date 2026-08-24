@@ -99,9 +99,16 @@ Main Dashboard
    - **Platforms** (Required): Select target platforms (comma-separated)
      - Example: `EMAIL,LINKEDIN,TWITTER`
    - **Target Audience** (Optional): Description of your target audience
-   - **Message Template** (Optional): Template for messages in this campaign
-   - **Email Subject** (Optional): Subject line for email messages
-   - **Landing Page** (Optional): Link to a landing page
+   - **Landing Page** (Optional): One of your landing pages; its public url
+     (`https://<your host>/landing/<pseudoId>`) replaces the `{landingPageUrl}`
+     placeholder. The link appears only where you write that placeholder — the
+     screen warns when a page is selected but no template uses it.
+   - **Message Template** (Optional): Template for messages in this campaign.
+     Placeholders: `{name}`, `{firstName}`, `{company}`, `{companyName}`,
+     `{title}`, `{landingPageUrl}`, each with an optional fallback after a pipe
+     (`{company|your team}`) used when the field is empty.
+   - **Email Subject** (Optional): Subject line for email messages; the same
+     placeholders work here
    - **Daily Limit per Platform** (Optional): Maximum messages per day per platform
      - Default: 50
 

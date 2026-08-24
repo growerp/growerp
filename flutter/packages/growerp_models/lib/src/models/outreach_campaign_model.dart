@@ -34,6 +34,11 @@ class OutreachCampaign {
   /// Associated landing page ID
   final String? landingPageId;
 
+  /// Public url of the landing page, computed by the backend from
+  /// [landingPageId]. Read-only: it is the value the {landingPageUrl}
+  /// placeholder in a message template resolves to.
+  final String? landingPageUrl;
+
   /// Message template with personalization tokens
   final String? messageTemplate;
 
@@ -119,6 +124,7 @@ class OutreachCampaign {
     required this.platforms,
     this.targetAudience,
     this.landingPageId,
+    this.landingPageUrl,
     this.messageTemplate,
     this.emailSubject,
     this.platformSettings,
@@ -152,6 +158,7 @@ class OutreachCampaign {
     String? platforms,
     String? targetAudience,
     String? landingPageId,
+    String? landingPageUrl,
     String? messageTemplate,
     String? emailSubject,
     String? platformSettings,
@@ -183,6 +190,7 @@ class OutreachCampaign {
       platforms: platforms ?? this.platforms,
       targetAudience: targetAudience ?? this.targetAudience,
       landingPageId: landingPageId ?? this.landingPageId,
+      landingPageUrl: landingPageUrl ?? this.landingPageUrl,
       messageTemplate: messageTemplate ?? this.messageTemplate,
       emailSubject: emailSubject ?? this.emailSubject,
       platformSettings: platformSettings ?? this.platformSettings,

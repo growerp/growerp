@@ -63,7 +63,15 @@ This section describes how a user interacts with the Outreach package to create 
     *   **Name**: Enter a descriptive name for the campaign.
     *   **Status**: Set initial status (usually `DRAFT`).
     *   **Target Audience**: Describe the target audience (used for search criteria).
-    *   **Message Template**: Write the message to be sent. Use placeholders like `{name}`, `{company}` for personalization.
+    *   **Landing Page**: (Optional) Pick one of the company's landing pages. Its public url
+        (`https://<company host>/landing/<pseudoId>`) is what the `{landingPageUrl}`
+        placeholder resolves to. Selecting a page does not change the message by itself:
+        the link only appears where the placeholder is written, and the screen warns when a
+        page is selected but no template uses it.
+    *   **Message Template**: Write the message to be sent. Placeholders: `{name}`,
+        `{firstName}`, `{company}`, `{companyName}`, `{title}`, `{landingPageUrl}`. Each
+        takes an optional fallback after a pipe, `{company|your team}`, used when the field
+        is empty. They work in the email subject too.
     *   **Email Subject**: (If Email platform is selected) Enter the email subject line.
     *   **Daily Limit**: Set the maximum number of messages to send per day per platform.
 *   **Platforms**: Select the platforms to target (e.g., Email, LinkedIn).

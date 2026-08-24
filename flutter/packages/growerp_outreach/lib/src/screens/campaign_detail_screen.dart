@@ -56,6 +56,10 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
   late TextEditingController _emailSubjectController;
   late TextEditingController _dailyLimitController;
 
+  /// Landing pages of this company, offered in the landing page dropdown.
+  List<LandingPage> _landingPages = [];
+  String? _selectedLandingPageId;
+
   final Set<String> _selectedPlatforms = {};
   final List<String> _availablePlatforms = [
     'EMAIL',
@@ -132,6 +136,10 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
     );
     _sendFromHour = _toLocalHour(widget.campaign.sendFromHour);
     _sendToHour = _toLocalHour(widget.campaign.sendToHour);
+    _selectedLandingPageId = widget.campaign.landingPageId;
+    // the warning under the dropdown depends on the template text
+    _messageTemplateController.addListener(_onTemplateChanged);
+    _loadLandingPages();
 
     // Parse existing platforms
     try {
@@ -158,10 +166,41 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
     _nameController.dispose();
     _descriptionController.dispose();
     _targetAudienceController.dispose();
-    _messageTemplateController.dispose();
+    _messageTemplateController
+      ..removeListener(_onTemplateChanged)
+      ..dispose();
     _emailSubjectController.dispose();
     _dailyLimitController.dispose();
     super.dispose();
+  }
+
+  void _onTemplateChanged() => setState(() {});
+
+  /// Landing pages to choose from; failures leave the dropdown empty, the
+  /// campaign is editable without one.
+  Future<void> _loadLandingPages() async {
+    final restClient = RepositoryProvider.of<RestClient>(context, listen: false);
+    try {
+      final result = await restClient.getLandingPages(limit: 100);
+      if (mounted) setState(() => _landingPages = result.landingPages);
+    } catch (_) {
+      // no landing pages available: the dropdown just stays empty
+    }
+  }
+
+  /// True when a landing page is selected but no template uses the
+  /// {landingPageUrl} placeholder, so the link would never appear in a message.
+  bool get _landingPageUnused {
+    if (_selectedLandingPageId == null) return false;
+    const token = '{landingPageUrl}';
+    if (_messageTemplateController.text.contains(token)) return false;
+    if (_emailSubjectController.text.contains(token)) return false;
+    return !_selectedPlatforms.any((platform) =>
+        _platformSettings
+            .getForPlatform(platform)
+            ?.messageTemplate
+            ?.contains(token) ??
+        false);
   }
 
   /// Show platform configuration dialog for editing platform-specific settings
@@ -183,6 +222,71 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
         _platformSettings = result;
       });
     }
+  }
+
+  /// Landing page picker. The chosen page's public url is what the
+  /// {landingPageUrl} placeholder in a message template resolves to, so a page
+  /// selected without that placeholder anywhere is flagged as unused.
+  Widget _landingPageField() {
+    final selectedUrl = widget.campaign.landingPageUrl;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        DropdownButtonFormField<String?>(
+          key: const Key('landingPageId'),
+          decoration: const InputDecoration(
+            labelText: 'Landing Page',
+            helperText: 'Insert its url in the message with {landingPageUrl}',
+          ),
+          isExpanded: true,
+          initialValue: _landingPages.any(
+                  (page) => page.landingPageId == _selectedLandingPageId)
+              ? _selectedLandingPageId
+              : null,
+          items: [
+            const DropdownMenuItem<String?>(value: null, child: Text('None')),
+            for (final page in _landingPages)
+              DropdownMenuItem<String?>(
+                key: Key('landingPage${page.pseudoId ?? page.landingPageId}'),
+                value: page.landingPageId,
+                child: Text(
+                  page.pseudoId == null
+                      ? page.title
+                      : '${page.title} [${page.pseudoId}]',
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+          ],
+          onChanged: (String? newValue) =>
+              setState(() => _selectedLandingPageId = newValue),
+        ),
+        if (_selectedLandingPageId != null &&
+            _selectedLandingPageId == widget.campaign.landingPageId &&
+            selectedUrl != null &&
+            selectedUrl.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              selectedUrl,
+              key: const Key('landingPageUrl'),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        if (_landingPageUnused)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              'Landing page selected but {landingPageUrl} is not used in the '
+              'message template',
+              key: const Key('landingPageUnused'),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: Colors.red),
+            ),
+          ),
+      ],
+    );
   }
 
   /// One end of the send window, in the user's own hours. 'Any time' clears it,
@@ -562,6 +666,8 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                         maxLines: 3,
                       ),
                       const SizedBox(height: 20),
+                      _landingPageField(),
+                      const SizedBox(height: 20),
                       TextFormField(
                         key: const Key('messageTemplate'),
                         controller: _messageTemplateController,
@@ -572,9 +678,10 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                                   '{company} and wanted to connect...'
                               : null,
                           helperText: 'Placeholders: {name}, {firstName}, '
-                              '{company}, {title}. Use {company|your team} '
-                              'for a fallback when the field is empty',
-                          helperMaxLines: 2,
+                              '{company}, {title}, {landingPageUrl}. Use '
+                              '{company|your team} for a fallback when the '
+                              'field is empty',
+                          helperMaxLines: 3,
                         ),
                         maxLines: 5,
                       ),
@@ -648,6 +755,7 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                                       platforms: platforms,
                                       targetAudience:
                                           _targetAudienceController.text,
+                                      landingPageId: _selectedLandingPageId,
                                       messageTemplate:
                                           _messageTemplateController.text,
                                       emailSubject:
@@ -670,6 +778,10 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                                       platforms: platforms,
                                       targetAudience:
                                           _targetAudienceController.text,
+                                      // '' clears the page, null would keep
+                                      // the stored one
+                                      landingPageId:
+                                          _selectedLandingPageId ?? '',
                                       messageTemplate:
                                           _messageTemplateController.text,
                                       emailSubject:

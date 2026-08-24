@@ -29,7 +29,10 @@ import 'package:growerp_marketing/growerp_marketing.dart';
 ///
 /// Imports the sample LinkedIn CSV as campaign recipients with a
 /// {name}/{company}/{title} template and verifies each OutreachMessage's
-/// messageContent is fully substituted server-side.
+/// messageContent is fully substituted server-side. A second campaign checks
+/// the {landingPageUrl} placeholder: the campaign's landing page is resolved to
+/// its public url and baked into the message at import time, which is what the
+/// client-sent platforms (LINKEDIN) rely on.
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -123,6 +126,62 @@ void main() {
     expect(eve.messageContent, contains('Consultant'));
     expect(eve.messageContent, isNot(contains('null')));
     expect(eve.messageContent, isNot(contains('{company}')));
+
+    // 4. {landingPageUrl}: a campaign with a landing page substitutes its
+    //    public url, {tenantBaseUrl}/landing/{pseudoId}.
+    final landingPage = await restClient.createLandingPage(
+      title: 'Recipients import landing',
+      pseudoId: 'recipients-import-landing',
+    );
+    expect(landingPage.landingPageId, isNotNull);
+
+    final linkCampaign = await restClient.createOutreachCampaign(campaign: {
+      'campaignName': 'Recipients import link test',
+      'platforms': '["LINKEDIN"]',
+      'landingPageId': landingPage.landingPageId,
+      'messageTemplate': 'Hi {firstName}, have a look: {landingPageUrl}',
+    });
+
+    await restClient.importOutreachRecipients(
+      marketingCampaignId: linkCampaign.campaignId,
+      recipients: [
+        {
+          'recipientName': 'Alice Anderson',
+          'recipientProfileUrl': 'https://www.linkedin.com/in/alice-anderson',
+          'platform': 'LINKEDIN',
+        }
+      ],
+    );
+
+    final linkMessages = (await restClient.listOutreachMessages(
+      marketingCampaignId: linkCampaign.campaignId,
+    ))
+        .messages;
+    expect(linkMessages.length, 1);
+    expect(linkMessages.first.messageContent,
+        contains('/landing/recipients-import-landing'));
+    expect(linkMessages.first.messageContent,
+        isNot(contains('{landingPageUrl}')));
+
+    // the campaign itself reports the url, which is what the campaign detail
+    // screen shows and the LinkedIn send queue substitutes with
+    final fetched = (await restClient.listOutreachCampaigns())
+        .campaigns
+        .firstWhere((c) => c.campaignId == linkCampaign.campaignId);
+    expect(fetched.landingPageId, landingPage.landingPageId);
+    expect(fetched.landingPageUrl, contains('/landing/recipients-import-landing'));
+
+    // an empty landingPageId clears the page (null would keep it, like every
+    // other field of a partial update)
+    await restClient.updateOutreachCampaign(campaign: {
+      'marketingCampaignId': linkCampaign.campaignId,
+      'landingPageId': '',
+    });
+    final cleared = (await restClient.listOutreachCampaigns())
+        .campaigns
+        .firstWhere((c) => c.campaignId == linkCampaign.campaignId);
+    expect(cleared.landingPageId, anyOf(isNull, isEmpty));
+    expect(cleared.landingPageUrl, anyOf(isNull, isEmpty));
 
     await CommonTest.logout(tester);
   }, skip: false);

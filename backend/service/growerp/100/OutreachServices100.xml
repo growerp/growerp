@@ -24,6 +24,10 @@
                 <parameter name="platforms" />
                 <parameter name="targetAudience" />
                 <parameter name="landingPageId" />
+                <parameter name="landingPageUrl">
+                    <description>Public url of the landing page, the value the
+                        {landingPageUrl} placeholder resolves to</description>
+                </parameter>
                 <parameter name="messageTemplate" />
                 <parameter name="emailSubject" />
                 <parameter name="statusId" />
@@ -67,8 +71,24 @@
                 <order-by field-name="-fromDate" />
             </entity-find>
 
+            <!-- one host lookup for the whole page; the per-campaign LandingPage read
+                 below hits the entity cache -->
+            <service-call name="growerp.100.NurtureServices100.get#TenantBaseUrl"
+                in-map="[ownerPartyId: ownerPartyId]" out-map="baseUrlOut" />
+
             <set field="campaigns" from="[]" />
             <iterate list="campaignList" entry="camp">
+                <set field="campLandingPageUrl" value="" />
+                <if condition="camp.landingPageId">
+                    <entity-find-one entity-name="growerp.landing.LandingPage"
+                        value-field="campLandingPage">
+                        <field-map field-name="landingPageId" from="camp.landingPageId" />
+                    </entity-find-one>
+                    <if condition="campLandingPage &amp;&amp; campLandingPage.pseudoId">
+                        <set field="campLandingPageUrl"
+                            value="${baseUrlOut.baseUrl}/landing/${campLandingPage.pseudoId}" />
+                    </if>
+                </if>
                 <entity-find-count entity-name="growerp.marketing.OutreachMessage"
                     count-field="totalMessages">
                     <econdition field-name="marketingCampaignId" from="camp.marketingCampaignId" />
@@ -82,6 +102,7 @@
                     platforms: camp.platforms,
                     targetAudience: camp.targetAudience,
                     landingPageId: camp.landingPageId,
+                    landingPageUrl: campLandingPageUrl,
                     messageTemplate: camp.messageTemplate,
                     emailSubject: camp.emailSubject,
                     platformSettings: camp.platformSettings,
@@ -125,6 +146,10 @@
                 <parameter name="platforms" />
                 <parameter name="targetAudience" />
                 <parameter name="landingPageId" />
+                <parameter name="landingPageUrl">
+                    <description>Public url of the landing page, the value the
+                        {landingPageUrl} placeholder resolves to</description>
+                </parameter>
                 <parameter name="messageTemplate" />
                 <parameter name="emailSubject" />
                 <parameter name="platformSettings" />
@@ -167,6 +192,11 @@
                     message="Campaign not found: pass marketingCampaignId or pseudoId, list them with growerp.100.OutreachServices100.list#OutreachCampaigns" />
             </if>
 
+            <service-call name="growerp.100.OutreachServices100.get#CampaignLandingPageUrl"
+                out-map="landingOut"
+                in-map="[landingPageId: campaignValue.landingPageId,
+                    ownerPartyId: ownerPartyId]" />
+
             <!-- Build campaign map matching frontend model -->
             <set field="campaign"
                 from="[
@@ -177,6 +207,7 @@
                 platforms: campaignValue.platforms,
                 targetAudience: campaignValue.targetAudience,
                 landingPageId: campaignValue.landingPageId,
+                landingPageUrl: landingOut.landingPageUrl,
                 messageTemplate: campaignValue.messageTemplate,
                 emailSubject: campaignValue.emailSubject,
                 platformSettings: campaignValue.platformSettings,
@@ -493,7 +524,10 @@
                 <parameter name="campaignSummary" />
                 <parameter name="platforms" />
                 <parameter name="targetAudience" />
-                <parameter name="landingPageId" />
+                <parameter name="landingPageId">
+                    <description>Empty string clears the campaign's landing page; null (the
+                        default) keeps the stored one, like every other field here</description>
+                </parameter>
                 <parameter name="messageTemplate" />
                 <parameter name="emailSubject" />
                 <parameter name="platformSettings" />
@@ -608,8 +642,11 @@
             <set field="existingCampaign.platforms" from="platforms ?: existingCampaign.platforms" />
             <set field="existingCampaign.targetAudience"
                 from="targetAudience ?: existingCampaign.targetAudience" />
+            <!-- null keeps the stored page (partial update), an empty string clears it:
+                 a plain null cannot express "no landing page any more" -->
             <set field="existingCampaign.landingPageId"
-                from="landingPageId ?: existingCampaign.landingPageId" />
+                from="landingPageId == null ? existingCampaign.landingPageId
+                      : (landingPageId ?: null)" />
             <set field="existingCampaign.messageTemplate"
                 from="messageTemplate ?: existingCampaign.messageTemplate" />
             <set field="existingCampaign.emailSubject"
@@ -1143,6 +1180,12 @@
                 }
             ]]></script>
 
+            <!-- one lookup for the whole import: every recipient shares the campaign's
+                 landing page url -->
+            <service-call name="growerp.100.OutreachServices100.get#CampaignLandingPageUrl"
+                out-map="landingOut"
+                in-map="[landingPageId: campaign.landingPageId, ownerPartyId: ownerPartyId]" />
+
             <set field="importedCount" from="0" type="Integer" />
             <set field="skippedCount" from="0" type="Integer" />
             <iterate list="recipients" entry="recipient">
@@ -1163,7 +1206,8 @@
                     in-map="[text: rcptTemplate,
                              recipientName: recipient.recipientName,
                              recipientCompany: recipient.recipientCompany,
-                             recipientTitle: recipient.recipientTitle]" />
+                             recipientTitle: recipient.recipientTitle,
+                             landingPageUrl: landingOut.landingPageUrl]" />
                 <set field="computedMessageContent"
                     from="recipient.messageContent ?: contentOut.text" />
                 <service-call name="create#growerp.marketing.OutreachMessage"
@@ -1450,10 +1494,41 @@
         </actions>
     </service>
 
+    <service verb="get" noun="CampaignLandingPageUrl">
+        <description>Public url of a campaign's landing page, the value substituted for the
+            {landingPageUrl} placeholder. Empty when the campaign has no landing page or the
+            page has no pseudoId: the token then blanks like any other empty field. The path
+            is the one the PopRestStore /landing screen serves, the host comes from the
+            tenant's store hostname.</description>
+        <in-parameters>
+            <parameter name="landingPageId" />
+            <parameter name="ownerPartyId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="landingPageUrl" />
+        </out-parameters>
+        <actions>
+            <set field="landingPageUrl" value="" />
+            <if condition="!landingPageId">
+                <return />
+            </if>
+            <entity-find-one entity-name="growerp.landing.LandingPage" value-field="landingPage">
+                <field-map field-name="landingPageId" />
+            </entity-find-one>
+            <if condition="landingPage &amp;&amp; landingPage.pseudoId">
+                <service-call name="growerp.100.NurtureServices100.get#TenantBaseUrl"
+                    in-map="[ownerPartyId: ownerPartyId]" out-map="baseUrlOut" />
+                <set field="landingPageUrl"
+                    value="${baseUrlOut.baseUrl}/landing/${landingPage.pseudoId}" />
+            </if>
+        </actions>
+    </service>
+
     <service verb="personalize" noun="OutreachText">
         <description>Substitute the recipient placeholders of a subject or body:
-            {name}, {firstName}, {company}, {companyName}, {title}. Each accepts a fallback
-            after a pipe, {company|your team}, used when the recipient field is empty.
+            {name}, {firstName}, {company}, {companyName}, {title} and {landingPageUrl}.
+            Each accepts a fallback after a pipe, {company|your team}, used when the
+            recipient field is empty.
             Used when a message is created from a template AND again at send time, so a
             hand-written subject or an AI-rewritten body gets the same treatment. Idempotent:
             substituted text holds no placeholders left to replace.</description>
@@ -1464,6 +1539,12 @@
             <parameter name="recipientName" allow-html="any" />
             <parameter name="recipientCompany" allow-html="any" />
             <parameter name="recipientTitle" allow-html="any" />
+            <parameter name="landingPageUrl" allow-html="any">
+                <description>Public url of the campaign's landing page, substituted for
+                    {landingPageUrl}; resolve it with get#CampaignLandingPageUrl. Empty when
+                    the campaign has no landing page, which blanks the token like any other
+                    empty field.</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="text" allow-html="any" />
@@ -1478,11 +1559,12 @@
                 def values = [name: fullName, firstName: firstName,
                               company: recipientCompany ?: '',
                               companyName: recipientCompany ?: '',
-                              title: recipientTitle ?: '']
+                              title: recipientTitle ?: '',
+                              landingPageUrl: landingPageUrl ?: '']
                 // {company} substitutes the field, {company|your team} falls back to the text
                 // after the pipe when the field is empty. Without a fallback an unknown field
                 // leaves a hole: "does {company} re-key" went out as "does  re-key".
-                text = text.replaceAll(/\{(name|firstName|company|companyName|title)(?:\|([^}]*))?\}/)
+                text = text.replaceAll(/\{(name|firstName|company|companyName|title|landingPageUrl)(?:\|([^}]*))?\}/)
                         { full, token, fallback -> values[token] ?: (fallback ?: '') }
                 // tidy the seam a blanked token leaves behind, without touching newlines:
                 // the body layout depends on them
@@ -1584,19 +1666,10 @@
                 <return error="true" message="Campaign not found: ${marketingCampaignId}" />
             </if>
 
-            <!-- Generate landing page URL if campaign has one -->
-            <set field="landingPageUrl" value="" />
-            <if condition="campaign.landingPageId">
-                <entity-find-one entity-name="growerp.landing.LandingPage"
-                    value-field="landingPage">
-                    <field-map field-name="landingPageId" from="campaign.landingPageId" />
-                </entity-find-one>
-                <if condition="landingPage &amp;&amp; landingPage.pseudoId">
-                    <!-- TODO: Get base URL from configuration -->
-                    <set field="landingPageUrl"
-                        value="https://growerp.com/landing/${landingPage.pseudoId}" />
-                </if>
-            </if>
+            <!-- Landing page url for the {landingPageUrl} placeholder -->
+            <service-call name="growerp.100.OutreachServices100.get#CampaignLandingPageUrl"
+                out-map="landingOut"
+                in-map="[landingPageId: campaign.landingPageId, ownerPartyId: ownerPartyId]" />
 
             <!-- Add unsubscribe link to body (served by pop-rest-store /nurture screen) -->
             <service-call name="growerp.100.NurtureServices100.get#TenantBaseUrl"
@@ -1604,10 +1677,12 @@
             <set field="unsubscribeUrl"
                 value="${baseUrl}/nurture/unsubscribe?email=${toEmail}&amp;campaign=${marketingCampaignId}" />
             <service-call name="growerp.100.OutreachServices100.personalize#OutreachText"
-                out-map="subjectOut" in-map="[text: subject, recipientName: toName]" />
+                out-map="subjectOut" in-map="[text: subject, recipientName: toName,
+                    landingPageUrl: landingOut.landingPageUrl]" />
             <set field="subject" from="subjectOut.text" />
             <service-call name="growerp.100.OutreachServices100.personalize#OutreachText"
-                out-map="bodyOut" in-map="[text: body, recipientName: toName]" />
+                out-map="bodyOut" in-map="[text: body, recipientName: toName,
+                    landingPageUrl: landingOut.landingPageUrl]" />
             <service-call name="growerp.100.OutreachServices100.render#OutreachEmailBody"
                 out-map="renderOut"
                 in-map="[bodyText: bodyOut.text, unsubscribeUrl: unsubscribeUrl]" />

@@ -107,16 +107,38 @@ class _LinkedInSendQueueScreenState extends State<LinkedInSendQueueScreen> {
   }
 
   /// Fill any template placeholders still present in a stored message body
-  /// (older imports only substituted {name}/{company}/{title}).
+  /// (older imports only substituted {name}/{company}/{title}). LinkedIn is
+  /// sent from here, not by the server, so this is the last chance to resolve
+  /// a token: {landingPageUrl} comes from the message's campaign, which the
+  /// campaign bloc already holds.
   String _substitute(OutreachMessage m, String text) {
     final name = (m.recipientName ?? '').trim();
     final firstName = name.isEmpty ? '' : name.split(RegExp(r'\s+')).first;
-    return text
+    final substituted = text
         .replaceAll('{name}', name)
         .replaceAll('{firstName}', firstName)
         .replaceAll('{company}', m.recipientCompany ?? '')
         .replaceAll('{companyName}', m.recipientCompany ?? '')
         .replaceAll('{title}', m.recipientTitle ?? '');
+    final landingPageUrl = _landingPageUrl(m);
+    // null = the campaigns are still loading; dropping the token now would
+    // lose the link for good, so leave it and substitute on the rebuild
+    return landingPageUrl == null
+        ? substituted
+        : substituted.replaceAll('{landingPageUrl}', landingPageUrl);
+  }
+
+  /// Public landing page url of the message's campaign: empty when the
+  /// campaign has none, null while the campaign list has not arrived yet.
+  String? _landingPageUrl(OutreachMessage m) {
+    final campaigns = context.read<OutreachCampaignBloc>().state.campaigns;
+    if (campaigns.isEmpty) return null;
+    for (final campaign in campaigns) {
+      if (campaign.campaignId == m.campaignId) {
+        return campaign.landingPageUrl ?? '';
+      }
+    }
+    return '';
   }
 
   Future<void> _copyAndOpen(OutreachMessage m) async {
@@ -191,8 +213,13 @@ class _LinkedInSendQueueScreenState extends State<LinkedInSendQueueScreen> {
         if (_index >= queue.length) _index = queue.isEmpty ? 0 : queue.length - 1;
         final current = queue.isEmpty ? null : queue[_index];
 
-        // Sync the editable body when the current message changes.
-        if (current?.messageId != _loadedMessageId) {
+        // Sync the editable body when the current message changes, and once
+        // more when a still-open {landingPageUrl} can finally be resolved
+        // (the campaign list arrives after the first build).
+        if (current?.messageId != _loadedMessageId ||
+            (current != null &&
+                _bodyController.text.contains('{landingPageUrl}') &&
+                _landingPageUrl(current) != null)) {
           _loadedMessageId = current?.messageId;
           _bodyController.text = current == null
               ? ''

@@ -454,6 +454,12 @@
                                 value-field="campaign">
                                 <field-map field-name="marketingCampaignId" from="message.marketingCampaignId"/>
                             </entity-find-one>
+                            <!-- landing page url for the {landingPageUrl} placeholder -->
+                            <service-call
+                                name="growerp.100.OutreachServices100.get#CampaignLandingPageUrl"
+                                out-map="landingOut"
+                                in-map="[landingPageId: campaign?.landingPageId,
+                                    ownerPartyId: ownerPartyId]"/>
                             <!-- unsubscribe served by pop-rest-store /nurture screen -->
                             <service-call name="growerp.100.NurtureServices100.get#TenantBaseUrl"
                                 in-map="[ownerPartyId: ownerPartyId]" out-map="context"/>
@@ -469,13 +475,15 @@
                                              ?: 'Hello from GrowERP',
                                          recipientName: message.recipientName,
                                          recipientCompany: message.recipientCompany,
-                                         recipientTitle: message.recipientTitle]"/>
+                                         recipientTitle: message.recipientTitle,
+                                         landingPageUrl: landingOut.landingPageUrl]"/>
                             <service-call name="growerp.100.OutreachServices100.personalize#OutreachText"
                                 out-map="bodyOut"
                                 in-map="[text: message.messageContent,
                                          recipientName: message.recipientName,
                                          recipientCompany: message.recipientCompany,
-                                         recipientTitle: message.recipientTitle]"/>
+                                         recipientTitle: message.recipientTitle,
+                                         landingPageUrl: landingOut.landingPageUrl]"/>
                             <service-call name="growerp.100.OutreachServices100.render#OutreachEmailBody"
                                 out-map="renderOut"
                                 in-map="[bodyText: bodyOut.text,
