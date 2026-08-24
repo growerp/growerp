@@ -18,7 +18,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../growerp_marketing.dart';
 
@@ -155,14 +154,14 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
     final text = _finalContentController.text;
     await Clipboard.setData(ClipboardData(text: text));
     final uri = Uri.https('twitter.com', '/intent/tweet', {'text': text});
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
+    final opened = await openExternalUrl(uri);
     if (mounted) {
       HelperFunctions.showMessage(
         context,
-        'Tweet copied — after posting, set status to PUBLISHED and Save',
-        Colors.green,
+        opened
+            ? 'Tweet copied — after posting, set status to PUBLISHED and Save'
+            : 'Tweet copied, however could not open a browser, use: $uri',
+        opened ? Colors.green : Colors.red,
       );
     }
   }

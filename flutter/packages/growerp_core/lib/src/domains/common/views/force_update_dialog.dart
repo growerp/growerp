@@ -15,7 +15,6 @@
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'reload_web_stub.dart'
     if (dart.library.js_interop) 'reload_web_web.dart';
 
@@ -236,10 +235,7 @@ class ForceUpdateDialog extends StatelessWidget {
   Future<void> _launchUpdateUrl() async {
     final updateUrl = forceUpdateInfo.updateUrl;
     if (updateUrl != null && updateUrl.isNotEmpty) {
-      final uri = Uri.parse(updateUrl);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      }
+      await openExternalUrl(Uri.parse(updateUrl));
     }
   }
 }
@@ -469,10 +465,7 @@ class ForceUpdateScreen extends StatelessWidget {
   Future<void> _launchUpdateUrl() async {
     final updateUrl = forceUpdateInfo.updateUrl;
     if (updateUrl != null && updateUrl.isNotEmpty) {
-      final uri = Uri.parse(updateUrl);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      }
+      await openExternalUrl(Uri.parse(updateUrl));
     }
   }
 }

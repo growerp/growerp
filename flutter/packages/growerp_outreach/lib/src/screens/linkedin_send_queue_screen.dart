@@ -17,7 +17,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../bloc/outreach_campaign_bloc.dart';
 import '../bloc/outreach_message_bloc.dart';
@@ -86,9 +85,9 @@ class _LinkedInSendQueueScreenState extends State<LinkedInSendQueueScreen> {
   Uri? _linkedInUri(OutreachMessage m) {
     final slug = _slug(m);
     if (slug != null) {
-      return Uri.parse(
-        'https://www.linkedin.com/messaging/compose/?recipient=$slug',
-      );
+      return Uri.https('www.linkedin.com', '/messaging/compose/', {
+        'recipient': slug,
+      });
     }
     final url = m.recipientProfileUrl;
     if (url != null && url.isNotEmpty) return Uri.tryParse(url);
@@ -123,14 +122,25 @@ class _LinkedInSendQueueScreenState extends State<LinkedInSendQueueScreen> {
   Future<void> _copyAndOpen(OutreachMessage m) async {
     await Clipboard.setData(ClipboardData(text: _bodyController.text));
     final uri = _linkedInUri(m);
-    if (uri != null && await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (uri == null) {
+      if (mounted) {
+        HelperFunctions.showMessage(
+          context,
+          'Message copied, however this contact has no LinkedIn '
+          'handle or profile url',
+          Colors.red,
+        );
+      }
+      return;
     }
+    final opened = await openExternalUrl(uri);
     if (mounted) {
       HelperFunctions.showMessage(
         context,
-        'Message copied — paste it in LinkedIn',
-        Colors.green,
+        opened
+            ? 'Message copied — paste it in LinkedIn'
+            : 'Message copied, however could not open a browser, use: $uri',
+        opened ? Colors.green : Colors.red,
       );
     }
   }

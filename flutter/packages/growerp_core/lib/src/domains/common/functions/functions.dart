@@ -6,3 +6,4 @@ export 'install_global_error_handlers.dart';
 export 'translate_bloc_message.dart';
 export 'icon_registry.dart';
 export 'subscription_warning_helper.dart';
+export 'open_external_url.dart';
