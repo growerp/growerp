@@ -71,8 +71,12 @@ REQUIREMENTS:
 2. campaignSummary: 2-3 sentences describing what the campaign does and why
 3. targetAudience: one string describing who is contacted
 4. emailSubject: a subject line that gets opened (max 70 characters)
-5. messageTemplate: the base outreach message (100-150 words). Personalize with
-   the tokens \${firstName}, \${lastName} and \${companyName} where natural
+5. messageTemplate: the base outreach message (100-150 words). Refer to the recipient
+   with these tokens, substituted per recipient when the message is sent:
+   {firstName}, {name}, {company}, {companyName}, {title}. Write "Hi {firstName},".
+   Never write a token with a leading \$ and never invent a bracketed placeholder such
+   as [Name]. A token whose field may be missing needs a fallback after a pipe, e.g.
+   {company|your team}.
 6. platformSettings: one entry per platform, keys lowercase:
 ${platformRules}
    - messageTemplate: the message adapted to that platform (LinkedIn short and
