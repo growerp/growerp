@@ -684,6 +684,18 @@
   "@userNewCompany": {
     "description": "Instruction to create a new company before adding a user"
   },
+  "aiTokenLimit": "AI token limit",
+  "@aiTokenLimit": {
+    "description": "Per tenant monthly AI token limit"
+  },
+  "aiTokenLimitHelp": "Leave empty to use the GrowERP wide default, 0 = unlimited",
+  "@aiTokenLimitHelp": {
+    "description": "Help text under the AI token limit field"
+  },
+  "aiTokens": "AI tokens",
+  "@aiTokens": {
+    "description": "Table column header: system AI tokens used this month / monthly limit"
+  },
   "vatSls": "VAT/SLS",
   "@vatSls": {
     "description": "Abbreviation for Value Added Tax / Sales"

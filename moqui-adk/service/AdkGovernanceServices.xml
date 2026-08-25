@@ -128,10 +128,17 @@
                         if (!hasCustomLlm && ownerPartyId) {
                             // GrowERP wide free allowance, maintained by system support in the
                             // support app (System Defaults); 0/empty = unlimited
-                            def sysDefault = ec.entity.find('growerp.general.SystemDefault').condition('defaultId', 'SYSTEM').one()
-                            // no row at all (upgraded install, seed not loaded) → seed value;
-                            // a row with an empty/0 limit means unlimited
-                            def tokenLimit = sysDefault == null ? 100000 : (sysDefault.llmMonthlyTokenLimit ?: 0)
+                            // a per tenant override (support app owner list) wins over it
+                            def ownerSettings = ec.entity.find('growerp.general.SystemSettings').condition('ownerPartyId', ownerPartyId).one()
+                            def tokenLimit
+                            if (ownerSettings?.llmMonthlyTokenLimit != null) {
+                                tokenLimit = ownerSettings.llmMonthlyTokenLimit
+                            } else {
+                                def sysDefault = ec.entity.find('growerp.general.SystemDefault').condition('defaultId', 'SYSTEM').one()
+                                // no row at all (upgraded install, seed not loaded) → seed value;
+                                // a row with an empty/0 limit means unlimited
+                                tokenLimit = sysDefault == null ? 100000 : (sysDefault.llmMonthlyTokenLimit ?: 0)
+                            }
                             if (tokenLimit > 0) {
                                 def cal = Calendar.getInstance()
                                 cal.set(Calendar.DAY_OF_MONTH, 1)
@@ -140,16 +147,13 @@
                                 cal.set(Calendar.SECOND, 0)
                                 def startOfMonth = new java.sql.Timestamp(cal.getTimeInMillis())
                                 
-                                def iter = ec.entity.find('moqui.adk.AdkActionLog')
+                                // grouped view: one row per owner, summed in SQL
+                                long totalUsed = 0
+                                ec.entity.find('moqui.adk.AdkOwnerTokenSummary')
+                                    .selectField('ownerPartyId').selectField('tokensTotal')
                                     .condition('ownerPartyId', ownerPartyId)
                                     .condition('actionTime', org.moqui.entity.EntityCondition.GREATER_THAN_EQUAL_TO, startOfMonth)
-                                    .selectField('tokensTotal').iterator()
-                                long totalUsed = 0
-                                while (iter.hasNext()) {
-                                    def r = iter.next()
-                                    totalUsed += (r.tokensTotal ?: 0)
-                                }
-                                iter.close()
+                                    .list().each { totalUsed += (it.tokensTotal ?: 0) as long }
                                 
                                 if (totalUsed >= tokenLimit) {
                                     decision = 'blocked'

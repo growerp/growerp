@@ -792,6 +792,17 @@ CRITICAL tool-use rules — follow exactly:
         if (!sessionId || sharedSessionService == null) return
         String coordId = sessionOwn[sessionId] ?: lookupConfigIdFromDb(sessionId)
         if (!coordId) return
+        logAgentRun(coordId, sessionId, 'chat', 'chat', 'User Chat Interaction', text, events)
+    }
+
+    /**
+     * Write one AdkActionLog row carrying the token counts of a completed agent run.
+     * Used for interactive chat turns and for scheduled/one-off runs, which have no
+     * persisted session to look a config id up from.
+     */
+    static void logAgentRun(String configId, String sessionId, String serviceName,
+                            String verbClass, String reason, String text, List<Map> events) {
+        if (!configId || sharedSessionService == null) return
         long[] tokens = extractTokensFromEvents(events)
         def ecf = sharedSessionService.ecf
         Thread t = new Thread({
@@ -800,20 +811,20 @@ CRITICAL tool-use rules — follow exactly:
                 boolean wasDisabled = ec.artifactExecution.disableAuthz()
                 try {
                     def coord = ec.entity.find('moqui.adk.AdkAgentConfig')
-                            .condition('adkAgentConfigId', coordId).one()
+                            .condition('adkAgentConfigId', configId).one()
                     if (!coord) return
                     String owner = coord.ownerPartyId as String
                     ec.service.sync().name('create#moqui.adk.AdkActionLog').parameters([
-                            ownerPartyId: owner, configId: coordId,
+                            ownerPartyId: owner, configId: configId,
                             adkSessionId: sessionId,
-                            serviceName: 'chat', verbClass: 'chat',
-                            decision: 'allowed', reason: 'User Chat Interaction',
-                            argsJson: "{\"text\": \"${text.take(200).replace('"', '\\"')}\"}",
+                            serviceName: serviceName, verbClass: verbClass,
+                            decision: 'allowed', reason: reason,
+                            argsJson: "{\"text\": \"${(text ?: '').take(200).replace('"', '\\"')}\"}",
                             tokensIn: tokens[0], tokensOut: tokens[1], tokensTotal: tokens[2],
                             actionTime: ec.user.nowTimestamp]).call()
                 } finally { if (!wasDisabled) ec.artifactExecution.enableAuthz() }
             } catch (Exception e) {
-                logger.warn("logChatTurn(${sessionId}) failed: ${e.message}")
+                logger.warn("logAgentRun(${configId}/${sessionId}) failed: ${e.message}")
             } finally { ec.destroy() }
         }, 'adk-chat-log')
         t.setDaemon(true)
@@ -899,6 +910,9 @@ CRITICAL tool-use rules — follow exactly:
               )
 
         if (err[0]) throw err[0]
+        // scheduled and one-off runs have their own in-memory session: log against the config
+        logAgentRun(cid, session.id() as String, 'agentRun', 'ai',
+                'Scheduled or one-off agent run', text, events)
         events
     }
 

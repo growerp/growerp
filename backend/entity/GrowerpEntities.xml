@@ -460,6 +460,11 @@ limitations under the License.
         <field name="touristTaxPerNight" type="currency-amount">
             <description>Hotel: lodging/tourist tax charged per room per night; 0/empty = none</description>
         </field>
+        <field name="llmMonthlyTokenLimit" type="number-integer">
+            <description>Per tenant override of SystemDefault.llmMonthlyTokenLimit, set by
+                system support in the Support app owner list; empty = use the system wide
+                default, 0 = unlimited for this tenant.</description>
+        </field>
     </entity>
 
     <entity entity-name="SystemDefault" package="growerp.general"

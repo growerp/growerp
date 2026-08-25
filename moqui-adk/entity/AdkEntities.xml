@@ -230,4 +230,14 @@
         <alias name="llmApiKey" entity-alias="LLM" field="apiKey"/>
     </view-entity>
 
+    <!-- Per-owner token totals. Moqui groups by every SELECTED non-aggregate field, so a
+         caller must select only ownerPartyId and tokensTotal; actionTime is aliased to be
+         usable in a where condition (non-aggregate conditions go to WHERE, not HAVING). -->
+    <view-entity entity-name="AdkOwnerTokenSummary" package="moqui.adk">
+        <member-entity entity-alias="AAL" entity-name="moqui.adk.AdkActionLog"/>
+        <alias name="ownerPartyId" entity-alias="AAL" field="ownerPartyId"/>
+        <alias name="actionTime"   entity-alias="AAL" field="actionTime"/>
+        <alias name="tokensTotal"  entity-alias="AAL" field="tokensTotal" function="sum"/>
+    </view-entity>
+
 </entities>

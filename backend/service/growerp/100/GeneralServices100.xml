@@ -2300,6 +2300,51 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="update" noun="OwnerTokenLimit">
+        <description>Set or clear one tenant's monthly system LLM token limit, overriding the
+            GrowERP wide SystemDefault. System support only, used from the Support app owner
+            list. An empty limit clears the override, 0 means unlimited for this tenant.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true"/>
+            <parameter name="llmMonthlyTokenLimit" type="Integer"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="llmTokenLimit" type="Integer">
+                <description>The limit now in effect: the override, or the system wide default
+                    when the override was cleared</description>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.check#SupportUser"/>
+
+            <entity-find-one entity-name="growerp.general.SystemSettings" value-field="ss"
+                    cache="false">
+                <field-map field-name="ownerPartyId" from="ownerPartyId"/>
+            </entity-find-one>
+            <if condition="ss == null">
+                <set field="ss" from="ec.entity.makeValue('growerp.general.SystemSettings')"/>
+                <set field="ss.ownerPartyId" from="ownerPartyId"/>
+                <set field="ss.llmMonthlyTokenLimit" from="llmMonthlyTokenLimit"/>
+                <script>ss.create()</script>
+            <else>
+                <!-- set unconditionally: null clears the override, 0 means unlimited -->
+                <set field="ss.llmMonthlyTokenLimit" from="llmMonthlyTokenLimit"/>
+                <script>ss.update()</script>
+            </else>
+            </if>
+
+            <if condition="llmMonthlyTokenLimit != null">
+                <set field="llmTokenLimit" from="llmMonthlyTokenLimit"/>
+                <else>
+                    <entity-find-one entity-name="growerp.general.SystemDefault" value-field="sd">
+                        <field-map field-name="defaultId" value="SYSTEM"/>
+                    </entity-find-one>
+                    <set field="llmTokenLimit" from="sd?.llmMonthlyTokenLimit"/>
+                </else>
+            </if>
+        </actions>
+    </service>
+
     <service verb="migrate" noun="GeminiApiKeyToLlmConfig" authenticate="false">
         <description>One-time idempotent migration: copies geminiApiKey from SystemSettings rows
             into LlmConfig(llmProvider='gemini') and clears the flat field.</description>

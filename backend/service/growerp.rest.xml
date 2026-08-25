@@ -92,6 +92,12 @@ limitations under the License.
                 <service name="growerp.100.GeneralServices100.update#SystemDefault" />
             </method>
         </resource>
+        <resource name="OwnerTokenLimit"
+            description="Override one tenant's monthly LLM token limit; system support only">
+            <method type="post">
+                <service name="growerp.100.GeneralServices100.update#OwnerTokenLimit" />
+            </method>
+        </resource>
         <resource name="Authenticate">
             <method type="get">
                 <service name="growerp.100.GeneralServices100.get#Authenticate" />

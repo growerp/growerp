@@ -264,6 +264,11 @@ abstract class RestClient {
   Future<SystemDefault> updateSystemDefault(
       @Body() Map<String, dynamic> systemDefault);
 
+  /// override one tenant's monthly LLM token limit, null limit clears the override
+  @POST("rest/s1/growerp/100/OwnerTokenLimit")
+  Future<void> updateOwnerTokenLimit(
+      @Body() Map<String, dynamic> ownerTokenLimit);
+
   // countries not used
   @GET("rest/s1/growerp/100/Countries")
   @Extra({'noApiKey': true})

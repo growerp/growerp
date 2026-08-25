@@ -213,6 +213,14 @@ limitations under the License.
                     <parameter name="salesPerc">
                         <description>Percentage used for sales tax</description>
                     </parameter>
+                    <parameter name="systemAiTokens" type="Integer">
+                        <description>System LLM tokens used by this owner in the current
+                            calendar month; null when the owner has its own API key or when
+                            not listing main companies</description>
+                    </parameter>
+                    <parameter name="llmTokenLimit" type="Integer">
+                        <description>System wide monthly system LLM token allowance</description>
+                    </parameter>
                 </parameter>
             </parameter>
         </out-parameters>
@@ -284,12 +292,66 @@ limitations under the License.
                     ]]></script>
                 </if>
             </if>
+            <!-- system LLM token usage this month, only for the owner(tenant) list -->
+            <set field="tokensByOwner" from="[:]" />
+            <set field="ownKeyOwners" from="[] as Set" />
+            <set field="limitByOwner" from="[:]" />
+            <set field="llmTokenLimit" />
+            <if condition="mainCompanies &amp;&amp; parties">
+                <set field="ownerIds"
+                    from="parties.collect { it.ownerPartyId ?: it.partyId }.unique()" />
+                <entity-find-one entity-name="growerp.general.SystemDefault"
+                    value-field="sysDefault">
+                    <field-map field-name="defaultId" value="SYSTEM" />
+                </entity-find-one>
+                <set field="llmTokenLimit" from="sysDefault?.llmMonthlyTokenLimit" />
+                <!-- a tenant can have its own limit, overriding the system wide one -->
+                <entity-find entity-name="growerp.general.SystemSettings" list="ownerSettings">
+                    <econdition field-name="ownerPartyId" operator="in" from="ownerIds" />
+                </entity-find>
+                <set field="limitByOwner"
+                    from="ownerSettings.findAll { it.llmMonthlyTokenLimit != null }
+                            .collectEntries { [(it.ownerPartyId): it.llmMonthlyTokenLimit] }" />
+                <!-- owners paying with their own key are not using system tokens -->
+                <entity-find entity-name="growerp.general.LlmConfig" list="llmConfigs">
+                    <econdition field-name="ownerPartyId" operator="in" from="ownerIds" />
+                </entity-find>
+                <set field="ownKeyOwners"
+                    from="llmConfigs.findAll { it.apiKey }.collect { it.ownerPartyId } as Set" />
+                <!-- Guarded: a no-op when the moqui-adk component is absent. -->
+                <script><![CDATA[
+                    try {
+                        def cal = java.util.Calendar.getInstance()
+                        cal.set(java.util.Calendar.DAY_OF_MONTH, 1)
+                        cal.set(java.util.Calendar.HOUR_OF_DAY, 0)
+                        cal.set(java.util.Calendar.MINUTE, 0)
+                        cal.set(java.util.Calendar.SECOND, 0)
+                        cal.set(java.util.Calendar.MILLISECOND, 0)
+                        def startOfMonth = new java.sql.Timestamp(cal.getTimeInMillis())
+                        ec.entity.find('moqui.adk.AdkOwnerTokenSummary')
+                            .selectField('ownerPartyId').selectField('tokensTotal')
+                            .condition('ownerPartyId',
+                                org.moqui.entity.EntityCondition.IN, ownerIds)
+                            .condition('actionTime',
+                                org.moqui.entity.EntityCondition.GREATER_THAN_EQUAL_TO,
+                                startOfMonth)
+                            .list().each {
+                                tokensByOwner[it.ownerPartyId] = (it.tokensTotal ?: 0) as int }
+                    } catch (Throwable t) {
+                        ec.logger.warn("ADK token usage skipped: ${t.message}")
+                    }
+                ]]></script>
+            </if>
             <set field="companies" from="[]" />
             <iterate list="parties" entry="party">
                 <set field="currency"
                     from="[
                     currencyId: party.baseCurrencyUomId,
                     description: party.uomDescription]" />
+                <set field="ownerKey" from="party.ownerPartyId ?: party.partyId" />
+                <set field="systemAiTokens"
+                    from="mainCompanies &amp;&amp; !ownKeyOwners.contains(ownerKey)
+                            ? (tokensByOwner[ownerKey] ?: 0) : null" />
                 <set field="company"
                     from="[ownerPartyId: party.ownerPartyId,
                                 partyId: party.partyId,
@@ -300,7 +362,10 @@ limitations under the License.
                                 telephoneNr: telByParty[party.partyId],
                                 currency: party.baseCurrencyUomId == null ? null : currency,
                                 vatPerc: party.vatPerc ? party.vatPerc.toString() : null,
-                                salesPerc: party.salesPerc ? party.salesPerc.toString() : null]" />
+                                salesPerc: party.salesPerc ? party.salesPerc.toString() : null,
+                                systemAiTokens: systemAiTokens,
+                                llmTokenLimit: limitByOwner.containsKey(ownerKey)
+                                        ? limitByOwner[ownerKey] : llmTokenLimit]" />
                 <script>companies.add(company)</script>
             </iterate>
         </actions>

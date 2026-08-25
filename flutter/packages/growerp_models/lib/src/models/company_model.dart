@@ -49,6 +49,9 @@ abstract class Company with _$Company {
     @Default([]) List<User> employees,
     String? hostName,
     String? secondaryBackend,
+    // system LLM tokens used this calendar month, null when own API key is used
+    int? systemAiTokens,
+    int? llmTokenLimit,
   }) = _Company;
 
   factory Company.fromJson(Map<String, dynamic> json) =>

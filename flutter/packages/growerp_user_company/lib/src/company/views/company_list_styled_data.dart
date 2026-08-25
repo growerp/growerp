@@ -14,18 +14,22 @@
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../company.dart';
 import 'rest_request_stats_dialog.dart';
+import 'token_limit_dialog.dart';
 import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
 /// Returns column definitions for company list based on device type
 List<StyledColumn> getCompanyListColumns(BuildContext context) {
   final localizations = UserCompanyLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
+  // the support app list shows owners(tenants): AI token use instead of phone/vat
+  bool isSupport = context.read<String>() == 'AppSupport';
 
   if (isPhone) {
     return [
@@ -41,8 +45,9 @@ List<StyledColumn> getCompanyListColumns(BuildContext context) {
     StyledColumn(header: localizations.name, flex: 2),
     StyledColumn(header: localizations.role, flex: 1),
     StyledColumn(header: localizations.email, flex: 2),
-    StyledColumn(header: localizations.tableHdrPhone, flex: 1),
-    StyledColumn(header: localizations.vatSls, flex: 1),
+    if (!isSupport) StyledColumn(header: localizations.tableHdrPhone, flex: 1),
+    if (!isSupport) StyledColumn(header: localizations.vatSls, flex: 1),
+    if (isSupport) StyledColumn(header: localizations.aiTokens, flex: 1),
     StyledColumn(header: '', flex: 1), // Actions
   ];
 }
@@ -126,14 +131,45 @@ List<Widget> getCompanyListRow({
     // Email
     cells.add(Text(company.email ?? '', key: Key('email$index')));
 
-    // Phone
-    cells.add(Text(company.telephoneNr ?? '', key: Key('telephone$index')));
+    if (applicationId == 'AppSupport') {
+      // System AI tokens used this month / monthly allowance,
+      // tap to override the allowance for this owner
+      final used = company.systemAiTokens;
+      final limit = company.llmTokenLimit ?? 0;
+      final fmt = NumberFormat.decimalPattern();
+      cells.add(
+        InkWell(
+          key: Key('aiTokens$index'),
+          onTap: () async {
+            final changed = await showDialog<bool>(
+              context: context,
+              builder: (BuildContext context) =>
+                  TokenLimitDialog(company: company),
+            );
+            if (changed == true) bloc.add(const CompanyFetch(mainOnly: true, refresh: true));
+          },
+          child: Text(
+            used == null
+                ? '-' // tenant uses its own API key
+                : limit > 0
+                ? '${fmt.format(used)} / ${fmt.format(limit)}'
+                : fmt.format(used),
+            style: (used != null && limit > 0 && used >= limit)
+                ? TextStyle(color: Theme.of(context).colorScheme.error)
+                : null,
+          ),
+        ),
+      );
+    } else {
+      // Phone
+      cells.add(Text(company.telephoneNr ?? '', key: Key('telephone$index')));
 
-    // VAT/SLS: both are optional, show nothing rather than 'null'
-    final perc = (company.vatPerc != null && company.vatPerc != Decimal.zero)
-        ? company.vatPerc
-        : company.salesPerc;
-    cells.add(Text(perc?.toString() ?? '', key: Key('perc$index')));
+      // VAT/SLS: both are optional, show nothing rather than 'null'
+      final perc = (company.vatPerc != null && company.vatPerc != Decimal.zero)
+          ? company.vatPerc
+          : company.salesPerc;
+      cells.add(Text(perc?.toString() ?? '', key: Key('perc$index')));
+    }
   }
 
   // Actions (both phone and desktop)
