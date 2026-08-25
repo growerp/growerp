@@ -41,7 +41,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     on<NotificationReceive>(_onNotificationReceive);
     on<NotificationSend>(_onNotificationSend);
     // Set up WS subscription once auth (and thus WS connect) completes.
-    authBloc.stream.listen((authState) {
+    _authSubscription = authBloc.stream.listen((authState) {
       if (authState.status == AuthStatus.authenticated && !_subscribed) {
         add(const NotificationFetch());
       } else if (authState.status == AuthStatus.unAuthenticated) {
@@ -54,6 +54,15 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   final WsClient notificationClient;
   final AuthBloc authBloc;
   bool _subscribed = false;
+  StreamSubscription? _wsSubscription;
+  StreamSubscription? _authSubscription;
+
+  @override
+  Future<void> close() {
+    _authSubscription?.cancel();
+    _wsSubscription?.cancel();
+    return super.close();
+  }
 
   Future<void> _onNotificationFetch(
     NotificationFetch event,
@@ -73,11 +82,17 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
           _subscribed = false;
           return;
         }
-        notificationClient.stream().listen(
+        // Cancel any listener left by an earlier login: the ws stream is a
+        // broadcast stream, so a stale listener stays alive and every message
+        // then arrives once per login the app has done.
+        _wsSubscription?.cancel();
+        _wsSubscription = notificationClient.stream().listen(
           (data) {
             debugPrint('WS notification received: $data');
             try {
-              add(NotificationReceive(NotificationWs.fromJson(jsonDecode(data))));
+              add(
+                NotificationReceive(NotificationWs.fromJson(jsonDecode(data))),
+              );
             } catch (e) {
               debugPrint('WS notification parse error: $e');
             }

@@ -48,6 +48,7 @@ class SetupInProgressDialogState extends State<SetupInProgressDialog> {
   Timer? _patienceTimer;
   bool _tookTooLong = false;
   bool _failed = false;
+  bool _continued = false;
 
   @override
   void initState() {
@@ -68,6 +69,10 @@ class SetupInProgressDialogState extends State<SetupInProgressDialog> {
   }
 
   void _continue() {
+    // The notification can be delivered more than once, and the button stays on
+    // screen while the bloc works: only the first call may promote the session.
+    if (_continued) return;
+    _continued = true;
     context.read<AuthBloc>().add(const AuthSetupCompleted());
   }
 

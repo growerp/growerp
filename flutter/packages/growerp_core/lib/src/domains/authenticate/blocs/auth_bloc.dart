@@ -273,7 +273,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         // full tag like en-US as one language code
         locale: (event.locale ?? PlatformDispatcher.instance.locale).languageCode,
       );
-      await PersistFunctions.persistAuthenticate(result);
+      // register#User returns the sentinel string 'registered' in apiKey, not a
+      // login key: persisting it puts api_key: registered on every later request,
+      // which the backend rejects as [No User].
+      await PersistFunctions.persistAuthenticate(result.copyWith(apiKey: null));
       emit(
         state.copyWith(
           status: AuthStatus.unAuthenticated,
@@ -334,6 +337,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     final authenticate = state.authenticate;
     if (authenticate?.apiKey == null) return;
+    // The demo data notification can arrive more than once; promoting twice
+    // reconnects the chat socket and re-emits for nothing.
+    if (state.status == AuthStatus.authenticated) return;
     // the demo data landed after login, so drop cached GETs taken before it
     await clearRestCache();
     final completed = authenticate!.copyWith(loginStatus: null);
@@ -441,6 +447,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         // listening when the backend reports the load finished.
         if (authenticate.loginStatus == 'setupInProgress' &&
             authenticate.user?.userId != null) {
+          // Persist the real key now: while the demo data loads the app still
+          // does REST calls (the notification fetch), and without this they go
+          // out with whatever register#User left behind and come back 403.
+          await PersistFunctions.persistKeyValue(
+            'apiKey',
+            authenticate.apiKey ?? '',
+          );
+          await PersistFunctions.persistKeyValue(
+            'moquiSessionToken',
+            authenticate.moquiSessionToken ?? '',
+          );
           await notification.connect(
             authenticate.apiKey!,
             authenticate.user!.userId!,

@@ -41,6 +41,7 @@ import 'views/plan_selection_form.dart';
 import 'views/accounting_form.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'l10n/generated/admin_localizations.dart';
+
 //webactivate  import 'package:web/web.dart' as web;
 
 Future main() async {
@@ -130,6 +131,13 @@ class _AdminAppState extends State<AdminApp> {
   late MenuConfigBloc _menuConfigBloc;
   final DeepLinkService _deepLinkService = DeepLinkService();
 
+  // Routers are kept per menu configuration: rebuilding them on every
+  // MenuConfigBloc state change handed MaterialApp.router a new delegate each
+  // time (and threw the user back to the splash screen during a menu reload).
+  GoRouter? _splashRouter;
+  GoRouter? _dynamicRouter;
+  String? _dynamicRouterKey;
+
   @override
   void initState() {
     super.initState();
@@ -155,32 +163,39 @@ class _AdminAppState extends State<AdminApp> {
         builder: (context, state) {
           GoRouter router;
 
-          if (state.status == MenuConfigStatus.success &&
-              state.menuConfiguration != null) {
+          final menuConfiguration = state.menuConfiguration;
+          if (menuConfiguration != null) {
             // Configuration loaded, build dynamic router using shared component
-            router = createDynamicAppRouter(
-              [state.menuConfiguration!],
-              config: DynamicRouterConfig(
-                mainConfigId: 'ADMIN_DEFAULT',
-                dashboardBuilder: () => const AdminDashboardContent(),
-                widgetLoader: WidgetRegistry.getWidget,
-                appTitle: 'GrowERP Administrator',
-                deepLinkService: _deepLinkService,
-                dashboardFabBuilder: (_) => Builder(
-                  builder: (ctx) => FloatingActionButton(
-                    key: const Key('adkChatFab'),
-                    tooltip: 'AI Assistant',
-                    onPressed: () => AdkChatDialog.show(ctx),
-                    child: const Icon(Icons.smart_toy),
+            final routerKey =
+                '${menuConfiguration.menuConfigurationId}_'
+                '${menuConfiguration.menuItems.length}';
+            if (_dynamicRouter == null || _dynamicRouterKey != routerKey) {
+              _dynamicRouterKey = routerKey;
+              _dynamicRouter = createDynamicAppRouter(
+                [menuConfiguration],
+                config: DynamicRouterConfig(
+                  mainConfigId: 'ADMIN_DEFAULT',
+                  dashboardBuilder: () => const AdminDashboardContent(),
+                  widgetLoader: WidgetRegistry.getWidget,
+                  appTitle: 'GrowERP Administrator',
+                  deepLinkService: _deepLinkService,
+                  dashboardFabBuilder: (_) => Builder(
+                    builder: (ctx) => FloatingActionButton(
+                      key: const Key('adkChatFab'),
+                      tooltip: 'AI Assistant',
+                      onPressed: () => AdkChatDialog.show(ctx),
+                      child: const Icon(Icons.smart_toy),
+                    ),
                   ),
                 ),
-              ),
-            );
+              );
+            }
+            router = _dynamicRouter!;
           } else {
             // Loading or error, show splash screen using shared component
             // The wildcard route ensures deep-link paths (e.g. #/acct-ledger)
             // are accepted and preserved while the menu config loads.
-            router = GoRouter(
+            router = _splashRouter ??= GoRouter(
               routes: [
                 GoRoute(
                   path: '/',

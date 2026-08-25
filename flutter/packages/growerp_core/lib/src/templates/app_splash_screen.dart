@@ -78,14 +78,17 @@ class _AppSplashScreenState extends State<AppSplashScreen> {
   Widget build(BuildContext context) {
 
     return BlocConsumer<AuthBloc, AuthState>(
+      // Only on the transition into authenticated: any later state change while
+      // logged in (a local authenticate update) reloaded the menu again.
+      listenWhen: (previous, current) =>
+          current.status == AuthStatus.authenticated &&
+          previous.status != AuthStatus.authenticated,
       listener: (context, authState) {
-        if (authState.status == AuthStatus.authenticated) {
-          // Always reload on auth transition so a newly logged-in user/company
-          // gets their own fresh menu config, not the previous user's state.
-          context
-              .read<MenuConfigBloc>()
-              .add(const MenuConfigLoad(userVersion: true));
-        }
+        // Always reload on auth transition so a newly logged-in user/company
+        // gets their own fresh menu config, not the previous user's state.
+        context.read<MenuConfigBloc>().add(
+          const MenuConfigLoad(userVersion: true),
+        );
       },
       builder: (context, authState) {
         if (authState.status != AuthStatus.authenticated) {

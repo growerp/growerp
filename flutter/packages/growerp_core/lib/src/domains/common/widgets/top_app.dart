@@ -80,6 +80,11 @@ class TopApp extends StatefulWidget {
 class _TopAppState extends State<TopApp> {
   MenuConfigBloc? _menuConfigBloc;
 
+  /// Built once: [getCoreBlocProviders] constructs AuthBloc and ChatRoomBloc
+  /// eagerly, so calling it from build() created (and leaked, listeners and
+  /// all) a new set on every rebuild.
+  late final List<BlocProvider> _coreBlocProviders;
+
   final List<LocalizationsDelegate> _localizationsDelegates = [
     CoreLocalizations.delegate,
     GlobalMaterialLocalizations.delegate,
@@ -108,6 +113,13 @@ class _TopAppState extends State<TopApp> {
     if (widget.appId != null) {
       _menuConfigBloc = MenuConfigBloc(widget.restClient, widget.appId!);
     }
+    _coreBlocProviders = getCoreBlocProviders(
+      widget.restClient,
+      widget.chatClient,
+      widget.notificationClient,
+      widget.applicationId,
+      widget.company,
+    );
   }
 
   @override
@@ -204,13 +216,7 @@ class _TopAppState extends State<TopApp> {
       ],
       child: MultiBlocProvider(
         providers: [
-          ...getCoreBlocProviders(
-            widget.restClient,
-            widget.chatClient,
-            widget.notificationClient,
-            widget.applicationId,
-            widget.company,
-          ),
+          ..._coreBlocProviders,
           if (_menuConfigBloc != null)
             BlocProvider<MenuConfigBloc>.value(value: _menuConfigBloc!),
           ...widget.extraBlocProviders,
