@@ -371,18 +371,21 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
             <script>context.putAll(personAndUserAccount as Map)</script>
             <!-- get company name -->
-            <entity-find entity-name="mantle.party.PartyRelationship" list="rel">
+            <entity-find entity-name="mantle.party.PartyRelationship" list="rel" limit="1">
                 <econdition field-name="fromPartyId" from="partyId" />
                 <econdition field-name="relationshipTypeEnumId" value="PrtEmployee" />
                 <date-filter />
             </entity-find>
-            <entity-find-one entity-name="mantle.party.Organization" value-field="company">
-                <field-map field-name="partyId" from="rel.toPartyId" />
-            </entity-find-one>
-            <set field="companyName" from="company?.organizationName" />
+            <set field="companyPartyId" from="rel[0]?.toPartyId" />
+            <if condition="companyPartyId">
+                <entity-find-one entity-name="mantle.party.Organization" value-field="company">
+                    <field-map field-name="partyId" from="companyPartyId" />
+                </entity-find-one>
+                <set field="companyName" from="company?.organizationName" />
+            </if>
             <!-- get contact info company or not available from person -->
             <service-call name="mantle.party.ContactServices.get#PartyContactInfo"
-                in-map="[partyId:rel.toPartyId ?: partyId, telecomContactMechPurposeId: 'PhonePrimary',
+                in-map="[partyId:companyPartyId ?: partyId, telecomContactMechPurposeId: 'PhonePrimary',
                         emailContactMechPurposeId:'EmailPrimary']"
                 out-map="context" />
         </actions>
@@ -567,15 +570,13 @@ along with this software (see the LICENSE.md file). If not, see
             </if>
 
             <!-- get related company -->
-            <entity-find entity-name="mantle.party.PartyRelationship" list="rel">
-                <econdition field-name="fromPartyId" from="customerPartyId" />
+            <entity-find entity-name="mantle.party.PartyRelationship" list="rel" limit="1">
+                <econdition field-name="fromPartyId" from="partyId" />
                 <econdition field-name="relationshipTypeEnumId" value="PrtEmployee" />
                 <date-filter />
             </entity-find>
-            <if condition="rel">
-                <set field="companyPartyId"
-                    from="rel[0].toPartyId ?: sessionAttributes.companyPartyId" />
-            </if>
+            <set field="companyPartyId"
+                from="rel[0]?.toPartyId ?: sessionAttributes.companyPartyId" />
             <service-call name="mantle.party.ContactServices.get#PartyContactInfoList"
                 out-map="shippingContactListInfo"
                 in-map="[partyId:companyPartyId ?: partyId, postalContactMechPurposeId:'PostalShippingDest']" />

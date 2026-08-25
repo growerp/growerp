@@ -1415,9 +1415,9 @@ limitations under the License.
                 <service-call out-map="context"
                     name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
                 <!-- make sure that username is only searched for in the logged in user own company -->
-                <entity-find entity-name="growerp.mobile.CompanyPersonAndLogin" list="accounts">
-                    <econdition field-name="username"/>
-                    <econdition field-name="toPartyId" from="companyPartyId"/>
+                <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany" list="accounts">
+                    <econdition field-name="loginName" from="username"/>
+                    <econdition field-name="ownerPartyId" from="ownerPartyId"/>
                 </entity-find>
                 <if condition="!accounts">
                     <return error="true"

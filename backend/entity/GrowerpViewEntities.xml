@@ -1239,10 +1239,10 @@ limitations under the License.
         <member-entity entity-alias="PERSONTOCOMPANY" entity-name="mantle.party.PartyRelationship"
             join-from-alias="PERSON" join-optional="true">
             <key-map field-name="partyId" related="fromPartyId" />
-            <!--entity-condition>
+            <entity-condition>
                 <econdition field-name="relationshipTypeEnumId" value="PrtEmployee" />
                 <date-filter from-field-name="userFromDate" thru-field-name="userThruDate" />
-            </entity-condition-->
+            </entity-condition>
         </member-entity>
         <member-entity entity-alias="ORGCOMPANYPARTY" entity-name="mantle.party.Party"
             join-from-alias="PERSONTOCOMPANY" join-optional="true">
@@ -2072,11 +2072,6 @@ limitations under the License.
             join-from-alias="PERSON">
             <key-map field-name="partyId" />
         </member-entity>
-        <!-- person to company do not show person related to company-->
-        <member-entity entity-alias="PERSONTOCOMPANY" entity-name="mantle.party.PartyRelationship"
-            join-from-alias="PERSON" join-optional="true">
-            <key-map field-name="partyId" related="fromPartyId" />
-        </member-entity>
         <!-- email address -->
         <member-entity entity-alias="EMAIL"
             entity-name="mantle.party.contact.PartyContactMech"
@@ -2101,82 +2096,8 @@ limitations under the License.
         <alias name="fromDate" entity-alias="EMAIL" />
         <alias name="thruDate" entity-alias="EMAIL" />
         <alias name="emailPurposeId" field="contactMechPurposeId" entity-alias="EMAIL" />
-        <alias name="fromPartyId" entity-alias="PERSONTOCOMPANY" />
-        <alias name="toPartyId" entity-alias="PERSONTOCOMPANY" />
-        <!-- only list persons with no company -->
-        <entity-condition>
-            <econdition field-name="toPartyId" operator="is-null" />
-        </entity-condition>
     </view-entity>
 
-
-    <!-- deprecated!!!! -->
-    <view-entity entity-name="CompanyPersonAndLogin" package="growerp.mobile">
-        <description>get all people related to a certain companyId = PR => toPartyId</description>
-        <member-entity entity-alias="PR" entity-name="mantle.party.PartyRelationship">
-            <entity-condition>
-                <!-- econdition field-name="fromRoleTypeId" value="Employee"/ selects the type of
-                person: Employee, Customer etc -->
-                <econdition field-name="toRoleTypeId" value="OrgInternal" />
-                <date-filter />
-            </entity-condition>
-        </member-entity>
-        <member-entity entity-alias="PTYPERSON" entity-name="mantle.party.Party"
-            join-from-alias="PR">
-            <key-map field-name="fromPartyId" related="partyId" />
-            <entity-condition>
-                <econdition field-name="personDisabled" operator="equals" value="N" or-null="true" />
-            </entity-condition>
-        </member-entity>
-        <member-entity entity-alias="PTYORG" entity-name="mantle.party.Party" join-from-alias="PR">
-            <key-map field-name="toPartyId" related="partyId" />
-            <entity-condition>
-                <econdition field-name="companyDisabled" operator="equals" value="N" or-null="true" />
-            </entity-condition>
-        </member-entity>
-        <member-entity entity-alias="PERSON" entity-name="mantle.party.Person" join-from-alias="PR">
-            <key-map field-name="fromPartyId" related="partyId" />
-        </member-entity>
-        <member-entity entity-alias="ACCT" entity-name="moqui.security.UserAccount"
-            join-from-alias="PR" join-optional="true">
-            <key-map field-name="fromPartyId" related="partyId" />
-        </member-entity>
-        <member-entity entity-alias="PCM" entity-name="mantle.party.contact.PartyContactMech"
-            join-from-alias="PERSON" join-optional="true">
-            <key-map field-name="partyId" />
-            <entity-condition>
-                <econdition field-name="contactMechPurposeId" operator="equals" value="EmailPrimary" />
-            </entity-condition>
-        </member-entity>
-        <member-entity entity-alias="CM" entity-name="mantle.party.contact.ContactMech"
-            join-from-alias="PCM" join-optional="true">
-            <key-map field-name="contactMechId" />
-            <entity-condition>
-                <econdition field-name="contactMechTypeEnumId" operator="equals"
-                    value="CmtEmailAddress" />
-            </entity-condition>
-        </member-entity>
-        <alias entity-alias="PR" name="toPartyId" />
-        <alias entity-alias="PR" name="toRoleTypeId" />
-        <alias entity-alias="PR" name="fromPartyId" />
-        <alias entity-alias="PR" name="fromRoleTypeId" />
-        <alias entity-alias="PR" name="fromDate" /><!-- date registered in the system -->
-        <alias entity-alias="PR" name="thruDate" />
-        <alias entity-alias="PTYPERSON" name="personDisabled" field="disabled" />
-        <alias entity-alias="PTYPERSON" name="externalId" />
-        <alias entity-alias="PTYORG" name="companyDisabled" field="disabled" />
-        <alias entity-alias="PERSON" name="firstName" />
-        <alias entity-alias="PERSON" name="lastName" />
-        <alias entity-alias="ACCT" name="userId" />
-        <alias entity-alias="ACCT" name="username" />
-        <alias entity-alias="ACCT" name="userFullName" />
-        <alias entity-alias="ACCT" name="emailAddress" />
-        <alias entity-alias="ACCT" name="locale" />
-        <alias entity-alias="ACCT" name="timeZone" />
-        <alias entity-alias="PCM" name="contactMechPurposeId" />
-        <alias entity-alias="CM" name="contactMechTypeEnumId" />
-        <alias entity-alias="CM" name="emailAddressAlt" field="infoString" />
-    </view-entity>
 
     <view-entity entity-name="ProductAndCategoryAndPrices" package="growerp.mobile.product">
         <member-entity entity-alias="PROD" entity-name="mantle.product.Product" />
