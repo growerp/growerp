@@ -97,8 +97,12 @@ For **each profile** found (up to daily limit):
    - Takes campaign's `messageTemplate`
    - Replaces placeholders:
      - `{name}` → Recipient's name
+     - `{firstName}` → First word of that name
      - `{company}` → Recipient's company
+     - `{companyName}` → Recipient's company, same value as `{company}`
      - `{title}` → Recipient's job title
+     - `{landingPageUrl}` → Public url of the landing page linked on the campaign
+   - A fallback after a pipe covers an empty field: `{company|your team}`
    - Example: "Hi {name}, I noticed you work at {company}..." becomes
      "Hi John Smith, I noticed you work at Acme Corp..."
 

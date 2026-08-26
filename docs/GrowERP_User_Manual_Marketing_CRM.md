@@ -229,12 +229,19 @@ or API keys, whether the platform is enabled, and a **daily send limit**.
 
 An outreach campaign groups a target audience, a base message template, the
 platforms to use, and per-platform overrides (e.g. a shorter LinkedIn variant of
-the e-mail text). A campaign can link a **landing page**, so every message carries
-your conversion link.
+the e-mail text). A campaign can link a **landing page** to carry your conversion
+link into the messages.
 
-- **Create:** press **+**, name the campaign, write the base message (use
-  placeholders such as the recipient name), select platforms, set daily limits,
-  optionally attach a landing page.
+- **Create:** press **+**, name the campaign, write the base message, select
+  platforms, set daily limits, optionally attach a landing page.
+- **Placeholders:** the message template and the e-mail subject accept
+  `{name}`, `{firstName}`, `{company}`, `{companyName}`, `{title}` and
+  `{landingPageUrl}`, each with an optional fallback after a pipe
+  (`{company|your team}`) used when the field is empty.
+- **The landing page link:** the attached page's public url
+  (`https://<your host>/landing/<pseudoId>`) is what `{landingPageUrl}` resolves
+  to. It reaches the prospect **only** where you write that placeholder — the
+  campaign screen warns when a page is attached but no template uses it.
 - **Execute:** open the campaign and use the execution dialog to run it; messages
   are generated per recipient and platform.
 - **Metrics:** each campaign tracks messages sent, responses and leads generated.

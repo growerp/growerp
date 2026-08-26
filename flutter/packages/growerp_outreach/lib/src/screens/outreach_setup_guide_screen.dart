@@ -74,6 +74,11 @@ class OutreachSetupGuideScreen extends StatefulWidget {
 /// Widget name of this screen in the app menu, used to switch it off.
 const String _guideWidgetName = 'OutreachSetupGuideScreen';
 
+/// Message template placeholder the campaign's landing page url replaces.
+/// Passed into the texts as a value because a literal { } in an arb message
+/// would be read as a placeholder.
+const String _landingPageToken = '{landingPageUrl}';
+
 class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
   bool _smtpConfigured = false;
   bool _llmConfigured = false;
@@ -279,10 +284,19 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
         status: _statusOfOpened('audience', localizations),
       ),
       _GuideStep(
+        id: 'landingPage',
+        icon: Icons.web,
+        title: localizations.guideStepLandingTitle,
+        description: localizations.guideStepLandingDesc,
+        targetWidgetName: 'LandingPageList',
+        optional: true,
+        status: _statusOfOpened('landingPage', localizations),
+      ),
+      _GuideStep(
         id: 'campaign',
         icon: Icons.campaign,
         title: localizations.guideStep4Title,
-        description: localizations.guideStep4Desc,
+        description: localizations.guideStep4Desc(_landingPageToken),
         targetWidgetName: 'CampaignListScreen',
         checked: campaigns.isNotEmpty,
         status: campaigns.isEmpty
@@ -381,22 +395,37 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
                 final guideItem = _guideMenuItem;
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Text(
-                          localizations.guideTitle,
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              localizations.guideTitle,
+                              style: Theme.of(context).textTheme.titleLarge,
+                            ),
+                          ),
+                          if (widget.staticMenuConfig == null &&
+                              guideItem?.menuItemId != null)
+                            IconButton(
+                              key: const Key('hideGuide'),
+                              icon: const Icon(Icons.visibility_off),
+                              tooltip: localizations.guideHide,
+                              onPressed: () => _confirmHideGuide(localizations),
+                            ),
+                        ],
                       ),
-                      if (widget.staticMenuConfig == null &&
-                          guideItem?.menuItemId != null)
-                        IconButton(
-                          key: const Key('hideGuide'),
-                          icon: const Icon(Icons.visibility_off),
-                          tooltip: localizations.guideHide,
-                          onPressed: () => _confirmHideGuide(localizations),
+                      const SizedBox(height: 8),
+                      Text(
+                        localizations.guideIntro(
+                          '{firstName}',
+                          '{company}',
+                          _landingPageToken,
                         ),
+                        key: const Key('guideIntro'),
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                     ],
                   ),
                 );

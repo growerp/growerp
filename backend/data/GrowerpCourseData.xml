@@ -565,7 +565,7 @@ TWITTER, FACEBOOK, INSTAGRAM, and YOUTUBE records can be added using the same fo
     <growerp.course.CourseLesson lessonId="MarketLess0302" moduleId="MarketMod03"
         courseId="CourseMarketingSales"
         title="Creating an Outreach Campaign"
-        keyPoints="[&quot;A campaign groups leads targeted by one message strategy&quot;, &quot;Link a campaign to a landing page to auto-enroll assessment completions&quot;, &quot;Set campaign type, target persona, and assigned platform config&quot;, &quot;Approve a campaign to hand it to the automation service&quot;]"
+        keyPoints="[&quot;A campaign groups leads targeted by one message strategy&quot;, &quot;Link a campaign to a landing page to fill the {landingPageUrl} placeholder in its messages&quot;, &quot;Set campaign type, target persona, and assigned platform config&quot;, &quot;Approve a campaign to hand it to the automation service&quot;]"
         sequenceNum="2">
         <content><![CDATA[## Creating an Outreach Campaign
 
@@ -583,7 +583,7 @@ A campaign is a container for a group of leads and the message sequence you inte
    - **Campaign Type** - typically EMAIL_SEQUENCE or LINKEDIN_SEQUENCE
    - **Platform Config** - select the email or LinkedIn config you set up in the previous lesson
    - **Target Persona** - select the persona this campaign targets (optional but recommended)
-   - **Landing Page** - if you link a landing page here, GrowERP will automatically enroll leads who complete that page&apos;s assessment into this campaign
+   - **Landing Page** - the page this campaign points people to. Its public url (https://&lt;your host&gt;/landing/&lt;pseudoId&gt;) is what the {landingPageUrl} placeholder in your messages resolves to; the link is only sent where you write that placeholder
 
 ### Campaign Statuses
 Campaigns move through these statuses:
@@ -603,7 +603,7 @@ When your sequences are ready (next lesson), change the Status to **MKTG_CAMP_AP
     <growerp.course.CourseLesson lessonId="MarketLess0303" moduleId="MarketMod03"
         courseId="CourseMarketingSales"
         title="Building a Message Sequence"
-        keyPoints="[&quot;Each message in a sequence has a step number, delay, platform, and body template&quot;, &quot;Use {{firstName}}, {{companyName}} etc. as template variables&quot;, &quot;OutreachMessage status lifecycle: PENDING → CONTACTED → RESPONDED → CONVERTED&quot;, &quot;Keep step 1 short and personal - no more than 3 sentences&quot;, &quot;Add a minimum of 2 steps: initial outreach and one follow-up&quot;]"
+        keyPoints="[&quot;Each message in a sequence has a step number, delay, platform, and body template&quot;, &quot;Use single-brace placeholders {firstName}, {companyName} etc. as template variables&quot;, &quot;OutreachMessage status lifecycle: PENDING → CONTACTED → RESPONDED → CONVERTED&quot;, &quot;Keep step 1 short and personal - no more than 3 sentences&quot;, &quot;Add a minimum of 2 steps: initial outreach and one follow-up&quot;]"
         sequenceNum="3">
         <content><![CDATA[## Building a Message Sequence
 
@@ -623,16 +623,21 @@ A message sequence is the series of touchpoints your campaign will execute for e
    - **Body** - the message text. Supports template variables (see below)
 
 ### Template Variables
-The message body supports these placeholders that are replaced with real data when the message sends:
-- {{firstName}} - lead&apos;s first name
-- {{lastName}} - lead&apos;s last name
-- {{companyName}} - lead&apos;s company name
-- {{assessmentScore}} - the score from the linked assessment
-- {{landingPageUrl}} - the URL of the linked landing page
+The message body and the email subject support these placeholders, written with single braces, that are replaced with real data when the message sends:
+- {name} - the recipient&apos;s full name
+- {firstName} - the first word of that name
+- {company} - the recipient&apos;s company
+- {companyName} - the recipient&apos;s company, same value as {company}
+- {title} - the recipient&apos;s job title
+- {landingPageUrl} - the public url of the landing page linked on the campaign
+
+Add a fallback after a pipe for the case where the field is empty: {company|your team} sends &quot;your team&quot; when no company is known.
+
+The landing page url appears **only** where you write {landingPageUrl} - linking a page on the campaign without that placeholder anywhere sends messages without the link, which the campaign screen warns about.
 
 ### A Proven 3-Step Sequence Structure
 Step 1 (Day 0) - Personal and short:
-&quot;Hi {{firstName}}, I noticed you completed our assessment and scored {{assessmentScore}} out of 50. That puts you in our High Priority group - I&apos;d love to share a quick insight that could help. Is 15 minutes this week possible?&quot;
+&quot;Hi {firstName}, I noticed you completed our assessment. That puts {company|your team} in our High Priority group - I&apos;d love to share a quick insight that could help. Have a look here: {landingPageUrl}. Is 15 minutes this week possible?&quot;
 
 Step 2 (Day 3) - Value-add follow-up:
 Share one specific insight, case study, or resource that is relevant to the lead&apos;s pain points based on their persona. End with a soft question.
@@ -955,8 +960,8 @@ This is your capstone exercise. Work through each step in order. By the end you 
 2. Name: &quot;ERP Readiness - High Score Leads&quot;
 3. Type: EMAIL_SEQUENCE. Link your email platform config. Link the ERP Readiness Assessment landing page. Save.
 4. Open the campaign &gt; Messages &gt; **+**
-   - Step 1, Delay 0 days: &quot;Hi {{firstName}}, you scored {{assessmentScore}}/20 on our ERP readiness check. I&apos;d love to share one insight. Reply to book 15 minutes.&quot;
-   - Step 2, Delay 3 days: &quot;Hi {{firstName}}, just following up on my last note. We have helped dozens of businesses in your situation. Worth a quick chat?&quot;
+   - Step 1, Delay 0 days: &quot;Hi {firstName}, you took our ERP readiness check. I&apos;d love to share one insight: {landingPageUrl}. Reply to book 15 minutes.&quot;
+   - Step 2, Delay 3 days: &quot;Hi {firstName}, just following up on my last note. We have helped dozens of businesses like {company|yours}. Worth a quick chat?&quot;
 5. Change campaign Status to **MKTG_CAMP_APPROVED**
 
 ---

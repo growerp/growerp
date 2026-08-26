@@ -335,6 +335,15 @@
   "@guideTitle": {
     "description": "Outreach setup guide: guideTitle"
   },
+  "guideIntro": "Work through these steps to run outreach end to end: configure e-mail and AI, enable the platforms you send on, create a landing page and a campaign that links it, add recipients, then start the automation and follow up on replies. In the campaign template personalise with {firstName} or {company} and place the landing page link with {landingPageUrl}: it only appears where you write that placeholder.",
+  "@guideIntro": {
+    "description": "Outreach setup guide: guideIntro",
+    "placeholders": {
+      "firstName": {"type": "String"},
+      "company": {"type": "String"},
+      "landingPageUrl": {"type": "String"}
+    }
+  },
   "guideStep1Title": "System Setup",
   "@guideStep1Title": {
     "description": "Outreach setup guide: guideStep1Title"
@@ -355,17 +364,28 @@
   "@guideStep3Title": {
     "description": "Outreach setup guide: guideStep3Title"
   },
-  "guideStep3Desc": "Create personas, content and landing pages in Marketing",
+  "guideStep3Desc": "Create personas and content in Marketing",
   "@guideStep3Desc": {
     "description": "Outreach setup guide: guideStep3Desc"
+  },
+  "guideStepLandingTitle": "Create a Landing Page",
+  "@guideStepLandingTitle": {
+    "description": "Outreach setup guide: guideStepLandingTitle"
+  },
+  "guideStepLandingDesc": "Build the page your message links to, then link it on the campaign",
+  "@guideStepLandingDesc": {
+    "description": "Outreach setup guide: guideStepLandingDesc"
   },
   "guideStep4Title": "Create a Campaign",
   "@guideStep4Title": {
     "description": "Outreach setup guide: guideStep4Title"
   },
-  "guideStep4Desc": "Choose platforms, message template and target audience",
+  "guideStep4Desc": "Choose platforms, target audience and message template; link a landing page and insert its url with {landingPageUrl}",
   "@guideStep4Desc": {
-    "description": "Outreach setup guide: guideStep4Desc"
+    "description": "Outreach setup guide: guideStep4Desc",
+    "placeholders": {
+      "landingPageUrl": {"type": "String"}
+    }
   },
   "guideStep5Title": "Add Recipients",
   "@guideStep5Title": {

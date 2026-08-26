@@ -7,7 +7,10 @@ A Flutter package for multi-platform marketing outreach and campaign automation 
 - **Campaign Management**: Create, manage, and track outreach campaigns
 - **Multi-Platform Support**: Email, LinkedIn, Twitter/X automation
 - **Lead Targeting**: Define and manage target audiences for campaigns
-- **Template System**: Reusable message templates with variable substitution
+- **Template System**: Reusable message templates with variable substitution —
+  `{name}`, `{firstName}`, `{company}`, `{companyName}`, `{title}` and
+  `{landingPageUrl}` (the campaign's linked landing page), each with an optional
+  fallback after a pipe: `{company|your team}`
 - **Rate Limiting**: Platform-specific rate limiting to avoid API throttling
 - **MCP Browser Automation**: Puppeteer-based browser automation via MCP protocol
 
