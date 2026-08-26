@@ -96,16 +96,17 @@ class CompanyListState extends State<CompanyList> {
               company: company,
               index: index,
               bloc: _companyBloc,
+              role: widget.role,
             );
           }).toList();
 
           return StyledDataTable(
-            columns: getCompanyListColumns(context),
+            columns: getCompanyListColumns(context, role: widget.role),
             rows: rows,
             isLoading: _isLoading && companies.isEmpty,
             scrollController: _scrollController,
             rowHeight: isPhone ? 64 : 56,
-                            onRowTap: (index) async {
+            onRowTap: (index) async {
               await showDialog(
                 barrierDismissible: true,
                 context: context,

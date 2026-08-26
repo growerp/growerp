@@ -18,6 +18,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../common/common.dart';
 import '../user.dart';
 import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
@@ -34,6 +35,8 @@ List<StyledColumn> getUserListColumns(BuildContext context, {Role? role}) {
         StyledColumn(header: localizations.role, flex: 2)
       else
         StyledColumn(header: localizations.company, flex: 3),
+      if (role == Role.lead)
+        StyledColumn(header: localizations.leadStatus, flex: 2),
       const StyledColumn(header: '', flex: 1), // Actions
     ];
   }
@@ -47,6 +50,8 @@ List<StyledColumn> getUserListColumns(BuildContext context, {Role? role}) {
       StyledColumn(header: localizations.role, flex: 2)
     else
       StyledColumn(header: localizations.company, flex: 2),
+    if (role == Role.lead)
+      StyledColumn(header: localizations.leadStatus, flex: 2),
     const StyledColumn(header: '', flex: 1), // Actions
   ];
 }
@@ -172,6 +177,23 @@ List<Widget> getUserListRow({
     );
   } else {
     cells.add(Text(user.company?.name ?? '', key: Key('companyName$index')));
+  }
+
+  // Lead status (lead list only)
+  if (role == Role.lead) {
+    cells.add(
+      StatusChip(
+        label: leadStatusName(
+          UserCompanyLocalizations.of(context)!,
+          user.leadStatus,
+        ),
+        type: user.leadStatus == LeadStatus.qualified
+            ? StatusType.success
+            : StatusType.warning,
+        size: StatusChipSize.small,
+        key: Key('leadStatus$index'),
+      ),
+    );
   }
 
   // Delete action

@@ -134,6 +134,22 @@ class FinDocStatusValConverter
   }
 }
 
+class LeadStatusConverter implements JsonConverter<LeadStatus?, String?> {
+  const LeadStatusConverter();
+
+  @override
+  LeadStatus? fromJson(String? json) {
+    if (json == null || json.isEmpty) return null;
+    return LeadStatus.getByValue(json);
+  }
+
+  @override
+  String? toJson(LeadStatus? object) {
+    if (object == null) return '';
+    return object.value;
+  }
+}
+
 class RoleConverter implements JsonConverter<Role?, String?> {
   const RoleConverter();
 

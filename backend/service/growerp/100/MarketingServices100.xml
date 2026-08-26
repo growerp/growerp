@@ -697,7 +697,9 @@
                     <econdition field-name="role" value="Customer" />
                     <econdition field-name="companyRole" value="Customer" />
                 </econditions>
-                <econdition field-name="customerStatusId" value="CUSTOMER_ASSIGNED" />
+                <!-- lead: a customer that has not been converted yet -->
+                <econdition field-name="customerStatusId" operator="not-equals"
+                    value="CUSTOMER_CONVERTED" or-null="true" />
             </entity-find-count>
             <!-- assessments completed -->
             <entity-find-count count-field="assessmentCompletions"

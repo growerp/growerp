@@ -228,9 +228,17 @@ limitations under the License.
                     <econdition field-name="role" value="Customer" />
                     <econdition field-name="companyRole" value="Customer" />
                 </econditions>
-                <econditions combine="or">
-                    <econdition field-name="customerStatusId" value="CUSTOMER_ASSIGNED" />
-                    <econdition field-name="companyCustomerStatusId" value="CUSTOMER_ASSIGNED" />
+                <!-- assigned: a new lead has no status yet, so anything not qualified
+                     and not converted counts as the first stage -->
+                <econditions combine="and">
+                    <econdition field-name="customerStatusId" operator="not-equals"
+                        value="CUSTOMER_QUALIFIED" or-null="true" />
+                    <econdition field-name="companyCustomerStatusId" operator="not-equals"
+                        value="CUSTOMER_QUALIFIED" or-null="true" />
+                    <econdition field-name="customerStatusId" operator="not-equals"
+                        value="CUSTOMER_CONVERTED" or-null="true" />
+                    <econdition field-name="companyCustomerStatusId" operator="not-equals"
+                        value="CUSTOMER_CONVERTED" or-null="true" />
                 </econditions>
             </entity-find-count>
             <entity-find-count count-field="qualifiedCount"

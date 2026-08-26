@@ -1,4 +1,3 @@
-
 // ignore_for_file: unnecessary_string_interpolations
 
 /*
@@ -31,8 +30,8 @@ import 'package:growerp_models/growerp_models.dart';
 //import 'package:growerp_activity/growerp_activity.dart';
 import 'package:flutter/rendering.dart';
 
-
 import '../../common/address_dialog.dart';
+import '../../common/lead_status_name.dart';
 import '../../common/payment_method_dialog.dart';
 import '../../company/views/company_dialog.dart';
 import '../../company/bloc/company_bloc.dart';
@@ -104,6 +103,7 @@ class UserDialogState extends State<UserDialogStateFull> {
   late List<UserGroup> localUserGroups;
   late UserGroup _selectedUserGroup;
   late Role _selectedRole;
+  LeadStatus? _selectedLeadStatus;
   Company _selectedCompany = Company();
   XFile? _imageFile;
   bool _deleteImage = false;
@@ -146,6 +146,7 @@ class UserDialogState extends State<UserDialogStateFull> {
     }
     _selectedCompany = widget.user.company ?? Company(role: Role.unknown);
     _selectedRole = widget.user.role ?? Role.unknown;
+    _selectedLeadStatus = widget.user.leadStatus;
     _selectedUserGroup = widget.user.userGroup ?? UserGroup.employee;
     localUserGroups = UserGroup.getValues();
     updatedUser = widget.user;
@@ -229,11 +230,7 @@ class UserDialogState extends State<UserDialogStateFull> {
         body: BlocConsumer<UserBloc, UserState>(
           listener: (context, state) {
             if (state.status == UserStatus.failure) {
-              HelperFunctions.showMessage(
-                context,
-                state.message,
-                Colors.red,
-              );
+              HelperFunctions.showMessage(context, state.message, Colors.red);
             }
             if (state.status == UserStatus.success) {
               // Update AuthBloc if this is the logged-in user
@@ -244,9 +241,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                 if (currentAuth?.user?.partyId == updatedUser.partyId) {
                   // Update the authenticate state with the new user data
                   authBloc.add(
-                    AuthUpdateLocal(
-                      currentAuth!.copyWith(user: updatedUser),
-                    ),
+                    AuthUpdateLocal(currentAuth!.copyWith(user: updatedUser)),
                   );
                 }
               }
@@ -367,6 +362,33 @@ class UserDialogState extends State<UserDialogStateFull> {
                 ),
               ],
             ),
+            if (_selectedRole == Role.lead)
+              DropdownButtonFormField<LeadStatus?>(
+                key: const Key('leadStatus'),
+                decoration: InputDecoration(
+                  labelText: localizations.leadStatus,
+                ),
+                hint: Text(localizations.leadStatus),
+                initialValue: _selectedLeadStatus,
+                items: [
+                  DropdownMenuItem<LeadStatus?>(
+                    value: null,
+                    child: Text(localizations.leadStatusNew),
+                  ),
+                  ...LeadStatus.values.map((item) {
+                    return DropdownMenuItem<LeadStatus?>(
+                      value: item,
+                      child: Text(leadStatusName(localizations, item)),
+                    );
+                  }),
+                ],
+                onChanged: (LeadStatus? newValue) {
+                  setState(() {
+                    _selectedLeadStatus = newValue;
+                  });
+                },
+                isExpanded: true,
+              ),
             Row(
               children: [
                 Expanded(
@@ -406,7 +428,9 @@ class UserDialogState extends State<UserDialogStateFull> {
                   child: TextFormField(
                     key: const Key('personalTitle'),
                     decoration: InputDecoration(
-                      labelText: UserCompanyLocalizations.of(context)!.jobTitlePosition,
+                      labelText: UserCompanyLocalizations.of(
+                        context,
+                      )!.jobTitlePosition,
                     ),
                     controller: _personalTitleController,
                   ),
@@ -988,6 +1012,7 @@ class UserDialogState extends State<UserDialogStateFull> {
         loginDisabled: _isLoginDisabled,
         userGroup: _selectedUserGroup,
         role: _selectedRole,
+        leadStatus: _selectedRole == Role.lead ? _selectedLeadStatus : null,
         appsUsed: [_applicationId],
         //                      language: Localizations.localeOf(context)
         //                          .languageCode

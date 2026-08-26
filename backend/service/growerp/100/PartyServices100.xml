@@ -396,6 +396,7 @@ limitations under the License.
                     <parameter name="email" />
                     <parameter name="url" />
                     <parameter name="role" />
+                    <parameter name="customerStatus" />
                     <parameter name="currency" type="Map">
                         <parameter name="currencyId" />
                         <parameter name="description" />
@@ -463,15 +464,16 @@ limitations under the License.
             <if condition="!companyPartyId &amp;&amp; !searchString">
                 <set field="disabled" value="N" />
             </if>
-            <!-- adjust role -->
+            <!-- adjust role: a lead is a customer without the converted status -->
             <if condition="role">
                 <if condition="role == 'Lead'">
                     <then>
-                        <set field="customerStatusId" value="CUSTOMER_ASSIGNED" />
+                        <set field="leadStatusList"
+                            from="['CUSTOMER_ASSIGNED', 'CUSTOMER_QUALIFIED']" />
                         <set field="companyRole" value="Customer" />
                     </then>
                     <else-if condition="role == 'Customer'">
-                        <set field="customerStatusId" value="CUSTOMER_QUALIFIED" />
+                        <set field="customerStatusId" value="CUSTOMER_CONVERTED" />
                         <set field="companyRole" from="role" />
                     </else-if>
                     <else-if condition="role != 'Company' &amp;&amp; role != 'Unknown'">
@@ -495,7 +497,9 @@ limitations under the License.
                         operator="like" from="search" ignore-if-empty="true" />
                 </econditions>
                 <econdition field-name="companyRole" ignore-if-empty="true" />
-                <econdition field-name="customerStatusId" ignore-if-empty="true" or-null="true" />
+                <econdition field-name="customerStatusId" operator="in" from="leadStatusList"
+                    or-null="true" ignore-if-empty="true" />
+                <econdition field-name="customerStatusId" ignore-if-empty="true" />
                 <econditions combine="or">
                     <econdition field-name="ownerDisabled" operator="equals"
                         from="disabled" or-null="true" ignore-if-empty="true" />
@@ -628,8 +632,9 @@ limitations under the License.
                                     pseudoId: item.companyPseudoId ?:'',
                                     name: item.companyName,
                                     role: item.companyRole == 'Customer'
-                                            &amp;&amp; item.customerStatusId == 'CUSTOMER_ASSIGNED'
+                                            &amp;&amp; item.customerStatusId != 'CUSTOMER_CONVERTED'
                                             ? 'Lead': item.companyRole,
+                                    customerStatus: item.customerStatusId ?: '',
                                     email: item.companyEmail ?:'',
                                     url: item.webAddress,
                                     currency: currency,
@@ -683,6 +688,7 @@ limitations under the License.
                 <parameter name="pseudoId" />
                 <parameter name="name" required="true" />
                 <parameter name="role" required="true" />
+                <parameter name="customerStatus" />
                 <parameter name="email" />
                 <parameter name="url" />
                 <parameter name="currency" type="Map">
@@ -729,6 +735,7 @@ limitations under the License.
                 <parameter name="email" />
                 <parameter name="url" />
                 <parameter name="role" />
+                <parameter name="customerStatus" />
                 <parameter name="currency" type="Map">
                     <parameter name="currencyId" />
                     <parameter name="description" />
@@ -783,10 +790,11 @@ limitations under the License.
                 <return error="true" message="Creating a company needs an ownerPartyId" />
             </if>
             <if condition="company.role == 'Lead'">
+                <!-- a lead is stored as a customer without the converted status -->
                 <set field="company.role" value="Customer" />
-                <set field="customerStatusId" value="CUSTOMER_ASSIGNED" />
+                <set field="customerStatusId" from="company.customerStatus ?: null" />
                 <else-if condition="company.role == 'Customer'">
-                    <set field="customerStatusId" value="CUSTOMER_QUALIFIED" />
+                    <set field="customerStatusId" value="CUSTOMER_CONVERTED" />
                 </else-if>
                 <else-if condition="company.role == 'Company'">
                     <set field="company.role" value="OrgInternal" />
@@ -938,6 +946,7 @@ limitations under the License.
                 <parameter name="pseudoId" />
                 <parameter name="name" />
                 <parameter name="role" required="true" />
+                <parameter name="customerStatus" />
                 <parameter name="email" />
                 <parameter name="url" />
                 <parameter name="currency" type="Map">
@@ -985,6 +994,7 @@ limitations under the License.
                 <parameter name="email" />
                 <parameter name="url" />
                 <parameter name="role" />
+                <parameter name="customerStatus" />
                 <parameter name="currency" type="Map">
                     <parameter name="currencyId" />
                     <parameter name="description" />
@@ -1056,20 +1066,36 @@ limitations under the License.
                     in-map="[partyId: oldValue.companies[0].partyId, organizationName: company.name]" />
             </if>
             <!-- update role , orgInternal cannot change-->
+            <!-- lead and customer are both stored with the Customer role, the customer status
+                 tells them apart and always wins over the role sent by the frontend -->
+            <set field="newRole" from="company.role" />
+            <set field="oldRole" from="oldValue.companies[0].role" />
+            <if condition="oldRole == 'Lead'">
+                <set field="oldRole" value="Customer" />
+            </if>
+            <if condition="company.role == 'Lead' || company.role == 'Customer'">
+                <set field="newRole" value="Customer" />
+                <if condition="company.role == 'Customer'
+                        || company.customerStatus == 'CUSTOMER_CONVERTED'">
+                    <then>
+                        <set field="customerStatusId" value="CUSTOMER_CONVERTED" />
+                    </then>
+                    <else>
+                        <set field="customerStatusId" from="company.customerStatus ?: null" />
+                    </else>
+                </if>
+                <!-- entity-update, not update#Party: entity-auto skips null values so
+                     clearing the status back to empty would not be stored -->
+                <entity-find-one entity-name="mantle.party.Party" value-field="partyRec">
+                    <field-map field-name="partyId" from="company.partyId" />
+                </entity-find-one>
+                <set field="partyRec.customerStatusId" from="customerStatusId" />
+                <entity-update value-field="partyRec" />
+            </if>
             <if
-                condition="oldValue.companies[0].role != 'OrgInternal' &amp;&amp; company.role != oldValue.companies[0].role">
-                <set field="newRole" from="company.role" />
-                <if condition="company.role == 'Lead'">
-                    <set field="newRole" value="Customer" />
-                    <service-call name="update#mantle.party.Party"
-                        in-map="[partyId: company.partyId, customerStatusId: 'CUSTOMER_ASSIGNED']" />
-                </if>
-                <if condition="company.role == 'Customer'">
-                    <service-call name="update#mantle.party.Party"
-                        in-map="[partyId: company.partyId, customerStatusId: CUSTOMER_QUALIFIED]" />
-                </if>
+                condition="oldRole != 'OrgInternal' &amp;&amp; newRole &amp;&amp; newRole != oldRole">
                 <service-call name="delete#mantle.party.PartyRole"
-                    in-map="[partyId: company.partyId, roleTypeId: oldValue.companies[0].role]" />
+                    in-map="[partyId: company.partyId, roleTypeId: oldRole]" />
                 <service-call name="create#mantle.party.PartyRole"
                     in-map="[partyId: company.partyId, roleTypeId: newRole]" />
             </if>
@@ -1415,6 +1441,7 @@ limitations under the License.
                     <parameter name="email" />
                     <parameter name="url" />
                     <parameter name="role" />
+                    <parameter name="customerStatus" />
                     <parameter name="firstName" />
                     <parameter name="lastName" />
                     <parameter name="personalTitle" />
@@ -1444,6 +1471,7 @@ limitations under the License.
                         <parameter name="name" />
                         <parameter name="email" />
                         <parameter name="role" />
+                        <parameter name="customerStatus" />
                     </parameter>
                     <parameter name="image" />
                     <parameter name="userId" />
@@ -1472,12 +1500,12 @@ limitations under the License.
             <if condition="!userPartyId &amp;&amp; !search">
                 <set field="disabled" value="N" />
             </if>
-            <!-- adjust role -->
+            <!-- adjust role: a lead is a customer without the converted status -->
             <if condition="role == 'Customer'">
-                <set field="customerStatusId" value="CUSTOMER_QUALIFIED" />
+                <set field="customerStatusId" value="CUSTOMER_CONVERTED" />
             </if>
             <if condition="role == 'Lead'">
-                <set field="customerStatusId" value="CUSTOMER_ASSIGNED" />
+                <set field="leadStatusList" from="['CUSTOMER_ASSIGNED', 'CUSTOMER_QUALIFIED']" />
                 <set field="role" value="Customer" />
             </if>
             <if condition="role == 'Unknown'">
@@ -1512,7 +1540,9 @@ limitations under the License.
                     <econdition field-name="role" ignore-if-empty="true" />
                     <econdition field-name="companyRole" from="role" ignore-if-empty="true" />
                 </econditions>
-                <econdition field-name="customerStatusId" ignore-if-empty="true" or-null="true" />
+                <econdition field-name="customerStatusId" operator="in" from="leadStatusList"
+                    or-null="true" ignore-if-empty="true" />
+                <econdition field-name="customerStatusId" ignore-if-empty="true" />
                 <econdition field-name="userGroupId" ignore-if-empty="true" />
                 <econditions combine="or">
                     <econdition field-name="ownerDisabled" operator="equals"
@@ -1523,14 +1553,14 @@ limitations under the License.
                 <order-by field-name="lastName^,firstName^,companyName^" />
             </entity-find>
             <iterate entry="userInfo" list="userInfos">
-                <!-- adjust role -->
+                <!-- adjust role: a lead is a customer without the converted status -->
                 <if
                     condition="userInfo.role == 'Customer' 
-                        &amp;&amp; userInfo.customerStatusId == 'CUSTOMER_ASSIGNED'">
+                        &amp;&amp; userInfo.customerStatusId != 'CUSTOMER_CONVERTED'">
                     <set field="userInfo.role" value="Lead" />
                 </if>
                 <if
-                    condition="userInfo.companyRole == 'Customer' &amp;&amp; userInfo.companyCustomerStatusId == 'CUSTOMER_ASSIGNED'">
+                    condition="userInfo.companyRole == 'Customer' &amp;&amp; userInfo.companyCustomerStatusId != 'CUSTOMER_CONVERTED'">
                     <set field="userInfo.companyRole" value="Lead" />
                 </if>
                 <!-- postal address -->
@@ -1597,7 +1627,7 @@ limitations under the License.
                             <!-- role adjustment -->
                             <if
                                 condition="userInfo.companyRole == 'Customer' &amp;&amp;
-                                    userInfo.companyCustomerStatusId == 'CUSTOMER_ASSIGNED'">
+                                    userInfo.companyCustomerStatusId != 'CUSTOMER_CONVERTED'">
                                 <set field="role" value="Lead" />
                                 <else>
                                     <set field="role" from="userInfo.companyRole" />
@@ -1610,6 +1640,7 @@ limitations under the License.
                                 pseudoId: userInfo.companyPseudoId,
                                 name: userInfo.companyName,
                                 role: role,
+                                customerStatus: userInfo.companyCustomerStatusId ?: '',
                                 ]" />
                         </else>
                     </if>
@@ -1641,7 +1672,7 @@ limitations under the License.
                         <!-- role adjustment -->
                         <if
                             condition="userInfo.role == 'Customer' &amp;&amp;
-                                    userInfo.customerStatusId == 'CUSTOMER_ASSIGNED'">
+                                    userInfo.customerStatusId != 'CUSTOMER_CONVERTED'">
                             <set field="role" value="Lead" />
                             <else>
                                 <set field="role" from="userInfo.role" />
@@ -1653,6 +1684,7 @@ limitations under the License.
                                 partyId: userInfo?.userPartyId,
                                 pseudoId: userInfo?.userPseudoId,
                                 role: role,
+                                customerStatus: userInfo.customerStatusId ?: '',
                                 email: userInfo?.emailAddress ?: userInfo.emailAddressCm,
                                 url: userInfo.webAddress,
                                 emailContactMechId: userInfo.emailContactMechId,
@@ -1695,6 +1727,7 @@ limitations under the License.
                 <parameter name="email" />
                 <parameter name="url" />
                 <parameter name="role" />
+                <parameter name="customerStatus" />
                 <parameter name="firstName" />
                 <parameter name="lastName" />
                 <parameter name="personalTitle" />
@@ -1731,6 +1764,7 @@ limitations under the License.
                     <parameter name="pseudoId" />
                     <parameter name="name" />
                     <parameter name="role" />
+                    <parameter name="customerStatus" />
                     <parameter name="email" />
                     <parameter name="url" />
                     <parameter name="currency" type="Map">
@@ -1773,6 +1807,7 @@ limitations under the License.
                 <parameter name="email" />
                 <parameter name="url" />
                 <parameter name="role" />
+                <parameter name="customerStatus" />
                 <parameter name="firstName" />
                 <parameter name="lastName" />
                 <parameter name="personalTitle" />
@@ -1803,6 +1838,7 @@ limitations under the License.
                     <parameter name="name" />
                     <parameter name="email" />
                     <parameter name="role" />
+                    <parameter name="customerStatus" />
                 </parameter>
                 <parameter name="userId" />
                 <parameter name="locale" />
@@ -1829,17 +1865,18 @@ limitations under the License.
                     out-map="context" />
                 <set field="user.pseudoId" from="seqNum" />
             </if>
-            <!-- role -->
+            <!-- role: a lead is stored as a customer without the converted status -->
             <if condition="user.role == 'Lead' || user.company?.role == 'Lead' ">
                 <then>
                     <set field="user.role" value="Customer" />
                     <if condition="user.company">
                         <set field="user.company.role" value="Customer" />
                     </if>
-                    <set field="customerStatusId" value="CUSTOMER_ASSIGNED" />
+                    <set field="customerStatusId"
+                        from="user.customerStatus ?: user.company?.customerStatus ?: null" />
                 </then>
                 <else-if condition="user.role == 'Customer' || user.company?.role == 'Customer'">
-                    <set field="customerStatusId" value="CUSTOMER_QUALIFIED" />
+                    <set field="customerStatusId" value="CUSTOMER_CONVERTED" />
                 </else-if>
             </if>
             <!-- create account with or without login-->
@@ -2099,6 +2136,7 @@ limitations under the License.
                 <parameter name="firstName" />
                 <parameter name="lastName" />
                 <parameter name="role" />
+                <parameter name="customerStatus" />
                 <parameter name="loginDisabled" type="Boolean" />
                 <parameter name="loginName" />
                 <parameter name="userGroupId" />
@@ -2134,6 +2172,7 @@ limitations under the License.
                     <parameter name="name" />
                     <parameter name="email" />
                     <parameter name="role" />
+                    <parameter name="customerStatus" />
                 </parameter>
                 <parameter name="appsUsed" type="List">
                     <parameter name="partyClassificationId" />
@@ -2149,6 +2188,7 @@ limitations under the License.
                 <parameter name="firstName" />
                 <parameter name="lastName" />
                 <parameter name="role" />
+                <parameter name="customerStatus" />
                 <parameter name="loginDisabled" type="Boolean" />
                 <parameter name="loginName" />
                 <parameter name="userGroupId" />
@@ -2180,6 +2220,7 @@ limitations under the License.
                     <parameter name="name" />
                     <parameter name="email" />
                     <parameter name="role" />
+                    <parameter name="customerStatus" />
                 </parameter>
                 <parameter name="appsUsed" type="List">
                     <parameter name="partyClassificationId" />
@@ -2251,21 +2292,37 @@ limitations under the License.
                 </else-if>
             </if>
             <!-- update role , orgInternal cannot change-->
+            <!-- lead and customer are both stored with the Customer role, the customer status
+                 tells them apart and always wins over the role sent by the frontend -->
+            <set field="newRole" from="user.role" />
+            <set field="oldRole" from="oldValue.user.role" />
+            <if condition="oldRole == 'Lead'">
+                <set field="oldRole" value="Customer" />
+            </if>
+            <if condition="user.role == 'Lead' || user.role == 'Customer'">
+                <set field="newRole" value="Customer" />
+                <if condition="user.role == 'Customer'
+                        || user.customerStatus == 'CUSTOMER_CONVERTED'">
+                    <then>
+                        <set field="customerStatusId" value="CUSTOMER_CONVERTED" />
+                    </then>
+                    <else>
+                        <set field="customerStatusId" from="user.customerStatus ?: null" />
+                    </else>
+                </if>
+                <!-- entity-update, not update#Party: entity-auto skips null values so
+                     clearing the status back to empty would not be stored -->
+                <entity-find-one entity-name="mantle.party.Party" value-field="partyRec">
+                    <field-map field-name="partyId" from="user.partyId" />
+                </entity-find-one>
+                <set field="partyRec.customerStatusId" from="customerStatusId" />
+                <entity-update value-field="partyRec" />
+            </if>
+            <!-- update role -->
             <if
-                condition="oldValue.user.role != 'OrgInternal' &amp;&amp; user.role != oldValue.user.role">
-                <set field="newRole" from="user.role" />
-                <if condition="user.role == 'Lead'">
-                    <set field="newRole" value="Customer" />
-                    <service-call name="update#mantle.party.Party"
-                        in-map="[partyId: user.partyId, customerStatusId: 'CUSTOMER_ASSIGNED']" />
-                </if>
-                <if condition="user.role == 'Customer'">
-                    <service-call name="update#mantle.party.Party"
-                        in-map="[partyId: user.partyId, customerStatusId: CUSTOMER_QUALIFIED]" />
-                </if>
-                <!-- update role -->
+                condition="oldRole != 'OrgInternal' &amp;&amp; newRole &amp;&amp; newRole != oldRole">
                 <service-call name="delete#mantle.party.PartyRole"
-                    in-map="[partyId: user.partyId, roleTypeId: oldValue.user.role]" />
+                    in-map="[partyId: user.partyId, roleTypeId: oldRole]" />
                 <service-call name="create#mantle.party.PartyRole"
                     in-map="[partyId: user.partyId, roleTypeId: newRole]" />
             </if>
@@ -2693,6 +2750,7 @@ limitations under the License.
                 <parameter name="pseudoId" />
                 <parameter name="partyType" />
                 <parameter name="role" />
+                <parameter name="customerStatus" />
                 <parameter name="email" />
                 <parameter name="url" />
                 <parameter name="name" />
@@ -2733,12 +2791,12 @@ limitations under the License.
                 <set field="lastName"
                     value="%${search.split().size() > 1? search.split()?[1] : null}%" />
             </if>
-            <!-- adjust role -->
+            <!-- adjust role: a lead is a customer without the converted status -->
             <if condition="role == 'Customer'">
-                <set field="customerStatusId" value="CUSTOMER_QUALIFIED" />
+                <set field="customerStatusId" value="CUSTOMER_CONVERTED" />
             </if>
             <if condition="role == 'Lead'">
-                <set field="customerStatusId" value="CUSTOMER_ASSIGNED" />
+                <set field="leadStatusList" from="['CUSTOMER_ASSIGNED', 'CUSTOMER_QUALIFIED']" />
                 <set field="role" value="Customer" />
             </if>
             <if condition="role == 'Unknown'">
@@ -2753,7 +2811,9 @@ limitations under the License.
                 <econdition field-name="partyId" from="partyId" ignore-if-empty="true" />
                 <econdition field-name="pseudoId" from="pseudoId" ignore-if-empty="true" />
                 <econdition field-name="role" ignore-if-empty="true" />
-                <econdition field-name="customerStatusId" ignore-if-empty="true" or-null="true" />
+                <econdition field-name="customerStatusId" operator="in" from="leadStatusList"
+                    or-null="true" ignore-if-empty="true" />
+                <econdition field-name="customerStatusId" ignore-if-empty="true" />
                 <econdition field-name="toPartyId" operator="is-null" ignore="export" />
                 <econditions combine="or">
                     <econdition field-name="companyName" from="searchString" ignore-case="true"
@@ -2808,7 +2868,7 @@ limitations under the License.
                 </if>
                 <!-- role adjustment -->
                 <if
-                    condition="item.role == 'Customer' &amp;&amp; item.customerStatusId == 'CUSTOMER_ASSIGNED'">
+                    condition="item.role == 'Customer' &amp;&amp; item.customerStatusId != 'CUSTOMER_CONVERTED'">
                     <set field="role" value="Lead" />
                     <else>
                         <set field="role" from="item.role" />
@@ -2817,6 +2877,7 @@ limitations under the License.
                 <set field="companyUser"
                     from="[
                     pseudoId: item.pseudoId, type: type, partyId: item.partyId, role: role, name: name,
+                    customerStatus: item.customerStatusId ?: '',
                     email: item.email, url: item.webAddress]" />
 
                 <!-- address -->
@@ -4083,7 +4144,7 @@ limitations under the License.
                         list="customers">
                         <econdition field-name="ownerPartyId" from="ownerPartyId" />
                         <econdition field-name="companyRole" value="Customer" />
-                        <econdition field-name="customerStatusId" value="CUSTOMER_QUALIFIED" />
+                        <econdition field-name="customerStatusId" value="CUSTOMER_CONVERTED" />
                     </entity-find>
                     <entity-find entity-name="growerp.party.OwnerCompanyDetailAndEmployee"
                         list="suppliers">
@@ -4453,6 +4514,46 @@ limitations under the License.
 
             <set field="unownedCount" from="unowned.size()" />
             <message>repair#PartyOwner${dryRun ? ' (dry run, nothing written)' : ''}: checked ${checkedCount}, repaired ${repairedCount}, left unowned ${unownedCount}</message>
+        </actions>
+    </service>
+
+    <service verb="repair" noun="CustomerStatus" authenticate="true">
+        <description>One shot migration of mantle.party.Party.customerStatusId for the lead status
+            field. A lead and a customer are both stored with the Customer role, the customer
+            status tells them apart: empty/CUSTOMER_ASSIGNED/CUSTOMER_QUALIFIED is a lead,
+            CUSTOMER_CONVERTED is a customer. Before that change CUSTOMER_QUALIFIED meant
+            customer, so every existing customer would read back as a lead. This sets every
+            Customer role party on CUSTOMER_QUALIFIED to CUSTOMER_CONVERTED.
+
+            Idempotent: parties already converted, assigned or without a status are never
+            touched. Run with dryRun=true first to see the count.</description>
+        <in-parameters>
+            <parameter name="dryRun" type="Boolean" default-value="true">
+                <description>Report what would change without writing anything.</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="repairedCount" type="Integer" />
+        </out-parameters>
+        <actions>
+            <set field="repairedCount" from="0" />
+            <entity-find entity-name="mantle.party.PartyRole" list="customerRoles">
+                <econdition field-name="roleTypeId" value="Customer" />
+            </entity-find>
+            <iterate list="customerRoles" entry="customerRole">
+                <entity-find-one entity-name="mantle.party.Party" value-field="party">
+                    <field-map field-name="partyId" from="customerRole.partyId" />
+                </entity-find-one>
+                <if condition="party?.customerStatusId == 'CUSTOMER_QUALIFIED'">
+                    <if condition="!dryRun">
+                        <set field="party.customerStatusId" value="CUSTOMER_CONVERTED" />
+                        <entity-update value-field="party" />
+                    </if>
+                    <set field="repairedCount" from="repairedCount + 1" />
+                    <log message="repair#CustomerStatus${dryRun ? ' (dry run)' : ''}: ${party.partyId} -> CUSTOMER_CONVERTED" />
+                </if>
+            </iterate>
+            <message>repair#CustomerStatus${dryRun ? ' (dry run, nothing written)' : ''}: converted ${repairedCount}</message>
         </actions>
     </service>
 

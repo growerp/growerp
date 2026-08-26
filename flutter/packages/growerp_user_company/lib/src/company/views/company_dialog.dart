@@ -77,7 +77,8 @@ class ShowCompanyDialog extends StatelessWidget {
     if (company.partyId == null) {
       return BlocBuilder<AuthBloc, AuthState>(
         buildWhen: (p, c) =>
-            p.authenticate?.company?.partyId != c.authenticate?.company?.partyId,
+            p.authenticate?.company?.partyId !=
+            c.authenticate?.company?.partyId,
         builder: (context, authState) {
           final mainCompany = authState.authenticate?.company;
           return CompanyDialog(
@@ -106,6 +107,7 @@ class CompanyFormState extends State<CompanyDialog> {
   List<User> employees = [];
   late Company company;
   Role _selectedRole = Role.unknown;
+  LeadStatus? _selectedLeadStatus;
   final _idController = TextEditingController();
   final _nameController = TextEditingController();
   final _telephoneController = TextEditingController();
@@ -173,6 +175,7 @@ class CompanyFormState extends State<CompanyDialog> {
     _idController.text = company.pseudoId ?? '';
     _nameController.text = company.name ?? '';
     _selectedRole = company.role ?? widget.company.role ?? Role.unknown;
+    _selectedLeadStatus = company.leadStatus ?? widget.company.leadStatus;
     _emailController.text = company.email ?? '';
     _urlController.text = company.url ?? '';
     _backendController.text = company.secondaryBackend ?? '';
@@ -252,7 +255,8 @@ class CompanyFormState extends State<CompanyDialog> {
               // getAuthenticate runs before the image upload finishes.
               if (companyBloc.state.companies.isNotEmpty) {
                 final updatedCompany = companyBloc.state.companies[0];
-                if (updatedCompany.partyId == authBloc.state.authenticate?.company?.partyId) {
+                if (updatedCompany.partyId ==
+                    authBloc.state.authenticate?.company?.partyId) {
                   authBloc.add(
                     AuthUpdateLocal(
                       authenticate.copyWith(company: updatedCompany),
@@ -428,6 +432,31 @@ class CompanyFormState extends State<CompanyDialog> {
             ),
         ],
       ),
+      if (_selectedRole == Role.lead)
+        DropdownButtonFormField<LeadStatus?>(
+          key: const Key('leadStatus'),
+          decoration: InputDecoration(labelText: _localizations.leadStatus),
+          hint: Text(_localizations.leadStatus),
+          initialValue: _selectedLeadStatus,
+          items: [
+            DropdownMenuItem<LeadStatus?>(
+              value: null,
+              child: Text(_localizations.leadStatusNew),
+            ),
+            ...LeadStatus.values.map((item) {
+              return DropdownMenuItem<LeadStatus?>(
+                value: item,
+                child: Text(leadStatusName(_localizations, item)),
+              );
+            }),
+          ],
+          onChanged: (LeadStatus? newValue) {
+            setState(() {
+              _selectedLeadStatus = newValue;
+            });
+          },
+          isExpanded: true,
+        ),
       TextFormField(
         readOnly: !isAdmin,
         key: const Key('companyName'),
@@ -650,14 +679,18 @@ class CompanyFormState extends State<CompanyDialog> {
                           const Icon(Icons.arrow_drop_down),
                           const SizedBox(width: 10),
                           if (company.paymentMethod != null &&
-                              company.paymentMethod?.ccDescription != "_DELETE_")
+                              company.paymentMethod?.ccDescription !=
+                                  "_DELETE_")
                             IconButton(
                               key: const Key('deletePaymentMethod'),
-                              onPressed: isAdmin && company.paymentMethod != null
+                              onPressed:
+                                  isAdmin && company.paymentMethod != null
                                   ? () => setState(
                                       () => company = company.copyWith(
                                         paymentMethod: company.paymentMethod!
-                                            .copyWith(ccDescription: "_DELETE_"),
+                                            .copyWith(
+                                              ccDescription: "_DELETE_",
+                                            ),
                                       ),
                                     )
                                   : null,
@@ -723,6 +756,9 @@ class CompanyFormState extends State<CompanyDialog> {
                           url: _urlController.text,
                           name: _nameController.text,
                           role: _selectedRole,
+                          leadStatus: _selectedRole == Role.lead
+                              ? _selectedLeadStatus
+                              : null,
                           telephoneNr: _telephoneController.text,
                           currency: _selectedCurrency,
                           fiscalYearStartMonth: _isMainCompany

@@ -34,12 +34,19 @@ abstract class Company with _$Company {
     String? partyId,
     String? pseudoId,
     @RoleConverter() Role? role,
+
+    /// lead status, only used when the role is lead: a lead without a status is
+    /// new, 'converted' turns it into a customer
+    @JsonKey(name: 'customerStatus')
+    @LeadStatusConverter()
+    LeadStatus? leadStatus,
     String? name,
     String? email,
     String? url,
     String? telephoneNr,
     Currency? currency,
-    int? fiscalYearStartMonth, // month the accounting year starts: any month 1..12
+    int?
+    fiscalYearStartMonth, // month the accounting year starts: any month 1..12
     @Default(true) bool acctPeriodChangeAllowed,
     @Uint8ListConverter() Uint8List? image,
     Address? address,

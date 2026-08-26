@@ -98,7 +98,9 @@ class WebsiteChatServicesTests extends Specification {
         out.chatRoomId
         detail.person.firstName == 'leadtest1'
         detail.person.lastName == 'website'
-        detail.party.customerStatusId == 'CUSTOMER_ASSIGNED'
+        // a new lead is created without a customer status, only a converted lead
+        // (= a customer) carries CUSTOMER_CONVERTED
+        detail.party.customerStatusId == null
         detail.role.roleTypeId == 'Customer'
 
         and: 'the new Lead shows up in the Lead list'

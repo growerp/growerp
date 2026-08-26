@@ -235,5 +235,25 @@
   "acctPeriodLocked": "无法更改：已过账交易",
   "@acctPeriodLocked": {
     "description": "Currency and accounting year can no longer be changed"
+  },
+  "leadStatus": "潜在客户状态",
+  "@leadStatus": {
+    "description": "Label of the lead status field"
+  },
+  "leadStatusNew": "新建",
+  "@leadStatusNew": {
+    "description": "Lead status: no status yet"
+  },
+  "leadStatusAssigned": "已分配",
+  "@leadStatusAssigned": {
+    "description": "Lead status: assigned"
+  },
+  "leadStatusQualified": "已确认",
+  "@leadStatusQualified": {
+    "description": "Lead status: qualified"
+  },
+  "leadStatusConverted": "已转换",
+  "@leadStatusConverted": {
+    "description": "Lead status: converted into a customer"
   }
 }

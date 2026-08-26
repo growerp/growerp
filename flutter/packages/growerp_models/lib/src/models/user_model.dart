@@ -30,11 +30,16 @@ abstract class User with _$User {
     String? partyId, // allocated by system cannot be changed.
     String? pseudoId,
     @RoleConverter() Role? role,
+
+    /// lead status, only used when the role is lead: a lead without a status is
+    /// new, 'converted' turns it into a customer
+    @JsonKey(name: 'customerStatus')
+    @LeadStatusConverter()
+    LeadStatus? leadStatus,
     String? userId, // allocated by system cannot be changed.
     String? firstName,
     String? lastName,
     String? personalTitle, // job title / position (e.g. LinkedIn 'Position')
-
     /// login account
     bool? loginDisabled,
     String? loginName,

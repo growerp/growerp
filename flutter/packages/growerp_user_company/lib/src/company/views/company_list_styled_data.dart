@@ -19,13 +19,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import '../../common/common.dart';
 import '../company.dart';
 import 'rest_request_stats_dialog.dart';
 import 'token_limit_dialog.dart';
 import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
 /// Returns column definitions for company list based on device type
-List<StyledColumn> getCompanyListColumns(BuildContext context) {
+List<StyledColumn> getCompanyListColumns(BuildContext context, {Role? role}) {
   final localizations = UserCompanyLocalizations.of(context)!;
   bool isPhone = isAPhone(context);
   // the support app list shows owners(tenants): AI token use instead of phone/vat
@@ -45,6 +46,8 @@ List<StyledColumn> getCompanyListColumns(BuildContext context) {
     StyledColumn(header: localizations.name, flex: 2),
     StyledColumn(header: localizations.role, flex: 1),
     StyledColumn(header: localizations.email, flex: 2),
+    if (role == Role.lead)
+      StyledColumn(header: localizations.leadStatus, flex: 1),
     if (!isSupport) StyledColumn(header: localizations.tableHdrPhone, flex: 1),
     if (!isSupport) StyledColumn(header: localizations.vatSls, flex: 1),
     if (isSupport) StyledColumn(header: localizations.aiTokens, flex: 1),
@@ -58,6 +61,7 @@ List<Widget> getCompanyListRow({
   required Company company,
   required int index,
   required Bloc bloc,
+  Role? role,
 }) {
   bool isPhone = isAPhone(context);
   var applicationId = context.read<String>();
@@ -130,6 +134,23 @@ List<Widget> getCompanyListRow({
 
     // Email
     cells.add(Text(company.email ?? '', key: Key('email$index')));
+
+    // Lead status (lead list only)
+    if (role == Role.lead) {
+      cells.add(
+        StatusChip(
+          label: leadStatusName(
+            UserCompanyLocalizations.of(context)!,
+            company.leadStatus,
+          ),
+          type: company.leadStatus == LeadStatus.qualified
+              ? StatusType.success
+              : StatusType.warning,
+          size: StatusChipSize.small,
+          key: Key('leadStatus$index'),
+        ),
+      );
+    }
 
     if (applicationId == 'AppSupport') {
       // System AI tokens used this month / monthly allowance,

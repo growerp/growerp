@@ -1082,5 +1082,25 @@
   "acctPeriodLocked": "Cannot be changed: transactions have been posted",
   "@acctPeriodLocked": {
     "description": "Currency and accounting year can no longer be changed"
+  },
+  "leadStatus": "Lead status",
+  "@leadStatus": {
+    "description": "Label of the lead status field"
+  },
+  "leadStatusNew": "New",
+  "@leadStatusNew": {
+    "description": "Lead status: no status yet"
+  },
+  "leadStatusAssigned": "Assigned",
+  "@leadStatusAssigned": {
+    "description": "Lead status: assigned"
+  },
+  "leadStatusQualified": "Qualified",
+  "@leadStatusQualified": {
+    "description": "Lead status: qualified"
+  },
+  "leadStatusConverted": "Converted",
+  "@leadStatusConverted": {
+    "description": "Lead status: converted into a customer"
   }
 }

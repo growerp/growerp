@@ -303,7 +303,7 @@ along with this software (see the LICENSE.md file). If not, see
                 <set field="customerPartyId" from="ec.user.userAccount.partyId" />
                 <!-- set customer qualifier -->
                 <service-call name="update#mantle.party.Party"
-                    in-map="[partyId: customerPartyId, customerStatusId: 'CUSTOMER_QUALIFIED']" />
+                    in-map="[partyId: customerPartyId, customerStatusId: 'CUSTOMER_CONVERTED']" />
                 <!-- NOTE: use the web session for attributes such as cartOrderId for security; this
                 won't work in a stateless mode or outside a web session -->
                 <set field="sessionAttributes" from="ec.web.sessionAttributes" />

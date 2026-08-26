@@ -235,5 +235,25 @@
   "acctPeriodLocked": "Kan niet meer gewijzigd worden: er zijn transacties geboekt",
   "@acctPeriodLocked": {
     "description": "Currency and accounting year can no longer be changed"
+  },
+  "leadStatus": "Lead status",
+  "@leadStatus": {
+    "description": "Label of the lead status field"
+  },
+  "leadStatusNew": "Nieuw",
+  "@leadStatusNew": {
+    "description": "Lead status: no status yet"
+  },
+  "leadStatusAssigned": "Toegewezen",
+  "@leadStatusAssigned": {
+    "description": "Lead status: assigned"
+  },
+  "leadStatusQualified": "Gekwalificeerd",
+  "@leadStatusQualified": {
+    "description": "Lead status: qualified"
+  },
+  "leadStatusConverted": "Omgezet",
+  "@leadStatusConverted": {
+    "description": "Lead status: converted into a customer"
   }
 }

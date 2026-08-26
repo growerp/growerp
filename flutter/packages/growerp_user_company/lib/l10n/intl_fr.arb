@@ -235,5 +235,25 @@
   "acctPeriodLocked": "Non modifiable : des écritures ont été comptabilisées",
   "@acctPeriodLocked": {
     "description": "Currency and accounting year can no longer be changed"
+  },
+  "leadStatus": "Statut du prospect",
+  "@leadStatus": {
+    "description": "Label of the lead status field"
+  },
+  "leadStatusNew": "Nouveau",
+  "@leadStatusNew": {
+    "description": "Lead status: no status yet"
+  },
+  "leadStatusAssigned": "Attribué",
+  "@leadStatusAssigned": {
+    "description": "Lead status: assigned"
+  },
+  "leadStatusQualified": "Qualifié",
+  "@leadStatusQualified": {
+    "description": "Lead status: qualified"
+  },
+  "leadStatusConverted": "Converti",
+  "@leadStatusConverted": {
+    "description": "Lead status: converted into a customer"
   }
 }
