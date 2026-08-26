@@ -27,7 +27,7 @@
     "marketing": { "apple": "6793362708", "windows": "9NJH32VW90KX" }
   },
   "bundleIds": {},
-  "androidIds": {},
+  "androidIds": { "agents": "org.growerp.agent" },
   "storeStatusOverrides": {},
   "dockerRegistry": "ghcr.io/growerp",
   "repositoryUrl": "git@github.com:growerp/growerp.git",

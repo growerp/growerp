@@ -381,6 +381,11 @@ jobs:
               return a if ka >= kb else b
 
           # ── Bump each app ────────────────────────────────────────────────────
+          # Central per-app store id overrides: bundleIds / androidIds in
+          # release_config.json. The agents app ships to Play under a different
+          # package than its Apple bundle id, so the two are resolved separately.
+          cfg = json.load(open('flutter/release/release_config.json'))
+
           apps = "${{ env.APPS }}".split(',')
           for app in [a.strip() for a in apps]:
               pubspec = f'flutter/packages/{app}/pubspec.yaml'
@@ -391,10 +396,11 @@ jobs:
               pub_major, pub_minor, pub_patch, pub_build = m.groups()
               pub_ver = f'{pub_major}.{pub_minor}.{pub_patch}'
 
-              bundle_id = f'org.growerp.{app}'
+              bundle_id  = cfg.get('bundleIds',  {}).get(app, f'org.growerp.{app}')
+              android_id = cfg.get('androidIds', {}).get(app, f'org.growerp.{app}')
               asc_ver  = latest_asc_version(bundle_id)
-              play_ver = latest_play_version(bundle_id)
-              play_code = latest_play_version_code(bundle_id)
+              play_ver = latest_play_version(android_id)
+              play_code = latest_play_version_code(android_id)
               asc_build = latest_asc_build_number(bundle_id)
               best_ver = max_version(max_version(asc_ver, play_ver), pub_ver)
 
@@ -896,6 +902,17 @@ jobs:
               exit 1
           fi
 
+      # The Play package is not always org.growerp.<app>: agents ships as
+      # org.growerp.agent after its original package was suspended.
+      # Central per-app override: androidIds in release_config.json.
+      - name: Resolve Android package name
+        env:
+          MATRIX_APP: ${{ matrix.app }}
+        run: |
+          echo "ANDROID_PACKAGE=$(jq -r --arg app "$MATRIX_APP" \
+            '.androidIds[$app] // ("org.growerp." + $app)' \
+            flutter/release/release_config.json)" >> "$GITHUB_ENV"
+
       - name: Write keystore and key.properties
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -939,7 +956,7 @@ jobs:
         env:
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
           RELEASE_STATUS: ${{ inputs.android_release_status }}
-          PACKAGE_NAME: org.growerp.${{ matrix.app }}
+          PACKAGE_NAME: ${{ env.ANDROID_PACKAGE }}
           TRACK: ${{ inputs.track }}
         run: |
           if [[ "$RELEASE_STATUS" != "auto" ]]; then
@@ -1007,7 +1024,7 @@ jobs:
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-          packageName: org.growerp.${{ matrix.app }}
+          packageName: ${{ env.ANDROID_PACKAGE }}
           releaseFiles: flutter/packages/${{ matrix.app
             }}/build/app/outputs/bundle/release/app-release.aab
           track: ${{ inputs.track == 'stable' && 'production' || inputs.track }}
