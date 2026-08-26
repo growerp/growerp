@@ -441,7 +441,7 @@ limitations under the License.
         <field name="storeSkipSeen" type="text-indicator"/>
         <field name="mailUsername"  type="text-medium" enable-audit-log="true"/>
         <field name="mailPassword"  type="text-medium" encrypt="true" enable-audit-log="true"/>
-        <field name="githubToken"      type="text-medium" encrypt="true" enable-audit-log="true"/>
+        <field name="githubToken"      type="text-long" encrypt="true" enable-audit-log="true"/>
         <field name="githubRepository" type="text-medium"/>
         <field name="aiModelName" type="text-short">
             <description>Tenant-wide default model for AI content generation (e.g.

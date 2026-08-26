@@ -149,6 +149,23 @@ company:
 > Setup dialog was slimmed to AI/LLM only (commit `a743edb7`), so they are **not editable there**.
 > Set them through the REST API or seed data.
 
+> **Long token formats.** GitHub's stateless installation tokens (`ghs_` JWTs) are ~520 characters,
+> so `SystemSettings.githubToken` is a `text-long` (`VARCHAR(4095)`) column. Moqui's auto-DDL adds
+> missing columns but never widens an existing one, so a database created before this change still
+> has `VARCHAR(255)` and will reject a stateless token. Widen it once (Postgres):
+>
+> ```sql
+> ALTER TABLE GROWERP_SYSTEM_SETTINGS ALTER COLUMN GITHUB_TOKEN TYPE VARCHAR(4095);
+> ```
+>
+> H2 (local dev), with the backend stopped:
+>
+> ```sql
+> ALTER TABLE GROWERP_SYSTEM_SETTINGS ALTER COLUMN GITHUB_TOKEN VARCHAR(4095);
+> ```
+>
+> New installs need nothing — the entity definition creates the wide column.
+
 ---
 
 ## 4. What agents can actually do — the MCP toolset

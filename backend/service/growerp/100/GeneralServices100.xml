@@ -2134,8 +2134,12 @@ limitations under the License.
                 <set field="ss.mailPassword" from="mailPassword"/>
             </if>
             <if condition="githubToken &amp;&amp; githubToken != '****'">
-                <set field="ss.githubToken" from="githubToken.take(255)"/>
-                <script>System.setProperty('growerp.github.token', githubToken.take(255))</script>
+                <set field="githubToken" from="githubToken.trim()"/>
+                <if condition="githubToken.length() &gt; 4000">
+                    <return error="true" message="githubToken too long (max 4000 characters)"/>
+                </if>
+                <set field="ss.githubToken" from="githubToken"/>
+                <script>System.setProperty('growerp.github.token', githubToken)</script>
             </if>
             <if condition="githubRepository != null">
                 <set field="ss.githubRepository" from="githubRepository.take(255)"/>
