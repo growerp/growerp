@@ -98,7 +98,6 @@ class UserDialogState extends State<UserDialogStateFull> {
   final _telephoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _urlController = TextEditingController();
-  final _companyController = TextEditingController();
 
   late List<UserGroup> localUserGroups;
   late UserGroup _selectedUserGroup;
@@ -671,10 +670,6 @@ class UserDialogState extends State<UserDialogStateFull> {
                                   _selectedCompany = newValue ?? Company();
                                 });
                               },
-                              validator: (value) =>
-                                  value == null && _companyController.text == ''
-                                  ? localizations.selectOrCreateCompany
-                                  : null,
                             );
                           default:
                             return const Center(child: LoadingIndicator());

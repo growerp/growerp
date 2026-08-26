@@ -102,6 +102,8 @@ class CompanyFormState extends State<CompanyDialog> {
   Currency? _selectedCurrency;
   late bool isAdmin;
   late final GlobalKey<FormState> _companyDialogFormKey;
+  // set when this dialog dispatched its own CompanyUserUpdate: gates the pop
+  bool _submitted = false;
   XFile? _imageFile;
   dynamic _pickImageError;
   String? _retrieveDataError;
@@ -219,7 +221,11 @@ class CompanyFormState extends State<CompanyDialog> {
               HelperFunctions.showMessage(context, state.message, Colors.red);
             }
             if (state.status == CompanyUserStatus.success) {
-              if (widget.dialog == true && _nameController.text != '') {
+              // only pop for our own save: the CompanyUserBloc is shared with
+              // the caller, which emits success for its own fetches too
+              if (widget.dialog == true &&
+                  _submitted &&
+                  companyUserBloc.state.companiesUsers.isNotEmpty) {
                 Navigator.of(
                   context,
                 ).pop(companyUserBloc.state.companiesUsers[0].getCompany());
@@ -690,6 +696,7 @@ class CompanyFormState extends State<CompanyDialog> {
                             Colors.red,
                           );
                         } else {
+                          _submitted = true;
                           companyUserBloc.add(
                             CompanyUserUpdate(
                               CompanyUser.tryParse(updatedCompany),

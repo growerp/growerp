@@ -45,6 +45,48 @@ class AutocompleteLabel<T extends Object> extends StatefulWidget {
 
 class _AutocompleteLabelState<T extends Object>
     extends State<AutocompleteLabel<T>> {
+  /// Owned by this widget (rather than by [Autocomplete]) so that a changed
+  /// [AutocompleteLabel.initialValue] can be pushed into the visible text:
+  /// Autocomplete only reads its own initialValue in initState.
+  late final TextEditingController _controller;
+  late final FocusNode _focusNode;
+  final GlobalKey<FormFieldState<T>> _fieldKey = GlobalKey<FormFieldState<T>>();
+
+  String _displayString(T? value) =>
+      value != null ? widget.displayStringForOption(value) : '';
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(
+      text: _displayString(widget.initialValue),
+    );
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void didUpdateWidget(AutocompleteLabel<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialValue != oldWidget.initialValue) {
+      // after the frame: writing the controller here notifies the TextFormField
+      // below, whose Form would then be marked dirty during its own build
+      final T? value = widget.initialValue;
+      final String text = _displayString(value);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || widget.initialValue != value) return;
+        if (_controller.text != text) _controller.text = text;
+        _fieldKey.currentState?.didChange(value);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
   /// Wraps the user-provided [optionsBuilder] so that if this widget is
   /// unmounted while the async builder is in flight, the returned Future
   /// never completes. This prevents Flutter's [RawAutocomplete] from
@@ -60,15 +102,15 @@ class _AutocompleteLabelState<T extends Object>
   @override
   Widget build(BuildContext context) {
     return FormField<T>(
+      // keyed so didUpdateWidget can push a changed initialValue into the
+      // field value: FormField, like Autocomplete, only reads it on init
+      key: _fieldKey,
       initialValue: widget.initialValue,
       validator: widget.validator,
       builder: (FormFieldState<T> field) {
         return Autocomplete<T>(
-          initialValue: widget.initialValue != null
-              ? TextEditingValue(
-                  text: widget.displayStringForOption(widget.initialValue!),
-                )
-              : null,
+          textEditingController: _controller,
+          focusNode: _focusNode,
           optionsBuilder: widget.readOnly
               ? (_) async => const Iterable.empty()
               : _safeOptionsBuilder,

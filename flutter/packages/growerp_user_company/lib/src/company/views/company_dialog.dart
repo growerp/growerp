@@ -120,6 +120,8 @@ class CompanyFormState extends State<CompanyDialog> {
   Currency? _selectedCurrency;
   late bool isAdmin;
   late final GlobalKey<FormState> _companyDialogFormKey;
+  // set when this dialog dispatched its own CompanyUpdate: gates the pop
+  bool _submitted = false;
   XFile? _imageFile;
   bool _deleteImage = false;
   dynamic _pickImageError;
@@ -264,8 +266,10 @@ class CompanyFormState extends State<CompanyDialog> {
                   );
                 }
               }
+              // only pop for our own save: the CompanyBloc is shared with the
+              // caller, whose autocomplete emits success for every CompanyFetch
               if (widget.dialog == true &&
-                  _nameController.text != '' &&
+                  _submitted &&
                   companyBloc.state.companies.isNotEmpty) {
                 Navigator.of(context).pop(companyBloc.state.companies[0]);
               }
@@ -780,6 +784,7 @@ class CompanyFormState extends State<CompanyDialog> {
                           secondaryBackend: _backendController.text,
                           image: convImage,
                         );
+                        _submitted = true;
                         companyBloc.add(CompanyUpdate(company));
                       }
                     }
