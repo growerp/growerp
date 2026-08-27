@@ -92,6 +92,44 @@ def submit_slot_available?(api_key, bundle_id, platform_filter)
   false
 end
 
+# States in which a version has not gone live yet, so its release type still
+# decides whether Apple publishes it automatically.
+UNRELEASED_STATES = %w[
+  PREPARE_FOR_SUBMISSION READY_FOR_REVIEW WAITING_FOR_REVIEW IN_REVIEW ACCEPTED
+  PROCESSING_FOR_APP_STORE PENDING_APPLE_RELEASE PENDING_DEVELOPER_RELEASE
+].freeze
+
+# deliver only writes releaseType when automatic_release is passed, and the
+# value is otherwise inherited from whatever App Store Connect already had. A
+# version left on AFTER_APPROVAL goes live the moment review passes, skipping
+# the release gate, so check every unreleased version and force MANUAL.
+def ensure_manual_release(api_key, bundle_id, platform_filter)
+  require "spaceship"
+  Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: api_key)
+  app = Spaceship::ConnectAPI::App.find(bundle_id)
+  UI.user_error!("App not found: #{bundle_id}") unless app
+
+  versions = app.get_app_store_versions(filter: { "platform" => platform_filter })
+               .select { |v| UNRELEASED_STATES.include?(v.app_store_state) }
+  if versions.empty?
+    UI.important("No unreleased #{platform_filter} version for #{bundle_id}; release type unchanged.")
+    return
+  end
+
+  versions.each do |ver|
+    if ver.release_type == Spaceship::ConnectAPI::AppStoreVersion::ReleaseType::MANUAL
+      UI.success("v#{ver.version_string} (#{platform_filter}) already releases manually.")
+      next
+    end
+    UI.important("v#{ver.version_string} (#{platform_filter}) release type is " \
+                 "#{ver.release_type || 'unset'}; setting it to MANUAL.")
+    ver.update(attributes: {
+      release_type: Spaceship::ConnectAPI::AppStoreVersion::ReleaseType::MANUAL
+    })
+    UI.success("v#{ver.version_string} (#{platform_filter}) now releases manually.")
+  end
+end
+
 # One-time signing bootstrap for a bundle ID that has no match profile yet.
 # The regular codesign lanes run readonly, so they can never create the first
 # certificate/profile for a new vertical. Run this manually (it WRITES to the
@@ -221,6 +259,7 @@ lane :upload do
       skip_screenshots:           true,
       force:                      true
     )
+    ensure_manual_release(api_key, "org.growerp.#{app_name}", "IOS")
   else
     # beta: upload to TestFlight only
     upload_to_testflight(
@@ -371,9 +410,11 @@ lane :upload_macos do
       metadata_path:              metadata_path,
       skip_screenshots:           true,
       submit_for_review:          true,
+      automatic_release:          false,
       run_precheck_before_submit: false,
       force:                      true
     )
+    ensure_manual_release(api_key, "org.growerp.#{app_name}", "MAC_OS")
   else
     upload_to_testflight(
       api_key:                 api_key,

@@ -1,7 +1,7 @@
 # Store Deploy — Secrets & Settings Setup Guide
 
 This document explains every GitHub Actions secret and configuration value required by
-`.github/workflows/publish-to-stores.yml` and `.github/workflows/release-approved-submissions.yml`.
+`.github/workflows/publish-binary.yml` and `.github/workflows/release-approved.yml`.
 Add secrets at: **GitHub repo → Settings → Secrets and variables → Actions → New repository secret**
 
 ---
@@ -24,10 +24,11 @@ The `track` input controls iOS review submission: `beta` uploads to TestFlight w
 
 Go to **Actions → Release Approved Store Submissions → Run workflow** and fill in:
 
-| Input | Description | Example |
+| Input | Description | Default |
 |-------|-------------|---------|
-| `apps` | Comma-separated app names | `admin,hotel` |
-| `stores` | Comma-separated stores to check | `ios,macos,android,windows,snap` |
+| `app_admin` … `app_marketing` | One checkbox per app | all on |
+| `store_ios` / `store_macos` / `store_android` / `store_windows` | Stores to check | all on |
+| `store_snap` | Promote `latest/beta` to `stable` (no review gate) | off |
 
 This workflow does **not** build anything. It queries each store API for versions that have passed review and are waiting for a manual developer release, then releases them. Run this after Apple/Google/Microsoft notifies you that your submission has been approved.
 
@@ -183,6 +184,10 @@ Partner Center manually, including category, pricing/availability, and age ratin
 | `WINDOWS_CLIENT_SECRET` | Client secret for the Azure AD app |
 | `WINDOWS_ADMIN_PRODUCT_ID` | Microsoft Store ID for the admin app |
 | `WINDOWS_HOTEL_PRODUCT_ID` | Microsoft Store ID for the hotel app |
+| `WINDOWS_FREELANCE_PRODUCT_ID` | Microsoft Store ID for the freelance app |
+| `WINDOWS_RENTAL_PRODUCT_ID` | Microsoft Store ID for the rental app |
+| `WINDOWS_AGENTS_PRODUCT_ID` | Microsoft Store ID for the agents app |
+| `WINDOWS_MARKETING_PRODUCT_ID` | Microsoft Store ID for the marketing app |
 
 ### How to obtain each
 
@@ -207,7 +212,7 @@ base64 -i certificate.pfx     # macOS
    Azure AD applications → Add Azure AD application → select the app you just created → assign the
    **Manager** role
 
-**Store IDs (`WINDOWS_ADMIN_PRODUCT_ID`, `WINDOWS_HOTEL_PRODUCT_ID`)**
+**Store IDs (`WINDOWS_<APP>_PRODUCT_ID`, one per app)**
 
 1. In Partner Center, open each app
 2. Copy the **Store ID** from App management → App identity
@@ -259,8 +264,7 @@ Copy the printed token as the secret value. The token expires after 1 year by de
 | `WINDOWS_TENANT_ID` | | | | ✓ | |
 | `WINDOWS_CLIENT_ID` | | | | ✓ | |
 | `WINDOWS_CLIENT_SECRET` | | | | ✓ | |
-| `WINDOWS_ADMIN_PRODUCT_ID` | | | | ✓ | |
-| `WINDOWS_HOTEL_PRODUCT_ID` | | | | ✓ | |
+| `WINDOWS_<APP>_PRODUCT_ID` (one per app) | | | | ✓ | |
 | `SNAPCRAFT_STORE_CREDENTIALS` | | | | | ✓ |
 
 ---

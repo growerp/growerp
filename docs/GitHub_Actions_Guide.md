@@ -10,9 +10,9 @@ This document describes all GitHub Actions workflows used in the GrowERP reposit
 2. [Workflow Summary](#workflow-summary)
 3. [Workflows](#workflows)
    - [Status (`status.yml`)](#1-status-statusyml)
-   - [Update Staging (`release.yml`)](#2-update-staging-releaseyml)
-   - [Publish to Stores (`publish-to-stores.yml`)](#3-publish-to-stores-publish-to-storesyml)
-   - [Release Approved Submissions (`release-approved-submissions.yml`)](#4-release-approved-submissions-release-approved-submissionsyml)
+   - [Update Staging (`update-staging.yml`)](#2-update-staging-update-stagingyml)
+   - [Publish to Stores (`publish-binary.yml`)](#3-publish-to-stores-publish-binaryyml)
+   - [Release Approved Submissions (`release-approved.yml`)](#4-release-approved-submissions-release-approvedyml)
    - [Stage to Production (`stage-to-production.yml`)](#5-stage-to-production-stage-to-productionyml)
    - [Revert Production Update (`revert-last-sync.yml`)](#6-revert-production-update-revert-last-syncyml)
 4. [Secrets Reference](#secrets-reference)
@@ -32,16 +32,20 @@ This document describes all GitHub Actions workflows used in the GrowERP reposit
 
 ## Overview
 
-GrowERP uses six GitHub Actions workflows to automate testing, releasing Docker images, and publishing to platform stores. All workflows live in `.github/workflows/`.
+GrowERP uses ten GitHub Actions workflows to automate testing, releasing Docker images, and publishing to platform stores. All workflows live in `.github/workflows/`. The six documented in detail below are the release path; the remaining four support it.
 
 ```
 .github/workflows/
 ├── status.yml                            # Integration tests + store status (scheduled + manual)
-├── release.yml                           # Docker image build + version bump (manual)
-├── publish-to-stores.yml                 # Build & submit to stores (manual)
-├── release-approved-submissions.yml      # Release store-approved versions to public (manual)
-├── stage-to-production.yml              # Promote staging Docker stack to production (manual)
-└── revert-last-sync.yml                 # Revert last production promotion (manual)
+├── update-staging.yml                    # Docker image build + version bump (manual)
+├── publish-binary.yml                    # Build & submit binaries to stores (manual)
+├── release-approved.yml                  # Release store-approved versions to public (manual)
+├── stage-to-production.yml               # Promote staging Docker stack to production (manual)
+├── revert-last-sync.yml                  # Revert last production promotion (manual)
+├── publish-metadata.yml                  # Upload listing text + screenshots to stores (manual)
+├── screenshots.yml                       # Capture + frame store screenshots (manual)
+├── download-store-metadata.yml           # Pull live listings back into the repo (manual)
+└── match-bootstrap.yml                   # One-time Apple signing bootstrap (manual)
 ```
 
 ---
@@ -122,7 +126,7 @@ check-changes                       resolve-matrix              swarm-status
 
 ---
 
-### 2. Update Staging (`release.yml`)
+### 2. Update Staging (`update-staging.yml`)
 
 **Purpose:** Bumps app versions, builds Docker images, and pushes them to `ghcr.io/growerp`. Optionally commits a version bump and pushes a git tag.
 
@@ -170,7 +174,7 @@ release  (single job)
 
 ---
 
-### 3. Publish to Stores (`publish-to-stores.yml`)
+### 3. Publish to Stores (`publish-binary.yml`)
 
 **Purpose:** Builds and publishes GrowERP apps to one or more app stores. Each platform runs as an independent parallel job. iOS, macOS, and Android also bump the build number (stored in `pubspec.yaml`) and commit it back.
 
@@ -180,11 +184,24 @@ release  (single job)
 
 **Manual Input Variables:**
 
-| Input | Type | Required | Default | Options | Description |
-|-------|------|----------|---------|---------|-------------|
-| `apps` | string | Yes | `admin,hotel` | — | Comma-separated app names to submit (e.g. `admin,hotel,freelance,health`). |
-| `stores` | string | Yes | `ios,macos,android,windows,snap` | — | Comma-separated stores to deploy to. |
-| `track` | choice | Yes | `beta` | `beta`, `stable` | Release track. `beta` = TestFlight only (no review submission). `stable` = submit to App Store review / production. |
+| Input | Type | Default | Options | Description |
+|-------|------|---------|---------|-------------|
+| `app_admin` … `app_marketing` | boolean | all on | — | One checkbox per app (admin, hotel, freelance, support, agents, rental, marketing). |
+| `store_ios` / `store_macos` / `store_android` / `store_windows` / `store_snap` | boolean | all on | — | Stores to deploy to. |
+| `track` | choice | `beta` | `beta`, `stable` | Release track. `beta` = TestFlight only (no review submission). `stable` = submit to App Store review / production. |
+| `android_release_status` | choice | `auto` | `auto`, `draft`, `completed` | Google Play release status. `auto` = `draft` on the production track (manual release gate), resolved from prior releases on beta. `completed` overrides the gate and rolls out on approval. |
+
+**Release gate:** submitting a binary never makes it go live by itself. Every store that
+has a release-mode setting is checked on each submit and forced to manual, so
+[`release-approved.yml`](#4-release-approved-submissions-release-approvedyml) stays the single
+place where an app goes public:
+
+| Store | Setting checked | Forced to |
+|-------|-----------------|-----------|
+| iOS / macOS | App Store version `releaseType` | `MANUAL` — Fastfile passes `automatic_release: false`, then `ensure_manual_release` re-reads every unreleased version and patches any that is still `AFTER_APPROVAL` |
+| Android | production-track release `status` | `draft` — Play exposes no API for the app-level managed-publishing switch, so a staged draft is the equivalent. Beta is left alone so testers still get builds immediately |
+| Windows | submission `targetPublishMode` | `Manual` — a cloned submission inherits `Immediate` from the last published one, which would go live straight out of certification |
+| Snap | — | Nothing to force: the Snap Store has no review or hold state, so `track` alone decides the channel. `beta` is the safe default; `stable` is live on upload |
 
 **Job Flow:**
 
@@ -210,7 +227,7 @@ resolve-matrix ──┬──> bootstrap ──┬──> deploy-ios     ─┐
 4. Builds the Flutter iOS app (no codesign).
 5. Runs `pod install`.
 6. Validates access to the Match certificate repository.
-7. Runs Fastlane lanes: `codesign`, `ci_build`, `upload`.
+7. Runs Fastlane lanes: `codesign`, `ci_build`, `upload`. On `stable`, `upload` submits for review and then forces the version's release type to `MANUAL`.
 
 **Job: `deploy-macos`** — Runs on `macos-latest`.
 1. Validates all required macOS secrets are present (including the app-specific provisioning profile).
@@ -223,12 +240,13 @@ resolve-matrix ──┬──> bootstrap ──┬──> deploy-ios     ─┐
 **Job: `deploy-android`** — Runs on `ubuntu-latest`.
 1. Writes the keystore file and `key.properties` from secrets.
 2. Builds the Flutter app bundle (`flutter build appbundle --release`).
-3. Uploads the `.aab` to Google Play via `r0adkll/upload-google-play@v1`.
+3. Resolves the release status — `draft` on the production track so the release is staged, not rolled out.
+4. Uploads the `.aab` to Google Play via `r0adkll/upload-google-play@v1`.
 
 **Job: `deploy-windows`** — Runs on `windows-latest`.
 1. Imports the PFX signing certificate into the Windows certificate store.
 2. Builds the MSIX package (`flutter pub run msix:create`).
-3. Authenticates with Azure AD and submits to Microsoft Partner Center via the Ingestion API.
+3. Authenticates with Azure AD and submits to Microsoft Partner Center via the Ingestion API, forcing `targetPublishMode` to `Manual`.
 
 **Job: `deploy-snap`** — Runs on `ubuntu-22.04`.
 1. Installs `snapcraft` (with retry logic for flaky snap daemon).
@@ -241,7 +259,7 @@ resolve-matrix ──┬──> bootstrap ──┬──> deploy-ios     ─┐
 
 ---
 
-### 4. Release Approved Submissions (`release-approved-submissions.yml`)
+### 4. Release Approved Submissions (`release-approved.yml`)
 
 **Purpose:** Checks each store for versions that have passed review but are held pending a manual developer release action, then releases them to the public. No build step — this workflow only calls store APIs.
 
@@ -251,10 +269,14 @@ resolve-matrix ──┬──> bootstrap ──┬──> deploy-ios     ─┐
 
 **Manual Input Variables:**
 
-| Input | Type | Required | Default | Description |
-|-------|------|----------|---------|-------------|
-| `apps` | string | Yes | `admin,hotel` | Comma-separated app names to check. |
-| `stores` | string | Yes | `ios,macos,android,windows,snap` | Comma-separated stores to check. |
+| Input | Type | Default | Description |
+|-------|------|---------|-------------|
+| `app_admin` … `app_marketing` | boolean | `true` | One checkbox per app (admin, hotel, freelance, support, agents, rental, marketing). |
+| `store_ios` / `store_macos` / `store_android` / `store_windows` | boolean | `true` | Stores to check for approved-but-held versions. |
+| `store_snap` | boolean | `false` | Promote `latest/beta` to `stable`. Off by default: the Snap Store has no review gate, so every run would push whatever sits in beta straight to stable users. |
+
+Apps are intersected with `storeApps` in `flutter/release/release_config.json`, so an app is only
+checked on the stores it is actually published on (e.g. `support` is android + snap only).
 
 **What each platform checks and how it releases:**
 
@@ -262,7 +284,7 @@ resolve-matrix ──┬──> bootstrap ──┬──> deploy-ios     ─┐
 |----------|-------------|----------------|
 | iOS | `PENDING_DEVELOPER_RELEASE` on App Store Connect | Fastlane Spaceship `AppStoreVersionReleaseRequest` |
 | macOS | `PENDING_DEVELOPER_RELEASE` on App Store Connect | Same as iOS |
-| Android | `draft` release on production track (Google Play managed publishing) | Google Play API: update release status to `completed` and commit edit |
+| Android | `draft` release on production track | Google Play API: set release status to `completed` and commit the edit. If Play refuses to send the changes for review automatically, it commits with `changesNotSentForReview` and prints a notice to finish in Play Console → Publishing overview → **Send changes for review**. |
 | Windows | `ReadyToPublish` pending submission in Partner Center | Partner Center Ingestion API publish call |
 | Snap | Any revision present in `latest/beta` channel | `snapcraft release <snap> <revision> stable` |
 
@@ -445,6 +467,10 @@ Authentication uses an Azure AD app registration with the Partner Center API.
 | `WINDOWS_CLIENT_SECRET` | Plain string | Azure Portal → App registrations → your app → Certificates & secrets → New client secret. Copy the **Value** immediately (shown only once). |
 | `WINDOWS_ADMIN_PRODUCT_ID` | Store ID string (e.g. `9NWX6KFTJNQL`) | [Partner Center](https://partner.microsoft.com/en-us/dashboard) → Apps and games → select the **admin** app → Product identity → **Store ID**. Must be the published Store ID, not a draft. |
 | `WINDOWS_HOTEL_PRODUCT_ID` | Store ID string | Same as above for the **hotel** app. |
+| `WINDOWS_FREELANCE_PRODUCT_ID` | Store ID string | Same as above for the **freelance** app. |
+| `WINDOWS_RENTAL_PRODUCT_ID` | Store ID string | Same as above for the **rental** app. |
+| `WINDOWS_AGENTS_PRODUCT_ID` | Store ID string | Same as above for the **agents** app. |
+| `WINDOWS_MARKETING_PRODUCT_ID` | Store ID string | Same as above for the **marketing** app. |
 
 ---
 
@@ -480,8 +506,8 @@ For organisation-wide secrets (shared across repos):
 
 | Setting | Value | Required by |
 |---------|-------|-------------|
-| Actions → General → Workflow permissions | **Read and write permissions** | `release.yml` (git push, tagging) |
-| Packages → Inherit access from repository | **Enabled** | `release.yml` (ghcr.io image publishing) |
+| Actions → General → Workflow permissions | **Read and write permissions** | `update-staging.yml` (git push, tagging) |
+| Packages → Inherit access from repository | **Enabled** | `update-staging.yml` (ghcr.io image publishing) |
 
 ### External Service Roles
 

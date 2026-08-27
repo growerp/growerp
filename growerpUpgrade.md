@@ -17,8 +17,9 @@ The GrowERP release process consist out of the following workflows:
 6. When review ok,
     a. "Copy staging to production"
        Backend upgrade from Staging run: ./sync-to-prod.sh  --apply
-    b. Manually release apps in the IOS/MACOS/Android.Windows store
-       No api available for this!
+    b. "release approved store submissions"
+       releases every app that passed review and is waiting for a manual
+       release action (IOS/MACOS/Android/Windows). Snap is off by default.
        
 ## when cleardb production
 

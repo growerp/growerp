@@ -940,10 +940,22 @@ jobs:
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
           RELEASE_STATUS: ${{ inputs.android_release_status }}
           PACKAGE_NAME: org.growerp.${{ matrix.app }}
+          TRACK: ${{ inputs.track }}
         run: |
           if [[ "$RELEASE_STATUS" != "auto" ]]; then
             echo "PLAY_STATUS=$RELEASE_STATUS" >> "$GITHUB_ENV"
             echo "Status forced to '$RELEASE_STATUS'"
+            exit 0
+          fi
+
+          # Play has no API for the app-level "managed publishing" switch, so
+          # 'draft' is the release-is-manual equivalent: the release is staged on
+          # the production track and only goes live when release-approved.yml
+          # flips it to completed. Beta keeps the resolved status below so beta
+          # testers still get the build straight away (same as TestFlight).
+          if [[ "$TRACK" == "stable" ]]; then
+            echo "PLAY_STATUS=draft" >> "$GITHUB_ENV"
+            echo "$PACKAGE_NAME: production release staged as draft (manual release)"
             exit 0
           fi
           pip install google-auth requests --quiet
@@ -1041,6 +1053,8 @@ jobs:
           [[ "${{ inputs.app_freelance }}" == "true" ]] && APPS="${APPS}freelance,"
           [[ "${{ inputs.app_support }}" == "true" ]] && APPS="${APPS}support,"
           [[ "${{ inputs.app_agents }}" == "true" ]] && APPS="${APPS}agents,"
+          [[ "${{ inputs.app_rental }}" == "true" ]] && APPS="${APPS}rental,"
+          [[ "${{ inputs.app_marketing }}" == "true" ]] && APPS="${APPS}marketing,"
           APPS="${APPS%,}"
 
           # Collect only platforms that were selected AND succeeded
@@ -1289,6 +1303,18 @@ jobs:
           $subId   = $sub.id
           $uploadUrl = $sub.fileUploadUrl
           Write-Host "Created submission $subId"
+
+          # The new submission clones the last published one, including its
+          # publish mode. "Immediate" would push the app live the moment
+          # certification passes, bypassing the release gate — force "Manual" so
+          # it parks at ReadyToPublish until release-approved.yml publishes it.
+          $publishMode = [string]$sub.targetPublishMode
+          if ($publishMode -eq "Manual") {
+            Write-Host "Target publish mode is already Manual."
+          } else {
+            Write-Host "Target publish mode is '$publishMode' — setting it to Manual."
+            $sub.targetPublishMode = "Manual"
+          }
 
           # Mark old packages for deletion, add new one
           foreach ($pkg in $sub.applicationPackages) { $pkg.fileStatus = "PendingDelete" }
