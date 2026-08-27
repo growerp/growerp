@@ -58,6 +58,12 @@ abstract class SystemSettings with _$SystemSettings {
     String? aiModelName,
     // Provider serving aiModelName: gemini, anthropic or openai.
     String? aiProvider,
+    // Tenant's own monthly token cap when running on its own API key; 0/null = no cap.
+    int? ownTokenLimit,
+    // Read-only: the free monthly allowance in effect (tenant override or system default).
+    int? systemTokenLimit,
+    // Read-only: tokens used since the first of the current month.
+    int? tokensUsedThisMonth,
   }) = _SystemSettings;
   SystemSettings._();
 

@@ -30,11 +30,8 @@ class SystemDefaultsDialog extends StatefulWidget {
 class _SystemDefaultsDialogState extends State<SystemDefaultsDialog> {
   final _formKey = GlobalKey<FormState>();
   final _tokenLimitCtrl = TextEditingController();
-  /// Dropdown value standing for a model id not in the shared list.
-  static const _customModel = '__custom__';
   String? _aiModelName;
   String _aiProvider = '';
-  final _customModelCtrl = TextEditingController();
   bool _isLoading = true;
   bool _isSaving = false;
 
@@ -52,7 +49,6 @@ class _SystemDefaultsDialogState extends State<SystemDefaultsDialog> {
   @override
   void dispose() {
     _tokenLimitCtrl.dispose();
-    _customModelCtrl.dispose();
     super.dispose();
   }
 
@@ -64,23 +60,15 @@ class _SystemDefaultsDialogState extends State<SystemDefaultsDialog> {
       if (!mounted) return;
       _tokenLimitCtrl.text = d.llmMonthlyTokenLimit?.toString() ?? '';
       // a stored model outside the shared list (an OpenAI model, or one added
-      // after this release) is kept and edited through the custom field
+      // after this release) stays selected: _modelItems() adds an entry for it
       if (d.aiModelName.isEmpty) {
         _aiModelName = null;
         _aiProvider = '';
-        _customModelCtrl.clear();
-      } else if (llmModels.any((m) => m.modelId == d.aiModelName)) {
+      } else {
         _aiModelName = d.aiModelName;
         _aiProvider = d.aiProvider.isNotEmpty
             ? d.aiProvider
             : providerForModel(d.aiModelName);
-        _customModelCtrl.clear();
-      } else {
-        _aiModelName = _customModel;
-        _aiProvider = d.aiProvider.isNotEmpty
-            ? d.aiProvider
-            : providerForModel(d.aiModelName);
-        _customModelCtrl.text = d.aiModelName;
       }
     } catch (e) {
       if (mounted) {
@@ -172,28 +160,32 @@ class _SystemDefaultsDialogState extends State<SystemDefaultsDialog> {
   }
 
   /// The model id to store: '' means "no system wide default".
-  String _selectedModelId() {
-    if (_aiModelName == null) return '';
-    if (_aiModelName == _customModel) return _customModelCtrl.text.trim();
-    return _aiModelName!;
-  }
+  String _selectedModelId() => _aiModelName ?? '';
 
   /// The full model list: this screen is cross tenant, and API keys are per
   /// tenant, so there is no key presence to filter on here.
-  List<DropdownMenuItem<String>> _modelItems() => [
-        const DropdownMenuItem<String>(
-          value: null,
-          child: Text('No system default'),
-        ),
-        ...llmModels.map((m) => DropdownMenuItem<String>(
-              value: m.modelId,
-              child: Text('${m.modelId}  (${m.provider})'),
-            )),
-        const DropdownMenuItem<String>(
-          value: _customModel,
-          child: Text('Other model…'),
-        ),
-      ];
+  List<DropdownMenuItem<String>> _modelItems() {
+    final items = <DropdownMenuItem<String>>[
+      const DropdownMenuItem<String>(
+        value: null,
+        child: Text('No system default'),
+      ),
+      ...llmModels.map((m) => DropdownMenuItem<String>(
+            value: m.modelId,
+            child: Text('${m.modelId}  (${m.provider})'),
+          )),
+    ];
+    // a stored model that is no longer in the shared list keeps its entry, so the
+    // dropdown never holds a value without a matching item
+    final saved = _aiModelName;
+    if (saved != null && !items.any((i) => i.value == saved)) {
+      items.add(DropdownMenuItem<String>(
+        value: saved,
+        child: Text('$saved  ($_aiProvider)'),
+      ));
+    }
+    return items;
+  }
 
   Widget _llmSection() {
     return GroupingDecorator(
@@ -204,7 +196,8 @@ class _SystemDefaultsDialogState extends State<SystemDefaultsDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Applies only to tenants without their own LLM API key.',
+            'Applies only to tenants without their own LLM API key. '
+            'The system API keys come from the server environment.',
             style: TextStyle(
               fontSize: 14,
               color: Theme.of(context).colorScheme.outline,
@@ -222,54 +215,14 @@ class _SystemDefaultsDialogState extends State<SystemDefaultsDialog> {
             items: _modelItems(),
             onChanged: (v) => setState(() {
               _aiModelName = v;
-              if (v == null) {
-                _aiProvider = '';
-              } else if (v != _customModel) {
-                _aiProvider = llmModels
-                    .firstWhere((m) => m.modelId == v,
-                        orElse: () => LlmModel(providerForModel(v), v))
-                    .provider;
-              } else if (_aiProvider.isEmpty) {
-                _aiProvider = llmProviders.first;
-              }
+              _aiProvider = v == null
+                  ? ''
+                  : llmModels
+                      .firstWhere((m) => m.modelId == v,
+                          orElse: () => LlmModel(providerForModel(v), v))
+                      .provider;
             }),
           ),
-          if (_aiModelName == _customModel) ...[
-            SizedBox(height: 12),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 130,
-                  child: DropdownButtonFormField<String>(
-                    key: const Key('customModelProvider'),
-                    initialValue:
-                        _aiProvider.isEmpty ? llmProviders.first : _aiProvider,
-                    decoration: const InputDecoration(labelText: 'Provider'),
-                    items: llmProviders
-                        .map((p) =>
-                            DropdownMenuItem<String>(value: p, child: Text(p)))
-                        .toList(),
-                    onChanged: (v) =>
-                        setState(() => _aiProvider = v ?? llmProviders.first),
-                  ),
-                ),
-                SizedBox(width: 8),
-                Expanded(
-                  child: TextFormField(
-                    key: const Key('customModelName'),
-                    controller: _customModelCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Model id',
-                      hintText: 'gpt-5.1',
-                    ),
-                    validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? 'Required' : null,
-                  ),
-                ),
-              ],
-            ),
-          ],
           SizedBox(height: 16),
           TextFormField(
             key: const Key('llmMonthlyTokenLimit'),

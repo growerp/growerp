@@ -67,12 +67,14 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
 
   // AI — dynamic list of {providerCtrl, apiKeyCtrl, obscure, apiKeyIsSet}
   final List<Map<String, dynamic>> _llmRows = [];
-  /// Dropdown value standing for "a model id not in the shared list", e.g. an
-  /// OpenAI model. The real id then lives in _customModelCtrl.
-  static const _customModel = '__custom__';
   String? _aiModelName;
   String _aiProvider = '';
-  final _customModelCtrl = TextEditingController();
+  /// The tenant's own monthly cap, editable only while running on an own key.
+  final _ownTokenLimitCtrl = TextEditingController();
+  /// Read-only: free allowance in effect and what was used of it this month.
+  final _systemTokenLimitCtrl = TextEditingController();
+  int? _systemTokenLimit;
+  int _tokensUsed = 0;
 
   // Email — same fields as EmailSettingsDialog (ADK Tools & integrations),
   // shown here too because this is the screen the outreach setup guide sends
@@ -116,7 +118,8 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
     _storeHostCtrl.dispose();
     _storePortCtrl.dispose();
     _storeFolderCtrl.dispose();
-    _customModelCtrl.dispose();
+    _ownTokenLimitCtrl.dispose();
+    _systemTokenLimitCtrl.dispose();
     super.dispose();
   }
 
@@ -177,26 +180,24 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
         ..clear()
         ..addAll(newRows);
       // A stored model that is not in the shared list (an OpenAI model, or one
-      // added after this release) is kept and shown through the custom field
-      // rather than silently reset.
+      // added after this release) keeps its own entry in _modelItems() rather
+      // than being silently reset.
       final storedModel = s.aiModelName ?? '';
       if (storedModel.isEmpty) {
         _aiModelName = null;
         _aiProvider = '';
-        _customModelCtrl.clear();
-      } else if (llmModels.any((m) => m.modelId == storedModel)) {
+      } else {
         _aiModelName = storedModel;
         _aiProvider = s.aiProvider?.isNotEmpty == true
             ? s.aiProvider!
             : providerForModel(storedModel);
-        _customModelCtrl.clear();
-      } else {
-        _aiModelName = _customModel;
-        _aiProvider = s.aiProvider?.isNotEmpty == true
-            ? s.aiProvider!
-            : providerForModel(storedModel);
-        _customModelCtrl.text = storedModel;
       }
+      _systemTokenLimit = s.systemTokenLimit;
+      _systemTokenLimitCtrl.text =
+          (s.systemTokenLimit ?? 0) > 0 ? s.systemTokenLimit.toString() : '';
+      _tokensUsed = s.tokensUsedThisMonth ?? 0;
+      _ownTokenLimitCtrl.text =
+          (s.ownTokenLimit ?? 0) > 0 ? s.ownTokenLimit.toString() : '';
     } catch (e) {
       if (mounted) {
         HelperFunctions.showMessage(
@@ -234,6 +235,12 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
       final payload = <String, dynamic>{'llmConfigs': llmConfigs};
       payload['aiModelName'] = _selectedModelId();
       payload['aiProvider'] = _selectedModelId().isEmpty ? '' : _aiProvider;
+      // only meaningful on an own key; 0 clears the cap. Not sent otherwise, so
+      // switching back to the system default never leaves a stale cap behind.
+      if (_hasOwnKeyForSelectedModel) {
+        payload['ownTokenLimit'] =
+            int.tryParse(_ownTokenLimitCtrl.text.trim()) ?? 0;
+      }
       payload.addAll({
         'smtpHost': _smtpHostCtrl.text,
         'smtpPort': _smtpPortCtrl.text,
@@ -543,13 +550,8 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
 
   // ── AI settings ─────────────────────────────────────────────────────────────
 
-  /// The model id to store: '' for "system default", the typed id when the
-  /// custom entry is picked, otherwise the selected list entry.
-  String _selectedModelId() {
-    if (_aiModelName == null) return '';
-    if (_aiModelName == _customModel) return _customModelCtrl.text.trim();
-    return _aiModelName!;
-  }
+  /// The model id to store: '' for "system default", otherwise the selection.
+  String _selectedModelId() => _aiModelName ?? '';
 
   /// Providers that currently have an API key row in the form. Read from live
   /// form state, not the last server load, so adding a key immediately makes
@@ -558,6 +560,27 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
       .map((r) => (r['providerCtrl'] as TextEditingController).text.trim())
       .where((p) => p.isNotEmpty)
       .toSet();
+
+  /// Providers with a key that is actually filled in: an empty new row must not
+  /// unlock the own token limit below.
+  Set<String> _providersWithFilledKey() => _llmRows
+      .where((r) =>
+          (r['apiKeyCtrl'] as TextEditingController).text.trim().isNotEmpty ||
+          r['apiKeyIsSet'] == true)
+      .map((r) => (r['providerCtrl'] as TextEditingController).text.trim())
+      .where((p) => p.isNotEmpty)
+      .toSet();
+
+  /// True when the selected model runs on this tenant's own API key: only then
+  /// is the monthly token limit the tenant's own cap rather than the free
+  /// allowance set by GrowERP support.
+  bool get _hasOwnKeyForSelectedModel {
+    final model = _aiModelName;
+    if (model == null) return false;
+    final provider =
+        _aiProvider.isNotEmpty ? _aiProvider : providerForModel(model);
+    return _providersWithFilledKey().contains(provider);
+  }
 
   List<DropdownMenuItem<String>> _modelItems() {
     final withKey = _providersWithKey();
@@ -573,21 +596,18 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
         child: Text('${model.modelId}  (${model.provider})'),
       ));
     }
-    // a saved model whose key row was removed stays selectable, so opening this
-    // screen never silently rewrites the stored setting
+    // a saved model whose key row was removed, or one no longer in the shared
+    // list, stays selectable: opening this screen never silently rewrites the
+    // stored setting, and the dropdown never holds a value without an item
     final saved = _aiModelName;
-    if (saved != null &&
-        saved != _customModel &&
-        !items.any((i) => i.value == saved)) {
+    if (saved != null && !items.any((i) => i.value == saved)) {
       items.add(DropdownMenuItem<String>(
         value: saved,
-        child: Text('$saved  (no API key)'),
+        child: Text(withKey.contains(_aiProvider)
+            ? '$saved  ($_aiProvider)'
+            : '$saved  (no API key)'),
       ));
     }
-    items.add(const DropdownMenuItem<String>(
-      value: _customModel,
-      child: Text('Other model…'),
-    ));
     return items;
   }
 
@@ -619,55 +639,14 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
             items: _modelItems(),
             onChanged: (v) => setState(() {
               _aiModelName = v;
-              if (v == null) {
-                _aiProvider = '';
-              } else if (v != _customModel) {
-                _aiProvider = llmModels
-                    .firstWhere((m) => m.modelId == v,
-                        orElse: () => LlmModel(providerForModel(v), v))
-                    .provider;
-              } else if (_aiProvider.isEmpty) {
-                _aiProvider = llmProviders.first;
-              }
+              _aiProvider = v == null
+                  ? ''
+                  : llmModels
+                      .firstWhere((m) => m.modelId == v,
+                          orElse: () => LlmModel(providerForModel(v), v))
+                      .provider;
             }),
           ),
-          if (_aiModelName == _customModel) ...[
-            SizedBox(height: 12),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 130,
-                  child: DropdownButtonFormField<String>(
-                    key: const Key('customModelProvider'),
-                    initialValue:
-                        _aiProvider.isEmpty ? llmProviders.first : _aiProvider,
-                    decoration: const InputDecoration(labelText: 'Provider'),
-                    items: llmProviders
-                        .map((p) =>
-                            DropdownMenuItem<String>(value: p, child: Text(p)))
-                        .toList(),
-                    onChanged: (v) =>
-                        setState(() => _aiProvider = v ?? llmProviders.first),
-                  ),
-                ),
-                SizedBox(width: 8),
-                Expanded(
-                  child: TextFormField(
-                    key: const Key('customModelName'),
-                    controller: _customModelCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Model id',
-                      hintText: 'gpt-5.1',
-                    ),
-                    validator: (v) => (v == null || v.trim().isEmpty)
-                        ? 'Required'
-                        : null,
-                  ),
-                ),
-              ],
-            ),
-          ],
           SizedBox(height: 16),
           ..._llmRows.asMap().entries.map((e) => _llmProviderRow(e.key)),
           SizedBox(height: 8),
@@ -684,8 +663,42 @@ class _SystemSetupDialogState extends State<SystemSetupDialog> {
               });
             }),
           ),
+          SizedBox(height: 16),
+          _tokenLimitField(),
         ],
       ),
+    );
+  }
+
+  /// Monthly token limit. Read-only while this tenant generates on the GrowERP
+  /// system key (the allowance is support's to set), editable as the tenant's
+  /// own cap once the selected model runs on the tenant's own API key.
+  Widget _tokenLimitField() {
+    final localizations = CoreLocalizations.of(context)!;
+    final own = _hasOwnKeyForSelectedModel;
+    final systemLimit = _systemTokenLimit ?? 0;
+    return TextFormField(
+      key: const Key('llmMonthlyTokenLimit'),
+      controller: own ? _ownTokenLimitCtrl : _systemTokenLimitCtrl,
+      enabled: own,
+      decoration: InputDecoration(
+        labelText: localizations.monthlyTokenLimit,
+        hintText: own ? 'e.g. 100000' : '',
+        helperMaxLines: 3,
+        helperText: own
+            ? localizations.ownTokenLimitHelp(_tokensUsed)
+            : localizations.systemTokenLimitHelp(
+                _tokensUsed, systemLimit > 0 ? '$systemLimit' : '\u221e'),
+      ),
+      keyboardType: TextInputType.number,
+      validator: (value) {
+        if (!own || value == null || value.isEmpty) return null;
+        final number = int.tryParse(value);
+        if (number == null || number < 0) {
+          return localizations.enterAPositiveNumberOrLeaveEmpty;
+        }
+        return null;
+      },
     );
   }
 

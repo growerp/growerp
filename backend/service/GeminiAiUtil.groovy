@@ -127,7 +127,9 @@ class GeminiAiUtil {
             throw new Exception("No API key configured for LLM provider '${provider}'. " +
                 "Add it in System Setup -> AI Settings.")
         }
-        if (!hasOwnApiKey(ec, ownerPartyId, provider, options.apiKey as String)) {
+        if (hasOwnApiKey(ec, ownerPartyId, provider, options.apiKey as String)) {
+            checkOwnAllowance(ec, ownerPartyId)
+        } else {
             checkMonthlyAllowance(ec, ownerPartyId)
         }
 
@@ -333,6 +335,31 @@ class GeminiAiUtil {
         if (used >= limit) {
             throw new Exception("Free monthly AI allowance used (${used} of ${limit} tokens). " +
                 "Please add your own API Key in System Setup -> AI Settings.")
+        }
+    }
+
+    /**
+     * Cap the tenant set on its own key (SystemSettings.ownTokenLimit, null/0 = no cap), so a
+     * tenant generating on its own API key can limit what it spends. Same rule the ADK agent
+     * gate applies in growerp.100.AdkGovernanceServices.govern#AgentAction.
+     */
+    private static void checkOwnAllowance(def ec, String ownerPartyId) {
+        if (!ownerPartyId || ownerPartyId == "_NA_") return
+        def settings = ec.entity.find("growerp.general.SystemSettings")
+            .condition("ownerPartyId", ownerPartyId).one()
+        long limit = (settings?.ownTokenLimit ?: 0) as long
+        if (limit <= 0) return
+        long used
+        try {
+            used = monthlyTokensUsed(ec, ownerPartyId)
+        } catch (Throwable t) {
+            // moqui-adk absent: nothing is metered, so nothing can be over the limit
+            ec.logger.warn("LLM own limit check skipped: ${t.message}")
+            return
+        }
+        if (used >= limit) {
+            throw new Exception("Own monthly AI token limit reached (${used} of ${limit} tokens). " +
+                "Raise or clear it in System Setup -> AI Settings.")
         }
     }
 

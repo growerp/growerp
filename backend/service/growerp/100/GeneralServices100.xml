@@ -2049,9 +2049,9 @@ limitations under the License.
                 <field-map field-name="ownerPartyId"/>
             </entity-find-one>
             <if condition="ss == null">
+                <!-- no row yet: the read only display values below still apply -->
                 <set field="systemSettings" from="[:]"/>
-                <return/>
-            </if>
+            <else>
             <set field="systemSettings" from="ss.getMap()"/>
             <script>systemSettings.mailPassword = ss.mailPassword ? '****' : ''; systemSettings.githubToken = ss.githubToken ? '****' : ''; systemSettings.githubRepository = ss.githubRepository ?: ''; systemSettings.googleClientSecret = ss.googleClientSecret ? '****' : ''; systemSettings.googleRefreshToken = ss.googleRefreshToken ? '****' : ''</script>
             <entity-find entity-name="growerp.general.LlmConfig" list="llmConfigList">
@@ -2064,6 +2064,24 @@ limitations under the License.
                     llmConfigs.add([llmProvider: lc.llmProvider, apiKey: lc.apiKey ? '****' : ''])
                 }
                 systemSettings.llmConfigs = llmConfigs
+            ]]></script>
+            </else>
+            </if>
+            <!-- read only display values: the free allowance now in effect and what
+                 was used of it this month -->
+            <entity-find-one entity-name="growerp.general.SystemDefault" value-field="sd">
+                <field-map field-name="defaultId" value="SYSTEM"/>
+            </entity-find-one>
+            <script><![CDATA[
+                systemSettings.systemTokenLimit = ss?.llmMonthlyTokenLimit != null
+                    ? ss.llmMonthlyTokenLimit : (sd?.llmMonthlyTokenLimit ?: 100000)
+                try {
+                    def util = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
+                    systemSettings.tokensUsedThisMonth = util.monthlyTokensUsed(ec, ownerPartyId)
+                } catch (Throwable t) {
+                    // moqui-adk absent: nothing is metered
+                    systemSettings.tokensUsedThisMonth = 0
+                }
             ]]></script>
         </actions>
     </service>
@@ -2092,6 +2110,12 @@ limitations under the License.
             <parameter name="githubRepository"/>
             <parameter name="aiModelName"/>
             <parameter name="aiProvider"/>
+            <parameter name="ownTokenLimit" type="Integer">
+                <description>Tenant's own monthly token cap on its own API key; 0 = no cap.
+                    Ignored when this tenant has no LLM API key of its own: the free system
+                    allowance (llmMonthlyTokenLimit) is support only, see update#OwnerTokenLimit.
+                </description>
+            </parameter>
             <parameter name="googleClientId"/>
             <parameter name="googleClientSecret"/>
             <parameter name="googleRefreshToken"/>
@@ -2150,6 +2174,23 @@ limitations under the License.
             </if>
             <if condition="aiModelName != null"><set field="ss.aiModelName" from="aiModelName"/></if>
             <if condition="aiProvider != null"><set field="ss.aiProvider" from="aiProvider"/></if>
+            <!-- an own cap only makes sense on an own key: accept it when the tenant already
+                 has a key, or is adding one in this same save. Never a way to change the
+                 support set free allowance. -->
+            <if condition="ownTokenLimit != null">
+                <entity-find entity-name="growerp.general.LlmConfig" list="ownKeyList">
+                    <econdition field-name="ownerPartyId"/>
+                    <econdition field-name="apiKey" operator="is-not-null"/>
+                </entity-find>
+                <set field="hasOwnKey" from="!ownKeyList.isEmpty()"/>
+                <if condition="!hasOwnKey &amp;&amp; llmConfigs">
+                    <set field="hasOwnKey"
+                        from="llmConfigs.any { it.apiKey &amp;&amp; it.apiKey != '****' }"/>
+                </if>
+                <if condition="hasOwnKey">
+                    <set field="ss.ownTokenLimit" from="ownTokenLimit"/>
+                </if>
+            </if>
             <if condition="googleClientId != null"><set field="ss.googleClientId" from="googleClientId"/></if>
             <if condition="googleClientSecret &amp;&amp; googleClientSecret != '****'">
                 <set field="ss.googleClientSecret" from="googleClientSecret"/>

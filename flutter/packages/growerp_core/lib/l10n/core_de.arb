@@ -1167,6 +1167,35 @@
   "@systemDefault": {
     "description": "System default text"
   },
+  "monthlyTokenLimit": "Monthly Token Limit",
+  "@monthlyTokenLimit": {
+    "description": "Monthly token limit field label"
+  },
+  "ownTokenLimitHelp": "Your own monthly cap on your own API key. Empty or 0 = unlimited. {used} tokens used this month.",
+  "@ownTokenLimitHelp": {
+    "description": "Helper text for the tenant's own monthly token cap",
+    "placeholders": {
+      "used": {
+        "type": "int"
+      }
+    }
+  },
+  "systemTokenLimitHelp": "Free tokens per month on the GrowERP system key: {used} used of {limit}. Set by GrowERP support.",
+  "@systemTokenLimitHelp": {
+    "description": "Helper text for the free system token allowance",
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "enterAPositiveNumberOrLeaveEmpty": "Enter a positive number or leave empty",
+  "@enterAPositiveNumberOrLeaveEmpty": {
+    "description": "Validation message for an optional positive number field"
+  },
   "addProvider": "Anbieter hinzufügen",
   "@addProvider": {
     "description": "Add Provider text"

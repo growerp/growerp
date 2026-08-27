@@ -125,13 +125,17 @@
                                 .condition('llmProvider', cfg?.llmProvider ?: 'gemini').one()
                             if (lc?.apiKey) hasCustomLlm = true
                         }
-                        if (!hasCustomLlm && ownerPartyId) {
-                            // GrowERP wide free allowance, maintained by system support in the
-                            // support app (System Defaults); 0/empty = unlimited
-                            // a per tenant override (support app owner list) wins over it
+                        if (ownerPartyId) {
                             def ownerSettings = ec.entity.find('growerp.general.SystemSettings').condition('ownerPartyId', ownerPartyId).one()
                             def tokenLimit
-                            if (ownerSettings?.llmMonthlyTokenLimit != null) {
+                            if (hasCustomLlm) {
+                                // own key: the only cap is the one the tenant set on itself in
+                                // System Settings; empty/0 = no cap
+                                tokenLimit = ownerSettings?.ownTokenLimit ?: 0
+                            } else if (ownerSettings?.llmMonthlyTokenLimit != null) {
+                                // GrowERP wide free allowance, maintained by system support in the
+                                // support app (System Defaults); 0/empty = unlimited
+                                // a per tenant override (support app owner list) wins over it
                                 tokenLimit = ownerSettings.llmMonthlyTokenLimit
                             } else {
                                 def sysDefault = ec.entity.find('growerp.general.SystemDefault').condition('defaultId', 'SYSTEM').one()
@@ -157,7 +161,9 @@
                                 
                                 if (totalUsed >= tokenLimit) {
                                     decision = 'blocked'
-                                    message = "Free monthly LLM allowance used (${totalUsed} of ${tokenLimit} tokens). Please add your own API Key."
+                                    message = hasCustomLlm
+                                        ? "Own monthly LLM token limit reached (${totalUsed} of ${tokenLimit} tokens). Raise or clear it in System Setup -> AI Settings."
+                                        : "Free monthly LLM allowance used (${totalUsed} of ${tokenLimit} tokens). Please add your own API Key."
                                 }
                             }
                         }

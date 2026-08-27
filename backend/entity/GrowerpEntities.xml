@@ -465,6 +465,10 @@ limitations under the License.
                 system support in the Support app owner list; empty = use the system wide
                 default, 0 = unlimited for this tenant.</description>
         </field>
+        <field name="ownTokenLimit" type="number-integer">
+            <description>Tenant's own monthly token cap when generating on its own LlmConfig
+                API key, set by the tenant in System Settings; empty or 0 = no cap.</description>
+        </field>
     </entity>
 
     <entity entity-name="SystemDefault" package="growerp.general"
