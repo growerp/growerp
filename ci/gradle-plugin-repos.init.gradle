@@ -1,0 +1,10 @@
+// Gradle plugin resolution in moqui/build.gradle only reaches the Gradle Plugin
+// Portal, which regularly flakes from CI ("could not resolve plugin artifact
+// org.ajoberstar.grgit:...:5.3.3"). Add Maven Central as a second source; the
+// portal stays first since com.github.ben-manes.versions is published there only.
+settingsEvaluated { settings ->
+    settings.pluginManagement.repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}

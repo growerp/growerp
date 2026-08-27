@@ -134,13 +134,16 @@ jobs:
             'https\://services.gradle.org/distributions/gradle-9.2.0-bin.zip'
             'https\://mirrors.cloud.tencent.com/gradle/gradle-9.2.0-bin.zip'
           )
+          # Growing backoff: the Gradle Plugin Portal blips can last minutes.
+          BACKOFF=(20 60 180)
           ok=0
           for url in "${MIRRORS[@]}"; do
             sed -i "s|^distributionUrl=.*|distributionUrl=$url|" "$WRAPPER"
             for attempt in 1 2 3; do
-              if ./gradlew build; then ok=1; break; fi
-              echo "gradlew attempt $attempt via $url failed; retrying in 20s..."
-              sleep 20
+              if ./gradlew -I ../ci/gradle-plugin-repos.init.gradle build; then ok=1; break; fi
+              delay=${BACKOFF[$((attempt - 1))]}
+              echo "gradlew attempt $attempt via $url failed; retrying in ${delay}s..."
+              sleep "$delay"
             done
             [ "$ok" = 1 ] && break
             echo "all attempts on $url failed; trying next mirror..."
@@ -183,12 +186,87 @@ jobs:
           retention-days: 7
 
   # ------------------------------------------------------------------
+  # 1b. Moqui backend image
+  #     Built once per run and handed to every integration-test slice as an
+  #     artifact. Before this the 8 slices each ran their own gradle build,
+  #     so every run made 8 cold Gradle Plugin Portal resolutions and a
+  #     single portal blip failed a slice (run 32988024630).
+  # ------------------------------------------------------------------
+  moqui-image:
+    needs: check-changes
+    if: needs.check-changes.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Init submodules (SSH → HTTPS rewrite)
+        run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git submodule update --init --recursive
+
+      - name: Set up backend component symlinks
+        run: bash setup-backend.sh
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Build moqui backend image
+        run: |
+          mkdir -p moqui/build
+          cd moqui
+          WRAPPER=gradle/wrapper/gradle-wrapper.properties
+          # services.gradle.org regularly times out / returns 504 from CI.
+          # Bump the wrapper timeout and fall back to a mirror when the
+          # primary CDN is unavailable. validateDistributionUrl must be off
+          # for the mirror since it is not on the gradle.org domain.
+          sed -i 's/^networkTimeout=.*/networkTimeout=60000/' "$WRAPPER"
+          sed -i 's/^validateDistributionUrl=.*/validateDistributionUrl=false/' "$WRAPPER"
+          MIRRORS=(
+            'https\://services.gradle.org/distributions/gradle-9.2.0-bin.zip'
+            'https\://mirrors.cloud.tencent.com/gradle/gradle-9.2.0-bin.zip'
+          )
+          # Growing backoff: the Gradle Plugin Portal blips can last minutes.
+          BACKOFF=(20 60 180)
+          ok=0
+          for url in "${MIRRORS[@]}"; do
+            sed -i "s|^distributionUrl=.*|distributionUrl=$url|" "$WRAPPER"
+            for attempt in 1 2 3; do
+              if ./gradlew -I ../ci/gradle-plugin-repos.init.gradle build getPostgresJdbc; then ok=1; break; fi
+              delay=${BACKOFF[$((attempt - 1))]}
+              echo "gradlew attempt $attempt via $url failed; retrying in ${delay}s..."
+              sleep "$delay"
+            done
+            [ "$ok" = 1 ] && break
+            echo "all attempts on $url failed; trying next mirror..."
+          done
+          [ "$ok" = 1 ] || { echo "gradlew failed on all mirrors"; exit 1; }
+          cd docker/simple && bash docker-build.sh ../.. growerp/growerp-moqui eclipse-temurin:21-jdk
+
+      - name: Export image
+        run: docker save growerp/growerp-moqui:latest | zstd -T0 -3 -o /tmp/moqui-image.tar.zst
+
+      - name: Upload image
+        uses: actions/upload-artifact@v4
+        with:
+          name: moqui-image
+          path: /tmp/moqui-image.tar.zst
+          retention-days: 1
+          # already zstd-compressed
+          compression-level: 0
+
+  # ------------------------------------------------------------------
   # 1. Integration tests
   #    Full run: 4 parallel slices, each with its own Moqui backend.
   #    Filtered run (package_filter set): single job using PACKAGE_FILTER.
   # ------------------------------------------------------------------
   integration-tests:
-    needs: check-changes
+    needs: [check-changes, moqui-image]
     if: needs.check-changes.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -221,52 +299,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Init submodules (SSH → HTTPS rewrite)
-        run: |
-          git config --global url."https://github.com/".insteadOf "git@github.com:"
-          git submodule update --init --recursive
-
-      - name: Set up backend component symlinks
-        run: bash setup-backend.sh
-
       # ------------------------------------------------------------------
-      # 3. Build moqui backend image from local source
+      # 3. Load the moqui backend image built by the moqui-image job.
+      #    Must run after the docker prune above.
       # ------------------------------------------------------------------
-      - name: Set up Java 21
-        uses: actions/setup-java@v4
+      - name: Download moqui image
+        uses: actions/download-artifact@v4
         with:
-          distribution: temurin
-          java-version: "21"
-          cache: gradle
+          name: moqui-image
+          path: /tmp
 
-      - name: Build moqui backend image
-        run: |
-          mkdir -p moqui/build
-          cd moqui
-          WRAPPER=gradle/wrapper/gradle-wrapper.properties
-          # services.gradle.org regularly times out / returns 504 from CI.
-          # Bump the wrapper timeout and fall back to a mirror when the
-          # primary CDN is unavailable. validateDistributionUrl must be off
-          # for the mirror since it is not on the gradle.org domain.
-          sed -i 's/^networkTimeout=.*/networkTimeout=60000/' "$WRAPPER"
-          sed -i 's/^validateDistributionUrl=.*/validateDistributionUrl=false/' "$WRAPPER"
-          MIRRORS=(
-            'https\://services.gradle.org/distributions/gradle-9.2.0-bin.zip'
-            'https\://mirrors.cloud.tencent.com/gradle/gradle-9.2.0-bin.zip'
-          )
-          ok=0
-          for url in "${MIRRORS[@]}"; do
-            sed -i "s|^distributionUrl=.*|distributionUrl=$url|" "$WRAPPER"
-            for attempt in 1 2 3; do
-              if ./gradlew build getPostgresJdbc; then ok=1; break; fi
-              echo "gradlew attempt $attempt via $url failed; retrying in 20s..."
-              sleep 20
-            done
-            [ "$ok" = 1 ] && break
-            echo "all attempts on $url failed; trying next mirror..."
-          done
-          [ "$ok" = 1 ] || { echo "gradlew failed on all mirrors"; exit 1; }
-          cd docker/simple && bash docker-build.sh ../.. growerp/growerp-moqui eclipse-temurin:21-jdk
+      - name: Load moqui image
+        run: zstd -dc /tmp/moqui-image.tar.zst | docker load
 
       # ------------------------------------------------------------------
       # 4. Build test runner image (cached via Docker layer cache)
@@ -1175,7 +1219,7 @@ jobs:
   #   Snap        : latest/stable revision + version
   # ------------------------------------------------------------------
   report:
-    needs: [backend-tests, integration-tests, resolve-matrix, swarm-status,
+    needs: [backend-tests, moqui-image, integration-tests, resolve-matrix, swarm-status,
             status-ios, status-macos, status-android, status-windows, status-snap]
     if: always()
     runs-on: ubuntu-latest
@@ -1823,11 +1867,16 @@ jobs:
         if: always()
         env:
           BACKEND_RESULT: ${{ needs.backend-tests.result }}
+          IMAGE_RESULT: ${{ needs.moqui-image.result }}
           TESTS_RESULT: ${{ needs.integration-tests.result }}
         run: |
           FAIL_FILE=$(mktemp)
           echo "0" > "$FAIL_FILE"
           if [ "$BACKEND_RESULT" = "failure" ]; then
+            echo "1" > "$FAIL_FILE"
+          fi
+          # A failed image build leaves every slice skipped, not failed.
+          if [ "$IMAGE_RESULT" = "failure" ]; then
             echo "1" > "$FAIL_FILE"
           fi
           # A slice that dies before writing test_output.log produces no
