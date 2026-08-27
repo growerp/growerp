@@ -147,7 +147,13 @@ jobs:
                 # WINDOWS_<SUFFIX>_PRODUCT_ID in release-windows — add a new
                 # app here (and to release_config.json) and its secret is
                 # picked up automatically, no further workflow edits needed.
-                json="${json}{\"app\":\"${app}\",\"secretSuffix\":\"${app^^}\"}"
+                # androidId is only read by release-android: the Play package is
+                # not always org.growerp.<app> (agents ships as org.growerp.agent
+                # after its original package was suspended).
+                local android_id=$(jq -r --arg app "$app" \
+                  '.androidIds[$app] // ("org.growerp." + $app)' \
+                  flutter/release/release_config.json)
+                json="${json}{\"app\":\"${app}\",\"androidId\":\"${android_id}\",\"secretSuffix\":\"${app^^}\"}"
                 first=false
               fi
             done
@@ -286,6 +292,7 @@ jobs:
         env:
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
           APP_NAME: ${{ matrix.app }}
+          ANDROID_PACKAGE: ${{ matrix.androidId }}
         run: |
           python3 - <<'PYEOF'
           import json, os, sys
@@ -298,7 +305,7 @@ jobs:
               sys.exit(1)
 
           app_name = os.environ["APP_NAME"]
-          package_name = f"org.growerp.{app_name}"
+          package_name = os.environ["ANDROID_PACKAGE"]
           summary = os.environ.get("GITHUB_STEP_SUMMARY")
 
           def report(state):
