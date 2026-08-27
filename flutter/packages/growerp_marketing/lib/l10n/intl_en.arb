@@ -1,4 +1,5 @@
 {
+  "@@locale": "en",
   "selectAnAssessmentToTake": "Select an Assessment to Take",
   "@selectAnAssessmentToTake": {
     "description": "Select an Assessment to Take"

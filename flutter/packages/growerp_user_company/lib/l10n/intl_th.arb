@@ -229,31 +229,10 @@
   "companiesUsers": "บริษัท/ผู้ใช้",
   "searchHintNoun": "ค้นหา{noun}...",
   "accountingYearStarts": "ปีบัญชีเริ่ม",
-  "@accountingYearStarts": {
-    "description": "Label of the month the accounting year starts"
-  },
   "acctPeriodLocked": "ไม่สามารถเปลี่ยนได้: มีการบันทึกรายการแล้ว",
-  "@acctPeriodLocked": {
-    "description": "Currency and accounting year can no longer be changed"
-  },
   "leadStatus": "สถานะผู้มุ่งหวัง",
-  "@leadStatus": {
-    "description": "Label of the lead status field"
-  },
   "leadStatusNew": "ใหม่",
-  "@leadStatusNew": {
-    "description": "Lead status: no status yet"
-  },
   "leadStatusAssigned": "มอบหมายแล้ว",
-  "@leadStatusAssigned": {
-    "description": "Lead status: assigned"
-  },
   "leadStatusQualified": "ผ่านการคัดกรอง",
-  "@leadStatusQualified": {
-    "description": "Lead status: qualified"
-  },
-  "leadStatusConverted": "เปลี่ยนเป็นลูกค้าแล้ว",
-  "@leadStatusConverted": {
-    "description": "Lead status: converted into a customer"
-  }
+  "leadStatusConverted": "เปลี่ยนเป็นลูกค้าแล้ว"
 }

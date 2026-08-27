@@ -68,14 +68,6 @@
   "courses_entireCourse": "ทั้งหลักสูตร",
   "courses_entireModule": "ทั้งโมดูล",
   "courses_areYouSureYou": "คุณแน่ใจหรือไม่ว่าต้องการลบ \"{valwidgetcoursetitle}\"?",
-  "@courses_areYouSureYou": {
-    "description": "Extracted string: Are you sure you want to delete \"${widget.course!.title}\"?",
-    "placeholders": {
-      "valwidgetcoursetitle": {
-        "type": "String"
-      }
-    }
-  },
   "courses_tableHdrDescription": "คำอธิบาย",
   "courses_tableHdrDifficulty": "ระดับความยาก",
   "courses_tableHdrDuration": "ระยะเวลา",

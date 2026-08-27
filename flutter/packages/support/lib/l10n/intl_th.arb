@@ -1,107 +1,26 @@
 {
   "@@locale": "th",
   "websiteReadAI": "อ่านเว็บไซต์แล้ว หน้าเว็บและสีถูกเขียนใหม่ด้วย AI สำหรับแม่แบบ GrowERP และติดตั้งผลลัพธ์เป็นเจ้าของใหม่ การดำเนินการนี้ใช้เวลาไม่กี่นาทีและใช้เครดิต AI",
-  "@websiteReadAI": {
-    "description": "Dialog text explaining AI website rewrite."
-  },
   "startConversion": "เริ่มการแปลง",
-  "@startConversion": {
-    "description": "Button text to start conversion."
-  },
   "passwordArg": "รหัสผ่าน: {password}",
-  "@passwordArg": {
-    "description": "Displays the generated password.",
-    "placeholders": {
-      "password": {
-        "type": "String",
-        "description": "The password."
-      }
-    }
-  },
   "giveThisToCustomer": "มอบสิ่งนี้ให้กับลูกค้าพร้อมกับการเข้าสู่ระบบของผู้ดูแลระบบ: ไม่สามารถแสดงอีกครั้งเมื่อการแปลงนี้ถูกลบ",
-  "@giveThisToCustomer": {
-    "description": "Instruction regarding customer login."
-  },
   "removeFromList": "ลบออกจากรายการ",
-  "@removeFromList": {
-    "description": "Button text to remove item from list."
-  },
   "removingClearsRow": "การลบจะล้างเฉพาะแถวนี้ เจ้าของที่สร้างขึ้นและเว็บไซต์จะยังคงอยู่",
-  "@removingClearsRow": {
-    "description": "Warning message when removing an item."
-  },
   "noWebsitesConverted": "ยังไม่มีเว็บไซต์ที่ถูกแปลง\n\nกด + เพื่อแปลงเว็บไซต์ของบริษัทที่มีอยู่เป็นเจ้าของ GrowERP ใหม่: ไซต์จะถูกอ่าน หน้าและสีของเว็บไซต์จะถูกเขียนใหม่สำหรับเทมเพลต GrowERP และผลลัพธ์จะถูกติดตั้งเป็นผู้เช่ารายใหม่",
-  "@noWebsitesConverted": {
-    "description": "Message when no websites have been converted."
-  },
   "failedToFetchApplications": "ไม่สามารถดึงข้อมูลแอปพลิเคชัน: {message}",
-  "@failedToFetchApplications": {
-    "description": "Error message when fetching applications fails.",
-    "placeholders": {
-      "message": {
-        "type": "String",
-        "description": "Error message details"
-      }
-    }
-  },
   "userRestActivity": "กิจกรรม REST ของผู้ใช้ ",
-  "@userRestActivity": {
-    "description": "Title for user REST activity chart."
-  },
   "thirtyDays": "30 วัน",
-  "@thirtyDays": {
-    "description": "Label for 30 days."
-  },
   "sixtyDays": "60 วัน",
-  "@sixtyDays": {
-    "description": "Label for 60 days."
-  },
   "ninetyDays": "90 วัน",
-  "@ninetyDays": {
-    "description": "Label for 90 days."
-  },
   "usersCount": "{count} ผู้ใช้",
-  "@usersCount": {
-    "description": "Displays number of users.",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "description": "Number of users."
-      }
-    }
-  },
   "noRestActivityInPeriod": "ไม่มีกิจกรรม REST ในช่วงเวลา",
-  "@noRestActivityInPeriod": {
-    "description": "Message when there is no activity."
-  },
   "failedToLoadMenuConfiguration": "ไม่สามารถโหลดการกำหนดค่าเมนู",
-  "@failedToLoadMenuConfiguration": {
-    "description": "Error message when menu fails to load."
-  },
   "unknownError": "ข้อผิดพลาดที่ไม่รู้จัก",
-  "@unknownError": {
-    "description": "Fallback error message."
-  },
   "retry": "ลองใหม่",
-  "@retry": {
-    "description": "Button to retry action."
-  },
   "logout": "ออกจากระบบ",
-  "@logout": {
-    "description": "Button to logout."
-  },
   "loadingMenuConfiguration": "กำลังโหลดการกำหนดค่าเมนู...",
-  "@loadingMenuConfiguration": {
-    "description": "Message shown while loading menu."
-  },
   "login": "เข้าสู่ระบบ",
-  "@login": {
-    "description": "Title for login screen."
-  },
   "growerpSupport": "ฝ่ายสนับสนุน GrowERP",
-  "@growerpSupport": {
-    "description": "Title for the support app."
-  },
   "tableHdrAssessmentId": "รหัสการประเมิน",
   "tableHdrBackendUrl": "URL แบ็กเอนด์",
   "tableHdrCompany": "บริษัท",

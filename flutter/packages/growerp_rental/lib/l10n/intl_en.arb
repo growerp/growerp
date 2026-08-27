@@ -1,4 +1,5 @@
 {
+  "@@locale": "en",
   "day": "Day",
   "@day": {
     "description": "Day"

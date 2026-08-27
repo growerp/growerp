@@ -1,4 +1,5 @@
 {
+  "@@locale": "th",
   "selectAnAssessmentToTake": "เลือกการประเมินที่จะทำ",
   "deleteContentPlan": "ลบแผนเนื้อหา",
   "cancel": "ยกเลิก",

@@ -1,29 +1,7 @@
 {
   "@@locale": "th",
   "errorWithArg": "ข้อผิดพลาด: {error}",
-  "@errorWithArg": {
-    "description": "Error message with an argument.",
-    "placeholders": {
-      "error": {
-        "type": "String",
-        "description": "The error description."
-      }
-    }
-  },
   "roomsToClean": "ห้องพัก: {totalRooms}   ต้องทำความสะอาด: {dirtyCount}",
-  "@roomsToClean": {
-    "description": "Displays total rooms and rooms to clean.",
-    "placeholders": {
-      "totalRooms": {
-        "type": "int",
-        "description": "Total number of rooms"
-      },
-      "dirtyCount": {
-        "type": "int",
-        "description": "Number of rooms to clean"
-      }
-    }
-  },
   "tableHdrOccupied": "มีผู้เข้าพัก",
   "tableHdrRoom": "ห้อง",
   "tableHdrStatus": "สถานะ",

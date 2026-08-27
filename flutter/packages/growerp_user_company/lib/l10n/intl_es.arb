@@ -229,31 +229,10 @@
   "companiesUsers": "Empresas/Usuarios",
   "searchHintNoun": "Buscar {noun}...",
   "accountingYearStarts": "El año contable empieza",
-  "@accountingYearStarts": {
-    "description": "Label of the month the accounting year starts"
-  },
   "acctPeriodLocked": "No se puede cambiar: ya se han contabilizado transacciones",
-  "@acctPeriodLocked": {
-    "description": "Currency and accounting year can no longer be changed"
-  },
   "leadStatus": "Estado del cliente potencial",
-  "@leadStatus": {
-    "description": "Label of the lead status field"
-  },
   "leadStatusNew": "Nuevo",
-  "@leadStatusNew": {
-    "description": "Lead status: no status yet"
-  },
   "leadStatusAssigned": "Asignado",
-  "@leadStatusAssigned": {
-    "description": "Lead status: assigned"
-  },
   "leadStatusQualified": "Cualificado",
-  "@leadStatusQualified": {
-    "description": "Lead status: qualified"
-  },
-  "leadStatusConverted": "Convertido",
-  "@leadStatusConverted": {
-    "description": "Lead status: converted into a customer"
-  }
+  "leadStatusConverted": "Convertido"
 }

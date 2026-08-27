@@ -1,4 +1,5 @@
 {
+  "@@locale": "th",
   "browsermcpTest": "การทดสอบเบราว์เซอร์MCP",
   "initialize": "เริ่มต้น",
   "cleanup": "การล้างข้อมูล",

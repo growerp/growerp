@@ -1,4 +1,5 @@
 {
+  "@@locale": "en",
   "browsermcpTest": "BrowserMCP Test",
   "@browsermcpTest": {
     "description": "BrowserMCP Test"
