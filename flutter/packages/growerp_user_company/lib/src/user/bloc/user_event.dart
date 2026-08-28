@@ -24,6 +24,10 @@ class UserFetch extends UserEvent {
   final UserGroup? userGroup;
   final String? partyId;
   final String searchString;
+
+  /// lead status filter, only used for the lead list: 'CUSTOMER_NEW' for leads
+  /// without a status yet, else a [LeadStatus] value, null for all leads
+  final String? customerStatus;
   final bool refresh;
   final int limit;
 
@@ -32,11 +36,12 @@ class UserFetch extends UserEvent {
     this.partyId,
     this.userGroup,
     this.searchString = '',
+    this.customerStatus,
     this.refresh = false,
   });
 
   @override
-  List<Object> get props => [searchString, refresh];
+  List<Object> get props => [searchString, customerStatus ?? '', refresh];
 }
 
 class UserUpdate extends UserEvent {
@@ -54,12 +59,16 @@ class UserSearchChanged extends UserEvent {
     required this.searchString,
     this.userGroup,
     this.partyId,
+    this.customerStatus,
     this.limit = 20,
   });
   final String searchString;
   final UserGroup? userGroup;
   final String? partyId;
+
+  /// see [UserFetch.customerStatus]
+  final String? customerStatus;
   final int limit;
   @override
-  List<Object> get props => [searchString];
+  List<Object> get props => [searchString, customerStatus ?? ''];
 }

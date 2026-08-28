@@ -231,6 +231,7 @@
   "accountingYearStarts": "Geschäftsjahr beginnt",
   "acctPeriodLocked": "Nicht mehr änderbar: es wurden Buchungen erfasst",
   "leadStatus": "Lead-Status",
+  "leadStatusAll": "Alle",
   "leadStatusNew": "Neu",
   "leadStatusAssigned": "Zugewiesen",
   "leadStatusQualified": "Qualifiziert",

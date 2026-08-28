@@ -1087,6 +1087,10 @@
   "@leadStatus": {
     "description": "Label of the lead status field"
   },
+  "leadStatusAll": "All",
+  "@leadStatusAll": {
+    "description": "Lead status filter: no status filter, show all leads"
+  },
   "leadStatusNew": "New",
   "@leadStatusNew": {
     "description": "Lead status: no status yet"

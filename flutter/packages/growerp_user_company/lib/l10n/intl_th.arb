@@ -231,6 +231,7 @@
   "accountingYearStarts": "ปีบัญชีเริ่ม",
   "acctPeriodLocked": "ไม่สามารถเปลี่ยนได้: มีการบันทึกรายการแล้ว",
   "leadStatus": "สถานะผู้มุ่งหวัง",
+  "leadStatusAll": "ทั้งหมด",
   "leadStatusNew": "ใหม่",
   "leadStatusAssigned": "มอบหมายแล้ว",
   "leadStatusQualified": "ผ่านการคัดกรอง",

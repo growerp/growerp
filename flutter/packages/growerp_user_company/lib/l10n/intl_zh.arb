@@ -231,6 +231,7 @@
   "accountingYearStarts": "会计年度开始",
   "acctPeriodLocked": "无法更改：已过账交易",
   "leadStatus": "潜在客户状态",
+  "leadStatusAll": "全部",
   "leadStatusNew": "新建",
   "leadStatusAssigned": "已分配",
   "leadStatusQualified": "已确认",

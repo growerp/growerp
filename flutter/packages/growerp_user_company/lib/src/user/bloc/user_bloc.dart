@@ -82,6 +82,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
         start: start,
         limit: event.limit,
         role: role,
+        customerStatus: event.customerStatus,
         partyId: event.partyId,
         searchString: event.searchString,
       );
@@ -115,6 +116,7 @@ class UserBloc extends Bloc<UserEvent, UserState>
       UserFetch(
         refresh: true,
         searchString: event.searchString,
+        customerStatus: event.customerStatus,
         userGroup: event.userGroup,
         partyId: event.partyId,
         limit: event.limit,

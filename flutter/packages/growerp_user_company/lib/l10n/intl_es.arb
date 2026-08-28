@@ -231,6 +231,7 @@
   "accountingYearStarts": "El año contable empieza",
   "acctPeriodLocked": "No se puede cambiar: ya se han contabilizado transacciones",
   "leadStatus": "Estado del cliente potencial",
+  "leadStatusAll": "Todos",
   "leadStatusNew": "Nuevo",
   "leadStatusAssigned": "Asignado",
   "leadStatusQualified": "Cualificado",

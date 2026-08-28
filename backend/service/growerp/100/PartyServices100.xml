@@ -1425,6 +1425,10 @@ limitations under the License.
             <parameter name="lastName" />
             <parameter name="companyName" />
             <parameter name="role" /><!-- if present select user from specific role-->
+            <parameter name="customerStatus">
+                <description>Narrow the lead list: CUSTOMER_NEW (no status yet),
+                    CUSTOMER_ASSIGNED or CUSTOMER_QUALIFIED. Only used when role is Lead.</description>
+            </parameter>
             <parameter name="userGroupId" /><!-- select user from specific security group-->
             <parameter name="ownerPartyId" /><!-- required when registering company customers-->
             <parameter name="start" type="Integer" default-value="0" />
@@ -1504,9 +1508,24 @@ limitations under the License.
             <if condition="role == 'Customer'">
                 <set field="customerStatusId" value="CUSTOMER_CONVERTED" />
             </if>
+            <!-- the lead status filter only applies to the lead list -->
+            <if condition="!customerStatus || role != 'Lead'">
+                <set field="customerStatus" from="null" />
+            </if>
             <if condition="role == 'Lead'">
-                <set field="leadStatusList" from="['CUSTOMER_ASSIGNED', 'CUSTOMER_QUALIFIED']" />
                 <set field="role" value="Customer" />
+                <if condition="customerStatus == 'CUSTOMER_NEW'">
+                    <then>
+                        <set field="leadStatusList" from="[]" />
+                    </then>
+                    <else-if condition="customerStatus">
+                        <set field="leadStatusList" from="[customerStatus]" />
+                    </else-if>
+                    <else>
+                        <set field="leadStatusList"
+                            from="['CUSTOMER_ASSIGNED', 'CUSTOMER_QUALIFIED']" />
+                    </else>
+                </if>
             </if>
             <if condition="role == 'Unknown'">
                 <set field="role" from="null" />
@@ -1540,8 +1559,15 @@ limitations under the License.
                     <econdition field-name="role" ignore-if-empty="true" />
                     <econdition field-name="companyRole" from="role" ignore-if-empty="true" />
                 </econditions>
+                <!-- default lead list: assigned/qualified or no status yet (new) -->
                 <econdition field-name="customerStatusId" operator="in" from="leadStatusList"
-                    or-null="true" ignore-if-empty="true" />
+                    or-null="true" ignore="customerStatus != null" ignore-if-empty="true" />
+                <!-- explicit lead status: exact match, nulls must not slip in through or-null -->
+                <econdition field-name="customerStatusId" operator="in" from="leadStatusList"
+                    ignore="customerStatus == null" ignore-if-empty="true" />
+                <!-- new leads: no status yet -->
+                <econdition field-name="customerStatusId" operator="is-null"
+                    ignore="customerStatus != 'CUSTOMER_NEW'" />
                 <econdition field-name="customerStatusId" ignore-if-empty="true" />
                 <econdition field-name="userGroupId" ignore-if-empty="true" />
                 <econditions combine="or">

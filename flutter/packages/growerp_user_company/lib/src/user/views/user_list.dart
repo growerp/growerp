@@ -41,6 +41,9 @@ class UserListState extends State<UserList> {
   List<User> users = const <User>[];
   bool showSearchField = false;
   String searchString = '';
+
+  /// lead list filter, null shows all leads
+  String? leadStatusFilter;
   bool hasReachedMax = false;
   bool _isLoading = true;
   late double bottom;
@@ -191,11 +194,49 @@ class UserListState extends State<UserList> {
                   _userBloc.add(
                     UserSearchChanged(
                       searchString: value,
+                      customerStatus: leadStatusFilter,
                       userGroup: null,
                       partyId: null,
                     ),
                   );
                 },
+                filters: widget.role != Role.lead
+                    ? null
+                    : [
+                        FilterDropdown<String>(
+                          key: const Key('leadStatusFilter'),
+                          label: _localizations.leadStatus,
+                          value: leadStatusFilter,
+                          items: [
+                            DropdownMenuItem(
+                              value: null,
+                              child: Text(_localizations.leadStatusAll),
+                            ),
+                            DropdownMenuItem(
+                              value: 'CUSTOMER_NEW',
+                              child: Text(_localizations.leadStatusNew),
+                            ),
+                            DropdownMenuItem(
+                              value: LeadStatus.assigned.value,
+                              child: Text(_localizations.leadStatusAssigned),
+                            ),
+                            DropdownMenuItem(
+                              value: LeadStatus.qualified.value,
+                              child: Text(_localizations.leadStatusQualified),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() => leadStatusFilter = value);
+                            _userBloc.add(
+                              UserFetch(
+                                refresh: true,
+                                searchString: searchString,
+                                customerStatus: value,
+                              ),
+                            );
+                          },
+                        ),
+                      ],
               ),
               // Main content area with StyledDataTable
               Expanded(
@@ -322,7 +363,9 @@ class UserListState extends State<UserList> {
     if (!hasReachedMax &&
         currentScroll > 0 &&
         maxScroll - currentScroll <= _scrollThreshold) {
-      _userBloc.add(UserFetch(searchString: searchString));
+      _userBloc.add(
+        UserFetch(searchString: searchString, customerStatus: leadStatusFilter),
+      );
     }
   }
 }

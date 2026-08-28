@@ -332,6 +332,7 @@ abstract class RestClient {
   Future<Users> getUser({
     @Query('userPartyId') String? partyId,
     @Query('role') Role? role,
+    @Query('customerStatus') String? customerStatus,
     @Query('start') int? start,
     @Query('limit') int? limit,
     @Query('firstName') String? firstName,

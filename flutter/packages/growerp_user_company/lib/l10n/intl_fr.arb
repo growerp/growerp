@@ -231,6 +231,7 @@
   "accountingYearStarts": "L'exercice comptable commence",
   "acctPeriodLocked": "Non modifiable : des écritures ont été comptabilisées",
   "leadStatus": "Statut du prospect",
+  "leadStatusAll": "Tous",
   "leadStatusNew": "Nouveau",
   "leadStatusAssigned": "Attribué",
   "leadStatusQualified": "Qualifié",
