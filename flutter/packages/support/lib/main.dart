@@ -30,6 +30,7 @@ import 'src/website_conversion/website_conversion.dart';
 import 'src/gl_account_translation/gl_account_translation.dart';
 import 'src/website_translation/website_translation.dart';
 import 'src/system_defaults/system_defaults.dart';
+import 'views/infrastructure_view.dart';
 import 'views/rest_statistics_view.dart';
 import 'views/support_dashboard_content.dart';
 import 'l10n/generated/support_localizations.dart';
@@ -210,6 +211,7 @@ List<Map<String, GrowerpWidgetBuilder>> supportWidgetRegistrations = [
     'ApplicationList': (args) => const ApplicationList(),
     'AdkSystemUsageView': (args) => const AdkSystemUsageView(),
     'RestStatisticsView': (args) => const RestStatisticsView(),
+    'InfrastructureView': (args) => const InfrastructureView(),
     'WebsiteConversionList': (args) => const WebsiteConversionList(),
     'WebsiteTranslationList': (args) => const WebsiteTranslationList(),
     'GlAccountTranslationList': (args) => const GlAccountTranslationList(),

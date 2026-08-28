@@ -50,6 +50,12 @@ limitations under the License.
                 <service name="growerp.100.GeneralServices100.get#SupportDashboard" />
             </method>
         </resource>
+        <resource name="InfraMetrics"
+            description="Host, JVM, database and ingress metrics for the support app">
+            <method type="get">
+                <service name="growerp.100.InfraServices100.get#InfraMetrics" />
+            </method>
+        </resource>
         <resource name="Application"
             description="Get/add/delete the application overrides for base url, for list, no authorization required">
             <method type="get">

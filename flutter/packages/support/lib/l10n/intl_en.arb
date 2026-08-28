@@ -237,5 +237,109 @@
   "dashPeakDay": "peak day",
   "@dashPeakDay": {
     "description": "Dashboard tile counter label"
+  },
+  "infraTitle": "Infrastructure",
+  "@infraTitle": {
+    "description": "Title of the infrastructure metrics screen"
+  },
+  "infraUnavailable": "Metrics unavailable",
+  "@infraUnavailable": {
+    "description": "Shown when Prometheus cannot be reached"
+  },
+  "infraHost": "Host",
+  "@infraHost": {
+    "description": "Section title: the physical/virtual machine"
+  },
+  "infraBackendJvms": "Backend JVMs",
+  "@infraBackendJvms": {
+    "description": "Section title: Moqui java instances"
+  },
+  "infraDatabase": "Database",
+  "@infraDatabase": {
+    "description": "Section title: PostgreSQL"
+  },
+  "infraIngress": "Ingress",
+  "@infraIngress": {
+    "description": "Section title: nginx"
+  },
+  "infraServices": "Services",
+  "@infraServices": {
+    "description": "Section title: per container resource use"
+  },
+  "infraCpu": "CPU",
+  "@infraCpu": {
+    "description": "Metric label: cpu usage percent"
+  },
+  "infraLoad": "Load (1m)",
+  "@infraLoad": {
+    "description": "Metric label: unix load average over one minute"
+  },
+  "infraMemory": "Memory",
+  "@infraMemory": {
+    "description": "Metric label: memory used of total"
+  },
+  "infraDisk": "Disk",
+  "@infraDisk": {
+    "description": "Metric label: disk used of total"
+  },
+  "infraUptime": "Uptime",
+  "@infraUptime": {
+    "description": "Metric label: time since boot"
+  },
+  "infraHeap": "Heap",
+  "@infraHeap": {
+    "description": "Metric label: JVM heap used of max"
+  },
+  "infraNonHeap": "Non-heap",
+  "@infraNonHeap": {
+    "description": "Metric label: JVM non-heap memory used"
+  },
+  "infraCommitted": "Committed",
+  "@infraCommitted": {
+    "description": "Metric label: JVM heap committed"
+  },
+  "infraThreads": "Threads",
+  "@infraThreads": {
+    "description": "Metric label: JVM live thread count"
+  },
+  "infraGcTime": "GC time (5m)",
+  "@infraGcTime": {
+    "description": "Metric label: seconds spent in garbage collection over five minutes"
+  },
+  "infraConnections": "Connections",
+  "@infraConnections": {
+    "description": "Metric label: database connections used of max"
+  },
+  "infraSize": "Size",
+  "@infraSize": {
+    "description": "Column header: database size on disk"
+  },
+  "infraActiveConnections": "Active connections",
+  "@infraActiveConnections": {
+    "description": "Metric label: nginx active connections"
+  },
+  "infraRequestsPerSecond": "Requests/sec",
+  "@infraRequestsPerSecond": {
+    "description": "Metric label: nginx request rate"
+  },
+  "infraDropped": "Dropped/sec",
+  "@infraDropped": {
+    "description": "Metric label: nginx connections accepted but not handled"
+  },
+  "infraVhost": "Host name",
+  "@infraVhost": {
+    "description": "Column header: nginx virtual host"
+  },
+  "infraErrors5xx": "5xx/sec",
+  "@infraErrors5xx": {
+    "description": "Column header: server error rate per virtual host"
+  },
+  "infraTasks": "Tasks",
+  "@infraTasks": {
+    "description": "Column header: number of running containers for a service"
+  },
+  "infraNoData": "No data",
+  "@infraNoData": {
+    "description": "Shown when a metrics section returned nothing"
   }
 }

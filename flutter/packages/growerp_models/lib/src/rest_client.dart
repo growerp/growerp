@@ -132,6 +132,9 @@ abstract class RestClient {
     @Query('periodDays') int? periodDays,
   });
 
+  @GET("rest/s1/growerp/100/InfraMetrics")
+  Future<InfraMetrics> getInfraMetrics();
+
   @GET("rest/s1/growerp/100/Authenticate")
   Future<Authenticate> getAuthenticate({
     @Query('applicationId') required String applicationId,
