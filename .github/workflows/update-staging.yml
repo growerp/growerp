@@ -304,11 +304,66 @@ jobs:
           if [ -n "${{ inputs.comment }}" ]; then
             MSG="$MSG — ${{ inputs.comment }}"
           fi
-          git add 'flutter/**/pubspec.yaml'
-          git add backend/component.xml 2>/dev/null || true
-          git diff --cached --quiet && echo "Nothing to commit" || git commit -m "$MSG"
-          git pull --rebase --autostash origin ${{ github.ref_name }}
-          git push origin HEAD
+          # Capture the bumped versions before touching git: the docker images
+          # were already built and pushed with these tags, so they are what must
+          # end up on the branch.
+          VERSIONS="$RUNNER_TEMP/bumped-versions.txt"
+          : > "$VERSIONS"
+          for pubspec in $(git diff --name-only -- 'flutter/packages/*/pubspec.yaml'); do
+            app=$(basename "$(dirname "$pubspec")")
+            ver=$(grep -m1 '^version:' "$pubspec" | sed 's/^version:[[:space:]]*//')
+            echo "${app}=${ver}" >> "$VERSIONS"
+          done
+          if ! git diff --quiet -- backend/component.xml; then
+            ver=$(grep -o 'name="growerp" version="[^"]*"' backend/component.xml \
+              | head -1 | sed 's/.*version="//; s/".*//')
+            echo "backend/component.xml=${ver}" >> "$VERSIONS"
+          fi
+          cat "$VERSIONS"
+          if [ ! -s "$VERSIONS" ]; then
+            echo "Nothing to commit"
+            exit 0
+          fi
+
+          # The image builds take tens of minutes, so another workflow (e.g. the
+          # store deploys) has often rewritten the same version: lines meanwhile.
+          # Replaying this run's diff would conflict on that one line, so apply the
+          # versions onto the current tip instead, and redo it if the tip moves.
+          COMMITTED=false
+          for attempt in 1 2 3; do
+            git checkout -- .
+            git fetch origin ${{ github.ref_name }}
+            git reset --hard origin/${{ github.ref_name }}
+
+            python3 .github/scripts/merge_pubspec_versions.py "$VERSIONS"
+
+            git add 'flutter/packages/*/pubspec.yaml' backend/component.xml
+            if git diff --cached --quiet; then
+              echo "Nothing to commit"
+              COMMITTED=true
+              break
+            fi
+            git commit -m "$MSG"
+            if git push origin HEAD:${{ github.ref_name }}; then
+              echo "Pushed version bump"
+              COMMITTED=true
+              break
+            fi
+            echo "Push rejected (attempt $attempt) — re-applying onto ${{ github.ref_name }}"
+          done
+          if [ "$COMMITTED" != "true" ]; then
+            echo "::error::Failed to push version bump after 3 attempts"
+            exit 1
+          fi
+
+          # The merge above keeps whatever version is highest, which may be ahead
+          # of the one computed at bump time, so tag what actually landed.
+          NEW_VERSION=$(grep -o 'name="growerp" version="[^"]*"' backend/component.xml 2>/dev/null \
+            | head -1 | sed 's/.*version="//; s/".*//; s/+.*//')
+          if [ -z "$NEW_VERSION" ]; then
+            NEW_VERSION=$(grep -m1 '^version:' flutter/packages/admin/pubspec.yaml 2>/dev/null \
+              | sed 's/^version:[[:space:]]*//; s/+.*//')
+          fi
 
           # Tag the released version — after the rebase/push so the tag points at
           # the commit that actually landed on the branch.

@@ -1082,19 +1082,44 @@ jobs:
           [[ "${{ needs.deploy-android.result }}" == "success" ]] && [[ "${{ inputs.store_android }}" == "true" ]] && add_store android || true
 
 
+          # Capture the bumped versions before touching git: the deploys have
+          # already consumed these build numbers at the stores, so they are what
+          # must end up on the branch.
+          VERSIONS="$RUNNER_TEMP/bumped-versions.txt"
+          : > "$VERSIONS"
           IFS=',' read -ra app_list <<< "$APPS"
           for app in "${app_list[@]}"; do
-            git add "flutter/packages/${app}/pubspec.yaml"
+            ver=$(grep -m1 '^version:' "flutter/packages/${app}/pubspec.yaml" \
+              | sed 's/^version:[[:space:]]*//')
+            echo "${app}=${ver}" >> "$VERSIONS"
           done
+          cat "$VERSIONS"
 
-          git diff --cached --quiet && { echo "Nothing to commit"; exit 0; }
-          git commit -m "chore: bump build number for apps=[$APPS] stores=[$STORES] [skip ci]"
-          # The bumped-pubspecs artifact restores every app's pubspec, but only
-          # the selected ones are committed above; discard the rest so the
-          # rebase has a clean tree.
-          git checkout -- .
-          git pull --rebase origin ${{ github.ref_name }}
-          git push origin HEAD:${{ github.ref_name }}
+          # The store deploys take tens of minutes, so another workflow has often
+          # rewritten the same version: lines meanwhile. Replaying this run's diff
+          # would conflict on that one line, so apply the versions onto the current
+          # tip instead of rebasing, and redo it if the tip moves under us.
+          for attempt in 1 2 3; do
+            git checkout -- .
+            git fetch origin ${{ github.ref_name }}
+            git reset --hard origin/${{ github.ref_name }}
+
+            python3 .github/scripts/merge_pubspec_versions.py "$VERSIONS"
+
+            for app in "${app_list[@]}"; do
+              git add "flutter/packages/${app}/pubspec.yaml"
+            done
+
+            git diff --cached --quiet && { echo "Nothing to commit"; exit 0; }
+            git commit -m "chore: bump build number for apps=[$APPS] stores=[$STORES] [skip ci]"
+            if git push origin HEAD:${{ github.ref_name }}; then
+              echo "Pushed version bump"
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt) — re-applying onto ${{ github.ref_name }}"
+          done
+          echo "::error::Failed to push version bump after 3 attempts"
+          exit 1
 
   # ───────────────────────────────────────────────────────────────────────────
   # Windows — flutter build windows + MSIX + Partner Center

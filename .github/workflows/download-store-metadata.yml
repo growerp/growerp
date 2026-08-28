@@ -482,4 +482,21 @@ jobs:
 
           git diff --cached --quiet && { echo "Nothing to commit — metadata already up to date"; exit 0; }
           git commit -m "chore: download store metadata for apps=[$APPS] stores=[$STORES] [skip ci]"
-          git push origin HEAD:${{ github.ref_name }}
+          # The branch has usually moved on by now (screenshots.yml writes into the
+          # same fastlane metadata trees), so a plain push is rejected. Rebase onto
+          # whatever landed meanwhile and retry.
+          for attempt in 1 2 3; do
+            if git push origin HEAD:${{ github.ref_name }}; then
+              echo "Pushed store metadata"
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt) — rebasing onto ${{ github.ref_name }}"
+            git fetch origin ${{ github.ref_name }}
+            if ! git rebase origin/${{ github.ref_name }}; then
+              git rebase --abort || true
+              echo "::error::Could not rebase downloaded metadata onto ${{ github.ref_name }}"
+              exit 1
+            fi
+          done
+          echo "::error::Failed to push store metadata after 3 attempts"
+          exit 1
