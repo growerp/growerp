@@ -51,6 +51,9 @@ services:
       #- ./MoquiProductionConf.xml:/opt/moqui/runtime/conf/MoquiProductionConf.xml
       #- ./runtime/lib:/opt/moqui/runtime/lib
       #- ./runtime/classes:/opt/moqui/runtime/classes
+      # These shadow the components in the image, so each dir must carry its own
+      # built lib/*.jar (gitignored): CI restores them from the component-libs
+      # artifact, a local run gets them from moqui/ ./gradlew build.
       - ../../backend:/opt/moqui/runtime/component/growerp
       - ../../pop-rest-store:/opt/moqui/runtime/component/PopRestStore
       - ../../mantle-stripe:/opt/moqui/runtime/component/mantle-stripe

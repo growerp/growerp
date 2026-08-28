@@ -248,6 +248,20 @@ jobs:
           [ "$ok" = 1 ] || { echo "gradlew failed on all mirrors"; exit 1; }
           cd docker/simple && bash docker-build.sh ../.. growerp/growerp-moqui eclipse-temurin:21-jdk
 
+      # The test slices mount the component source dirs from their own checkout
+      # over the image's components, and every component lib/ is gitignored — so
+      # the compiled classes have to travel with the image or the slices run a
+      # backend without them (AdkManager, ChatEndpoint, ...).
+      - name: Package component jars
+        run: tar czf /tmp/component-libs.tar.gz backend/lib moqui-adk/lib moqui-mcp/lib mantle-stripe/lib
+
+      - name: Upload component jars
+        uses: actions/upload-artifact@v4
+        with:
+          name: component-libs
+          path: /tmp/component-libs.tar.gz
+          retention-days: 1
+
       - name: Export image
         run: docker save growerp/growerp-moqui:latest | zstd -T0 -3 -o /tmp/moqui-image.tar.zst
 
@@ -311,6 +325,19 @@ jobs:
 
       - name: Load moqui image
         run: zstd -dc /tmp/moqui-image.tar.zst | docker load
+
+      # The compose file mounts the component dirs from this checkout, which has
+      # no build output; restore the jars built by the moqui-image job.
+      - name: Download component jars
+        uses: actions/download-artifact@v4
+        with:
+          name: component-libs
+          path: /tmp
+
+      - name: Unpack component jars
+        run: |
+          tar xzf /tmp/component-libs.tar.gz
+          ls backend/lib/*.jar moqui-adk/lib/*.jar moqui-mcp/lib/*.jar
 
       # ------------------------------------------------------------------
       # 4. Build test runner image (cached via Docker layer cache)
