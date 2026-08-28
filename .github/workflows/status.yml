@@ -80,8 +80,13 @@ jobs:
             echo "▶️ Integration tests running (event: ${{ github.event_name }})." >> "$GITHUB_STEP_SUMMARY"
           else
             SINCE=$(date -u -d '24 hours ago' '+%Y-%m-%dT%H:%M:%S')
+            # The custom components live at the repo root and are symlinked into
+            # moqui/runtime/component by setup-backend.sh, so commits to them
+            # never show under that path.
             COUNT=$(git log --since="$SINCE" --oneline -- \
-              'flutter/**' 'moqui/runtime/component/**' | wc -l)
+              'flutter/**' 'moqui/runtime/component/**' \
+              'backend/**' 'moqui-adk/**' 'moqui-mcp/**' \
+              'mantle-stripe/**' 'pop-rest-store/**' | wc -l)
             if [ "$COUNT" -gt 0 ]; then
               echo "should_run=true" >> "$GITHUB_OUTPUT"
               echo "$COUNT commit(s) with relevant changes found."
@@ -89,7 +94,7 @@ jobs:
             else
               echo "should_run=false" >> "$GITHUB_OUTPUT"
               echo "No relevant changes in the last 24 hours — skipping tests."
-              echo "⏭️ Integration tests skipped — no relevant changes (flutter/** or moqui/runtime/component/**) in the last 24h." >> "$GITHUB_STEP_SUMMARY"
+              echo "⏭️ Integration tests skipped — no relevant changes (flutter/**, moqui/runtime/component/** or the root component dirs) in the last 24h." >> "$GITHUB_STEP_SUMMARY"
             fi
           fi
 
