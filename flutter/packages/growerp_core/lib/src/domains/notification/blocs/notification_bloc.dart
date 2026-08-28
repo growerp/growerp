@@ -37,25 +37,45 @@ int _notificationLimit = 20;
 class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   NotificationBloc(this.restClient, this.notificationClient, this.authBloc)
     : super(const NotificationState()) {
-    on<NotificationFetch>(_onNotificationFetch);
+    on<NotificationFetch>(
+      _onNotificationFetch,
+      // The startup fetch and the one from SetupInProgressDialog used to arrive
+      // together and hit the backend twice in the same millisecond.
+      transformer: notificationDroppable(const Duration(milliseconds: 500)),
+    );
     on<NotificationReceive>(_onNotificationReceive);
     on<NotificationSend>(_onNotificationSend);
-    // Set up WS subscription once auth (and thus WS connect) completes.
+    // Listen once, on the client's own broadcast stream: it outlives the socket,
+    // so this keeps working over a reconnect without anything re-attaching it.
+    _wsSubscription = notificationClient.stream().listen(
+      (data) {
+        debugPrint('WS notification received: $data');
+        try {
+          add(NotificationReceive(NotificationWs.fromJson(jsonDecode(data))));
+        } catch (e) {
+          debugPrint('WS notification parse error: $e');
+        }
+      },
+      onError: (e) => debugPrint('WS stream error: $e'),
+      cancelOnError: false,
+    );
     _authSubscription = authBloc.stream.listen((authState) {
-      if (authState.status == AuthStatus.authenticated && !_subscribed) {
+      // On the transition only: while logged in every unrelated auth emission
+      // would otherwise refetch.
+      if (authState.status == AuthStatus.authenticated &&
+          _lastAuthStatus != AuthStatus.authenticated) {
         add(const NotificationFetch());
-      } else if (authState.status == AuthStatus.unAuthenticated) {
-        _subscribed = false;
       }
+      _lastAuthStatus = authState.status;
     });
   }
 
   final RestClient restClient;
   final WsClient notificationClient;
   final AuthBloc authBloc;
-  bool _subscribed = false;
   StreamSubscription? _wsSubscription;
   StreamSubscription? _authSubscription;
+  AuthStatus? _lastAuthStatus;
 
   @override
   Future<void> close() {
@@ -69,38 +89,9 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     Emitter<NotificationState> emit,
   ) async {
     try {
-      debugPrint(
-        'NotificationFetch: _subscribed=$_subscribed '
-        'isConnected=${notificationClient.isConnected}',
-      );
-      if (!_subscribed && notificationClient.isConnected) {
-        _subscribed = true;
-        try {
-          notificationClient.send("subscribe: ALL");
-        } catch (e) {
-          debugPrint('WS subscribe send error: $e');
-          _subscribed = false;
-          return;
-        }
-        // Cancel any listener left by an earlier login: the ws stream is a
-        // broadcast stream, so a stale listener stays alive and every message
-        // then arrives once per login the app has done.
-        _wsSubscription?.cancel();
-        _wsSubscription = notificationClient.stream().listen(
-          (data) {
-            debugPrint('WS notification received: $data');
-            try {
-              add(
-                NotificationReceive(NotificationWs.fromJson(jsonDecode(data))),
-              );
-            } catch (e) {
-              debugPrint('WS notification parse error: $e');
-            }
-          },
-          onError: (e) => debugPrint('WS stream error: $e'),
-          cancelOnError: false,
-        );
-      }
+      // Idempotent and buffered until there is a socket, so a fetch that runs
+      // before the connection is up no longer leaves the session unsubscribed.
+      notificationClient.subscribe('ALL');
 
       Notifications compResult = await restClient.getNotifications(
         limit: event.limit ?? _notificationLimit,
@@ -109,6 +100,11 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
         state.copyWith(
           status: NotificationStatus.success,
           notifications: compResult.notifications,
+          // Fetched messages must wake the same listeners as pushed ones: a
+          // message the socket missed is only ever seen through a fetch.
+          notificationSeq: compResult.notifications.isEmpty
+              ? state.notificationSeq
+              : state.notificationSeq + 1,
         ),
       );
     } on DioException catch (e) {

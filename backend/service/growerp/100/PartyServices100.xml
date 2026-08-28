@@ -3686,8 +3686,9 @@ limitations under the License.
     <service verb="load" noun="DemoDataAsync" transaction="ignore">
         <description>
             Runs load#DemoData off the login request (scheduled by setup#SpecificApp, see the
-            comment there) and tells the user over the notification websocket when it ends, so
-            the frontend can leave its 'setting up' screen.
+            comment there) and tells the user when it ends, so the frontend can leave its
+            'setting up' screen. The notification is persisted, so a frontend whose socket was
+            not subscribed yet still finds it on its next get#Notification poll.
 
             transaction=ignore so this begins no transaction of its own. The two steps then get
             one each, which is what makes the sequence correct: load#DemoData commits (under its
@@ -3742,7 +3743,9 @@ limitations under the License.
                         .message([ownerPartyId: ownerPartyId, loaded: loaded])
                         .title(loaded ? 'Demo data is ready' : 'Demo data could not be loaded')
                         .type(loaded ? 'success' : 'danger')
-                        .send(false)
+                        // persisted: the socket may not be subscribed yet, or may have
+                        // dropped, and the frontend then reads this back over REST
+                        .send(true)
                 })
             ]]></script>
         </actions>

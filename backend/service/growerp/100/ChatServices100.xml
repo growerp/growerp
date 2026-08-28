@@ -617,28 +617,62 @@ limitations under the License.
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <set field="nowTimestamp" from="ec.user.nowTimestamp" />
-            <entity-find entity-name="moqui.security.UserPreference" list="lastReadDate">
-                <econdition field-name="userId" from="ec.user.userAccount.userId" />
-                <econdition field-name="preferenceKey" value="notification-lastReadDate" />
-            </entity-find>
-            <if condition="!lastReadDate">
-                <service-call name="create#moqui.security.UserPreference"
+            <entity-find-one entity-name="moqui.security.UserPreference" value-field="lastReadPref">
+                <field-map field-name="userId" from="ec.user.userAccount.userId" />
+                <field-map field-name="preferenceKey" value="notification-lastReadDate" />
+            </entity-find-one>
+            <if condition="lastReadPref?.preferenceValue">
+                <!-- a value written by an older version, or by hand, must not turn a read
+                     into a 400: leave the window open and return the last messages -->
+                <script><![CDATA[
+                    try {
+                        lastReadTimeStamp = java.sql.Timestamp.valueOf(
+                            lastReadPref.preferenceValue.toString().trim())
+                    } catch (IllegalArgumentException e) {
+                        ec.logger.warn("Unusable notification-lastReadDate " +
+                            "[${lastReadPref.preferenceValue}] for user " +
+                            "${ec.user.userAccount.userId}, reading from the start")
+                    }
+                ]]></script>
+            </if>
+            <if condition="lastReadPref != null">
+                <service-call name="update#moqui.security.UserPreference"
                     in-map="[userId: ec.user.userAccount.userId,
                             preferenceKey: 'notification-lastReadDate',
                             preferenceValue: nowTimestamp]" />
                 <else>
-                    <set field="lastReadTimeStamp" from="java.sql.Timestamp.valueOf(lastReadDate[0].preferenceValue.toString().trim())" />
-                    <service-call name="update#moqui.security.UserPreference"
-                        in-map="[userId: ec.user.userAccount.userId,
-                            preferenceKey: 'notification-lastReadDate',
-                            preferenceValue: nowTimestamp]" />
+                    <!-- The app fetches from more than one place at a time and both calls
+                         can find no row and both insert. store# would not help: entity-auto
+                         store is find-then-create, so it races the same way. The insert
+                         therefore gets its own transaction (a failed one must not mark the
+                         read's transaction rollback-only) and losing the race is ignored:
+                         the other call wrote the same value. -->
+                    <script><![CDATA[
+                        try {
+                            ec.transaction.runRequireNew(60, null, {
+                                ec.entity.makeValue("moqui.security.UserPreference")
+                                    .setAll([userId: ec.user.userAccount.userId,
+                                        preferenceKey: 'notification-lastReadDate',
+                                        preferenceValue: nowTimestamp.toString()])
+                                    .create()
+                            })
+                        } catch (Throwable t) {
+                            ec.logger.info("notification-lastReadDate for user " +
+                                "${ec.user.userAccount.userId} was written by a concurrent " +
+                                "request: ${t.message}")
+                        }
+                    ]]></script>
                 </else>
             </if>
 
-            <entity-find entity-name="moqui.security.user.NotificationMessage"
+            <!-- by user: messages are addressed to a user, so without this every tenant
+                 reads every other tenant's notifications -->
+            <entity-find entity-name="moqui.security.user.NotificationMessageByUser"
                 list="messages" limit="limit">
+                <econdition field-name="userId" from="ec.user.userAccount.userId" />
                 <econdition field-name="sentDate" operator="greater-equals" from="lastReadTimeStamp"
                     ignore-if-empty="true" />
+                <order-by field-name="-sentDate" />
             </entity-find>
             <set field="notifications" from="[]" />
             <iterate list="messages" entry="message">

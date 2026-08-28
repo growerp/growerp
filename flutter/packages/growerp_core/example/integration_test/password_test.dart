@@ -140,6 +140,35 @@ void main() {
       await CommonTest.enterText(tester, 'password', 'aaaaaa9!');
       await CommonTest.enterText(tester, 'password2', 'aaaaaa9!');
       await tester.tap(find.text('Submit new password'));
+
+      // The confirmation is a snackbar that disappears again, so poll for it
+      // instead of settling past it. It must be the localized sentence: the
+      // AuthBloc emits a message key and nothing used to translate it, so the
+      // user saw 'passwordChangeSuccess:<email>' on screen.
+      bool sawKey = false;
+      bool sawText = false;
+      for (int i = 0; i < 25 && !sawText; i++) {
+        await tester.pump(const Duration(milliseconds: 300));
+        if (find.textContaining('passwordChangeSuccess').evaluate().isNotEmpty) {
+          sawKey = true;
+        }
+        if (find
+            .textContaining('Password successfully changed')
+            .evaluate()
+            .isNotEmpty) {
+          sawText = true;
+        }
+      }
+      expect(
+        sawKey,
+        isFalse,
+        reason: 'Password change message must be translated, not the raw key',
+      );
+      expect(
+        sawText,
+        isTrue,
+        reason: 'Password change must confirm with the localized message',
+      );
       await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
 
       // --- Step 7: logout ---

@@ -19,6 +19,7 @@ import 'package:image/image.dart' as image;
 import 'package:universal_io/io.dart';
 import 'package:http/http.dart' show get;
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
+import 'package:growerp_core/src/common/translate_bloc_messages.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../domains.dart';
@@ -31,6 +32,12 @@ class HelperFunctions {
     int? seconds,
   }) {
     if (message != null && message != "null") {
+      // BLoCs emit message keys, so translate before display. Every caller has a
+      // context below MaterialApp; free text and unknown keys pass through.
+      final localizations = CoreLocalizations.of(context);
+      if (localizations != null) {
+        message = translateAuthBlocMessage(message, localizations);
+      }
       try {
         final messenger =
             ScaffoldMessenger.maybeOf(context) ??

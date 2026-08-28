@@ -43,6 +43,10 @@ class WsClient {
   final StreamController _streamController = StreamController.broadcast();
   String? _apiKey;
   String? _userId;
+  // Kept for the life of the client: the server drops the subscription with the
+  // socket, so every reconnect has to ask for the topics again or nothing is
+  // ever delivered over the new connection.
+  final Set<String> _topics = {};
   bool _closedByUser = false;
   Timer? _reconnectTimer;
   StreamSubscription? _subscription;
@@ -125,6 +129,9 @@ class WsClient {
       _scheduleReconnect();
       return;
     }
+    for (final topic in _topics) {
+      _sendSubscribe(topic);
+    }
     _subscription = _channel!.stream.listen(
       (data) => _streamController.add(data),
       onError: (e) {
@@ -148,6 +155,23 @@ class WsClient {
     _reconnectTimer = Timer(const Duration(seconds: 5), () {
       connect(_apiKey!, _userId!);
     });
+  }
+
+  /// Subscribe to a notification topic ('ALL' for everything). Safe to call
+  /// before the socket is up and safe to repeat: the topic is remembered and
+  /// (re)sent on every connect.
+  void subscribe(String topic) {
+    _topics.add(topic);
+    _sendSubscribe(topic);
+  }
+
+  void _sendSubscribe(String topic) {
+    if (_channel == null) return;
+    try {
+      _channel!.sink.add("subscribe: $topic");
+    } catch (e) {
+      logger.w('Websocket subscribe failed for $topic: $e');
+    }
   }
 
   void send(Object message) {

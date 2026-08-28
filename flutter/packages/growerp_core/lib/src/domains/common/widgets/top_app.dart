@@ -24,6 +24,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
 
+import '../../../common/translate_bloc_messages.dart';
 import '../../../get_core_bloc_providers.dart';
 import '../../../services/widget_registry.dart';
 import '../../../services/ws_client.dart';
@@ -136,6 +137,16 @@ class _TopAppState extends State<TopApp> {
   void _showMessageWithRetry(String message, bool isError, [int attempt = 0]) {
     final messenger = Constant.scaffoldMessengerKey.currentState;
     if (messenger != null) {
+      // The AuthBloc emits message keys, not text. Translate here, below
+      // MaterialApp where the delegates live: the listener itself sits above it
+      // and has no localizations of its own. Free text passes through.
+      final messengerContext = Constant.scaffoldMessengerKey.currentContext;
+      final localizations = messengerContext != null
+          ? CoreLocalizations.of(messengerContext)
+          : null;
+      if (localizations != null) {
+        message = translateAuthBlocMessage(message, localizations);
+      }
       // Use neutral colors that work in both light and dark modes
       // Avoid context.read() as it may fail during navigation transitions
       final backgroundColor = isError

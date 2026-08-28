@@ -58,6 +58,9 @@ class LoginDialogState extends State<LoginDialog> {
   late String password;
   late DataFetchBloc productBloc;
   CoreLocalizations? _localizations;
+  // The welcome/assessment sequence belongs to the first login only; a repeat
+  // would stack a second copy on top of the dialogs still being awaited.
+  bool _postLoginHandled = false;
 
   @override
   void initState() {
@@ -83,6 +86,12 @@ class LoginDialogState extends State<LoginDialog> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: BlocConsumer<AuthBloc, AuthState>(
+          // Only on a status change: while authenticated, every later emission
+          // re-ran this body, and its pop() then closed whatever dialog the
+          // first run had opened on top (the trial welcome).
+          listenWhen: (previous, current) =>
+              previous.status != current.status ||
+              previous.message != current.message,
           listener: (context, state) async {
             switch (state.status) {
               case AuthStatus.failure:
@@ -92,6 +101,9 @@ class LoginDialogState extends State<LoginDialog> {
                   Theme.of(context).colorScheme.error,
                 );
               case AuthStatus.authenticated:
+                if (_postLoginHandled) return;
+                _postLoginHandled = true;
+                final navigator = Navigator.of(context);
                 final auth = state.authenticate!;
                 final isGrowERP =
                     auth.company?.name?.toLowerCase() == 'growerp';
@@ -134,9 +146,12 @@ class LoginDialogState extends State<LoginDialog> {
                     }
                   }
                 }
+                // through the navigator captured before the awaits: resolving
+                // it now would pop whatever route ended up on top instead of
+                // this dialog
                 if (context.mounted) {
-                  if (Navigator.of(context).canPop()) {
-                    Navigator.of(context).pop();
+                  if (navigator.canPop()) {
+                    navigator.pop();
                   } else {
                     context.go('/');
                   }

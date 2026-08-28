@@ -28,6 +28,7 @@ import '../../../services/build_dio_client.dart';
 import '../../../services/get_dio_error.dart';
 import '../../../services/startup_credentials.dart';
 import '../../common/bloc/locale_bloc.dart';
+import '../../common/functions/bloc_message_keys.dart';
 import '../../common/functions/functions.dart';
 
 part 'auth_event.dart';
@@ -310,7 +311,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(
         state.copyWith(
           status: AuthStatus.unAuthenticated,
-          message: "Logged off",
+          message: AuthBlocMessageKeys.logoutSuccess,
         ),
       );
       PersistFunctions.persistAuthenticate(

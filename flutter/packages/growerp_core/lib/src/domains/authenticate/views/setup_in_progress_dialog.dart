@@ -46,6 +46,7 @@ class SetupInProgressDialogState extends State<SetupInProgressDialog> {
   static const Duration _patienceLimit = Duration(minutes: 3);
 
   Timer? _patienceTimer;
+  Timer? _pollTimer;
   bool _tookTooLong = false;
   bool _failed = false;
   bool _continued = false;
@@ -57,6 +58,11 @@ class SetupInProgressDialogState extends State<SetupInProgressDialog> {
     // bloc was created at startup, so it has not subscribed yet. This makes it
     // attach its listener now that there is a live connection.
     context.read<NotificationBloc>().add(const NotificationFetch());
+    // The backend persists the message, so polling covers the cases the socket
+    // cannot: not subscribed yet when the load finished, or dropped since.
+    _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (mounted) context.read<NotificationBloc>().add(const NotificationFetch());
+    });
     _patienceTimer = Timer(_patienceLimit, () {
       if (mounted) setState(() => _tookTooLong = true);
     });
@@ -65,6 +71,7 @@ class SetupInProgressDialogState extends State<SetupInProgressDialog> {
   @override
   void dispose() {
     _patienceTimer?.cancel();
+    _pollTimer?.cancel();
     super.dispose();
   }
 
@@ -73,6 +80,7 @@ class SetupInProgressDialogState extends State<SetupInProgressDialog> {
     // screen while the bloc works: only the first call may promote the session.
     if (_continued) return;
     _continued = true;
+    _pollTimer?.cancel();
     context.read<AuthBloc>().add(const AuthSetupCompleted());
   }
 
@@ -84,11 +92,13 @@ class SetupInProgressDialogState extends State<SetupInProgressDialog> {
       listenWhen: (previous, current) =>
           previous.notificationSeq != current.notificationSeq,
       listener: (context, state) {
-        final notification = state.notifications.isEmpty
-            ? null
-            : state.notifications.first;
-        if (notification?.topic != demoDataLoadTopic) return;
-        if (notification?.message?['loaded'] == true) {
+        // A poll returns a list, not a single pushed message, so look for the
+        // one topic this dialog waits on instead of assuming it is first.
+        final notification = state.notifications
+            .where((n) => n.topic == demoDataLoadTopic)
+            .firstOrNull;
+        if (notification == null) return;
+        if (notification.message?['loaded'] == true) {
           _continue();
         } else {
           setState(() => _failed = true);

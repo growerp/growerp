@@ -30,9 +30,10 @@ List<BlocProvider> getCoreBlocProviders(
       create: (context) => LocaleBloc()..add(LocaleLoaded()),
     ),
     BlocProvider<NotificationBloc>(
+      // no startup fetch: it ran before there were any credentials, and racing
+      // the dialog's own fetch is what made the backend insert twice
       create: (context) =>
-          NotificationBloc(restClient, notificationClient, authBloc)
-            ..add(const NotificationFetch()),
+          NotificationBloc(restClient, notificationClient, authBloc),
     ),
     BlocProvider<ChatMessageBloc>(
       create: (context) =>
