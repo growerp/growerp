@@ -26,7 +26,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'router_builder.dart';
 import 'package:growerp_adk/growerp_adk.dart';
 
-Future main() async {
+Future main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   installGlobalErrorHandlers();
   await GlobalConfiguration().loadFromAsset('app_settings');
@@ -48,12 +48,15 @@ Future main() async {
   WsClient chatClient = WsClient('chat');
   WsClient notificationClient = WsClient('notws');
 
+  Company? company = await getStartupCompany(restClient, args: args);
+
   runApp(
     AgentsApp(
       restClient: restClient,
       applicationId: applicationId,
       chatClient: chatClient,
       notificationClient: notificationClient,
+      company: company,
     ),
   );
 }
@@ -68,12 +71,14 @@ class AgentsApp extends StatefulWidget {
     required this.applicationId,
     required this.chatClient,
     required this.notificationClient,
+    this.company,
   });
 
   final RestClient restClient;
   final String applicationId;
   final WsClient chatClient;
   final WsClient notificationClient;
+  final Company? company;
 
   @override
   State<AgentsApp> createState() => _AgentsAppState();
@@ -173,6 +178,7 @@ class _AgentsAppState extends State<AgentsApp> {
               widget.restClient,
               widget.applicationId,
             ),
+            company: widget.company,
             widgetRegistrations: agentsWidgetRegistrations,
           );
         },

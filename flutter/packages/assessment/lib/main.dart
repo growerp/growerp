@@ -12,7 +12,6 @@
  * limitations under the License.
  */
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,7 +25,7 @@ import 'dart:js_interop' if (dart.library.io) 'dart:js_interop';
 import 'package:web/web.dart' as web if (dart.library.io) 'package:web/web.dart';
 import 'l10n/generated/assessment_localizations.dart';
 
-Future main() async {
+Future main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   installGlobalErrorHandlers();
   await GlobalConfiguration().loadFromAsset('app_settings');
@@ -45,16 +44,10 @@ Future main() async {
   WsClient chatClient = WsClient('chat');
   WsClient notificationClient = WsClient('notws');
 
-  // this part is only executing on the web
-  Company? company;
+  Company? company = await getStartupCompany(restClient, args: args);
+
   final uri = Uri.base;
   debugPrint("=====Uri.base: ${Uri.base} host: ${uri.host}");
-  try {
-    company = await restClient.getCompanyFromHost(uri.host);
-  } on DioException catch (e) {
-    debugPrint("getting hostname error: ${await getDioError(e)}");
-  }
-
   final query = uri.queryParameters;
   String? landingPageId = query['landingPageId'];
   String pseudoId = query['pseudoId'] ?? query['pageId'] ?? 'erp-landing-page';

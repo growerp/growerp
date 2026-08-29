@@ -5,7 +5,6 @@
   "accounts": "บัญชี",
   "addNew": "เพิ่มใหม่",
   "andAtLeastOne": "และอย่างน้อยหนึ่ง ",
-  "backendServer": "เซิร์ฟเวอร์แบ็กเอนด์",
   "balanceSheet": "งบดุล",
   "balanceSummary": "สรุปยอดคงเหลือ",
   "businessCompanyName": "ต้องระบุชื่อบริษัท!",
@@ -13,9 +12,7 @@
   "cancel": "ยกเลิก",
   "cannotLoadRestRequests": "ไม่สามารถโหลดคำขอ REST ได้!",
   "chat": "แชท",
-  "chatServer": "เซิร์ฟเวอร์แชท",
   "completeRegistration": "ลงทะเบียนให้เสร็จสิ้น",
-  "companyPartyId": "รหัสบริษัท",
   "continueButton": "ดำเนินการต่อ",
   "contributing": "การมีส่วนร่วม",
   "copyright": "© {year} GrowERP.com",
@@ -38,7 +35,6 @@
   "emailAddress": "ที่อยู่อีเมล",
   "emailAddressError": "ที่อยู่อีเมลจำเป็นต้องระบุ!",
   "emailAddressError2": "รูปแบบที่อยู่อีเมลไม่ถูกต้อง!",
-  "enterBackendUrl": "ป้อน URL แบ็กเอนด์",
   "enterCompanyAndCurrency": "กรุณาป้อนชื่อบริษัทและสกุลเงิน",
   "enterCompanyName": "ป้อนชื่อบริษัท",
   "error": "ข้อผิดพลาด",
@@ -267,9 +263,6 @@
   "@andAtLeastOne": {
     "description": "Partial validation message indicating minimum requirement"
   },
-  "@backendServer": {
-    "description": "Backend server input label"
-  },
   "@balanceSheet": {
     "description": "Balance sheet report menu item"
   },
@@ -291,14 +284,8 @@
   "@chat": {
     "description": "Chat menu item"
   },
-  "@chatServer": {
-    "description": "Chat server input label"
-  },
   "@completeRegistration": {
     "description": "Complete registration dialog title"
-  },
-  "@companyPartyId": {
-    "description": "Company party ID input label"
   },
   "@continueButton": {
     "description": "Continue button text"
@@ -375,9 +362,6 @@
   },
   "@emailAddressError2": {
     "description": "Email address format validation error message"
-  },
-  "@enterBackendUrl": {
-    "description": "Enter backend URL dialog title"
   },
   "@enterCompanyAndCurrency": {
     "description": "Company and currency input instruction"

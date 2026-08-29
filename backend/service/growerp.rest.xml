@@ -167,6 +167,12 @@ limitations under the License.
                 <service name="growerp.100.PartyServices100.get#CompanyFromHost" />
             </method>
         </resource>
+        <!-- public company info by partyId, used at app startup -->
+        <resource name="PublicCompany" require-authentication="anonymous-all">
+            <method type="get">
+                <service name="growerp.100.PartyServices100.get#PublicCompany" />
+            </method>
+        </resource>
         <!-- public subscription plan list for pricing pages -->
         <resource name="SubscriptionPlans" require-authentication="anonymous-all">
             <method type="get">

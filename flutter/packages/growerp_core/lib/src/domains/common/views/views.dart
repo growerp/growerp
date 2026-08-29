@@ -1,5 +1,4 @@
 export 'about_form.dart';
-export 'change_ip_form.dart';
 export 'color_scheme_picker_dialog.dart';
 export 'email_settings_dialog.dart';
 export 'force_update_dialog.dart';

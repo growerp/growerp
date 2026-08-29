@@ -5,7 +5,6 @@
   "accounts": "Konten",
   "addNew": "Neu hinzufügen",
   "andAtLeastOne": "und mindestens ein ",
-  "backendServer": "Backend-Server",
   "balanceSheet": "Bilanz",
   "balanceSummary": "Saldenübersicht",
   "businessCompanyName": "Name des Unternehmens erforderlich!",
@@ -13,9 +12,7 @@
   "cancel": "Abbrechen",
   "cannotLoadRestRequests": "REST-Anfragen können nicht geladen werden!",
   "chat": "Plaudern",
-  "chatServer": "Chat-Server",
   "completeRegistration": "Registrierung abschließen",
-  "companyPartyId": "Firmen-Party-ID",
   "continueButton": "Fortsetzen",
   "contributing": "Beitragen",
   "copyright": "© {year} GrowERP.com",
@@ -38,7 +35,6 @@
   "emailAddress": "E-Mail-Addresse",
   "emailAddressError": "E-Mail-Adresse ist erforderlich!",
   "emailAddressError2": "Das E-Mail-Adressformat ist falsch!",
-  "enterBackendUrl": "Geben Sie die Backend-URL ein",
   "enterCompanyAndCurrency": "Bitte geben Sie Ihren Firmennamen und Ihre Währung ein",
   "enterCompanyName": "Geben Sie den Firmennamen ein",
   "error": "Fehler",
@@ -312,9 +308,6 @@
   "@andAtLeastOne": {
     "description": "Partial validation message indicating minimum requirement"
   },
-  "@backendServer": {
-    "description": "Backend server input label"
-  },
   "@balanceSheet": {
     "description": "Balance sheet report menu item"
   },
@@ -336,14 +329,8 @@
   "@chat": {
     "description": "Chat menu item"
   },
-  "@chatServer": {
-    "description": "Chat server input label"
-  },
   "@completeRegistration": {
     "description": "Complete registration dialog title"
-  },
-  "@companyPartyId": {
-    "description": "Company party ID input label"
   },
   "@continueButton": {
     "description": "Continue button text"
@@ -420,9 +407,6 @@
   },
   "@emailAddressError2": {
     "description": "Email address format validation error message"
-  },
-  "@enterBackendUrl": {
-    "description": "Enter backend URL dialog title"
   },
   "@enterCompanyAndCurrency": {
     "description": "Company and currency input instruction"

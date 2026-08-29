@@ -15,10 +15,8 @@
 // ignore_for_file: depend_on_referenced_packages, avoid_print
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart' as http;
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -37,14 +35,12 @@ import 'views/housekeeping_form.dart';
 import 'l10n/generated/hotel_localizations.dart';
 import 'package:growerp_adk/growerp_adk.dart';
 
-Future main() async {
+Future main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   installGlobalErrorHandlers();
 
   await GlobalConfiguration().loadFromAsset('app_settings');
 
-  // can change backend url by pressing long the title on the home screen.
-  SharedPreferences prefs = await SharedPreferences.getInstance();
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
   GlobalConfiguration().updateValue('appName', packageInfo.appName);
   GlobalConfiguration().updateValue('packageName', packageInfo.packageName);
@@ -59,25 +55,6 @@ Future main() async {
     packageInfo.version,
   );
 
-  String ip = prefs.getString('ip') ?? '';
-  String chat = prefs.getString('chat') ?? '';
-  String singleCompany = prefs.getString('companyPartyId') ?? '';
-  if (ip.isNotEmpty) {
-    late http.Response response;
-    try {
-      response = await http.get(Uri.parse('${ip}rest/s1/growerp/Ping'));
-      if (response.statusCode == 200) {
-        GlobalConfiguration().updateValue('databaseUrl', ip);
-        GlobalConfiguration().updateValue('chatUrl', chat);
-        GlobalConfiguration().updateValue('singleCompany', singleCompany);
-        debugPrint(
-          '=== New ip: $ip , chat: $chat company: $singleCompany Updated!',
-        );
-      }
-    } catch (error) {
-      debugPrint('===$ip does not respond...not updating databaseUrl: $error');
-    }
-  }
   // Set date offset for testing (rental, subscription expiration, etc.)
   // Change to non-zero value to test time-dependent features, e.g., 15
   setTestDaysOffset(0);
@@ -91,12 +68,15 @@ Future main() async {
   WsClient notificationClient = WsClient('notws');
 
   Bloc.observer = AppBlocObserver();
+  Company? company = await getStartupCompany(restClient, args: args);
+
   runApp(
     HotelApp(
       restClient: restClient,
       applicationId: applicationId,
       chatClient: chatClient,
       notificationClient: notificationClient,
+      company: company,
       forceUpdateInfo: forceUpdateInfo,
     ),
   );
@@ -109,6 +89,7 @@ class HotelApp extends StatefulWidget {
     required this.applicationId,
     required this.chatClient,
     required this.notificationClient,
+    this.company,
     this.forceUpdateInfo,
   });
 
@@ -116,6 +97,7 @@ class HotelApp extends StatefulWidget {
   final String applicationId;
   final WsClient chatClient;
   final WsClient notificationClient;
+  final Company? company;
   final ForceUpdateInfo? forceUpdateInfo;
 
   @override
@@ -201,6 +183,7 @@ class _HotelAppState extends State<HotelApp> {
               widget.restClient,
               widget.applicationId,
             ),
+            company: widget.company,
             widgetRegistrations: hotelWidgetRegistrations,
             forceUpdateInfo: widget.forceUpdateInfo,
           );

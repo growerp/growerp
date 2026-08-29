@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -36,22 +35,21 @@ import 'l10n/generated/freelance_localizations.dart';
 import 'views/freelance_db_form.dart';
 import 'views/accounting_form.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-//webactivate  import 'package:web/web.dart' as web;
 
-Future main() async {
+Future main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   installGlobalErrorHandlers();
   // runApp() must always be reached: anything thrown on the way there leaves
   // the app without a single frame, which is an unexplained black screen.
   try {
-    await _startApp();
+    await _startApp(args);
   } catch (e, s) {
     debugPrint('===freelance startup failed: $e\n$s');
     runApp(StartupErrorScreen(message: e.toString()));
   }
 }
 
-Future<void> _startApp() async {
+Future<void> _startApp(List<String> args) async {
   String version = '';
   try {
     await GlobalConfiguration().loadFromAsset('app_settings');
@@ -79,20 +77,7 @@ Future<void> _startApp() async {
   WsClient chatClient = WsClient('chat');
   WsClient notificationClient = WsClient('notws');
 
-  Company? company;
-  if (kIsWeb) {
-    String? hostName;
-    //webactivate  hostName = web.window.location.hostname;
-    // ignore: unnecessary_null_comparison
-    if (hostName != null) {
-      try {
-        company = await restClient.getCompanyFromHost(hostName);
-      } on DioException catch (e) {
-        debugPrint("getting hostname error: ${await getDioError(e)}");
-      }
-      if (company?.partyId == null) company = null;
-    }
-  }
+  Company? company = await getStartupCompany(restClient, args: args);
 
   runApp(
     FreelanceApp(

@@ -30,6 +30,7 @@ limitations under the License.
                 <parameter name="role" />
                 <parameter name="telephoneNr" />
                 <parameter name="url" />
+                <parameter name="image" />
                 <parameter name="address" type="Map">
                     <parameter name="addressId" />
                     <parameter name="address1" />
@@ -62,70 +63,130 @@ limitations under the License.
                 <econdition field-name="productStoreId" />
             </entity-find>
             <if condition="stores">
-                <entity-find entity-name="growerp.party.OwnerCompany" list="companies">
-                    <econdition field-name="partyId" from="stores[0].organizationPartyId" />
-                </entity-find>
-                <set field="company" from="companies[0]" />
-                <set field="orgPartyId" from="stores[0].organizationPartyId" />
-                <!-- postal address -->
-                <entity-find entity-name="mantle.party.contact.PartyContactMech" list="postalList"
-                    limit="1">
-                    <econdition field-name="partyId" from="orgPartyId" />
-                    <econdition field-name="contactMechPurposeId" value="PostalPrimary" />
-                    <date-filter />
-                </entity-find>
-                <if condition="postalList">
-                    <entity-find-one entity-name="mantle.party.contact.PostalAddress"
-                        value-field="postalAddress">
-                        <field-map field-name="contactMechId" from="postalList[0].contactMechId" />
-                    </entity-find-one>
-                    <if condition="postalAddress">
-                        <set field="company.address"
-                            from="[
-                                addressId: postalAddress.contactMechId,
-                                address1: postalAddress.address1,
-                                address2: postalAddress.address2,
-                                city: postalAddress.city,
-                                postalCode: postalAddress.postalCode,
-                                provinceId: postalAddress.stateProvinceGeoId,
-                                countryId: postalAddress.countryGeoId,
-                            ]" />
-                    </if>
-                </if>
-                <!-- telephone -->
-                <entity-find entity-name="mantle.party.contact.PartyContactMech" list="phoneList"
-                    limit="1">
-                    <econdition field-name="partyId" from="orgPartyId" />
-                    <econdition field-name="contactMechPurposeId" value="PhonePrimary" />
-                    <date-filter />
-                </entity-find>
-                <if condition="phoneList">
-                    <entity-find-one entity-name="mantle.party.contact.TelecomNumber"
-                        value-field="telecomNumber">
-                        <field-map field-name="contactMechId" from="phoneList[0].contactMechId" />
-                    </entity-find-one>
-                    <if condition="telecomNumber">
-                        <set field="company.telephoneNr"
-                            value="${telecomNumber.countryCode?:''}${telecomNumber.areaCode?:''}${telecomNumber.contactNumber?:''}" />
-                    </if>
-                </if>
-                <!-- url -->
-                <entity-find entity-name="mantle.party.contact.PartyContactMech" list="urlList"
-                    limit="1">
-                    <econdition field-name="partyId" from="orgPartyId" />
-                    <econdition field-name="contactMechPurposeId" value="WebUrlPrimary" />
-                    <date-filter />
-                </entity-find>
-                <if condition="urlList">
-                    <entity-find-one entity-name="mantle.party.contact.ContactMech"
-                        value-field="urlMech">
-                        <field-map field-name="contactMechId" from="urlList[0].contactMechId" />
-                    </entity-find-one>
-                    <if condition="urlMech">
-                        <set field="company.url" from="urlMech.infoString" />
-                    </if>
+                <service-call name="growerp.100.PartyServices100.get#PublicCompany"
+                    in-map="[companyPartyId: stores[0].organizationPartyId]" out-map="context" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="PublicCompany" authenticate="anonymous-all">
+        <description>Get the public information(name, logo, contact) of a main company by
+            its partyId. Used at app startup when a companyPartyId was provided by the
+            user(url, deeplink, command line) to preselect and brand the app.</description>
+        <in-parameters>
+            <parameter name="companyPartyId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="company" type="Map">
+                <parameter name="ownerPartyId" />
+                <parameter name="partyId" />
+                <parameter name="pseudoId" />
+                <parameter name="name" />
+                <parameter name="email" />
+                <parameter name="role" />
+                <parameter name="telephoneNr" />
+                <parameter name="url" />
+                <parameter name="image" />
+                <parameter name="address" type="Map">
+                    <parameter name="addressId" />
+                    <parameter name="address1" />
+                    <parameter name="address2" />
+                    <parameter name="city" />
+                    <parameter name="postalCode" />
+                    <parameter name="province" />
+                    <parameter name="provinceId" />
+                    <parameter name="country" />
+                    <parameter name="countryId" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="growerp.party.OwnerCompany" list="companies">
+                <econdition field-name="partyId" from="companyPartyId" />
+            </entity-find>
+            <if condition="!companies">
+                <log level="info" message="No company found for partyId: ${companyPartyId}" />
+                <return />
+            </if>
+            <!-- a company has a row per role: prefer the main(internal) company row -->
+            <set field="found"
+                from="companies.find { it.role == 'OrgInternal' } ?: companies[0]" />
+            <set field="company"
+                from="[ownerPartyId: found.ownerPartyId, partyId: found.partyId,
+                    pseudoId: found.pseudoId, name: found.name, email: found.email,
+                    role: found.role]" />
+            <!-- postal address -->
+            <entity-find entity-name="mantle.party.contact.PartyContactMech" list="postalList"
+                limit="1">
+                <econdition field-name="partyId" from="companyPartyId" />
+                <econdition field-name="contactMechPurposeId" value="PostalPrimary" />
+                <date-filter />
+            </entity-find>
+            <if condition="postalList">
+                <entity-find-one entity-name="mantle.party.contact.PostalAddress"
+                    value-field="postalAddress">
+                    <field-map field-name="contactMechId" from="postalList[0].contactMechId" />
+                </entity-find-one>
+                <if condition="postalAddress">
+                    <set field="company.address"
+                        from="[
+                            addressId: postalAddress.contactMechId,
+                            address1: postalAddress.address1,
+                            address2: postalAddress.address2,
+                            city: postalAddress.city,
+                            postalCode: postalAddress.postalCode,
+                            provinceId: postalAddress.stateProvinceGeoId,
+                            countryId: postalAddress.countryGeoId,
+                        ]" />
                 </if>
             </if>
+            <!-- telephone -->
+            <entity-find entity-name="mantle.party.contact.PartyContactMech" list="phoneList"
+                limit="1">
+                <econdition field-name="partyId" from="companyPartyId" />
+                <econdition field-name="contactMechPurposeId" value="PhonePrimary" />
+                <date-filter />
+            </entity-find>
+            <if condition="phoneList">
+                <entity-find-one entity-name="mantle.party.contact.TelecomNumber"
+                    value-field="telecomNumber">
+                    <field-map field-name="contactMechId" from="phoneList[0].contactMechId" />
+                </entity-find-one>
+                <if condition="telecomNumber">
+                    <set field="company.telephoneNr"
+                        value="${telecomNumber.countryCode?:''}${telecomNumber.areaCode?:''}${telecomNumber.contactNumber?:''}" />
+                </if>
+            </if>
+            <!-- url -->
+            <entity-find entity-name="mantle.party.contact.PartyContactMech" list="urlList"
+                limit="1">
+                <econdition field-name="partyId" from="companyPartyId" />
+                <econdition field-name="contactMechPurposeId" value="WebUrlPrimary" />
+                <date-filter />
+            </entity-find>
+            <if condition="urlList">
+                <entity-find-one entity-name="mantle.party.contact.ContactMech"
+                    value-field="urlMech">
+                    <field-map field-name="contactMechId" from="urlList[0].contactMechId" />
+                </entity-find-one>
+                <if condition="urlMech">
+                    <set field="company.url" from="urlMech.infoString" />
+                </if>
+            </if>
+            <!-- logo: cannot call download#Image, that service needs a logged in user -->
+            <entity-find entity-name="mantle.party.PartyContent" list="contents" limit="1">
+                <econdition field-name="partyId" from="companyPartyId" />
+                <econdition field-name="partyContentTypeEnumId" value="PcntImageSmall" />
+            </entity-find>
+            <script><![CDATA[
+                if (contents) {
+                    def ref = ec.resource.getLocationReference(contents[0].contentLocation)
+                    if (ref != null && ref.getExists()) {
+                        def bytes = org.apache.commons.io.IOUtils.toByteArray(ref.openStream())
+                        company.image = org.apache.commons.codec.binary.Base64.encodeBase64String(bytes)
+                    }
+                }
+            ]]></script>
         </actions>
     </service>
 

@@ -2,6 +2,7 @@ export 'helper_functions.dart';
 export 'persist_functions.dart';
 export 'screen_size.dart';
 export 'get_backend_url.dart';
+export 'get_startup_company.dart';
 export 'install_global_error_handlers.dart';
 export 'translate_bloc_message.dart';
 export 'icon_registry.dart';

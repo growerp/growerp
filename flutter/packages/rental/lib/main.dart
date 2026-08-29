@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
@@ -34,9 +32,8 @@ import 'package:growerp_rental/growerp_rental.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'views/rental_db_form.dart';
 import 'package:growerp_adk/growerp_adk.dart';
-//webactivate  import 'package:web/web.dart' as web;
 
-Future main() async {
+Future main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   installGlobalErrorHandlers();
 
@@ -59,20 +56,7 @@ Future main() async {
   WsClient chatClient = WsClient('chat');
   WsClient notificationClient = WsClient('notws');
 
-  Company? company;
-  if (kIsWeb) {
-    String? hostName;
-    //webactivate  hostName = web.window.location.hostname;
-    // ignore: unnecessary_null_comparison
-    if (hostName != null) {
-      try {
-        company = await restClient.getCompanyFromHost(hostName);
-      } on DioException catch (e) {
-        debugPrint("getting hostname error: ${await getDioError(e)}");
-      }
-      if (company?.partyId == null) company = null;
-    }
-  }
+  Company? company = await getStartupCompany(restClient, args: args);
 
   runApp(
     RentalApp(

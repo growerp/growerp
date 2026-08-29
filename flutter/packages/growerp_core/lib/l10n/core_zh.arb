@@ -5,7 +5,6 @@
   "accounts": "账户",
   "addNew": "添新",
   "andAtLeastOne": "并且至少一个 ",
-  "backendServer": "后端服务器",
   "balanceSheet": "资产负债表",
   "balanceSummary": "余额摘要",
   "businessCompanyName": "需要公司名称！",
@@ -13,9 +12,7 @@
   "cancel": "取消",
   "cannotLoadRestRequests": "无法加载其余请求！",
   "chat": "聊天",
-  "chatServer": "聊天服务器",
   "completeRegistration": "完成注册",
-  "companyPartyId": "公司方ID",
   "continueButton": "继续",
   "contributing": "贡献",
   "copyright": "© {year} GrowERP.com",
@@ -38,7 +35,6 @@
   "emailAddress": "电子邮件地址",
   "emailAddressError": "电子邮件地址为必填项！",
   "emailAddressError2": "电子邮件地址格式不正确！",
-  "enterBackendUrl": "输入后端URL",
   "enterCompanyAndCurrency": "请输入您的公司名称和货币",
   "enterCompanyName": "输入公司名称",
   "error": "错误",
@@ -312,9 +308,6 @@
   "@andAtLeastOne": {
     "description": "Partial validation message indicating minimum requirement"
   },
-  "@backendServer": {
-    "description": "Backend server input label"
-  },
   "@balanceSheet": {
     "description": "Balance sheet report menu item"
   },
@@ -336,14 +329,8 @@
   "@chat": {
     "description": "Chat menu item"
   },
-  "@chatServer": {
-    "description": "Chat server input label"
-  },
   "@completeRegistration": {
     "description": "Complete registration dialog title"
-  },
-  "@companyPartyId": {
-    "description": "Company party ID input label"
   },
   "@continueButton": {
     "description": "Continue button text"
@@ -420,9 +407,6 @@
   },
   "@emailAddressError2": {
     "description": "Email address format validation error message"
-  },
-  "@enterBackendUrl": {
-    "description": "Enter backend URL dialog title"
   },
   "@enterCompanyAndCurrency": {
     "description": "Company and currency input instruction"

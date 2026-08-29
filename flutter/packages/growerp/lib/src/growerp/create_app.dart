@@ -416,8 +416,6 @@ String _mainDart(
  * limitations under the License.
  */
 
-import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
@@ -427,9 +425,8 @@ import 'package:growerp_models/growerp_models.dart';
 ${imports.toString().trimRight()}
 import 'package:package_info_plus/package_info_plus.dart';
 import 'views/${name}_db_form.dart';
-//webactivate  import 'package:web/web.dart' as web;
 
-Future main() async {
+Future main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   installGlobalErrorHandlers();
 
@@ -452,20 +449,9 @@ Future main() async {
   WsClient chatClient = WsClient('chat');
   WsClient notificationClient = WsClient('notws');
 
-  Company? company;
-  if (kIsWeb) {
-    String? hostName;
-    //webactivate  hostName = web.window.location.hostname;
-    // ignore: unnecessary_null_comparison
-    if (hostName != null) {
-      try {
-        company = await restClient.getCompanyFromHost(hostName);
-      } on DioException catch (e) {
-        debugPrint("getting hostname error: \${await getDioError(e)}");
-      }
-      if (company?.partyId == null) company = null;
-    }
-  }
+  // optional company: --companyPartyId= on the command line, ?companyPartyId=
+  // in the url, a deeplink or the singleCompany app_settings key
+  Company? company = await getStartupCompany(restClient, args: args);
 
   runApp(
     ${pascal}App(

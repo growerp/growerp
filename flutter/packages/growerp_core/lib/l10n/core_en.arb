@@ -25,10 +25,6 @@
   "@andAtLeastOne": {
     "description": "Partial validation message indicating minimum requirement"
   },
-  "backendServer": "Backend Server",
-  "@backendServer": {
-    "description": "Backend server input label"
-  },
   "balanceSheet": "Balance Sheet",
   "@balanceSheet": {
     "description": "Balance sheet report menu item"
@@ -57,17 +53,9 @@
   "@chat": {
     "description": "Chat menu item"
   },
-  "chatServer": "Chat Server",
-  "@chatServer": {
-    "description": "Chat server input label"
-  },
   "completeRegistration": "Complete Registration",
   "@completeRegistration": {
     "description": "Complete registration dialog title"
-  },
-  "companyPartyId": "Company Party Id",
-  "@companyPartyId": {
-    "description": "Company party ID input label"
   },
   "continueButton": "Continue",
   "@continueButton": {
@@ -166,10 +154,6 @@
   "emailAddressError2": "Email address format incorrect!",
   "@emailAddressError2": {
     "description": "Email address format validation error message"
-  },
-  "enterBackendUrl": "Enter backend URL",
-  "@enterBackendUrl": {
-    "description": "Enter backend URL dialog title"
   },
   "enterCompanyAndCurrency": "Please enter your company name and currency",
   "@enterCompanyAndCurrency": {
