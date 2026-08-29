@@ -90,6 +90,7 @@
   "register": "Registreren",
   "registerAndCharge": "Registreren en in rekening brengen",
   "registerNewCompanyAndAdmin": "Nieuw bedrijf en beheerder registreren",
+  "registerNewUserOfCompany": "Registreren als nieuwe gebruiker van {companyName}",
   "registration": "Registratie",
   "requestName": "Naam van verzoek",
   "requestUrl": "URL van verzoek",

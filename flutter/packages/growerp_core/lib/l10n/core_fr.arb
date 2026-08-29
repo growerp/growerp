@@ -90,6 +90,7 @@
   "register": "S'inscrire",
   "registerAndCharge": "S'inscrire et facturer",
   "registerNewCompanyAndAdmin": "Inscrire une nouvelle entreprise et un nouvel administrateur",
+  "registerNewUserOfCompany": "S'inscrire comme nouvel utilisateur de {companyName}",
   "registration": "Inscription",
   "requestName": "Nom de la requête",
   "requestUrl": "URL de la requête",

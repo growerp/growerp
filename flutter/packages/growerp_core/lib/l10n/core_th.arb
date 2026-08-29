@@ -90,6 +90,7 @@
   "register": "ลงทะเบียน",
   "registerAndCharge": "ลงทะเบียนและเรียกเก็บเงิน",
   "registerNewCompanyAndAdmin": "ลงทะเบียนบริษัทและผู้ดูแลใหม่",
+  "registerNewUserOfCompany": "ลงทะเบียนเป็นผู้ใช้ใหม่ของ {companyName}",
   "registration": "การลงทะเบียน",
   "requestName": "ชื่อคำขอ",
   "requestUrl": "URL คำขอ",

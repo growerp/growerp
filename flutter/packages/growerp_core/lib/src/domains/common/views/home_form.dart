@@ -92,7 +92,7 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
       if (!mounted || _pendingRegisterHandled) return;
       if (_authBloc.state.pendingRegistrationEmail != null) {
         _pendingRegisterHandled = true;
-        _showAuthDialog(const RegisterUserDialog(true));
+        _showAuthDialog(RegisterUserDialog(company == null));
       }
     });
   }
@@ -341,16 +341,24 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
                                     },
                                   ),
                                   const SizedBox(height: 50),
+                                  // With a startup company the registration
+                                  // joins that company as a new user, the
+                                  // backend ignores the admin flag then.
                                   if (applicationId != 'AppSupport')
                                     _buildPremiumButton(
                                       context: context,
                                       key: const Key('newUserButton'),
-                                      label: _localizations!
-                                          .registerNewCompanyAndAdmin,
+                                      label: company == null
+                                          ? _localizations!
+                                                .registerNewCompanyAndAdmin
+                                          : _localizations!
+                                                .registerNewUserOfCompany(
+                                                  company!.name ?? '',
+                                                ),
                                       isPrimary: false,
                                       colorScheme: colorScheme,
                                       onPressed: () => _showAuthDialog(
-                                        const RegisterUserDialog(true),
+                                        RegisterUserDialog(company == null),
                                       ),
                                     ),
                                   const SizedBox(height: 60),

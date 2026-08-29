@@ -90,6 +90,7 @@
   "register": "注册",
   "registerAndCharge": "注册并收费",
   "registerNewCompanyAndAdmin": "注册新公司和管理员",
+  "registerNewUserOfCompany": "注册为 {companyName} 的新用户",
   "registration": "注册",
   "requestName": "请求名称",
   "requestUrl": "请求URL",

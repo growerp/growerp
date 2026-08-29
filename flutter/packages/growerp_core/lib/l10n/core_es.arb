@@ -90,6 +90,7 @@
   "payNow": "Paga ahora",
   "subscriptionExpired": "Tu suscripción ha caducado. Por favor renueve para continuar.",
   "registerNewCompanyAndAdmin": "Registrar nueva empresa y administrador",
+  "registerNewUserOfCompany": "Registrarse como nuevo usuario de {companyName}",
   "registration": "Registro",
   "requestName": "Nombre de la solicitud",
   "requestUrl": "Solicitar URL",

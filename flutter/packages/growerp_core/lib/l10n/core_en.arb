@@ -375,6 +375,15 @@
   "@registerNewCompanyAndAdmin": {
     "description": "Register new company link text"
   },
+  "registerNewUserOfCompany": "Register as new user of {companyName}",
+  "@registerNewUserOfCompany": {
+    "description": "Register link text when the app was started for a single company",
+    "placeholders": {
+      "companyName": {
+        "type": "String"
+      }
+    }
+  },
   "registration": "Registration",
   "@registration": {
     "description": "Registration dialog title"

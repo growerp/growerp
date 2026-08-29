@@ -94,7 +94,7 @@
             "deviceId": "linux",
             "toolArgs": [
                 "--dart-define=BACKEND_PORT=8080",
-                "--dart-entrypoint-args=--companyPartyId=100001"
+                "--dart-entrypoint-args=--companyPartyId=100076"
             ]
         },
         {

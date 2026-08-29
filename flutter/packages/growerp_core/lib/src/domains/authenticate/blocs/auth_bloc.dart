@@ -265,7 +265,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         companyPartyId: event.user.company?.partyId,
         firstName: event.user.firstName!,
         lastName: event.user.lastName!,
-        userGroup: event.user.userGroup!,
+        userGroup: event.user.userGroup,
         // Caller-chosen password (e.g. from the web startup page) wins;
         // otherwise debug builds default to qqqqqq9!, release emails a temp one.
         newPassword: event.newPassword ?? (kReleaseMode ? null : 'qqqqqq9!'),
@@ -293,6 +293,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           status: AuthStatus.failure,
           authenticate: Authenticate(applicationId: applicationId),
           message: await getDioError(e),
+        ),
+      );
+    } catch (e) {
+      // any other error would leave the dialog on its loading indicator
+      emit(
+        state.copyWith(
+          status: AuthStatus.failure,
+          authenticate: Authenticate(applicationId: applicationId),
+          message: e.toString(),
         ),
       );
     }
