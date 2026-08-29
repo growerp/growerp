@@ -26,6 +26,7 @@ const String _paramName = 'companyPartyId';
 
 /// Optional company the app is started for, on any platform:
 /// - desktop: --companyPartyId=100000 on the command line
+///   (under flutter run: --dart-entrypoint-args=--companyPartyId=100000)
 /// - web: ?companyPartyId=100000 in the url
 /// - mobile: a deeplink like growerp://admin?companyPartyId=100000
 /// - any platform: --dart-define=COMPANY_PARTY_ID=100000 at build time

@@ -52,6 +52,7 @@ This directory contains comprehensive documentation for extending and developing
   - **[Implementation Details](./DEEP_LINKING_IMPLEMENTATION.md)** - Technical implementation summary
 - **[Data Model Basic Guide](./basic_explanation_of_the_frontend_REST_Backend_data_models.md)** - Frontend/Backend data models
 - **[Flutter-Moqui REST Backend Interface](./Flutter_Moqui_REST_Backend_Interface.md)** - Complete REST API communication guide with code examples
+- **[Registration, Login and Trial Specification](./Registration_Login_Specification.md)** - Startup company resolution, registration, tenant setup, the login state machine and the evaluation period
 - **[Integration Test Guide](./Integration_Test_Guide.md)** ⭐ **NEW!** - Comprehensive guide to GrowERP's integration testing framework
 - **[Manufacturing Lifecycle Test](./Manufacturing_Lifecycle_Test.md)** - End-to-end manufacturing workflow: BOM, work orders, purchase/receive, production, shipment, and accounting
 - **[Invoice Scan Documentation](./Invoice_Scan_Documentation.md)** - AI-powered invoice processing ⭐ **NEW!**

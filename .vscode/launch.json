@@ -93,7 +93,8 @@
             "program": "lib/main.dart",
             "deviceId": "linux",
             "toolArgs": [
-                "--dart-define=BACKEND_PORT=8080"
+                "--dart-define=BACKEND_PORT=8080",
+                "--dart-entrypoint-args=--companyPartyId=100001"
             ]
         },
         {

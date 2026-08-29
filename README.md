@@ -46,6 +46,7 @@ GrowERP is an open-source, multi-platform ERP application built with a modular a
 
 - **[🔗 Data Models Guide](./docs/basic_explanation_of_the_frontend_REST_Backend_data_models.md)** - Frontend-backend data model integration
 - **[📡 Flutter-Moqui REST Backend Interface](./docs/Flutter_Moqui_REST_Backend_Interface.md)** - Complete guide to REST API communication with practical code examples
+- **[🔐 Registration, Login & Trial Specification](./docs/Registration_Login_Specification.md)** - Startup company resolution, registration, tenant setup, login state machine and evaluation period
 - **[🤖 Invoice Scan & AI Extraction](./docs/Invoice_Scan_Documentation.md)** - Invoice scanning and AI-powered data extraction with Google Gemini
 - **[🤖 LLM & API Key Architecture](./docs/GrowERP_LLM_And_API_Key_Architecture.md)** - How GrowERP uses LLMs, resolves API keys, and enforces token limits, plus a catalog of Gemini/Vertex AI (Veo 2) and GenUI features
 - **[🧠 Agent Control Center (ADK)](./docs/Agent_Control_Center_User_Guide.md)** - Guide to multi-agent orchestration, tool scoping, and RAG knowledge ingest
