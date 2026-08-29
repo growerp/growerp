@@ -47,6 +47,11 @@ class _HostState extends State<_Host> {
                 onPressed: () => setState(() => _value = null),
                 child: const Text('remove'),
               ),
+              TextButton(
+                key: const Key('rebuild'),
+                onPressed: () => setState(() {}),
+                child: const Text('rebuild'),
+              ),
             ],
           ),
         ),
@@ -97,7 +102,7 @@ void main() {
     await tester.pump();
 
     // an unrelated parent rebuild with an unchanged initialValue
-    tester.state<_HostState>(find.byType(_Host)).setState(() {});
+    await tester.tap(find.byKey(const Key('rebuild')));
     await tester.pumpAndSettle();
 
     expect(fieldText(tester), 'typ');
