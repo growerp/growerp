@@ -19,7 +19,6 @@ import 'package:flutter/foundation.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:go_router/go_router.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:universal_io/io.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
@@ -110,9 +109,9 @@ class LoginDialogState extends State<LoginDialog> {
                 if (context.mounted &&
                     !isGrowERP &&
                     (auth.user?.appsUsed.isEmpty ?? false)) {
-                  // Apple rejects trial/subscription messaging outside IAP,
-                  // so the trial welcome is not shown on iOS.
-                  if (!Platform.isIOS) {
+                  // A user who registered into an existing company does not
+                  // own the trial, only an admin starts one.
+                  if (auth.user?.userGroup == UserGroup.admin) {
                     await showDialog(
                       context: context,
                       barrierDismissible: false,

@@ -317,8 +317,9 @@ sequenceDiagram
    `_postLoginHandled` and a `listenWhen` on status change so later emissions cannot re-run
    it. Conditions: the company is not GrowERP itself and `user.appsUsed` is empty.
    1. `TrialWelcomeDialog`, `barrierDismissible: false`, one action `Key('startTrial')`
-      labelled *Get started*. **Skipped on iOS** — Apple does not allow trial or
-      subscription messaging outside IAP.
+      labelled *Get started*. Only for `user.userGroup == GROWERP_M_ADMIN`: a user who
+      registered into an existing company (§3.2 branch A, `GROWERP_M_OTHER`) or was created
+      by an admin does not own the trial.
    2. `ErpAssessmentDialog` ("Do you need an ERP system?").
    3. `registerAppUsed(applicationId)` → `appsUsed` is no longer empty, so neither dialog
       returns on the next login. A failure here is swallowed on purpose: the dialogs may
