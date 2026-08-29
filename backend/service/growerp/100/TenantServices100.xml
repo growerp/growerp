@@ -101,8 +101,10 @@ limitations under the License.
             ]"/>
 
             <!-- Create admin user with company -->
+            <!-- the admin group is chosen here, not by the anonymous caller -->
             <service-call name="growerp.100.PartyServices100.create#User"
-                in-map="[user: user, password: password, ownerPartyId: ownerPartyId, applicationId: applicationId]"
+                in-map="[user: user, password: password, trustGroup: true,
+                        ownerPartyId: ownerPartyId, applicationId: applicationId]"
                 out-map="userResult"/>
 
             <set field="adminPartyId" from="userResult.user.partyId"/>

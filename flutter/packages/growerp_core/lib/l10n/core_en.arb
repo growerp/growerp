@@ -1714,5 +1714,49 @@
   "showOutreachGuideHelp": "Adds the Guide tab to the outreach menu for you only.",
   "@showOutreachGuideHelp": {
     "description": "System setup: help text for the outreach setup guide switch"
+  },
+  "screenAccess": "Screen access",
+  "@screenAccess": {
+    "description": "Title of the organization security grid"
+  },
+  "screen": "Screen",
+  "@screen": {
+    "description": "Column header naming a menu screen"
+  },
+  "adminGroup": "Admin",
+  "@adminGroup": {
+    "description": "Short label for the GROWERP_M_ADMIN user group"
+  },
+  "employeeGroup": "Employee",
+  "@employeeGroup": {
+    "description": "Short label for the GROWERP_M_EMPLOYEE user group"
+  },
+  "otherGroup": "Other",
+  "@otherGroup": {
+    "description": "Short label for the GROWERP_M_OTHER user group"
+  },
+  "accessNone": "none",
+  "@accessNone": {
+    "description": "Cell value: the group cannot reach this screen"
+  },
+  "accessView": "view",
+  "@accessView": {
+    "description": "Cell value: the group can read this screen"
+  },
+  "accessWrite": "write",
+  "@accessWrite": {
+    "description": "Cell value: the group can change data on this screen"
+  },
+  "searchScreens": "Search screens...",
+  "@searchScreens": {
+    "description": "Search hint on the security grid"
+  },
+  "restDomain": "REST domain",
+  "@restDomain": {
+    "description": "Field label for the artifact group behind a screen"
+  },
+  "writeImpliesView": "Write access also grants view access",
+  "@writeImpliesView": {
+    "description": "Explains the subset rule in the security dialog"
   }
 }

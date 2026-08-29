@@ -12,6 +12,8 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -129,7 +131,9 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
         widgetName: event.menuOption.widgetName,
         image: event.menuOption.image,
         selectedImage: event.menuOption.selectedImage,
-        userGroupsJson: event.menuOption.userGroups?.toString(),
+        userGroupsJson: _groupsToJson(event.menuOption.userGroups),
+        updateGroupsJson: _groupsToJson(event.menuOption.updateGroups),
+        artifactGroupId: event.menuOption.artifactGroupId,
         sequenceNum: event.menuOption.sequenceNum,
         isActive: event.menuOption.isActive ? 'Y' : 'N',
       );
@@ -179,7 +183,9 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
         widgetName: event.menuOption.widgetName,
         image: event.menuOption.image,
         selectedImage: event.menuOption.selectedImage,
-        userGroupsJson: event.menuOption.userGroups?.toString(),
+        userGroupsJson: _groupsToJson(event.menuOption.userGroups),
+        updateGroupsJson: _groupsToJson(event.menuOption.updateGroups),
+        artifactGroupId: event.menuOption.artifactGroupId,
         sequenceNum: event.menuOption.sequenceNum,
         isActive: event.menuOption.isActive ? 'Y' : 'N',
       );
@@ -635,3 +641,9 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
     }
   }
 }
+
+/// The backend parses these fields with a JSON slurper, so they have to be real
+/// JSON. `List.toString()` produces `[GROWERP_M_ADMIN]`, which parses to null and
+/// silently drops the restriction.
+String? _groupsToJson(List<UserGroup>? groups) =>
+    groups == null ? null : jsonEncode(groups.map((g) => g.value).toList());

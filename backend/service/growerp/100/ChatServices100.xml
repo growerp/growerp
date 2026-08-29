@@ -775,7 +775,7 @@ limitations under the License.
                             lastName: 'website',
                             email: email,
                             role: 'Lead',
-                            userGroupId: 'GROWERP_M_LEAD',
+                            userGroupId: 'GROWERP_M_OTHER',
                         ]" />
                 </service-call>
                 <!-- re-find the freshly created email contact -->

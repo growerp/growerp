@@ -1682,16 +1682,7 @@ limitations under the License.
                         <set field="imageFile" from="null" />
                     </else>
                 </if>
-                <!-- if somebody registered a company, then ordered from another website, admin and
-                employee need to be adjusted -->
                 <set field="userGroupId" from="userInfo.userGroupId" />
-                <!--TODO:
-                if condition="userGroupId in ['GROWERP_M_ADMIN','GROWERP_M_EMPLOYEE']">
-                    <if condition="userInfo.companyRole == 'Customer'">
-                        <set field="userGroupId" value="GROWERP_M_CUSTOMER"/></if>
-                    <if condition="userInfo.companyRole == 'Supplier'">
-                        <set field="userGroupId" value="GROWERP_M_SUPPLIER"/></if>
-                </if-->
                 <if condition="userInfo.paymentMethodId">
                     <set field="nrLength" from="userInfo.cardNumber.length()" />
                     <set field="ccDescription"
@@ -1886,6 +1877,11 @@ limitations under the License.
             <parameter name="ownerPartyId" /><!-- only required when no user logged in after
                                                 creating owner company -->
             <parameter name="applicationId" />
+            <parameter name="trustGroup" type="Boolean" default-value="false">
+                <description>Set by services that already chose user.userGroupId server-side
+                    (registration, tenant creation). Client facing calls must leave it false so
+                    the caller cannot pick their own group.</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="user" type="Map">
@@ -2006,9 +2002,13 @@ limitations under the License.
                     in-map="[partyId: userPartyId, personalTitle: user.personalTitle]" />
             </if>
             <if condition="user.loginName">
-                <!-- user security access -->
+                <!-- user security access: never trust the group the client sent -->
+                <service-call name="growerp.100.SecurityServices100.resolve#GrantableUserGroup"
+                    in-map="[requestedUserGroupId: user.userGroupId, trustGroup: trustGroup,
+                            currentUserGroupId: 'GROWERP_M_OTHER']"
+                    out-map="grantedGroup" />
                 <service-call name="create#moqui.security.UserGroupMember"
-                    in-map="[userGroupId: user.userGroupId, userId: userAccount.userId]" />
+                    in-map="[userGroupId: grantedGroup.userGroupId, userId: userAccount.userId]" />
                 <service-call name="create#moqui.security.UserGroupMember"
                     in-map="[userGroupId: 'ALL_USERS', userId: userAccount.userId]" />
             </if>
@@ -2450,9 +2450,15 @@ limitations under the License.
                         contactMechPurposeId: 'WebUrlPrimary', webAddress: user.url]" />
                 </if>
             </if>
-            <!-- update security group -->
+            <!-- update security group: never trust the group the client sent -->
+            <if condition="userAccount?.userId">
+                <service-call name="growerp.100.SecurityServices100.resolve#GrantableUserGroup"
+                    in-map="[requestedUserGroupId: user.userGroupId,
+                            currentUserGroupId: oldValue.user.userGroupId]"
+                    out-map="grantedGroup" />
+            </if>
             <if
-                condition="userAccount?.userId &amp;&amp; user.userGroupId != oldValue.user.userGroupId">
+                condition="userAccount?.userId &amp;&amp; grantedGroup.userGroupId != oldValue.user.userGroupId">
                 <entity-find entity-name="moqui.security.UserGroupMember"
                     list="userGroupMembers" limit="1">
                     <econdition field-name="userGroupId" from="oldValue.user.userGroupId" />
@@ -2466,7 +2472,7 @@ limitations under the License.
                 </if>
                 <!-- create new -->
                 <service-call name="create#moqui.security.UserGroupMember"
-                    in-map="[userGroupId: user.userGroupId, userId: userAccount.userId]" />
+                    in-map="[userGroupId: grantedGroup.userGroupId, userId: userAccount.userId]" />
             </if>
             <!-- update image: non-empty base64 = upload, empty string = delete -->
             <if condition="user.image != null">
@@ -3041,7 +3047,13 @@ limitations under the License.
                 <parameter name="lastName" />
                 <parameter name="loginDisabled" type="Boolean" default-value="false" />
                 <parameter name="loginName" default="email" />
-                <parameter name="userGroupId" />
+                <parameter name="role">
+                    <description>Business role: Customer or Supplier</description>
+                </parameter>
+                <parameter name="userGroupId">
+                    <description>Deprecated: the security group is always GROWERP_M_OTHER here,
+                        this is only still read to derive the role for older clients</description>
+                </parameter>
                 <parameter name="groupDescription" />
                 <parameter name="language" />
                 <parameter name="companyPartyId" />
@@ -3124,17 +3136,24 @@ limitations under the License.
                     from="org.moqui.util.StringUtilities.getRandomString(6) + '9!'" />
             </if>
             <set field="newPasswordVerify" from="newPassword" />
-            <!-- role -->
-            <if
-                condition="user.userGroupId == 'GROWERP_M_LEAD' ||
-                        user.userGroupId == 'GROWERP_M_CUSTOMER'">
-                <set field="roleTypeId" value="Customer" />
-                <else-if condition="user.userGroupId == 'GROWERP_M_SUPPLIER'">
-                    <set field="roleTypeId" value="Supplier" />
-                </else-if>
-                <else>
-                    <return message="Not a valid userGroupId: ${user.userGroupId}" />
-                </else>
+            <!-- business role: from user.role, else the legacy userGroupId the older
+                 clients sent to mean the same thing -->
+            <set field="roleTypeId" from="user.role" />
+            <if condition="!roleTypeId">
+                <if
+                    condition="user.userGroupId == 'GROWERP_M_LEAD' ||
+                            user.userGroupId == 'GROWERP_M_CUSTOMER'">
+                    <set field="roleTypeId" value="Customer" />
+                    <else-if condition="user.userGroupId == 'GROWERP_M_SUPPLIER'">
+                        <set field="roleTypeId" value="Supplier" />
+                    </else-if>
+                    <else>
+                        <set field="roleTypeId" value="Customer" />
+                    </else>
+                </if>
+            </if>
+            <if condition="roleTypeId != 'Customer' &amp;&amp; roleTypeId != 'Supplier'">
+                <return error="true" message="Not a valid role: ${roleTypeId}" />
             </if>
             <!-- create account-->
             <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
@@ -3150,9 +3169,12 @@ limitations under the License.
                             emailAddress: user.email, disabled: disabled]"
                 out-map="userAccount" />
             <set field="userPartyId" from="userAccount.partyId" />
-            <!-- provide security -->
+            <!-- provide security: an anonymous caller never picks its own group,
+                 every outside user is GROWERP_M_OTHER -->
             <service-call name="create#moqui.security.UserGroupMember"
-                in-map="[userGroupId: user.userGroupId, userId: userAccount.userId]" />
+                in-map="[userGroupId: 'GROWERP_M_OTHER', userId: userAccount.userId]" />
+            <service-call name="create#moqui.security.UserGroupMember"
+                in-map="[userGroupId: 'ALL_USERS', userId: userAccount.userId]" />
             <!-- only send email when login name provided -->
             <if condition="user.email">
                 <entity-find-one entity-name="moqui.basic.email.EmailServer"
@@ -3283,6 +3305,7 @@ limitations under the License.
                                 locale: locale
                             ],
                             password: newPassword,
+                            trustGroup: true,
                             ownerPartyId: ownerPartyId,
                             applicationId: applicationId
                         ]"

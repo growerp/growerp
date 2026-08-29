@@ -26,6 +26,10 @@ Service definitions for menu configuration and menu item management
       <parameter name="userVersion" type="Boolean">
         <description>If true, return user-specific configuration. If false/null, return seed data.</description>
       </parameter>
+      <parameter name="includeAllGroups" type="Boolean" default-value="false">
+        <description>Return every item regardless of the caller's group, for the security grid.
+          Admins and system users only; ignored for anyone else.</description>
+      </parameter>
     </in-parameters>
     <out-parameters>
       <parameter name="menuConfigurationId" />
@@ -44,6 +48,11 @@ Service definitions for menu configuration and menu item management
       <service-call out-map="context"
         name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
 
+      <!-- Three tiers, most specific first:
+           1. this user's own copy   (userId set, ownerPartyId set)
+           2. this organization's    (userId null, ownerPartyId set)  <- the security grid edits this
+           3. shipped seed data      (userId null, ownerPartyId null) -->
+
       <!-- When userVersion=true, look for user+owner specific config first -->
       <if condition="userVersion">
         <entity-find entity-name="growerp.menu.MenuConfiguration" list="userConfigs">
@@ -54,12 +63,24 @@ Service definitions for menu configuration and menu item management
         </entity-find>
       </if>
 
-      <!-- Fall back to seed data (userId is null) when userVersion=false or no user config found -->
+      <!-- Then this organization's own configuration -->
+      <if condition="!userConfigs &amp;&amp; ownerPartyId">
+        <entity-find entity-name="growerp.menu.MenuConfiguration" list="userConfigs">
+          <field-map field-name="menuConfigurationId" from="menuConfigurationId" ignore-if-empty="true"/>
+          <econdition field-name="appId" from="appId" ignore-if-empty="true"/>
+          <econdition field-name="userId" operator="is-null"/>
+          <econdition field-name="ownerPartyId" from="ownerPartyId"/>
+        </entity-find>
+      </if>
+
+      <!-- Fall back to seed data. ownerPartyId must be null here too: without it this query
+           happily returns ANOTHER organization's configuration. -->
       <if condition="!userConfigs">
         <entity-find entity-name="growerp.menu.MenuConfiguration" list="userConfigs">
           <field-map field-name="menuConfigurationId" from="menuConfigurationId" ignore-if-empty="true"/>
           <econdition field-name="appId" from="appId" ignore-if-empty="true"/>
           <econdition field-name="userId" operator="is-null"/>
+          <econdition field-name="ownerPartyId" operator="is-null"/>
         </entity-find>
       </if>
 
@@ -82,6 +103,23 @@ Service definitions for menu configuration and menu item management
         <econdition field-name="preferenceKey" operator="like" value="growerp.menu.hidden.%" />
         <econdition field-name="preferenceValue" value="Y" />
       </entity-find>
+
+      <!-- The caller's single security group; drives which items they may see and write -->
+      <entity-find entity-name="moqui.security.UserGroupMember" list="myGroupMembers" limit="1">
+        <econdition field-name="userId" from="ec.user.userId" />
+        <!-- the four security groups, listed rather than matched with a LIKE: '_' is a
+             single character wildcard, and escaping it breaks the generated Groovy -->
+        <econdition field-name="userGroupId" operator="in"
+          from="['GROWERP_M_SYSTEM', 'GROWERP_M_ADMIN', 'GROWERP_M_EMPLOYEE', 'GROWERP_M_OTHER']" />
+        <date-filter />
+      </entity-find>
+      <set field="myUserGroupId"
+        from="myGroupMembers ? myGroupMembers[0].userGroupId : null" />
+      <set field="isAdmin"
+        from="myUserGroupId == 'GROWERP_M_ADMIN' || myUserGroupId == 'GROWERP_M_SYSTEM'"
+        type="Boolean" />
+      <!-- only an admin may look past their own access -->
+      <set field="showAll" from="includeAllGroups &amp;&amp; isAdmin" type="Boolean" />
 
       <!-- Get top-level menu items (those with no parent) for this configuration -->
       <entity-find entity-name="growerp.menu.MenuItem" list="topLevelItems">
@@ -112,6 +150,23 @@ Service definitions for menu configuration and menu item management
             catch (e) { return null }
         }
 
+        // Access check: an empty group list means no restriction. Applies to children
+        // as well as top level items - a hidden screen must not be reachable as a tab.
+        // GROWERP_M_SYSTEM is the superuser and keeps root REST access, so it is never
+        // filtered out; most seed items list only GROWERP_M_ADMIN and would otherwise
+        // disappear for support staff.
+        boolean isSystem = myUserGroupId == 'GROWERP_M_SYSTEM'
+        def hasAccess = { jsonStr ->
+          if (showAll || isSystem) return true
+          List groups = parseUserGroups(jsonStr)
+          // No list means "the internal groups". Outside users (GROWERP_M_OTHER:
+          // customers, suppliers, leads) are default-deny and only reach a screen
+          // that names them, so a newly added screen is never exposed to them by
+          // accident.
+          if (!groups) return myUserGroupId != 'GROWERP_M_OTHER'
+          return groups.contains(myUserGroupId)
+        }
+
         // Recursive function to build menu item tree
         def buildMenuItem
         buildMenuItem = { item ->
@@ -123,7 +178,7 @@ Service definitions for menu configuration and menu item management
 
           List children = []
           childItems.each { child ->
-            children.add(buildMenuItem(child))
+            if (hasAccess(child.userGroupsJson)) children.add(buildMenuItem(child))
           }
           // Sort children by sequence
           children.sort { a, b -> ((a.sequenceNum ?: 0) as Integer).compareTo((b.sequenceNum ?: 0) as Integer) }
@@ -146,6 +201,8 @@ Service definitions for menu configuration and menu item management
             image: item.image,
             selectedImage: item.selectedImage,
             userGroups: parseUserGroups(item.userGroupsJson),
+            updateGroups: parseUserGroups(item.updateGroupsJson),
+            artifactGroupId: item.artifactGroupId,
             sequenceNum: item.sequenceNum,
             isActive: item.isActive == 'Y' &amp;&amp; !hiddenWidgets.contains(item.widgetName),
             isMinimized: item.isMinimized == 'Y',
@@ -167,7 +224,7 @@ Service definitions for menu configuration and menu item management
         // Build list of top-level menu items with their children
         List menuItems = []
         topLevelItems.each { item ->
-          menuItems.add(buildMenuItem(item))
+          if (hasAccess(item.userGroupsJson)) menuItems.add(buildMenuItem(item))
         }
         
         // Sort by sequenceNum
@@ -455,12 +512,70 @@ Service definitions for menu configuration and menu item management
     </actions>
   </service>
 
+  <!-- ensureOwnerMenuConfiguration: the organization's own copy, edited by the security grid.
+       Sits between the user's copy and the shipped seed data. -->
+  <service verb="ensure" noun="OwnerMenuConfiguration" authenticate="true">
+    <description>Ensure this organization has its own menu configuration. If the given config is
+      seed data, clone it for the organization (userId null, ownerPartyId set).</description>
+    <in-parameters>
+      <parameter name="menuConfigurationId" required="true" />
+    </in-parameters>
+    <out-parameters>
+      <parameter name="ownerMenuConfigurationId" />
+      <parameter name="wasCloned" type="Boolean" />
+    </out-parameters>
+    <actions>
+      <service-call out-map="context"
+        name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+
+      <if condition="!ownerPartyId">
+        <return error="true" message="No organization for the current user" />
+      </if>
+
+      <entity-find-one entity-name="growerp.menu.MenuConfiguration" value-field="config">
+        <field-map field-name="menuConfigurationId" from="menuConfigurationId" />
+      </entity-find-one>
+      <if condition="!config">
+        <return error="true" message="Menu configuration not found: ${menuConfigurationId}" />
+      </if>
+
+      <!-- already the organization's own copy -->
+      <if condition="config.userId == null &amp;&amp; config.ownerPartyId == ownerPartyId">
+        <set field="ownerMenuConfigurationId" from="menuConfigurationId" />
+        <set field="wasCloned" from="false" type="Boolean" />
+        <return />
+      </if>
+
+      <entity-find entity-name="growerp.menu.MenuConfiguration" list="existingOwnerConfigs" limit="1">
+        <econdition field-name="appId" from="config.appId" />
+        <econdition field-name="userId" operator="is-null" />
+        <econdition field-name="ownerPartyId" from="ownerPartyId" />
+      </entity-find>
+      <if condition="existingOwnerConfigs">
+        <set field="ownerMenuConfigurationId"
+          from="existingOwnerConfigs[0].menuConfigurationId" />
+        <set field="wasCloned" from="false" type="Boolean" />
+        <return />
+      </if>
+
+      <service-call name="growerp.100.MenuServices100.clone#MenuConfiguration"
+        out-map="cloneOut"
+        in-map="[sourceMenuConfigurationId: menuConfigurationId, ownerLevel: true,
+                name: config.name + ' (Organization)']" />
+      <set field="ownerMenuConfigurationId" from="cloneOut.menuConfigurationId" />
+      <set field="wasCloned" from="true" type="Boolean" />
+    </actions>
+  </service>
+
   <!-- cloneMenuConfiguration: Clone configuration for user customization -->
   <service verb="clone" noun="MenuConfiguration" authenticate="true">
     <description>Clone an existing menu configuration for user customization.</description>
     <in-parameters>
       <parameter name="sourceMenuConfigurationId" required="true" />
       <parameter name="name" />
+      <parameter name="ownerLevel" type="Boolean" default-value="false">
+        <description>Clone for the whole organization (userId null) instead of for this user</description>
+      </parameter>
     </in-parameters>
     <out-parameters>
       <parameter name="menuConfigurationId" />
@@ -471,7 +586,7 @@ Service definitions for menu configuration and menu item management
     <actions>
       <service-call out-map="context"
         name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-      <set field="currentUserId" from="ec.user.userId" />
+      <set field="currentUserId" from="ownerLevel ? null : ec.user.userId" />
 
       <entity-find-one entity-name="growerp.menu.MenuConfiguration" value-field="sourceConfig">
         <field-map field-name="menuConfigurationId" from="sourceMenuConfigurationId" />
@@ -517,6 +632,8 @@ Service definitions for menu configuration and menu item management
               image: item.image,
               selectedImage: item.selectedImage,
               userGroupsJson: item.userGroupsJson,
+              updateGroupsJson: item.updateGroupsJson,
+              artifactGroupId: item.artifactGroupId,
               sequenceNum: item.sequenceNum,
               isActive: item.isActive
             ])
@@ -635,6 +752,8 @@ Service definitions for menu configuration and menu item management
       <parameter name="image" />
       <parameter name="selectedImage" />
       <parameter name="userGroupsJson" />
+      <parameter name="updateGroupsJson" />
+      <parameter name="artifactGroupId" />
       <parameter name="sequenceNum" type="Integer" />
       <parameter name="isActive" default-value="Y" />
     </in-parameters>
@@ -717,6 +836,8 @@ Service definitions for menu configuration and menu item management
         image: image,
         selectedImage: selectedImage,
         userGroupsJson: userGroupsJson,
+        updateGroupsJson: updateGroupsJson,
+        artifactGroupId: artifactGroupId,
         sequenceNum: sequenceNum,
         isActive: isActive
       ]" />
@@ -750,6 +871,8 @@ Service definitions for menu configuration and menu item management
       <parameter name="image" />
       <parameter name="selectedImage" />
       <parameter name="userGroupsJson" />
+      <parameter name="updateGroupsJson" />
+      <parameter name="artifactGroupId" />
       <parameter name="sequenceNum" type="Integer" />
       <parameter name="isActive" />
       <parameter name="isMinimized" />
@@ -825,6 +948,8 @@ Service definitions for menu configuration and menu item management
         image: image ?: existingItem.image,
         selectedImage: selectedImage ?: existingItem.selectedImage,
         userGroupsJson: userGroupsJson ?: existingItem.userGroupsJson,
+        updateGroupsJson: updateGroupsJson ?: existingItem.updateGroupsJson,
+        artifactGroupId: artifactGroupId ?: existingItem.artifactGroupId,
         sequenceNum: sequenceNum ?: existingItem.sequenceNum,
         isActive: isActive ?: existingItem.isActive,
         isMinimized: isMinimized ?: existingItem.isMinimized
@@ -1020,6 +1145,108 @@ Service definitions for menu configuration and menu item management
       ]" />
 
       <set field="isActive" from="newIsActive" />
+    </actions>
+  </service>
+
+  <!-- setMenuItemGroups: the Organization -> Security grid writes here. Edits land on the
+       organization's own menu configuration, never on the shipped seed data. -->
+  <service verb="set" noun="MenuItemGroups" authenticate="true">
+    <description>Set which user groups may see and write through one menu item, for this
+      organization. Admins may grant Admin/Employee/Other; only a system user may grant
+      GROWERP_M_SYSTEM.</description>
+    <in-parameters>
+      <parameter name="menuItemId" required="true" />
+      <parameter name="userGroups" type="List">
+        <description>Groups that may see the item; empty means no restriction</description>
+        <parameter name="userGroup" />
+      </parameter>
+      <parameter name="updateGroups" type="List">
+        <description>Groups that may write through the item; must be a subset of userGroups</description>
+        <parameter name="updateGroup" />
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="menuItemId" />
+      <parameter name="menuConfigurationId" />
+      <parameter name="userGroups" type="List" />
+      <parameter name="updateGroups" type="List" />
+    </out-parameters>
+    <actions>
+      <set field="callerIsSystem" from="ec.user.isInGroup('GROWERP_M_SYSTEM')" type="Boolean" />
+      <set field="callerIsAdmin"
+        from="callerIsSystem || ec.user.isInGroup('GROWERP_M_ADMIN')" type="Boolean" />
+      <if condition="!callerIsAdmin">
+        <return error="true" message="Only an administrator can change screen access" />
+      </if>
+
+      <set field="userGroups" from="userGroups ?: []" />
+      <set field="updateGroups" from="updateGroups ?: []" />
+
+      <!-- the organization has no authority over system access -->
+      <if
+        condition="!callerIsSystem &amp;&amp; (userGroups.contains('GROWERP_M_SYSTEM')
+                || updateGroups.contains('GROWERP_M_SYSTEM'))">
+        <return error="true" message="Not authorized to assign user group GROWERP_M_SYSTEM" />
+      </if>
+
+      <!-- Never let an administrator remove their own access: the security grid is
+           itself a menu item, so a self revoke would leave no way back in. -->
+      <if condition="!callerIsSystem &amp;&amp; !userGroups.contains('GROWERP_M_ADMIN')">
+        <return error="true"
+          message="An administrator cannot remove administrator access to a screen" />
+      </if>
+
+      <!-- write implies read -->
+      <iterate list="updateGroups" entry="updateGroup">
+        <if condition="userGroups &amp;&amp; !userGroups.contains(updateGroup)">
+          <return error="true"
+            message="${updateGroup} has write access but no read access to this screen" />
+        </if>
+      </iterate>
+
+      <entity-find-one entity-name="growerp.menu.MenuItem" value-field="sourceItem">
+        <field-map field-name="menuItemId" from="menuItemId" />
+      </entity-find-one>
+      <if condition="!sourceItem">
+        <return error="true" message="Menu item not found: ${menuItemId}" />
+      </if>
+
+      <!-- move to the organization's own configuration before writing -->
+      <service-call name="growerp.100.MenuServices100.ensure#OwnerMenuConfiguration"
+        in-map="[menuConfigurationId: sourceItem.menuConfigurationId]" out-map="ensureOut" />
+      <set field="menuConfigurationId" from="ensureOut.ownerMenuConfigurationId" />
+
+      <!-- after a clone the item ids differ, so find the copy by its itemKey -->
+      <set field="targetMenuItemId" from="menuItemId" />
+      <if condition="menuConfigurationId != sourceItem.menuConfigurationId">
+        <entity-find entity-name="growerp.menu.MenuItem" list="ownerItems" limit="1">
+          <econdition field-name="menuConfigurationId" from="menuConfigurationId" />
+          <econdition field-name="itemKey" from="sourceItem.itemKey" ignore-if-empty="true" />
+          <econdition field-name="title" from="sourceItem.title" />
+        </entity-find>
+        <if condition="!ownerItems">
+          <return error="true"
+            message="Menu item ${sourceItem.title} not found in the organization configuration" />
+        </if>
+        <set field="targetMenuItemId" from="ownerItems[0].menuItemId" />
+      </if>
+
+      <script>
+        import groovy.json.JsonOutput
+        // empty string, not null: entity-auto update skips null parameters, so a null
+        // here would silently keep the old restriction instead of clearing it
+        context.userGroupsJson = userGroups ? JsonOutput.toJson(userGroups) : ''
+        context.updateGroupsJson = updateGroups ? JsonOutput.toJson(updateGroups) : ''
+      </script>
+
+      <service-call name="update#growerp.menu.MenuItem"
+        in-map="[
+        menuItemId: targetMenuItemId,
+        userGroupsJson: userGroupsJson,
+        updateGroupsJson: updateGroupsJson
+      ]" />
+
+      <set field="menuItemId" from="targetMenuItemId" />
     </actions>
   </service>
 

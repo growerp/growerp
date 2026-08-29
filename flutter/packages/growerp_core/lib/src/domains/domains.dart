@@ -3,4 +3,5 @@ export 'authenticate/authenticate.dart';
 export 'common/common.dart';
 export 'notification/blocs/notification_bloc.dart';
 export 'chat/chat.dart';
+export 'security/security.dart';
 

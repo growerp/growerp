@@ -46,6 +46,7 @@ limitations under the License.
         <index name="MENU_CONFIG_APP_USER" unique="true">
             <index-field name="appId"/>
             <index-field name="userId"/>
+            <index-field name="ownerPartyId"/>
         </index>
     </entity>
 
@@ -78,7 +79,16 @@ limitations under the License.
             <description>Path to selected image</description>
         </field>
         <field name="userGroupsJson" type="text-long">
-            <description>JSON array of user groups with access (e.g., '["Admin","Employee"]')</description>
+            <description>JSON array of user groups that may SEE this item
+                (e.g., '["GROWERP_M_ADMIN","GROWERP_M_EMPLOYEE"]'). Empty means no restriction.</description>
+        </field>
+        <field name="updateGroupsJson" type="text-long">
+            <description>JSON array of user groups that may WRITE through this item; subset of
+                userGroupsJson. Empty means read-only for everyone but the owning admin.</description>
+        </field>
+        <field name="artifactGroupId" type="id">
+            <description>REST security domain this item drives, e.g. GROWERP_ORDER. Links the menu
+                item to the moqui.security.ArtifactGroup covering the endpoints behind it.</description>
         </field>
         <field name="sequenceNum" type="number-integer" default="10">
             <description>Display order</description>

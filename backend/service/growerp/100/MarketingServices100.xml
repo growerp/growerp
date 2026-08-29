@@ -814,7 +814,7 @@
                         lastName: engagement.platform ?: 'engagement',
                         email: email,
                         role: 'Lead',
-                        userGroupId: 'GROWERP_M_LEAD',
+                        userGroupId: 'GROWERP_M_OTHER',
                     ]" />
             </service-call>
             <set field="partyId" from="userOut?.user?.partyId" />

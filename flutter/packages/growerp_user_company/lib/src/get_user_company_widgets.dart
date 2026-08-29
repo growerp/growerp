@@ -82,12 +82,35 @@ Map<String, GrowerpWidgetBuilder> getUserCompanyWidgets() {
 
     // System settings
     'SystemSetupDialog': (args) => const SystemSetupDialog(),
+
+    // Organization -> Security: screen access per user group. The bloc is
+    // provided here so no app has to add it to its provider list.
+    'SecurityList': (args) => BlocProvider(
+      create: (ctx) => SecurityBloc(
+        ctx.read<RestClient>(),
+        ctx.read<MenuConfigBloc>().appId,
+      ),
+      child: SecurityList(key: getKeyFromArgs(args)),
+    ),
   };
 }
 
 /// Returns widget metadata with icons for the user_company package
 List<WidgetMetadata> getUserCompanyWidgetsWithMetadata() {
   return [
+    WidgetMetadata(
+      widgetName: 'SecurityList',
+      description: 'Screen access per user group for this organization',
+      iconName: 'security',
+      keywords: ['security', 'access', 'permission', 'group', 'authorization'],
+      builder: (args) => BlocProvider(
+        create: (ctx) => SecurityBloc(
+          ctx.read<RestClient>(),
+          ctx.read<MenuConfigBloc>().appId,
+        ),
+        child: SecurityList(key: getKeyFromArgs(args)),
+      ),
+    ),
     WidgetMetadata(
       widgetName: 'UserList',
       description: 'List of users by role',

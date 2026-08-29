@@ -67,6 +67,13 @@ class MenuItem {
   final String? selectedImage;
   @JsonKey(fromJson: _userGroupsFromJson, toJson: _userGroupsToJson)
   final List<UserGroup>? userGroups;
+
+  /// Groups allowed to write through this screen; subset of [userGroups].
+  @JsonKey(fromJson: _userGroupsFromJson, toJson: _userGroupsToJson)
+  final List<UserGroup>? updateGroups;
+
+  /// REST security domain behind this screen, e.g. 'GROWERP_ORDER'.
+  final String? artifactGroupId;
   final int sequenceNum;
   @JsonKey(fromJson: _isActiveFromJson, toJson: _isActiveToJson)
   final bool isActive;
@@ -93,6 +100,8 @@ class MenuItem {
     this.image,
     this.selectedImage,
     this.userGroups,
+    this.updateGroups,
+    this.artifactGroupId,
     this.sequenceNum = 10,
     this.isActive = true,
     this.tileType = 'navigation',
@@ -117,6 +126,8 @@ class MenuItem {
     String? image,
     String? selectedImage,
     List<UserGroup>? userGroups,
+    List<UserGroup>? updateGroups,
+    String? artifactGroupId,
     int? sequenceNum,
     bool? isActive,
     String? tileType,
@@ -135,6 +146,8 @@ class MenuItem {
       image: image ?? this.image,
       selectedImage: selectedImage ?? this.selectedImage,
       userGroups: userGroups ?? this.userGroups,
+      updateGroups: updateGroups ?? this.updateGroups,
+      artifactGroupId: artifactGroupId ?? this.artifactGroupId,
       sequenceNum: sequenceNum ?? this.sequenceNum,
       isActive: isActive ?? this.isActive,
       tileType: tileType ?? this.tileType,

@@ -1852,6 +1852,7 @@ abstract class RestClient {
     @Query('menuConfigurationId') String? menuConfigurationId,
     @Query('appId') String? appId,
     @Query('userVersion') bool? userVersion,
+    @Query('includeAllGroups') bool? includeAllGroups,
   });
 
   /// List all menu configurations with pagination
@@ -1921,6 +1922,8 @@ abstract class RestClient {
     @Field() String? image,
     @Field() String? selectedImage,
     @Field() String? userGroupsJson,
+    @Field() String? updateGroupsJson,
+    @Field() String? artifactGroupId,
     @Field() int? sequenceNum,
     @Field() String? isActive,
   });
@@ -1938,6 +1941,8 @@ abstract class RestClient {
     @Field() String? image,
     @Field() String? selectedImage,
     @Field() String? userGroupsJson,
+    @Field() String? updateGroupsJson,
+    @Field() String? artifactGroupId,
     @Field() int? sequenceNum,
     @Field() String? isActive,
     @Field() String? isMinimized,
@@ -1966,6 +1971,17 @@ abstract class RestClient {
   Future<void> setUserMenuWidgetVisibility({
     @Field() required String widgetName,
     @Field() required bool hidden,
+  });
+
+  /// Set which user groups may see and write through one screen, for this
+  /// organization. Writes land on the organization's own menu configuration.
+  /// Returns only the ids and the two group lists, not a whole MenuItem, so the
+  /// response is deliberately not deserialized into one.
+  @PATCH("rest/s1/growerp/100/MenuItem/groups")
+  Future<void> setMenuItemGroups({
+    @Field() required String menuItemId,
+    @Field() required List<String> userGroups,
+    @Field() required List<String> updateGroups,
   });
 
   // ========== Agent Manager ==========

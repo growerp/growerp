@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Security services for GrowERP.
+
+The user group (GROWERP_M_SYSTEM / _ADMIN / _EMPLOYEE / _OTHER) is the only security
+axis; the business relationship lives on the party Role and never grants access.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+  <!-- resolveGrantableUserGroup: what group is the CALLER allowed to give this user?
+       Callers send userGroupId straight from the client, so it can never be trusted. -->
+  <service verb="resolve" noun="GrantableUserGroup" authenticate="true">
+    <description>Return the user group the caller may actually grant. Non-admins cannot change a
+      group at all; admins cannot grant GROWERP_M_SYSTEM. An unknown group is rejected.</description>
+    <in-parameters>
+      <parameter name="requestedUserGroupId">
+        <description>Group asked for by the client, may be null</description>
+      </parameter>
+      <parameter name="trustGroup" type="Boolean" default-value="false">
+        <description>The caller already decided the group server-side (registration, tenant
+          creation). Never derive this from the absence of a session: an anonymous REST request
+          can run on a pooled thread that still carries the previous request's user.</description>
+      </parameter>
+      <parameter name="currentUserGroupId">
+        <description>Group the user has now; returned unchanged when the caller may not change it</description>
+      </parameter>
+    </in-parameters>
+    <out-parameters>
+      <parameter name="userGroupId" />
+    </out-parameters>
+    <actions>
+      <set field="userGroupId" from="currentUserGroupId" />
+      <if condition="!requestedUserGroupId || requestedUserGroupId == currentUserGroupId">
+        <return />
+      </if>
+      <if condition="trustGroup">
+        <set field="userGroupId" from="requestedUserGroupId" />
+        <return />
+      </if>
+
+      <entity-find-one entity-name="moqui.security.UserGroup" value-field="requestedGroup">
+        <field-map field-name="userGroupId" from="requestedUserGroupId" />
+      </entity-find-one>
+      <if condition="!requestedGroup">
+        <return error="true" message="Not a valid userGroupId: ${requestedUserGroupId}" />
+      </if>
+
+      <set field="callerIsSystem" from="ec.user.isInGroup('GROWERP_M_SYSTEM')" type="Boolean" />
+      <set field="callerIsAdmin"
+        from="callerIsSystem || ec.user.isInGroup('GROWERP_M_ADMIN')" type="Boolean" />
+
+      <!-- only a system user can hand out system access -->
+      <if condition="requestedUserGroupId == 'GROWERP_M_SYSTEM' &amp;&amp; !callerIsSystem">
+        <return error="true" message="Not authorized to assign user group ${requestedUserGroupId}" />
+      </if>
+      <!-- anyone below admin keeps whatever group the user already had -->
+      <if condition="!callerIsAdmin">
+        <return />
+      </if>
+
+      <set field="userGroupId" from="requestedUserGroupId" />
+    </actions>
+  </service>
+
+  <!-- migrateUserGroups: one-off, move live members of the deprecated role-derived groups
+       (GROWERP_M_CUSTOMER / _LEAD / _SUPPLIER) to GROWERP_M_OTHER. Safe to re-run. -->
+  <service verb="migrate" noun="UserGroups" authenticate="true">
+    <out-parameters>
+      <parameter name="movedCount" type="Integer" />
+    </out-parameters>
+    <actions>
+      <if condition="!ec.user.isInGroup('GROWERP_M_SYSTEM')">
+        <return error="true" message="Only a system user can migrate user groups" />
+      </if>
+      <set field="movedCount" from="0" type="Integer" />
+      <entity-find entity-name="moqui.security.UserGroupMember" list="oldMembers">
+        <econdition field-name="userGroupId" operator="in"
+          from="['GROWERP_M_CUSTOMER', 'GROWERP_M_LEAD', 'GROWERP_M_SUPPLIER']" />
+        <date-filter />
+      </entity-find>
+      <iterate list="oldMembers" entry="oldMember">
+        <service-call name="update#moqui.security.UserGroupMember"
+          in-map="oldMember.getMap() + [thruDate: ec.user.nowTimestamp]" />
+        <entity-find entity-name="moqui.security.UserGroupMember" list="existingOther" limit="1">
+          <econdition field-name="userGroupId" value="GROWERP_M_OTHER" />
+          <econdition field-name="userId" from="oldMember.userId" />
+          <date-filter />
+        </entity-find>
+        <if condition="!existingOther">
+          <service-call name="create#moqui.security.UserGroupMember"
+            in-map="[userGroupId: 'GROWERP_M_OTHER', userId: oldMember.userId]" />
+        </if>
+        <set field="movedCount" from="movedCount + 1" />
+      </iterate>
+      <log message="migrate#UserGroups moved ${movedCount} member(s) to GROWERP_M_OTHER" />
+    </actions>
+  </service>
+
+</services>

@@ -1332,6 +1332,11 @@ limitations under the License.
                     <service name="growerp.100.MenuServices100.set#UserMenuWidgetVisibility" />
                 </method>
             </resource>
+            <resource name="groups"><!-- organization security grid -->
+                <method type="patch">
+                    <service name="growerp.100.MenuServices100.set#MenuItemGroups" />
+                </method>
+            </resource>
         </resource>
 
         <resource name="MenuItems">

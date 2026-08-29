@@ -1477,7 +1477,7 @@ limitations under the License.
                             lastName: 'website',
                             email: email,
                             role: 'Lead',
-                            userGroupId: 'GROWERP_M_LEAD',
+                            userGroupId: 'GROWERP_M_OTHER',
                         ]" />
                 </service-call>
                 <entity-find entity-name="mantle.party.contact.ContactMech" list="emailContacts">

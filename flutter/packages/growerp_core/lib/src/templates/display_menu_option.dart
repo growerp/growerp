@@ -284,11 +284,9 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
     );
   }
 
-  bool _hasAccessToItem(MenuItem item) {
-    // MenuItems don't have userGroups in the new model
-    // Access is controlled at the MenuItem level
-    return true;
-  }
+  /// Tabs are menu items too, so they get the same check as the top level. The
+  /// backend already filters, this is defence in depth for a stale cached config.
+  bool _hasAccessToItem(MenuItem item) => _hasAccess(item);
 
   @override
   void dispose() {

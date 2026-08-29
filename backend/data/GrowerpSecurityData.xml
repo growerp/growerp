@@ -32,11 +32,15 @@ limitations under the License.
     </moqui.security.UserGroup>
     <moqui.security.UserGroup userGroupId="GROWERP_M_OTHER" description="Customer"
         groupTypeEnumId="GROWERPMOBILE" />
-    <moqui.security.UserGroup userGroupId="GROWERP_M_CUSTOMER" description="Customer"
+    <!-- DEPRECATED: these three were derived from the business role (Customer/Lead/Supplier),
+         which is not a security concept. Outside users are GROWERP_M_OTHER; the relationship
+         lives on the party Role. Kept only so existing UserGroupMember rows keep their FK -
+         they are granted nothing. See GrowerpSecurityMigrationData.xml. -->
+    <moqui.security.UserGroup userGroupId="GROWERP_M_CUSTOMER" description="Customer (deprecated)"
         groupTypeEnumId="GROWERPMOBILE" />
-    <moqui.security.UserGroup userGroupId="GROWERP_M_LEAD" description="Lead"
+    <moqui.security.UserGroup userGroupId="GROWERP_M_LEAD" description="Lead (deprecated)"
         groupTypeEnumId="GROWERPMOBILE" />
-    <moqui.security.UserGroup userGroupId="GROWERP_M_SUPPLIER" description="Supplier"
+    <moqui.security.UserGroup userGroupId="GROWERP_M_SUPPLIER" description="Supplier (deprecated)"
         groupTypeEnumId="GROWERPMOBILE" />
 
     <!-- Artifact group for all of the GROWERP REST API via the GROWERP resource (the root resource) -->

@@ -780,7 +780,7 @@ Service definitions for assessment management and completion
                         email: respondentEmail,
                         telephoneNr: respondentPhone,
                         role: 'Lead',
-                        userGroupId: 'OTHER'
+                        userGroupId: 'GROWERP_M_OTHER'
                     ]" />
                     <field-map field-name="ownerPartyId" from="ownerPartyId" />
                 </service-call>

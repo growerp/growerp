@@ -151,6 +151,19 @@ GoRouter createDynamicAppRouter(
       if (!isAuthenticated && state.uri.path != '/') {
         return '/';
       }
+
+      // A hidden screen must also be unreachable by typing its route. Resolve
+      // against the live menu (the same state the wildcard route below uses),
+      // not the startup snapshot, so menu items added later still work.
+      final path = state.uri.path;
+      if (isAuthenticated && path != '/' && !_alwaysAllowedRoutes.contains(path)) {
+        final liveConfig =
+            context.read<MenuConfigBloc?>()?.state.menuConfiguration ?? mainConfig;
+        // An empty menu means the config has not arrived yet - do not block.
+        if (liveConfig.menuItems.isNotEmpty && !_routeInMenu(liveConfig, path)) {
+          return '/';
+        }
+      }
       return null;
     },
     routes: [
@@ -364,4 +377,21 @@ List<RouteBase> _generateRoutes(
     );
   }
   return routes;
+}
+
+/// Routes declared directly on the router rather than coming from the menu.
+/// They are reachable from screens the user already has access to (a profile,
+/// a document detail, the print preview), so they are not gated by the menu.
+const _alwaysAllowedRoutes = {'/user', '/company', '/findoc', '/printer'};
+
+/// True when [path] belongs to a menu item the user can actually see. The
+/// backend has already dropped items the caller's group has no access to, so
+/// "not in the menu" is the same answer as "not allowed".
+bool _routeInMenu(MenuConfiguration config, String path) {
+  bool matches(MenuItem item) {
+    if (item.route == path) return true;
+    return (item.children ?? const <MenuItem>[]).any(matches);
+  }
+
+  return config.menuItems.any(matches);
 }
