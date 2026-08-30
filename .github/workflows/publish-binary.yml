@@ -1568,20 +1568,32 @@ jobs:
       # The Snap Store has no review gate, so 'candidate' is the hold: a stable
       # release parks there and release-approved.yml promotes it to stable.
       # Beta keeps going straight to its own channel for testers.
-      - name: Upload and release snap
+      # Parallel matrix legs uploading at once occasionally get dropped by the
+      # store mid-transfer ("Connection aborted ... RemoteDisconnected"), so
+      # retry with a growing backoff. Re-uploading the same file is safe.
+      - name: Upload and release snap (with retry)
+        shell: bash
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
           SNAP_CHANNEL: ${{ inputs.track == 'stable' && 'candidate' || inputs.track }}
         run: |
+          set -uo pipefail
           SNAP_FILE=$(ls flutter/packages/${{ matrix.app }}/growerp-${{ matrix.app }}_*.snap 2>/dev/null \
             || ls flutter/packages/${{ matrix.app }}/*.snap | head -1)
-          snapcraft upload "$SNAP_FILE" --release="$SNAP_CHANNEL"
+          for i in {1..4}; do
+            if snapcraft upload "$SNAP_FILE" --release="$SNAP_CHANNEL"; then exit 0; fi
+            echo "snapcraft upload failed (attempt $i), retrying..."
+            sleep $((i * 30))
+          done
+          echo "snapcraft upload failed after retries"
+          exit 1
 
       - name: Rebuild and release snap as 'growerp' (admin only)
         if: matrix.app == 'admin'
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
           SNAP_CHANNEL: ${{ inputs.track == 'stable' && 'candidate' || inputs.track }}
+        shell: bash
         run: |
           set -euxo pipefail
           sed -i 's/^name: growerp-admin$/name: growerp/' flutter/packages/admin/snapcraft.yaml
@@ -1592,4 +1604,11 @@ jobs:
             sleep 15
           done
           SNAP_FILE=$(ls growerp_*.snap | head -1)
-          snapcraft upload "$SNAP_FILE" --release="$SNAP_CHANNEL"
+          set +e
+          for i in {1..4}; do
+            if snapcraft upload "$SNAP_FILE" --release="$SNAP_CHANNEL"; then exit 0; fi
+            echo "snapcraft upload failed (attempt $i), retrying..."
+            sleep $((i * 30))
+          done
+          echo "snapcraft upload failed after retries"
+          exit 1
