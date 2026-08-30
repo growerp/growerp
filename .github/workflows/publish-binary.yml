@@ -1014,13 +1014,34 @@ jobs:
               f.write(f'PLAY_STATUS={status}\n')
           PYEOF
 
-      # Committing the edit fails with "Changes cannot be sent for review
-      # automatically" whenever the Console will not let the API self-submit
-      # (managed publishing on, or the app under enforcement). The edit is then
-      # discarded and the uploaded bundle is lost. Committing without sending
-      # for review always succeeds; the release is then submitted from
-      # Publishing overview → Send changes for review.
+      # Play accepts exactly one of two commit modes per app, and which one it
+      # rejects flips with the app/account state:
+      #   * managed publishing on, or the app under enforcement — a plain commit
+      #     fails with "Changes cannot be sent for review automatically"
+      #   * changes auto-sent for review — a commit with the flag fails with
+      #     "Changes are sent for review automatically. The query parameter
+      #     changesNotSentForReview must not be set."
+      # So try the plain commit first and fall back to committing without
+      # sending for review (release-approved.yml does the same for promotion).
+      # A failed commit consumes no version code — the bundle only lives inside
+      # the uncommitted edit — so the retry can re-upload the same AAB. After a
+      # fallback commit the release is submitted from the Console, Publishing
+      # overview → Send changes for review.
       - name: Upload to Play Store
+        id: play_upload
+        continue-on-error: true
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: ${{ env.ANDROID_PACKAGE }}
+          releaseFiles: flutter/packages/${{ matrix.app
+            }}/build/app/outputs/bundle/release/app-release.aab
+          track: ${{ inputs.track == 'stable' && 'production' || inputs.track }}
+          status: ${{ env.PLAY_STATUS }}
+          changesNotSentForReview: false
+
+      - name: Upload to Play Store (changes not sent for review)
+        if: steps.play_upload.outcome == 'failure'
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
