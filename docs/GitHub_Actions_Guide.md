@@ -189,7 +189,7 @@ release  (single job)
 | `app_admin` … `app_marketing` | boolean | all on | — | One checkbox per app (admin, hotel, freelance, support, agents, rental, marketing). |
 | `store_ios` / `store_macos` / `store_android` / `store_windows` / `store_snap` | boolean | all on | — | Stores to deploy to. |
 | `track` | choice | `beta` | `beta`, `stable` | Release track. `beta` = TestFlight only (no review submission). `stable` = submit to App Store review / production. |
-| `android_release_status` | choice | `auto` | `auto`, `draft`, `completed` | Google Play release status. `auto` = `draft` on the production track (manual release gate), resolved from prior releases on beta. `completed` overrides the gate and rolls out on approval. |
+| `android_release_status` | choice | `auto` | `auto`, `draft`, `completed` | Google Play release status. `auto` = `completed` for a published app (managed publishing holds it after review), `draft` only for an app Play has never published. `draft` forces the staged-release gate on apps without managed publishing. |
 
 **Release gate:** submitting a binary never makes it go live by itself. Every store that
 has a release-mode setting is checked on each submit and forced to manual, so
@@ -199,9 +199,9 @@ place where an app goes public:
 | Store | Setting checked | Forced to |
 |-------|-----------------|-----------|
 | iOS / macOS | App Store version `releaseType` | `MANUAL` — Fastfile passes `automatic_release: false`, then `ensure_manual_release` re-reads every unreleased version and patches any that is still `AFTER_APPROVAL` |
-| Android | production-track release `status` | `draft` — Play exposes no API for the app-level managed-publishing switch, so a staged draft is the equivalent. Beta is left alone so testers still get builds immediately |
+| Android | app-level **managed publishing** (Play Console → Publishing overview → Manage publishing) | Switched on per app in the Console — Play exposes no API for it. With it on, the uploaded `completed` release is reviewed immediately and parks in *Ready to publish*. Apps without it can still be gated with `android_release_status: draft` |
 | Windows | submission `targetPublishMode` | `Manual` — a cloned submission inherits `Immediate` from the last published one, which would go live straight out of certification |
-| Snap | — | Nothing to force: the Snap Store has no review or hold state, so `track` alone decides the channel. `beta` is the safe default; `stable` is live on upload |
+| Snap | upload channel | `candidate` — the Snap Store has no review or hold state, so a `stable` run parks the revision in `candidate` and `release-approved.yml` promotes it. `beta` still goes straight to the beta channel for testers |
 
 **Job Flow:**
 
@@ -240,7 +240,7 @@ resolve-matrix ──┬──> bootstrap ──┬──> deploy-ios     ─┐
 **Job: `deploy-android`** — Runs on `ubuntu-latest`.
 1. Writes the keystore file and `key.properties` from secrets.
 2. Builds the Flutter app bundle (`flutter build appbundle --release`).
-3. Resolves the release status — `draft` on the production track so the release is staged, not rolled out.
+3. Resolves the release status — `completed` for a published app (managed publishing holds it after review), `draft` for an app Play has never published.
 4. Uploads the `.aab` to Google Play via `r0adkll/upload-google-play@v1`.
 
 **Job: `deploy-windows`** — Runs on `windows-latest`.
@@ -273,7 +273,7 @@ resolve-matrix ──┬──> bootstrap ──┬──> deploy-ios     ─┐
 |-------|------|---------|-------------|
 | `app_admin` … `app_marketing` | boolean | `true` | One checkbox per app (admin, hotel, freelance, support, agents, rental, marketing). |
 | `store_ios` / `store_macos` / `store_android` / `store_windows` | boolean | `true` | Stores to check for approved-but-held versions. |
-| `store_snap` | boolean | `false` | Promote `latest/beta` to `stable`. Off by default: the Snap Store has no review gate, so every run would push whatever sits in beta straight to stable users. |
+| `store_snap` | boolean | `true` | Promote `latest/candidate` to `stable`. `publish-binary` parks stable-track revisions in `candidate`, so this is the Snap equivalent of the other stores' release gate. |
 
 Apps are intersected with `storeApps` in `flutter/release/release_config.json`, so an app is only
 checked on the stores it is actually published on (e.g. `support` is android + snap only).
@@ -284,9 +284,9 @@ checked on the stores it is actually published on (e.g. `support` is android + s
 |----------|-------------|----------------|
 | iOS | `PENDING_DEVELOPER_RELEASE` on App Store Connect | Fastlane Spaceship `AppStoreVersionReleaseRequest` |
 | macOS | `PENDING_DEVELOPER_RELEASE` on App Store Connect | Same as iOS |
-| Android | `draft` release on production track | Google Play API: set release status to `completed` and commit the edit. If Play refuses to send the changes for review automatically, it commits with `changesNotSentForReview` and prints a notice to finish in Play Console → Publishing overview → **Send changes for review**. |
+| Android | Managed publishing *Ready to publish* (Console-only), or a `draft` release on the production track for apps without managed publishing | No API publishes a managed-publishing release — the job prints a notice to finish in Play Console → Publishing overview → **Publish**. For a `draft` release it sets the status to `completed` and commits the edit, falling back to `changesNotSentForReview` plus a **Send changes for review** notice if Play refuses. |
 | Windows | `ReadyToPublish` pending submission in Partner Center | Partner Center Ingestion API publish call |
-| Snap | Any revision present in `latest/beta` channel | `snapcraft release <snap> <revision> stable` |
+| Snap | Any revision present in `latest/candidate` channel | `snapcraft release <snap> <revision> stable` |
 
 If no held version is found for a given app/platform combination, the job exits cleanly with a message — it is not an error.
 

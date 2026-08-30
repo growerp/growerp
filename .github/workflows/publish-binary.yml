@@ -951,13 +951,13 @@ jobs:
       # A draft app (one that has never been published) only accepts a draft
       # release — "Only releases with status draft may be created on draft app".
       # Published apps must keep getting completed releases, so the status is
-      # resolved per app rather than by one global flag.
+      # resolved per app rather than by one global flag. Holding the release
+      # back is managed publishing's job, not this status (see below).
       - name: Resolve Play release status
         env:
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
           RELEASE_STATUS: ${{ inputs.android_release_status }}
           PACKAGE_NAME: ${{ env.ANDROID_PACKAGE }}
-          TRACK: ${{ inputs.track }}
         run: |
           if [[ "$RELEASE_STATUS" != "auto" ]]; then
             echo "PLAY_STATUS=$RELEASE_STATUS" >> "$GITHUB_ENV"
@@ -965,16 +965,14 @@ jobs:
             exit 0
           fi
 
-          # Play has no API for the app-level "managed publishing" switch, so
-          # 'draft' is the release-is-manual equivalent: the release is staged on
-          # the production track and only goes live when release-approved.yml
-          # flips it to completed. Beta keeps the resolved status below so beta
-          # testers still get the build straight away (same as TestFlight).
-          if [[ "$TRACK" == "stable" ]]; then
-            echo "PLAY_STATUS=draft" >> "$GITHUB_ENV"
-            echo "$PACKAGE_NAME: production release staged as draft (manual release)"
-            exit 0
-          fi
+          # Managed publishing (Play Console → Publishing overview → Manage
+          # publishing) is what holds a reviewed release back until someone
+          # publishes it, and it has no API — it is switched on per app in the
+          # Console. With it on, a completed release is sent for review at
+          # upload and parks in "Ready to publish", which matches how iOS and
+          # Windows are gated. So the status comes from the probe below for
+          # every track: completed for a published app, draft only for an app
+          # that has never been published (Play rejects completed there).
           pip install google-auth requests --quiet
           python3 << 'PYEOF'
           import json, os
@@ -1567,18 +1565,23 @@ jobs:
           exit 1
         working-directory: flutter/packages/${{ matrix.app }}
 
+      # The Snap Store has no review gate, so 'candidate' is the hold: a stable
+      # release parks there and release-approved.yml promotes it to stable.
+      # Beta keeps going straight to its own channel for testers.
       - name: Upload and release snap
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+          SNAP_CHANNEL: ${{ inputs.track == 'stable' && 'candidate' || inputs.track }}
         run: |
           SNAP_FILE=$(ls flutter/packages/${{ matrix.app }}/growerp-${{ matrix.app }}_*.snap 2>/dev/null \
             || ls flutter/packages/${{ matrix.app }}/*.snap | head -1)
-          snapcraft upload "$SNAP_FILE" --release="${{ inputs.track }}"
+          snapcraft upload "$SNAP_FILE" --release="$SNAP_CHANNEL"
 
       - name: Rebuild and release snap as 'growerp' (admin only)
         if: matrix.app == 'admin'
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+          SNAP_CHANNEL: ${{ inputs.track == 'stable' && 'candidate' || inputs.track }}
         run: |
           set -euxo pipefail
           sed -i 's/^name: growerp-admin$/name: growerp/' flutter/packages/admin/snapcraft.yaml
@@ -1589,4 +1592,4 @@ jobs:
             sleep 15
           done
           SNAP_FILE=$(ls growerp_*.snap | head -1)
-          snapcraft upload "$SNAP_FILE" --release="${{ inputs.track }}"
+          snapcraft upload "$SNAP_FILE" --release="$SNAP_CHANNEL"

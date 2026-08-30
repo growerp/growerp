@@ -28,7 +28,7 @@ Go to **Actions → Release Approved Store Submissions → Run workflow** and fi
 |-------|-------------|---------|
 | `app_admin` … `app_marketing` | One checkbox per app | all on |
 | `store_ios` / `store_macos` / `store_android` / `store_windows` | Stores to check | all on |
-| `store_snap` | Promote `latest/beta` to `stable` (no review gate) | off |
+| `store_snap` | Promote `latest/candidate` to `stable` | on |
 
 This workflow does **not** build anything. It queries each store API for versions that have passed review and are waiting for a manual developer release, then releases them. Run this after Apple/Google/Microsoft notifies you that your submission has been approved.
 
