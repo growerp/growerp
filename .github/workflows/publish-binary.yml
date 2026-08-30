@@ -1367,6 +1367,22 @@ jobs:
             minimumSystemRam       = "None"
           }
 
+          # A submission cloned from an app whose baseline never set this 400s on
+          # the update PUT (InvalidParameterValue). GrowERP ships a Desktop MSIX,
+          # so default Desktop=true and the other families false. Existing values
+          # are kept. Mirrors publish-metadata.yml.
+          $aff = @{}
+          if ($sub.allowTargetFutureDeviceFamilies) {
+            foreach ($p in $sub.allowTargetFutureDeviceFamilies.PSObject.Properties) {
+              $aff[$p.Name] = $p.Value
+            }
+          }
+          foreach ($fam in 'Desktop','Mobile','Xbox','Holographic') {
+            if (-not $aff.ContainsKey($fam)) { $aff[$fam] = ($fam -eq 'Desktop') }
+          }
+          $sub | Add-Member -NotePropertyName allowTargetFutureDeviceFamilies `
+            -NotePropertyValue $aff -Force
+
           # Update submission metadata
           $subJson = $sub | ConvertTo-Json -Depth 100 -Compress
           Invoke-RestMethod -Uri "$baseUri/submissions/$subId" -Method PUT `
