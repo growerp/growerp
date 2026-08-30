@@ -1,6 +1,6 @@
 name: marketing
 resolution: workspace
-version: 1.17.14+14
+version: 1.17.15+15
 publish_to: none
 
 environment:
