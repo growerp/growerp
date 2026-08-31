@@ -110,9 +110,12 @@ class LoginDialogState extends State<LoginDialog> {
                 if (context.mounted &&
                     !isGrowERP &&
                     (auth.user?.appsUsed.isEmpty ?? false)) {
-                  // Apple rejects trial/subscription messaging outside IAP,
-                  // so the trial welcome is not shown on iOS.
-                  if (!Platform.isIOS) {
+                  // Apple/Mac App Store reject trial messaging outside IAP;
+                  // suppress the trial welcome on those platforms in test.
+                  final skipTrialWelcome =
+                      (Platform.isIOS || Platform.isMacOS) &&
+                      GlobalConfiguration().get("test") == true;
+                  if (!skipTrialWelcome) {
                     await showDialog(
                       context: context,
                       barrierDismissible: false,
