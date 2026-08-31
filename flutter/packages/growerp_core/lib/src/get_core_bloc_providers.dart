@@ -32,6 +32,9 @@ List<BlocProvider> getCoreBlocProviders(
     BlocProvider<NotificationBloc>(
       // no startup fetch: it ran before there were any credentials, and racing
       // the dialog's own fetch is what made the backend insert twice
+      // not lazy: created on first read it missed the login transition, so the
+      // socket was never subscribed and no notification ever arrived
+      lazy: false,
       create: (context) =>
           NotificationBloc(restClient, notificationClient, authBloc),
     ),
