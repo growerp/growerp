@@ -569,8 +569,11 @@ jobs:
   #          APP_STORE_CONNECT_API_KEY_CONTENT
   # ─────────────────────────────────────────────────────────────────────────────
   status-ios:
-      needs: [ resolve-matrix ]
-      if: needs.resolve-matrix.outputs.run_ios == 'true'
+      # Depends on the test jobs only for ordering: the store answer is written
+      # into the page by `report`, so querying at workflow start made every cell
+      # 2+ hours old before anyone could read it.
+      needs: [ resolve-matrix, backend-tests, integration-tests ]
+      if: always() && needs.resolve-matrix.outputs.run_ios == 'true'
       runs-on: ubuntu-latest
       strategy:
           fail-fast: false
@@ -663,7 +666,10 @@ jobs:
                 except Exception as e:
                     rows = [{'version': '—', 'state': '—', 'date': '—'}]
 
-                fragment = {'store': 'ios', 'app': app_name, 'rows': rows}
+                # When the store was actually asked — the page prints the oldest of
+                # these so a stale cell is visible instead of implied fresh.
+                queried = time.strftime('%Y-%m-%dT%H:%MZ', time.gmtime())
+                fragment = {'store': 'ios', 'app': app_name, 'rows': rows, 'queried': queried}
                 with open('/tmp/fragment.json', 'w') as f:
                     json.dump(fragment, f)
 
@@ -691,8 +697,8 @@ jobs:
   #          APP_STORE_CONNECT_API_KEY_CONTENT
   # ─────────────────────────────────────────────────────────────────────────────
   status-macos:
-      needs: [ resolve-matrix ]
-      if: needs.resolve-matrix.outputs.run_macos == 'true'
+      needs: [ resolve-matrix, backend-tests, integration-tests ]
+      if: always() && needs.resolve-matrix.outputs.run_macos == 'true'
       runs-on: ubuntu-latest
       strategy:
           fail-fast: false
@@ -780,7 +786,10 @@ jobs:
                 except Exception as e:
                     rows = [{'version': '—', 'state': '—', 'date': '—'}]
 
-                fragment = {'store': 'macos', 'app': app_name, 'rows': rows}
+                # When the store was actually asked — the page prints the oldest of
+                # these so a stale cell is visible instead of implied fresh.
+                queried = time.strftime('%Y-%m-%dT%H:%MZ', time.gmtime())
+                fragment = {'store': 'macos', 'app': app_name, 'rows': rows, 'queried': queried}
                 with open('/tmp/fragment.json', 'w') as f:
                     json.dump(fragment, f)
 
@@ -806,8 +815,8 @@ jobs:
   # Secrets: GOOGLE_PLAY_SERVICE_ACCOUNT_JSON
   # ─────────────────────────────────────────────────────────────────────────────
   status-android:
-      needs: [ resolve-matrix ]
-      if: needs.resolve-matrix.outputs.run_android == 'true'
+      needs: [ resolve-matrix, backend-tests, integration-tests ]
+      if: always() && needs.resolve-matrix.outputs.run_android == 'true'
       runs-on: ubuntu-latest
       strategy:
           fail-fast: false
@@ -824,7 +833,7 @@ jobs:
                 PACKAGE_NAME: ${{ matrix.android_id }}
             run: |
                 python3 << 'PYEOF'
-                import base64, json, os, sys
+                import base64, json, os, sys, time
 
                 from google.oauth2 import service_account
                 from googleapiclient.discovery import build
@@ -927,7 +936,10 @@ jobs:
                 for r in rows:
                     r['live'] = live
 
-                fragment = {'store': 'android', 'app': app_name, 'rows': rows}
+                # When the store was actually asked — the page prints the oldest of
+                # these so a stale cell is visible instead of implied fresh.
+                queried = time.strftime('%Y-%m-%dT%H:%MZ', time.gmtime())
+                fragment = {'store': 'android', 'app': app_name, 'rows': rows, 'queried': queried}
                 with open('/tmp/fragment.json', 'w') as f:
                     json.dump(fragment, f)
 
@@ -956,8 +968,8 @@ jobs:
   #          WINDOWS_<APP>_PRODUCT_ID per app
   # ─────────────────────────────────────────────────────────────────────────────
   status-windows:
-      needs: [ resolve-matrix ]
-      if: needs.resolve-matrix.outputs.run_windows == 'true'
+      needs: [ resolve-matrix, backend-tests, integration-tests ]
+      if: always() && needs.resolve-matrix.outputs.run_windows == 'true'
       runs-on: ubuntu-latest
       strategy:
           fail-fast: false
@@ -976,7 +988,7 @@ jobs:
                 APP_NAME: ${{ matrix.app }}
             run: |
                 python3 << 'PYEOF'
-                import json, os, sys, requests
+                import json, os, sys, time, requests
 
                 app_name = os.environ['APP_NAME']
                 app_id = os.environ.get('WINDOWS_PRODUCT_ID', '')
@@ -1027,7 +1039,10 @@ jobs:
                     sub = get_json(f"{base}/submissions/{pending['id']}")
                     rows.append({'label': 'pending', 'version': pkg_version(sub), 'status': sub.get('status', '?')})
 
-                fragment = {'store': 'windows', 'app': app_name, 'rows': rows}
+                # When the store was actually asked — the page prints the oldest of
+                # these so a stale cell is visible instead of implied fresh.
+                queried = time.strftime('%Y-%m-%dT%H:%MZ', time.gmtime())
+                fragment = {'store': 'windows', 'app': app_name, 'rows': rows, 'queried': queried}
                 with open('/tmp/fragment.json', 'w') as f:
                     json.dump(fragment, f)
 
@@ -1054,8 +1069,8 @@ jobs:
   # Snap name convention: growerp-<app>
   # ─────────────────────────────────────────────────────────────────────────────
   status-snap:
-      needs: [ resolve-matrix ]
-      if: needs.resolve-matrix.outputs.run_snap == 'true'
+      needs: [ resolve-matrix, backend-tests, integration-tests ]
+      if: always() && needs.resolve-matrix.outputs.run_snap == 'true'
       runs-on: ubuntu-latest
       strategy:
           fail-fast: false
@@ -1079,7 +1094,7 @@ jobs:
                 snapcraft revisions "$SNAP_NAME" > /tmp/snap-revisions.txt 2>&1 || true
 
                 python3 << 'PYEOF'
-                import json, os, re
+                import json, os, re, time
 
                 app_name  = os.environ['APP_NAME']
                 snap_name = f'growerp-{app_name}'
@@ -1120,7 +1135,10 @@ jobs:
                 except Exception as e:
                     rows = [{'channel': '—', 'revision': '—', 'version': 'NOT FOUND', 'released': '—'}]
 
-                fragment = {'store': 'snap', 'app': app_name, 'rows': rows}
+                # When the store was actually asked — the page prints the oldest of
+                # these so a stale cell is visible instead of implied fresh.
+                queried = time.strftime('%Y-%m-%dT%H:%MZ', time.gmtime())
+                fragment = {'store': 'snap', 'app': app_name, 'rows': rows, 'queried': queried}
                 with open('/tmp/fragment.json', 'w') as f:
                     json.dump(fragment, f)
 
@@ -1148,6 +1166,10 @@ jobs:
   #   * an inline image inventory — running version per app per environment
   # ------------------------------------------------------------------
   swarm-status:
+    # Ordering only, like the store jobs: run just before `report` so the page
+    # shows what the swarm ran at publish time.
+    needs: [ backend-tests, integration-tests ]
+    if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
     continue-on-error: true
@@ -1342,6 +1364,7 @@ jobs:
 
           # Load all fragments: data[(store, app)] = rows list
           data = {}
+          queried_times = []
           fragments_dir = '/tmp/fragments'
           for store in STORE_ORDER:
               for app in APP_ORDER:
@@ -1354,6 +1377,13 @@ jobs:
                       for r in rows:
                           r['override'] = override
                       data[(store, app)] = rows
+                      if frag.get('queried'):
+                          queried_times.append(frag['queried'])
+
+          # Oldest store answer on the page. The store jobs run just before this
+          # one, so it should be minutes behind "Generated" — a bigger gap means
+          # a cell may have moved on in the store since.
+          queried_str = min(queried_times) if queried_times else '?'
 
           # ── Store console deep links ─────────────────────────────────────
           def console_url(store, app):
@@ -1375,10 +1405,16 @@ jobs:
               return f'<a href="{url}">{text}</a>' if url else text
 
           # ── Cell formatters ──────────────────────────────────────────────
+          # appStoreVersions has no `sort` parameter and documents no ordering, so
+          # take the newest by createdDate ('YYYY-MM-DD', sorts as text) instead of
+          # trusting the list order.
           def cell_asc(rows, url):
               if not rows:
                   return '—'
-              r = rows[0]
+              def created(x):
+                  d = x.get('date') or ''
+                  return '' if d == '—' else d
+              r = max(rows, key=created)
               return f"{link(r.get('version','—'), url)}<br>{r.get('state','?')}"
 
           # The Play API reports per-track release status only; it never says
@@ -1417,14 +1453,27 @@ jobs:
                   parts.append(f"✓ {link(ver, url)}" if r.get('label') == 'published' else f"⏳ {link(ver, url)} {st}")
               return '<br>'.join(parts)
 
+          # snapcraft marks the revision currently released to a channel with '*';
+          # superseded revisions keep the bare channel name and must not be picked.
+          def snap_current(rows, channel):
+              return next((r for r in rows or []
+                           if f'latest/{channel}*' in r.get('channel', '')
+                           and r.get('version') not in ('—', None)), None)
+
+          # Snap has no review gate, so 'candidate' is where a stable release waits
+          # for promotion — show it next to the live revision instead of only the
+          # released one.
           def cell_snap(rows, url):
               if not rows:
                   return '—'
-              stable = [r for r in rows if '/stable' in r.get('channel', '')]
-              r = stable[0] if stable else rows[0]
-              if r.get('version') == '—':
-                  return '—'
-              return f"r{r.get('revision','?')} {link(r.get('version','?'), url)}"
+              stable = snap_current(rows, 'stable')
+              cand   = snap_current(rows, 'candidate')
+              parts = []
+              if stable:
+                  parts.append(f"✓ r{stable.get('revision','?')} {link(stable.get('version','?'), url)}")
+              if cand and (not stable or cand.get('revision') != stable.get('revision')):
+                  parts.append(f"⏳ r{cand.get('revision','?')} {link(cand.get('version','?'), url)} candidate")
+              return '<br>'.join(parts) or '—'
 
           cell_fn = {
               'ios': cell_asc, 'macos': cell_asc,
@@ -1460,6 +1509,8 @@ jobs:
               'android': {'inProgress', 'draft', 'in review', 'in review or rejected'},
               'windows': {'Certification', 'PreProcessing', 'CommitStarted',
                           'PendingCommit', 'PendingPublication', 'ReadyToPublish'},
+              # Snap rows carry no state field; a candidate ahead of stable is the
+              # waiting case and is handled separately below.
               'snap':    set(),
           }
 
@@ -1468,6 +1519,16 @@ jobs:
               for app in APP_ORDER:
                   rows = data.get((store, app))
                   if not rows:
+                      continue
+                  if store == 'snap':
+                      stable = snap_current(rows, 'stable')
+                      cand   = snap_current(rows, 'candidate')
+                      if cand and (not stable or cand.get('revision') != stable.get('revision')):
+                          ver = cand.get('version', '?')
+                          waiting.append(
+                              f"  SNAP      {app:10s}  v{ver:12s}  "
+                              f"pending stable release [r{cand.get('revision','?')}]"
+                          )
                       continue
                   for r in rows:
                       # iOS/macOS use 'state'; Android uses 'status'; Windows uses 'status'
@@ -1839,7 +1900,7 @@ jobs:
               '<!DOCTYPE html><html><head><meta charset="utf-8"><title>GrowERP Status</title>'
               f'<style>\n{css}\n</style></head><body>'
               '<h1>GrowERP Status</h1>'
-              f'<p>Generated: {now_str}</p>'
+              f'<p>Generated: {now_str}<br>Store data queried: {esc(queried_str)}</p>'
               + md_lib.markdown(store_md, extensions=['tables'])
               + f'<h2>{tests_heading}</h2>'
               + tests_table
@@ -1876,7 +1937,8 @@ jobs:
           # Store part of the step summary; the test breakdown is appended by
           # the next step, so open in append mode.
           with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
-              f.write(f'# GrowERP Status\n\nGenerated: {now_str}\n\n' + store_md + '\n')
+              f.write(f'# GrowERP Status\n\nGenerated: {now_str}  \n'
+                      f'Store data queried: {queried_str}\n\n' + store_md + '\n')
           print(store_md)
           PYEOF
 
