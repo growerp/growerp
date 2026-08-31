@@ -77,8 +77,23 @@ one.
 
 | Subsystem | Config field | Precedence | Default |
 |---|---|---|---|
-| ADK | `AdkAgentConfig.modelName` + `llmProvider` (per-agent) | explicit value on the agent row → `AdkManager.defaultModelFor(provider)` (env `GEMINI_MODEL` / `ANTHROPIC_MODEL` first) | `gemini-3.5-flash-lite`, `claude-sonnet-5` |
-| Content-gen | `SystemSettings.aiModelName` + `aiProvider` (per-tenant), `SystemDefault.aiModelName` + `aiProvider` (GrowERP wide) | explicit override → tenant `SystemSettings` → `SystemDefault` (`defaultId='SYSTEM'`) → per-user Moqui preference (`GEMINI_MODEL`) → env var → system property → `DEFAULT_MODEL` | `gemini-3.5-flash-lite` |
+| ADK | `AdkAgentConfig.modelName` + `llmProvider` (per-agent) | explicit value on the agent row → `AdkManager.defaultModelFor(provider)`: `SystemDefault.aiModelName` (when its `aiProvider` matches) → env `GEMINI_MODEL` / `ANTHROPIC_MODEL` → system property → `DEFAULT_GEMINI_MODEL` / `DEFAULT_ANTHROPIC_MODEL` | `gemini-3.7-flash`, `claude-sonnet-5` |
+| Content-gen | `SystemSettings.aiModelName` + `aiProvider` (per-tenant), `SystemDefault.aiModelName` + `aiProvider` (GrowERP wide) | explicit override → tenant `SystemSettings` → `SystemDefault` (`defaultId='SYSTEM'`) → per-user Moqui preference (`GEMINI_MODEL`) → env var → system property → `DEFAULT_MODEL` | `gemini-3.7-flash` |
+
+Both subsystems share one authority: the `SystemDefault` row (`defaultId='SYSTEM'`,
+edited in Support app → System Defaults). Change the GrowERP wide model there — no
+restart, no redeploy. Env vars stay the per-deployment override, and the built-in
+constants (`GeminiAiUtil.DEFAULT_MODEL`, `AdkManager.DEFAULT_GEMINI_MODEL`, and
+`defaultLlmModel` in `llm_models.dart` for what the Flutter screens show) are only the
+fresh-install fallback. Seed agent rows deliberately name **no** model so they follow
+that default instead of pinning a model id that goes stale.
+
+Rows written before that (an `AdkAgentConfig.modelName` or `SystemSettings.aiModelName`
+still naming a retired 2.0/2.5/3.5 Gemini id) are cleaned up by the idempotent
+`growerp.100.GeneralServices100.migrate#StaleLlmModelNames`, run once from
+`/apps/tools/Service/ServiceRun/runJson`: it clears those rows so they follow the central
+default again and sets `SystemDefault` to the current built-in model. Rows naming a
+current or non-Gemini model are left alone.
 
 Content-gen resolution is `GeminiAiUtil.resolveModelConfig(ec, ownerPartyId,
 explicitModel, explicitProvider)`, called from `callLlmApi()`. It returns the model

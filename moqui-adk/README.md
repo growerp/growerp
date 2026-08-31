@@ -120,7 +120,7 @@ The default `growerp-agent` is used automatically. No UI config needed.
 |-------|-------------|---------|
 | Owner Party ID | Tenant/company this agent belongs to (blank = global) | _(blank = global)_ |
 | Agent Name | Leave blank to use the built-in `growerp-agent` | _(blank = growerp-agent)_ |
-| Model | Gemini model ID | `gemini-2.0-flash` |
+| Model | Gemini model ID | `gemini-3.7-flash` |
 | API Key | Your Google Gemini API key | — |
 | System Instruction | Agent persona / constraints | — |
 
@@ -170,7 +170,7 @@ Authorization: Bearer <token>
 
 {
   "agentName":   "sales-agent",
-  "modelName":   "gemini-2.0-flash",
+  "modelName":   "gemini-3.7-flash",
   "instruction": "You are a sales assistant. Help users find products and place orders.",
   "apiKey":      "AIza..."          # optional — omit to reuse server default
 }
@@ -192,7 +192,7 @@ To update an existing agent, `POST /adk/configs` again with the same `agentName`
 ```
 service: moqui.adk.AdkServices.update#AgentConfig
   agentName:   "sales-agent"
-  modelName:   "gemini-2.0-flash"
+  modelName:   "gemini-3.7-flash"
   instruction: "You are a sales assistant…"
   ownerPartyId: "PARTY_001"   # optional — scopes agent to one tenant
   apiKey:       "AIza…"       # optional — omit to reuse existing/env key
@@ -415,7 +415,7 @@ Call `update#AgentConfig` once per tenant with their `ownerPartyId`:
 service: moqui.adk.AdkServices.update#AgentConfig
   ownerPartyId: "PARTY_001"
   agentName: "sales-agent"
-  modelName: "gemini-2.0-flash"
+  modelName: "gemini-3.7-flash"
   apiKey: "AIza..."
   instruction: "You are a sales assistant for Acme Corp..."
 ```

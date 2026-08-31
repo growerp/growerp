@@ -29,7 +29,7 @@ final _logger = Logger(filter: ProductionFilter());
 /// confirmation, then runs the same deterministic [createApp] scaffold.
 ///
 /// Requires the GOOGLE_API_KEY environment variable. The model is Gemini
-/// (override with GEMINI_MODEL, default gemini-2.0-flash).
+/// (override with GEMINI_MODEL, default gemini-3.7-flash).
 Future<void> createAppFromDescription(
   String description,
   String growerpPath,
@@ -86,7 +86,7 @@ Future<String> _callGemini(
   String description,
   String? priorError,
 ) async {
-  final model = Platform.environment['GEMINI_MODEL'] ?? 'gemini-2.0-flash';
+  final model = Platform.environment['GEMINI_MODEL'] ?? 'gemini-3.7-flash';
   final uri = Uri.parse(
     'https://generativelanguage.googleapis.com/v1beta/models/'
     '$model:generateContent?key=$apiKey',

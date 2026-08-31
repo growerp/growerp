@@ -9,6 +9,8 @@
          Agents need an LLM key (config/AdkAgentConfig.apiKey or GOOGLE_API_KEY env).
          Each scheduled agent ships with a default scheduleChatRoomId; change it per agent in /adk if needed.
          See plans/marketing-sales-plan.md.
+         Agents deliberately name no modelName: AdkManager.defaultModelFor resolves it at
+         build time (SystemDefault row -> env -> constant), so seed rows never go stale.
          ════════════════════════════════════════════════════════════════════════ -->
 
     <!-- 1 ── Outreach Personalizer: fills PENDING message bodies with AI, hourly in work hours -->
@@ -16,7 +18,6 @@
         ownerPartyId="GROWERP"
         adkAgentConfigId="GROWERP_OUTREACH_PERSONALIZER"
         agentName="Outreach Personalizer"
-        modelName="gemini-3.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
@@ -59,7 +60,6 @@ moqui_search_services with a single noun and use the exact name it returns."/>
         ownerPartyId="GROWERP"
         adkAgentConfigId="GROWERP_SDR"
         agentName="GrowERP SDR"
-        modelName="gemini-3.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
@@ -78,7 +78,6 @@ run their business today. When a visitor shows buying intent, asks for a person/
         ownerPartyId="GROWERP"
         adkAgentConfigId="GROWERP_LEAD_TRIAGE"
         agentName="Lead Triage"
-        modelName="gemini-3.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
@@ -111,7 +110,6 @@ moqui_search_services with a single noun and use the exact name it returns."/>
         ownerPartyId="GROWERP"
         adkAgentConfigId="GROWERP_CONTENT_SOCIAL"
         agentName="Content and Social"
-        modelName="gemini-3.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
@@ -154,7 +152,6 @@ moqui_search_services with a single noun and use the exact name it returns."/>
         ownerPartyId="GROWERP"
         adkAgentConfigId="GROWERP_OPS_DIGEST"
         agentName="Marketing Ops Digest"
-        modelName="gemini-3.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"

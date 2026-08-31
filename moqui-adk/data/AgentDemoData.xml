@@ -18,12 +18,13 @@
 
     <!-- ── Coordinator ─────────────────────────────────────────────────────────
          Routes each request to the right specialist. Orchestration picks the member
-         by its DESCRIPTION, so member descriptions below are written as routing hints. -->
+         by its DESCRIPTION, so member descriptions below are written as routing hints.
+         Agents deliberately name no modelName: AdkManager.defaultModelFor resolves it at
+         build time (SystemDefault row -> env -> constant), so seed rows never go stale. -->
     <moqui.adk.AdkAgentConfig
         ownerPartyId="_NA_"
         adkAgentConfigId="ADK_DEMO_COORD"
         agentName="Operations Assistant"
-        modelName="gemini-3.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         agentRole="coordinator"
@@ -44,7 +45,6 @@ spans several areas, delegate them in turn. Never invent data."/>
         ownerPartyId="_NA_"
         adkAgentConfigId="ADK_DEMO_SALES"
         agentName="Sales Specialist"
-        modelName="gemini-3.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
@@ -63,7 +63,6 @@ prices; look them up."/>
         ownerPartyId="_NA_"
         adkAgentConfigId="ADK_DEMO_INV"
         agentName="Inventory Specialist"
-        modelName="gemini-3.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
@@ -79,7 +78,6 @@ through the Sales specialist with approval."/>
         ownerPartyId="_NA_"
         adkAgentConfigId="ADK_DEMO_SUPPORT"
         agentName="Support Specialist"
-        modelName="gemini-3.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
@@ -105,7 +103,6 @@ requestHumanHandoff tool with a short reason, then tell them a member of the tea
         ownerPartyId="_NA_"
         adkAgentConfigId="ADK_DEMO_DIGEST"
         agentName="Ops Digest"
-        modelName="gemini-3.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"

@@ -28,7 +28,7 @@
                             </field>
                             <field name="modelName">
                                 <default-field title="Model">
-                                    <text-line size="40" default-value="${configValue?.modelName ?: 'gemini-2.0-flash'}"/>
+                                    <text-line size="40" default-value="${configValue?.modelName ?: org.moqui.adk.AdkManager.DEFAULT_GEMINI_MODEL}"/>
                                 </default-field>
                             </field>
                             <field name="apiKey">

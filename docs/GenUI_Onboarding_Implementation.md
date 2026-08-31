@@ -15,7 +15,7 @@ OnboardingDialog
   │ POST /rest/s1/growerp/100/OnboardingChat
   │  { applicationId,    ──► onboardingChat.groovy
   │    systemPrompt,             │ flattens history → prompt
-  │    messages (history) }      │ POST generateContent    ──► gemini-3.5-flash
+  │    messages (history) }      │ POST generateContent    ──► gemini-3.7-flash
   │                              │                         ◄── A2UI JSONL text
   │  { jsonl }              ◄──  └ returns jsonl field
   │

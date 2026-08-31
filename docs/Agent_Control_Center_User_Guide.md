@@ -11,7 +11,7 @@ The **Agent Control Center** is your central hub for configuring, managing, and 
 ## Agent List View
 The main screen lists all your configured agents. For each agent, you can see:
 * **Name**: The agent's assigned name.
-* **Model**: The underlying LLM model (e.g., `gemini-2.5-flash`).
+* **Model**: The underlying LLM model (e.g., `gemini-3.7-flash`).
 * **Instruction**: A preview of the agent's system prompt.
 * **Schedule**: The cron schedule (if enabled).
 
@@ -29,7 +29,7 @@ When you tap the **+** button or edit an existing agent, you will open the Agent
 
 ### 1. Basic Information
 * **Agent Name**: A descriptive, unique name for the agent (required).
-* **Model**: The AI model the agent will use. Defaults to `gemini-2.5-flash`.
+* **Model**: The AI model the agent will use. Defaults to `gemini-3.7-flash`.
 * **LLM Provider**: The provider hosting the model (e.g., `gemini`, `openai`, `anthropic`). Defaults to `gemini`.
 * **Instruction (System Prompt)**: The exact instructions detailing what the agent should do, its persona, and rules to follow.
 * **Description**: An optional brief summary of the agent's purpose.

@@ -23,7 +23,7 @@ import 'package:growerp_models/growerp_models.dart';
 List<AdkAgentConfig> agents = [
   const AdkAgentConfig(
     agentName: 'ReadOnly Assistant',
-    modelName: 'gemini-2.5-flash',
+    modelName: 'gemini-3.7-flash',
     instruction: 'You are a read-only reporting assistant.',
     description: 'Answers questions, never writes.',
     toolMode: 'readOnly',
@@ -31,7 +31,7 @@ List<AdkAgentConfig> agents = [
   ),
   const AdkAgentConfig(
     agentName: 'Scoped Order Agent',
-    modelName: 'gemini-2.5-flash',
+    modelName: 'gemini-3.7-flash',
     instruction: 'Manage orders within the allow-list.',
     description: 'Writes need approval.',
     toolMode: 'scoped',
@@ -45,7 +45,7 @@ List<AdkAgentConfig> agents = [
 List<AdkAgentConfig> agentsUpdate = [
   const AdkAgentConfig(
     agentName: 'ReadOnly Assistant v2',
-    modelName: 'gemini-2.5-flash',
+    modelName: 'gemini-3.7-flash',
     instruction: 'Updated read-only reporting assistant.',
     description: 'Updated description.',
     toolMode: 'readOnly',
@@ -53,7 +53,7 @@ List<AdkAgentConfig> agentsUpdate = [
   ),
   const AdkAgentConfig(
     agentName: 'Scoped Order Agent v2',
-    modelName: 'gemini-2.5-flash',
+    modelName: 'gemini-3.7-flash',
     instruction: 'Updated scoped order agent.',
     description: 'Still needs approval.',
     toolMode: 'scoped',
@@ -66,7 +66,7 @@ List<AdkAgentConfig> agentsUpdate = [
 List<AdkAgentConfig> scheduledAgents = [
   const AdkAgentConfig(
     agentName: 'Hourly Reporter',
-    modelName: 'gemini-2.5-flash',
+    modelName: 'gemini-3.7-flash',
     instruction: 'Produce an hourly status report.',
     toolMode: 'readOnly',
     writePolicy: 'block',

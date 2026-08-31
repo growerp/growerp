@@ -264,7 +264,9 @@ class AdkDevServlet extends HttpServlet {
                     Map params = [
                         ownerPartyId      : ownerPartyId ?: body.ownerPartyId,
                         agentName         : body.agentName,
-                        modelName         : body.modelName ?: 'gemini-3.5-flash-lite',
+                        // no default here: an empty modelName lets AdkManager.defaultModelFor
+                        // resolve it at agent-build time (SystemDefault -> env -> constant)
+                        modelName         : body.modelName,
                         instruction       : body.instruction,
                         description       : body.description,
                         scheduleExpression: body.scheduleExpression,

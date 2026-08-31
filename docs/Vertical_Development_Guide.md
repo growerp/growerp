@@ -94,7 +94,7 @@ cd flutter/packages/bakery && flutter run
 
 Let an LLM pick the name and blocks from a plain-language description, then run the
 same deterministic scaffold. Requires `GOOGLE_API_KEY` (override the model with
-`GEMINI_MODEL`, default `gemini-2.0-flash`):
+`GEMINI_MODEL`, default `gemini-3.7-flash`):
 
 ```bash
 dart run bin/growerp.dart createApp --describe "small bakery with a webshop" -d /data/growerp

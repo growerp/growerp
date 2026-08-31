@@ -2424,6 +2424,79 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="migrate" noun="StaleLlmModelNames">
+        <description>One-time idempotent migration for rows still naming a retired Gemini model
+            (2.0/2.5/3.5 flash). Agent rows and tenant settings are cleared so they follow the
+            central default again (SystemDefault -> env -> built-in); the SystemDefault row itself
+            is pointed at the current built-in default. Rows naming a current or non-Gemini model
+            are left untouched. Run from /apps/tools/Service/ServiceRun/runJson.</description>
+        <out-parameters>
+            <parameter name="agentsCleared" type="Integer"/>
+            <parameter name="tenantsCleared" type="Integer"/>
+            <parameter name="systemDefaultModel"/>
+        </out-parameters>
+        <actions>
+            <set field="retired" from="['gemini-2.0-flash', 'gemini-2.5-flash',
+                'gemini-2.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.5-flash-lite']"/>
+            <set field="agentsCleared" from="0"/>
+            <set field="tenantsCleared" from="0"/>
+
+            <!-- ADK agents: empty modelName is resolved by AdkManager.defaultModelFor at
+                 agent-build time. Skipped when moqui-adk is not installed. -->
+            <if condition="ec.entity.isEntityDefined('moqui.adk.AdkAgentConfig')">
+                <entity-find entity-name="moqui.adk.AdkAgentConfig" list="staleAgents"
+                        for-update="true">
+                    <econdition field-name="modelName" operator="in" from="retired"/>
+                </entity-find>
+                <iterate list="staleAgents" entry="agentCfg">
+                    <set field="agentCfg.modelName" from="null"/>
+                    <entity-update value-field="agentCfg"/>
+                    <set field="agentsCleared" from="agentsCleared + 1"/>
+                </iterate>
+            </if>
+
+            <!-- Tenant choices: model and provider always travel together, so clear both. -->
+            <entity-find entity-name="growerp.general.SystemSettings" list="staleSettings"
+                    for-update="true">
+                <econdition field-name="aiModelName" operator="in" from="retired"/>
+            </entity-find>
+            <iterate list="staleSettings" entry="ssRow">
+                <set field="ssRow.aiModelName" from="null"/>
+                <set field="ssRow.aiProvider" from="null"/>
+                <entity-update value-field="ssRow"/>
+                <set field="tenantsCleared" from="tenantsCleared + 1"/>
+            </iterate>
+
+            <!-- The system wide row is the authority, so it keeps an explicit model: the
+                 built-in default, read from the single backend constant. -->
+            <script>
+                def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
+                defaultModel = GeminiAiUtil.DEFAULT_MODEL
+                defaultProvider = GeminiAiUtil.providerForModel(defaultModel)
+            </script>
+            <entity-find-one entity-name="growerp.general.SystemDefault" value-field="sd"
+                    for-update="true">
+                <field-map field-name="defaultId" value="SYSTEM"/>
+            </entity-find-one>
+            <if condition="sd == null">
+                <entity-make-value entity-name="growerp.general.SystemDefault" value-field="sd"/>
+                <set field="sd.defaultId" value="SYSTEM"/>
+                <set field="sd.aiModelName" from="defaultModel"/>
+                <set field="sd.aiProvider" from="defaultProvider"/>
+                <entity-create value-field="sd"/>
+                <else>
+                    <if condition="!sd.aiModelName || retired.contains(sd.aiModelName)">
+                        <set field="sd.aiModelName" from="defaultModel"/>
+                        <set field="sd.aiProvider" from="defaultProvider"/>
+                        <entity-update value-field="sd"/>
+                    </if>
+                </else>
+            </if>
+            <set field="systemDefaultModel" from="sd.aiModelName"/>
+            <log level="info" message="migrate#StaleLlmModelNames: cleared ${agentsCleared} agent row(s), ${tenantsCleared} tenant setting(s); system default model is '${systemDefaultModel}'"/>
+        </actions>
+    </service>
+
     <service verb="get" noun="ActiveEmailServer">
         <description>Resolve the email server to send with. With ownerPartyId: only the
             owner company's own EmailServer record (synced from its SMTP settings in
