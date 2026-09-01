@@ -1037,7 +1037,13 @@ jobs:
                 pending = app_data.get('pendingApplicationSubmission', {})
                 if pending:
                     sub = get_json(f"{base}/submissions/{pending['id']}")
-                    rows.append({'label': 'pending', 'version': pkg_version(sub), 'status': sub.get('status', '?')})
+                    # targetPublishMode decides who the submission waits for once it
+                    # passes certification: 'Manual' waits for us to press publish,
+                    # 'SpecificDate' waits for targetPublishDate, 'Immediate' goes out.
+                    rows.append({'label': 'pending', 'version': pkg_version(sub),
+                                 'status': sub.get('status', '?'),
+                                 'publishMode': sub.get('targetPublishMode', ''),
+                                 'publishDate': sub.get('targetPublishDate', '')})
 
                 # When the store was actually asked — the page prints the oldest of
                 # these so a stale cell is visible instead of implied fresh.
@@ -1414,6 +1420,7 @@ jobs:
           REJECTED_WORDS = ('reject', 'invalid', 'certificationfailed', 'removed')
           RELEASE_WORDS  = ('pending_developer_release', 'pending_apple_release',
                             'readytopublish', 'pendingpublication',
+                            'waiting for developer release', 'waiting for release on',
                             'pending stable release', 'candidate')
           REVIEW_WORDS   = ('review', 'waiting', 'certification', 'inprogress',
                             'draft', 'pending', 'commit', 'processing')
@@ -1455,11 +1462,18 @@ jobs:
           # hand-maintained override goes stale the moment the store moves on).
           # storeStatusOverrides still wins when the real state is worth pinning.
           AMBIGUOUS = 'in review or rejected'
+          # A Play release with status 'draft' has been uploaded but never rolled
+          # out: the store is not holding it, we are. Same situation as an iOS
+          # PENDING_DEVELOPER_RELEASE, so it gets the same wording.
+          DEV_RELEASE = 'waiting for developer release'
+
           def android_status(r):
               status = r.get('status', '?')
               override = r.get('override')
               if override:
                   return override
+              if status == 'draft':
+                  return DEV_RELEASE
               if r.get('live') is False:
                   return AMBIGUOUS if status == 'completed' else f'{status} · {AMBIGUOUS}'
               return status
@@ -1472,14 +1486,35 @@ jobs:
               # the completed release is the one that reflects production.
               done = [r for r in prod if r.get('status') == 'completed']
               src  = (done or prod or rows)[0]
-              return f"{link(src.get('version','?'), url)}<br>{state_span(android_status(src))}"
+              parts = [f"{link(src.get('version','?'), url)}<br>{state_span(android_status(src))}"]
+              # The draft is the row that needs action, so show it next to the
+              # live version instead of letting the completed release hide it.
+              parts += [f"⏳ {link(r.get('version','?'), url)} {state_span(DEV_RELEASE)}"
+                        for r in prod
+                        if r.get('status') == 'draft' and r is not src and not r.get('override')]
+              return '<br>'.join(parts)
+
+          # Windows: 'PendingPublication' means certification passed and the
+          # submission is parked. targetPublishMode says who it waits for —
+          # 'Manual' is us, 'SpecificDate' is the clock.
+          def windows_status(r):
+              if r.get('override'):
+                  return r['override']
+              st = r.get('status', '?')
+              if st != 'PendingPublication':
+                  return st
+              mode = r.get('publishMode', '')
+              if mode == 'SpecificDate':
+                  date = (r.get('publishDate') or '')[:10]
+                  return f'waiting for release on {date}' if date else st
+              return DEV_RELEASE
 
           def cell_windows(rows, url):
               if not rows:
                   return '—'
               parts = []
               for r in rows:
-                  ver, st = r.get('version','?'), r.get('status','?')
+                  ver, st = r.get('version','?'), windows_status(r)
                   parts.append(f"✓ {link(ver, url)}" if r.get('label') == 'published'
                                else f"⏳ {link(ver, url)} {state_span(st)}")
               return '<br>'.join(parts)
@@ -1538,9 +1573,11 @@ jobs:
                           'PENDING_APPLE_RELEASE'},
               'macos':   {'IN_REVIEW', 'WAITING_FOR_REVIEW', 'PENDING_DEVELOPER_RELEASE',
                           'PENDING_APPLE_RELEASE'},
-              'android': {'inProgress', 'draft', 'in review', 'in review or rejected'},
+              'android': {'inProgress', 'draft', 'in review', 'in review or rejected',
+                          DEV_RELEASE},
               'windows': {'Certification', 'PreProcessing', 'CommitStarted',
-                          'PendingCommit', 'PendingPublication', 'ReadyToPublish'},
+                          'PendingCommit', 'PendingPublication', 'ReadyToPublish',
+                          DEV_RELEASE},
               # Snap rows carry no state field; a candidate ahead of stable is the
               # waiting case and is handled separately below.
               'snap':    set(),
@@ -1569,6 +1606,8 @@ jobs:
                       label_info = f" [{r['label']}]" if 'label' in r else ''
                       if store == 'android' and r.get('track') == 'production':
                           status_val = android_status(r)
+                      elif store == 'windows':
+                          status_val = windows_status(r)
                       elif r.get('override'):
                           status_val = r['override']
                       if status_val in PENDING_STATES.get(store, set()):
