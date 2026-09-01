@@ -98,9 +98,12 @@ class SetupInProgressDialogState extends State<SetupInProgressDialog> {
             .where((n) => n.topic == demoDataLoadTopic)
             .firstOrNull;
         if (notification == null) return;
+        // Only an explicit failure is reported as one: a payload this version
+        // cannot read must not turn a company that was set up fine into an
+        // error, the patience timer already offers a way out.
         if (notification.message?['loaded'] == true) {
           _continue();
-        } else {
+        } else if (notification.message?['loaded'] == false) {
           setState(() => _failed = true);
         }
       },

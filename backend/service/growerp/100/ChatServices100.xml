@@ -595,21 +595,16 @@ limitations under the License.
         <out-parameters>
             <parameter name="notifications" type="List">
                 <parameter name="notification" type="Map">
-                    <parameter name="topic" type="Map">
-                        <parameter name="topicName" />
-                        <parameter name="description" />
-                        <parameter name="email" type="Boolean" />
-                        <parameter name="user" type="Map">
-                            <parameter name="userId" />
-                        </parameter>
+                    <parameter name="topic" />
+                    <parameter name="message" type="Map">
+                        <description>the payload as the sender wrote it, contents depend on the
+                            topic</description>
                     </parameter>
-                    <parameter name="messageJson" />
+                    <parameter name="sentDate" />
                     <parameter name="title" />
                     <parameter name="link" />
+                    <parameter name="type" />
                     <parameter name="showAlert" type="Boolean" />
-                    <parameter name="user" type="Map">
-                        <parameter name="userId" />
-                    </parameter>
                 </parameter>
             </parameter>
         </out-parameters>
@@ -678,11 +673,14 @@ limitations under the License.
             <iterate list="messages" entry="message">
                 <set field="mapMessage" type="NewMap"
                     from="new groovy.json.JsonSlurper().parseText(message.messageJson)" />
-                <set field="outMessage" from="[message: mapMessage.message]" type="NewMap" />
+                <!-- message is the payload as the sender wrote it: senders use their own keys
+                     (a plain 'message' text, or fields like DemoDataLoad's 'loaded'), so nothing
+                     may be picked out of it here. This is the shape the websocket push delivers
+                     too, see NotificationMessageImpl.getWrappedMessageJson(). -->
                 <set field="notification"
                     from="[
                     topic: message.topic,
-                    message: [message: mapMessage.message],
+                    message: mapMessage,
                     sentDate: message.sentDate
                         ? ec.l10n.format(message.sentDate,'yyyy-MM-dd')  : null,
                     title: message.titleText,
