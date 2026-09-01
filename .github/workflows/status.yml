@@ -958,8 +958,9 @@ jobs:
                             parent=f'applications/{package_name}/tracks/{track_name}'
                         ).execute()
                         for summary in resp.get('releases', []):
-                            summaries[(track_name, summary.get('releaseName'))] = \
-                                summary.get('releaseLifecycleState', '')
+                            summaries.setdefault(
+                                (track_name, summary.get('releaseName')), []
+                            ).append(summary.get('releaseLifecycleState', ''))
                         print(f'{track_name}: ' + ', '.join(
                             f"{s.get('releaseName')}={s.get('releaseLifecycleState')}"
                             for s in resp.get('releases', [])) or f'{track_name}: none')
@@ -967,9 +968,26 @@ jobs:
                     print(f'WARN: release summaries unavailable ({e})')
 
                 for r in rows:
-                    raw = summaries.get((r.get('track'), r.get('version')))
-                    if raw:
-                        r['lifecycle'] = LIFECYCLE.get(raw, raw)
+                    states = summaries.get((r.get('track'), r.get('version')), [])
+                    if not states:
+                        continue
+                    draft = 'RELEASE_LIFECYCLE_STATE_DRAFT'
+                    want_draft = r.get('status') == 'draft'
+                    raw = next((x for x in states
+                                if (x == draft) == want_draft), states[0])
+                    r['lifecycle'] = LIFECYCLE.get(raw, raw)
+
+                # A live release that a newer one superseded is no longer an
+                # "active" release in the edit, so without this the published
+                # version vanishes from the page the moment a new release is
+                # approved. Add the summaries no track row covered.
+                covered = {(r.get('track'), r.get('version')) for r in rows}
+                for (track_name, name), states in summaries.items():
+                    if (track_name, name) in covered:
+                        continue
+                    rows += [{'track': track_name, 'version': name, 'status': '—',
+                              'rollout': '—', 'live': live,
+                              'lifecycle': LIFECYCLE.get(raw, raw)} for raw in states]
 
                 # When the store was actually asked — the page prints the oldest of
                 # these so a stale cell is visible instead of implied fresh.
@@ -1513,7 +1531,11 @@ jobs:
               # is live, so the rollout status stays more informative there.
               lifecycle = r.get('lifecycle')
               if lifecycle:
-                  return status if lifecycle == 'published' else lifecycle
+                  if lifecycle != 'published':
+                      return lifecycle
+                  # Rows carried over from the release summaries have no rollout
+                  # status of their own.
+                  return status if status not in ('—', '?', '') else lifecycle
               # Fallback for a run where that endpoint was unavailable.
               if status == 'draft':
                   return DEV_RELEASE
@@ -1541,20 +1563,22 @@ jobs:
                         if r is not src and android_status(r) in ACTIONABLE]
               return '<br>'.join(parts)
 
-          # Windows: 'PendingPublication' means certification passed and the
-          # submission is parked. targetPublishMode says who it waits for —
-          # 'Manual' is us, 'SpecificDate' is the clock.
+          # Windows parks a certified submission in 'Release' (older submissions
+          # report 'PendingPublication'); targetPublishMode says who it waits
+          # for — 'Manual' is us, 'SpecificDate' is the clock, 'Immediate'
+          # nobody.
           def windows_status(r):
               if r.get('override'):
                   return r['override']
               st = r.get('status', '?')
-              if st != 'PendingPublication':
+              if st not in ('Release', 'PendingPublication'):
                   return st
               mode = r.get('publishMode', '')
-              if mode == 'SpecificDate':
-                  date = (r.get('publishDate') or '')[:10]
-                  return f'waiting for release on {date}' if date else st
-              return DEV_RELEASE
+              # Unset dates come back as the .NET min date, not as empty.
+              date = (r.get('publishDate') or '')[:10]
+              if mode == 'SpecificDate' and date and not date.startswith('1601'):
+                  return f'waiting for release on {date}'
+              return DEV_RELEASE if mode == 'Manual' else st
 
           def cell_windows(rows, url):
               if not rows:
