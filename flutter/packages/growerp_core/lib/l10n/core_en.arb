@@ -1707,6 +1707,14 @@
   "@acctPeriodLocked": {
     "description": "Currency and accounting year can no longer be changed"
   },
+  "guides": "Guides",
+  "@guides": {
+    "description": "System setup: title of the guides tab"
+  },
+  "noGuidesAvailable": "No guides available in this app.",
+  "@noGuidesAvailable": {
+    "description": "System setup: shown when the app registered no guide screens"
+  },
   "showOutreachGuide": "Show outreach setup guide",
   "@showOutreachGuide": {
     "description": "System setup: switch the outreach setup guide on or off"

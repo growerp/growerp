@@ -2095,12 +2095,18 @@ limitations under the License.
             <parameter name="llmConfigs" type="List"/>
             <parameter name="smtpHost"/>
             <parameter name="smtpPort"/>
-            <parameter name="smtpStartTls" default-value="N"/>
-            <parameter name="smtpSsl"      default-value="N"/>
+            <!-- No default-value on the mail fields: every action below is guarded on
+                 != null, so a caller sending only part of the settings (the AI tab, say)
+                 leaves the rest as stored. A default would arrive as a real value and
+                 reset the mail server of a tenant that only changed its API key. -->
+            <parameter name="smtpStartTls"/>
+            <parameter name="smtpSsl"/>
             <parameter name="storeHost"/>
             <parameter name="storePort"/>
-            <parameter name="storeProtocol" default-value="imaps"/>
-            <parameter name="storeFolder"   default-value="INBOX"/>
+            <parameter name="storeProtocol"/>
+            <parameter name="storeFolder"/>
+            <!-- these three are not on any screen, so their default is the only value
+                 they ever get and it cannot overwrite a choice -->
             <parameter name="storeDelete"   default-value="N"/>
             <parameter name="storeMarkSeen" default-value="Y"/>
             <parameter name="storeSkipSeen" default-value="Y"/>

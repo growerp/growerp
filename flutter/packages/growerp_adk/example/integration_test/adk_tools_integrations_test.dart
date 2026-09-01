@@ -99,7 +99,7 @@ void main() {
     expect(CommonTest.getTextFormField('smtpHost'), smtpHost,
         reason: 'system setup should show the configured SMTP host');
     await CommonTest.enterText(tester, 'storeHost', 'imap.example.com');
-    await CommonTest.tapByKey(tester, 'saveSettings',
+    await CommonTest.tapByKey(tester, 'saveEmailSettings',
         seconds: CommonTest.waitTime);
     await CommonTest.waitForSnackbarToGo(tester);
 

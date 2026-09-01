@@ -112,6 +112,14 @@ limitations under the License.
     <growerp.menu.MenuItem menuItemId="ADMIN_ORG_WEBFORMS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ORG"
         title="Web Forms" iconName="dynamic_form" widgetName="WebsiteFormList" sequenceNum="35"/>
     
+
+    <!-- ADMIN_SYSTEM_SETUP children (tabs) -->
+    <growerp.menu.MenuItem menuItemId="ADMIN_SETUP_AI" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_SYSTEM_SETUP"
+        title="AI" iconName="psychology" widgetName="SystemSetupAiView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_SETUP_EMAIL" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_SYSTEM_SETUP"
+        title="Email" iconName="mail_outline" widgetName="SystemSetupEmailView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_SETUP_GUIDES" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_SYSTEM_SETUP"
+        title="Guides" iconName="checklist" widgetName="GuideList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="30"/>
     <!-- ADMIN_CRM children -->
     <growerp.menu.MenuItem menuItemId="ADMIN_CRM_ACTIVITIES" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_CRM"
         title="My To Do, tasks" iconName="task" widgetName="ActivityList" sequenceNum="10"/>
@@ -377,6 +385,15 @@ limitations under the License.
         title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
         userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="999"/>
 
+    <!-- FREELANCE_SYSTEM_SETUP children (tabs) -->
+    <growerp.menu.MenuItem menuItemId="FREELANCE_SETUP_AI" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_SYSTEM_SETUP"
+        title="AI" iconName="psychology" widgetName="SystemSetupAiView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="FREELANCE_SETUP_EMAIL" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_SYSTEM_SETUP"
+        title="Email" iconName="mail_outline" widgetName="SystemSetupEmailView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="FREELANCE_SETUP_GUIDES" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_SYSTEM_SETUP"
+        title="Guides" iconName="checklist" widgetName="GuideList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="30"/>
+
+
     <!-- ====================== HOTEL_DEFAULT Menu Items ====================== -->
     <growerp.menu.MenuItem menuItemId="HOTEL_MAIN" menuConfigurationId="HOTEL_DEFAULT" 
         title="Main" route="/" iconName="dashboard" widgetName="GanttForm" sequenceNum="10"/>
@@ -466,6 +483,13 @@ limitations under the License.
     <growerp.menu.MenuItem menuItemId="HOTEL_SYSTEM_SETUP" menuConfigurationId="HOTEL_DEFAULT"
         title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
         userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="999"/>
+
+    <!-- HOTEL_SYSTEM_SETUP children (tabs) -->
+    <growerp.menu.MenuItem menuItemId="HOTEL_SETUP_AI" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_SYSTEM_SETUP"
+        title="AI" iconName="psychology" widgetName="SystemSetupAiView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="HOTEL_SETUP_EMAIL" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_SYSTEM_SETUP"
+        title="Email" iconName="mail_outline" widgetName="SystemSetupEmailView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="20"/>
+
 
     <!-- ====================== HEALTH_DEFAULT ====================== -->
     <growerp.menu.MenuItem menuItemId="HEALTH_MAIN" menuConfigurationId="HEALTH_DEFAULT" 
@@ -605,6 +629,13 @@ limitations under the License.
         title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="CORE_EX_SETUP" menuConfigurationId="CORE_EXAMPLE_DEFAULT"
         title="System Setup" route="/setup" iconName="settings" widgetName="SystemSetupDialog" sequenceNum="50"/>
+
+    <!-- CORE_EX_SETUP children (tabs) -->
+    <growerp.menu.MenuItem menuItemId="CORE_EX_SETUP_AI" menuConfigurationId="CORE_EXAMPLE_DEFAULT" parentMenuItemId="CORE_EX_SETUP"
+        title="AI" iconName="psychology" widgetName="SystemSetupAiView" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="CORE_EX_SETUP_EMAIL" menuConfigurationId="CORE_EXAMPLE_DEFAULT" parentMenuItemId="CORE_EX_SETUP"
+        title="Email" iconName="mail_outline" widgetName="SystemSetupEmailView" sequenceNum="20"/>
+
     <growerp.menu.MenuItem menuItemId="CORE_EX_AICHAT" menuConfigurationId="CORE_EXAMPLE_DEFAULT"
         title="AI Chat" route="/chat" iconName="smart_toy" widgetName="AdkChatView" sequenceNum="60"/>
     <growerp.menu.MenuItem menuItemId="CORE_EX_AIAGENTS" menuConfigurationId="CORE_EXAMPLE_DEFAULT"
@@ -659,6 +690,13 @@ limitations under the License.
         title="Organization" route="/organization" iconName="business" widgetName="ShowCompanyDialog" sequenceNum="70"/>
     <growerp.menu.MenuItem menuItemId="AGENTS_SETUP" menuConfigurationId="AGENTS_DEFAULT"
         title="System Setup" route="/setup" iconName="settings" widgetName="SystemSetupDialog" sequenceNum="80"/>
+
+    <!-- AGENTS_SETUP children (tabs) -->
+    <growerp.menu.MenuItem menuItemId="AGENTS_SETUPT_AI" menuConfigurationId="AGENTS_DEFAULT" parentMenuItemId="AGENTS_SETUP"
+        title="AI" iconName="psychology" widgetName="SystemSetupAiView" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="AGENTS_SETUPT_EMAIL" menuConfigurationId="AGENTS_DEFAULT" parentMenuItemId="AGENTS_SETUP"
+        title="Email" iconName="mail_outline" widgetName="SystemSetupEmailView" sequenceNum="20"/>
+
     <!-- AGENTS_ORG children (tabs): company / employees / web -->
     <growerp.menu.MenuItem menuItemId="AGENTS_ORG_COMPANY" menuConfigurationId="AGENTS_DEFAULT" parentMenuItemId="AGENTS_ORG"
         title="company" iconName="home" widgetName="ShowCompanyDialog" sequenceNum="10"/>
@@ -666,5 +704,9 @@ limitations under the License.
         title="employees" iconName="school" widgetName="UserListEmployee" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="AGENTS_ORG_WEB" menuConfigurationId="AGENTS_DEFAULT" parentMenuItemId="AGENTS_ORG"
         title="Web" iconName="webhook" widgetName="WebsiteDialog" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="AGENTS_ORG_SECURITY" menuConfigurationId="AGENTS_DEFAULT" parentMenuItemId="AGENTS_ORG"
+        title="security" iconName="security" widgetName="SecurityList" artifactGroupId="GROWERP_BASE"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]'
+        updateGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="40"/>
 
 </entity-facade-xml>

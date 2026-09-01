@@ -80,8 +80,12 @@ Map<String, GrowerpWidgetBuilder> getUserCompanyWidgets() {
     'CompanyListMainOnly': (args) =>
         const CompanyList(role: null, mainOnly: true),
 
-    // System settings
+    // System settings: the whole page, and the tabs it is split into for apps
+    // whose System Setup menu item has children.
     'SystemSetupDialog': (args) => const SystemSetupDialog(),
+    'SystemSetupAiView': (args) => const SystemSetupAiView(),
+    'SystemSetupEmailView': (args) => const SystemSetupEmailView(),
+    'GuideList': (args) => const GuideList(),
 
     // Organization -> Security: screen access per user group. The bloc is
     // provided here so no app has to add it to its provider list.
@@ -266,6 +270,27 @@ List<WidgetMetadata> getUserCompanyWidgetsWithMetadata() {
       iconName: 'settings',
       keywords: ['settings', 'setup', 'configuration', 'system'],
       builder: (args) => const SystemSetupDialog(),
+    ),
+    WidgetMetadata(
+      widgetName: 'SystemSetupAiView',
+      description: 'AI provider API keys, model and token limit',
+      iconName: 'psychology',
+      keywords: ['ai', 'llm', 'api key', 'model', 'gemini', 'openai', 'tokens'],
+      builder: (args) => const SystemSetupAiView(),
+    ),
+    WidgetMetadata(
+      widgetName: 'SystemSetupEmailView',
+      description: 'Email server settings of this organization',
+      iconName: 'mail_outline',
+      keywords: ['email', 'smtp', 'imap', 'mail server'],
+      builder: (args) => const SystemSetupEmailView(),
+    ),
+    WidgetMetadata(
+      widgetName: 'GuideList',
+      description: 'Step-by-step setup guides available in this app',
+      iconName: 'checklist',
+      keywords: ['guide', 'guides', 'setup', 'checklist', 'onboarding'],
+      builder: (args) => const GuideList(),
     ),
   ];
 }

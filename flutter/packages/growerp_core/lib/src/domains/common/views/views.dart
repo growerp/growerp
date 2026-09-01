@@ -1,4 +1,5 @@
 export 'about_form.dart';
+export 'guide_list.dart';
 export 'color_scheme_picker_dialog.dart';
 export 'email_settings_dialog.dart';
 export 'force_update_dialog.dart';
@@ -7,4 +8,6 @@ export 'google_workspace_settings_dialog.dart';
 export 'fatal_error_form.dart';
 export 'home_form.dart';
 export 'splash_form.dart';
+export 'system_setup_ai_view.dart';
 export 'system_setup_dialog.dart';
+export 'system_setup_email_view.dart';

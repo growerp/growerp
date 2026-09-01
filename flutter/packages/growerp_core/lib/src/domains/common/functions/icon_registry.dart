@@ -81,6 +81,7 @@ final Map<String, Icon> iconRegistry = {
   'rocket_launch': const Icon(Icons.rocket_launch),
   'outbox': const Icon(Icons.outbox),
   'mark_email_read': const Icon(Icons.mark_email_read),
+  'mail_outline': const Icon(Icons.mail_outline),
   'forum': const Icon(Icons.forum),
   'chat': const Icon(Icons.chat),
   // Support app icons
