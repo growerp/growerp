@@ -1404,6 +1404,36 @@ jobs:
           def link(text, url):
               return f'<a href="{url}">{text}</a>' if url else text
 
+          # ── Status colouring ─────────────────────────────────────────────
+          # red   = the store rejected the build
+          # amber = submitted, waiting for the store to review it
+          # green = approved, waiting for us to press release
+          # Matching is on substrings because each store spells its states
+          # differently; RELEASE is tested before REVIEW since
+          # PENDING_DEVELOPER_RELEASE also contains "pending".
+          REJECTED_WORDS = ('reject', 'invalid', 'certificationfailed', 'removed')
+          RELEASE_WORDS  = ('pending_developer_release', 'pending_apple_release',
+                            'readytopublish', 'pendingpublication',
+                            'pending stable release', 'candidate')
+          REVIEW_WORDS   = ('review', 'waiting', 'certification', 'inprogress',
+                            'draft', 'pending', 'commit', 'processing')
+
+          def state_span(text):
+              t = (text or '').lower()
+              # AMBIGUOUS says "review or rejected" — the store never told us
+              # which, so it stays amber rather than claiming a rejection.
+              if AMBIGUOUS in t:
+                  cls = 'st-rev'
+              elif any(w in t for w in REJECTED_WORDS):
+                  cls = 'st-rej'
+              elif any(w in t for w in RELEASE_WORDS):
+                  cls = 'st-rel'
+              elif any(w in t for w in REVIEW_WORDS):
+                  cls = 'st-rev'
+              else:
+                  return text
+              return f'<span class="{cls}">{text}</span>'
+
           # ── Cell formatters ──────────────────────────────────────────────
           # appStoreVersions has no `sort` parameter and documents no ordering, so
           # take the newest by createdDate ('YYYY-MM-DD', sorts as text) instead of
@@ -1415,7 +1445,7 @@ jobs:
                   d = x.get('date') or ''
                   return '' if d == '—' else d
               r = max(rows, key=created)
-              return f"{link(r.get('version','—'), url)}<br>{r.get('state','?')}"
+              return f"{link(r.get('version','—'), url)}<br>{state_span(r.get('state','?'))}"
 
           # The Play API reports per-track release status only; it never says
           # whether the app itself passed review. A completed release that is
@@ -1442,7 +1472,7 @@ jobs:
               # the completed release is the one that reflects production.
               done = [r for r in prod if r.get('status') == 'completed']
               src  = (done or prod or rows)[0]
-              return f"{link(src.get('version','?'), url)}<br>{android_status(src)}"
+              return f"{link(src.get('version','?'), url)}<br>{state_span(android_status(src))}"
 
           def cell_windows(rows, url):
               if not rows:
@@ -1450,7 +1480,8 @@ jobs:
               parts = []
               for r in rows:
                   ver, st = r.get('version','?'), r.get('status','?')
-                  parts.append(f"✓ {link(ver, url)}" if r.get('label') == 'published' else f"⏳ {link(ver, url)} {st}")
+                  parts.append(f"✓ {link(ver, url)}" if r.get('label') == 'published'
+                               else f"⏳ {link(ver, url)} {state_span(st)}")
               return '<br>'.join(parts)
 
           # snapcraft marks the revision currently released to a channel with '*';
@@ -1472,7 +1503,8 @@ jobs:
               if stable:
                   parts.append(f"✓ r{stable.get('revision','?')} {link(stable.get('version','?'), url)}")
               if cand and (not stable or cand.get('revision') != stable.get('revision')):
-                  parts.append(f"⏳ r{cand.get('revision','?')} {link(cand.get('version','?'), url)} candidate")
+                  parts.append(f"⏳ r{cand.get('revision','?')} "
+                               f"{link(cand.get('version','?'), url)} {state_span('candidate')}")
               return '<br>'.join(parts) or '—'
 
           cell_fn = {
@@ -1895,13 +1927,24 @@ jobs:
               '  h3    { color: #1a5276; margin-top: 1.2em; }',
               '  .bad  { color: #b03030; font-weight: bold; }',
               '  .warn { color: #b06a00; font-weight: bold; }',
+              '  .st-rej, .st-rev, .st-rel { font-weight: bold; padding: 1px 5px; '
+              'border-radius: 3px; }',
+              '  .st-rej { color: #8e1f1f; background: #fbe3e3; }',   # rejected
+              '  .st-rev { color: #7a5700; background: #fdf3d8; }',   # waiting for review
+              '  .st-rel { color: #1c6b32; background: #e2f4e6; }',   # waiting for release
           ])
+          legend = ('<p>Status colours: '
+                    '<span class="st-rej">rejected</span> '
+                    '<span class="st-rev">waiting for store review</span> '
+                    '<span class="st-rel">approved, waiting for developer release</span>'
+                    '</p>')
           full_html = (
               '<!DOCTYPE html><html><head><meta charset="utf-8"><title>GrowERP Status</title>'
               f'<style>\n{css}\n</style></head><body>'
               '<h1>GrowERP Status</h1>'
               f'<p>Generated: {now_str}<br>Store data queried: {esc(queried_str)}</p>'
               + md_lib.markdown(store_md, extensions=['tables'])
+              + legend
               + f'<h2>{tests_heading}</h2>'
               + tests_table
               + '<h2>Swarm Status — Staging and Production</h2>'
