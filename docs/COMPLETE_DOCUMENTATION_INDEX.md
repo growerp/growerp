@@ -167,6 +167,23 @@
 
 ---
 
+### 9. GrowERP_CI_Store_Maintenance_Guide.md ⭐ CI/CD & APP RELEASE PROCESS
+**Size:** 100+ lines | **Purpose:** Complete guide to 30+ apps maintenance  
+**Read Time:** 15 minutes  
+**For:** Release Managers, DevOps Engineers, and Flutter Developers
+
+**Contents:**
+- 30+ App Ecosystem overview
+- 6-Step Hybrid Release Workflow
+- Nightly Integration Tests & Status Checks
+- Live Status Report Matrix
+- Handling App Store Rejections
+- Future Roadmap (AI Agents)
+
+**Start Reading:** YES - Essential for CI/CD and deployment roles
+
+---
+
 ## 📖 Reading Recommendations by Role
 
 ### 👔 Project Managers / Stakeholders
