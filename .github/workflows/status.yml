@@ -936,6 +936,41 @@ jobs:
                 for r in rows:
                     r['live'] = live
 
+                # tracks-in-edit reports rollout only ('completed'), never whether
+                # Play reviewed the release — that is what makes a rolled-out and an
+                # approved-but-unpublished release look identical. The release
+                # summaries endpoint (outside the edit) carries the Console
+                # lifecycle, so ask it per track and attach the real state.
+                LIFECYCLE = {
+                    'RELEASE_LIFECYCLE_STATE_DRAFT':                 'draft',
+                    'RELEASE_LIFECYCLE_STATE_NOT_SENT_FOR_REVIEW':   'not sent for review',
+                    'RELEASE_LIFECYCLE_STATE_IN_REVIEW':             'in review',
+                    'RELEASE_LIFECYCLE_STATE_APPROVED_NOT_PUBLISHED': 'waiting for developer release',
+                    'RELEASE_LIFECYCLE_STATE_NOT_APPROVED':          'rejected',
+                    'RELEASE_LIFECYCLE_STATE_PUBLISHED':             'published',
+                }
+                summaries = {}
+                try:
+                    releases_api = service.applications().tracks().releases()
+                    for track_name in sorted({r['track'] for r in rows
+                                              if r.get('track') not in ('—', '?')}):
+                        resp = releases_api.list(
+                            parent=f'applications/{package_name}/tracks/{track_name}'
+                        ).execute()
+                        for summary in resp.get('releases', []):
+                            summaries[(track_name, summary.get('releaseName'))] = \
+                                summary.get('releaseLifecycleState', '')
+                        print(f'{track_name}: ' + ', '.join(
+                            f"{s.get('releaseName')}={s.get('releaseLifecycleState')}"
+                            for s in resp.get('releases', [])) or f'{track_name}: none')
+                except Exception as e:
+                    print(f'WARN: release summaries unavailable ({e})')
+
+                for r in rows:
+                    raw = summaries.get((r.get('track'), r.get('version')))
+                    if raw:
+                        r['lifecycle'] = LIFECYCLE.get(raw, raw)
+
                 # When the store was actually asked — the page prints the oldest of
                 # these so a stale cell is visible instead of implied fresh.
                 queried = time.strftime('%Y-%m-%dT%H:%MZ', time.gmtime())
@@ -944,10 +979,11 @@ jobs:
                     json.dump(fragment, f)
 
                 lines = [f'### Android — {app_name}\n',
-                         '| Track | Version | Status | Rollout |',
-                         '|-------|---------|--------|---------|']
+                         '| Track | Version | Status | Rollout | Lifecycle |',
+                         '|-------|---------|--------|---------|-----------|']
                 for r in rows:
-                    lines.append(f"| {r['track']} | {r['version']} | {r['status']} | {r['rollout']} |")
+                    lines.append(f"| {r['track']} | {r['version']} | {r['status']} "
+                                 f"| {r['rollout']} | {r.get('lifecycle', '—')} |")
                 text = '\n'.join(lines) + '\n'
                 with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
                     f.write(text)
@@ -1472,26 +1508,37 @@ jobs:
               override = r.get('override')
               if override:
                   return override
+              # The release-summaries lifecycle is the Console's own wording — use
+              # it whenever the collector got it. 'published' only says the release
+              # is live, so the rollout status stays more informative there.
+              lifecycle = r.get('lifecycle')
+              if lifecycle:
+                  return status if lifecycle == 'published' else lifecycle
+              # Fallback for a run where that endpoint was unavailable.
               if status == 'draft':
                   return DEV_RELEASE
               if r.get('live') is False:
                   return AMBIGUOUS if status == 'completed' else f'{status} · {AMBIGUOUS}'
               return status
 
+          # States worth a line of their own next to the live version.
+          ACTIONABLE = {DEV_RELEASE, 'in review', 'not sent for review', 'rejected'}
+
           def cell_android(rows, url):
               if not rows:
                   return '—'
               prod = [r for r in rows if r.get('track') == 'production']
-              # A track can hold a draft release next to the rolled-out one;
-              # the completed release is the one that reflects production.
+              # A track can hold an unpublished release next to the rolled-out one;
+              # the live (or completed) release is the one that reflects production.
+              live = [r for r in prod if r.get('lifecycle') == 'published']
               done = [r for r in prod if r.get('status') == 'completed']
-              src  = (done or prod or rows)[0]
+              src  = (live or done or prod or rows)[0]
               parts = [f"{link(src.get('version','?'), url)}<br>{state_span(android_status(src))}"]
-              # The draft is the row that needs action, so show it next to the
-              # live version instead of letting the completed release hide it.
-              parts += [f"⏳ {link(r.get('version','?'), url)} {state_span(DEV_RELEASE)}"
+              # A release waiting on us or on Play is the row that needs action, so
+              # show it instead of letting the live release hide it.
+              parts += [f"⏳ {link(r.get('version','?'), url)} {state_span(android_status(r))}"
                         for r in prod
-                        if r.get('status') == 'draft' and r is not src and not r.get('override')]
+                        if r is not src and android_status(r) in ACTIONABLE]
               return '<br>'.join(parts)
 
           # Windows: 'PendingPublication' means certification passed and the
@@ -1574,7 +1621,7 @@ jobs:
               'macos':   {'IN_REVIEW', 'WAITING_FOR_REVIEW', 'PENDING_DEVELOPER_RELEASE',
                           'PENDING_APPLE_RELEASE'},
               'android': {'inProgress', 'draft', 'in review', 'in review or rejected',
-                          DEV_RELEASE},
+                          'not sent for review', DEV_RELEASE},
               'windows': {'Certification', 'PreProcessing', 'CommitStarted',
                           'PendingCommit', 'PendingPublication', 'ReadyToPublish',
                           DEV_RELEASE},
