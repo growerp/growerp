@@ -124,7 +124,7 @@ and `loginStatus = apiKey = 'registered'`.
    `roleTypeId='OrgInternal'`; otherwise error `Not a valid main company`.
 2. `ownerPartyId` defaults to that company's owner.
 3. `create#User` with `role: 'Customer'`, `userGroupId: 'GROWERP_M_OTHER'`,
-   `loginName: email`.
+   `loginName: email`, and `trustGroup: true` (see §3.3).
 
 **B — create a new tenant** (no `companyPartyId`, `userGroupId == 'GROWERP_M_ADMIN'`)
 → `growerp.100.TenantServices100.create#Tenant` — [TenantServices100.xml:18](../backend/service/growerp/100/TenantServices100.xml):
@@ -137,16 +137,40 @@ and `loginStatus = apiKey = 'registered'`.
      created inside the tenant, which would collide with the `PARTY_ID_PSEUDO` unique index
      on (`pseudoId`, `ownerPartyId`).
    - `GROWERP` missing → create it (should not happen with seed data loaded).
-2. `create#User`: admin user in `GROWERP_M_ADMIN` with role `OrgInternal` and a placeholder
-   company named `Main Organization`.
+2. `create#User` with `trustGroup: true` (see §3.3): admin user in `GROWERP_M_ADMIN` with
+   role `OrgInternal` and a placeholder company named `Main Organization`.
 3. `growerp.general.TenantSetup` row with `setupComplete='N'` and the `applicationId`.
 4. System event `New tenant & admin created`.
 5. Back in `register#User`: `BirdSendServices100.registerAdd#UserToGroup` (mailing list).
 
+### 3.3 How the user group is decided
+
+The client supplies `userGroupId`, so it is never trusted. `create#User` and `update#User`
+run it through `growerp.100.SecurityServices100.resolve#GrantableUserGroup`:
+
+- a caller who is not an admin cannot change a group at all — the user keeps the one they have;
+- an admin may grant Admin, Employee or Other, but never `GROWERP_M_SYSTEM`;
+- only a system user may grant `GROWERP_M_SYSTEM`;
+- an unknown group id is rejected.
+
+Registration and tenant creation legitimately pick the group server-side, and say so with an
+explicit `trustGroup: true` parameter. It is explicit **on purpose**: inferring "this is
+registration" from the absence of a logged-in user is wrong, because an anonymous REST request
+can run on a pooled request thread that still carries the previous request's user.
+
+`register#WebsiteUser` (also `anonymous-all`) previously passed the caller's `userGroupId`
+straight into `create#UserGroupMember`, which let an anonymous caller make themselves an
+admin. It now fixes the group to `GROWERP_M_OTHER` and takes the business relationship from a
+`role` parameter, falling back to the legacy `userGroupId` values for older clients.
+
+The user group is the **only** security axis; the party role carries the business
+relationship and grants nothing. See
+[GrowERP Security Model](./GrowERP_Security_Model.md).
+
 **C — anything else** → error `Invalid registration: must provide companyPartyId or be an
 admin user`.
 
-### 3.3 Welcome email
+### 3.4 Welcome email
 
 Sent from `create#User` ([PartyServices100.xml:2127](../backend/service/growerp/100/PartyServices100.xml)) when a
 `loginName` is set, asynchronously, template `WELCOME` on a `.com` host and `WELCOME_TEST`
@@ -154,7 +178,7 @@ otherwise. Skipped — with the generated password written to the log at WARN �
 SYSTEM `EmailServer` is configured or the address is `@example.com`. Per-application copy
 comes from `GrowerpEmailWelcomeIntro<App>` localized message rows.
 
-### 3.4 Client rule
+### 3.5 Client rule
 
 `loginStatus`/`apiKey` `'registered'` is a **sentinel, not a key**. The client must clear it
 before persisting; persisting it sends `api_key: registered` on every later request, which

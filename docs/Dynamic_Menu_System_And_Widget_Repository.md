@@ -12,10 +12,15 @@ GrowERP's navigation system is built on a powerful combination of **dynamic menu
 
 - **Dynamic menu configuration** stored in the backend database
 - **Composable widget registry** allowing packages to register their screens
-- **Role-based access control** for menu visibility
+- **Group-based access control**, enforced on the server, which also authorizes the REST API
 - **Two router patterns**: Static for simple apps, Dynamic for full-featured apps
 
 This document covers both the **full implementation** (used in production apps like Admin) and the **simple implementation** (used in package example apps).
+
+> **The menu is the security policy.** Which groups see a menu item also decides which REST
+> endpoints they may call, per organization. This document describes the menu structure; see
+> [GrowERP Security Model](./GrowERP_Security_Model.md) for the access rules, their defaults,
+> and how to debug a 403.
 
 ---
 
@@ -47,8 +52,8 @@ This document covers both the **full implementation** (used in production apps l
 │                        Common Components                              │
 │  ┌─────────────────────────────────────────────────────────────────┐ │
 │  │ WidgetRegistry: Maps widget names → Widget builders              │ │
-│  │ DisplayMenuOption: Renders navigation UI (rail/drawer + tabs)    │ │
-│  │ MenuConfiguration → MenuOption → MenuItem (hierarchy)            │ │
+│  │ DisplayMenuItem: Renders navigation UI (rail/drawer + tabs)      │ │
+│  │ MenuConfiguration → MenuItem → MenuItem children (tabs)          │ │
 │  └─────────────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -70,74 +75,73 @@ class MenuConfiguration {
   final String? userId;               // For user-specific overrides (null = default)
   final bool isActive;                // Enable/disable configuration
   final DateTime? createdDate;        // Audit timestamp
-  final List<MenuOption> menuOptions; // Main menu entries
+  final List<MenuItem> menuItems;     // Top level entries, each with children
 }
 ```
 
 **Key Features:**
 - `appId` identifies which application this config belongs to
 - `userId` allows per-user menu customization (null = app default)
-- `menuOptions` contains the main navigation items
-
-### MenuOption
-
-Represents a main menu entry (navigation rail item or drawer item).
-
-```dart
-class MenuOption {
-  final String? menuOptionId;         // Unique ID
-  final String? menuConfigurationId;  // Parent configuration
-  final String? itemKey;              // Key for Widget testing
-  final String title;                 // Display title
-  final String? route;                // GoRouter path (e.g., '/products')
-  final String? iconName;             // Icon from registry (e.g., 'business')
-  final String? widgetName;           // Widget name in WidgetRegistry
-  final String? image;                // Image asset path for nav rail
-  final String? selectedImage;        // Selected state image
-  final List<UserGroup>? userGroups;  // Access control (admin, employee, etc.)
-  final int sequenceNum;              // Display order
-  final bool isActive;                // Enable/disable option
-  final List<MenuItem>? children;     // Sub-items (tabs)
-}
-```
-
-**Key Features:**
-- `widgetName` references a widget registered in `WidgetRegistry`
-- `children` contains `MenuItem` sub-tabs for tabbed interfaces
-- `userGroups` controls visibility based on user role
-- `image`/`selectedImage` for navigation rail icons
+- `menuItems` contains the top level navigation items, each with its tabs as `children`
 
 ### MenuItem
 
-Represents a tab or child item within a MenuOption.
+One unified, recursive entity: a top-level menu entry and a tab inside one are the same
+thing, distinguished only by `parentMenuItemId`. (Older revisions of this document described a
+separate `MenuOption` class; it no longer exists.)
 
 ```dart
 class MenuItem {
-  final String menuItemId;    // Unique ID
-  final String title;         // Tab label
-  final String? iconName;     // Icon for tab bar
-  final String? widgetName;   // Widget name in WidgetRegistry
-  final String? image;        // Optional image
-  final bool isActive;        // Enable/disable item
-  final int? sequenceNum;     // Display order within parent
+  final String? menuItemId;
+  final String? menuConfigurationId;
+  final String? parentMenuItemId;   // null = top level, set = a tab of that parent
+  final String? itemKey;            // key for widget testing
+  final String title;
+  final String? route;              // GoRouter path, top level items only
+  final String? iconName;           // icon from the registry
+  final String? widgetName;         // widget in the WidgetRegistry
+  final String? image;              // navigation rail image
+  final String? selectedImage;
+  final List<UserGroup>? userGroups;    // groups that may SEE this screen
+  final List<UserGroup>? updateGroups;  // groups that may WRITE through it
+  final String? artifactGroupId;        // REST domain override, see the security model
+  final int sequenceNum;
+  final bool isActive;
+  final bool isMinimized;           // shown at the end of the dashboard, hidden from the drawer
+  final List<MenuItem>? children;   // tabs
 }
 ```
 
-**Example Hierarchy:**
+**Key features:**
+- `widgetName` references a widget registered in `WidgetRegistry`
+- `children` are rendered as tabs of the parent
+- `userGroups` / `updateGroups` are **enforced on the server**, not merely used to hide tiles,
+  and they also decide REST access — see
+  [GrowERP Security Model](./GrowERP_Security_Model.md)
+- `image` / `selectedImage` for navigation rail icons
+
+**Access is server-side.** `get#MenuConfiguration` drops items the caller's group may not see,
+children included, before the menu ever reaches the client. An empty `userGroups` means the
+internal groups and never `GROWERP_M_OTHER`; the exact defaults are in the security model doc.
+
+**Three configuration tiers,** resolved most specific first:
+
+1. the user's own copy (`userId` set, `ownerPartyId` set)
+2. the organization's copy (`userId` null, `ownerPartyId` set) — what Organization → Security edits
+3. the shipped seed (`userId` null, `ownerPartyId` null)
+
+**Example hierarchy:**
 ```
 MenuConfiguration (Admin App)
-├── MenuOption (Main Dashboard)
-│   └── route: '/'
-│   └── widgetName: 'AdminDashboard'
-├── MenuOption (Catalog)
-│   └── route: '/catalog'
-│   └── children:
-│       ├── MenuItem (Products) → widgetName: 'ProductList'
-│       ├── MenuItem (Categories) → widgetName: 'CategoryList'
-│       └── MenuItem (Assets) → widgetName: 'AssetList'
-└── MenuOption (Users)
-    └── route: '/users'
-    └── widgetName: 'UserList'
+├── MenuItem (Main)          route: '/'          widgetName: 'AdminDashboard'
+├── MenuItem (Catalog)       route: '/catalog'   widgetName: 'ProductList'
+│   ├── MenuItem (Products)                      widgetName: 'ProductList'
+│   ├── MenuItem (Categories)                    widgetName: 'CategoryList'
+│   └── MenuItem (Assets)                        widgetName: 'AssetList'
+└── MenuItem (Organization)  route: '/companies' widgetName: 'ShowCompanyDialog'
+    ├── MenuItem (Company)                       widgetName: 'ShowCompanyDialog'
+    ├── MenuItem (Employees)                     widgetName: 'UserListEmployee'
+    └── MenuItem (Security)                      widgetName: 'SecurityList'
 ```
 
 ---
@@ -272,7 +276,7 @@ class DynamicRouterConfig {
 
 1. **Backend Menu Loading**: Uses `MenuConfigBloc` to fetch configuration from REST API
 2. **Accounting Submenu**: Supports nested accounting submenu with its own shell
-3. **Dynamic Route Generation**: Creates routes from `MenuOption.route` values
+3. **Dynamic Route Generation**: Creates routes from top level `MenuItem.route` values
 4. **Widget Loading**: Uses `WidgetRegistry.getWidget()` to instantiate widgets
 
 ### Full App Example (Admin)
@@ -367,22 +371,22 @@ const catalogMenuConfig = MenuConfiguration(
   menuConfigurationId: 'CATALOG_EXAMPLE',
   appId: 'catalog_example',
   name: 'Catalog Example Menu',
-  menuOptions: [
-    MenuOption(
+  menuItems: [
+    MenuItem(
       menuOptionId: 'CATALOG_MAIN',
       title: 'Catalog',
       route: '/',
       iconName: 'category',
       widgetName: 'CatalogDashboard',
     ),
-    MenuOption(
+    MenuItem(
       menuOptionId: 'CATALOG_PRODUCTS',
       title: 'Products',
       route: '/products',
       iconName: 'products',
       widgetName: 'ProductList',
     ),
-    MenuOption(
+    MenuItem(
       menuOptionId: 'CATALOG_CATEGORIES',
       title: 'Categories',
       route: '/categories',
@@ -416,8 +420,8 @@ const userCompanyMenuConfig = MenuConfiguration(
   menuConfigurationId: 'USER_COMPANY_EXAMPLE',
   appId: 'user_company_example',
   name: 'User & Company Example Menu',
-  menuOptions: [
-    MenuOption(
+  menuItems: [
+    MenuItem(
       menuOptionId: 'UC_COMPANIES',
       title: 'Companies',
       route: '/companies',
@@ -529,8 +533,7 @@ GoRouter createUserCompanyExampleRouter() {
 | File | Purpose |
 |------|---------|
 | `growerp_models/lib/src/models/menu_configuration_model.dart` | MenuConfiguration model |
-| `growerp_models/lib/src/models/menu_option_model.dart` | MenuOption model |
-| `growerp_models/lib/src/models/menu_item_model.dart` | MenuItem model |
+| `growerp_models/lib/src/models/menu_item_model.dart` | MenuItem model (unified: entries and tabs) |
 | `growerp_core/lib/src/services/widget_registry.dart` | WidgetRegistry service |
 | `growerp_core/lib/src/templates/dynamic_router_builder.dart` | Dynamic router builder |
 | `growerp_core/lib/src/templates/static_router_builder.dart` | Static router builder |

@@ -103,6 +103,7 @@ Custom components tracked in growerp root, symlinked by `setup-backend.sh`:
 
 ## Key Docs
 
+- `docs/GrowERP_Security_Model.md` — user groups, menu-driven access, REST authorization
 - `docs/GrowERP_Design_Patterns.md` — canonical patterns and naming conventions
 - `docs/GrowERP_Code_Templates.md` — ready-to-use code templates
 - `docs/GrowERP_AI_Instructions.md` — detailed AI development guidance

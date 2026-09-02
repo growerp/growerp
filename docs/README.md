@@ -25,6 +25,7 @@ This directory contains comprehensive documentation for extending and developing
 
 - **[GrowERP Features](./GrowERP_Features.md)** - Complete overview of all applications, modules, and platform features
 - **[GrowERP Extensibility Guide](./GrowERP_Extensibility_Guide.md)** - Start here for complete overview
+- **[GrowERP Security Model](./GrowERP_Security_Model.md)** - Who may see a screen and call the API behind it: user groups, the Organization → Security grid, menu-driven REST authorization, and how to debug a 403
 - **[Building Blocks Development Guide](./Building_Blocks_Development_Guide.md)** - Create Flutter packages
 - **[Backend Components Development Guide](./Backend_Components_Development_Guide.md)** - Develop Moqui components
 - **[Website Template Definition](./Website_Template_Definition.md)** - Storefront template spec (mandatory/optional sections, lumina theme contract) and LLM procedure to convert an existing website into GrowERP content pages

@@ -320,95 +320,103 @@ The menu system is the primary way users navigate through GrowERP applications. 
 
 #### Menu Structure
 
-The menu system is defined in `flutter/packages/admin/lib/menu_options.dart` and consists of:
+Menus are **backend data**, not a Dart file. Each application has a
+`growerp.menu.MenuConfiguration` holding `growerp.menu.MenuItem` rows, shipped as seed data in
+[`GrowerpMenuSeedData.xml`](../backend/data/GrowerpMenuSeedData.xml) and fetched at runtime by
+`MenuConfigBloc`. An organization can then customise its own copy — see
+[GrowERP Security Model](./GrowERP_Security_Model.md).
 
-```dart
-List<MenuOption> menuOptions = [
-  MenuOption(
-    image: 'packages/growerp_core/images/dashBoardGrey.png',
-    selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Main',
-    route: '/',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const AdminDbForm(),
-  ),
-  // More menu options...
-];
+```xml
+<growerp.menu.MenuConfiguration menuConfigurationId="ADMIN_DEFAULT" appId="admin"
+    name="Admin Menu" description="Default admin application menu structure"/>
+
+<growerp.menu.MenuItem menuItemId="ADMIN_MAIN" menuConfigurationId="ADMIN_DEFAULT"
+    title="Main" route="/" iconName="dashboard" widgetName="AdminDashboard" sequenceNum="10"/>
+
+<growerp.menu.MenuItem menuItemId="ADMIN_CATALOG" menuConfigurationId="ADMIN_DEFAULT"
+    title="Catalog" route="/catalog" iconName="category" widgetName="ProductList"
+    sequenceNum="90"/>
+<!-- children of a menu item are rendered as its tabs -->
+<growerp.menu.MenuItem menuItemId="ADMIN_CAT_PRODUCTS" menuConfigurationId="ADMIN_DEFAULT"
+    parentMenuItemId="ADMIN_CATALOG"
+    title="Products" iconName="home" widgetName="ProductList" sequenceNum="10"/>
+<growerp.menu.MenuItem menuItemId="ADMIN_CAT_CATEGORIES" menuConfigurationId="ADMIN_DEFAULT"
+    parentMenuItemId="ADMIN_CATALOG"
+    title="Categories" iconName="business" widgetName="CategoryList" sequenceNum="20"/>
 ```
 
-#### MenuOption Properties
+A screen is referenced by `widgetName`, never by an inline widget: the name is resolved
+through the `WidgetRegistry` at render time, which is what lets any package contribute screens
+and lets a menu be reconfigured without recompiling.
+
+#### MenuItem Properties
+
+One recursive model for both menu entries and their tabs — `parentMenuItemId` is the only
+difference.
 
 ```dart
-class MenuOption {
-  final String image;              // Unselected state icon
-  final String selectedImage;      // Selected state icon
-  final String title;              // Display title
-  final String route;              // Navigation route
-  final List<UserGroup>? userGroups; // Access control
-  final Widget? child;             // Simple page content
-  final List<TabItem>? tabItems;   // Tabbed interface
+class MenuItem {
+  final String? menuItemId;
+  final String? menuConfigurationId;
+  final String? parentMenuItemId;   // null = top level, set = a tab of that parent
+  final String? itemKey;            // key for widget testing
+  final String title;
+  final String? route;              // GoRouter path, top level items only
+  final String? iconName;           // icon from the registry
+  final String? widgetName;         // widget in the WidgetRegistry
+  final String? image;              // navigation rail image
+  final String? selectedImage;
+  final List<UserGroup>? userGroups;    // groups that may SEE this screen
+  final List<UserGroup>? updateGroups;  // groups that may WRITE through it
+  final String? artifactGroupId;        // REST domain override
+  final int sequenceNum;
+  final bool isActive;
+  final bool isMinimized;
+  final List<MenuItem>? children;   // tabs
 }
 ```
 
-#### TabItem Structure
+#### Tabs
 
-For complex screens with multiple tabs:
-
-```dart
-TabItem(
-  form: const ProductList(),           // Widget to display
-  label: 'Products',                   // Tab label
-  icon: const Icon(Icons.inventory),   // Tab icon
-  floatButtonRoute: '/product/add',    // Optional: route for FAB
-  floatButtonForm: ProductDialog(),    // Optional: dialog for FAB
-  floatButtonArgs: {'mode': 'create'}, // Optional: FAB arguments
-)
-```
+A tabbed screen is a menu item with children. There is no separate tab class: each child is a
+`MenuItem` with its own `title`, `iconName` and `widgetName`, ordered by `sequenceNum`, and
+subject to the same access rules as any other item.
 
 #### Creating Custom Menu Configurations
 
 1. **Simple Menu Item:**
-```dart
-MenuOption(
-  image: 'packages/growerp_core/images/customGrey.png',
-  selectedImage: 'packages/growerp_core/images/custom.png',
-  title: 'Custom Module',
-  route: '/custom',
-  userGroups: [UserGroup.admin],
-  child: const CustomDashboard(),
-)
+```xml
+<growerp.menu.MenuItem menuItemId="ADMIN_CUSTOM" menuConfigurationId="ADMIN_DEFAULT"
+    title="Custom Module" route="/custom" iconName="apps"
+    widgetName="CustomDashboard"
+    userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="200"/>
 ```
 
-2. **Tabbed Menu Item:**
-```dart
-MenuOption(
-  image: 'packages/growerp_core/images/customGrey.png',
-  selectedImage: 'packages/growerp_core/images/custom.png',
-  title: 'Custom Module',
-  route: '/custom',
-  userGroups: [UserGroup.admin, UserGroup.employee],
-  tabItems: [
-    TabItem(
-      form: const CustomList(),
-      label: 'Items',
-      icon: const Icon(Icons.list),
-      floatButtonForm: const CustomDialog(),
-    ),
-    TabItem(
-      form: const CustomReports(),
-      label: 'Reports',
-      icon: const Icon(Icons.analytics),
-    ),
-    TabItem(
-      form: const CustomSettings(),
-      label: 'Settings',
-      icon: const Icon(Icons.settings),
-    ),
-  ],
-)
+2. **Tabbed Menu Item:** the parent carries the route, each child is a tab.
+```xml
+<growerp.menu.MenuItem menuItemId="ADMIN_CUSTOM" menuConfigurationId="ADMIN_DEFAULT"
+    title="Custom Module" route="/custom" iconName="apps"
+    widgetName="CustomList" sequenceNum="200"/>
+
+<growerp.menu.MenuItem menuItemId="ADMIN_CUSTOM_ITEMS" menuConfigurationId="ADMIN_DEFAULT"
+    parentMenuItemId="ADMIN_CUSTOM"
+    title="Items" iconName="list" widgetName="CustomList" sequenceNum="10"/>
+<growerp.menu.MenuItem menuItemId="ADMIN_CUSTOM_REPORTS" menuConfigurationId="ADMIN_DEFAULT"
+    parentMenuItemId="ADMIN_CUSTOM"
+    title="Reports" iconName="assessment" widgetName="CustomReports" sequenceNum="20"/>
 ```
 
-3. **Role-Based Access:**
+Each `widgetName` must be registered in the `WidgetRegistry` (see
+[Dynamic Menu System and Widget Repository](./Dynamic_Menu_System_And_Widget_Repository.md))
+and mapped to a REST domain in
+[`GrowerpRestDomainData.xml`](../backend/data/GrowerpRestDomainData.xml).
+
+3. **Group-Based Access:**
+
+There are four security groups: `UserGroup.system`, `.admin`, `.employee` and `.other`.
+(`UserGroup.customer` does not exist — customers, suppliers and leads are all `.other`, and
+their business relationship lives on the party `Role`, which grants nothing.)
+
 ```dart
 // Admin only
 userGroups: [UserGroup.admin]
@@ -416,9 +424,15 @@ userGroups: [UserGroup.admin]
 // Admin and employees
 userGroups: [UserGroup.admin, UserGroup.employee]
 
-// All authenticated users
-userGroups: [UserGroup.admin, UserGroup.employee, UserGroup.customer]
+// Leave it out entirely for "all internal groups": an empty list means system,
+// admin and employee, and never .other. Outside users are default-deny, so a new
+// screen is never exposed to customers by accident - name .other to include them.
 ```
+
+Access is enforced **on the server** and also decides which REST endpoints the group may
+call, per organization. Setting `userGroups` is not cosmetic. See
+[GrowERP Security Model](./GrowERP_Security_Model.md) for the defaults, the write list
+(`updateGroups`), and how to debug a 403.
 
 ### Template System {#template-system}
 
@@ -428,7 +442,7 @@ The template system provides consistent UI patterns and responsive layouts acros
 
 Located in `flutter/packages/growerp_core/lib/src/templates/`:
 
-1. **DisplayMenuOption** - Main template engine
+1. **DisplayMenuItem** - Main template engine (in `display_menu_option.dart`)
 2. **MyDrawerWidget** - Mobile navigation drawer
 3. **MyNavigationRailWidget** - Desktop navigation rail
 4. **AppBarTitle** - Consistent app bar styling
@@ -475,7 +489,7 @@ Widget customAppBarTitle(BuildContext context, String title, bool isPhone) {
 
 2. **Custom Navigation Drawer:**
 ```dart
-Widget customDrawer(BuildContext context, bool isPhone, List<MenuOption> menuList) {
+Widget customDrawer(BuildContext context, bool isPhone, List<MenuItem> menuList) {
   return Drawer(
     child: Column(
       children: [
@@ -540,6 +554,16 @@ dependencies:
 
 #### Creating a Custom Application
 
+> **Security step, easy to miss.** Every widget a menu references needs a row in
+> [`GrowerpRestDomainData.xml`](../backend/data/GrowerpRestDomainData.xml) mapping its
+> `widgetName` to a REST domain. Without one, the screen's endpoints are unreachable for
+> everyone but system users. Widgets reused from existing packages already have theirs — the
+> map is keyed on the widget precisely so a new vertical inherits them. If the vertical adds
+> REST resources of its own, add them to a domain in
+> [`GrowerpRestDomainGroupData.xml`](../backend/data/GrowerpRestDomainGroupData.xml). See
+> [GrowERP Security Model](./GrowERP_Security_Model.md#developer-checklist).
+
+
 1. **Create Application Structure:**
 ```bash
 mkdir my_custom_app
@@ -562,113 +586,87 @@ dependencies:
   growerp_custom: ^1.0.0     # Your custom building block
 ```
 
-3. **Configure Menu:**
+3. **Register your widgets:** every screen the menu can name.
 ```dart
-// lib/menu_options.dart
+// lib/router_builder.dart
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_custom/growerp_custom.dart';
 
-List<MenuOption> menuOptions = [
-  MenuOption(
-    image: 'packages/growerp_core/images/dashBoardGrey.png',
-    selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Dashboard',
-    route: '/',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const CustomDashboard(),
-  ),
-  MenuOption(
-    image: 'packages/growerp_core/images/productsGrey.png',
-    selectedImage: 'packages/growerp_core/images/products.png',
-    title: 'Catalog',
-    route: '/catalog',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    tabItems: [
-      TabItem(
-        form: const ProductList(),
-        label: 'Products',
-        icon: const Icon(Icons.inventory),
-      ),
-      TabItem(
-        form: const CategoryList(),
-        label: 'Categories',
-        icon: const Icon(Icons.category),
-      ),
-    ],
-  ),
-  MenuOption(
-    image: 'packages/growerp_core/images/customGrey.png',
-    selectedImage: 'packages/growerp_core/images/custom.png',
-    title: 'Custom Features',
-    route: '/custom',
-    userGroups: [UserGroup.admin],
-    child: const CustomList(),
-  ),
+List<Map<String, GrowerpWidgetBuilder>> myWidgetRegistrations = [
+  getUserCompanyWidgets(),
+  getCatalogWidgets(),
+  // app specific screens
+  {
+    'CustomDashboard': (args) => const CustomDashboard(),
+    'CustomList': (args) => const CustomList(),
+  },
 ];
 ```
 
-4. **Create Main Application:**
+4. **Configure the menu** as seed data in the backend, referencing those widget names:
+```xml
+<growerp.menu.MenuConfiguration menuConfigurationId="MYAPP_DEFAULT" appId="myapp"
+    name="My Custom App Menu"/>
+
+<growerp.menu.MenuItem menuItemId="MYAPP_MAIN" menuConfigurationId="MYAPP_DEFAULT"
+    title="Dashboard" route="/" iconName="dashboard"
+    widgetName="CustomDashboard" sequenceNum="10"/>
+<growerp.menu.MenuItem menuItemId="MYAPP_CATALOG" menuConfigurationId="MYAPP_DEFAULT"
+    title="Catalog" route="/catalog" iconName="category"
+    widgetName="ProductList" sequenceNum="20"/>
+<growerp.menu.MenuItem menuItemId="MYAPP_CAT_PRODUCTS" menuConfigurationId="MYAPP_DEFAULT"
+    parentMenuItemId="MYAPP_CATALOG"
+    title="Products" iconName="home" widgetName="ProductList" sequenceNum="10"/>
+<growerp.menu.MenuItem menuItemId="MYAPP_CAT_CATEGORIES" menuConfigurationId="MYAPP_DEFAULT"
+    parentMenuItemId="MYAPP_CATALOG"
+    title="Categories" iconName="business" widgetName="CategoryList" sequenceNum="20"/>
+<growerp.menu.MenuItem menuItemId="MYAPP_CUSTOM" menuConfigurationId="MYAPP_DEFAULT"
+    title="Custom Features" route="/custom" iconName="apps"
+    widgetName="CustomList"
+    userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="30"/>
+```
+
+Map each new widget to a REST domain in
+[`GrowerpRestDomainData.xml`](../backend/data/GrowerpRestDomainData.xml), or its endpoints are
+unreachable. Widgets reused from existing packages already have theirs.
+
+5. **Create the main application.** Routes are generated from the menu, so there is no route
+table to maintain: `createDynamicAppRouter` builds a go_router from the configuration and
+`TopApp` wires up the blocs, localizations and widget registry.
 ```dart
 // lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:growerp_core/growerp_core.dart';
-import 'menu_options.dart';
+import 'package:growerp_models/growerp_models.dart';
+import 'router_builder.dart';
 
-void main() {
-  runApp(const MyCustomApp());
-}
-
-class MyCustomApp extends StatelessWidget {
-  const MyCustomApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return GrowerpApp(
-      title: 'My Custom App',
-      menuOptions: menuOptions,
-      applicationId: 'AppAdmin',
-      chatEnabled: true,
-      router: generateRoute,
-    );
-  }
-}
-
-// Route generation
-Route<dynamic> generateRoute(RouteSettings settings) {
-  switch (settings.name) {
-    case '/':
-      return MaterialPageRoute(
-        builder: (context) => DisplayMenuOption(
-          menuList: menuOptions,
-          menuIndex: 0,
-        ),
-        settings: settings,
-      );
-    case '/catalog':
-      return MaterialPageRoute(
-        builder: (context) => DisplayMenuOption(
-          menuList: menuOptions,
-          menuIndex: 1,
-        ),
-        settings: settings,
-      );
-    case '/custom':
-      return MaterialPageRoute(
-        builder: (context) => DisplayMenuOption(
-          menuList: menuOptions,
-          menuIndex: 2,
-        ),
-        settings: settings,
-      );
-    default:
-      return MaterialPageRoute(
-        builder: (context) => const NotFoundPage(),
-        settings: settings,
-      );
-  }
+void main() async {
+  runApp(TopApp(
+    restClient: restClient,
+    applicationId: 'AppAdmin',
+    chatClient: chatClient,
+    notificationClient: notificationClient,
+    title: 'My Custom App',
+    router: createDynamicAppRouter(
+      configurations,
+      config: DynamicRouterConfig(
+        widgetLoader: WidgetRegistry.getWidget,
+        appTitle: 'My Custom App',
+      ),
+    ),
+    appId: 'myapp',                     // matches MenuConfiguration.appId
+    widgetRegistrations: myWidgetRegistrations,
+    extraDelegates: const [UserCompanyLocalizations.delegate],
+    extraBlocProviders: [
+      ...getUserCompanyBlocProviders(restClient, 'AppAdmin'),
+    ],
+  ));
 }
 ```
+
+See `flutter/packages/admin/lib/main.dart` for a complete, working example.
 
 ---
 
@@ -1074,15 +1072,15 @@ GrowERP implements role-based access control at both frontend and backend levels
 
 #### Frontend Security
 
-```dart
-// Role-based menu filtering
-MenuOption(
-  title: 'Admin Only Feature',
-  route: '/admin-feature',
-  userGroups: [UserGroup.admin], // Only admins can see this
-  child: const AdminFeature(),
-)
+```xml
+<!-- Group based menu filtering, enforced on the server: this also decides whether
+     the group may call the REST endpoints behind the screen -->
+<growerp.menu.MenuItem menuItemId="ADMIN_ONLY_FEATURE" menuConfigurationId="ADMIN_DEFAULT"
+    title="Admin Only Feature" route="/admin-feature" widgetName="AdminFeature"
+    userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="200"/>
+```
 
+```dart
 // Conditional UI elements
 BlocBuilder<AuthBloc, AuthState>(
   builder: (context, state) {
@@ -1175,46 +1173,26 @@ class CustomBloc extends Bloc<CustomEvent, CustomState> {
 
 The hotel application demonstrates how to create a specialized application:
 
-```dart
-// Hotel-specific menu configuration
-List<MenuOption> hotelMenuOptions = [
-  MenuOption(
-    image: 'packages/growerp_core/images/dashBoardGrey.png',
-    selectedImage: 'packages/growerp_core/images/dashBoard.png',
-    title: 'Dashboard',
-    route: '/',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const HotelDashboard(),
-  ),
-  MenuOption(
-    image: 'packages/growerp_core/images/roomsGrey.png',
-    selectedImage: 'packages/growerp_core/images/rooms.png',
-    title: 'Rooms',
-    route: '/rooms',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    tabItems: [
-      TabItem(
-        form: const RoomList(),
-        label: 'Rooms',
-        icon: const Icon(Icons.hotel),
-        floatButtonForm: const RoomDialog(),
-      ),
-      TabItem(
-        form: const RoomTypeList(),
-        label: 'Room Types',
-        icon: const Icon(Icons.category),
-      ),
-    ],
-  ),
-  MenuOption(
-    image: 'packages/growerp_core/images/bookingGrey.png',
-    selectedImage: 'packages/growerp_core/images/booking.png',
-    title: 'Bookings',
-    route: '/bookings',
-    userGroups: [UserGroup.admin, UserGroup.employee],
-    child: const BookingList(),
-  ),
-];
+```xml
+<!-- Hotel menu, from GrowerpMenuSeedData.xml. Note that the hotel reuses generic
+     screens: rooms are assets, reservations are rental sales orders. A vertical is
+     mostly a menu over existing building blocks. -->
+<growerp.menu.MenuConfiguration menuConfigurationId="HOTEL_DEFAULT" appId="hotel"
+    name="Hotel Menu"/>
+
+<growerp.menu.MenuItem menuItemId="HOTEL_MAIN" menuConfigurationId="HOTEL_DEFAULT"
+    title="Main" route="/" iconName="dashboard" widgetName="GanttForm" sequenceNum="10"/>
+<growerp.menu.MenuItem menuItemId="HOTEL_ROOMS" menuConfigurationId="HOTEL_DEFAULT"
+    title="Rooms" route="/rooms" iconName="king_bed" widgetName="AssetList" sequenceNum="30"/>
+<growerp.menu.MenuItem menuItemId="HOTEL_RESERVATIONS" menuConfigurationId="HOTEL_DEFAULT"
+    title="Reservations" route="/reservations" iconName="book_online"
+    widgetName="SalesOrderRentalList" sequenceNum="40"/>
+<growerp.menu.MenuItem menuItemId="HOTEL_CHECKINOUT" menuConfigurationId="HOTEL_DEFAULT"
+    title="In/Out" route="/checkInOut" iconName="luggage"
+    widgetName="CheckInList" sequenceNum="50"/>
+<growerp.menu.MenuItem menuItemId="HOTEL_HOUSEKEEPING" menuConfigurationId="HOTEL_DEFAULT"
+    title="Housekeeping" route="/housekeeping" iconName="cleaning_services"
+    widgetName="HousekeepingForm" sequenceNum="55"/>
 ```
 
 #### Freelance Application Example
