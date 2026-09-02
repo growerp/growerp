@@ -663,6 +663,28 @@ CRITICAL tool-use rules — follow exactly:
         ensureAgentBuilt(configId)
     }
 
+    /// Drop a single config from the running registry and close only its toolsets, leaving
+    /// the rest of the ADK runtime (every other agent and tenant) alive. Used when a config
+    /// is deleted: destroy() would shut the whole JVM's ADK down until a restart.
+    static synchronized void unloadConfig(String configId) {
+        if (!configId) return
+        registry.remove(configId)
+        agentRegistry.remove(configId)
+        tenantRegistry.entrySet().removeIf { it.value == configId }
+        def ts = configMcpToolsets.remove(configId)
+        if (ts != null) {
+            try { ts.close() } catch (Exception e) {
+                logger.warn("Error closing McpToolset for config ${configId}: ${e.message}")
+            }
+        }
+        def external = configExternalToolsets.remove(configId)
+        if (external) external.each { t ->
+            try { t?.close() } catch (Exception e) {
+                logger.warn("Error closing external McpToolset for config ${configId}: ${e.message}")
+            }
+        }
+    }
+
     static boolean isInitialized() { !registry.isEmpty() }
 
     static List<String> listAgents() {
