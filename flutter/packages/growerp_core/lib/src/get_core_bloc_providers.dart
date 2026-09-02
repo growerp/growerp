@@ -30,8 +30,10 @@ List<BlocProvider> getCoreBlocProviders(
       create: (context) => LocaleBloc()..add(LocaleLoaded()),
     ),
     BlocProvider<NotificationBloc>(
-      // no startup fetch: it ran before there were any credentials, and racing
-      // the dialog's own fetch is what made the backend insert twice
+      // no startup event: a fetch dispatched here ran before there were any
+      // credentials. The bloc fetches itself when it is created while already
+      // authenticated; its droppable transformer collapses that with the fetch
+      // SetupInProgressDialog does, which is what used to insert twice.
       create: (context) =>
           NotificationBloc(restClient, notificationClient, authBloc),
     ),

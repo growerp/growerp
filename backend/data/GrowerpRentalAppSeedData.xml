@@ -51,6 +51,20 @@ limitations under the License.
     <growerp.menu.MenuItem menuItemId="RENTAL_ABOUT" menuConfigurationId="RENTAL_DEFAULT"
         title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="100"/>
 
+    <!-- Every app menu needs this: it is the only item that carries GROWERP_SETUP,
+         and without it the organization has no access to import/export, email or
+         system settings. injectAdminSetup() adds the screen client side, but the
+         backend authorizes from the menu, so the row has to exist here too. -->
+    <growerp.menu.MenuItem menuItemId="RENTAL_SYSTEM_SETUP" menuConfigurationId="RENTAL_DEFAULT"
+        title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
+        userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="999"/>
+
+    <!-- RENTAL_SYSTEM_SETUP children (tabs) -->
+    <growerp.menu.MenuItem menuItemId="RENTAL_SETUP_AI" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_SYSTEM_SETUP"
+        title="AI" iconName="psychology" widgetName="SystemSetupAiView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_SETUP_EMAIL" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_SYSTEM_SETUP"
+        title="Email" iconName="mail_outline" widgetName="SystemSetupEmailView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="20"/>
+
     <!-- My Company children -->
     <growerp.menu.MenuItem menuItemId="RENTAL_MC_COMPANY" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_MYCOMPANY"
         title="company" iconName="home" widgetName="ShowCompanyDialog" sequenceNum="10"/>

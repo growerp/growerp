@@ -68,6 +68,13 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
       }
       _lastAuthStatus = authState.status;
     });
+    // The provider is lazy, so this bloc is normally created after login: by then
+    // the authenticated transition above has already gone by and the fetch that
+    // subscribes the socket would never run, leaving every push dropped.
+    _lastAuthStatus = authBloc.state.status;
+    if (_lastAuthStatus == AuthStatus.authenticated) {
+      add(const NotificationFetch());
+    }
   }
 
   final RestClient restClient;

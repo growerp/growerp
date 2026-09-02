@@ -66,11 +66,15 @@ The 28 anonymous-* resources bypass authz entirely and need no domain.
         artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
         artifactName="/growerp/100/(InventoryDashboard|CatalogDashboard|Subscription|Category|ItemType|Location|Product|Asset)(/.*)?"/>
 
+    <!-- DailyRentalOccupancy is here, not in GROWERP_RENTAL: it backs the rental
+         date field of an ORDER ITEM, so every menu that shows order entry needs it.
+         The admin menu has no rental screen at all and would otherwise 403 on the
+         date picker of a rental order line. -->
     <moqui.security.ArtifactGroup artifactGroupId="GROWERP_ORDER"
         description="Orders, shipments and payment gateway"/>
     <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_ORDER"
         artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
-        artifactName="/growerp/100/(FinDocShipment|GatewayPayment|OrderDashboard|PaymentType|FinDoc)(/.*)?"/>
+        artifactName="/growerp/100/(DailyRentalOccupancy|FinDocShipment|GatewayPayment|OrderDashboard|PaymentType|FinDoc)(/.*)?"/>
 
     <moqui.security.ArtifactGroup artifactGroupId="GROWERP_ACCOUNTING"
         description="Invoices, payments, ledger and reports"/>
@@ -82,7 +86,7 @@ The 28 anonymous-* resources bypass authz entirely and need no domain.
         description="Rental and hotel occupancy"/>
     <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_RENTAL"
         artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
-        artifactName="/growerp/100/(DailyRentalOccupancy|HotelStatistics|Housekeeping|RentalPrice|RentalQuote|Statistics)(/.*)?"/>
+        artifactName="/growerp/100/(HotelStatistics|Housekeeping|RentalPrice|RentalQuote|Statistics)(/.*)?"/>
 
     <moqui.security.ArtifactGroup artifactGroupId="GROWERP_MARKETING"
         description="Campaigns, content, outreach and assessments"/>
