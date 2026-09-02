@@ -97,4 +97,292 @@ axis; the business relationship lives on the party Role and never grants access.
     </actions>
   </service>
 
+  <!-- ============================================================= -->
+  <!-- REST authorization, driven by the organization's menu          -->
+  <!-- ============================================================= -->
+
+  <!-- checkRestAccess: called by the GROWERP_REST_GUARDED ArtifactAuthz for every
+       REST leaf (see GrowerpSecurityData.xml). Moqui runs this inside its own
+       disable-authz block, so entity finds here do not recurse.
+
+       A group reaches an endpoint only when the organization's menu shows it a
+       screen that drives that endpoint's domain. No screen, no API. -->
+  <service verb="check" noun="RestAccess" authenticate="false">
+    <description>Return AUTHZT_ALWAYS or AUTHZT_DENY for one REST path, from the caller's
+      group and the menu of the caller's organization.</description>
+    <in-parameters>
+      <parameter name="userId" />
+      <parameter name="authzActionEnumId" />
+      <parameter name="artifactTypeEnumId" />
+      <parameter name="artifactName" />
+    </in-parameters>
+    <out-parameters>
+      <parameter name="authzTypeEnumId" />
+    </out-parameters>
+    <actions>
+      <!-- default deny: an unmapped path, an unknown caller or a domain the
+           organization's menu never mentions all end up here -->
+      <set field="authzTypeEnumId" value="AUTHZT_DENY" />
+      <if condition="!userId">
+        <return />
+      </if>
+
+      <entity-find entity-name="moqui.security.UserGroupMember" list="myGroups" limit="1">
+        <econdition field-name="userId" from="userId" />
+        <econdition field-name="userGroupId" operator="in"
+          from="['GROWERP_M_SYSTEM', 'GROWERP_M_ADMIN', 'GROWERP_M_EMPLOYEE', 'GROWERP_M_OTHER']" />
+        <date-filter />
+      </entity-find>
+      <if condition="!myGroups">
+        <return />
+      </if>
+      <set field="myUserGroupId" from="myGroups[0].userGroupId" />
+
+      <!-- system is the superuser here as everywhere else -->
+      <if condition="myUserGroupId == 'GROWERP_M_SYSTEM'">
+        <set field="authzTypeEnumId" value="AUTHZT_ALWAYS" />
+        <return />
+      </if>
+
+      <service-call name="growerp.100.SecurityServices100.get#RestDomain"
+        in-map="[artifactName: artifactName]" out-map="domainOut" />
+      <set field="domain" from="domainOut.artifactGroupId" />
+      <if condition="!domain">
+        <return />
+      </if>
+
+      <!-- Session, menu and messaging must work before any menu derived access can
+           be computed, otherwise login deadlocks against the very configuration it
+           needs to read. -->
+      <if condition="domain == 'GROWERP_BASE'">
+        <set field="authzTypeEnumId" value="AUTHZT_ALWAYS" />
+        <return />
+      </if>
+
+      <entity-find-one entity-name="moqui.security.UserAccount" value-field="callerAccount"
+        cache="true">
+        <field-map field-name="userId" from="userId" />
+      </entity-find-one>
+      <if condition="!callerAccount?.partyId">
+        <return />
+      </if>
+      <entity-find-one entity-name="mantle.party.Party" value-field="callerParty" cache="true">
+        <field-map field-name="partyId" from="callerAccount.partyId" />
+      </entity-find-one>
+      <set field="ownerPartyId" from="callerParty?.ownerPartyId" />
+      <if condition="!ownerPartyId || ownerPartyId == '_NA_'">
+        <return />
+      </if>
+
+      <service-call name="growerp.100.SecurityServices100.get#OwnerDomainAccess"
+        in-map="[ownerPartyId: ownerPartyId, userGroupId: myUserGroupId]" out-map="accessOut" />
+      <set field="level" from="accessOut.domainAccess?.get(domain)" />
+      <if condition="!level">
+        <return />
+      </if>
+      <if condition="authzActionEnumId == 'AUTHZA_VIEW' || level == 'WRITE'">
+        <set field="authzTypeEnumId" value="AUTHZT_ALWAYS" />
+      </if>
+    </actions>
+  </service>
+
+  <!-- getRestDomain: which security domain a REST path belongs to, by matching the
+       AT_REST_PATH patterns of the GROWERP_* ArtifactGroups. Cached per path: this
+       runs on every request. -->
+  <service verb="get" noun="RestDomain" authenticate="false">
+    <in-parameters>
+      <parameter name="artifactName" required="true" />
+    </in-parameters>
+    <out-parameters>
+      <parameter name="artifactGroupId" />
+    </out-parameters>
+    <actions>
+      <script><![CDATA[
+        import java.util.regex.Pattern
+
+        def pathCache = ec.cache.getCache('growerp.security.restDomain')
+        def cached = pathCache.get(artifactName)
+        if (cached != null) {
+            artifactGroupId = ('_NONE_' == cached) ? null : cached
+            return
+        }
+
+        def patternCache = ec.cache.getCache('growerp.security.restPatterns')
+        List patterns = (List) patternCache.get('all')
+        if (patterns == null) {
+            patterns = []
+            ec.entity.find('moqui.security.ArtifactGroupMember')
+                .condition('artifactTypeEnumId', 'AT_REST_PATH')
+                .condition('nameIsPattern', 'Y').list().each { member ->
+                    String groupId = member.artifactGroupId?.toString()
+                    // the domains only; GROWERP_REST_GUARDED is the guard itself and
+                    // GROWERP_API is the legacy catch all
+                    if (groupId != null && groupId.startsWith('GROWERP_') &&
+                            groupId != 'GROWERP_REST_GUARDED' && groupId != 'GROWERP_API' &&
+                            groupId != 'GROWERP_API_SCREEN') {
+                        patterns.add([groupId: groupId,
+                                      pattern: Pattern.compile(member.artifactName.toString())])
+                    }
+                }
+            patternCache.put('all', patterns)
+        }
+
+        def match = patterns.find { it.pattern.matcher(artifactName).matches() }
+        pathCache.put(artifactName, match ? match.groupId : '_NONE_')
+        artifactGroupId = match?.groupId
+      ]]></script>
+    </actions>
+  </service>
+
+  <!-- getOwnerDomainAccess: domain -> SEE|WRITE for one group in one organization,
+       derived from the menu. Cached per owner and group; every menu write clears it
+       through clear#OwnerDomainAccessCache. -->
+  <service verb="get" noun="OwnerDomainAccess" authenticate="false">
+    <in-parameters>
+      <parameter name="ownerPartyId" required="true" />
+      <parameter name="userGroupId" required="true" />
+    </in-parameters>
+    <out-parameters>
+      <parameter name="domainAccess" type="Map" />
+    </out-parameters>
+    <actions>
+      <script><![CDATA[
+        import groovy.json.JsonSlurper
+
+        def cache = ec.cache.getCache('growerp.security.ownerDomain')
+        String key = ownerPartyId + '|' + userGroupId
+        Map hit = (Map) cache.get(key)
+        if (hit != null) { domainAccess = hit; return }
+
+        def slurper = new JsonSlurper()
+        def parseGroups = { jsonStr ->
+            if (!jsonStr) return null
+            try { return slurper.parseText(jsonStr.toString()) } catch (e) { return null }
+        }
+        // Same default as get#MenuConfiguration: no list means the internal groups,
+        // never the outside group.
+        def allows = { groups ->
+            if (!groups) return userGroupId != 'GROWERP_M_OTHER'
+            return groups.contains(userGroupId)
+        }
+        // Write follows view unless a screen names its writers. Without this every
+        // seed item, which carries no updateGroupsJson, would be read only and the
+        // whole application would 403 on save.
+        def allowsWrite = { writeGroups ->
+            if (writeGroups == null) return userGroupId != 'GROWERP_M_OTHER'
+            return writeGroups.contains(userGroupId)
+        }
+
+        // The apps this organization actually has: the ones it customised, plus the
+        // one it registered for. A REST call carries no appId, so without this every
+        // seed menu would count and a hotel tenant would inherit manufacturing.
+        Set appIds = new HashSet()
+        ec.entity.find('growerp.menu.MenuConfiguration')
+            .condition('ownerPartyId', ownerPartyId).condition('userId', null)
+            .list().each { appIds.add(it.appId?.toString()) }
+        def tenantSetup = ec.entity.find('growerp.general.TenantSetup')
+            .condition('ownerPartyId', ownerPartyId).one()
+        if (tenantSetup?.applicationId) {
+            String appId = tenantSetup.applicationId.toString()
+            if (appId.startsWith('App')) appId = appId.substring(3)
+            appIds.add(appId.toLowerCase())
+        }
+        appIds.remove(null)
+
+        Map widgetDomains = [:]
+        ec.entity.find('growerp.menu.WidgetDomain').list().each {
+            widgetDomains[it.widgetName?.toString()] = it.artifactGroupId?.toString()
+        }
+
+        Map access = [:]
+        appIds.each { appId ->
+            // the organization's own configuration for this app, else the seed
+            def configs = ec.entity.find('growerp.menu.MenuConfiguration')
+                .condition('appId', appId).condition('userId', null)
+                .condition('ownerPartyId', ownerPartyId).list()
+            if (!configs) {
+                configs = ec.entity.find('growerp.menu.MenuConfiguration')
+                    .condition('appId', appId).condition('userId', null)
+                    .condition('ownerPartyId', null).list()
+            }
+            if (!configs) return
+
+            def items = ec.entity.find('growerp.menu.MenuItem')
+                .condition('menuConfigurationId', configs[0].menuConfigurationId).list()
+            Map byId = [:]
+            items.each { byId[it.menuItemId?.toString()] = it }
+
+            // a child is only reachable when its parent is
+            def visible
+            visible = { item ->
+                if (!allows(parseGroups(item.userGroupsJson))) return false
+                def parentId = item.parentMenuItemId?.toString()
+                if (!parentId) return true
+                def parent = byId[parentId]
+                return parent == null ? true : visible(parent)
+            }
+
+            items.each { item ->
+                if (item.isActive == 'N') return
+                if (!visible(item)) return
+                String domain = item.artifactGroupId?.toString()
+                if (!domain) domain = widgetDomains[item.widgetName?.toString()]
+                if (!domain) return
+                if (allowsWrite(parseGroups(item.updateGroupsJson))) access[domain] = 'WRITE'
+                else if (access[domain] == null) access[domain] = 'SEE'
+            }
+        }
+
+        cache.put(key, access)
+        domainAccess = access
+      ]]></script>
+    </actions>
+  </service>
+
+  <!-- clearOwnerDomainAccessCache: called by every menu write so a security change
+       takes effect on the next request instead of when the cache happens to expire. -->
+  <service verb="clear" noun="OwnerDomainAccessCache" authenticate="false">
+    <in-parameters>
+      <parameter name="ownerPartyId" />
+    </in-parameters>
+    <actions>
+      <script><![CDATA[
+        def cache = ec.cache.getCache('growerp.security.ownerDomain')
+        if (ownerPartyId) {
+            ['GROWERP_M_SYSTEM', 'GROWERP_M_ADMIN', 'GROWERP_M_EMPLOYEE',
+             'GROWERP_M_OTHER'].each { cache.remove(ownerPartyId + '|' + it) }
+        } else {
+            cache.clear()
+        }
+      ]]></script>
+    </actions>
+  </service>
+
+  <!-- migrateRestAuthz: one-off. GrowerpSecurityData.xml is seed-initial, so a reload
+       adds and updates rows but never deletes the ones that were removed from it.
+       Existing databases keep the old blanket grants, which would silently leave the
+       whole API open. Safe to re-run. -->
+  <service verb="migrate" noun="RestAuthz" authenticate="true">
+    <out-parameters>
+      <parameter name="removedCount" type="Integer" />
+    </out-parameters>
+    <actions>
+      <if condition="!ec.user.isInGroup('GROWERP_M_SYSTEM')">
+        <return error="true" message="Only a system user can migrate REST authorization" />
+      </if>
+      <set field="removedCount" from="0" type="Integer" />
+      <entity-find entity-name="moqui.security.ArtifactAuthz" list="obsolete">
+        <econdition field-name="artifactAuthzId" operator="in"
+          from="['GROWERPAPI_AUTHZ_ADMIN_SYS', 'GROWERPAPI_AUTHZ_ADMIN',
+                'GROWERPAPI_AUTHZ_EMPL', 'GROWERPAPI_AUTHZ_OTHER']" />
+      </entity-find>
+      <iterate list="obsolete" entry="row">
+        <entity-delete value-field="row" />
+        <set field="removedCount" from="removedCount + 1" />
+      </iterate>
+      <service-call name="growerp.100.SecurityServices100.clear#OwnerDomainAccessCache" />
+      <log message="migrate#RestAuthz removed ${removedCount} blanket API grant(s)" />
+    </actions>
+  </service>
+
 </services>

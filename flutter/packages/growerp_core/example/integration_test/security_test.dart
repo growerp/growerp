@@ -86,19 +86,19 @@ void main() {
 
     // Default policy: a screen with no group list is for the internal groups.
     // Outside users are default deny, so they reach nothing unless named.
-    await SecurityTest.checkAccess(tester, 0, 'employee', 'view');
+    await SecurityTest.checkAccess(tester, 0, 'employee', 'write');
     await SecurityTest.checkAccess(tester, 0, 'other', 'none');
 
     // Grant, then confirm it survives the reload that follows the save. This
     // is the first write, so it also clones the seed menu for the organization
     // and every menuItemId changes underneath the grid.
-    await SecurityTest.setAccess(tester, 0, 'employee', 'write');
-    await SecurityTest.checkAccess(tester, 0, 'employee', 'write');
+    await SecurityTest.setAccess(tester, 0, 'employee', 'view');
+    await SecurityTest.checkAccess(tester, 0, 'employee', 'view');
 
     // Granting the outside group, and leaving the other groups alone.
     await SecurityTest.setAccess(tester, 0, 'other', 'view');
     await SecurityTest.checkAccess(tester, 0, 'other', 'view');
-    await SecurityTest.checkAccess(tester, 0, 'employee', 'write');
+    await SecurityTest.checkAccess(tester, 0, 'employee', 'view');
 
     // ... and taking it away again.
     await SecurityTest.setAccess(tester, 0, 'other', 'none');

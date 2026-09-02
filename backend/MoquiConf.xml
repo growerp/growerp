@@ -41,6 +41,20 @@
     </webapp-list>
 
 
+    <!-- REST authorization caches. check#RestAccess runs on every REST leaf, so
+         neither the path to domain lookup nor the per organization access map can
+         be recomputed per request. The owner map is cleared explicitly by every
+         menu write (clear#OwnerDomainAccessCache); the idle expiry is only a
+         backstop. -->
+    <cache-list>
+        <cache name="growerp.security.restDomain" max-elements="2000"
+            expire-time-idle="3600" eviction-strategy="least-recently-used"/>
+        <cache name="growerp.security.restPatterns" max-elements="10"
+            expire-time-idle="3600" eviction-strategy="least-recently-used"/>
+        <cache name="growerp.security.ownerDomain" max-elements="2000"
+            expire-time-idle="3600" eviction-strategy="least-recently-used"/>
+    </cache-list>
+
     <screen-facade>
         <screen location="component://webroot/screen/webroot.xml">
             <subscreens-item name="growerp" menu-include="false" no-sub-path="true"

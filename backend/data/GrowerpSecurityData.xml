@@ -43,9 +43,13 @@ limitations under the License.
     <moqui.security.UserGroup userGroupId="GROWERP_M_SUPPLIER" description="Supplier (deprecated)"
         groupTypeEnumId="GROWERPMOBILE" />
 
-    <!-- Artifact group for all of the GROWERP REST API via the GROWERP resource (the root resource) -->
+    <!-- Break glass only: the whole REST tree, inherited, for the system accounts.
+         An inheritable ALWAYS+ALL grant here short circuits every leaf check
+         (ArtifactExecutionFacadeImpl isPermitted), which is exactly why the
+         GROWERP_M_ADMIN / _EMPLOYEE / _OTHER grants that used to sit here are gone:
+         they made the whole API readable and writable by every signed in user. -->
     <moqui.security.ArtifactGroup artifactGroupId="GROWERP_API"
-        description="GROWERP REST API (via root resource)" />
+        description="GROWERP REST API (via root resource), system accounts only" />
     <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_API"
         artifactTypeEnumId="AT_REST_PATH"
         inheritAuthz="Y" artifactName="/growerp" />
@@ -53,30 +57,71 @@ limitations under the License.
     <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_API"
         artifactTypeEnumId="AT_REST_PATH"
         inheritAuthz="Y" artifactName="/pop" />
-    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_API"
-        artifactTypeEnumId="AT_XML_SCREEN"
-        inheritAuthz="Y" artifactName="component://growerp/screen/rest.xml" />
 
-    <!-- Full company permissions for the ADMIN and system user group -->
-    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPAPI_AUTHZ_ADMIN_SYS" userGroupId="ADMIN"
+    <!-- distinct ids: artifactAuthzId is the sole PK, and these two rows used to
+         share GROWERPAPI_AUTHZ_ADMIN_SYS, so the framework ADMIN grant was silently
+         overwritten by the GROWERP_M_SYSTEM one -->
+    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPAPI_AUTHZ_ADMIN_FW" userGroupId="ADMIN"
         artifactGroupId="GROWERP_API" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL" />
-
-    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPAPI_AUTHZ_ADMIN_SYS"
+    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPAPI_AUTHZ_SYSTEM"
         userGroupId="GROWERP_M_SYSTEM"
         artifactGroupId="GROWERP_API" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL" />
 
-    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPAPI_AUTHZ_ADMIN"
-        userGroupId="GROWERP_M_ADMIN"
-        artifactGroupId="GROWERP_API" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL" />
+    <!-- The screen hosting the REST API must stay reachable for everyone; the
+         guard below decides the actual endpoints. -->
+    <moqui.security.ArtifactGroup artifactGroupId="GROWERP_API_SCREEN"
+        description="Screen hosting the GROWERP REST API" />
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_API_SCREEN"
+        artifactTypeEnumId="AT_XML_SCREEN"
+        inheritAuthz="Y" artifactName="component://growerp/screen/rest.xml" />
+    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPSCREEN_AUTHZ_SYSTEM"
+        userGroupId="GROWERP_M_SYSTEM" artifactGroupId="GROWERP_API_SCREEN"
+        authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL" />
+    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPSCREEN_AUTHZ_ADMIN"
+        userGroupId="GROWERP_M_ADMIN" artifactGroupId="GROWERP_API_SCREEN"
+        authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL" />
+    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPSCREEN_AUTHZ_EMPL"
+        userGroupId="GROWERP_M_EMPLOYEE" artifactGroupId="GROWERP_API_SCREEN"
+        authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL" />
+    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPSCREEN_AUTHZ_OTHER"
+        userGroupId="GROWERP_M_OTHER" artifactGroupId="GROWERP_API_SCREEN"
+        authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL" />
 
-    <!-- Read permissions for all employees user group temporary set to all too..better in app..-->
-    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPAPI_AUTHZ_EMPL"
-        userGroupId="GROWERP_M_EMPLOYEE"
-        artifactGroupId="GROWERP_API" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL" />
+    <!-- The guard. One pattern over every REST leaf, with authzServiceName so the
+         decision is made per organization at request time: ArtifactAuthz has no
+         ownerPartyId and GrowERP tenancy is an application convention, so a static
+         row per tenant is not possible.
+         The pattern must match the LEAF and nothing above it: /growerp/100/.* does
+         not match /growerp or /growerp/100, so the check happens per endpoint. That
+         is what went wrong with the old blanket grant, whose member was plain
+         /growerp: it matched an ancestor, and an inheritable allow there short
+         circuited every leaf below it.
 
-    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPAPI_AUTHZ_OTHER"
-        userGroupId="GROWERP_M_OTHER"
-        artifactGroupId="GROWERP_API" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL" />
+         inheritAuthz="Y" because authorizing the endpoint has to carry through to
+         the service and entities it invokes. With "N" the REST path is allowed and
+         then the service call is checked separately, finds no AT_SERVICE grant, and
+         fails with "not authorized for View on Service ...".
+
+         AUTHZA_ALL so the row matches every method; check#RestAccess tells view
+         from write. Domains live in GrowerpRestDomainGroupData.xml. -->
+    <moqui.security.ArtifactGroup artifactGroupId="GROWERP_REST_GUARDED"
+        description="GrowERP REST API, authorized from the organization menu" />
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_REST_GUARDED"
+        artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="Y"
+        artifactName="/growerp/100/.*" />
+
+    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPGUARD_AUTHZ_ADMIN"
+        userGroupId="GROWERP_M_ADMIN" artifactGroupId="GROWERP_REST_GUARDED"
+        authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"
+        authzServiceName="growerp.100.SecurityServices100.check#RestAccess" />
+    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPGUARD_AUTHZ_EMPL"
+        userGroupId="GROWERP_M_EMPLOYEE" artifactGroupId="GROWERP_REST_GUARDED"
+        authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"
+        authzServiceName="growerp.100.SecurityServices100.check#RestAccess" />
+    <moqui.security.ArtifactAuthz artifactAuthzId="GROWERPGUARD_AUTHZ_OTHER"
+        userGroupId="GROWERP_M_OTHER" artifactGroupId="GROWERP_REST_GUARDED"
+        authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"
+        authzServiceName="growerp.100.SecurityServices100.check#RestAccess" />
 
     <!-- Special Permissions -->
     <!-- in general users can read with the company, write access can be limited to other users and

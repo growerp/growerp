@@ -150,8 +150,8 @@ Service definitions for menu configuration and menu item management
             catch (e) { return null }
         }
 
-        // Access check: an empty group list means no restriction. Applies to children
-        // as well as top level items - a hidden screen must not be reachable as a tab.
+        // Access check, applied to children as well as top level items: a hidden
+        // screen must not stay reachable as a tab.
         // GROWERP_M_SYSTEM is the superuser and keeps root REST access, so it is never
         // filtered out; most seed items list only GROWERP_M_ADMIN and would otherwise
         // disappear for support staff.
@@ -1233,10 +1233,14 @@ Service definitions for menu configuration and menu item management
 
       <script>
         import groovy.json.JsonOutput
-        // empty string, not null: entity-auto update skips null parameters, so a null
-        // here would silently keep the old restriction instead of clearing it
+        // Empty string, not null: entity-auto update skips null parameters, so a null
+        // here would silently keep the old restriction instead of clearing it.
         context.userGroupsJson = userGroups ? JsonOutput.toJson(userGroups) : ''
-        context.updateGroupsJson = updateGroups ? JsonOutput.toJson(updateGroups) : ''
+        // '[]' rather than '': for the write list, absent means "write follows view"
+        // while an explicit empty list means "nobody writes". Clearing it to '' would
+        // read back as absent and hand write access straight back to the internal
+        // groups, so setting every group to view would not stick.
+        context.updateGroupsJson = updateGroups ? JsonOutput.toJson(updateGroups) : '[]'
       </script>
 
       <service-call name="update#growerp.menu.MenuItem"

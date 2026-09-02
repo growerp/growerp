@@ -116,4 +116,14 @@ limitations under the License.
         </index>
     </entity>
 
+    <!-- Which REST security domain a screen drives. Keyed on widgetName because the
+         same widget is the same screen in every app menu; MenuItem.artifactGroupId
+         overrides it for one placement. Read by check#RestAccess. -->
+    <entity entity-name="WidgetDomain" package="growerp.menu" cache="true">
+        <field name="widgetName" type="id" is-pk="true"/>
+        <field name="artifactGroupId" type="id">
+            <description>moqui.security.ArtifactGroup holding this domain's REST paths</description>
+        </field>
+    </entity>
+
 </entities>

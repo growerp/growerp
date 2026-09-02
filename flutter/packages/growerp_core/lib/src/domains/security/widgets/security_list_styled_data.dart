@@ -36,7 +36,14 @@ ScreenAccess accessOf(MenuItem item, UserGroup group) {
       : see.contains(group);
   if (!canSee) return ScreenAccess.none;
   final write = item.updateGroups;
-  if (write != null && write.contains(group)) return ScreenAccess.write;
+  // Absent write list: write follows view, matching check#RestAccess. Most seed
+  // screens name no writers and are writable by the internal groups today, so
+  // showing them read-only would be a lie. An *empty* list is different: it means
+  // the screen was explicitly set to read-only for everyone.
+  if (write == null) {
+    return group == UserGroup.other ? ScreenAccess.view : ScreenAccess.write;
+  }
+  if (write.contains(group)) return ScreenAccess.write;
   return ScreenAccess.view;
 }
 

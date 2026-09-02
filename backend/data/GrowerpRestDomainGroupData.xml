@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!--
+The REST security domains.
+
+These ArtifactGroups deliberately carry NO ArtifactAuthz: they are the path to
+domain lookup that growerp.100.SecurityServices100.check#RestAccess reads. The
+single guard that does carry an ArtifactAuthz is GROWERP_REST_GUARDED in
+GrowerpSecurityData.xml, which calls that service for every REST leaf.
+
+artifactName is a Java regex (nameIsPattern="Y") matched against the full
+artifact name, e.g. /growerp/100/FinDoc. inheritAuthz is irrelevant on these
+members and left at "N": they carry no ArtifactAuthz, so the framework never
+authorizes anything through them. The value that matters is on the guard in
+GrowerpSecurityData.xml, which is "Y" so an authorized endpoint carries through
+to the service it invokes.
+
+A domain may need SEVERAL members: artifactName is text-medium (255) and part of
+the primary key, so one long alternation does not fit. check#RestAccess matches
+against every pattern, so splitting one domain over several rows is equivalent.
+Alternatives are longest first so that e.g. Courses is not shadowed by Course.
+
+The 28 anonymous-* resources bypass authz entirely and need no domain.
+-->
+<entity-facade-xml type="seed">
+
+    <moqui.security.ArtifactGroup artifactGroupId="GROWERP_BASE"
+        description="Session, menu and messaging: reachable by every signed in user"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_BASE"
+        artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
+        artifactName="/growerp/100/(MenuConfigurations|MenuConfiguration|Authenticate|Notification|ChatMessage|MenuItems|ChatRoom|MenuItem|AppUsed|Logout)(/.*)?"/>
+
+    <moqui.security.ArtifactGroup artifactGroupId="GROWERP_COMPANY"
+        description="Own company and the people in it"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_COMPANY"
+        artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
+        artifactName="/growerp/100/(CompanyUser|Company|User)(/.*)?"/>
+
+    <moqui.security.ArtifactGroup artifactGroupId="GROWERP_CRM"
+        description="Opportunities and pipeline"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_CRM"
+        artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
+        artifactName="/growerp/100/(CrmDashboard|Opportunity)(/.*)?"/>
+
+    <moqui.security.ArtifactGroup artifactGroupId="GROWERP_ACTIVITY"
+        description="Projects, tasks and time entries"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_ACTIVITY"
+        artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
+        artifactName="/growerp/100/(TimeEntryInvoice|TimeEntryReport|TimeEntry|Activity|Project)(/.*)?"/>
+
+    <moqui.security.ArtifactGroup artifactGroupId="GROWERP_CATALOG"
+        description="Products, categories, assets, stock and locations"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_CATALOG"
+        artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
+        artifactName="/growerp/100/(InventoryDashboard|CatalogDashboard|Subscription|Category|ItemType|Location|Product|Asset)(/.*)?"/>
+
+    <moqui.security.ArtifactGroup artifactGroupId="GROWERP_ORDER"
+        description="Orders, shipments and payment gateway"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_ORDER"
+        artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
+        artifactName="/growerp/100/(FinDocShipment|GatewayPayment|OrderDashboard|PaymentType|FinDoc)(/.*)?"/>
+
+    <moqui.security.ArtifactGroup artifactGroupId="GROWERP_ACCOUNTING"
+        description="Invoices, payments, ledger and reports"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_ACCOUNTING"
+        artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
+        artifactName="/growerp/100/(OperatingRevenueExpenseChart|AcctPurchaseDashboard|GlAccountTranslation|AcctSalesDashboard|LedgerDashboard|BalanceSummary|LedgerJournal|AccountClass|BalanceSheet|AccountType|TimePeriod|GlAccount|Ledger)(/.*)?"/>
+
+    <moqui.security.ArtifactGroup artifactGroupId="GROWERP_RENTAL"
+        description="Rental and hotel occupancy"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_RENTAL"
+        artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
+        artifactName="/growerp/100/(DailyRentalOccupancy|HotelStatistics|Housekeeping|RentalPrice|RentalQuote|Statistics)(/.*)?"/>
+
+    <moqui.security.ArtifactGroup artifactGroupId="GROWERP_MARKETING"
+        description="Campaigns, content, outreach and assessments"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_MARKETING"
+        artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
+        artifactName="/growerp/100/(GeneratePlatformMessage|OutreachMessageContent|PlatformConfigurations|PlatformConfiguration|PolishOutreachMessage|AllAssessmentResults|AssessmentThreshold|SendOutreachMessage|MarketingDashboard)(/.*)?"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_MARKETING"
+        artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
+        artifactName="/growerp/100/(OutreachRecipients|MarkMessageFailed|MarketingPersonas|OutreachCampaigns|OutreachDashboard|TestMCPConnection|MarketingPersona|OutreachCampaign|SocialEngagement|MarkMessageSent|OutreachMessage|MasterContents)(/.*)?"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_MARKETING"
+        artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
+        artifactName="/growerp/100/(EmailSequence|MasterContent|ReadyMessages|ContentPlans|ContentPlan|LandingPage|SocialPosts|Assessment|SocialPost|Substack)(/.*)?"/>
+
+    <moqui.security.ArtifactGroup artifactGroupId="GROWERP_WEBSITE"
+        description="Website, its content and forms"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_WEBSITE"
+        artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
+        artifactName="/growerp/100/(WebsiteTranslation|WebsiteConversion|WebsiteContent|WebsiteForm|Obsidian|Website)(/.*)?"/>
+
+    <moqui.security.ArtifactGroup artifactGroupId="GROWERP_MANUFACTURING"
+        description="Work orders, boms, routings and liners"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_MANUFACTURING"
+        artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
+        artifactName="/growerp/100/(ManufacturingDashboard|RoutingTasks|LinerPanels|RoutingTask|LinerPanel|LinerTypes|WorkOrders|LinerType|WorkOrder|BomItems|Routings|BomItem|Routing|Boms)(/.*)?"/>
+
+    <moqui.security.ArtifactGroup artifactGroupId="GROWERP_TRAINING"
+        description="Courses and their participants"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_TRAINING"
+        artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
+        artifactName="/growerp/100/(AllCourseParticipants|MyCourseSubscriptions|CourseParticipants|CourseSubscription|CourseProgress|GenerateVideo|CourseMedia|Courses|Course)(/.*)?"/>
+
+    <moqui.security.ArtifactGroup artifactGroupId="GROWERP_WIKI"
+        description="Wiki and knowledge base"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_WIKI"
+        artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
+        artifactName="/growerp/100/(WikiSpaces|WikiPages|WikiPage|Okf)(/.*)?"/>
+
+    <moqui.security.ArtifactGroup artifactGroupId="GROWERP_ADK"
+        description="AI agents, their jobs, tools and approvals"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_ADK"
+        artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
+        artifactName="/growerp/100/(AdkKnowledgeImportProducts|AgentControlDashboard|AdkAgentMcpServer|AdkAgentConfig|AdkSystemUsage|AdkAgentTeam|AdkKnowledge|AdkMcpServer|AdkApproval|AdkAction|AdkMemory|AdkJob)(/.*)?"/>
+
+    <moqui.security.ArtifactGroup artifactGroupId="GROWERP_SETUP"
+        description="Tenant setup: email, system settings, subscriptions, import/export"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_SETUP"
+        artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
+        artifactName="/growerp/100/(OwnerTokenLimit|SystemSettings|EmailTemplate|SystemDefault|ImportExport)(/.*)?"/>
+
+    <moqui.security.ArtifactGroup artifactGroupId="GROWERP_SUPPORT"
+        description="GrowERP support staff only"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_SUPPORT"
+        artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
+        artifactName="/growerp/100/(RestUsageStatistics|SupportDashboard|InfraMetrics|Application|RestRequest)(/.*)?"/>
+</entity-facade-xml>

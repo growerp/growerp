@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!--
+Which REST security domain each screen drives.
+
+Keyed on widgetName rather than on the menu item: the same widget is the same
+screen in every one of the app menus, so one row here secures it everywhere and
+a new vertical reusing the widget inherits it. A MenuItem may still override
+this with its own artifactGroupId.
+
+check#RestAccess turns this into authorization: a group reaches a domain only
+when the organization's menu shows it a screen that drives that domain.
+-->
+<entity-facade-xml type="seed">
+
+    <!-- GROWERP_BASE -->
+    <growerp.menu.WidgetDomain widgetName="AboutForm" artifactGroupId="GROWERP_BASE"/>
+    <growerp.menu.WidgetDomain widgetName="AdminDashboard" artifactGroupId="GROWERP_BASE"/>
+    <growerp.menu.WidgetDomain widgetName="AdminDbForm" artifactGroupId="GROWERP_BASE"/>
+    <growerp.menu.WidgetDomain widgetName="CoreDashboard" artifactGroupId="GROWERP_BASE"/>
+    <growerp.menu.WidgetDomain widgetName="FreelanceDbForm" artifactGroupId="GROWERP_BASE"/>
+    <growerp.menu.WidgetDomain widgetName="MarketingDbForm" artifactGroupId="GROWERP_BASE"/>
+    <growerp.menu.WidgetDomain widgetName="SecurityList" artifactGroupId="GROWERP_BASE"/>
+
+    <!-- GROWERP_COMPANY -->
+    <growerp.menu.WidgetDomain widgetName="CompanyUserListCustomer" artifactGroupId="GROWERP_COMPANY"/>
+    <growerp.menu.WidgetDomain widgetName="CompanyUserListSupplier" artifactGroupId="GROWERP_COMPANY"/>
+    <growerp.menu.WidgetDomain widgetName="ShowCompanyDialog" artifactGroupId="GROWERP_COMPANY"/>
+    <growerp.menu.WidgetDomain widgetName="UserList" artifactGroupId="GROWERP_COMPANY"/>
+    <growerp.menu.WidgetDomain widgetName="UserListCompany" artifactGroupId="GROWERP_COMPANY"/>
+    <growerp.menu.WidgetDomain widgetName="UserListCustomer" artifactGroupId="GROWERP_COMPANY"/>
+    <growerp.menu.WidgetDomain widgetName="UserListEmployee" artifactGroupId="GROWERP_COMPANY"/>
+    <growerp.menu.WidgetDomain widgetName="UserListSupplier" artifactGroupId="GROWERP_COMPANY"/>
+
+    <!-- GROWERP_CRM -->
+    <growerp.menu.WidgetDomain widgetName="OpportunityList" artifactGroupId="GROWERP_CRM"/>
+    <growerp.menu.WidgetDomain widgetName="OpportunityPipeline" artifactGroupId="GROWERP_CRM"/>
+    <growerp.menu.WidgetDomain widgetName="UserListLead" artifactGroupId="GROWERP_CRM"/>
+
+    <!-- GROWERP_ACTIVITY -->
+    <growerp.menu.WidgetDomain widgetName="ActivityList" artifactGroupId="GROWERP_ACTIVITY"/>
+    <growerp.menu.WidgetDomain widgetName="TimeEntryReportList" artifactGroupId="GROWERP_ACTIVITY"/>
+
+    <!-- GROWERP_CATALOG -->
+    <growerp.menu.WidgetDomain widgetName="AssetList" artifactGroupId="GROWERP_CATALOG"/>
+    <growerp.menu.WidgetDomain widgetName="CategoryList" artifactGroupId="GROWERP_CATALOG"/>
+    <growerp.menu.WidgetDomain widgetName="IncomingShipmentList" artifactGroupId="GROWERP_CATALOG"/>
+    <growerp.menu.WidgetDomain widgetName="ItemTypeList" artifactGroupId="GROWERP_CATALOG"/>
+    <growerp.menu.WidgetDomain widgetName="LocationList" artifactGroupId="GROWERP_CATALOG"/>
+    <growerp.menu.WidgetDomain widgetName="OutgoingShipmentList" artifactGroupId="GROWERP_CATALOG"/>
+    <growerp.menu.WidgetDomain widgetName="ProductList" artifactGroupId="GROWERP_CATALOG"/>
+    <growerp.menu.WidgetDomain widgetName="SubscriptionList" artifactGroupId="GROWERP_CATALOG"/>
+
+    <!-- GROWERP_ORDER -->
+    <growerp.menu.WidgetDomain widgetName="FinDocList" artifactGroupId="GROWERP_ORDER"/>
+    <growerp.menu.WidgetDomain widgetName="FinDocListRequest" artifactGroupId="GROWERP_ORDER"/>
+    <growerp.menu.WidgetDomain widgetName="PaymentTypeList" artifactGroupId="GROWERP_ORDER"/>
+    <growerp.menu.WidgetDomain widgetName="PurchaseOrderList" artifactGroupId="GROWERP_ORDER"/>
+    <growerp.menu.WidgetDomain widgetName="SalesOrderList" artifactGroupId="GROWERP_ORDER"/>
+
+    <!-- GROWERP_ACCOUNTING -->
+    <growerp.menu.WidgetDomain widgetName="BalanceSheetForm" artifactGroupId="GROWERP_ACCOUNTING"/>
+    <growerp.menu.WidgetDomain widgetName="BalanceSummaryList" artifactGroupId="GROWERP_ACCOUNTING"/>
+    <growerp.menu.WidgetDomain widgetName="GlAccountList" artifactGroupId="GROWERP_ACCOUNTING"/>
+    <growerp.menu.WidgetDomain widgetName="GlAccountTranslationList" artifactGroupId="GROWERP_ACCOUNTING"/>
+    <growerp.menu.WidgetDomain widgetName="LedgerJournalList" artifactGroupId="GROWERP_ACCOUNTING"/>
+    <growerp.menu.WidgetDomain widgetName="LedgerTreeForm" artifactGroupId="GROWERP_ACCOUNTING"/>
+    <growerp.menu.WidgetDomain widgetName="PlanSelectionForm" artifactGroupId="GROWERP_ACCOUNTING"/>
+    <growerp.menu.WidgetDomain widgetName="PurchaseInvoiceList" artifactGroupId="GROWERP_ACCOUNTING"/>
+    <growerp.menu.WidgetDomain widgetName="PurchasePaymentList" artifactGroupId="GROWERP_ACCOUNTING"/>
+    <growerp.menu.WidgetDomain widgetName="RevenueExpenseChart" artifactGroupId="GROWERP_ACCOUNTING"/>
+    <growerp.menu.WidgetDomain widgetName="SalesInvoiceList" artifactGroupId="GROWERP_ACCOUNTING"/>
+    <growerp.menu.WidgetDomain widgetName="SalesPaymentList" artifactGroupId="GROWERP_ACCOUNTING"/>
+    <growerp.menu.WidgetDomain widgetName="TimePeriodListForm" artifactGroupId="GROWERP_ACCOUNTING"/>
+    <growerp.menu.WidgetDomain widgetName="TransactionList" artifactGroupId="GROWERP_ACCOUNTING"/>
+
+    <!-- GROWERP_RENTAL -->
+    <growerp.menu.WidgetDomain widgetName="CheckInList" artifactGroupId="GROWERP_RENTAL"/>
+    <growerp.menu.WidgetDomain widgetName="CheckOutList" artifactGroupId="GROWERP_RENTAL"/>
+    <growerp.menu.WidgetDomain widgetName="GanttForm" artifactGroupId="GROWERP_RENTAL"/>
+    <growerp.menu.WidgetDomain widgetName="HousekeepingForm" artifactGroupId="GROWERP_RENTAL"/>
+    <growerp.menu.WidgetDomain widgetName="RentalRateForm" artifactGroupId="GROWERP_RENTAL"/>
+    <growerp.menu.WidgetDomain widgetName="SalesOrderRentalList" artifactGroupId="GROWERP_RENTAL"/>
+    <growerp.menu.WidgetDomain widgetName="StatisticsForm" artifactGroupId="GROWERP_RENTAL"/>
+
+    <!-- GROWERP_MARKETING -->
+    <growerp.menu.WidgetDomain widgetName="AssessmentList" artifactGroupId="GROWERP_MARKETING"/>
+    <growerp.menu.WidgetDomain widgetName="AutomationScreen" artifactGroupId="GROWERP_MARKETING"/>
+    <growerp.menu.WidgetDomain widgetName="CampaignListScreen" artifactGroupId="GROWERP_MARKETING"/>
+    <growerp.menu.WidgetDomain widgetName="ContentPlanList" artifactGroupId="GROWERP_MARKETING"/>
+    <growerp.menu.WidgetDomain widgetName="EmailSequenceList" artifactGroupId="GROWERP_MARKETING"/>
+    <growerp.menu.WidgetDomain widgetName="LandingPageList" artifactGroupId="GROWERP_MARKETING"/>
+    <growerp.menu.WidgetDomain widgetName="LinkedInSendQueueScreen" artifactGroupId="GROWERP_MARKETING"/>
+    <growerp.menu.WidgetDomain widgetName="MasterContentList" artifactGroupId="GROWERP_MARKETING"/>
+    <growerp.menu.WidgetDomain widgetName="OutreachMessageList" artifactGroupId="GROWERP_MARKETING"/>
+    <growerp.menu.WidgetDomain widgetName="OutreachSetupGuideScreen" artifactGroupId="GROWERP_MARKETING"/>
+    <growerp.menu.WidgetDomain widgetName="PersonaList" artifactGroupId="GROWERP_MARKETING"/>
+    <growerp.menu.WidgetDomain widgetName="PlatformConfigListScreen" artifactGroupId="GROWERP_MARKETING"/>
+    <growerp.menu.WidgetDomain widgetName="SocialEngagementList" artifactGroupId="GROWERP_MARKETING"/>
+
+    <!-- GROWERP_WEBSITE -->
+    <growerp.menu.WidgetDomain widgetName="WebsiteConversionList" artifactGroupId="GROWERP_WEBSITE"/>
+    <growerp.menu.WidgetDomain widgetName="WebsiteDialog" artifactGroupId="GROWERP_WEBSITE"/>
+    <growerp.menu.WidgetDomain widgetName="WebsiteFormList" artifactGroupId="GROWERP_WEBSITE"/>
+    <growerp.menu.WidgetDomain widgetName="WebsiteTranslationList" artifactGroupId="GROWERP_WEBSITE"/>
+
+    <!-- GROWERP_MANUFACTURING -->
+    <growerp.menu.WidgetDomain widgetName="BomList" artifactGroupId="GROWERP_MANUFACTURING"/>
+    <growerp.menu.WidgetDomain widgetName="RoutingList" artifactGroupId="GROWERP_MANUFACTURING"/>
+    <growerp.menu.WidgetDomain widgetName="WorkOrderList" artifactGroupId="GROWERP_MANUFACTURING"/>
+
+    <!-- GROWERP_TRAINING -->
+    <growerp.menu.WidgetDomain widgetName="CourseList" artifactGroupId="GROWERP_TRAINING"/>
+    <growerp.menu.WidgetDomain widgetName="CourseMediaList" artifactGroupId="GROWERP_TRAINING"/>
+    <growerp.menu.WidgetDomain widgetName="CourseViewer" artifactGroupId="GROWERP_TRAINING"/>
+    <growerp.menu.WidgetDomain widgetName="CoursesDashboard" artifactGroupId="GROWERP_TRAINING"/>
+    <growerp.menu.WidgetDomain widgetName="GuideList" artifactGroupId="GROWERP_TRAINING"/>
+
+    <!-- GROWERP_WIKI -->
+    <growerp.menu.WidgetDomain widgetName="WikiList" artifactGroupId="GROWERP_WIKI"/>
+
+    <!-- GROWERP_ADK -->
+    <growerp.menu.WidgetDomain widgetName="AdkActionsListView" artifactGroupId="GROWERP_ADK"/>
+    <growerp.menu.WidgetDomain widgetName="AdkAgentListView" artifactGroupId="GROWERP_ADK"/>
+    <growerp.menu.WidgetDomain widgetName="AdkApprovalsListView" artifactGroupId="GROWERP_ADK"/>
+    <growerp.menu.WidgetDomain widgetName="AdkChatView" artifactGroupId="GROWERP_ADK"/>
+    <growerp.menu.WidgetDomain widgetName="AdkJobListView" artifactGroupId="GROWERP_ADK"/>
+    <growerp.menu.WidgetDomain widgetName="AdkKnowledgeView" artifactGroupId="GROWERP_ADK"/>
+    <growerp.menu.WidgetDomain widgetName="AdkMcpServerListView" artifactGroupId="GROWERP_ADK"/>
+    <growerp.menu.WidgetDomain widgetName="AdkSystemUsageView" artifactGroupId="GROWERP_ADK"/>
+    <growerp.menu.WidgetDomain widgetName="AgentsDashboard" artifactGroupId="GROWERP_ADK"/>
+
+    <!-- GROWERP_SETUP -->
+    <growerp.menu.WidgetDomain widgetName="SystemDefaultsDialog" artifactGroupId="GROWERP_SETUP"/>
+    <growerp.menu.WidgetDomain widgetName="SystemSetupAiView" artifactGroupId="GROWERP_SETUP"/>
+    <growerp.menu.WidgetDomain widgetName="SystemSetupDialog" artifactGroupId="GROWERP_SETUP"/>
+    <growerp.menu.WidgetDomain widgetName="SystemSetupEmailView" artifactGroupId="GROWERP_SETUP"/>
+
+    <!-- GROWERP_SUPPORT -->
+    <growerp.menu.WidgetDomain widgetName="ApplicationList" artifactGroupId="GROWERP_SUPPORT"/>
+    <growerp.menu.WidgetDomain widgetName="CompanyListMainOnly" artifactGroupId="GROWERP_SUPPORT"/>
+    <growerp.menu.WidgetDomain widgetName="InfrastructureView" artifactGroupId="GROWERP_SUPPORT"/>
+    <growerp.menu.WidgetDomain widgetName="RestStatisticsView" artifactGroupId="GROWERP_SUPPORT"/>
+    <growerp.menu.WidgetDomain widgetName="SupportDashboard" artifactGroupId="GROWERP_SUPPORT"/>
+
+</entity-facade-xml>
