@@ -137,6 +137,38 @@ Filtering happens **server-side**, for children as well as top-level items: a sc
 from a group must not remain reachable as a tab. The Flutter check in `display_menu_option.dart`
 is defence in depth against a stale cached config, not the control.
 
+## Which APIs are open
+
+Moqui serves several REST APIs. Only two of them are open to the applications:
+
+| API | Open to | Enforced by |
+|---|---|---|
+| `/rest/s1/growerp` | every signed-in user, per organization | `GROWERP_REST_GUARDED` → `check#RestAccess`, below |
+| `/rest/s1/pop` | storefront, partly anonymous | `require-authentication` per resource in `pop-rest-store/service/pop.rest.xml` |
+| `/rest/s1/moqui` (Tools) | nobody | `AUTHZT_DENY / AUTHZA_ALL` for `ALL_USERS` in [`GrowerpRestApiDisableData.xml`](../backend/data/GrowerpRestApiDisableData.xml) |
+| `/rest/s1/mantle` (Mantle USL) | nobody | same |
+| `/rest/e1`, `/rest/m1`, `/rest/v1` (Entity, Entity Master) | nobody | same, on the `rest.xml` transitions |
+
+The reason is tenancy. GrowERP separates organizations with `Party.ownerPartyId`, applied by
+the `growerp` services. The Entity, Mantle and Tools APIs know nothing about it: they read and
+write straight across every organization in the database. An endpoint there cannot be made
+safe by authorizing it, so it is closed instead.
+
+The one exception is [`GrowerpRestApiEnableData.xml`](../backend/data/GrowerpRestApiEnableData.xml),
+which re-grants `AUTHZT_ALWAYS / AUTHZA_VIEW` — read only — to the framework `ADMIN` group, for
+support debugging through the moqui MCP server's `moqui_rest_call`. `ADMIN` here is the Moqui
+group holding `SystemSupport`, not `GROWERP_M_ADMIN`: a company administrator is not in it.
+
+**Schema documents follow the same split.** `/rest/entity.swagger`, `/rest/master.swagger`,
+`/rest/entity.json`, `/rest/master.json`, `/rest/service.swagger` and `/rest/service.raml`
+describe the data model and every endpoint, so they are not public either. `rest.xml` is
+declared `require-authentication="false"`, which means its transitions are pushed with
+authorization disabled and no `ArtifactAuthz` row is consulted; the check therefore lives in
+`RestSchemaUtil.schemaAccessDenied` in the moqui fork. It requires a login, then allows the
+APIs named in the `rest_schema_open_apis` System property (`growerp,pop`, set by
+[`backend/MoquiConf.xml`](../backend/MoquiConf.xml)) and limits every other document to the
+`ADMIN` group. Adding an API that applications may use means adding it there as well.
+
 ## REST authorization
 
 ### Resolving a request to a domain

@@ -16,6 +16,12 @@
          System property, which default-property sets before the transaction facade initialises. -->
     <default-property name="bitronix.tm.timer.defaultTransactionTimeout" value="600" />
 
+    <!-- REST APIs whose swagger/RAML document any logged in user may read. Everything else -
+         the Entity and Entity Master APIs, Mantle USL and Moqui Tools - is ADMIN only, matching
+         the runtime authorization in data/GrowerpRestApiDisableData.xml. Read by
+         RestSchemaUtil.schemaAccessDenied, see docs/GrowERP_Security_Model.md -->
+    <default-property name="rest_schema_open_apis" value="growerp,pop" />
+
     <server-stats bin-length-seconds="900" visit-enabled="false" visit-ip-info-on-login="true"
         visitor-enabled="false">
         <artifact-stats type="AT_XML_SCREEN" persist-bin="false" persist-hit="false" />
