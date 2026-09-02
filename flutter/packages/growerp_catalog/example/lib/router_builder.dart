@@ -39,7 +39,7 @@ const catalogMenuConfig = MenuConfiguration(
       menuItemId: 'CATALOG_PRODUCTS',
       title: 'Products',
       route: '/products',
-      iconName: 'products',
+      iconName: 'inventory',
       sequenceNum: 20,
       widgetName: 'ProductList',
     ),

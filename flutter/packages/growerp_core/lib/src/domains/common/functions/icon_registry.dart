@@ -23,6 +23,7 @@ final Map<String, Icon> iconRegistry = {
   'school': const Icon(Icons.school),
   'settings': const Icon(Icons.settings),
   'security': const Icon(Icons.security),
+  'cleaning_services': const Icon(Icons.cleaning_services),
   'task': const Icon(Icons.task),
   'money': const Icon(Icons.money),
   'send': const Icon(Icons.send),
@@ -128,6 +129,43 @@ final Map<String, Icon> iconRegistry = {
   'fact_check': const Icon(Icons.fact_check), // write approvals
   'history': const Icon(Icons.history), // agent action audit log
   'menu_book': const Icon(Icons.menu_book), // knowledge base
+
+  // Referenced by menu seed data but previously missing here, so these items
+  // fell back to the generic circle in the drawer, nav rail and dashboard.
+  'auto_awesome': const Icon(Icons.auto_awesome), // generated content
+  'construction': const Icon(Icons.construction),
+  'dynamic_form': const Icon(Icons.dynamic_form), // web forms
+  'hotel': const Icon(Icons.hotel),
+  'memory': const Icon(Icons.memory), // infrastructure
+  'play_circle_outline': const Icon(Icons.play_circle_outline), // course viewer
+  'precision_manufacturing': const Icon(Icons.precision_manufacturing),
+  'price_change': const Icon(Icons.price_change), // rental rates
+  'route': const Icon(Icons.route), // manufacturing routings
+  'schema': const Icon(Icons.schema), // bill of materials
+  'thumb_up': const Icon(Icons.thumb_up), // engagements
+  'translate': const Icon(Icons.translate),
+  'travel_explore': const Icon(Icons.travel_explore), // website generator
+  'tune': const Icon(Icons.tune), // system defaults
+  'view_kanban': const Icon(Icons.view_kanban), // pipeline
+
+  // Referenced by the Dart menu configurations of the package example apps.
+  'account_balance_wallet': const Icon(Icons.account_balance_wallet),
+  'attach_money': const Icon(Icons.attach_money),
+  'bed': const Icon(Icons.bed),
+  'calendar_today': const Icon(Icons.calendar_today),
+  'check_circle': const Icon(Icons.check_circle),
+  'event': const Icon(Icons.event),
+  'folder': const Icon(Icons.folder),
+  'layers': const Icon(Icons.layers),
+  'location_on': const Icon(Icons.location_on),
+  'login': const Icon(Icons.login),
+  'money_off': const Icon(Icons.money_off),
+  'outbound': const Icon(Icons.outbound),
+  'palette': const Icon(Icons.palette),
+  'payment': const Icon(Icons.payment),
+  'payments': const Icon(Icons.payments),
+  'play_circle': const Icon(Icons.play_circle),
+  'summarize': const Icon(Icons.summarize),
 };
 
 /// Get an Icon by its name from the registry.
