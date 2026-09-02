@@ -885,15 +885,6 @@ limitations under the License.
                     <service
                         name="growerp.100.LandingPageServices100.delete#CredibilityInfo" />
                 </method>
-                <resource name="Statistic">
-                    <method type="post">
-                        <service name="growerp.100.LandingPageServices100.add#CredibilityStatistic" />
-                    </method>
-                    <method type="delete">
-                        <service
-                            name="growerp.100.LandingPageServices100.remove#CredibilityStatistic" />
-                    </method>
-                </resource>
             </resource>
         </resource>
 

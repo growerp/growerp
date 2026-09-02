@@ -1298,6 +1298,51 @@
     <!--  Platform Configuration Services                         -->
     <!-- ========================================================= -->
 
+    <service verb="get" noun="PlatformConfiguration">
+        <description>Get the platform configuration of the owner for one platform</description>
+        <in-parameters>
+            <parameter name="platform" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="configId" />
+            <parameter name="ownerPartyId" />
+            <parameter name="platform" />
+            <parameter name="isEnabled" />
+            <parameter name="dailyLimit" type="Integer" />
+            <parameter name="apiKey" />
+            <parameter name="apiSecret" />
+            <parameter name="username" />
+            <parameter name="password" />
+            <parameter name="createdDate" />
+            <parameter name="lastModifiedDate" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <!-- stored uppercase, clients can send lowercase enum names -->
+            <set field="platform" from="platform?.toUpperCase()" />
+            <entity-find-one entity-name="growerp.marketing.PlatformConfiguration"
+                value-field="conf">
+                <field-map field-name="ownerPartyId" />
+                <field-map field-name="platform" />
+            </entity-find-one>
+            <if condition="!conf">
+                <return error="true" message="Platform configuration not found: ${platform}" />
+            </if>
+            <set field="configId" from="conf.configId" />
+            <set field="isEnabled" from="conf.isEnabled == 'Y'" />
+            <set field="dailyLimit" from="conf.dailyLimit" />
+            <set field="apiKey" from="conf.apiKey" />
+            <set field="apiSecret" from="conf.apiSecret" />
+            <set field="username" from="conf.username" />
+            <set field="password" from="conf.password" />
+            <set field="createdDate"
+                from="conf.createdDate ? ec.l10n.format(conf.createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+            <set field="lastModifiedDate"
+                from="conf.lastModifiedDate ? ec.l10n.format(conf.lastModifiedDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+        </actions>
+    </service>
+
     <service verb="create" noun="PlatformConfiguration">
         <description>Create platform configuration</description>
         <in-parameters>

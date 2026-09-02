@@ -1617,12 +1617,6 @@ abstract class RestClient {
     @Field() required String credibilityInfoId,
   });
 
-  @DELETE("rest/s1/growerp/100/LandingPage/Credibility/Statistic")
-  Future<void> deleteCredibilityStatistic({
-    @Field() required String credibilityInfoId,
-    @Field() required String credibilityStatisticId,
-  });
-
   // ========================================================
   // OUTREACH CAMPAIGN ENDPOINTS
   // ========================================================
