@@ -10,6 +10,8 @@
 analyzer:
   exclude:
     - build/**
+    # scaffold output of `flutter create`, gitignored (flutter/.gitignore:79)
+    - test/**
     - android/**
     - ios/**
     - web/**

@@ -109,7 +109,7 @@ melos:
 
   scripts:
     analyze:
-      exec: dart analyze .
+      exec: dart --suppress-analytics analyze .
       description: Analyse all packages for possible problems.
     build:
       description: build_runner build all modules.
