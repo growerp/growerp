@@ -1327,7 +1327,7 @@ jobs:
   # detail, so failures.html is rebuilt identically on a carried-over run.
   #
   # Cell content per store:
-  #   iOS / macOS : latest version + state  (first row, sorted -createdDate)
+  #   iOS / macOS : live version + pending submission (newest by createdDate)
   #   Android     : production track — latest completed/inProgress version
   #   Windows     : "✓{pub_ver}  ⏳{pend_ver} {status}" (pending omitted if none)
   #   Snap        : latest/stable revision + version
@@ -1496,17 +1496,37 @@ jobs:
               return f'<span class="{cls}">{text}</span>'
 
           # ── Cell formatters ──────────────────────────────────────────────
+          # App Store states that mean "this build is what customers get".
+          ASC_LIVE = {'READY_FOR_SALE'}
+
           # appStoreVersions has no `sort` parameter and documents no ordering, so
-          # take the newest by createdDate ('YYYY-MM-DD', sorts as text) instead of
-          # trusting the list order.
+          # order by createdDate ('YYYY-MM-DD', sorts as text) instead of trusting
+          # the list order. Apple keeps superseded versions on READY_FOR_SALE, so
+          # the live one is the newest of those — never simply the newest row,
+          # which is whatever was submitted last (pending, or rejected).
           def cell_asc(rows, url):
               if not rows:
                   return '—'
               def created(x):
                   d = x.get('date') or ''
                   return '' if d == '—' else d
-              r = max(rows, key=created)
-              return f"{link(r.get('version','—'), url)}<br>{state_span(r.get('state','?'))}"
+              ordered = sorted(rows, key=created, reverse=True)
+              live    = next((r for r in ordered if r.get('state') in ASC_LIVE), None)
+              # Only a submission at least as new as the live version is pending:
+              # older non-live rows are superseded history (REPLACED_WITH_NEW_VERSION,
+              # a rejection we already moved past) and must not read as waiting.
+              # With no live row at all this is the newest row — never submitted,
+              # or TestFlight-only.
+              pending = next((r for r in ordered
+                              if r.get('state') not in ASC_LIVE
+                              and (live is None or created(r) >= created(live))), None)
+              parts = []
+              if live:
+                  parts.append(f"✓ {link(live.get('version','?'), url)}")
+              if pending:
+                  parts.append(f"⏳ {link(pending.get('version','?'), url)} "
+                               f"{state_span(pending.get('state','?'))}")
+              return '<br>'.join(parts) or '—'
 
           # The Play API reports per-track release status only; it never says
           # whether the app itself passed review. A completed release that is
