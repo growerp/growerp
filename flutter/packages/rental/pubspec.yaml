@@ -1,6 +1,6 @@
 name: rental
 resolution: workspace
-version: 1.18.0+18
+version: 1.18.1+19
 publish_to: none
 
 environment:
