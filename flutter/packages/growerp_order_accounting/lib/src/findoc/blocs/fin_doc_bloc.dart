@@ -79,6 +79,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     this.docType,
     this.applicationId, {
     this.journalId = '',
+    this.authBloc,
   }) : super(const FinDocState()) {
     on<FinDocFetch>(
       _onFinDocFetch,
@@ -98,6 +99,15 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
       _onFinDocSearchChanged,
       transformer: finDocSearchDebounce(),
     );
+    on<FinDocReset>((event, emit) => emit(const FinDocState()));
+    // A fetch queued before logout can still be in flight when the api key is
+    // cleared, so it comes back denied instead of empty. Drop straight back to
+    // initial rather than let that denial paint as a fatal error on the way out.
+    _authSubscription = authBloc?.stream.listen((authState) {
+      if (authState.status == AuthStatus.unAuthenticated) {
+        add(const FinDocReset());
+      }
+    });
   }
 
   final RestClient restClient;
@@ -105,7 +115,15 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
   final bool sales;
   final FinDocType docType;
   final String journalId;
+  final AuthBloc? authBloc;
+  StreamSubscription? _authSubscription;
   int start = 0;
+
+  @override
+  Future<void> close() {
+    _authSubscription?.cancel();
+    return super.close();
+  }
 
   Future<void> _onFinDocSearchChanged(
     FinDocSearchChanged event,

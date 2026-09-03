@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_order_accounting/src/findoc/blocs/invoice_upload/invoice_upload_bloc.dart';
 
@@ -16,40 +17,85 @@ List<BlocProvider> getOrderAccountingBlocProviders(
     ),
     // sales order used in hotel
     BlocProvider<FinDocBloc>(
-      create: (context) =>
-          FinDocBloc(restClient, true, FinDocType.order, applicationId),
+      create: (context) => FinDocBloc(
+        restClient,
+        true,
+        FinDocType.order,
+        applicationId,
+        authBloc: context.read<AuthBloc>(),
+      ),
     ),
     BlocProvider<PurchaseOrderBloc>(
-      create: (context) =>
-          FinDocBloc(restClient, false, FinDocType.order, applicationId),
+      create: (context) => FinDocBloc(
+        restClient,
+        false,
+        FinDocType.order,
+        applicationId,
+        authBloc: context.read<AuthBloc>(),
+      ),
     ),
     BlocProvider<PurchaseInvoiceBloc>(
-      create: (context) =>
-          FinDocBloc(restClient, false, FinDocType.invoice, applicationId),
+      create: (context) => FinDocBloc(
+        restClient,
+        false,
+        FinDocType.invoice,
+        applicationId,
+        authBloc: context.read<AuthBloc>(),
+      ),
     ),
     BlocProvider<PurchasePaymentBloc>(
-      create: (context) =>
-          FinDocBloc(restClient, false, FinDocType.payment, applicationId),
+      create: (context) => FinDocBloc(
+        restClient,
+        false,
+        FinDocType.payment,
+        applicationId,
+        authBloc: context.read<AuthBloc>(),
+      ),
     ),
     BlocProvider<IncomingShipmentBloc>(
-      create: (context) =>
-          FinDocBloc(restClient, false, FinDocType.shipment, applicationId),
+      create: (context) => FinDocBloc(
+        restClient,
+        false,
+        FinDocType.shipment,
+        applicationId,
+        authBloc: context.read<AuthBloc>(),
+      ),
     ),
     BlocProvider<SalesOrderBloc>(
-      create: (context) =>
-          FinDocBloc(restClient, true, FinDocType.order, applicationId),
+      create: (context) => FinDocBloc(
+        restClient,
+        true,
+        FinDocType.order,
+        applicationId,
+        authBloc: context.read<AuthBloc>(),
+      ),
     ),
     BlocProvider<SalesInvoiceBloc>(
-      create: (context) =>
-          FinDocBloc(restClient, true, FinDocType.invoice, applicationId),
+      create: (context) => FinDocBloc(
+        restClient,
+        true,
+        FinDocType.invoice,
+        applicationId,
+        authBloc: context.read<AuthBloc>(),
+      ),
     ),
     BlocProvider<SalesPaymentBloc>(
-      create: (context) =>
-          FinDocBloc(restClient, true, FinDocType.payment, applicationId),
+      create: (context) => FinDocBloc(
+        restClient,
+        true,
+        FinDocType.payment,
+        applicationId,
+        authBloc: context.read<AuthBloc>(),
+      ),
     ),
     BlocProvider<OutgoingShipmentBloc>(
-      create: (context) =>
-          FinDocBloc(restClient, true, FinDocType.shipment, applicationId),
+      create: (context) => FinDocBloc(
+        restClient,
+        true,
+        FinDocType.shipment,
+        applicationId,
+        authBloc: context.read<AuthBloc>(),
+      ),
     ),
     BlocProvider<TransactionBloc>(
       create: (context) => FinDocBloc(
@@ -57,11 +103,17 @@ List<BlocProvider> getOrderAccountingBlocProviders(
         true,
         FinDocType.transaction,
         applicationId,
+        authBloc: context.read<AuthBloc>(),
       ),
     ),
     BlocProvider<RequestBloc>(
-      create: (context) =>
-          FinDocBloc(restClient, true, FinDocType.request, applicationId),
+      create: (context) => FinDocBloc(
+        restClient,
+        true,
+        FinDocType.request,
+        applicationId,
+        authBloc: context.read<AuthBloc>(),
+      ),
     ),
     BlocProvider<LedgerJournalBloc>(
       create: (context) => LedgerJournalBloc(restClient),

@@ -152,3 +152,9 @@ class FinDocSearchChanged extends FinDocEvent {
   @override
   List<Object> get props => [searchString];
 }
+
+/// Internal: fired when the auth session ends while a fetch may still be in
+/// flight, so its eventual denial has nothing to overwrite.
+class FinDocReset extends FinDocEvent {
+  const FinDocReset();
+}

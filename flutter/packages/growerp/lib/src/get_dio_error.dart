@@ -38,6 +38,14 @@ Future<String> getDioError(dynamic e) async {
               decoded['errors'].toString().isNotEmpty) {
             errorMessage = decoded['errors'].toString();
 
+            // A request that left the client after logout arrives keyless and
+            // the backend answers with its internal authz text; the user just
+            // signed out, say so instead of leaking that text verbatim.
+            if (errorMessage.contains('[No User]') &&
+                errorMessage.contains('is not authorized for')) {
+              return 'You have been signed out, please log in again.';
+            }
+
             // Try to extract the inner error message from nested JSON errors
             try {
               final RegExp jsonPattern = RegExp(
