@@ -37,7 +37,12 @@ Each Flutter application targets up to five platforms, resulting in over 30 uniq
 ---
 
 ## 3. The 6-Step Hybrid Release Workflow
-To tame this massive ecosystem, we utilize a standardized 6-step release protocol that balances automated CI pipelines with critical manual oversight. 
+To tame this massive ecosystem, we utilize a standardized 6-step release protocol that balances automated CI pipelines with critical manual oversight. \
+
+pre-requisite:
+- Staging updated for the latest normally new minor tag, 11.9.1 -> 11.10.1
+- new draft release created using this tag in GitHub 11.10.1-prerelease
+- All CI tests passed.
 
 1. **CI: Download Metadata** 
    - Before any upload occurs, the pipeline pulls down the current store metadata for existing apps. This ensures we are always working from the latest baseline and prevents accidental overwrites of live text.
