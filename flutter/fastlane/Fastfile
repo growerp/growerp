@@ -84,11 +84,40 @@ def submit_slot_available?(api_key, bundle_id, platform_filter)
     )
   end
   unless blocking.empty?
-    UI.important(
-      "#{bundle_id} (#{platform_filter}) has v#{blocking.first.version_string} in " \
-      "#{blocking.first.app_store_state}; uploading the build without submitting for review."
-    )
-    return false
+    if blocking.first.app_store_state == "WAITING_FOR_REVIEW"
+      # Not yet picked up by a reviewer, so cancelling it doesn't interrupt anyone
+      # (unlike IN_REVIEW below, which is left alone). Free the slot and continue.
+      UI.important(
+        "#{bundle_id} (#{platform_filter}) has v#{blocking.first.version_string} " \
+        "WAITING_FOR_REVIEW; cancelling it to submit the new build."
+      )
+      submission = app.get_in_progress_review_submission(platform: platform_filter)
+      submission&.cancel_submission
+
+      cleared = false
+      30.times do
+        sleep(10)
+        still_blocking = app.get_in_progress_review_submission(platform: platform_filter)
+        if still_blocking.nil? || still_blocking.state != "WAITING_FOR_REVIEW"
+          cleared = true
+          break
+        end
+      end
+
+      unless cleared
+        UI.important(
+          "#{bundle_id} (#{platform_filter}): cancelling the WAITING_FOR_REVIEW submission " \
+          "did not clear in time; uploading the build without submitting for review."
+        )
+        return false
+      end
+    else
+      UI.important(
+        "#{bundle_id} (#{platform_filter}) has v#{blocking.first.version_string} in " \
+        "#{blocking.first.app_store_state}; uploading the build without submitting for review."
+      )
+      return false
+    end
   end
 
   # deliver also needs an editable App Info (app-level metadata: name, category,
