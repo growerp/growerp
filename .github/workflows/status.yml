@@ -569,8 +569,11 @@ jobs:
   #          APP_STORE_CONNECT_API_KEY_CONTENT
   # ─────────────────────────────────────────────────────────────────────────────
   status-ios:
-      needs: [ resolve-matrix ]
-      if: needs.resolve-matrix.outputs.run_ios == 'true'
+      # Depends on the test jobs only for ordering: the store answer is written
+      # into the page by `report`, so querying at workflow start made every cell
+      # 2+ hours old before anyone could read it.
+      needs: [ resolve-matrix, backend-tests, integration-tests ]
+      if: always() && needs.resolve-matrix.outputs.run_ios == 'true'
       runs-on: ubuntu-latest
       strategy:
           fail-fast: false
@@ -663,7 +666,10 @@ jobs:
                 except Exception as e:
                     rows = [{'version': '—', 'state': '—', 'date': '—'}]
 
-                fragment = {'store': 'ios', 'app': app_name, 'rows': rows}
+                # When the store was actually asked — the page prints the oldest of
+                # these so a stale cell is visible instead of implied fresh.
+                queried = time.strftime('%Y-%m-%dT%H:%MZ', time.gmtime())
+                fragment = {'store': 'ios', 'app': app_name, 'rows': rows, 'queried': queried}
                 with open('/tmp/fragment.json', 'w') as f:
                     json.dump(fragment, f)
 
@@ -691,8 +697,8 @@ jobs:
   #          APP_STORE_CONNECT_API_KEY_CONTENT
   # ─────────────────────────────────────────────────────────────────────────────
   status-macos:
-      needs: [ resolve-matrix ]
-      if: needs.resolve-matrix.outputs.run_macos == 'true'
+      needs: [ resolve-matrix, backend-tests, integration-tests ]
+      if: always() && needs.resolve-matrix.outputs.run_macos == 'true'
       runs-on: ubuntu-latest
       strategy:
           fail-fast: false
@@ -780,7 +786,10 @@ jobs:
                 except Exception as e:
                     rows = [{'version': '—', 'state': '—', 'date': '—'}]
 
-                fragment = {'store': 'macos', 'app': app_name, 'rows': rows}
+                # When the store was actually asked — the page prints the oldest of
+                # these so a stale cell is visible instead of implied fresh.
+                queried = time.strftime('%Y-%m-%dT%H:%MZ', time.gmtime())
+                fragment = {'store': 'macos', 'app': app_name, 'rows': rows, 'queried': queried}
                 with open('/tmp/fragment.json', 'w') as f:
                     json.dump(fragment, f)
 
@@ -806,8 +815,8 @@ jobs:
   # Secrets: GOOGLE_PLAY_SERVICE_ACCOUNT_JSON
   # ─────────────────────────────────────────────────────────────────────────────
   status-android:
-      needs: [ resolve-matrix ]
-      if: needs.resolve-matrix.outputs.run_android == 'true'
+      needs: [ resolve-matrix, backend-tests, integration-tests ]
+      if: always() && needs.resolve-matrix.outputs.run_android == 'true'
       runs-on: ubuntu-latest
       strategy:
           fail-fast: false
@@ -824,7 +833,7 @@ jobs:
                 PACKAGE_NAME: ${{ matrix.android_id }}
             run: |
                 python3 << 'PYEOF'
-                import base64, json, os, sys
+                import base64, json, os, sys, time
 
                 from google.oauth2 import service_account
                 from googleapiclient.discovery import build
@@ -927,15 +936,72 @@ jobs:
                 for r in rows:
                     r['live'] = live
 
-                fragment = {'store': 'android', 'app': app_name, 'rows': rows}
+                # tracks-in-edit reports rollout only ('completed'), never whether
+                # Play reviewed the release — that is what makes a rolled-out and an
+                # approved-but-unpublished release look identical. The release
+                # summaries endpoint (outside the edit) carries the Console
+                # lifecycle, so ask it per track and attach the real state.
+                LIFECYCLE = {
+                    'RELEASE_LIFECYCLE_STATE_DRAFT':                 'draft',
+                    'RELEASE_LIFECYCLE_STATE_NOT_SENT_FOR_REVIEW':   'not sent for review',
+                    'RELEASE_LIFECYCLE_STATE_IN_REVIEW':             'in review',
+                    'RELEASE_LIFECYCLE_STATE_APPROVED_NOT_PUBLISHED': 'waiting for developer release',
+                    'RELEASE_LIFECYCLE_STATE_NOT_APPROVED':          'rejected',
+                    'RELEASE_LIFECYCLE_STATE_PUBLISHED':             'published',
+                }
+                summaries = {}
+                try:
+                    releases_api = service.applications().tracks().releases()
+                    for track_name in sorted({r['track'] for r in rows
+                                              if r.get('track') not in ('—', '?')}):
+                        resp = releases_api.list(
+                            parent=f'applications/{package_name}/tracks/{track_name}'
+                        ).execute()
+                        for summary in resp.get('releases', []):
+                            summaries.setdefault(
+                                (track_name, summary.get('releaseName')), []
+                            ).append(summary.get('releaseLifecycleState', ''))
+                        print(f'{track_name}: ' + ', '.join(
+                            f"{s.get('releaseName')}={s.get('releaseLifecycleState')}"
+                            for s in resp.get('releases', [])) or f'{track_name}: none')
+                except Exception as e:
+                    print(f'WARN: release summaries unavailable ({e})')
+
+                for r in rows:
+                    states = summaries.get((r.get('track'), r.get('version')), [])
+                    if not states:
+                        continue
+                    draft = 'RELEASE_LIFECYCLE_STATE_DRAFT'
+                    want_draft = r.get('status') == 'draft'
+                    raw = next((x for x in states
+                                if (x == draft) == want_draft), states[0])
+                    r['lifecycle'] = LIFECYCLE.get(raw, raw)
+
+                # A live release that a newer one superseded is no longer an
+                # "active" release in the edit, so without this the published
+                # version vanishes from the page the moment a new release is
+                # approved. Add the summaries no track row covered.
+                covered = {(r.get('track'), r.get('version')) for r in rows}
+                for (track_name, name), states in summaries.items():
+                    if (track_name, name) in covered:
+                        continue
+                    rows += [{'track': track_name, 'version': name, 'status': '—',
+                              'rollout': '—', 'live': live,
+                              'lifecycle': LIFECYCLE.get(raw, raw)} for raw in states]
+
+                # When the store was actually asked — the page prints the oldest of
+                # these so a stale cell is visible instead of implied fresh.
+                queried = time.strftime('%Y-%m-%dT%H:%MZ', time.gmtime())
+                fragment = {'store': 'android', 'app': app_name, 'rows': rows, 'queried': queried}
                 with open('/tmp/fragment.json', 'w') as f:
                     json.dump(fragment, f)
 
                 lines = [f'### Android — {app_name}\n',
-                         '| Track | Version | Status | Rollout |',
-                         '|-------|---------|--------|---------|']
+                         '| Track | Version | Status | Rollout | Lifecycle |',
+                         '|-------|---------|--------|---------|-----------|']
                 for r in rows:
-                    lines.append(f"| {r['track']} | {r['version']} | {r['status']} | {r['rollout']} |")
+                    lines.append(f"| {r['track']} | {r['version']} | {r['status']} "
+                                 f"| {r['rollout']} | {r.get('lifecycle', '—')} |")
                 text = '\n'.join(lines) + '\n'
                 with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
                     f.write(text)
@@ -956,8 +1022,8 @@ jobs:
   #          WINDOWS_<APP>_PRODUCT_ID per app
   # ─────────────────────────────────────────────────────────────────────────────
   status-windows:
-      needs: [ resolve-matrix ]
-      if: needs.resolve-matrix.outputs.run_windows == 'true'
+      needs: [ resolve-matrix, backend-tests, integration-tests ]
+      if: always() && needs.resolve-matrix.outputs.run_windows == 'true'
       runs-on: ubuntu-latest
       strategy:
           fail-fast: false
@@ -976,7 +1042,7 @@ jobs:
                 APP_NAME: ${{ matrix.app }}
             run: |
                 python3 << 'PYEOF'
-                import json, os, sys, requests
+                import json, os, sys, time, requests
 
                 app_name = os.environ['APP_NAME']
                 app_id = os.environ.get('WINDOWS_PRODUCT_ID', '')
@@ -1025,9 +1091,18 @@ jobs:
                 pending = app_data.get('pendingApplicationSubmission', {})
                 if pending:
                     sub = get_json(f"{base}/submissions/{pending['id']}")
-                    rows.append({'label': 'pending', 'version': pkg_version(sub), 'status': sub.get('status', '?')})
+                    # targetPublishMode decides who the submission waits for once it
+                    # passes certification: 'Manual' waits for us to press publish,
+                    # 'SpecificDate' waits for targetPublishDate, 'Immediate' goes out.
+                    rows.append({'label': 'pending', 'version': pkg_version(sub),
+                                 'status': sub.get('status', '?'),
+                                 'publishMode': sub.get('targetPublishMode', ''),
+                                 'publishDate': sub.get('targetPublishDate', '')})
 
-                fragment = {'store': 'windows', 'app': app_name, 'rows': rows}
+                # When the store was actually asked — the page prints the oldest of
+                # these so a stale cell is visible instead of implied fresh.
+                queried = time.strftime('%Y-%m-%dT%H:%MZ', time.gmtime())
+                fragment = {'store': 'windows', 'app': app_name, 'rows': rows, 'queried': queried}
                 with open('/tmp/fragment.json', 'w') as f:
                     json.dump(fragment, f)
 
@@ -1054,8 +1129,8 @@ jobs:
   # Snap name convention: growerp-<app>
   # ─────────────────────────────────────────────────────────────────────────────
   status-snap:
-      needs: [ resolve-matrix ]
-      if: needs.resolve-matrix.outputs.run_snap == 'true'
+      needs: [ resolve-matrix, backend-tests, integration-tests ]
+      if: always() && needs.resolve-matrix.outputs.run_snap == 'true'
       runs-on: ubuntu-latest
       strategy:
           fail-fast: false
@@ -1079,7 +1154,7 @@ jobs:
                 snapcraft revisions "$SNAP_NAME" > /tmp/snap-revisions.txt 2>&1 || true
 
                 python3 << 'PYEOF'
-                import json, os, re
+                import json, os, re, time
 
                 app_name  = os.environ['APP_NAME']
                 snap_name = f'growerp-{app_name}'
@@ -1120,7 +1195,10 @@ jobs:
                 except Exception as e:
                     rows = [{'channel': '—', 'revision': '—', 'version': 'NOT FOUND', 'released': '—'}]
 
-                fragment = {'store': 'snap', 'app': app_name, 'rows': rows}
+                # When the store was actually asked — the page prints the oldest of
+                # these so a stale cell is visible instead of implied fresh.
+                queried = time.strftime('%Y-%m-%dT%H:%MZ', time.gmtime())
+                fragment = {'store': 'snap', 'app': app_name, 'rows': rows, 'queried': queried}
                 with open('/tmp/fragment.json', 'w') as f:
                     json.dump(fragment, f)
 
@@ -1148,6 +1226,10 @@ jobs:
   #   * an inline image inventory — running version per app per environment
   # ------------------------------------------------------------------
   swarm-status:
+    # Ordering only, like the store jobs: run just before `report` so the page
+    # shows what the swarm ran at publish time.
+    needs: [ backend-tests, integration-tests ]
+    if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
     continue-on-error: true
@@ -1245,7 +1327,7 @@ jobs:
   # detail, so failures.html is rebuilt identically on a carried-over run.
   #
   # Cell content per store:
-  #   iOS / macOS : latest version + state  (first row, sorted -createdDate)
+  #   iOS / macOS : live version + pending submission (newest by createdDate)
   #   Android     : production track — latest completed/inProgress version
   #   Windows     : "✓{pub_ver}  ⏳{pend_ver} {status}" (pending omitted if none)
   #   Snap        : latest/stable revision + version
@@ -1342,6 +1424,7 @@ jobs:
 
           # Load all fragments: data[(store, app)] = rows list
           data = {}
+          queried_times = []
           fragments_dir = '/tmp/fragments'
           for store in STORE_ORDER:
               for app in APP_ORDER:
@@ -1354,6 +1437,13 @@ jobs:
                       for r in rows:
                           r['override'] = override
                       data[(store, app)] = rows
+                      if frag.get('queried'):
+                          queried_times.append(frag['queried'])
+
+          # Oldest store answer on the page. The store jobs run just before this
+          # one, so it should be minutes behind "Generated" — a bigger gap means
+          # a cell may have moved on in the store since.
+          queried_str = min(queried_times) if queried_times else '?'
 
           # ── Store console deep links ─────────────────────────────────────
           def console_url(store, app):
@@ -1374,12 +1464,69 @@ jobs:
           def link(text, url):
               return f'<a href="{url}">{text}</a>' if url else text
 
+          # ── Status colouring ─────────────────────────────────────────────
+          # red   = the store rejected the build
+          # amber = submitted, waiting for the store to review it
+          # green = approved, waiting for us to press release
+          # Matching is on substrings because each store spells its states
+          # differently; RELEASE is tested before REVIEW since
+          # PENDING_DEVELOPER_RELEASE also contains "pending".
+          REJECTED_WORDS = ('reject', 'invalid', 'certificationfailed', 'removed')
+          RELEASE_WORDS  = ('pending_developer_release', 'pending_apple_release',
+                            'readytopublish', 'pendingpublication',
+                            'waiting for developer release', 'waiting for release on',
+                            'pending stable release', 'candidate')
+          REVIEW_WORDS   = ('review', 'waiting', 'certification', 'inprogress',
+                            'draft', 'pending', 'commit', 'processing')
+
+          def state_span(text):
+              t = (text or '').lower()
+              # AMBIGUOUS says "review or rejected" — the store never told us
+              # which, so it stays amber rather than claiming a rejection.
+              if AMBIGUOUS in t:
+                  cls = 'st-rev'
+              elif any(w in t for w in REJECTED_WORDS):
+                  cls = 'st-rej'
+              elif any(w in t for w in RELEASE_WORDS):
+                  cls = 'st-rel'
+              elif any(w in t for w in REVIEW_WORDS):
+                  cls = 'st-rev'
+              else:
+                  return text
+              return f'<span class="{cls}">{text}</span>'
+
           # ── Cell formatters ──────────────────────────────────────────────
+          # App Store states that mean "this build is what customers get".
+          ASC_LIVE = {'READY_FOR_SALE'}
+
+          # appStoreVersions has no `sort` parameter and documents no ordering, so
+          # order by createdDate ('YYYY-MM-DD', sorts as text) instead of trusting
+          # the list order. Apple keeps superseded versions on READY_FOR_SALE, so
+          # the live one is the newest of those — never simply the newest row,
+          # which is whatever was submitted last (pending, or rejected).
           def cell_asc(rows, url):
               if not rows:
                   return '—'
-              r = rows[0]
-              return f"{link(r.get('version','—'), url)}<br>{r.get('state','?')}"
+              def created(x):
+                  d = x.get('date') or ''
+                  return '' if d == '—' else d
+              ordered = sorted(rows, key=created, reverse=True)
+              live    = next((r for r in ordered if r.get('state') in ASC_LIVE), None)
+              # Only a submission at least as new as the live version is pending:
+              # older non-live rows are superseded history (REPLACED_WITH_NEW_VERSION,
+              # a rejection we already moved past) and must not read as waiting.
+              # With no live row at all this is the newest row — never submitted,
+              # or TestFlight-only.
+              pending = next((r for r in ordered
+                              if r.get('state') not in ASC_LIVE
+                              and (live is None or created(r) >= created(live))), None)
+              parts = []
+              if live:
+                  parts.append(f"✓ {link(live.get('version','?'), url)}")
+              if pending:
+                  parts.append(f"⏳ {link(pending.get('version','?'), url)} "
+                               f"{state_span(pending.get('state','?'))}")
+              return '<br>'.join(parts) or '—'
 
           # The Play API reports per-track release status only; it never says
           # whether the app itself passed review. A completed release that is
@@ -1389,42 +1536,102 @@ jobs:
           # hand-maintained override goes stale the moment the store moves on).
           # storeStatusOverrides still wins when the real state is worth pinning.
           AMBIGUOUS = 'in review or rejected'
+          # A Play release with status 'draft' has been uploaded but never rolled
+          # out: the store is not holding it, we are. Same situation as an iOS
+          # PENDING_DEVELOPER_RELEASE, so it gets the same wording.
+          DEV_RELEASE = 'waiting for developer release'
+
           def android_status(r):
               status = r.get('status', '?')
               override = r.get('override')
               if override:
                   return override
+              # The release-summaries lifecycle is the Console's own wording — use
+              # it whenever the collector got it. 'published' only says the release
+              # is live, so the rollout status stays more informative there.
+              lifecycle = r.get('lifecycle')
+              if lifecycle:
+                  if lifecycle != 'published':
+                      return lifecycle
+                  # Rows carried over from the release summaries have no rollout
+                  # status of their own.
+                  return status if status not in ('—', '?', '') else lifecycle
+              # Fallback for a run where that endpoint was unavailable.
+              if status == 'draft':
+                  return DEV_RELEASE
               if r.get('live') is False:
                   return AMBIGUOUS if status == 'completed' else f'{status} · {AMBIGUOUS}'
               return status
+
+          # States worth a line of their own next to the live version.
+          ACTIONABLE = {DEV_RELEASE, 'in review', 'not sent for review', 'rejected'}
 
           def cell_android(rows, url):
               if not rows:
                   return '—'
               prod = [r for r in rows if r.get('track') == 'production']
-              # A track can hold a draft release next to the rolled-out one;
-              # the completed release is the one that reflects production.
+              # A track can hold an unpublished release next to the rolled-out one;
+              # the live (or completed) release is the one that reflects production.
+              live = [r for r in prod if r.get('lifecycle') == 'published']
               done = [r for r in prod if r.get('status') == 'completed']
-              src  = (done or prod or rows)[0]
-              return f"{link(src.get('version','?'), url)}<br>{android_status(src)}"
+              src  = (live or done or prod or rows)[0]
+              parts = [f"{link(src.get('version','?'), url)}<br>{state_span(android_status(src))}"]
+              # A release waiting on us or on Play is the row that needs action, so
+              # show it instead of letting the live release hide it.
+              parts += [f"⏳ {link(r.get('version','?'), url)} {state_span(android_status(r))}"
+                        for r in prod
+                        if r is not src and android_status(r) in ACTIONABLE]
+              return '<br>'.join(parts)
+
+          # Windows parks a certified submission in 'Release' (older submissions
+          # report 'PendingPublication'); targetPublishMode says who it waits
+          # for — 'Manual' is us, 'SpecificDate' is the clock, 'Immediate'
+          # nobody.
+          def windows_status(r):
+              if r.get('override'):
+                  return r['override']
+              st = r.get('status', '?')
+              if st not in ('Release', 'PendingPublication'):
+                  return st
+              mode = r.get('publishMode', '')
+              # Unset dates come back as the .NET min date, not as empty.
+              date = (r.get('publishDate') or '')[:10]
+              if mode == 'SpecificDate' and date and not date.startswith('1601'):
+                  return f'waiting for release on {date}'
+              return DEV_RELEASE if mode == 'Manual' else st
 
           def cell_windows(rows, url):
               if not rows:
                   return '—'
               parts = []
               for r in rows:
-                  ver, st = r.get('version','?'), r.get('status','?')
-                  parts.append(f"✓ {link(ver, url)}" if r.get('label') == 'published' else f"⏳ {link(ver, url)} {st}")
+                  ver, st = r.get('version','?'), windows_status(r)
+                  parts.append(f"✓ {link(ver, url)}" if r.get('label') == 'published'
+                               else f"⏳ {link(ver, url)} {state_span(st)}")
               return '<br>'.join(parts)
 
+          # snapcraft marks the revision currently released to a channel with '*';
+          # superseded revisions keep the bare channel name and must not be picked.
+          def snap_current(rows, channel):
+              return next((r for r in rows or []
+                           if f'latest/{channel}*' in r.get('channel', '')
+                           and r.get('version') not in ('—', None)), None)
+
+          # Snap has no review gate, so 'candidate' is where a stable release waits
+          # for promotion — show it next to the live revision instead of only the
+          # released one.
           def cell_snap(rows, url):
               if not rows:
                   return '—'
-              stable = [r for r in rows if '/stable' in r.get('channel', '')]
-              r = stable[0] if stable else rows[0]
-              if r.get('version') == '—':
-                  return '—'
-              return f"r{r.get('revision','?')} {link(r.get('version','?'), url)}"
+              stable = snap_current(rows, 'stable')
+              cand   = snap_current(rows, 'candidate')
+              parts = []
+              if stable:
+                  parts.append(f"✓ r{stable.get('revision','?')} {link(stable.get('version','?'), url)}")
+              if cand and (not stable or cand.get('revision') != stable.get('revision')):
+                  parts.append(f"⏳ r{cand.get('revision','?')} "
+                               f"{link(cand.get('version','?'), url)} {state_span('candidate')}")
+              return '<br>'.join(parts) or '—'
 
           cell_fn = {
               'ios': cell_asc, 'macos': cell_asc,
@@ -1457,9 +1664,13 @@ jobs:
                           'PENDING_APPLE_RELEASE'},
               'macos':   {'IN_REVIEW', 'WAITING_FOR_REVIEW', 'PENDING_DEVELOPER_RELEASE',
                           'PENDING_APPLE_RELEASE'},
-              'android': {'inProgress', 'draft', 'in review', 'in review or rejected'},
+              'android': {'inProgress', 'draft', 'in review', 'in review or rejected',
+                          'not sent for review', DEV_RELEASE},
               'windows': {'Certification', 'PreProcessing', 'CommitStarted',
-                          'PendingCommit', 'PendingPublication', 'ReadyToPublish'},
+                          'PendingCommit', 'PendingPublication', 'ReadyToPublish',
+                          DEV_RELEASE},
+              # Snap rows carry no state field; a candidate ahead of stable is the
+              # waiting case and is handled separately below.
               'snap':    set(),
           }
 
@@ -1469,6 +1680,16 @@ jobs:
                   rows = data.get((store, app))
                   if not rows:
                       continue
+                  if store == 'snap':
+                      stable = snap_current(rows, 'stable')
+                      cand   = snap_current(rows, 'candidate')
+                      if cand and (not stable or cand.get('revision') != stable.get('revision')):
+                          ver = cand.get('version', '?')
+                          waiting.append(
+                              f"  SNAP      {app:10s}  v{ver:12s}  "
+                              f"pending stable release [r{cand.get('revision','?')}]"
+                          )
+                      continue
                   for r in rows:
                       # iOS/macOS use 'state'; Android uses 'status'; Windows uses 'status'
                       status_val = r.get('state') or r.get('status', '')
@@ -1476,6 +1697,8 @@ jobs:
                       label_info = f" [{r['label']}]" if 'label' in r else ''
                       if store == 'android' and r.get('track') == 'production':
                           status_val = android_status(r)
+                      elif store == 'windows':
+                          status_val = windows_status(r)
                       elif r.get('override'):
                           status_val = r['override']
                       if status_val in PENDING_STATES.get(store, set()):
@@ -1834,13 +2057,24 @@ jobs:
               '  h3    { color: #1a5276; margin-top: 1.2em; }',
               '  .bad  { color: #b03030; font-weight: bold; }',
               '  .warn { color: #b06a00; font-weight: bold; }',
+              '  .st-rej, .st-rev, .st-rel { font-weight: bold; padding: 1px 5px; '
+              'border-radius: 3px; }',
+              '  .st-rej { color: #8e1f1f; background: #fbe3e3; }',   # rejected
+              '  .st-rev { color: #7a5700; background: #fdf3d8; }',   # waiting for review
+              '  .st-rel { color: #1c6b32; background: #e2f4e6; }',   # waiting for release
           ])
+          legend = ('<p>Status colours: '
+                    '<span class="st-rej">rejected</span> '
+                    '<span class="st-rev">waiting for store review</span> '
+                    '<span class="st-rel">approved, waiting for developer release</span>'
+                    '</p>')
           full_html = (
               '<!DOCTYPE html><html><head><meta charset="utf-8"><title>GrowERP Status</title>'
               f'<style>\n{css}\n</style></head><body>'
               '<h1>GrowERP Status</h1>'
-              f'<p>Generated: {now_str}</p>'
+              f'<p>Generated: {now_str}<br>Store data queried: {esc(queried_str)}</p>'
               + md_lib.markdown(store_md, extensions=['tables'])
+              + legend
               + f'<h2>{tests_heading}</h2>'
               + tests_table
               + '<h2>Swarm Status — Staging and Production</h2>'
@@ -1876,7 +2110,8 @@ jobs:
           # Store part of the step summary; the test breakdown is appended by
           # the next step, so open in append mode.
           with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
-              f.write(f'# GrowERP Status\n\nGenerated: {now_str}\n\n' + store_md + '\n')
+              f.write(f'# GrowERP Status\n\nGenerated: {now_str}  \n'
+                      f'Store data queried: {queried_str}\n\n' + store_md + '\n')
           print(store_md)
           PYEOF
 

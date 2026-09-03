@@ -71,8 +71,7 @@ This directory contains comprehensive documentation for extending and developing
 
 ### 🚀 Release & Operations
 
-- **[GitHub Actions Guide](./GitHub_Actions_Guide.md)** ⭐ **NEW!** - All CI/CD workflows explained with full secrets reference and setup instructions
-- **[Version Management and Release Process](./GrowERP_Version_Management_and_Release_Process.md)** - Release strategy
+- **[GrowERP CI Store Maintenance Guide](./GrowERP_CI_Store_Maintenance_Guide.md)** ⭐ **NEW!** - All CI/CD workflows, release strategy, secrets, and store maintenance explained
 - **[Snap Linux Distribution Guide](./snap_linux_distribution.md)** - Package for Linux
 - **[GrowERP Timeout Fix Documentation](./GrowERP_Timeout_Fix_Documentation.md)** - Timeout handling
 
@@ -241,9 +240,8 @@ BlocListener<UserBloc, UserState>(
 
 ### 🔧 DevOps / Infrastructure
 **Time:** 60 minutes
-1. [GitHub Actions Guide](./GitHub_Actions_Guide.md) ⭐ **NEW!** - CI/CD workflows, secrets setup (20 min)
-2. [Assessment Landing Page Explanation](./Assessment_Landing_Page_Explanation.md) (30 min) ⭐ **Phase 12 - Deployment & MIME types**
-3. [Version Management and Release Process](./GrowERP_Version_Management_and_Release_Process.md) (15 min)
+1. [GrowERP CI Store Maintenance Guide](./GrowERP_CI_Store_Maintenance_Guide.md) ⭐ **NEW!** - CI/CD workflows, secrets setup, release strategy (35 min)
+2. [Building Blocks Development Guide](./Building_Blocks_Development_Guide.md) (20 min)
 
 ### 🎨 Admin / UI Developers
 **Time:** 60 minutes
@@ -343,8 +341,7 @@ BlocListener<UserBloc, UserState>(
 | **Real-time notifications** | [WebSocket Notification System](./WebSocket_Notification_System.md) | Complete guide |
 | **Chat functionality** | [Chat Functionality](./GrowERP_Chat_Functionality.md) | Functional overview |
 | **Timezone handling** | [Timezone Management Guide](./GrowERP_Timezone_Management_Guide.md) | Complete guide |
-| **CI/CD workflows & secrets** | [GitHub Actions Guide](./GitHub_Actions_Guide.md) | Complete guide |
-| **Release process** | [Version Management and Release Process](./GrowERP_Version_Management_and_Release_Process.md) | Complete guide |
+| **CI/CD workflows, secrets, release process** | [GrowERP CI Store Maintenance Guide](./GrowERP_CI_Store_Maintenance_Guide.md) | Complete guide |
 | **AI development** | [GrowERP AI Development Instructions](./GrowERP_AI_Instructions.md) | Complete guide |
 
 ---
@@ -359,7 +356,7 @@ BlocListener<UserBloc, UserState>(
 
 **⚙️ Backend Dev?** → [Assessment Landing Page](./Assessment_Landing_Page_Explanation.md) + [Backend Components Guide](./Backend_Components_Development_Guide.md) + [Data Models](./basic_explanation_of_the_frontend_REST_Backend_data_models.md)
 
-**🔧 DevOps?** → [Assessment Landing Page](./Assessment_Landing_Page_Explanation.md) (Deployment section) + [Version Management](./GrowERP_Version_Management_and_Release_Process.md)
+**🔧 DevOps?** → [Assessment Landing Page](./Assessment_Landing_Page_Explanation.md) (Deployment section) + [CI Store Maintenance Guide](./GrowERP_CI_Store_Maintenance_Guide.md)
 
 **🎨 Admin Dev?** → [Assessment Landing Page](./Assessment_Landing_Page_Explanation.md) + [Architecture Guide](./GROWERP_ASSESSMENT_AND_LANDING_PAGE_ARCHITECTURE.md)
 
@@ -387,7 +384,7 @@ BlocListener<UserBloc, UserState>(
 
 ### Release Your Changes
 
-1. Follow [Version Management](./GrowERP_Version_Management_and_Release_Process.md)
+1. Follow [CI Store Maintenance Guide](./GrowERP_CI_Store_Maintenance_Guide.md)
 2. Run tests
 3. Update documentation
 4. Create release

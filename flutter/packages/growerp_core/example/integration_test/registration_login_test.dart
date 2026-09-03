@@ -34,6 +34,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:universal_io/io.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -797,7 +798,8 @@ void main() {
       );
       await CommonTest.skipOnboardingIfPresent(tester);
       await CommonTest.logout(tester);
-    });
+      // The trial welcome is suppressed on iOS/macOS while testing.
+    }, skip: Platform.isIOS || Platform.isMacOS);
   });
 
   group('Trial Expiry Tests', () {

@@ -163,7 +163,7 @@
     }
   },
   "model": {
-    "name": "gemini-3.5-flash"
+    "name": "gemini-3.7-flash"
   },
   "permissions": {
     "allow": [

@@ -15,6 +15,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import '../domains/common/llm_models.dart';
 import 'widget_registry.dart';
 
 /// Simple data class for menu option info (to avoid model dependency)
@@ -82,7 +83,7 @@ class NavigationIntent {
 class AiNavigationService {
   final String apiKey;
   final String _baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
-  final String _model = 'gemini-3.5-flash-lite';
+  final String _model = defaultLlmModel.modelId;
 
   /// Optional menu configuration for route-aware navigation
   List<MenuItemInfo>? _menuItems;

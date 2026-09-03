@@ -11,7 +11,7 @@
             String envKey = System.getenv("GOOGLE_API_KEY") ?: System.getenv("GOOGLE_GENAI_API_KEY") ?: System.getenv("GEMINI_API_KEY") ?: ""
             configured  = (dbKey.length() > 0 || envKey.length() > 0)
             agentName   = configValue?.agentName ?: "MoquiAgent"
-            modelName   = configValue?.modelName ?: "gemini-2.0-flash"
+            modelName   = configValue?.modelName ?: org.moqui.adk.AdkManager.DEFAULT_GEMINI_MODEL
         ]]></script>
     </actions>
 

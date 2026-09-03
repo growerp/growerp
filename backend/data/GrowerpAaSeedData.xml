@@ -521,7 +521,8 @@ limitations under the License.
         enumTypeId="ProductStoreSettingType" />
 
     <!-- GrowERP wide defaults, maintained in the support app -->
-    <growerp.general.SystemDefault defaultId="SYSTEM" llmMonthlyTokenLimit="100000"/>
+    <growerp.general.SystemDefault defaultId="SYSTEM" llmMonthlyTokenLimit="100000"
+        aiModelName="gemini-3.7-flash" aiProvider="gemini"/>
 
     <dbResources resourceId="GROWERP_LOGO" filename="growerp_logo.jpg" isFile="Y"
         parentResourceId="growerp_images" />

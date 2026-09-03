@@ -436,7 +436,7 @@ jobs:
 
 ## 📚 Related Documentation
 
-- [GrowERP Version Management and Release Process](../../docs/GrowERP_Version_Management_and_Release_Process.md)
+- [GrowERP CI Store Maintenance Guide](../../docs/GrowERP_CI_Store_Maintenance_Guide.md)
 - [Hotfix Documentation](../hotfix/README.md)
 - [GrowERP Extensibility Guide](../../docs/GrowERP_Extensibility_Guide.md)
 

@@ -45,6 +45,11 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     );
     on<NotificationReceive>(_onNotificationReceive);
     on<NotificationSend>(_onNotificationSend);
+    // Subscribe as soon as the bloc exists: the server delivers nothing to an
+    // unsubscribed session, and tying this to the fetch left every login that
+    // never fetched silently receiving no notifications at all. Buffered until
+    // there is a socket and re-sent on every reconnect.
+    notificationClient.subscribe('ALL');
     // Listen once, on the client's own broadcast stream: it outlives the socket,
     // so this keeps working over a reconnect without anything re-attaching it.
     _wsSubscription = notificationClient.stream().listen(
@@ -68,11 +73,10 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
       }
       _lastAuthStatus = authState.status;
     });
-    // The provider is lazy, so this bloc is normally created after login: by then
-    // the authenticated transition above has already gone by and the fetch that
-    // subscribes the socket would never run, leaving every push dropped.
-    _lastAuthStatus = authBloc.state.status;
-    if (_lastAuthStatus == AuthStatus.authenticated) {
+    // Built after the login already happened (lazy provider, or a bloc created
+    // from a screen): the transition above is gone, so fetch once here.
+    if (authBloc.state.status == AuthStatus.authenticated) {
+      _lastAuthStatus = AuthStatus.authenticated;
       add(const NotificationFetch());
     }
   }

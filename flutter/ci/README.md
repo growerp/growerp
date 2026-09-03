@@ -183,4 +183,4 @@ Tests run automatically on push to `master`/`development` and on pull requests. 
 
 - [Integration Test Guide](../../docs/Integration_Test_Guide.md)
 - [GrowERP Design Patterns](../../docs/GrowERP_Design_Patterns.md)
-- [Release Process](../../docs/GrowERP_Version_Management_and_Release_Process.md)
+- [GrowERP CI Store Maintenance Guide](../../docs/GrowERP_CI_Store_Maintenance_Guide.md)

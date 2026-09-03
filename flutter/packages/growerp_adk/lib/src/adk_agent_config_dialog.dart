@@ -88,7 +88,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     final e = widget.existing;
     if (e != null) {
       _nameCtrl.text = e.agentName ?? '';
-      _modelCtrl.text = e.modelName ?? 'gemini-3.5-flash-lite';
+      _modelCtrl.text = e.modelName ?? defaultLlmModel.modelId;
       _llmProviderCtrl.text = e.llmProvider ?? 'gemini';
       _instructionCtrl.text = e.instruction ?? '';
       _descriptionCtrl.text = e.description ?? '';
@@ -107,7 +107,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       if (_agentRole != 'specialist' && e.adkAgentConfigId != null) _loadTeam();
       if (e.adkAgentConfigId != null) _loadMcpServers();
     } else {
-      _modelCtrl.text = 'gemini-3.5-flash-lite';
+      _modelCtrl.text = defaultLlmModel.modelId;
       _llmProviderCtrl.text = 'gemini';
     }
     _loadProvidersWithKey();
@@ -567,7 +567,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                         enabled: _providerOptions().isNotEmpty,
                         decoration: InputDecoration(
                           labelText: 'Model',
-                          hintText: 'gemini-3.5-flash-lite',
+                          hintText: defaultLlmModel.modelId,
                           suffixIcon: PopupMenuButton<String>(
                             key: Key('modelNameMenu'),
                             tooltip: 'Pick a model',

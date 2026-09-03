@@ -227,7 +227,15 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
     try {
       final svc = await AdkConfigService.create();
       await svc.delete(cfg.adkAgentConfigId!);
-      await _load();
+      // Drop the row locally instead of re-reading: the backend verifies the row is gone
+      // before reporting success, so a re-read can only put a stale row back on screen.
+      if (mounted) {
+        setState(() {
+          _configs = _configs
+              .where((c) => c.adkAgentConfigId != cfg.adkAgentConfigId)
+              .toList();
+        });
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -413,7 +421,7 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
                 style: const TextStyle(fontWeight: FontWeight.w500),
               ),
               Text(
-                cfg.modelName ?? 'gemini-3.5-flash-lite',
+                cfg.modelName ?? defaultLlmModel.modelId,
                 style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
               ),
               if (cfg.instruction != null && cfg.instruction!.isNotEmpty)
@@ -434,7 +442,7 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
         // 'name$i' (same as phone) so doNewSearch can find/open the row on desktop
         Text(cfg.agentName ?? '(unnamed)', key: Key('name$i')),
         Text(
-          cfg.modelName ?? 'gemini-3.5-flash-lite',
+          cfg.modelName ?? defaultLlmModel.modelId,
           style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
         ),
         Text(

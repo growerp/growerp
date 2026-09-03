@@ -83,14 +83,47 @@ class AdkManager {
      *  ships Gemini and Claude only, so an openai agent still registers without a runner. */
     static final List<String> SUPPORTED_PROVIDERS = ['gemini', 'anthropic']
 
-    /** Model used when an agent row names no model. */
+    /** Built-in fallbacks, used only when neither the SystemDefault row nor the environment
+     *  names a model. Gemini value mirrors GeminiAiUtil.DEFAULT_MODEL on the backend. */
+    static final String DEFAULT_GEMINI_MODEL    = 'gemini-3.7-flash'
+    static final String DEFAULT_ANTHROPIC_MODEL = 'claude-sonnet-5'
+
+    /** Model used when an agent row names no model: the GrowERP wide SystemDefault row
+     *  (Support app -> System Defaults) when it holds a model for this provider, then the
+     *  environment, then the built-in constant. Same precedence GeminiAiUtil uses for content
+     *  generation, minus the per-tenant SystemSettings level (an ADK agent is per-tenant
+     *  already: its own row names the model). */
     static String defaultModelFor(String provider) {
+        String sysDefault = systemDefaultModelFor(provider)
+        if (sysDefault) return sysDefault
         if (provider == 'anthropic') {
             return System.getenv('ANTHROPIC_MODEL') ?: System.getProperty('ANTHROPIC_MODEL') ?:
-                'claude-sonnet-5'
+                DEFAULT_ANTHROPIC_MODEL
         }
         return System.getenv('GEMINI_MODEL') ?: System.getProperty('GEMINI_MODEL') ?:
-            'gemini-3.5-flash-lite'
+            DEFAULT_GEMINI_MODEL
+    }
+
+    /** SystemDefault.aiModelName when that row serves [provider]; '' when unset, served by
+     *  another provider, or unreadable (no EC yet, table not loaded). */
+    private static String systemDefaultModelFor(String provider) {
+        if (sharedSessionService == null) return ''
+        try {
+            def ec = sharedSessionService.ecf.getExecutionContext()
+            boolean wasDisabled = ec.artifactExecution.disableAuthz()
+            try {
+                def sd = ec.entity.find('growerp.general.SystemDefault')
+                        .condition('defaultId', 'SYSTEM').one()
+                String model = sd?.aiModelName as String
+                if (!model) return ''
+                String sdProvider = (sd.aiProvider ?:
+                        (model.startsWith('claude') ? 'anthropic' : 'gemini')) as String
+                return sdProvider == provider ? model : ''
+            } finally { if (!wasDisabled) ec.artifactExecution.enableAuthz() }
+        } catch (Exception e) {
+            logger.warn("defaultModelFor: SystemDefault lookup failed: ${e.message}")
+            return ''
+        }
     }
 
     /** The provider's key from the environment, for agents configured without one. */
@@ -354,7 +387,8 @@ CRITICAL tool-use rules — follow exactly:
             // A general (unnamed) interactive agent OR a coordinator claims the tenant's chat route;
             // plain named/scheduled specialists (e.g. CI Monitor) must not hijack interactive chat.
             if (ownerPartyId && (!agentName || isCoordinator)) tenantRegistry[ownerPartyId] = configId
-            currentConfig = [agentName: agent.name(), modelName: modelName, configId: configId]
+            // modelId, not modelName: a row that names no model still reports what it runs on
+            currentConfig = [agentName: agent.name(), modelName: modelId, configId: configId]
             logger.info("ADK agent '${agent.name()}' registered as configId='${configId}' (tenant='${ownerPartyId ?: 'global'}')")
         } catch (Throwable t) {
             logger.warn("Failed to initialize ADK agent configId='${configId}': ${t.message}", t)
@@ -516,8 +550,7 @@ CRITICAL tool-use rules — follow exactly:
         }
         if (!defaultKey) defaultKey = seedKey ?: ''
         // the borrowed seed key and its model both come from a gemini agent (see lazyInit)
-        String modelId = model ?:
-                (provider == 'gemini' ? 'gemini-3.5-flash-lite' : defaultModelFor(provider))
+        String modelId = model ?: defaultModelFor(provider)
         logger.info("ensureInteractiveDefault: registering __default__ provider={} hasKey={} (seedKeyPresent={})",
                 provider, (defaultKey ? true : false), (seedKey ? true : false))
         initConfig(DEFAULT_CONFIG, null, null, modelId, '', defaultKey, provider)
@@ -628,6 +661,28 @@ CRITICAL tool-use rules — follow exactly:
         registry.remove(configId)
         agentRegistry.remove(configId)
         ensureAgentBuilt(configId)
+    }
+
+    /// Drop a single config from the running registry and close only its toolsets, leaving
+    /// the rest of the ADK runtime (every other agent and tenant) alive. Used when a config
+    /// is deleted: destroy() would shut the whole JVM's ADK down until a restart.
+    static synchronized void unloadConfig(String configId) {
+        if (!configId) return
+        registry.remove(configId)
+        agentRegistry.remove(configId)
+        tenantRegistry.entrySet().removeIf { it.value == configId }
+        def ts = configMcpToolsets.remove(configId)
+        if (ts != null) {
+            try { ts.close() } catch (Exception e) {
+                logger.warn("Error closing McpToolset for config ${configId}: ${e.message}")
+            }
+        }
+        def external = configExternalToolsets.remove(configId)
+        if (external) external.each { t ->
+            try { t?.close() } catch (Exception e) {
+                logger.warn("Error closing external McpToolset for config ${configId}: ${e.message}")
+            }
+        }
     }
 
     static boolean isInitialized() { !registry.isEmpty() }

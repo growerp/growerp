@@ -445,7 +445,7 @@ limitations under the License.
         <field name="githubRepository" type="text-medium"/>
         <field name="aiModelName" type="text-short">
             <description>Tenant-wide default model for AI content generation (e.g.
-                gemini-3.5-flash-lite, claude-sonnet-5); empty uses the system default.</description>
+                gemini-3.7-flash, claude-sonnet-5); empty uses the system default.</description>
         </field>
         <field name="aiProvider" type="text-short">
             <description>LLM provider serving aiModelName: gemini, anthropic or openai.

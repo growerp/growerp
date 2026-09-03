@@ -85,8 +85,9 @@
                     <entity-make-value entity-name="moqui.adk.AdkAgentConfig" value-field="newCfg"/>
                     <set field="newCfg.ownerPartyId"       from="ownerPartyId"/>
                     <set field="newCfg.agentName"          from="agentName    ?: 'MoquiAgent'"/>
-                    <set field="newCfg.modelName"
-                        from="modelName ?: ((llmProvider ?: 'gemini') == 'gemini' ? 'gemini-3.5-flash-lite' : null)"/>
+                    <!-- left empty when not given: AdkManager.defaultModelFor resolves the
+                         model at agent-build time (SystemDefault row -> env -> constant) -->
+                    <set field="newCfg.modelName"          from="modelName"/>
                     <set field="newCfg.apiKey"             from="apiKey"/>
                     <set field="newCfg.llmProvider"        from="llmProvider  ?: 'gemini'"/>
                     <set field="newCfg.instruction"        from="instruction  ?: 'You are a helpful assistant for the GrowERP ERP system.'"/>

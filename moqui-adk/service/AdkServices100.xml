@@ -188,7 +188,7 @@
         </actions>
     </service>
 
-    <service verb="delete" noun="AdkAgentConfig">
+    <service verb="delete" noun="AdkAgentConfig" transaction="force-new">
         <in-parameters>
             <parameter name="adkAgentConfigId" required="true"/>
         </in-parameters>
@@ -222,7 +222,14 @@
             </entity-find>
             <iterate list="jobs" entry="j"><entity-delete value-field="j"/></iterate>
             <entity-delete value-field="cfg"/>
-            <script>org.moqui.adk.AdkManager.destroy()</script>
+            <!-- unload only this agent: destroy() would tear down the ADK runtime for every
+                 tenant in this JVM and leave it shut down until a restart -->
+            <script>org.moqui.adk.AdkManager.unloadConfig(adkAgentConfigId as String)</script>
+            <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="stillThere"
+                auto-field-map="[adkAgentConfigId: adkAgentConfigId]"/>
+            <if condition="stillThere">
+                <return error="true" message="Agent ${adkAgentConfigId} was not deleted, please try again."/>
+            </if>
         </actions>
     </service>
 
@@ -291,7 +298,7 @@
         </actions>
     </service>
 
-    <service verb="delete" noun="AdkAgentTeam">
+    <service verb="delete" noun="AdkAgentTeam" transaction="force-new">
         <in-parameters><parameter name="adkAgentTeamMemberId" required="true"/></in-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
@@ -301,6 +308,17 @@
                 <set field="coordId" from="tm.coordinatorConfigId"/>
                 <entity-delete value-field="tm"/>
                 <script>org.moqui.adk.AdkManager.reloadConfig(coordId)</script>
+                <entity-find-one entity-name="moqui.adk.AdkAgentTeamMember" value-field="stillThere"
+                    auto-field-map="[adkAgentTeamMemberId: adkAgentTeamMemberId]"/>
+                <if condition="stillThere">
+                    <return error="true"
+                        message="Team member ${adkAgentTeamMemberId} was not deleted, please try again."/>
+                </if>
+                <!-- else: never report success for a delete that did not happen -->
+                <else>
+                    <return error="true"
+                        message="Team member ${adkAgentTeamMemberId} not found for your company."/>
+                </else>
             </if>
         </actions>
     </service>
@@ -390,7 +408,7 @@
         </actions>
     </service>
 
-    <service verb="delete" noun="AdkMcpServer">
+    <service verb="delete" noun="AdkMcpServer" transaction="force-new">
         <in-parameters><parameter name="adkMcpServerId" required="true"/></in-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
@@ -415,6 +433,11 @@
                 <script>org.moqui.adk.AdkManager.reloadConfig(cfgId as String)</script>
             </iterate>
             <entity-delete value-field="srv"/>
+            <entity-find-one entity-name="moqui.adk.AdkMcpServer" value-field="stillThere"
+                auto-field-map="[adkMcpServerId: adkMcpServerId]"/>
+            <if condition="stillThere">
+                <return error="true" message="MCP server ${adkMcpServerId} was not deleted, please try again."/>
+            </if>
         </actions>
     </service>
 
@@ -469,7 +492,7 @@
         </actions>
     </service>
 
-    <service verb="delete" noun="AdkAgentMcpServer">
+    <service verb="delete" noun="AdkAgentMcpServer" transaction="force-new">
         <in-parameters><parameter name="adkAgentMcpServerId" required="true"/></in-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
@@ -479,6 +502,12 @@
                 <set field="cfgId" from="lnk.configId"/>
                 <entity-delete value-field="lnk"/>
                 <script>org.moqui.adk.AdkManager.reloadConfig(cfgId as String)</script>
+                <entity-find-one entity-name="moqui.adk.AdkAgentMcpServer" value-field="stillThere"
+                    auto-field-map="[adkAgentMcpServerId: adkAgentMcpServerId]"/>
+                <if condition="stillThere">
+                    <return error="true"
+                        message="MCP server attachment ${adkAgentMcpServerId} was not deleted, please try again."/>
+                </if>
                 <!-- else: never report success for a delete that did not happen -->
                 <else>
                     <return error="true"

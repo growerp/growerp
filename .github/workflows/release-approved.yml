@@ -8,9 +8,11 @@ name: Release Approved Store Submissions
 # --------------- | -------------------------------------------
 # iOS             | App Store → PENDING_DEVELOPER_RELEASE
 # macOS           | App Store → PENDING_DEVELOPER_RELEASE
-# Android         | Google Play → production track, status=draft
+# Android         | Google Play → managed publishing "Ready to publish"
+#                 | (Console-only) or a production track release with
+#                 | status=draft on apps without managed publishing
 # Windows         | Partner Center → ReadyToPublish certification status
-# Snap            | Snap Store → revision in latest/beta → promote to stable
+# Snap            | Snap Store → revision in latest/candidate → promote to stable
 #
 # Nothing held for an app/store is a normal outcome, not a failure: those jobs
 # report and finish green so a full sweep over every app stays readable.
@@ -63,10 +65,9 @@ on:
         type: boolean
         default: true
       store_snap:
-        description: "Snap Store (promote latest/beta to stable — no review gate,
-          off by default)"
+        description: "Snap Store (promote latest/candidate to stable)"
         type: boolean
-        default: false
+        default: true
 
 concurrency:
   group: store-release
@@ -270,10 +271,13 @@ jobs:
 
   # ───────────────────────────────────────────────────────────────────────────
   # Android — promote production-track draft releases to completed.
-  # publish-binary uploads with changesNotSentForReview=true, so the release is
-  # staged but never sent for review. Here we try to send it for review; if Play
-  # refuses (it does for some accounts / change types), fall back to staging the
-  # completed status and tell the user to click "Send changes for review".
+  # On apps with managed publishing on, publish-binary already uploaded a
+  # completed release that was reviewed and is parked in "Ready to publish";
+  # Play has no API to publish it, so that last click stays in the Console and
+  # this job reports it as such. Apps without managed publishing still get a
+  # draft release, which is promoted here: commit sends it for review, and if
+  # Play refuses, fall back to staging the completed status and tell the user
+  # to click "Send changes for review".
   # Secrets: GOOGLE_PLAY_SERVICE_ACCOUNT_JSON
   # ───────────────────────────────────────────────────────────────────────────
   release-android:
@@ -353,7 +357,10 @@ jobs:
           edit_id = stage_completed()
           if edit_id is None:
               print(f"No draft releases on production track for {package_name}.")
-              report("nothing pending")
+              print(f"::notice::{package_name}: nothing to promote via the API. With managed "
+                    "publishing on, a reviewed release waits in Play Console → Publishing "
+                    "overview → Publish.")
+              report("nothing pending (publish in Play Console if managed publishing is on)")
               sys.exit(0)
 
           try:
@@ -513,7 +520,7 @@ jobs:
             sleep 10
           done
 
-      - name: Promote latest/beta to stable
+      - name: Promote latest/candidate to stable
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
           APP_NAME: ${{ matrix.app }}
@@ -534,13 +541,13 @@ jobs:
           data = json.load(sys.stdin)
           for entry in data.get('channel-map', []):
               ch = entry.get('channel', {})
-              if ch.get('name') == 'beta' and ch.get('track') == 'latest':
+              if ch.get('name') == 'candidate' and ch.get('track') == 'latest':
                   print(entry.get('revision', ''))
                   break
           ")
 
             if [ -z "$REVISION" ]; then
-              echo "No revision in latest/beta for ${SNAP_NAME}."
+              echo "No revision in latest/candidate for ${SNAP_NAME}."
               echo "- **snap / ${SNAP_NAME}**: nothing pending" >> "$GITHUB_STEP_SUMMARY"
               continue
             fi

@@ -3,12 +3,13 @@
 
     <!-- CI Monitor Agent — checks GitHub Actions for Flutter exceptions and creates fix PRs.
          Requires GITHUB_TOKEN env var (repo + workflow scopes) and GOOGLE_API_KEY.
-         Triggered manually via /adk DevUI or AdkSchedulerServices.run#ScheduledAgent. -->
+         Triggered manually via /adk DevUI or AdkSchedulerServices.run#ScheduledAgent.
+         Agents deliberately name no modelName: AdkManager.defaultModelFor resolves it at
+         build time (SystemDefault row -> env -> constant), so seed rows never go stale. -->
     <moqui.adk.AdkAgentConfig
         ownerPartyId="GROWERP"
         adkAgentConfigId="CI_MONITOR_AGENT"
         agentName="GrowERP CI Monitor"
-        modelName="gemini-3.5-flash-lite"
         llmProvider="gemini"
         enabled="Y"
         scheduleEnabled="N"
