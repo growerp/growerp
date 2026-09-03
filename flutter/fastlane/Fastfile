@@ -83,13 +83,28 @@ def submit_slot_available?(api_key, bundle_id, platform_filter)
       filter: { "appStoreState" => state, "platform" => platform_filter }
     )
   end
-  return true if blocking.empty?
+  unless blocking.empty?
+    UI.important(
+      "#{bundle_id} (#{platform_filter}) has v#{blocking.first.version_string} in " \
+      "#{blocking.first.app_store_state}; uploading the build without submitting for review."
+    )
+    return false
+  end
 
-  UI.important(
-    "#{bundle_id} (#{platform_filter}) has v#{blocking.first.version_string} in " \
-    "#{blocking.first.app_store_state}; uploading the build without submitting for review."
-  )
-  false
+  # deliver also needs an editable App Info (app-level metadata: name, category,
+  # etc. — a separate Apple resource from the App Store Version checked above)
+  # to submit. When it's locked (e.g. still IN_REVIEW/PENDING_RELEASE from a
+  # prior release), upload_to_app_store retries "Cannot find edit app info" for
+  # ~20 minutes and then hard-fails. Check upfront and fall back to TestFlight.
+  unless app.fetch_edit_app_info
+    UI.important(
+      "#{bundle_id} (#{platform_filter}) has no editable App Info right now; " \
+      "uploading the build without submitting for review."
+    )
+    return false
+  end
+
+  true
 end
 
 # States in which a version has not gone live yet, so its release type still
