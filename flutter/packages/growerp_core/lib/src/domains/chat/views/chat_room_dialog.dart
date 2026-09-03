@@ -64,7 +64,7 @@ class ChatRoomDialogState extends State<ChatRoomDialog> {
         if (state.status == ChatRoomStatus.success) {
           HelperFunctions.showMessage(
             context,
-            '${state.message}',
+            translateChatRoomBlocMessage(state.message, _localizations!),
             Colors.green,
           );
           Navigator.of(context).pop();

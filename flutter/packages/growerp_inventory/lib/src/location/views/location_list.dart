@@ -17,9 +17,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:growerp_inventory/l10n/generated/inventory_localizations.dart';
+import 'package:growerp_inventory/growerp_inventory.dart';
 
-import '../location.dart';
 import 'location_list_styled_data.dart';
 
 class LocationList extends StatefulWidget {
@@ -113,7 +112,11 @@ class LocationListState extends State<LocationList> {
           );
         }
         if (state.status == LocationStatus.success && state.message != null) {
-          HelperFunctions.showMessage(context, state.message!, Colors.green);
+          HelperFunctions.showMessage(
+            context,
+            translateLocationBlocMessage(state.message, _localizations),
+            Colors.green,
+          );
         }
         if (state.status == LocationStatus.success) {
           WidgetsBinding.instance.addPostFrameCallback(

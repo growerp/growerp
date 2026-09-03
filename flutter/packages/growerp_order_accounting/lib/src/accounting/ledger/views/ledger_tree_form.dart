@@ -18,9 +18,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_simple_treeview/flutter_simple_treeview.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
-
-import '../../accounting.dart';
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 
 class LedgerTreeForm extends StatelessWidget {
   const LedgerTreeForm({super.key});
@@ -126,7 +124,7 @@ class LedgerTreeFormState extends State<LedgerTreeListForm> {
         if (state.status == LedgerStatus.success) {
           HelperFunctions.showMessage(
             context,
-            '${state.message}',
+            translateLedgerBlocMessage(state.message, _localizations),
             Colors.green,
           );
         }

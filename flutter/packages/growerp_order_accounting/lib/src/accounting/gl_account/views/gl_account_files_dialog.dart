@@ -20,9 +20,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart' as foundation;
-import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
-
-import '../gl_account.dart';
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 
 class GlAccountFilesDialog extends StatefulWidget {
   const GlAccountFilesDialog({super.key});
@@ -90,7 +88,7 @@ class _FilesHeaderState extends State<GlAccountFilesDialog> {
         if (state.status == GlAccountStatus.success) {
           HelperFunctions.showMessage(
             context,
-            '${state.message}',
+            translateGlAccountBlocMessage(state.message, _localizations),
             Colors.green,
           );
           Navigator.of(context).pop();

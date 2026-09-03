@@ -132,7 +132,7 @@ class LedgerJournalBloc extends Bloc<LedgerJournalEvent, LedgerJournalState> {
           state.copyWith(
             status: LedgerJournalStatus.success,
             ledgerJournals: ledgerJournals,
-            message: "ledgerJournal ${event.ledgerJournal.journalName} updated",
+            message: 'ledgerJournalUpdateSuccess',
           ),
         );
       } else {

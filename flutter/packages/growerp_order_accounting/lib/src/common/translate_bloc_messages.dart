@@ -84,11 +84,17 @@ String translateGlAccountBlocMessage(
         return localizations.glAccountUpdateSuccess(param);
       case 'glAccountAddSuccess':
         return localizations.glAccountAddSuccess(param);
-      case 'glAccountUploadSuccess':
-        return localizations.glAccountUploadSuccess;
       default:
         break;
     }
+  }
+
+  // Handle non-parameterized glAccount keys
+  switch (messageKey) {
+    case 'glAccountUploadSuccess':
+      return localizations.glAccountUploadSuccess;
+    default:
+      break;
   }
 
   // Fallback: return the key itself
@@ -147,6 +153,14 @@ String translateLedgerJournalBlocMessage(
       default:
         break;
     }
+  }
+
+  // Handle non-parameterized ledgerJournal keys
+  switch (messageKey) {
+    case 'ledgerJournalUpdateSuccess':
+      return localizations.ledgerJournalUpdateSuccess;
+    default:
+      break;
   }
 
   // Fallback: return the key itself

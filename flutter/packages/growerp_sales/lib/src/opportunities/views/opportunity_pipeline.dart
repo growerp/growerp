@@ -16,10 +16,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
-
-import '../bloc/opportunity_bloc.dart';
-import '../widgets/sales_funnel_chart.dart';
-import 'opportunity_dialog.dart';
+import 'package:growerp_sales/growerp_sales.dart';
 
 /// Kanban-style pipeline board: one column per stage, opportunities as
 /// draggable cards. Dropping a card on another column updates its stage.
@@ -44,6 +41,7 @@ class OpportunityPipelineState extends State<OpportunityPipeline> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = SalesLocalizations.of(context)!;
     return BlocConsumer<OpportunityBloc, OpportunityState>(
       listener: (context, state) {
         if (state.status == OpportunityStatus.failure) {
@@ -51,7 +49,11 @@ class OpportunityPipelineState extends State<OpportunityPipeline> {
         }
         if (state.status == OpportunityStatus.success &&
             (state.message ?? '').isNotEmpty) {
-          HelperFunctions.showMessage(context, '${state.message}', Colors.green);
+          HelperFunctions.showMessage(
+            context,
+            translateOpportunityBlocMessage(state.message, localizations),
+            Colors.green,
+          );
         }
       },
       builder: (context, state) {

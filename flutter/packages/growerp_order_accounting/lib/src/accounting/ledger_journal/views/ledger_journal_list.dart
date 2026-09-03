@@ -100,7 +100,7 @@ class LedgerJournalsState extends State<LedgerJournalList> {
         if (state.status == LedgerJournalStatus.success) {
           HelperFunctions.showMessage(
             context,
-            '${state.message}',
+            translateLedgerJournalBlocMessage(state.message, localizations),
             Colors.green,
           );
           _searchFocusNode.requestFocus();

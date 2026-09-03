@@ -104,7 +104,7 @@ class GlAccountsState extends State<GlAccountList> {
         if (state.status == GlAccountStatus.success) {
           HelperFunctions.showMessage(
             context,
-            '${state.message}',
+            translateGlAccountBlocMessage(state.message, localizations),
             Colors.green,
           );
         }

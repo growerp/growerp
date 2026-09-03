@@ -16,9 +16,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
-
-import '../../accounting.dart';
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 
 class TimePeriodListForm extends StatelessWidget {
   const TimePeriodListForm({super.key});
@@ -68,7 +66,7 @@ class TimePeriodListState extends State<TimePeriodList> {
         if (state.status == LedgerStatus.success) {
           HelperFunctions.showMessage(
             context,
-            '${state.message}',
+            translateLedgerBlocMessage(state.message, localizations),
             Colors.green,
           );
         }

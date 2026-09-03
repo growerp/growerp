@@ -14,14 +14,13 @@
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
-import 'package:growerp_sales/l10n/generated/sales_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import '../bloc/opportunity_bloc.dart';
+import 'package:growerp_sales/growerp_sales.dart';
 
 class OpportunityDialog extends StatefulWidget {
   final Opportunity opportunity;
@@ -96,7 +95,7 @@ class OpportunityDialogState extends State<OpportunityDialog> {
             if (state.convertedOrderId != null) {
               HelperFunctions.showMessage(
                 context,
-                'Quote #${state.convertedPseudoId ?? state.convertedOrderId} created successfully',
+                translateOpportunityBlocMessage(state.message, _localizations),
                 Colors.green,
               );
             }

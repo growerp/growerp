@@ -169,7 +169,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
           case WebsiteStatus.success:
             HelperFunctions.showMessage(
               context,
-              '${websiteState.message}',
+              translateWebsiteBlocMessage(websiteState.message, _localizations),
               Colors.green,
             );
             break;

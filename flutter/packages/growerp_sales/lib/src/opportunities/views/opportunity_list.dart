@@ -14,13 +14,11 @@
 
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter/material.dart';
-import 'package:growerp_sales/l10n/generated/sales_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:growerp_sales/growerp_sales.dart';
 
-import '../bloc/opportunity_bloc.dart';
 import '../widgets/opportunity_list_styled_data.dart';
-import 'views.dart';
 
 class OpportunityList extends StatefulWidget {
   const OpportunityList({super.key});
@@ -110,7 +108,7 @@ class OpportunitiesState extends State<OpportunityList> {
           if ((state.message ?? '').isNotEmpty) {
             HelperFunctions.showMessage(
               context,
-              '${state.message}',
+              translateOpportunityBlocMessage(state.message, _localizations),
               Colors.green,
             );
           }

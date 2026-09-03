@@ -17,9 +17,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:growerp_inventory/l10n/generated/inventory_localizations.dart';
+import 'package:growerp_inventory/growerp_inventory.dart';
 
-import '../asset.dart';
 import 'asset_list_styled_data.dart';
 
 class AssetList extends StatefulWidget {
@@ -134,7 +133,11 @@ class AssetListState extends State<AssetList> {
         }
         if (state.status == AssetStatus.success) {
           if (state.message != null && state.message!.isNotEmpty) {
-            HelperFunctions.showMessage(context, state.message!, Colors.green);
+            HelperFunctions.showMessage(
+              context,
+              translateAssetBlocMessage(state.message, _localizations),
+              Colors.green,
+            );
           }
           WidgetsBinding.instance.addPostFrameCallback(
             (_) => _searchFocusNode.requestFocus(),

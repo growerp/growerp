@@ -17,11 +17,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
+import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:intl/intl.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-
-import '../../accounting.dart';
 
 class BalanceSummaryList extends StatefulWidget {
   const BalanceSummaryList({super.key});
@@ -76,7 +74,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
           started = true;
           HelperFunctions.showMessage(
             context,
-            '${state.message}',
+            translateLedgerBlocMessage(state.message, _localizations),
             Colors.green,
           );
         }
