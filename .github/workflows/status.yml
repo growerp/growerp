@@ -1464,20 +1464,36 @@ jobs:
           def link(text, url):
               return f'<a href="{url}">{text}</a>' if url else text
 
+          # ── Canonical status vocabulary ──────────────────────────────────
+          # Every store spells its states differently; each store's *_canonical()
+          # helper below maps its raw value down to one of these five words so a
+          # cell reads the same regardless of platform. Unmapped/unexpected raw
+          # values fall through unchanged rather than being hidden or guessed at.
+          CREATED  = 'created'
+          WAIT_REV = 'waiting for review'
+          IN_REV   = 'in review'
+          REJECTED = 'rejected'
+          WAIT_REL = 'waiting for release'
+
           # ── Status colouring ─────────────────────────────────────────────
           # red   = the store rejected the build
           # amber = submitted, waiting for the store to review it
           # green = approved, waiting for us to press release
-          # Matching is on substrings because each store spells its states
-          # differently; RELEASE is tested before REVIEW since
-          # PENDING_DEVELOPER_RELEASE also contains "pending".
-          REJECTED_WORDS = ('reject', 'invalid', 'certificationfailed', 'removed')
-          RELEASE_WORDS  = ('pending_developer_release', 'pending_apple_release',
-                            'readytopublish', 'pendingpublication',
+          # grey  = created/uploaded but not yet submitted for review
+          # Matching is on substrings so raw text that slips through a
+          # *_canonical() helper unmapped still gets a best-effort colour;
+          # RELEASE is tested before REVIEW since PENDING_DEVELOPER_RELEASE
+          # also contains "pending".
+          CREATED_WORDS  = (CREATED, 'prepare_for_submission', 'testflight',
+                            'no submissions', 'not sent for review',
+                            'pendingcommit', 'commitstarted', 'preprocessing')
+          REJECTED_WORDS = (REJECTED, 'invalid', 'certificationfailed', 'removed')
+          RELEASE_WORDS  = (WAIT_REL, 'pending_developer_release', 'pending_apple_release',
+                            'readytopublish', 'pendingpublication', 'processing_for_app_store',
                             'waiting for developer release', 'waiting for release on',
-                            'pending stable release', 'candidate')
-          REVIEW_WORDS   = ('review', 'waiting', 'certification', 'inprogress',
-                            'draft', 'pending', 'commit', 'processing')
+                            'pending stable release', 'candidate', 'publishing')
+          REVIEW_WORDS   = (WAIT_REV, IN_REV, 'review', 'waiting', 'certification',
+                            'inprogress', 'draft', 'pending', 'commit', 'processing')
 
           def state_span(text):
               t = (text or '').lower()
@@ -1485,6 +1501,8 @@ jobs:
               # which, so it stays amber rather than claiming a rejection.
               if AMBIGUOUS in t:
                   cls = 'st-rev'
+              elif any(w in t for w in CREATED_WORDS):
+                  cls = 'st-new'
               elif any(w in t for w in REJECTED_WORDS):
                   cls = 'st-rej'
               elif any(w in t for w in RELEASE_WORDS):
@@ -1495,9 +1513,37 @@ jobs:
                   return text
               return f'<span class="{cls}">{text}</span>'
 
+          # ── Two-line cell rendering, shared by every store ────────────────
+          # Line 1: the production (live) version, if any. Line 2: the next
+          # version working its way through the store, with its status, if any.
+          def prod_line(version, url):
+              return f"✓ {link(version, url)}"
+
+          def pending_line(version, status, url):
+              return f"⏳ {link(version, url)} {state_span(status)}"
+
           # ── Cell formatters ──────────────────────────────────────────────
           # App Store states that mean "this build is what customers get".
           ASC_LIVE = {'READY_FOR_SALE'}
+
+          ASC_STATUS_MAP = {
+              'PREPARE_FOR_SUBMISSION':     CREATED,
+              'WAITING_FOR_REVIEW':         WAIT_REV,
+              'IN_REVIEW':                  IN_REV,
+              'REJECTED':                   REJECTED,
+              'DEVELOPER_REJECTED':         REJECTED,
+              'METADATA_REJECTED':          REJECTED,
+              'INVALID_BINARY':             REJECTED,
+              'PENDING_DEVELOPER_RELEASE':  WAIT_REL,
+              'PENDING_APPLE_RELEASE':      WAIT_REL,
+              'PROCESSING_FOR_APP_STORE':   WAIT_REL,
+          }
+
+          def asc_canonical(state):
+              state = state or '?'
+              if state.startswith('TESTFLIGHT') or state == 'NO SUBMISSIONS':
+                  return CREATED
+              return ASC_STATUS_MAP.get(state, state)
 
           # appStoreVersions has no `sort` parameter and documents no ordering, so
           # order by createdDate ('YYYY-MM-DD', sorts as text) instead of trusting
@@ -1522,10 +1568,10 @@ jobs:
                               and (live is None or created(r) >= created(live))), None)
               parts = []
               if live:
-                  parts.append(f"✓ {link(live.get('version','?'), url)}")
+                  parts.append(prod_line(live.get('version', '?'), url))
               if pending:
-                  parts.append(f"⏳ {link(pending.get('version','?'), url)} "
-                               f"{state_span(pending.get('state','?'))}")
+                  parts.append(pending_line(pending.get('version', '?'),
+                                             asc_canonical(pending.get('state')), url))
               return '<br>'.join(parts) or '—'
 
           # The Play API reports per-track release status only; it never says
@@ -1563,25 +1609,48 @@ jobs:
                   return AMBIGUOUS if status == 'completed' else f'{status} · {AMBIGUOUS}'
               return status
 
-          # States worth a line of their own next to the live version.
-          ACTIONABLE = {DEV_RELEASE, 'in review', 'not sent for review', 'rejected'}
+          ANDROID_STATUS_MAP = {
+              'draft':            WAIT_REL,  # see android_status: same as PENDING_DEVELOPER_RELEASE
+              'not sent for review': CREATED,
+              'in review':        IN_REV,
+              DEV_RELEASE:        WAIT_REL,
+              'rejected':         REJECTED,
+          }
+
+          def android_canonical(status):
+              # AMBIGUOUS ("in review or rejected", plus its "<status> · ..." composite
+              # form) is a genuine unknown between two buckets — never guess.
+              if status == AMBIGUOUS or (status or '').endswith(AMBIGUOUS):
+                  return status
+              return ANDROID_STATUS_MAP.get(status, status)
+
+          # Canonical states worth a line of their own next to the live version.
+          ACTIONABLE = {CREATED, IN_REV, REJECTED, WAIT_REL}
 
           def cell_android(rows, url):
               if not rows:
                   return '—'
               prod = [r for r in rows if r.get('track') == 'production']
               # A track can hold an unpublished release next to the rolled-out one;
-              # the live (or completed) release is the one that reflects production.
-              live = [r for r in prod if r.get('lifecycle') == 'published']
+              # the live release is the one that reflects production. Anything else
+              # — even a "completed" rollout with no confirmed lifecycle — is not
+              # confirmed live, so it belongs on the pending line, not claimed as
+              # production.
+              live = next((r for r in prod if r.get('lifecycle') == 'published'), None)
               done = [r for r in prod if r.get('status') == 'completed']
-              src  = (live or done or prod or rows)[0]
-              parts = [f"{link(src.get('version','?'), url)}<br>{state_span(android_status(src))}"]
+              src  = live or (done or prod or rows)[0]
+              parts = []
+              if live:
+                  parts.append(prod_line(src.get('version', '?'), url))
+              else:
+                  parts.append(pending_line(src.get('version', '?'),
+                                             android_canonical(android_status(src)), url))
               # A release waiting on us or on Play is the row that needs action, so
               # show it instead of letting the live release hide it.
-              parts += [f"⏳ {link(r.get('version','?'), url)} {state_span(android_status(r))}"
+              parts += [pending_line(r.get('version', '?'), android_canonical(android_status(r)), url)
                         for r in prod
-                        if r is not src and android_status(r) in ACTIONABLE]
-              return '<br>'.join(parts)
+                        if r is not src and android_canonical(android_status(r)) in ACTIONABLE]
+              return '<br>'.join(parts) or '—'
 
           # Windows parks a certified submission in 'Release' (older submissions
           # report 'PendingPublication'); targetPublishMode says who it waits
@@ -1600,15 +1669,33 @@ jobs:
                   return f'waiting for release on {date}'
               return DEV_RELEASE if mode == 'Manual' else st
 
+          WINDOWS_STATUS_MAP = {
+              'PendingCommit':       CREATED,
+              'CommitStarted':       CREATED,
+              'PreProcessing':       CREATED,
+              'Certification':       IN_REV,
+              'CertificationFailed': REJECTED,
+              'Publishing':          WAIT_REL,
+              'ReadyToPublish':      WAIT_REL,
+              DEV_RELEASE:           WAIT_REL,
+          }
+
+          def windows_canonical(status):
+              if (status or '').startswith('waiting for release on'):
+                  return status
+              return WINDOWS_STATUS_MAP.get(status, status)
+
           def cell_windows(rows, url):
               if not rows:
                   return '—'
               parts = []
               for r in rows:
-                  ver, st = r.get('version','?'), windows_status(r)
-                  parts.append(f"✓ {link(ver, url)}" if r.get('label') == 'published'
-                               else f"⏳ {link(ver, url)} {state_span(st)}")
-              return '<br>'.join(parts)
+                  ver = r.get('version', '?')
+                  if r.get('label') == 'published':
+                      parts.append(prod_line(ver, url))
+                  else:
+                      parts.append(pending_line(ver, windows_canonical(windows_status(r)), url))
+              return '<br>'.join(parts) or '—'
 
           # snapcraft marks the revision currently released to a channel with '*';
           # superseded revisions keep the bare channel name and must not be picked.
@@ -1630,7 +1717,7 @@ jobs:
                   parts.append(f"✓ r{stable.get('revision','?')} {link(stable.get('version','?'), url)}")
               if cand and (not stable or cand.get('revision') != stable.get('revision')):
                   parts.append(f"⏳ r{cand.get('revision','?')} "
-                               f"{link(cand.get('version','?'), url)} {state_span('candidate')}")
+                               f"{link(cand.get('version','?'), url)} {state_span(WAIT_REL)}")
               return '<br>'.join(parts) or '—'
 
           cell_fn = {
@@ -1658,17 +1745,14 @@ jobs:
           )
 
           # ── Waiting-for-approval scan ────────────────────────────────────
-          # States that mean "submitted and waiting for store review/release".
+          # Canonical states that mean "submitted and waiting for store review/
+          # release" — the same buckets that drive the ⏳ line in the table above,
+          # so this summary always agrees with the cells.
           PENDING_STATES = {
-              'ios':     {'IN_REVIEW', 'WAITING_FOR_REVIEW', 'PENDING_DEVELOPER_RELEASE',
-                          'PENDING_APPLE_RELEASE'},
-              'macos':   {'IN_REVIEW', 'WAITING_FOR_REVIEW', 'PENDING_DEVELOPER_RELEASE',
-                          'PENDING_APPLE_RELEASE'},
-              'android': {'inProgress', 'draft', 'in review', 'in review or rejected',
-                          'not sent for review', DEV_RELEASE},
-              'windows': {'Certification', 'PreProcessing', 'CommitStarted',
-                          'PendingCommit', 'PendingPublication', 'ReadyToPublish',
-                          DEV_RELEASE},
+              'ios':     {WAIT_REV, IN_REV, WAIT_REL},
+              'macos':   {WAIT_REV, IN_REV, WAIT_REL},
+              'android': {IN_REV, WAIT_REL, AMBIGUOUS},
+              'windows': {IN_REV, WAIT_REL},
               # Snap rows carry no state field; a candidate ahead of stable is the
               # waiting case and is handled separately below.
               'snap':    set(),
@@ -1691,16 +1775,16 @@ jobs:
                           )
                       continue
                   for r in rows:
-                      # iOS/macOS use 'state'; Android uses 'status'; Windows uses 'status'
-                      status_val = r.get('state') or r.get('status', '')
                       track_info = f" [{r['track']}]" if 'track' in r else ''
                       label_info = f" [{r['label']}]" if 'label' in r else ''
-                      if store == 'android' and r.get('track') == 'production':
-                          status_val = android_status(r)
+                      if store in ('ios', 'macos'):
+                          status_val = r.get('override') or asc_canonical(r.get('state'))
+                      elif store == 'android' and r.get('track') == 'production':
+                          status_val = android_canonical(android_status(r))
                       elif store == 'windows':
-                          status_val = windows_status(r)
-                      elif r.get('override'):
-                          status_val = r['override']
+                          status_val = windows_canonical(windows_status(r))
+                      else:
+                          status_val = r.get('override') or r.get('state') or r.get('status', '')
                       if status_val in PENDING_STATES.get(store, set()):
                           ver = r.get('version', '?')
                           waiting.append(
@@ -2057,16 +2141,18 @@ jobs:
               '  h3    { color: #1a5276; margin-top: 1.2em; }',
               '  .bad  { color: #b03030; font-weight: bold; }',
               '  .warn { color: #b06a00; font-weight: bold; }',
-              '  .st-rej, .st-rev, .st-rel { font-weight: bold; padding: 1px 5px; '
+              '  .st-rej, .st-rev, .st-rel, .st-new { font-weight: bold; padding: 1px 5px; '
               'border-radius: 3px; }',
               '  .st-rej { color: #8e1f1f; background: #fbe3e3; }',   # rejected
-              '  .st-rev { color: #7a5700; background: #fdf3d8; }',   # waiting for review
+              '  .st-rev { color: #7a5700; background: #fdf3d8; }',   # waiting for review / in review
               '  .st-rel { color: #1c6b32; background: #e2f4e6; }',   # waiting for release
+              '  .st-new { color: #555555; background: #eceff1; }',  # created
           ])
           legend = ('<p>Status colours: '
-                    '<span class="st-rej">rejected</span> '
-                    '<span class="st-rev">waiting for store review</span> '
-                    '<span class="st-rel">approved, waiting for developer release</span>'
+                    '<span class="st-new">created</span> '
+                    '<span class="st-rev">waiting for review / in review</span> '
+                    '<span class="st-rel">waiting for release</span> '
+                    '<span class="st-rej">rejected</span>'
                     '</p>')
           full_html = (
               '<!DOCTYPE html><html><head><meta charset="utf-8"><title>GrowERP Status</title>'
