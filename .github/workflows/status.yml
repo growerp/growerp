@@ -1516,8 +1516,9 @@ jobs:
           # ── Two-line cell rendering, shared by every store ────────────────
           # Line 1: the production (live) version, if any. Line 2: the next
           # version working its way through the store, with its status, if any.
-          def prod_line(version, url):
-              return f"✓ {link(version, url)}"
+          def prod_line(version, url, date=None):
+              text = f"✓ {link(version, url)}"
+              return f"{text} · {date}" if date and date != '—' else text
 
           def pending_line(version, status, url):
               return f"⏳ {link(version, url)} {state_span(status)}"
@@ -1568,7 +1569,7 @@ jobs:
                               and (live is None or created(r) >= created(live))), None)
               parts = []
               if live:
-                  parts.append(prod_line(live.get('version', '?'), url))
+                  parts.append(prod_line(live.get('version', '?'), url, live.get('date')))
               if pending:
                   parts.append(pending_line(pending.get('version', '?'),
                                              asc_canonical(pending.get('state')), url))
@@ -1714,7 +1715,11 @@ jobs:
               cand   = snap_current(rows, 'candidate')
               parts = []
               if stable:
-                  parts.append(f"✓ r{stable.get('revision','?')} {link(stable.get('version','?'), url)}")
+                  line = f"✓ r{stable.get('revision','?')} {link(stable.get('version','?'), url)}"
+                  released = stable.get('released')
+                  if released and released != '—':
+                      line += f" · {released}"
+                  parts.append(line)
               if cand and (not stable or cand.get('revision') != stable.get('revision')):
                   parts.append(f"⏳ r{cand.get('revision','?')} "
                                f"{link(cand.get('version','?'), url)} {state_span(WAIT_REL)}")
@@ -1730,7 +1735,7 @@ jobs:
           visible_apps   = [a for a in APP_ORDER   if a in selected_apps]
 
           header = '| App | ' + ' | '.join(s.upper() for s in visible_stores) + ' |'
-          sep    = '|-----|' + '|'.join(':-------:' for _ in visible_stores) + '|'
+          sep    = '|-----|' + '|'.join('-------' for _ in visible_stores) + '|'
 
           table_rows = [header, sep]
           for app in visible_apps:
