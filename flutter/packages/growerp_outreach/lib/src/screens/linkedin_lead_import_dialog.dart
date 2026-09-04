@@ -12,10 +12,9 @@
  * limitations under the License.
  */
 
-import 'package:universal_io/io.dart';
+import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:fast_csv/fast_csv.dart' as fast_csv;
-import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -63,12 +62,11 @@ class _LinkedInLeadImportDialogState extends State<LinkedInLeadImportDialog> {
   bool get _isApollo => widget.source == LeadImportSource.apollo;
 
   Future<void> _pickAndImport() async {
-    final result = await FilePicker.platform.pickFiles(
+    final picked = await FilePicker.pickFile(
       allowedExtensions: ['csv'],
       type: FileType.custom,
-      withData: foundation.kIsWeb,
     );
-    if (result == null) return;
+    if (picked == null) return;
 
     // Busy from the moment a file is chosen: reading + parsing + submitting.
     setState(() {
@@ -77,11 +75,7 @@ class _LinkedInLeadImportDialogState extends State<LinkedInLeadImportDialog> {
     });
     try {
       String fileString;
-      if (foundation.kIsWeb) {
-        fileString = String.fromCharCodes(result.files.first.bytes!);
-      } else {
-        fileString = await File(result.files.single.path!).readAsString();
-      }
+      fileString = utf8.decode(await picked.readAsBytes());
 
       var leads = _isApollo
           ? parseApolloCsv(fileString)

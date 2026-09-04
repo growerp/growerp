@@ -24,7 +24,7 @@ dependencies:
   go_router: ^17.1.0
   bloc_concurrency: ^0.3.0
   stream_transform: ^2.1.1
-  file_picker: ^10.3.10
+  file_picker: ^12.2.0
   flutter_test:
     sdk: flutter
 

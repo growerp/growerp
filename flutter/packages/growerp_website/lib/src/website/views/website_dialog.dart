@@ -858,23 +858,20 @@ class WebsiteDialogState extends State<WebsiteDialog> {
               key: const Key('upload'),
               child: Text(_localizations.upload),
               onPressed: () async {
-                FilePickerResult? result;
+                PlatformFile? picked;
                 String? path;
                 // Note: Using FileType.any because file_picker 10.1.2 has a
                 // known bug where FileType.custom with allowedExtensions
                 // prevents file selection. We validate the extension manually.
-                result = await FilePicker.platform.pickFiles(
-                  type: FileType.any,
-                  withData: true, // Ensure bytes are available on all platforms
-                );
+                picked = await FilePicker.pickFile(type: FileType.any);
 
                 // Cancelled by user
-                if (result == null || result.files.isEmpty) {
+                if (picked == null) {
                   return;
                 }
 
                 // Validate that the selected file is a .zip file
-                if (!result.files.first.name.toLowerCase().endsWith('.zip')) {
+                if (!picked.name.toLowerCase().endsWith('.zip')) {
                   if (mounted) {
                     HelperFunctions.showMessage(
                       context,
@@ -887,15 +884,13 @@ class WebsiteDialogState extends State<WebsiteDialog> {
 
                 // On desktop platforms, get the path from the file
                 if (!foundation.kIsWeb) {
-                  path = result.files.first.path;
+                  path = picked.path;
                 }
 
+                final zip = await picked.readAsBytes();
                 _websiteBloc.add(
                   WebsiteObsUpload(
-                    Obsidian(
-                      title: _obsidianController.text,
-                      zip: result.files.first.bytes,
-                    ),
+                    Obsidian(title: _obsidianController.text, zip: zip),
                     path,
                   ),
                 );

@@ -14,7 +14,6 @@
 
 import 'dart:convert';
 
-import 'package:universal_io/io.dart';
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:file_picker/file_picker.dart';
@@ -52,20 +51,15 @@ class _FilesHeaderState extends State<GlAccountFilesDialog> {
   Future<void> _saveCsv(String csvFile) async {
     try {
       final bytes = foundation.Uint8List.fromList(utf8.encode(csvFile));
-      final path = await FilePicker.platform.saveFile(
+      final uri = await FilePicker.saveFile(
         dialogTitle: _localizations.initialUpload,
         fileName: 'GlAccounts.csv',
         type: FileType.custom,
         allowedExtensions: ['csv'],
-        bytes: bytes, // web and mobile need the content up front
+        bytes: bytes, // saveFile writes the bytes itself on every platform
       );
-      if (!mounted || path == null) return; // cancelled
-      if (!foundation.kIsWeb) {
-        // on desktop saveFile only returns the chosen path, it writes nothing
-        await File(path).writeAsBytes(bytes);
-      }
-      if (!mounted) return;
-      HelperFunctions.showMessage(context, 'Saved as $path', Colors.green);
+      if (!mounted || uri == null) return; // cancelled
+      HelperFunctions.showMessage(context, 'Saved as ${uri.path}', Colors.green);
     } catch (e) {
       if (!mounted) return;
       HelperFunctions.showMessage(context, 'Could not save: $e', Colors.red);
@@ -126,20 +120,13 @@ class _FilesHeaderState extends State<GlAccountFilesDialog> {
                       );
                       return;
                     }
-                    FilePickerResult? result = await FilePicker.platform
-                        .pickFiles(
-                          allowedExtensions: ['csv'],
-                          type: FileType.custom,
-                        );
-                    if (result != null) {
-                      String fileString = '';
-                      if (foundation.kIsWeb) {
-                        foundation.Uint8List bytes = result.files.first.bytes!;
-                        fileString = String.fromCharCodes(bytes);
-                      } else {
-                        File file = File(result.files.single.path!);
-                        fileString = await file.readAsString();
-                      }
+                    PlatformFile? picked = await FilePicker.pickFile(
+                      allowedExtensions: ['csv'],
+                      type: FileType.custom,
+                    );
+                    if (picked != null) {
+                      final bytes = await picked.readAsBytes();
+                      final fileString = String.fromCharCodes(bytes);
                       glAccountBloc.add(
                         GlAccountUpload(fileString, periodYear),
                       );

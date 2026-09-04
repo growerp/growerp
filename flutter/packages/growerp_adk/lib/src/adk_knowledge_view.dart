@@ -171,10 +171,9 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
   /// Pick a text document, read it, and open the form pre-filled so the user can
   /// review/edit before ingesting it (sourceType=upload).
   Future<void> _upload() async {
-    FilePickerResult? picked;
+    PlatformFile? f;
     try {
-      picked = await FilePicker.platform.pickFiles(
-        withData: true,
+      f = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: const [
           'txt',
@@ -199,10 +198,8 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
       }
       return;
     }
-    if (picked == null || picked.files.isEmpty) return;
-    final f = picked.files.first;
-    final bytes = f.bytes;
-    if (bytes == null) return;
+    if (f == null) return;
+    final bytes = await f.readAsBytes();
     String content;
     try {
       content = utf8.decode(bytes);

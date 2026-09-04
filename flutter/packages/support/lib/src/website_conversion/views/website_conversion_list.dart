@@ -14,10 +14,8 @@
 
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:universal_io/io.dart';
 import 'package:flutter/material.dart';
 import '../../../l10n/generated/support_localizations.dart';
-import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -58,23 +56,18 @@ class WebsiteConversionListState extends State<WebsiteConversionList> {
   Future<void> _saveExport(WebsiteExport export) async {
     try {
       final bytes = Uint8List.fromList(utf8.encode(export.xmlText));
-      final path = await FilePicker.platform.saveFile(
+      final uri = await FilePicker.saveFile(
         dialogTitle: 'Save the website export',
         fileName: export.fileName.isEmpty
             ? 'WebsiteOwnerImportData.xml'
             : export.fileName,
         type: FileType.custom,
         allowedExtensions: ['xml'],
-        bytes: bytes, // web and mobile need the content up front
+        bytes: bytes, // saveFile writes the bytes itself on every platform
       );
       if (!mounted) return;
-      if (path == null) return; // cancelled
-      if (!foundation.kIsWeb) {
-        // on desktop saveFile only returns the chosen path, it writes nothing
-        await File(path).writeAsBytes(bytes);
-      }
-      if (!mounted) return;
-      HelperFunctions.showMessage(context, 'Saved as $path', Colors.green);
+      if (uri == null) return; // cancelled
+      HelperFunctions.showMessage(context, 'Saved as ${uri.path}', Colors.green);
     } catch (e) {
       if (!mounted) return;
       HelperFunctions.showMessage(context, 'Could not save: $e', Colors.red);
@@ -83,21 +76,12 @@ class WebsiteConversionListState extends State<WebsiteConversionList> {
 
   /// Install an owner-import XML: one exported here, or one /convert-website made.
   Future<void> _pickAndImport() async {
-    final result = await FilePicker.platform.pickFiles(
+    final file = await FilePicker.pickFile(
       allowedExtensions: ['xml'],
       type: FileType.custom,
-      withData: true,
     );
-    if (result == null || result.files.isEmpty) return;
-    final file = result.files.first;
-    String content;
-    if (file.bytes != null) {
-      content = utf8.decode(file.bytes!);
-    } else if (file.path != null) {
-      content = await File(file.path!).readAsString();
-    } else {
-      return;
-    }
+    if (file == null) return;
+    final content = utf8.decode(await file.readAsBytes());
     if (!mounted) return;
     _bloc.add(WebsiteConversionImportFile(content, file.name));
   }

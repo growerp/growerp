@@ -16,7 +16,7 @@ dependencies:
   growerp_core: ^1.11.0
   growerp_models: ^1.12.0
   growerp_marketing: ^1.9.0
-  package_info_plus: ^9.0.0
+  package_info_plus: ^10.2.1
   flutter_localizations:
     sdk: flutter
   universal_io: ^2.2.2

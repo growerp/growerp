@@ -88,12 +88,12 @@ class _ImageButtonsState extends State<ImageButtons> {
             onPressed: () async {
               if (isDesktop) {
                 // Use file_picker for desktop platforms
-                FilePickerResult? result = await FilePicker.platform.pickFiles(
+                PlatformFile? picked = await FilePicker.pickFile(
                   type: FileType.image,
                 );
                 if (!mounted) return;
-                if (result != null && result.files.single.path != null) {
-                  widget.onImageButtonPressed(result.files.single.path);
+                if (picked != null && picked.path != null) {
+                  widget.onImageButtonPressed(picked.path);
                 }
               } else {
                 // Use image_picker for mobile/web

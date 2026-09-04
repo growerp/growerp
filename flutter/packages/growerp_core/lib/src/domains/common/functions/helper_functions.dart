@@ -155,11 +155,11 @@ class HelperFunctions {
     if (kIsWeb || Platform.isAndroid || Platform.isIOS) {
       return await ImagePicker().pickImage(source: ImageSource.gallery);
     } else {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
+      PlatformFile? picked = await FilePicker.pickFile(
         type: FileType.image,
       );
-      if (result != null && result.files.single.path != null) {
-        return XFile(result.files.single.path!);
+      if (picked != null && picked.path != null) {
+        return XFile(picked.path!);
       }
     }
     return null;

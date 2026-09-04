@@ -15,7 +15,7 @@ environment:
   sdk: ^3.10.0
 dependencies:
   archive: ^3.6.1
-  dcli: ^8.4.2
+  dcli: ^10.0.0
   dio: ^5.4.3
   fast_csv: ^0.2.6
   get_it: ^9.2.1

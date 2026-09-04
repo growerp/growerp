@@ -1,9 +1,7 @@
-import 'package:universal_io/io.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' as foundation;
 
 import '../../../l10n/generated/user_company_localizations.dart';
 import '../../common/translate_bloc_messages.dart';
@@ -60,20 +58,13 @@ class _CompanyUserFilesDialogState extends State<CompanyUserFilesDialog> {
                   key: const Key('upload'),
                   child: Text(UserCompanyLocalizations.of(context)!.uploadCsvFile),
                   onPressed: () async {
-                    FilePickerResult? result = await FilePicker.platform
-                        .pickFiles(
-                          allowedExtensions: ['csv'],
-                          type: FileType.custom,
-                        );
-                    if (result != null) {
-                      String fileString = '';
-                      if (foundation.kIsWeb) {
-                        foundation.Uint8List bytes = result.files.first.bytes!;
-                        fileString = String.fromCharCodes(bytes);
-                      } else {
-                        File file = File(result.files.single.path!);
-                        fileString = await file.readAsString();
-                      }
+                    PlatformFile? picked = await FilePicker.pickFile(
+                      allowedExtensions: ['csv'],
+                      type: FileType.custom,
+                    );
+                    if (picked != null) {
+                      final bytes = await picked.readAsBytes();
+                      final fileString = String.fromCharCodes(bytes);
                       companyUserBloc.add(CompanyUserUpload(fileString));
                       Future.delayed(const Duration(milliseconds: 1000), () {
                         companyUserBloc.add(

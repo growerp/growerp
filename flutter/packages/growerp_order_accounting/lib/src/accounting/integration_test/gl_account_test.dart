@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 import 'package:universal_io/io.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:file_picker_platform_interface/file_picker_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -109,7 +109,7 @@ class GlAccountTest {
   }) async {
     final tempDir = await Directory.systemTemp.createTemp('glAccountTest');
     final csvPath = '${tempDir.path}/GlAccounts.csv';
-    FilePicker.platform = TestFilePicker(csvPath);
+    FilePickerPlatform.instance = TestFilePicker(csvPath);
 
     await CommonTest.tapByKey(tester, 'upDownload');
     await CommonTest.tapByKey(tester, 'download', seconds: CommonTest.waitTime);

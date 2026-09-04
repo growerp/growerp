@@ -22,7 +22,7 @@ dependencies:
   growerp_rental: ^1.1.0
   growerp_user_company: ^1.11.0
   growerp_activity: ^1.11.0
-  package_info_plus: ^9.0.0
+  package_info_plus: ^10.2.1
   horizontal_data_table: ^4.3.1
   flutter_localizations:
     sdk: flutter

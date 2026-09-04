@@ -12,12 +12,10 @@
  * limitations under the License.
  */
 
-import 'package:universal_io/io.dart';
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter/foundation.dart' as foundation;
 
 import '../../../growerp_catalog.dart';
 
@@ -72,20 +70,13 @@ class _FilesHeaderState extends State<CategoryFilesDialog> {
                   key: const Key('upload'),
                   child: Text(_localizations!.uploadCsv),
                   onPressed: () async {
-                    FilePickerResult? result = await FilePicker.platform
-                        .pickFiles(
-                          allowedExtensions: ['csv'],
-                          type: FileType.custom,
-                        );
-                    if (result != null) {
-                      String fileString = '';
-                      if (foundation.kIsWeb) {
-                        foundation.Uint8List bytes = result.files.first.bytes!;
-                        fileString = String.fromCharCodes(bytes);
-                      } else {
-                        File file = File(result.files.single.path!);
-                        fileString = await file.readAsString();
-                      }
+                    PlatformFile? picked = await FilePicker.pickFile(
+                      allowedExtensions: ['csv'],
+                      type: FileType.custom,
+                    );
+                    if (picked != null) {
+                      final bytes = await picked.readAsBytes();
+                      final fileString = String.fromCharCodes(bytes);
                       _categoryBloc.add(CategoryUpload(fileString));
                     }
                   },
