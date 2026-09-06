@@ -344,7 +344,11 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
                                   // With a startup company the registration
                                   // joins that company as a new user, the
                                   // backend ignores the admin flag then.
-                                  if (applicationId != 'AppSupport')
+                                  if (applicationId != 'AppSupport' &&
+                                      !(GlobalConfiguration().get("test") ==
+                                              true &&
+                                          (Platform.isIOS ||
+                                              Platform.isMacOS)))
                                     _buildPremiumButton(
                                       context: context,
                                       key: const Key('newUserButton'),
