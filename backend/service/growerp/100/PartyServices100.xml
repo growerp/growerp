@@ -3961,9 +3961,9 @@ limitations under the License.
                     opportunityStageId: 'Proposal']
             ]" />
 
-            <!-- the marketing app sells nothing itself: it gets the CRM/activity demo
-                 and the agent team below, but no catalog, warehouse or orders -->
-            <set field="loadCatalog" from="applicationId != 'AppMarketing'" type="Boolean" />
+            <!-- the marketing app has a catalog to market, but sells nothing itself:
+                 no warehouse locations and no orders demo -->
+            <set field="loadOrders" from="applicationId != 'AppMarketing'" type="Boolean" />
 
             <set field="nowDate" from="ec.user.nowTimestamp" />
             <set field="counter" value="0" type="Integer" />
@@ -3976,142 +3976,139 @@ limitations under the License.
                 <!-- uppercase categories are demo, lowercase category id's should be connected to
                 the current rootcategory -->
 
-                <!-- catalog/inventory demo: not for the marketing app, which has no
-                     products or orders, see loadCatalog above -->
-                <if condition="loadCatalog">
-                    <!-- copy demo categories -->
-                    <set field="catgTrans" from="[:]" />
-                    <set field="prodTrans" from="[:]" />
-                    <entity-find entity-name="mantle.product.category.ProductCategory"
-                        list="categories">
-                        <econdition field-name="ownerPartyId" value="_NA_" />
-                    </entity-find>
-                    <set field="sequenceNum" value="1" type="Integer" />
-                    <iterate list="categories" entry="category">
-                        <if
-                            condition="category.productCategoryId.toUpperCase() != category.productCategoryId">
-                            <continue />
-                        </if>
-                        <!-- create category -->
-                        <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                            in-map="[ownerPartyId: ownerPartyId, seqName: 'category']"
-                            out-map="context" />
-                        <service-call name="create#mantle.product.category.ProductCategory"
-                            in-map="category + [pseudoId: seqNum, productCategoryId: null,
-                                                    ownerPartyId: ownerPartyId]"
-                            out-map="context" />
-                        <set field="catgTrans[category.productCategoryId]" from="productCategoryId" />
-                        <!-- connect to root -->
-                        <service-call
-                            name="create#mantle.product.category.ProductCategoryRollup"
-                            in-map="[parentProductCategoryId: rootProductCategoryId,
-                                        productCategoryId: productCategoryId]" />
-                        <!-- and ecommerce browseRoot -->
-                        <service-call
-                            name="create#mantle.product.category.ProductCategoryRollup"
-                            in-map="[parentProductCategoryId: browseRootProductCategoryId,
-                                        productCategoryId: productCategoryId,
-                                        sequenceNum: sequenceNum++]" />
-                    </iterate>
-                    <!-- create translation table for categories-->
-                    <entity-find entity-name="mantle.product.category.ProductCategory"
-                        list="categories">
-                        <econdition field-name="ownerPartyId" value="_NA_" />
-                    </entity-find>
-                    <iterate list="categories" entry="category">
-                        <entity-find entity-name="mantle.product.category.ProductCategory"
-                            list="localProductCategories">
-                            <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                            <econdition field-name="categoryName" from="category.categoryName" />
-                        </entity-find>
-                        <set field="catgTrans[category.productCategoryId]"
-                            from="localProductCategories[0].productCategoryId" />
-                    </iterate>
-                    <!-- create product: hotel gets the rooms, rental the cars &amp;
-                         equipment, other apps get all demo products -->
-                    <if condition="applicationId == 'AppHotel'">
-                        <set field="productIdList"
-                            from="['SINGLE_ROOM', 'STANDARD_ROOM', 'DELUXE_ROOM']" />
+                <!-- catalog demo: demo categories and products, cloned from the _NA_ owner -->
+                <!-- copy demo categories -->
+                <set field="catgTrans" from="[:]" />
+                <set field="prodTrans" from="[:]" />
+                <entity-find entity-name="mantle.product.category.ProductCategory"
+                    list="categories">
+                    <econdition field-name="ownerPartyId" value="_NA_" />
+                </entity-find>
+                <set field="sequenceNum" value="1" type="Integer" />
+                <iterate list="categories" entry="category">
+                    <if
+                        condition="category.productCategoryId.toUpperCase() != category.productCategoryId">
+                        <continue />
                     </if>
-                    <if condition="applicationId == 'AppRental'">
-                        <set field="productIdList"
-                            from="['COMPACT_CAR', 'SUV_4X4', 'MINI_EXCAVATOR', 'SCISSOR_LIFT']" />
-                    </if>
-                    <entity-find entity-name="mantle.product.Product" list="products">
-                        <econdition field-name="ownerPartyId" value="_NA_" />
-                        <econdition field-name="productId" operator="in" from="productIdList"
-                            ignore-if-empty="true" />
+                    <!-- create category -->
+                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                        in-map="[ownerPartyId: ownerPartyId, seqName: 'category']"
+                        out-map="context" />
+                    <service-call name="create#mantle.product.category.ProductCategory"
+                        in-map="category + [pseudoId: seqNum, productCategoryId: null,
+                                                ownerPartyId: ownerPartyId]"
+                        out-map="context" />
+                    <set field="catgTrans[category.productCategoryId]" from="productCategoryId" />
+                    <!-- connect to root -->
+                    <service-call
+                        name="create#mantle.product.category.ProductCategoryRollup"
+                        in-map="[parentProductCategoryId: rootProductCategoryId,
+                                    productCategoryId: productCategoryId]" />
+                    <!-- and ecommerce browseRoot -->
+                    <service-call
+                        name="create#mantle.product.category.ProductCategoryRollup"
+                        in-map="[parentProductCategoryId: browseRootProductCategoryId,
+                                    productCategoryId: productCategoryId,
+                                    sequenceNum: sequenceNum++]" />
+                </iterate>
+                <!-- create translation table for categories-->
+                <entity-find entity-name="mantle.product.category.ProductCategory"
+                    list="categories">
+                    <econdition field-name="ownerPartyId" value="_NA_" />
+                </entity-find>
+                <iterate list="categories" entry="category">
+                    <entity-find entity-name="mantle.product.category.ProductCategory"
+                        list="localProductCategories">
+                        <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                        <econdition field-name="categoryName" from="category.categoryName" />
                     </entity-find>
-                    <!-- get currency -->
-                    <entity-find-one entity-name="mantle.ledger.config.PartyAcctgPreference"
-                        value-field="aPref">
-                        <field-map field-name="organizationPartyId" from="companyPartyId" />
-                    </entity-find-one>
-                    <iterate list="products" entry="product">
-                        <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                            in-map="[ownerPartyId: ownerPartyId, seqName: 'product']"
-                            out-map="context" />
-                        <service-call name="create#mantle.product.Product"
-                            in-map="product + [productId: null, pseudoId: seqNum,
-                                        ownerPartyId: ownerPartyId]"
-                            out-map="context" />
-                        <set field="prodTrans[product.productId]" from="productId" />
-                        <!-- content -->
-                        <entity-find entity-name="mantle.product.ProductContent"
-                            list="prodContents">
-                            <econdition field-name="productId" from="product.productId" />
-                        </entity-find>
-                        <iterate list="prodContents" entry="prodContent">
-                            <service-call name="create#mantle.product.ProductContent"
-                                in-map="prodContent + [productContentId: null, productId: productId]" />
-                        </iterate>
-                        <!-- price adjust currency -->
-                        <entity-find entity-name="mantle.product.ProductPrice" list="prodPrices">
-                            <econdition field-name="productId" from="product.productId" />
-                        </entity-find>
-                        <iterate list="prodPrices" entry="prodPrice">
-                            <service-call name="create#mantle.product.ProductPrice"
-                                in-map="prodPrice + [ priceUomId: currencyId, 
-                                            productId: productId, productPriceId: null]" />
-                        </iterate>
-                        <!-- attach product to categories -->
-                        <entity-find entity-name="mantle.product.category.ProductCategoryMember"
-                            list="members">
-                            <econdition field-name="productId" from="product.productId" />
-                        </entity-find>
-                        <iterate list="members" entry="member">
-                            <set field="newProductId" from="prodTrans[product.productId]" />
-                            <set field="newCategoryId" from="catgTrans[member.productCategoryId]" />
-                            <service-call
-                                name="create#mantle.product.category.ProductCategoryMember"
-                                in-map="member + [productId: newProductId,
-                                                productCategoryId: newCategoryId]" />
-                        </iterate>
-                        <!-- create related assets -->
-                        <entity-find entity-name="mantle.product.asset.Asset" list="assets">
-                            <econdition field-name="productId" from="product.productId" />
-                            <econdition field-name="ownerPartyId" value="_NA_" />
-                        </entity-find>
-                        <iterate list="assets" entry="asset">
-                            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                                in-map="[ownerPartyId: ownerPartyId, seqName: 'asset']"
-                                out-map="context" />
-                            <service-call name="create#mantle.product.asset.Asset"
-                                in-map="[asset + [assetId: null, assetPseudoId: seqNum,
-                                                productId: productId,
-                                                ownerPartyId: companyPartyId,
-                                                facilityId: facilityId,
-                                                ]]"
-                                out-map="context" />
-                            <entity-find entity-name="mantle.product.asset.AssetDetail"
-                                list="assetDetails">
-                                <econdition field-name="assetId" from="asset.assetId" />
-                            </entity-find>
-                            <service-call name="create#mantle.product.asset.AssetDetail"
-                                in-map="[assetDetails[0] + [assetDetailId: null, assetId: assetId]]" />
-                        </iterate>
-                    </iterate>
+                    <set field="catgTrans[category.productCategoryId]"
+                        from="localProductCategories[0].productCategoryId" />
+                </iterate>
+                <!-- create product: hotel gets the rooms, rental the cars &amp;
+                     equipment, other apps get all demo products -->
+                <if condition="applicationId == 'AppHotel'">
+                    <set field="productIdList"
+                        from="['SINGLE_ROOM', 'STANDARD_ROOM', 'DELUXE_ROOM']" />
                 </if>
+                <if condition="applicationId == 'AppRental'">
+                    <set field="productIdList"
+                        from="['COMPACT_CAR', 'SUV_4X4', 'MINI_EXCAVATOR', 'SCISSOR_LIFT']" />
+                </if>
+                <entity-find entity-name="mantle.product.Product" list="products">
+                    <econdition field-name="ownerPartyId" value="_NA_" />
+                    <econdition field-name="productId" operator="in" from="productIdList"
+                        ignore-if-empty="true" />
+                </entity-find>
+                <!-- get currency -->
+                <entity-find-one entity-name="mantle.ledger.config.PartyAcctgPreference"
+                    value-field="aPref">
+                    <field-map field-name="organizationPartyId" from="companyPartyId" />
+                </entity-find-one>
+                <iterate list="products" entry="product">
+                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                        in-map="[ownerPartyId: ownerPartyId, seqName: 'product']"
+                        out-map="context" />
+                    <service-call name="create#mantle.product.Product"
+                        in-map="product + [productId: null, pseudoId: seqNum,
+                                    ownerPartyId: ownerPartyId]"
+                        out-map="context" />
+                    <set field="prodTrans[product.productId]" from="productId" />
+                    <!-- content -->
+                    <entity-find entity-name="mantle.product.ProductContent"
+                        list="prodContents">
+                        <econdition field-name="productId" from="product.productId" />
+                    </entity-find>
+                    <iterate list="prodContents" entry="prodContent">
+                        <service-call name="create#mantle.product.ProductContent"
+                            in-map="prodContent + [productContentId: null, productId: productId]" />
+                    </iterate>
+                    <!-- price adjust currency -->
+                    <entity-find entity-name="mantle.product.ProductPrice" list="prodPrices">
+                        <econdition field-name="productId" from="product.productId" />
+                    </entity-find>
+                    <iterate list="prodPrices" entry="prodPrice">
+                        <service-call name="create#mantle.product.ProductPrice"
+                            in-map="prodPrice + [ priceUomId: currencyId, 
+                                        productId: productId, productPriceId: null]" />
+                    </iterate>
+                    <!-- attach product to categories -->
+                    <entity-find entity-name="mantle.product.category.ProductCategoryMember"
+                        list="members">
+                        <econdition field-name="productId" from="product.productId" />
+                    </entity-find>
+                    <iterate list="members" entry="member">
+                        <set field="newProductId" from="prodTrans[product.productId]" />
+                        <set field="newCategoryId" from="catgTrans[member.productCategoryId]" />
+                        <service-call
+                            name="create#mantle.product.category.ProductCategoryMember"
+                            in-map="member + [productId: newProductId,
+                                            productCategoryId: newCategoryId]" />
+                    </iterate>
+                    <!-- create related assets -->
+                    <entity-find entity-name="mantle.product.asset.Asset" list="assets">
+                        <econdition field-name="productId" from="product.productId" />
+                        <econdition field-name="ownerPartyId" value="_NA_" />
+                    </entity-find>
+                    <iterate list="assets" entry="asset">
+                        <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                            in-map="[ownerPartyId: ownerPartyId, seqName: 'asset']"
+                            out-map="context" />
+                        <service-call name="create#mantle.product.asset.Asset"
+                            in-map="[asset + [assetId: null, assetPseudoId: seqNum,
+                                            productId: productId,
+                                            ownerPartyId: companyPartyId,
+                                            facilityId: facilityId,
+                                            ]]"
+                            out-map="context" />
+                        <entity-find entity-name="mantle.product.asset.AssetDetail"
+                            list="assetDetails">
+                            <econdition field-name="assetId" from="asset.assetId" />
+                        </entity-find>
+                        <service-call name="create#mantle.product.asset.AssetDetail"
+                            in-map="[assetDetails[0] + [assetDetailId: null, assetId: assetId]]" />
+                    </iterate>
+                </iterate>
 
                 <set field="dbLeads" from="[]" />
                 <set field="dbEmployees" from="[]" />
@@ -4168,8 +4165,8 @@ limitations under the License.
                     <set field="index" from="index + 1" />
                 </iterate>
 
-                <!-- warehouse locations + orders: catalog apps only -->
-                <if condition="loadCatalog">
+                <!-- warehouse locations + orders: selling apps only -->
+                <if condition="loadOrders">
                     <!-- create facility locations if not exist yet-->
                     <entity-find entity-name="mantle.facility.FacilityLocation" list="locations">
                         <econdition field-name="facilityId" from="facilityId" />
@@ -4527,6 +4524,98 @@ limitations under the License.
                 </iterate>
             </iterate>
 
+            <!-- marketing demo content: personas, their weekly PNP plans and the master
+                 content pieces the agents adapt per platform. Marketing app only. -->
+            <if condition="applicationId == 'AppMarketing'">
+                <set field="demoPersonas"
+                    from="[
+                    [ name: 'SMB Owner Sara',
+                        demographics: 'Owner of a 10-50 person wholesale and retail company, age 35-55, runs the business on spreadsheets and a bookkeeping package.',
+                        painPoints: 'Numbers live in five spreadsheets, nobody knows real stock or margin, and every ERP quote she gets runs into six figures.',
+                        goals: 'One affordable system for orders, stock and accounting that is live in weeks, not in a two year project.',
+                        toneOfVoice: 'Plain and practical, no jargon, short sentences, concrete numbers.'],
+                    [ name: 'Consultant Frank',
+                        demographics: 'Independent ERP and IT consultant, age 30-50, bills by the hour for three to ten clients at a time.',
+                        painPoints: 'Unbilled admin hours, invoices sent late, and a different half broken system at every client.',
+                        goals: 'Register time and bill it the same week, and hand clients a system he can support himself.',
+                        toneOfVoice: 'Peer to peer, technical, evidence first, happy to show the code.'],
+                    [ name: 'Agency Owner Amara',
+                        demographics: 'Runs a 5-20 person digital agency, age 28-45, sells retainers and project work.',
+                        painPoints: 'The content calendar slips every week, leads go cold, and no one owns the follow up.',
+                        goals: 'A repeatable weekly content and outreach rhythm that keeps running when the team is busy.',
+                        toneOfVoice: 'Energetic, story led, social native, one idea per post.']
+                ]" />
+                <set field="demoPersonaIds" from="[]" />
+                <iterate list="demoPersonas" entry="demoPersona">
+                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                        in-map="[ownerPartyId: ownerPartyId, seqName: 'marketingPersona']"
+                        out-map="context" />
+                    <service-call name="create#growerp.marketing.MarketingPersona"
+                        in-map="demoPersona + [pseudoId: seqNum, ownerPartyId: ownerPartyId,
+                                createdDate: nowDate, lastModifiedDate: nowDate]"
+                        out-map="context" />
+                    <set field="demoPersonaIds" from="demoPersonaIds + [personaId]" />
+                </iterate>
+
+                <!-- one weekly plan per persona: this week, next week and the week after -->
+                <set field="demoPlans"
+                    from="[
+                    [ personaIndex: 0, weekOffset: 0, status: 'ACTIVE',
+                        theme: 'The spreadsheet ceiling: when the workbook becomes the bottleneck'],
+                    [ personaIndex: 1, weekOffset: 7, status: 'DRAFT',
+                        theme: 'Bill every hour you work: time registration that pays for itself'],
+                    [ personaIndex: 2, weekOffset: 14, status: 'DRAFT',
+                        theme: 'One rhythm: plan, publish and follow up without a content manager']
+                ]" />
+                <set field="demoPlanIds" from="[]" />
+                <iterate list="demoPlans" entry="demoPlan">
+                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                        in-map="[ownerPartyId: ownerPartyId, seqName: 'contentPlan']"
+                        out-map="context" />
+                    <service-call name="create#growerp.marketing.ContentPlan"
+                        in-map="[pseudoId: seqNum, ownerPartyId: ownerPartyId,
+                                personaId: demoPersonaIds[demoPlan.personaIndex],
+                                weekStartDate: new java.sql.Timestamp(
+                                        nowDate.time + demoPlan.weekOffset * 86400000L),
+                                theme: demoPlan.theme, status: demoPlan.status,
+                                createdDate: nowDate, lastModifiedDate: nowDate]"
+                        out-map="context" />
+                    <set field="demoPlanIds" from="demoPlanIds + [planId]" />
+                </iterate>
+
+                <!-- master content: the pain, news and prize piece of the running plan -->
+                <set field="demoContents"
+                    from="[
+                    [ planIndex: 0, pnpType: 'PAIN', contentType: 'POSTING', status: 'APPROVED',
+                        title: 'Your stock report is three days old and everyone knows it',
+                        body: 'Every order you type twice is a margin you cannot explain at the end of the month. The workbook was fine at ten orders a day. At fifty it quietly runs the company, and nobody dares touch the formulas. That is not a discipline problem, it is a tooling problem.',
+                        callToAction: 'Ask us what one week of your order flow looks like in a real system.'],
+                    [ planIndex: 1, pnpType: 'NEWS', contentType: 'ARTICLE', status: 'DRAFT',
+                        title: 'Time registration and self billing now ship in the standard package',
+                        body: 'Register hours against a task, approve them, and turn them into a sales invoice and a supplier self bill in one step. No export, no second system, no month end reconstruction of what actually happened.',
+                        callToAction: 'Read how the hours to invoice flow works.'],
+                    [ planIndex: 2, pnpType: 'PRIZE', contentType: 'POSTING', status: 'DRAFT',
+                        title: 'Run the whole company from one screen',
+                        body: 'Plan the week, publish the posts, catch the replies as leads, and let the follow up land on somebody by name. The prize is not more content, it is a week that repeats without anyone chasing it.',
+                        callToAction: 'Start the free demo and load your own data.']
+                ]" />
+                <iterate list="demoContents" entry="demoContent">
+                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                        in-map="[ownerPartyId: ownerPartyId, seqName: 'MasterContent']"
+                        out-map="context" />
+                    <service-call name="create#growerp.marketing.MasterContent"
+                        in-map="[pseudoId: seqNum, ownerPartyId: ownerPartyId,
+                                planId: demoPlanIds[demoContent.planIndex],
+                                contentType: demoContent.contentType,
+                                pnpType: demoContent.pnpType,
+                                title: demoContent.title, body: demoContent.body,
+                                callToAction: demoContent.callToAction,
+                                targetUrl: 'https://www.growerp.com',
+                                status: demoContent.status,
+                                approvedDate: demoContent.status == 'APPROVED' ? nowDate : null,
+                                createdDate: nowDate, lastModifiedDate: nowDate]" />
+                </iterate>
+            </if>
             <!-- marketing runs on agents instead of a catalog: clone the GROWERP marketing
                  agent team into this new tenant. ignore-error: a missing moqui-adk component
                  or a template problem must not fail the whole demo load. -->
