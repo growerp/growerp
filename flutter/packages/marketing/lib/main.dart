@@ -21,6 +21,7 @@ import 'package:go_router/go_router.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
+import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_sales/growerp_sales.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
@@ -189,6 +190,7 @@ class _MarketingAppState extends State<MarketingApp> {
 /// Widget registrations for all packages used by the Marketing app.
 List<LocalizationsDelegate> delegates = const [
   UserCompanyLocalizations.delegate,
+  CatalogLocalizations.delegate,
   SalesLocalizations.delegate,
   OrderAccountingLocalizations.delegate,
   WebsiteLocalizations.delegate,
@@ -207,6 +209,7 @@ List<BlocProvider> getMarketingAppBlocProviders(
 ) {
   return [
     ...getUserCompanyBlocProviders(restClient, applicationId),
+    ...getCatalogBlocProviders(restClient, applicationId),
     ...getSalesBlocProviders(restClient),
     ...getOrderAccountingBlocProviders(restClient, applicationId),
     ...getMarketingBlocProviders(restClient),
@@ -218,6 +221,7 @@ List<BlocProvider> getMarketingAppBlocProviders(
 
 List<Map<String, GrowerpWidgetBuilder>> marketingWidgetRegistrations = [
   getUserCompanyWidgets(),
+  getCatalogWidgets(),
   getSalesWidgets(),
   getOrderAccountingWidgets(),
   getMarketingWidgets(),
@@ -241,6 +245,7 @@ List<Map<String, GrowerpWidgetBuilder>> marketingWidgetRegistrations = [
 /// Rich widget metadata for AI navigation.
 List<WidgetMetadata> marketingWidgetMetadata = [
   ...getUserCompanyWidgetsWithMetadata(),
+  ...getCatalogWidgetsWithMetadata(),
   ...getSalesWidgetsWithMetadata(),
   ...getOrderAccountingWidgetsWithMetadata(),
   ...getMarketingWidgetsWithMetadata(),

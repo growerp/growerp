@@ -89,6 +89,10 @@ limitations under the License.
         title="salesOrders" iconName="home" widgetName="SalesOrderList" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_ORD_CUST" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_ORDERS"
         title="customers" iconName="school" widgetName="UserListCustomer" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_ORD_PROD" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_ORDERS"
+        title="Products" iconName="category" widgetName="ProductList" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_ORD_CAT" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_ORDERS"
+        title="Categories" iconName="business" widgetName="CategoryList" sequenceNum="40"/>
 
     <!-- ====================== Agent Control children ====================== -->
     <growerp.menu.MenuItem menuItemId="MKTAPP_ADK_AGENTS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_AGENT_CONTROL"
