@@ -47,7 +47,7 @@
                     gain intelligent insights across your entire organization with unparalleled clarity.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 mt-8">
-                    <a href="https://admin.growerp.com" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-8 py-4 rounded-lg l-glow transition-all active:scale-95 text-center">
+                    <a href="/admin/" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-8 py-4 rounded-lg l-glow transition-all active:scale-95 text-center">
                         Start Free Trial
                     </a>
                     <a href="https://calendar.app.google/KQBVyUZEGyPPM4HK9" target="_blank" rel="noopener" class="l-glass hover:bg-surface-container text-on-surface font-label text-sm font-medium px-8 py-4 rounded-lg transition-all active:scale-95 text-center flex items-center justify-center gap-2">
@@ -121,7 +121,7 @@
             <h3 class="font-display text-xl font-semibold text-on-surface mb-2">Get GrowERP on every platform</h3>
             <p class="text-sm text-on-surface-variant mb-6">One codebase, every device &mdash; your data syncs seamlessly.</p>
             <div class="flex flex-wrap justify-center gap-3">
-                <a href="https://admin.growerp.com" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface font-label text-sm px-5 py-2.5 rounded-full transition-colors">
+                <a href="/admin/" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface font-label text-sm px-5 py-2.5 rounded-full transition-colors">
                     <span class="material-symbols-outlined text-[18px]">language</span>Web Browser
                 </a>
                 <a href="https://play.google.com/store/apps/details?id=org.growerp.admin" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface font-label text-sm px-5 py-2.5 rounded-full transition-colors">
@@ -737,7 +737,7 @@ You can delete your account and company data from any GrowERP application (GrowE
                 Join the global businesses leveraging the power of GrowERP's intelligent ecosystem.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="https://admin.growerp.com" class="bg-primary hover:bg-primary/90 text-on-primary px-8 py-4 rounded-lg font-label text-sm font-semibold l-glow transition-all active:scale-95">Start Free Trial</a>
+                <a href="/admin/" class="bg-primary hover:bg-primary/90 text-on-primary px-8 py-4 rounded-lg font-label text-sm font-semibold l-glow transition-all active:scale-95">Start Free Trial</a>
                 <a href="https://calendar.app.google/DqduYuVLkZ4A8Gbr7" class="bg-surface-container-high px-8 py-4 rounded-lg border border-white/10 hover:bg-surface-container-highest transition-colors font-label text-sm font-semibold text-on-surface">Request Demo</a>
             </div>
         </div>

@@ -84,7 +84,7 @@
                     <#if (storeOwnerPartyId!'') != 'GROWERP'>
                     <a href="https://admin.growerp.com" class="hidden sm:inline-flex font-label text-sm text-on-primary-container hover:text-on-primary-container transition-colors">${l('GrowerpWebsiteSignIn')}</a>
                     </#if>
-                    <a href="https://admin.growerp.com" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-3 sm:px-5 py-2.5 rounded-lg l-glow transition-all active:scale-95 flex items-center gap-2 shrink-0">
+                    <a href="/admin/" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-3 sm:px-5 py-2.5 rounded-lg l-glow transition-all active:scale-95 flex items-center gap-2 shrink-0">
                         <span class="hidden sm:inline">${l('GrowerpWebsiteGetStarted')}</span>
                         <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
                     </a>

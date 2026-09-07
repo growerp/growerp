@@ -164,19 +164,7 @@
                 }
             });
         });
-        
-        // Register Flutter admin service worker early
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/admin/flutter_service_worker.js', {
-                    scope: '/admin/'
-                }).then(registration => {
-                    console.log('✅ Flutter Admin Service Worker registered with scope:', registration.scope);
-                }).catch(error => {
-                    console.log('ℹ️ Flutter Admin Service Worker registration failed (normal if /admin/ not deployed):', error.message);
-                });
-            });
-        }
+
     </script>
     
     <#-- Additional Scripts from subpages -->

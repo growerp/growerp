@@ -180,21 +180,37 @@
                 }
             });
         });
-
-        // Register Flutter admin service worker early
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/admin/flutter_service_worker.js', {
-                    scope: '/admin/'
-                }).then(function(registration) {
-                    console.log('Flutter Admin Service Worker registered with scope:', registration.scope);
-                }).catch(function(error) {
-                    console.log('Flutter Admin Service Worker registration failed (normal if /admin/ not deployed):', error.message);
-                });
-            });
-        }
     </script>
     </#noparse>
+
+    <#-- GrowERP marketing site only: pre-boot the Flutter admin app served at /admin/ in a hidden
+         iframe once this page has loaded, so its (large) wasm and canvaskit files are already in the
+         browser cache when the visitor clicks "Start Free Trial". Desktop only, once per tab. -->
+    <#if (storeInfo.productStore.productStoreId!'') == '100000'>
+    <#noparse>
+    <script>
+        (function () {
+            if (!window.matchMedia('(min-width: 1024px)').matches) return;
+            if (navigator.connection && navigator.connection.saveData) return;
+            try { if (sessionStorage.getItem('growerpAdminPreloaded')) return; } catch (e) {}
+            window.addEventListener('load', function () {
+                setTimeout(function () {
+                    var frame = document.createElement('iframe');
+                    frame.src = '/admin/';
+                    frame.title = 'admin app preload';
+                    frame.setAttribute('aria-hidden', 'true');
+                    frame.tabIndex = -1;
+                    // rendered off-screen at a real size (not display:none) so the Flutter engine
+                    // lays out and completes its start-up instead of stalling
+                    frame.style.cssText = 'position:fixed;left:-10000px;top:0;width:1280px;height:800px;border:0;visibility:hidden;pointer-events:none';
+                    document.body.appendChild(frame);
+                    try { sessionStorage.setItem('growerpAdminPreloaded', '1'); } catch (e) {}
+                }, 3000);
+            });
+        })();
+    </script>
+    </#noparse>
+    </#if>
 
     <#-- Additional Scripts from subpages -->
     <#if footerScriptText?has_content>${footerScriptText}</#if>

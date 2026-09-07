@@ -8,6 +8,12 @@ If not deployed, shows setup instructions
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
     standalone="true" require-authentication="anonymous-view" allow-extra-path="true">
 
+    <pre-actions>
+        <!-- Moqui defaults to frame-ancestors 'none'; allow same-origin framing so the marketing
+             site can pre-boot this app in a hidden iframe (see modern/root.html.ftl) -->
+        <script>ec.web.response.setHeader("Content-Security-Policy", "frame-ancestors 'self'; form-action 'self';")</script>
+    </pre-actions>
+
     <actions>
         <script><![CDATA[
             // Check if the Flutter admin build has been deployed
