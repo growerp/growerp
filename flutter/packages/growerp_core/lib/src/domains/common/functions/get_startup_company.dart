@@ -24,6 +24,19 @@ const String _companyPartyIdDefine = String.fromEnvironment('COMPANY_PARTY_ID');
 const String _prefKey = 'companyPartyId';
 const String _paramName = 'companyPartyId';
 
+/// The first tenant hosts the public admin app: a visitor registering there
+/// must get a company of its own, not an employee account at GrowERP. So the
+/// company of the first tenant is never used as startup company.
+const String _firstTenantOwnerPartyId = 'GROWERP';
+
+Company? _unlessFirstTenant(Company company) {
+  if (company.ownerPartyId == _firstTenantOwnerPartyId) {
+    debugPrint('=== first tenant company ignored: register creates a company');
+    return null;
+  }
+  return company;
+}
+
 /// Optional company the app is started for, on any platform:
 /// - desktop: --companyPartyId=100000 on the command line
 ///   (under flutter run: --dart-entrypoint-args=--companyPartyId=100000)
@@ -38,6 +51,8 @@ const String _paramName = 'companyPartyId';
 ///
 /// When no company id is available the web hostname is used, as before.
 /// Returns null when nothing was found: the app then shows all companies.
+/// The company of the first tenant(GROWERP) is ignored the same way: its
+/// admin app is the public entry point where a visitor registers a new company.
 Future<Company?> getStartupCompany(
   RestClient restClient, {
   List<String> args = const [],
@@ -66,7 +81,7 @@ Future<Company?> getStartupCompany(
     if (!kIsWeb || Uri.base.host.isEmpty) return null;
     try {
       final company = await restClient.getCompanyFromHost(Uri.base.host);
-      return company.partyId == null ? null : company;
+      return company.partyId == null ? null : _unlessFirstTenant(company);
     } catch (e) {
       debugPrint('=== company for host: ${Uri.base.host} not found: $e');
       return null;
@@ -83,7 +98,7 @@ Future<Company?> getStartupCompany(
       return null;
     }
     debugPrint('=== startup company: ${company.name}[${company.partyId}]');
-    return company;
+    return _unlessFirstTenant(company);
   } catch (e) {
     debugPrint('=== getting company: $companyPartyId error: $e');
     return null;
