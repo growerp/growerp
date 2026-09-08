@@ -34,6 +34,8 @@ limitations under the License.
         title="Outreach" route="/outreach" iconName="send" widgetName="CampaignListScreen" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_AGENT_CONTROL" menuConfigurationId="MARKETING_DEFAULT"
         title="Agent Control" route="/agent-control" iconName="smart_toy" widgetName="AdkAgentListView" sequenceNum="50"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_KNOWLEDGE" menuConfigurationId="MARKETING_DEFAULT"
+        title="Knowledge" route="/knowledge" iconName="menu_book" widgetName="AdkKnowledgeView" sequenceNum="55"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_ORG" menuConfigurationId="MARKETING_DEFAULT"
         title="Organization" route="/companies" iconName="business" widgetName="ShowCompanyDialog" sequenceNum="60"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_SYSTEM_SETUP" menuConfigurationId="MARKETING_DEFAULT"
@@ -77,8 +79,11 @@ limitations under the License.
         title="Platforms" iconName="public" widgetName="PlatformConfigListScreen" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_OUT_MESSAGES" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_OUTREACH"
         title="Messages" iconName="message" widgetName="OutreachMessageList" sequenceNum="40"/>
+    <!-- Switched off, not removed: the LinkedIn send queue is now a mode of the
+         Messages screen. A removed seed line would leave the row behind in every
+         database that already loaded it; isActive=N also lets a user put the tab back. -->
     <growerp.menu.MenuItem menuItemId="MKTAPP_OUT_SEND_QUEUE" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_OUTREACH"
-        title="Send Queue" iconName="send" widgetName="LinkedInSendQueueScreen" sequenceNum="50"/>
+        title="Send Queue" iconName="send" widgetName="LinkedInSendQueueScreen" isActive="N" sequenceNum="50"/>
 
     <!-- ====================== Orders children ====================== -->
     <growerp.menu.MenuItem menuItemId="MKTAPP_ORDERS" menuConfigurationId="MARKETING_DEFAULT"
@@ -103,10 +108,12 @@ limitations under the License.
         title="Approvals" iconName="fact_check" widgetName="AdkApprovalsListView" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_ADK_ACTIONS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_AGENT_CONTROL"
         title="Agent Actions" iconName="history" widgetName="AdkActionsListView" sequenceNum="40"/>
-    <growerp.menu.MenuItem menuItemId="MKTAPP_ADK_KNOWLEDGE" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_AGENT_CONTROL"
-        title="Knowledge" iconName="menu_book" widgetName="AdkKnowledgeView" sequenceNum="50"/>
-    <growerp.menu.MenuItem menuItemId="MKTAPP_ADK_WIKI" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_AGENT_CONTROL"
-        title="Wiki" iconName="menu_book" widgetName="WikiList" sequenceNum="55"/>
+
+    <!-- ====================== Knowledge children ====================== -->
+    <growerp.menu.MenuItem menuItemId="MKTAPP_ADK_KNOWLEDGE" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_KNOWLEDGE"
+        title="Knowledge" iconName="menu_book" widgetName="AdkKnowledgeView" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_ADK_WIKI" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_KNOWLEDGE"
+        title="Wiki" iconName="menu_book" widgetName="WikiList" sequenceNum="20"/>
 
     <!-- ====================== Organization children ====================== -->
     <growerp.menu.MenuItem menuItemId="MKTAPP_ORG_COMPANY" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_ORG"

@@ -292,15 +292,24 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
   /// One end of the send window, in the user's own hours. 'Any time' clears it,
   /// which lets the campaign send on every hourly tick.
   Widget _hourDropdown(String label, bool isFrom) {
+    // the option keys carry the field name: both dropdowns show the same
+    // labels, so a shared key (or the label itself) is ambiguous once the
+    // other field displays the option that is being picked here.
+    final fieldKey = isFrom ? 'sendFromHour' : 'sendToHour';
     return DropdownButtonFormField<int?>(
-      key: Key(isFrom ? 'sendFromHour' : 'sendToHour'),
+      key: Key(fieldKey),
       decoration: InputDecoration(labelText: label),
       initialValue: isFrom ? _sendFromHour : _sendToHour,
       isExpanded: true,
       items: [
-        DropdownMenuItem<int?>(value: null, child: Text(OutreachLocalizations.of(context)!.anyTime)),
+        DropdownMenuItem<int?>(
+          key: Key('${fieldKey}OptionAny'),
+          value: null,
+          child: Text(OutreachLocalizations.of(context)!.anyTime),
+        ),
         for (int hour = 0; hour < 24; hour++)
           DropdownMenuItem<int?>(
+            key: Key('$fieldKey' 'Option$hour'),
             value: hour,
             child: Text('${hour.toString().padLeft(2, '0')}:00'),
           ),

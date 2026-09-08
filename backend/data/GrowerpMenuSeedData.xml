@@ -67,6 +67,8 @@ limitations under the License.
         title="Acct Reports" route="/acct-reports" iconName="assessment" widgetName="RevenueExpenseChart" sequenceNum="50"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_AGENT_CONTROL" menuConfigurationId="ADMIN_DEFAULT"
         title="Agent Control" route="/agent-control" iconName="smart_toy" widgetName="AdkAgentListView" sequenceNum="60"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_KNOWLEDGE" menuConfigurationId="ADMIN_DEFAULT"
+        title="Knowledge" route="/knowledge" iconName="menu_book" widgetName="AdkKnowledgeView" sequenceNum="65"/>
     <!-- Outside users (GROWERP_M_OTHER) reach only their own company details here;
          every other screen is default deny for them. Read only: they are absent
          from updateGroupsJson. -->
@@ -165,8 +167,11 @@ limitations under the License.
         title="Platforms" iconName="public" widgetName="PlatformConfigListScreen" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_OUT_MESSAGES" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_OUTREACH"
         title="Messages" iconName="message" widgetName="OutreachMessageList" sequenceNum="40"/>
+    <!-- Switched off, not removed: the LinkedIn send queue is now a mode of the
+         Messages screen. A removed seed line would leave the row behind in every
+         database that already loaded it; isActive=N also lets a user put the tab back. -->
     <growerp.menu.MenuItem menuItemId="ADMIN_OUT_SEND_QUEUE" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_OUTREACH"
-        title="Send Queue" iconName="send" widgetName="LinkedInSendQueueScreen" sequenceNum="50"/>
+        title="Send Queue" iconName="send" widgetName="LinkedInSendQueueScreen" isActive="N" sequenceNum="50"/>
 
     <!-- ADMIN_COURSES children -->
     <growerp.menu.MenuItem menuItemId="ADMIN_COURSES_LIST" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_COURSES"
@@ -272,10 +277,12 @@ limitations under the License.
         title="Approvals" iconName="fact_check" widgetName="AdkApprovalsListView" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ADK_ACTIONS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_AGENT_CONTROL"
         title="Agent Actions" iconName="history" widgetName="AdkActionsListView" sequenceNum="40"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_ADK_KNOWLEDGE" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_AGENT_CONTROL"
-        title="Knowledge" iconName="menu_book" widgetName="AdkKnowledgeView" sequenceNum="50"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_ADK_WIKI" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_AGENT_CONTROL"
-        title="Wiki" iconName="menu_book" widgetName="WikiList" sequenceNum="55"/>
+
+    <!-- ADMIN_KNOWLEDGE children -->
+    <growerp.menu.MenuItem menuItemId="ADMIN_ADK_KNOWLEDGE" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_KNOWLEDGE"
+        title="Knowledge" iconName="menu_book" widgetName="AdkKnowledgeView" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_ADK_WIKI" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_KNOWLEDGE"
+        title="Wiki" iconName="menu_book" widgetName="WikiList" sequenceNum="20"/>
 
     <!-- ====================== FREELANCE_DEFAULT Menu Items ====================== -->
     <!-- Top-level -->

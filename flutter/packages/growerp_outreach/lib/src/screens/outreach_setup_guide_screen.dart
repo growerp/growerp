@@ -36,6 +36,7 @@ class _GuideStep {
     required this.description,
     required this.status,
     this.targetWidgetName,
+    this.menuWidgetName,
     this.optional = false,
     this.checked,
   });
@@ -51,6 +52,11 @@ class _GuideStep {
 
   /// Widget name of the destination screen, looked up in the app menu.
   final String? targetWidgetName;
+
+  /// Widget name to look up in the menu, when the destination screen is a mode
+  /// of another screen and has no menu item of its own. Defaults to
+  /// [targetWidgetName].
+  final String? menuWidgetName;
   final bool optional;
 
   /// Live completion check, null when the step cannot be checked from data
@@ -331,6 +337,8 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
         title: localizations.guideStep7Title,
         description: localizations.guideStep7Desc,
         targetWidgetName: 'LinkedInSendQueueScreen',
+        // the send queue is a mode of the Messages screen, it has no menu item
+        menuWidgetName: 'OutreachMessageList',
         status: _statusOfOpened('sendQueue', localizations),
       ),
       _GuideStep(
@@ -496,7 +504,9 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
     required bool isLast,
   }) {
     final theme = Theme.of(context);
-    final available = _isAvailable(step.targetWidgetName);
+    final available = _isAvailable(
+      step.menuWidgetName ?? step.targetWidgetName,
+    );
     final done = step.checked ?? _completed.contains(step.id);
 
     return Column(

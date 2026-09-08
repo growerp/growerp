@@ -20,6 +20,7 @@ import 'package:growerp_models/growerp_models.dart';
 import '../bloc/outreach_message_bloc.dart';
 import '../bloc/outreach_message_event.dart';
 import '../bloc/outreach_message_state.dart';
+import 'linkedin_send_queue_screen.dart';
 import 'outreach_message_detail_screen.dart';
 import 'outreach_message_list_styled_data.dart';
 import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
@@ -44,6 +45,9 @@ class OutreachMessageListState extends State<OutreachMessageList> {
   double currentScroll = 0;
   String searchString = '';
   bool _isLoading = true;
+
+  /// Shows the assisted LinkedIn send queue instead of the message list.
+  bool _showQueue = false;
 
   @override
   void initState() {
@@ -135,68 +139,85 @@ class OutreachMessageListState extends State<OutreachMessageList> {
         }
         hasReachedMax = state.hasReachedMax;
 
+        final coreLocalizations = CoreLocalizations.of(context)!;
+
         return Column(
           children: [
-            // Filter bar with search
+            // Filter bar with search, and the switch to the send queue
             ListFilterBar(
               searchHint: OutreachLocalizations.of(context)!.searchHintMessages,
               searchController: _searchController,
               focusNode: _searchFocusNode,
+              showSearch: !_showQueue,
               onSearchChanged: (value) {
                 searchString = value;
                 _messageBloc.add(OutreachMessageSearchRequested(query: value));
               },
+              actions: [
+                IconButton(
+                  key: const Key('sendQueueToggle'),
+                  icon: Icon(_showQueue ? Icons.list : Icons.send),
+                  tooltip: _showQueue
+                      ? coreLocalizations.messages
+                      : coreLocalizations.sendQueue,
+                  onPressed: () => setState(() => _showQueue = !_showQueue),
+                ),
+              ],
             ),
-            // Main content area with StyledDataTable
-            Expanded(
-              child: Stack(
-                children: [
-                  tableView(),
-                  Positioned(
-                    right: right,
-                    bottom: bottom,
-                    child: GestureDetector(
-                      onPanUpdate: (details) {
-                        setState(() {
-                          right = right! - details.delta.dx;
-                          bottom -= details.delta.dy;
-                        });
-                      },
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          FloatingActionButton(
-                            key: const Key('addNewMessage'),
-                            heroTag: 'messageBtn1',
-                            onPressed: () async {
-                              await showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return BlocProvider.value(
-                                    value: _messageBloc,
-                                    child: const OutreachMessageDetailScreen(
-                                      message: OutreachMessage(
-                                        platform: 'EMAIL',
-                                        messageContent: '',
-                                        status: 'PENDING',
+            // The send queue works the PENDING LinkedIn messages one by one
+            if (_showQueue)
+              const Expanded(child: LinkedInSendQueueScreen())
+            else
+              // Main content area with StyledDataTable
+              Expanded(
+                child: Stack(
+                  children: [
+                    tableView(),
+                    Positioned(
+                      right: right,
+                      bottom: bottom,
+                      child: GestureDetector(
+                        onPanUpdate: (details) {
+                          setState(() {
+                            right = right! - details.delta.dx;
+                            bottom -= details.delta.dy;
+                          });
+                        },
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            FloatingActionButton(
+                              key: const Key('addNewMessage'),
+                              heroTag: 'messageBtn1',
+                              onPressed: () async {
+                                await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return BlocProvider.value(
+                                      value: _messageBloc,
+                                      child: const OutreachMessageDetailScreen(
+                                        message: OutreachMessage(
+                                          platform: 'EMAIL',
+                                          messageContent: '',
+                                          status: 'PENDING',
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                },
-                              );
-                              _searchFocusNode.requestFocus();
-                            },
-                            tooltip: 'Add new message',
-                            child: const Icon(Icons.add),
-                          ),
-                        ],
+                                    );
+                                  },
+                                );
+                                _searchFocusNode.requestFocus();
+                              },
+                              tooltip: 'Add new message',
+                              child: const Icon(Icons.add),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
           ],
         );
       },

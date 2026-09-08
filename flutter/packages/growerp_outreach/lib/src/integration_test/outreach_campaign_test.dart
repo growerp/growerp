@@ -35,21 +35,22 @@ class OutreachCampaignTest {
       : ((utcHour + DateTime.now().timeZoneOffset.inHours + 24) % 24)
           .toString();
 
-  static String _hourLabel(int? utcHour) {
-    final value = _hourValue(utcHour);
-    return value.isEmpty ? 'Any time' : '${value.padLeft(2, '0')}:00';
-  }
-
-  /// Only touch the dropdown when the wanted hour is not already selected:
-  /// re-picking the shown value makes the option text ambiguous, the closed
-  /// field and the open menu then both carry it.
+  /// Pick an hour by the option's own key: both send-window dropdowns show the
+  /// same labels, so selecting by label taps the other closed field instead of
+  /// the open menu as soon as that field shows the wanted option.
   static Future<void> _selectHour(
     WidgetTester tester,
     String key,
     int? utcHour,
   ) async {
-    if (CommonTest.getDropdown(key) == _hourValue(utcHour)) return;
-    await CommonTest.selectDropDown(tester, key, _hourLabel(utcHour));
+    final value = _hourValue(utcHour);
+    if (CommonTest.getDropdown(key) == value) return;
+    await CommonTest.selectDropDown(
+      tester,
+      key,
+      '',
+      optionKey: '${key}Option${value.isEmpty ? 'Any' : value}',
+    );
   }
 
   /// Campaign platform chips can only be selected when the platform has an

@@ -1645,16 +1645,26 @@ class CommonTest {
     await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 
+  /// Pick [value] in the dropdown with [key].
+  ///
+  /// Pass [optionKey] when the screen keys its dropdown options: two dropdowns
+  /// on one screen can show the same labels, and then the label of the wanted
+  /// option is also on screen in the other, closed field — tapping by text hits
+  /// that field instead of the open menu. [value] is ignored when [optionKey]
+  /// is given.
   static Future<void> selectDropDown(
     WidgetTester tester,
     String key,
     String value, {
     seconds = 1,
+    String? optionKey,
   }) async {
     await tapByKey(tester, key, seconds: seconds);
     // a long option list (e.g. the 24 hours of a send window) only renders the
     // part of the menu that fits the screen: scroll the overlay to the option.
-    final option = find.textContaining(RegExp(value, caseSensitive: false));
+    final option = optionKey != null
+        ? find.byKey(Key(optionKey))
+        : find.textContaining(RegExp(value, caseSensitive: false));
     if (!tester.any(option)) {
       // the menu opens at the currently selected item, so the wanted option can
       // sit either below or above it: scroll forward first, then backward.
@@ -1671,7 +1681,17 @@ class CommonTest {
         if (tester.any(option)) break;
       }
     }
-    await tapByText(tester, value);
+    if (optionKey == null) {
+      await tapByText(tester, value);
+      return;
+    }
+    expect(
+      tester.any(option),
+      true,
+      reason: "could not find option: $optionKey to tap on",
+    );
+    await tester.tap(await readyTarget(tester, option));
+    await tester.pumpAndSettle(Duration(seconds: seconds));
   }
 
   static String getRandom() {
