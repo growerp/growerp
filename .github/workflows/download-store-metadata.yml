@@ -235,17 +235,27 @@ jobs:
 
           API_KEY_FILE="${{ steps.asc-key.outputs.api_key_path }}"
 
+          # --use_live_version: without it deliver looks for an *editable*
+          # version and silently downloads nothing (exit 0) whenever the app
+          # sits in Waiting for Review / Pending Developer Release. The live
+          # listing is exactly what this workflow is meant to pull back.
           bundle exec fastlane deliver download_metadata \
             --api_key_path "$API_KEY_FILE" \
             --metadata_path "$METADATA_PATH" \
-            --app_identifier "org.growerp.${APP_NAME}"
+            --app_identifier "org.growerp.${APP_NAME}" \
+            --use_live_version true
 
           bundle exec fastlane deliver download_screenshots \
             --api_key_path "$API_KEY_FILE" \
             --screenshots_path "$SCREENSHOTS_PATH" \
-            --app_identifier "org.growerp.${APP_NAME}"
+            --app_identifier "org.growerp.${APP_NAME}" \
+            --use_live_version true
 
           rm -f "$API_KEY_FILE"
+
+          if [ -z "$(find "$METADATA_PATH" -type f -print -quit)" ]; then
+            echo "::warning::iOS ${APP_NAME}: deliver returned no metadata — nothing to commit"
+          fi
         working-directory: flutter
 
       # Two separate artifacts, one directory each: with two paths in one
@@ -323,13 +333,20 @@ jobs:
 
           API_KEY_FILE="${{ steps.asc-key.outputs.api_key_path }}"
 
+          # --use_live_version: see the iOS job — without it deliver finds no
+          # editable version and writes nothing at all, exit 0.
           bundle exec fastlane deliver download_metadata \
             --api_key_path "$API_KEY_FILE" \
             --metadata_path "$METADATA_PATH" \
             --app_identifier "$BUNDLE_ID" \
-            --platform osx
+            --platform osx \
+            --use_live_version true
 
           rm -f "$API_KEY_FILE"
+
+          if [ -z "$(find "$METADATA_PATH" -type f -print -quit)" ]; then
+            echo "::warning::macOS ${APP_NAME}: deliver returned no metadata — nothing to commit"
+          fi
         working-directory: flutter
 
       - name: Upload downloaded macOS metadata
