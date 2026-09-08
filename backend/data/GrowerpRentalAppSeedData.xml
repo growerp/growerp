@@ -26,6 +26,8 @@ limitations under the License.
         title="Main" route="/" iconName="dashboard" widgetName="GanttForm" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="RENTAL_MYCOMPANY" menuConfigurationId="RENTAL_DEFAULT"
         title="My Company" route="/myCompany" iconName="business" widgetName="ShowCompanyDialog" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_WEBSITE" menuConfigurationId="RENTAL_DEFAULT"
+        title="Website" route="/website" iconName="web" widgetName="WebsiteDialog" sequenceNum="25"/>
     <growerp.menu.MenuItem menuItemId="RENTAL_EQUIPMENT" menuConfigurationId="RENTAL_DEFAULT"
         title="Equipment" route="/equipment" iconName="construction" widgetName="AssetList" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="RENTAL_RENTALS" menuConfigurationId="RENTAL_DEFAULT"
@@ -70,10 +72,23 @@ limitations under the License.
         title="company" iconName="home" widgetName="ShowCompanyDialog" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="RENTAL_MC_USERS" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_MYCOMPANY"
         title="employees" iconName="school" widgetName="UserListCompany" sequenceNum="20"/>
-    <growerp.menu.MenuItem menuItemId="RENTAL_MC_WEBSITE" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_MYCOMPANY"
-        title="Website" iconName="webhook" widgetName="WebsiteDialog" sequenceNum="30"/>
 
     <!-- Equipment children -->
+    <growerp.menu.MenuItem menuItemId="RENTAL_MC_SECURITY" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_MYCOMPANY"
+        title="security" iconName="security" widgetName="SecurityList" artifactGroupId="GROWERP_BASE"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]'
+        updateGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="25"/>
+
+    <!-- ====================== Website children ====================== -->
+    <growerp.menu.MenuItem menuItemId="RENTAL_MC_WEBSITE" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_WEBSITE"
+        title="Content" iconName="webhook" widgetName="WebsiteDialog" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_WEB_LANDING" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_WEBSITE"
+        title="Landing Pages" iconName="web" widgetName="LandingPageList" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_WEB_ASSESS" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_WEBSITE"
+        title="Assessments" iconName="quiz" widgetName="AssessmentList" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_WEB_FORMS" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_WEBSITE"
+        title="Web Forms" iconName="dynamic_form" widgetName="WebsiteFormList" sequenceNum="40"/>
+
     <growerp.menu.MenuItem menuItemId="RENTAL_EQ_ASSETS" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_EQUIPMENT"
         title="Equipment" iconName="construction" widgetName="AssetList" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="RENTAL_EQ_PROD" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_EQUIPMENT"

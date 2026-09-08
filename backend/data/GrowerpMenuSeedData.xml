@@ -59,6 +59,8 @@ limitations under the License.
         title="crm" route="/crm" iconName="people" widgetName="ActivityList" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_MARKETING" menuConfigurationId="ADMIN_DEFAULT"
         title="Marketing" route="/marketing" iconName="campaign" widgetName="ContentPlanList" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_WEBSITE" menuConfigurationId="ADMIN_DEFAULT"
+        title="Website" route="/website" iconName="web" widgetName="WebsiteDialog" sequenceNum="35"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_OUTREACH" menuConfigurationId="ADMIN_DEFAULT"
         title="Outreach" route="/outreach" iconName="send" widgetName="CampaignListScreen" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ACC_REPORTS" menuConfigurationId="ADMIN_DEFAULT"
@@ -103,15 +105,21 @@ limitations under the License.
         updateGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN","GROWERP_M_EMPLOYEE"]' sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ORG_USERS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ORG"
         title="employees" iconName="school" widgetName="UserListEmployee" sequenceNum="20"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_ORG_WEBSITE" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ORG"
-        title="Website" iconName="webhook" widgetName="WebsiteDialog" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ORG_SECURITY" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ORG"
         title="security" iconName="security" widgetName="SecurityList" artifactGroupId="GROWERP_BASE"
         userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]'
         updateGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="25"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_ORG_WEBFORMS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ORG"
-        title="Web Forms" iconName="dynamic_form" widgetName="WebsiteFormList" sequenceNum="35"/>
     
+
+    <!-- ADMIN_WEBSITE children (tabs) -->
+    <growerp.menu.MenuItem menuItemId="ADMIN_ORG_WEBSITE" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_WEBSITE"
+        title="Content" iconName="webhook" widgetName="WebsiteDialog" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_MKTG_LANDING" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_WEBSITE"
+        title="Landing Pages" iconName="web" widgetName="LandingPageList" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_MKTG_ASSESS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_WEBSITE"
+        title="Assessments" iconName="quiz" widgetName="AssessmentList" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_ORG_WEBFORMS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_WEBSITE"
+        title="Web Forms" iconName="dynamic_form" widgetName="WebsiteFormList" sequenceNum="40"/>
 
     <!-- ADMIN_SYSTEM_SETUP children (tabs) -->
     <growerp.menu.MenuItem menuItemId="ADMIN_SETUP_AI" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_SYSTEM_SETUP"
@@ -145,10 +153,6 @@ limitations under the License.
         title="Email Sequences" iconName="schedule_send" widgetName="EmailSequenceList" sequenceNum="35"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_MKTG_ENGAGEMENT" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MARKETING"
         title="Engagements" iconName="thumb_up" widgetName="SocialEngagementList" sequenceNum="38"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_MKTG_LANDING" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MARKETING"
-        title="Landing Pages" iconName="web" widgetName="LandingPageList" sequenceNum="40"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_MKTG_ASSESS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MARKETING"
-        title="Assessments" iconName="quiz" widgetName="AssessmentList" sequenceNum="50"/>
 
     <!-- ADMIN_OUTREACH children -->
     <growerp.menu.MenuItem menuItemId="ADMIN_OUT_GUIDE" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_OUTREACH"
@@ -279,6 +283,9 @@ limitations under the License.
         title="Main" route="/" iconName="dashboard" widgetName="FreelanceDbForm" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_TASKS" menuConfigurationId="FREELANCE_DEFAULT" itemKey="allTasks"
         title="Tasks" route="/tasks" iconName="task" widgetName="ActivityList" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="FREELANCE_MYCOMPANY" menuConfigurationId="FREELANCE_DEFAULT"
+        title="My Company" route="/myCompany" iconName="business" widgetName="ShowCompanyDialog"
+        userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="25"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_CRM" menuConfigurationId="FREELANCE_DEFAULT" itemKey="myOpportunities"
         title="CRM" route="/crm" iconName="people" widgetName="ActivityList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_MARKETING" menuConfigurationId="FREELANCE_DEFAULT" 
@@ -305,6 +312,12 @@ limitations under the License.
         title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="80"/>
 
     <!-- FREELANCE children -->
+    <growerp.menu.MenuItem menuItemId="FREELANCE_MC_COMPANY" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_MYCOMPANY"
+        title="company" iconName="home" widgetName="ShowCompanyDialog" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="FREELANCE_MC_SECURITY" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_MYCOMPANY"
+        title="security" iconName="security" widgetName="SecurityList" artifactGroupId="GROWERP_BASE"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]'
+        updateGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_TASKS_ALL" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_TASKS"
         title="Tasks" iconName="task" widgetName="ActivityList" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_TASKS_HOURS" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_TASKS"
@@ -323,10 +336,14 @@ limitations under the License.
         title="Content" iconName="auto_awesome" widgetName="MasterContentList" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_MKTG_PERSONA" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_MARKETING"
         title="Personas" iconName="people" widgetName="PersonaList" sequenceNum="30"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_MKTG_LANDING" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_MARKETING"
-        title="Landing Pages" iconName="web" widgetName="LandingPageList" sequenceNum="40"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_MKTG_ASSESS" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_MARKETING"
-        title="Assessments" iconName="quiz" widgetName="AssessmentList" sequenceNum="50"/>
+    <growerp.menu.MenuItem menuItemId="FREELANCE_WEB_CONTENT" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_WEBSITE"
+        title="Content" iconName="webhook" widgetName="WebsiteDialog" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="FREELANCE_MKTG_LANDING" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_WEBSITE"
+        title="Landing Pages" iconName="web" widgetName="LandingPageList" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="FREELANCE_MKTG_ASSESS" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_WEBSITE"
+        title="Assessments" iconName="quiz" widgetName="AssessmentList" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="FREELANCE_WEB_FORMS" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_WEBSITE"
+        title="Web Forms" iconName="dynamic_form" widgetName="WebsiteFormList" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_OUT_GUIDE" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_OUTREACH"
         title="Guide" iconName="checklist" widgetName="OutreachSetupGuideScreen" sequenceNum="5"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_OUT_CAMP" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_OUTREACH"
@@ -399,6 +416,8 @@ limitations under the License.
         title="Main" route="/" iconName="dashboard" widgetName="GanttForm" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_MYHOTEL" menuConfigurationId="HOTEL_DEFAULT" 
         title="My Hotel" route="/myHotel" iconName="business" widgetName="ShowCompanyDialog" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="HOTEL_WEBSITE" menuConfigurationId="HOTEL_DEFAULT"
+        title="Website" route="/website" iconName="web" widgetName="WebsiteDialog" sequenceNum="25"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_ROOMS" menuConfigurationId="HOTEL_DEFAULT" 
         title="Rooms" route="/rooms" iconName="king_bed" widgetName="AssetList" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_RESERVATIONS" menuConfigurationId="HOTEL_DEFAULT" 
@@ -424,8 +443,18 @@ limitations under the License.
         title="company" iconName="home" widgetName="ShowCompanyDialog" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_MH_USERS" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_MYHOTEL"
         title="employees" iconName="school" widgetName="UserListCompany" sequenceNum="20"/>
-    <growerp.menu.MenuItem menuItemId="HOTEL_MH_WEBSITE" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_MYHOTEL"
-        title="Website" iconName="webhook" widgetName="WebsiteDialog" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="HOTEL_MH_SECURITY" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_MYHOTEL"
+        title="security" iconName="security" widgetName="SecurityList" artifactGroupId="GROWERP_BASE"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]'
+        updateGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="25"/>
+    <growerp.menu.MenuItem menuItemId="HOTEL_MH_WEBSITE" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_WEBSITE"
+        title="Content" iconName="webhook" widgetName="WebsiteDialog" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="HOTEL_WEB_LANDING" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_WEBSITE"
+        title="Landing Pages" iconName="web" widgetName="LandingPageList" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="HOTEL_WEB_ASSESS" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_WEBSITE"
+        title="Assessments" iconName="quiz" widgetName="AssessmentList" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="HOTEL_WEB_FORMS" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_WEBSITE"
+        title="Web Forms" iconName="dynamic_form" widgetName="WebsiteFormList" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_ROOMS_ASSETS" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ROOMS"
         title="Rooms" iconName="king_bed" widgetName="AssetList" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_ROOMS_PROD" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ROOMS"

@@ -28,6 +28,8 @@ limitations under the License.
         title="CRM" route="/crm" iconName="people" widgetName="ActivityList" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_MARKETING" menuConfigurationId="MARKETING_DEFAULT"
         title="Marketing" route="/marketing" iconName="campaign" widgetName="ContentPlanList" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_WEBSITE" menuConfigurationId="MARKETING_DEFAULT"
+        title="Website" route="/website" iconName="web" widgetName="WebsiteDialog" sequenceNum="35"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_OUTREACH" menuConfigurationId="MARKETING_DEFAULT"
         title="Outreach" route="/outreach" iconName="send" widgetName="CampaignListScreen" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_AGENT_CONTROL" menuConfigurationId="MARKETING_DEFAULT"
@@ -63,10 +65,6 @@ limitations under the License.
         title="Email Sequences" iconName="schedule_send" widgetName="EmailSequenceList" sequenceNum="35"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_MKTG_ENGAGEMENT" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_MARKETING"
         title="Engagements" iconName="thumb_up" widgetName="SocialEngagementList" sequenceNum="38"/>
-    <growerp.menu.MenuItem menuItemId="MKTAPP_MKTG_LANDING" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_MARKETING"
-        title="Landing Pages" iconName="web" widgetName="LandingPageList" sequenceNum="40"/>
-    <growerp.menu.MenuItem menuItemId="MKTAPP_MKTG_ASSESS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_MARKETING"
-        title="Assessments" iconName="quiz" widgetName="AssessmentList" sequenceNum="50"/>
 
     <!-- ====================== Outreach children ====================== -->
     <growerp.menu.MenuItem menuItemId="MKTAPP_OUT_GUIDE" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_OUTREACH"
@@ -115,7 +113,15 @@ limitations under the License.
         title="Company" iconName="home" widgetName="ShowCompanyDialog" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_ORG_USERS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_ORG"
         title="Employees" iconName="school" widgetName="UserListEmployee" sequenceNum="20"/>
-    <growerp.menu.MenuItem menuItemId="MKTAPP_ORG_WEBSITE" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_ORG"
-        title="Website" iconName="webhook" widgetName="WebsiteDialog" sequenceNum="30"/>
+
+    <!-- ====================== Website children ====================== -->
+    <growerp.menu.MenuItem menuItemId="MKTAPP_ORG_WEBSITE" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_WEBSITE"
+        title="Content" iconName="webhook" widgetName="WebsiteDialog" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_MKTG_LANDING" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_WEBSITE"
+        title="Landing Pages" iconName="web" widgetName="LandingPageList" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_MKTG_ASSESS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_WEBSITE"
+        title="Assessments" iconName="quiz" widgetName="AssessmentList" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_WEB_FORMS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_WEBSITE"
+        title="Web Forms" iconName="dynamic_form" widgetName="WebsiteFormList" sequenceNum="40"/>
 
 </entity-facade-xml>
