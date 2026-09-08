@@ -1,0 +1,15 @@
+GrowERP Admin is a comprehensive, open-source enterprise resource planning (ERP) application designed for small to medium-sized businesses. Manage your entire business operations from a single, intuitive platform—including inventory, sales, purchasing, human resources, and financial management.
+
+Key Features:
+• Centralized dashboard for real-time business insights
+• Complete inventory and product management
+• Sales and order tracking
+• Purchase order management
+• Employee and HR administration
+• General ledger and financial reporting
+• Multi-company support
+• Real-time synchronization across all devices
+
+Whether you're managing a retail store, manufacturing facility, or service business, GrowERP provides the flexibility and power you need to scale your operations. Built with modern technology and designed for ease of use, GrowERP helps you work smarter and more efficiently.
+
+Accessible on Windows, macOS, iOS, Android, and web browsers. All synchronized in real-time.

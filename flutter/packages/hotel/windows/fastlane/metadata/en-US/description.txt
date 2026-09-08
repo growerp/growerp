@@ -1,0 +1,16 @@
+GrowERP Hotel is a comprehensive property management system (PMS) designed specifically for hotels, hostels, and hospitality businesses. Streamline your operations with integrated reservation management, housekeeping coordination, guest services, and financial reporting.
+
+Key Features:
+• Easy-to-use reservation and booking management
+• Room and occupancy tracking
+• Housekeeping task assignments and status
+• Guest profiles and communication
+• Rate management and pricing rules
+• Gantt chart for visual room scheduling
+• Financial reporting and ledger
+• Multi-property management support
+• Real-time synchronization across all devices
+
+From boutique hotels to large properties, GrowERP Hotel provides the tools you need to deliver exceptional guest experiences while optimizing your operations. Built on modern technology and designed for hospitality professionals.
+
+Accessible on Windows, macOS, iOS, Android, and web browsers. All synchronized in real-time.

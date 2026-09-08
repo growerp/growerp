@@ -408,38 +408,55 @@ jobs:
           token = auth_resp.json()['access_token']
           headers = {'Authorization': f'Bearer {token}', 'Accept': 'application/json'}
 
-          # Get app details
+          # Get app details. raise_for_status, because an unchecked 4xx used to
+          # yield {} here and the job then wrote four EMPTY files that now
+          # overwrite the real listing in the repo.
           base_url = f'https://manage.devcenter.microsoft.com/v1.0/my/applications/{app_id}'
-          app_data = requests.get(base_url, headers=headers).json()
+          app_resp = requests.get(base_url, headers=headers)
+          app_resp.raise_for_status()
+          app_data = app_resp.json()
 
           # Extract metadata from last published submission
-          metadata = {
-              'description': '',
-              'short_description': '',
-              'release_notes': '',
-              'keywords': '',
-          }
+          metadata = {}
 
           last_pub = app_data.get('lastPublishedApplicationSubmission', {})
           if last_pub:
-              sub_data = requests.get(f"{base_url}/submissions/{last_pub['id']}", headers=headers).json()
+              sub_resp = requests.get(f"{base_url}/submissions/{last_pub['id']}", headers=headers)
+              sub_resp.raise_for_status()
+              sub_data = sub_resp.json()
 
               # Extract store listing (usually first listing is en-US)
               listings = sub_data.get('listings', {})
               if listings:
                   first_listing = next(iter(listings.values()), {})
-                  metadata['description'] = first_listing.get('description', '')
-                  metadata['short_description'] = first_listing.get('shortDescription', '')
-                  metadata['release_notes'] = first_listing.get('releaseNotes', '')
-                  metadata['keywords'] = first_listing.get('keywords', '')
+                  metadata = {
+                      'description': first_listing.get('description', ''),
+                      'short_description': first_listing.get('shortDescription', ''),
+                      'release_notes': first_listing.get('releaseNotes', ''),
+                      'keywords': first_listing.get('keywords', ''),
+                  }
+
+          # No published listing to mirror: write nothing at all. Writing empty
+          # files here would wipe the repo copy, since the restore treats the
+          # download as authoritative.
+          if not any(metadata.values()):
+              print(f'::warning::Windows {app_name}: no published listing returned '
+                    '(no lastPublishedApplicationSubmission or empty listings) — '
+                    'leaving the stored metadata untouched')
+              exit(0)
 
           # Write to fastlane metadata dir
           metadata_dir = Path(f'flutter/packages/{app_name}/windows/fastlane/metadata/en-US')
           metadata_dir.mkdir(parents=True, exist_ok=True)
 
           for key, value in metadata.items():
+              if not value:
+                  # An individual empty field is a field the store does not have;
+                  # do not blank the local one on its behalf.
+                  print(f'Skipped {key}.txt (empty in the store listing)')
+                  continue
               path = metadata_dir / f'{key}.txt'
-              path.write_text(value or '')
+              path.write_text(value)
               print(f'Saved {path}')
 
           print('Windows metadata downloaded successfully')
@@ -504,18 +521,22 @@ jobs:
             find "$dst" -mindepth 1 -type d -empty -delete 2>/dev/null || true
           }
 
-          # $1 = artifact name, $2 = repo dir. Artifact roots hold the contents
-          # of the single directory each download job uploaded.
+          # $1 = artifact name, $2 = repo dir, $3 = "noprune" to copy over the
+          # repo copy without deleting what the download omitted.
+          # Artifact roots hold the contents of the single directory each
+          # download job uploaded.
           restore() {
-            local src="_downloads/$1" dst="$2"
+            local src="_downloads/$1" dst="$2" mode="${3:-prune}"
             if [ ! -d "$src" ]; then
               echo "  (no artifact $1)"
               return 0
             fi
             mkdir -p "$dst"
-            prune_to_download "$src" "$dst"
+            if [ "$mode" != "noprune" ]; then
+              prune_to_download "$src" "$dst"
+            fi
             cp -r "$src/." "$dst/"
-            echo "  restored $1 -> $dst"
+            echo "  restored $1 -> $dst ($mode)"
           }
 
           IFS=',' read -ra app_list <<< "$APPS"
@@ -526,7 +547,11 @@ jobs:
             restore "ios-metadata-${app}"      "flutter/packages/${app}/ios/fastlane/metadata"
             restore "ios-screenshots-${app}"   "flutter/packages/${app}/ios/fastlane/screenshots"
             restore "macos-metadata-${app}"    "flutter/packages/${app}/macos/fastlane/metadata"
-            restore "windows-metadata-${app}"  "flutter/packages/${app}/windows/fastlane/metadata"
+            # noprune: fastlane mirrors a store listing in full, but the Windows
+            # job maps four hand-picked Partner Center fields and omits any that
+            # come back empty. Pruning on that partial view would delete the
+            # local copy of exactly those fields.
+            restore "windows-metadata-${app}"  "flutter/packages/${app}/windows/fastlane/metadata" noprune
           done
 
       - name: Clean up artifact download directory
