@@ -1,1 +1,0 @@
-Property management system for hotels and hospitality businesses with reservations, housekeeping, and guest management.
