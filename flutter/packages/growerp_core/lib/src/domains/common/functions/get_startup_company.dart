@@ -24,6 +24,12 @@ const String _companyPartyIdDefine = String.fromEnvironment('COMPANY_PARTY_ID');
 const String _prefKey = 'companyPartyId';
 const String _paramName = 'companyPartyId';
 
+/// This runs before runApp(): every wait here is a frame that is not drawn yet,
+/// so an unreachable backend must not be allowed to hold the app on an empty
+/// window. Waiting longer than this is treated as 'no startup company'.
+const Duration _startupTimeout = Duration(seconds: 4);
+const Duration _deepLinkTimeout = Duration(seconds: 2);
+
 /// The first tenant hosts the public admin app: a visitor registering there
 /// must get a company of its own, not an employee account at GrowERP. So the
 /// company of the first tenant is never used as startup company.
@@ -80,7 +86,9 @@ Future<Company?> getStartupCompany(
     // no company id: on the web the hostname decides which company
     if (!kIsWeb || Uri.base.host.isEmpty) return null;
     try {
-      final company = await restClient.getCompanyFromHost(Uri.base.host);
+      final company = await restClient
+          .getCompanyFromHost(Uri.base.host)
+          .timeout(_startupTimeout);
       return company.partyId == null ? null : _unlessFirstTenant(company);
     } catch (e) {
       debugPrint('=== company for host: ${Uri.base.host} not found: $e');
@@ -90,9 +98,9 @@ Future<Company?> getStartupCompany(
 
   GlobalConfiguration().updateValue('singleCompany', companyPartyId);
   try {
-    final company = await restClient.getPublicCompany(
-      companyPartyId: companyPartyId,
-    );
+    final company = await restClient
+        .getPublicCompany(companyPartyId: companyPartyId)
+        .timeout(_startupTimeout);
     if (company.partyId == null) {
       debugPrint('=== company: $companyPartyId not found');
       return null;
@@ -122,7 +130,7 @@ String? _fromUri(Uri uri) => uri.queryParameters[_paramName];
 
 Future<String?> _fromDeepLink() async {
   try {
-    final uri = await AppLinks().getInitialLink();
+    final uri = await AppLinks().getInitialLink().timeout(_deepLinkTimeout);
     return uri == null ? null : _fromUri(uri);
   } catch (e) {
     debugPrint('=== getting deeplink error: $e');

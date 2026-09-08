@@ -12,6 +12,8 @@
  * limitations under the License.
  */
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 /// Shown while the app is waiting on the backend.
@@ -19,10 +21,44 @@ import 'package:flutter/material.dart';
 /// Every waiting state needs visible content: an empty widget while a rest call
 /// runs is indistinguishable from a crashed app, which is what the app store
 /// review reported as a black screen on launch.
-class AppLoadingScreen extends StatelessWidget {
-  const AppLoadingScreen({super.key, this.message = 'Loading...'});
+/// When [onRetry] is given and the wait takes longer than [retryDelay], the
+/// spinner is joined by an explanation and a retry button: a backend that never
+/// answers otherwise leaves the user with a spinner and no way out.
+class AppLoadingScreen extends StatefulWidget {
+  const AppLoadingScreen({
+    super.key,
+    this.message = 'Loading...',
+    this.onRetry,
+    this.retryDelay = const Duration(seconds: 10),
+  });
 
   final String message;
+  final VoidCallback? onRetry;
+  final Duration retryDelay;
+
+  @override
+  State<AppLoadingScreen> createState() => _AppLoadingScreenState();
+}
+
+class _AppLoadingScreenState extends State<AppLoadingScreen> {
+  Timer? _timer;
+  bool _showRetry = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.onRetry != null) {
+      _timer = Timer(widget.retryDelay, () {
+        if (mounted) setState(() => _showRetry = true);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +70,32 @@ class AppLoadingScreen extends StatelessWidget {
         children: [
           const CircularProgressIndicator(),
           const SizedBox(height: 24),
-          Text(message, style: Theme.of(context).textTheme.titleLarge),
+          Text(widget.message, style: Theme.of(context).textTheme.titleLarge),
+          if (_showRetry) ...[
+            const SizedBox(height: 24),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                'This is taking longer than expected.\n'
+                'The server cannot be reached at the moment.',
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              key: const Key('retryStartup'),
+              onPressed: () {
+                setState(() => _showRetry = false);
+                _timer?.cancel();
+                _timer = Timer(widget.retryDelay, () {
+                  if (mounted) setState(() => _showRetry = true);
+                });
+                widget.onRetry!();
+              },
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+            ),
+          ],
         ],
       ),
     );

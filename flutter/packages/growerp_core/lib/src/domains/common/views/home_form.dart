@@ -212,6 +212,31 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
               ),
               child: Column(
                 children: [
+                  // A failed startup only flashed a snackbar before: leave a
+                  // standing explanation with a retry, so an unreachable
+                  // server is visible instead of a login that cannot succeed.
+                  if (status == AuthStatus.failure)
+                    MaterialBanner(
+                      key: const Key('startupFailureBanner'),
+                      backgroundColor: colorScheme.errorContainer,
+                      content: Text(
+                        state.message ??
+                            'The server cannot be reached at the moment.',
+                        style: TextStyle(color: colorScheme.onErrorContainer),
+                      ),
+                      leading: Icon(
+                        Icons.cloud_off,
+                        color: colorScheme.onErrorContainer,
+                      ),
+                      actions: [
+                        TextButton(
+                          key: const Key('retryStartup'),
+                          onPressed: () =>
+                              context.read<AuthBloc>().add(AuthLoad()),
+                          child: const Text('RETRY'),
+                        ),
+                      ],
+                    ),
                   Expanded(
                     child: Scaffold(
                       backgroundColor: Colors.transparent,
@@ -384,7 +409,11 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
           default:
             // initial/loading: never render an empty widget here, it is the
             // first thing shown at launch and reads as a dead (black) app.
-            return const AppLoadingScreen();
+            // An unreachable backend must not spin forever either: offer a
+            // retry once the wait becomes suspicious.
+            return AppLoadingScreen(
+              onRetry: () => context.read<AuthBloc>().add(AuthLoad()),
+            );
         }
       },
     );

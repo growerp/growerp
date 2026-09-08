@@ -114,7 +114,10 @@ class WsClient {
       _channel = WebSocketChannel.connect(
         Uri.parse("$wsUrl?api_key=$apiKey&userId=$userId"),
       );
-      await _channel!.ready;
+      // AuthBloc awaits this before it can report the user as logged in: a host
+      // that accepts the socket but never completes the handshake would keep
+      // the app on the loading screen forever.
+      await _channel!.ready.timeout(const Duration(seconds: 10));
     } catch (error) {
       if (error is WebSocketChannelException) {
         if (error.inner != null) {

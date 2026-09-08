@@ -39,9 +39,13 @@ void installGlobalErrorHandlers() {
 /// failure shows what went wrong instead of a blank rectangle. Also usable as
 /// the root widget when startup itself fails, so runApp() always gets called.
 class StartupErrorScreen extends StatelessWidget {
-  const StartupErrorScreen({super.key, required this.message});
+  const StartupErrorScreen({super.key, required this.message, this.onRetry});
 
   final String message;
+
+  /// When given, a retry button runs it: a startup failure caused by an
+  /// unreachable server is otherwise a dead end until the app is killed.
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +77,14 @@ class StartupErrorScreen extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(color: Colors.black54, fontSize: 12),
             ),
+            if (onRetry != null) ...[
+              const SizedBox(height: 16),
+              TextButton(
+                key: const Key('retryStartup'),
+                onPressed: onRetry,
+                child: const Text('Retry'),
+              ),
+            ],
           ],
         ),
       ),

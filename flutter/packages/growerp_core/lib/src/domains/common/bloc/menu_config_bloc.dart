@@ -98,6 +98,12 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
           message: await getDioError(e),
         ),
       );
+    } catch (e) {
+      // Anything else(parse/type error) would leave the status on loading and
+      // the splash screen spinning forever, with no retry offered.
+      emit(
+        state.copyWith(status: MenuConfigStatus.failure, message: e.toString()),
+      );
     }
   }
 

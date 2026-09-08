@@ -44,7 +44,12 @@ Future main(List<String> args) async {
     await _startApp(args);
   } catch (e, s) {
     debugPrint('===freelance startup failed: $e\n$s');
-    runApp(StartupErrorScreen(message: e.toString()));
+    runApp(
+      StartupErrorScreen(
+        message: e.toString(),
+        onRetry: () => main(args),
+      ),
+    );
   }
 }
 
