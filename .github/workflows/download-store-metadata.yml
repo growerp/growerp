@@ -588,8 +588,14 @@ jobs:
             # screenshots.yml artifact, so the repo copies are not a source of
             # truth — -u keeps the handful of already-tracked files in sync and
             # never touches ignored untracked ones.
+            # ls-files guard: `git add -u` exits 128 ("pathspec did not match any
+            # file(s) known to git") when the directory exists but holds nothing
+            # tracked — which is every app whose screenshots are only ignored
+            # downloads.
             shots="flutter/packages/${app}/ios/fastlane/screenshots"
-            if [ -d "$shots" ]; then git add -u "$shots"; fi
+            if [ -d "$shots" ] && [ -n "$(git ls-files -- "$shots")" ]; then
+              git add -u "$shots"
+            fi
           done
 
           echo "=== git status ==="
