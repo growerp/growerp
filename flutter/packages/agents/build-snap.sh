@@ -9,7 +9,8 @@ cd "$(dirname "$0")"
 # Check if Flutter Linux build exists
 if [ ! -f "build/linux/x64/release/bundle/agents" ]; then
     echo "Linux build not found. Building Flutter app first..."
-    flutter build linux --release
+    flutter build linux --release \
+        --obfuscate --split-debug-info=build/symbols
 fi
 
 # Clean previous snap build artifacts

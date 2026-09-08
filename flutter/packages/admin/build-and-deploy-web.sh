@@ -35,6 +35,7 @@ echo -e "Getting Flutter dependencies..."
 flutter pub get
 echo -e "Building for web (with source maps)..."
 flutter build web --release --wasm
+find build/web -name '*.symbols' -delete
 
 # Restore the original app_settings.json
 echo -e "${YELLOW}Restoring original app_settings.json...${NC}"
@@ -54,6 +55,7 @@ echo -e "Getting Flutter dependencies..."
 flutter pub get
 echo -e "Building for web (with source maps)..."
 flutter build web --release --wasm
+find build/web -name '*.symbols' -delete
 popd > /dev/null
 echo -e "${GREEN}✓ Assessment build completed successfully${NC}"
 

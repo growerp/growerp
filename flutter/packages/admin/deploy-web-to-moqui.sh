@@ -90,6 +90,7 @@ deploy_app() {
     # support. The SW only caused stale-bundle pain after every redeploy because
     # version.json is not bumped, so browsers kept serving the previous build.
     flutter build web --wasm --pwa-strategy=none
+    find build/web -name '*.symbols' -delete
     BUILD_RESULT=$?
 
     # Restore original app_settings.json

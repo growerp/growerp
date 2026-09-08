@@ -55,6 +55,9 @@ RUN melos build --no-select
 WORKDIR /root/flutter/packages/support
 RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
 RUN flutter build web --release
+# Drop the engine .symbols maps: offline symboliser input only, never fetched
+# by the browser, ~7MB per image.
+RUN find build/web -name '*.symbols' -delete
 
 # Stage 2 - Create the run-time image
 FROM nginx

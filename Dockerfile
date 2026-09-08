@@ -70,6 +70,14 @@ RUN flutter build web --release --wasm --pwa-strategy=none
 WORKDIR /root/growerp/flutter/packages/freelance
 RUN flutter build web --release --wasm --pwa-strategy=none
 
+# The engine ships a .symbols map next to every CanvasKit/skwasm variant (~7.6MB
+# per app). They are only read by the offline stack-trace symboliser, never by
+# the browser, so drop them rather than bake them into the image three times.
+RUN find /root/growerp/flutter/packages/admin/build/web \
+         /root/growerp/flutter/packages/assessment/build/web \
+         /root/growerp/flutter/packages/freelance/build/web \
+         -name '*.symbols' -delete
+
 # ===== Stage 2: Build Moqui 4 backend =====
 FROM eclipse-temurin:21-jdk AS build-env
 ARG BRANCH=master

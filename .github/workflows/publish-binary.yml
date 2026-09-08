@@ -934,8 +934,21 @@ jobs:
         working-directory: flutter/packages/${{ matrix.app }}
 
       - name: Flutter build appbundle
-        run: flutter build appbundle --release
+        run: |
+          flutter build appbundle --release \
+            --obfuscate --split-debug-info=build/symbols
         working-directory: flutter/packages/${{ matrix.app }}
+
+      # Obfuscation renames Dart symbols in the AOT snapshot, so Play crash
+      # reports are unreadable without these maps. Keep them for the life of
+      # the release, well beyond the 7 days the .aab itself needs.
+      - name: Upload Dart symbol maps
+        uses: actions/upload-artifact@v4
+        with:
+          name: dart-symbols-android-${{ matrix.app }}
+          retention-days: 90
+          if-no-files-found: error
+          path: flutter/packages/${{ matrix.app }}/build/symbols
 
       # Keep the .aab downloadable from every run so any future new app can get
       # its first Play Console release uploaded by hand (the Play publishing API
@@ -1543,8 +1556,18 @@ jobs:
         working-directory: flutter/packages/${{ matrix.app }}
 
       - name: Flutter build Linux release
-        run: flutter build linux --release
+        run: |
+          flutter build linux --release \
+            --obfuscate --split-debug-info=build/symbols
         working-directory: flutter/packages/${{ matrix.app }}
+
+      - name: Upload Dart symbol maps
+        uses: actions/upload-artifact@v4
+        with:
+          name: dart-symbols-linux-${{ matrix.app }}
+          retention-days: 90
+          if-no-files-found: error
+          path: flutter/packages/${{ matrix.app }}/build/symbols
 
       - name: Sync snapcraft.yaml version from pubspec.yaml
         run: |

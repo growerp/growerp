@@ -58,7 +58,6 @@ flutter:
 
   assets:
     - packages/growerp_core/images/growerp.png
-    - packages/growerp_core/images/crm.png
     - packages/growerp_core/images/growerpDark100.png
     - packages/growerp_core/images/growerp100.png
     - packages/growerp_core/images/growerp.jpg
