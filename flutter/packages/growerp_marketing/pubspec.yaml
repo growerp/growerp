@@ -32,7 +32,6 @@ dependencies:
   intl: ^0.20.0
 
   # Web support
-  web: ^1.0.0
 
 dev_dependencies:
   flutter_test:

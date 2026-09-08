@@ -200,6 +200,6 @@ List<BlocProvider> getAgentsBlocProviders(
 ) {
   return [
     ...getUserCompanyBlocProviders(restClient, applicationId),
-    ...getWebsiteBlocProviders(restClient),
+    ...getWebsiteBlocProviders(restClient, applicationId),
   ];
 }

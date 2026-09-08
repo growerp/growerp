@@ -1,0 +1,354 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
+
+import '../blocs/question_bloc.dart';
+import '../blocs/question_event.dart';
+import '../blocs/question_state.dart';
+import 'answer_option_list_styled_data.dart';
+import 'package:growerp_website/l10n/generated/website_localizations.dart';
+
+class QuestionDetailScreen extends StatefulWidget {
+  final String assessmentId;
+  final AssessmentQuestion question;
+
+  const QuestionDetailScreen({
+    super.key,
+    required this.assessmentId,
+    required this.question,
+  });
+
+  @override
+  QuestionDetailScreenState createState() => QuestionDetailScreenState();
+}
+
+class QuestionDetailScreenState extends State<QuestionDetailScreen> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _questionTextController;
+  late TextEditingController _questionDescriptionController;
+  late String _questionType;
+  late bool _isRequired;
+  late List<Map<String, dynamic>> _options;
+  bool _isSubmitting = false;
+
+  final List<String> _questionTypes = [
+    'text',
+    'email',
+    'radio',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _questionTextController =
+        TextEditingController(text: widget.question.questionText ?? '');
+    _questionDescriptionController =
+        TextEditingController(text: widget.question.questionDescription ?? '');
+
+    // Ensure question type is in the list, default to 'text' if not
+    final incomingType = widget.question.questionType ?? 'text';
+    _questionType =
+        _questionTypes.contains(incomingType) ? incomingType : 'text';
+
+    _isRequired = widget.question.isRequired ?? false;
+
+    // Initialize options list with existing data
+    _options = (widget.question.options ?? [])
+        .map((opt) => {
+              'id': opt.assessmentQuestionOptionId,
+              'textController':
+                  TextEditingController(text: opt.optionText ?? ''),
+              'scoreController': TextEditingController(
+                  text: opt.optionScore?.toString() ?? '0'),
+              'sequence': opt.optionSequence ?? 0,
+            })
+        .toList();
+  }
+
+  @override
+  void dispose() {
+    _questionTextController.dispose();
+    _questionDescriptionController.dispose();
+    for (var opt in _options) {
+      (opt['textController'] as TextEditingController).dispose();
+      (opt['scoreController'] as TextEditingController).dispose();
+    }
+    super.dispose();
+  }
+
+  void _addOption() {
+    setState(() {
+      _options.add({
+        'id': null,
+        'textController': TextEditingController(),
+        'scoreController': TextEditingController(text: '0'),
+        'sequence': _options.length + 1,
+      });
+    });
+  }
+
+  void _removeOption(int index) {
+    setState(() {
+      ((_options[index]['textController']) as TextEditingController).dispose();
+      ((_options[index]['scoreController']) as TextEditingController).dispose();
+      _options.removeAt(index);
+      // Update sequences
+      for (int i = 0; i < _options.length; i++) {
+        _options[i]['sequence'] = i + 1;
+      }
+    });
+  }
+
+  void _saveQuestion() {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    final isNew = widget.question.assessmentQuestionId == null ||
+        widget.question.assessmentQuestionId!.isEmpty;
+    final questionBloc = context.read<QuestionBloc>();
+
+    // Convert options to AssessmentQuestionOption objects
+    final optionsList = _options.map((opt) {
+      final scoreText = (opt['scoreController'] as TextEditingController).text;
+      final score = double.tryParse(scoreText) ?? 0.0;
+
+      return AssessmentQuestionOption(
+        assessmentQuestionOptionId: opt['id'],
+        assessmentId: widget.assessmentId,
+        optionText: (opt['textController'] as TextEditingController).text,
+        optionScore: score,
+        optionSequence: opt['sequence'] as int,
+      );
+    }).toList();
+
+    if (isNew) {
+      questionBloc.add(
+        QuestionCreate(
+          assessmentId: widget.assessmentId,
+          questionText: _questionTextController.text,
+          questionType: _questionType,
+          questionSequence: widget.question.questionSequence,
+          isRequired: _isRequired,
+          options: optionsList,
+        ),
+      );
+    } else {
+      questionBloc.add(
+        QuestionUpdate(
+          assessmentId: widget.assessmentId,
+          questionId: widget.question.assessmentQuestionId!,
+          questionText: _questionTextController.text,
+          questionDescription: _questionDescriptionController.text,
+          questionType: _questionType,
+          questionSequence: widget.question.questionSequence,
+          isRequired: _isRequired,
+          options: optionsList,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isNew = widget.question.assessmentQuestionId == null ||
+        widget.question.assessmentQuestionId!.isEmpty;
+
+    return Dialog(
+      insetPadding: const EdgeInsets.all(10),
+      child: popUp(
+        context: context,
+        title: isNew ? 'New Question' : 'Edit Question',
+        width: 700,
+        height: 700,
+        child: BlocConsumer<QuestionBloc, QuestionState>(
+          listener: (context, state) {
+            if (state.status == QuestionStatus.failure) {
+              setState(() {
+                _isSubmitting = false;
+              });
+              HelperFunctions.showMessage(
+                context,
+                state.message ?? 'Error',
+                Colors.red,
+              );
+            }
+            if (state.status == QuestionStatus.success && _isSubmitting) {
+              // Close dialog only when user explicitly saves
+              Navigator.of(context).pop();
+            }
+          },
+          builder: (context, state) {
+            if (state.status == QuestionStatus.loading) {
+              return const LoadingIndicator();
+            }
+
+            return SingleChildScrollView(
+              key: const Key('questionDetailListView'),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Question Text
+                    TextFormField(
+                      key: const Key('questionText'),
+                      controller: _questionTextController,
+                      decoration: const InputDecoration(
+                        labelText: 'Question Text *',
+                      ),
+                      maxLines: 2,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter question text';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Question Description
+                    TextFormField(
+                      key: const Key('questionDescription'),
+                      controller: _questionDescriptionController,
+                      decoration: const InputDecoration(
+                        labelText: 'Description (optional)',
+                      ),
+                      maxLines: 2,
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Question Type Dropdown
+                    DropdownButtonFormField<String>(
+                      key: const Key('questionType'),
+                      initialValue: _questionType,
+                      decoration: const InputDecoration(
+                        labelText: 'Question Type',
+                      ),
+                      items: _questionTypes
+                          .map((type) => DropdownMenuItem(
+                                value: type,
+                                child: Text(type),
+                              ))
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _questionType = value!;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Is Required Checkbox
+                    CheckboxListTile(
+                      key: const Key('isRequired'),
+                      title: Text(WebsiteLocalizations.of(context)!.requiredQuestion),
+                      value: _isRequired,
+                      onChanged: (value) {
+                        setState(() {
+                          _isRequired = value!;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Options Section - only show for question types that need options
+                    if (_questionType != 'text' &&
+                        _questionType != 'email') ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Answer Options',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          ElevatedButton.icon(
+                            key: const Key('addOption'),
+                            onPressed: _addOption,
+                            icon: const Icon(Icons.add),
+                            label: Text(WebsiteLocalizations.of(context)!.addOption),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Add answer choices with scores for assessment scoring',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Options Table using StyledDataTable
+                      if (_options.isEmpty)
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Text(
+                              'No options yet. Add options for multiple choice questions.',
+                              style: TextStyle(color: Colors.grey[600]),
+                            ),
+                          ),
+                        )
+                      else
+                        SizedBox(
+                          height: (_options.length * 56.0) + 40,
+                          child: StyledDataTable(
+                            columns: getAnswerOptionListColumns(context),
+                            rows: _options.asMap().entries.map((entry) {
+                              final index = entry.key;
+                              final opt = entry.value;
+                              return getAnswerOptionListRow(
+                                context: context,
+                                index: index,
+                                textController: opt['textController']
+                                    as TextEditingController,
+                                scoreController: opt['scoreController']
+                                    as TextEditingController,
+                                onDelete: () => _removeOption(index),
+                              );
+                            }).toList(),
+                            rowHeight: 56,
+                          ),
+                        ),
+                      const SizedBox(height: 24),
+                    ],
+
+                    // Save Button
+                    Center(
+                      child: ElevatedButton(
+                        key: const Key('save'),
+                        onPressed: _saveQuestion,
+                        child: Text(isNew ? 'Create' : 'Update'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}

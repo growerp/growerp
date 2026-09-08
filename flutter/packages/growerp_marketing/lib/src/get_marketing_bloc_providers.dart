@@ -3,28 +3,12 @@ import 'package:growerp_models/growerp_models.dart';
 
 import '../growerp_marketing.dart';
 
-/// Provides BLoC instances for the marketing module with landing page support
+/// Provides BLoC instances for the marketing module
+/// [applicationId] is accepted for call-site compatibility; the marketing blocs
+/// no longer need it since landing pages moved to growerp_website.
 List<BlocProvider> getMarketingBlocProviders(RestClient restClient,
     [String applicationId = 'AppAdmin']) {
   List<BlocProvider> blocProviders = [
-    BlocProvider<AssessmentBloc>(
-      create: (context) => AssessmentBloc(restClient),
-    ),
-    BlocProvider<LandingPageBloc>(
-      create: (context) => LandingPageBloc(
-        restClient: restClient,
-        applicationId: applicationId,
-      ),
-    ),
-    BlocProvider<PageSectionBloc>(
-      create: (context) => PageSectionBloc(restClient: restClient),
-    ),
-    BlocProvider<CredibilityBloc>(
-      create: (context) => CredibilityBloc(restClient: restClient),
-    ),
-    BlocProvider<QuestionBloc>(
-      create: (context) => QuestionBloc(restClient: restClient),
-    ),
     BlocProvider<PersonaBloc>(
       create: (context) => PersonaBloc(restClient),
     ),

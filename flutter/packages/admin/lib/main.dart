@@ -311,7 +311,7 @@ List<BlocProvider> getAdminBlocProviders(
     ...getSalesBlocProviders(restClient),
     ...getMarketingBlocProviders(restClient),
     ...getOutreachBlocProviders(restClient),
-    ...getWebsiteBlocProviders(restClient),
+    ...getWebsiteBlocProviders(restClient, applicationId),
     ...getCoursesBlocProviders(restClient),
   ];
 }

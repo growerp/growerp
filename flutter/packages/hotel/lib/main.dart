@@ -233,6 +233,6 @@ List<BlocProvider> getHotelBlocProviders(
     ...getCatalogBlocProviders(restClient, applicationId),
     ...getOrderAccountingBlocProviders(restClient, applicationId),
     ...getSalesBlocProviders(restClient),
-    ...getWebsiteBlocProviders(restClient),
+    ...getWebsiteBlocProviders(restClient, applicationId),
   ];
 }

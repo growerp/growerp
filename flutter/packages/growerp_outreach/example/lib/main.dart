@@ -21,6 +21,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_outreach/growerp_outreach.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
+import 'package:growerp_website/growerp_website.dart';
 import 'router_builder.dart';
 
 Future main() async {
@@ -44,11 +45,13 @@ Future main() async {
         getOutreachWidgets(),
         getUserCompanyWidgets(),
         getMarketingWidgets(),
+        getWebsiteWidgets(),
       ],
       extraDelegates: const [
         UserCompanyLocalizations.delegate,
         OutreachLocalizations.delegate,
         MarketingLocalizations.delegate,
+        WebsiteLocalizations.delegate,
       ],
       extraBlocProviders: [
         BlocProvider<OutreachCampaignBloc>(
@@ -62,6 +65,7 @@ Future main() async {
         ),
         ...getUserCompanyBlocProviders(restClient, 'AppAdmin'),
         ...getMarketingBlocProviders(restClient, 'AppAdmin'),
+        ...getWebsiteBlocProviders(restClient, 'AppAdmin'),
       ],
     ),
   );

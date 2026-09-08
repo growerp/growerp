@@ -19,6 +19,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_outreach/growerp_outreach.dart';
+import 'package:growerp_website/growerp_website.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 
 /// Canonical menu configuration for Outreach example app.
@@ -112,6 +113,7 @@ const List<LocalizationsDelegate> outreachExampleDelegates = [
   UserCompanyLocalizations.delegate,
   OutreachLocalizations.delegate,
   MarketingLocalizations.delegate,
+  WebsiteLocalizations.delegate,
 ];
 
 GoRouter createOutreachExampleRouter() {

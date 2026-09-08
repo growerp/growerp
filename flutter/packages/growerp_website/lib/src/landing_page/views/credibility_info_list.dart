@@ -1,0 +1,246 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
+
+import '../blocs/credibility_bloc.dart';
+import '../blocs/credibility_event.dart';
+import '../blocs/credibility_state.dart';
+import 'credibility_info_detail_screen.dart';
+import 'package:growerp_website/l10n/generated/website_localizations.dart';
+
+class CredibilityInfoListScreen extends StatefulWidget {
+  final String landingPageId;
+
+  const CredibilityInfoListScreen({super.key, required this.landingPageId});
+
+  @override
+  CredibilityInfoListScreenState createState() =>
+      CredibilityInfoListScreenState();
+}
+
+class CredibilityInfoListScreenState extends State<CredibilityInfoListScreen> {
+  late CredibilityBloc _credibilityBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _credibilityBloc = context.read<CredibilityBloc>()
+      ..add(CredibilityLoad(landingPageId: widget.landingPageId));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      floatingActionButton: FloatingActionButton(
+        key: const Key('addCredibility'),
+        onPressed: () async {
+          await showDialog(
+            barrierDismissible: true,
+            context: context,
+            builder: (BuildContext context) {
+              return BlocProvider.value(
+                value: _credibilityBloc,
+                child: CredibilityInfoDetailScreen(
+                  landingPageId: widget.landingPageId,
+                  credibilityInfo: const CredibilityInfo(),
+                ),
+              );
+            },
+          );
+        },
+        tooltip: 'Add Credibility Info',
+        child: const Icon(Icons.add),
+      ),
+      body: BlocConsumer<CredibilityBloc, CredibilityState>(
+        listener: (context, state) {
+          if (state.status == CredibilityStatus.failure) {
+            HelperFunctions.showMessage(
+              context,
+              state.message ?? 'Error loading credibility',
+              Colors.red,
+            );
+          }
+          if (state.status == CredibilityStatus.success &&
+              (state.message ?? '').isNotEmpty) {
+            HelperFunctions.showMessage(context, state.message!, Colors.green);
+          }
+        },
+        builder: (context, state) {
+          if (state.status == CredibilityStatus.loading) {
+            return const LoadingIndicator();
+          }
+
+          if (state.credibilityElements.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.verified_user, size: 64, color: Colors.grey[400]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No credibility information yet',
+                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Tap + to add credibility info',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return ListView.builder(
+            itemCount: state.credibilityElements.length,
+            itemBuilder: (context, index) {
+              final credibility = state.credibilityElements[index];
+              return Card(
+                key: Key('credibilityItem${credibility.pseudoId}'),
+                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: InkWell(
+                  key: Key('item$index'),
+                  onTap: () async {
+                    await showDialog(
+                      barrierDismissible: true,
+                      context: context,
+                      builder: (BuildContext context) {
+                        return BlocProvider.value(
+                          value: _credibilityBloc,
+                          child: CredibilityInfoDetailScreen(
+                            landingPageId: widget.landingPageId,
+                            credibilityInfo: credibility,
+                          ),
+                        );
+                      },
+                    );
+                    // Reload credibility data after dialog closes to show any new statistics
+                    _credibilityBloc.add(
+                      CredibilityLoad(landingPageId: widget.landingPageId),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        credibility.creatorImageUrl != null
+                            ? CircleAvatar(
+                                backgroundImage: NetworkImage(
+                                  credibility.creatorImageUrl!,
+                                ),
+                              )
+                            : const CircleAvatar(child: Icon(Icons.person)),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                credibility.pseudoId ?? 'Credibility Info',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              if ((credibility.creatorBio ?? '').isNotEmpty)
+                                Text(
+                                  credibility.creatorBio!,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  if (credibility.statistics?.isNotEmpty ??
+                                      false)
+                                    Chip(
+                                      visualDensity: VisualDensity.compact,
+                                      label: Text(
+                                        '${credibility.statistics!.length} stats',
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                    ),
+                                  IconButton(
+                                    key: Key(
+                                      'deleteCredibility${credibility.pseudoId}',
+                                    ),
+                                    visualDensity: VisualDensity.compact,
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                    ),
+                                    onPressed: () async {
+                                      final confirmed = await showDialog<bool>(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: const Text(
+                                              'Delete Credibility Info',
+                                            ),
+                                            content: const Text(
+                                              'Are you sure you want to delete this credibility information?',
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.of(
+                                                  context,
+                                                ).pop(false),
+                                                child: Text(WebsiteLocalizations.of(context)!.cancel),
+                                              ),
+                                              TextButton(
+                                                onPressed: () => Navigator.of(
+                                                  context,
+                                                ).pop(true),
+                                                child: Text(WebsiteLocalizations.of(context)!.delete),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                      if (confirmed == true) {
+                                        _credibilityBloc.add(
+                                          CredibilityInfoDelete(
+                                            landingPageId: widget.landingPageId,
+                                            credibilityInfoId:
+                                                credibility.credibilityInfoId ??
+                                                '',
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}

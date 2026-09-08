@@ -22,6 +22,7 @@ import 'package:growerp_outreach/growerp_outreach.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
+import 'package:growerp_website/growerp_website.dart';
 
 /// Approving an EMAIL-only campaign must be handled entirely by the backend:
 /// process#CampaignAutomation drains the PENDING messages through the company's
@@ -54,6 +55,7 @@ void main() {
         ),
         ...getUserCompanyBlocProviders(restClient, 'AppAdmin'),
         ...getMarketingBlocProviders(restClient, 'AppAdmin'),
+        ...getWebsiteBlocProviders(restClient, 'AppAdmin'),
       ],
       title: 'Outreach email approve test',
       clear: true,

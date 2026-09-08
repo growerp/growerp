@@ -1,0 +1,162 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import 'package:flutter/material.dart';
+import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
+
+import '../blocs/question_bloc.dart';
+import '../blocs/question_event.dart';
+import 'package:growerp_website/l10n/generated/website_localizations.dart';
+
+/// Returns column definitions for question list based on device type
+List<StyledColumn> getQuestionListColumns(BuildContext context) {
+  final localizations = WebsiteLocalizations.of(context)!;
+  bool isPhone = isAPhone(context);
+
+  if (isPhone) {
+    return [
+      StyledColumn(header: '', flex: 1), // Sequence
+      StyledColumn(header: localizations.tableHdrInfo, flex: 4),
+      StyledColumn(header: '', flex: 1), // Actions
+    ];
+  }
+
+  return [
+    StyledColumn(header: localizations.tableHdrNumber, flex: 1),
+    StyledColumn(header: localizations.tableHdrQuestionText, flex: 4),
+    StyledColumn(header: localizations.tableHdrType, flex: 1),
+    StyledColumn(header: localizations.tableHdrOptions, flex: 1),
+    StyledColumn(header: '', flex: 1), // Actions
+  ];
+}
+
+/// Returns row data for question list
+List<Widget> getQuestionListRow({
+  required BuildContext context,
+  required AssessmentQuestion question,
+  required int index,
+  required QuestionBloc bloc,
+}) {
+  bool isPhone = isAPhone(context);
+
+  Future<void> confirmDelete() async {
+    if (question.assessmentQuestionId == null) return;
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(WebsiteLocalizations.of(context)!.deleteQuestion),
+        content: const Text('Are you sure you want to delete this question?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(WebsiteLocalizations.of(context)!.cancel),
+          ),
+          TextButton(
+            key: Key('deleteConfirm$index'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    if (shouldDelete == true) {
+      bloc.add(QuestionDelete(question.assessmentQuestionId ?? ''));
+    }
+  }
+
+  List<Widget> cells = [];
+
+  if (isPhone) {
+    // Sequence number
+    cells.add(
+      CircleAvatar(
+        key: const Key('questionItem'),
+        child: Text('${question.questionSequence ?? index + 1}'),
+      ),
+    );
+
+    // Combined info cell
+    cells.add(
+      Column(
+        key: Key('questionInfo$index'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            (question.questionText ?? 'Untitled Question').truncate(30),
+            key: Key('name$index'),
+            style: const TextStyle(fontWeight: FontWeight.w600),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          Text(
+            '${question.options?.length ?? 0} options · ${question.questionType ?? 'text'}',
+            key: Key('id$index'),
+            style: TextStyle(
+              fontSize: 12,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  } else {
+    // Sequence (wrapped so the constant 'questionItem' key is present on
+    // desktop too — tests count it to determine the number of rows)
+    cells.add(
+      SizedBox(
+        key: const Key('questionItem'),
+        child: Text(
+          '${question.questionSequence ?? index + 1}',
+          key: Key('id$index'),
+        ),
+      ),
+    );
+
+    // Question text
+    cells.add(
+      Text(
+        question.questionText ?? 'Untitled Question',
+        key: Key('name$index'),
+        style: const TextStyle(fontWeight: FontWeight.w500),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+
+    // Type
+    cells.add(Text(question.questionType ?? 'text', key: Key('type$index')));
+
+    // Options count
+    cells.add(
+      Text('${question.options?.length ?? 0}', key: Key('options$index')),
+    );
+  }
+
+  // Delete action
+  cells.add(
+    IconButton(
+      key: Key('delete$index'),
+      icon: const Icon(Icons.delete_forever, color: Colors.red),
+      tooltip: 'Delete question',
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(),
+      onPressed: question.assessmentQuestionId == null ? null : confirmDelete,
+    ),
+  );
+
+  return cells;
+}

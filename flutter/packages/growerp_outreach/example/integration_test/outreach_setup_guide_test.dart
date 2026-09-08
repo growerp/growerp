@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_outreach/growerp_outreach.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
+import 'package:growerp_website/growerp_website.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +39,7 @@ void main() {
         ),
         ...getUserCompanyBlocProviders(restClient, 'AppAdmin'),
         ...getMarketingBlocProviders(restClient, 'AppAdmin'),
+        ...getWebsiteBlocProviders(restClient, 'AppAdmin'),
       ],
       widgetRegistrations: [
         getOutreachWidgets(),

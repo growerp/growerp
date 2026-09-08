@@ -232,11 +232,11 @@ const Map<String, AppBlock> appBlocks = {
     version: '^1.9.0',
     importUri: 'package:growerp_website/growerp_website.dart',
     description:
-        'Storefront website and web forms. Use for businesses that sell or '
-        'capture leads online.',
+        'Storefront website, web forms, landing pages and assessments. Use for '
+        'businesses that sell or capture leads online.',
     widgetsFn: 'getWebsiteWidgets',
     blocProvidersFn: 'getWebsiteBlocProviders',
-    providerTakesAppId: false,
+    providerTakesAppId: true,
     localizationsDelegate: 'WebsiteLocalizations.delegate',
     menuItem: BlockMenuItem(
       title: 'Website',
@@ -251,11 +251,11 @@ const Map<String, AppBlock> appBlocks = {
     version: '^1.9.0',
     importUri: 'package:growerp_marketing/growerp_marketing.dart',
     description:
-        'Content plans, social content, personas, landing pages and email '
-        'sequences. Use for content-led marketing.',
+        'Content plans, social content, personas and email sequences. Use for '
+        'content-led marketing.',
     widgetsFn: 'getMarketingWidgets',
     blocProvidersFn: 'getMarketingBlocProviders',
-    providerTakesAppId: false,
+    providerTakesAppId: true,
     localizationsDelegate: null,
     menuItem: BlockMenuItem(
       title: 'Marketing',

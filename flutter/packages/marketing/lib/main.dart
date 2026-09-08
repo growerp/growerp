@@ -214,7 +214,7 @@ List<BlocProvider> getMarketingAppBlocProviders(
     ...getOrderAccountingBlocProviders(restClient, applicationId),
     ...getMarketingBlocProviders(restClient),
     ...getOutreachBlocProviders(restClient),
-    ...getWebsiteBlocProviders(restClient),
+    ...getWebsiteBlocProviders(restClient, applicationId),
     ...getActivityBlocProviders(restClient, applicationId),
   ];
 }

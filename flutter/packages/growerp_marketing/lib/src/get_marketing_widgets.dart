@@ -24,8 +24,6 @@ Map<String, GrowerpWidgetBuilder> getMarketingWidgets() {
     'PersonaList': (args) => const PersonaList(),
     'EmailSequenceList': (args) => const EmailSequenceList(),
     'SocialEngagementList': (args) => const SocialEngagementList(),
-    'LandingPageList': (args) => const LandingPageList(),
-    'AssessmentList': (args) => const AssessmentList(),
   };
 }
 
@@ -59,20 +57,6 @@ List<WidgetMetadata> getMarketingWidgetsWithMetadata() {
       iconName: 'person_outline',
       keywords: ['persona', 'target', 'audience', 'profile'],
       builder: (args) => const PersonaList(),
-    ),
-    WidgetMetadata(
-      widgetName: 'LandingPageList',
-      description: 'List of landing pages',
-      iconName: 'web',
-      keywords: ['landing', 'page', 'website', 'conversion'],
-      builder: (args) => const LandingPageList(),
-    ),
-    WidgetMetadata(
-      widgetName: 'AssessmentList',
-      description: 'List of marketing assessments',
-      iconName: 'quiz',
-      keywords: ['assessment', 'quiz', 'survey', 'evaluation'],
-      builder: (args) => const AssessmentList(),
     ),
   ];
 }

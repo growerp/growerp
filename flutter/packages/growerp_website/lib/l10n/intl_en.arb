@@ -500,5 +500,201 @@
   "searchHintForms": "Search in name, title...",
   "@searchHintForms": {
     "description": "Search field hint"
+  },
+  "addOption": "Add Option",
+  "@addOption": {
+    "description": "Add Option"
+  },
+  "addRow": "Add row",
+  "@addRow": {
+    "description": "Add row"
+  },
+  "advancedOptions": "Advanced Options",
+  "@advancedOptions": {
+    "description": "Advanced Options"
+  },
+  "assessment": "Assessment",
+  "@assessment": {
+    "description": "Assessment"
+  },
+  "assessmentLandingPage": "Assessment Landing Page",
+  "@assessmentLandingPage": {
+    "description": "Assessment Landing Page"
+  },
+  "assessmentNotAvailableForThisLandingPage": "Assessment not available for this landing page",
+  "@assessmentNotAvailableForThisLandingPage": {
+    "description": "Assessment not available for this landing page"
+  },
+  "assessmentStep2": "Assessment - Step 2",
+  "@assessmentStep2": {
+    "description": "Assessment - Step 2"
+  },
+  "backToLandingPage": "Back to Landing Page",
+  "@backToLandingPage": {
+    "description": "Back to Landing Page"
+  },
+  "credibility": "Credibility",
+  "@credibility": {
+    "description": "Credibility"
+  },
+  "custom": "Custom",
+  "@custom": {
+    "description": "Custom"
+  },
+  "deleteAssessment": "Delete Assessment",
+  "@deleteAssessment": {
+    "description": "Delete Assessment"
+  },
+  "deleteLandingPage": "Delete Landing Page",
+  "@deleteLandingPage": {
+    "description": "Delete Landing Page"
+  },
+  "deleteQuestion": "Delete Question",
+  "@deleteQuestion": {
+    "description": "Delete Question"
+  },
+  "deleteSection": "Delete Section",
+  "@deleteSection": {
+    "description": "Delete Section"
+  },
+  "errorLoadingAssessment": "Error loading assessment",
+  "@errorLoadingAssessment": {
+    "description": "Error loading assessment"
+  },
+  "form": "Form",
+  "@form": {
+    "description": "Form"
+  },
+  "frustration": "Frustration",
+  "@frustration": {
+    "description": "Frustration"
+  },
+  "goBack": "Go Back",
+  "@goBack": {
+    "description": "Go Back"
+  },
+  "landingPageNotFound": "Landing page not found",
+  "@landingPageNotFound": {
+    "description": "Landing page not found"
+  },
+  "questions": "Questions",
+  "@questions": {
+    "description": "Questions"
+  },
+  "requiredQuestion": "Required Question",
+  "@requiredQuestion": {
+    "description": "Required Question"
+  },
+  "results": "Results",
+  "@results": {
+    "description": "Results"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry"
+  },
+  "sections": "Sections",
+  "@sections": {
+    "description": "Sections"
+  },
+  "selectHookType": "Select hook type",
+  "@selectHookType": {
+    "description": "Select hook type"
+  },
+  "selectStatus": "Select status",
+  "@selectStatus": {
+    "description": "Select status"
+  },
+  "url": "Url",
+  "@url": {
+    "description": "Url"
+  },
+  "viewDetailedResults": "View Detailed Results",
+  "@viewDetailedResults": {
+    "description": "View Detailed Results"
+  },
+  "selectAnAssessmentToTake": "Select an Assessment to Take",
+  "@selectAnAssessmentToTake": {
+    "description": "Select an Assessment to Take"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete"
+  },
+  "generate": "Generate",
+  "@generate": {
+    "description": "Generate"
+  },
+  "tableHdrNumber": "#",
+  "@tableHdrNumber": {
+    "description": "Table column header"
+  },
+  "tableHdrOption": "Option",
+  "@tableHdrOption": {
+    "description": "Table column header"
+  },
+  "tableHdrScore": "Score",
+  "@tableHdrScore": {
+    "description": "Table column header"
+  },
+  "tableHdrOptionText": "Option Text",
+  "@tableHdrOptionText": {
+    "description": "Table column header"
+  },
+  "searchHintAssessments": "Search assessments...",
+  "@searchHintAssessments": {
+    "description": "Search field hint"
+  },
+  "tableHdrInfo": "Info",
+  "@tableHdrInfo": {
+    "description": "Table column header"
+  },
+  "tableHdrId": "ID",
+  "@tableHdrId": {
+    "description": "Table column header"
+  },
+  "tableHdrName": "Name",
+  "@tableHdrName": {
+    "description": "Table column header"
+  },
+  "tableHdrDescription": "Description",
+  "@tableHdrDescription": {
+    "description": "Table column header"
+  },
+  "tableHdrStatus": "Status",
+  "@tableHdrStatus": {
+    "description": "Table column header"
+  },
+  "searchHintQuestions": "Search questions...",
+  "@searchHintQuestions": {
+    "description": "Search field hint"
+  },
+  "tableHdrQuestionText": "Question Text",
+  "@tableHdrQuestionText": {
+    "description": "Table column header"
+  },
+  "tableHdrType": "Type",
+  "@tableHdrType": {
+    "description": "Table column header"
+  },
+  "tableHdrOptions": "Options",
+  "@tableHdrOptions": {
+    "description": "Table column header"
+  },
+  "searchHintLandingPages": "Search landing pages...",
+  "@searchHintLandingPages": {
+    "description": "Search field hint"
+  },
+  "tableHdrTitle": "Title",
+  "@tableHdrTitle": {
+    "description": "Table column header"
+  },
+  "tableHdrHeadline": "Headline",
+  "@tableHdrHeadline": {
+    "description": "Table column header"
+  },
+  "tableHdrHookType": "Hook Type",
+  "@tableHdrHookType": {
+    "description": "Table column header"
   }
 }

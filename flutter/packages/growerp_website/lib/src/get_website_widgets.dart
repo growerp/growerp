@@ -20,6 +20,8 @@ Map<String, GrowerpWidgetBuilder> getWebsiteWidgets() {
   return {
     'WebsiteDialog': (args) => const WebsiteDialog(),
     'WebsiteFormList': (args) => WebsiteFormList(key: getKeyFromArgs(args)),
+    'LandingPageList': (args) => const LandingPageList(),
+    'AssessmentList': (args) => const AssessmentList(),
   };
 }
 
@@ -40,6 +42,20 @@ List<WidgetMetadata> getWebsiteWidgetsWithMetadata() {
       iconName: 'dynamic_form',
       keywords: ['form', 'lead capture', 'website form', 'signup'],
       builder: (args) => WebsiteFormList(key: getKeyFromArgs(args)),
+    ),
+    WidgetMetadata(
+      widgetName: 'LandingPageList',
+      description: 'List of landing pages',
+      iconName: 'web',
+      keywords: ['landing', 'page', 'website', 'conversion'],
+      builder: (args) => const LandingPageList(),
+    ),
+    WidgetMetadata(
+      widgetName: 'AssessmentList',
+      description: 'List of assessments used on landing pages',
+      iconName: 'quiz',
+      keywords: ['assessment', 'quiz', 'survey', 'evaluation'],
+      builder: (args) => const AssessmentList(),
     ),
   ];
 }

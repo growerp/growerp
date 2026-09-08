@@ -24,6 +24,7 @@ import 'package:growerp_outreach/growerp_outreach.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
+import 'package:growerp_website/growerp_website.dart';
 
 /// Integration test for the LinkedIn connections CSV lead import.
 ///
@@ -56,6 +57,7 @@ void main() {
         ),
         ...getUserCompanyBlocProviders(restClient, 'AppAdmin'),
         ...getMarketingBlocProviders(restClient, 'AppAdmin'),
+        ...getWebsiteBlocProviders(restClient, 'AppAdmin'),
       ],
       title: 'LinkedIn lead import test',
       clear: true,

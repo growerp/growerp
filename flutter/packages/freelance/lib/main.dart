@@ -240,7 +240,7 @@ List<BlocProvider> getFreelanceBlocProviders(
     ...getCatalogBlocProviders(restClient, applicationId),
     ...getOrderAccountingBlocProviders(restClient, applicationId),
     ...getSalesBlocProviders(restClient),
-    ...getWebsiteBlocProviders(restClient),
+    ...getWebsiteBlocProviders(restClient, applicationId),
     ...getMarketingBlocProviders(restClient),
     ...getOutreachBlocProviders(restClient),
   ];
