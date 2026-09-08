@@ -546,7 +546,10 @@ jobs:
       - name: Flutter build iOS (no codesign)
         run: |
           flutter config --no-enable-swift-package-manager
-          flutter build ios --release --no-codesign
+          # Match the settings ci_build passes as xcargs, so this pre-pass and
+          # fastlane's archive do not disagree over the AOT snapshot.
+          flutter build ios --release --no-codesign \
+            --obfuscate --split-debug-info=build/symbols
         working-directory: flutter/packages/${{ matrix.app }}
 
       - name: Validate iOS signing certificate access
@@ -629,6 +632,20 @@ jobs:
           name: ios-build-logs-${{ matrix.app }}
           path: /tmp/xcodebuild-ios-logs/
           if-no-files-found: ignore
+
+      # ci_build archives with DART_OBFUSCATION=true, so the Dart frames in
+      # App Store crash reports only resolve against these maps. They are not
+      # in the .dSYM and cannot be regenerated after the fact.
+      - name: Upload Dart symbol maps
+        uses: actions/upload-artifact@v4
+        with:
+          name: dart-symbols-ios-${{ matrix.app }}
+          retention-days: 90
+          # warn, not error, until a real run confirms the archive writes here:
+          # a wrong path must not block a store release on its first use. Tighten
+          # to error once the artifact shows up.
+          if-no-files-found: warn
+          path: flutter/packages/${{ matrix.app }}/build/symbols
 
       - name: Fastlane upload
         env:
@@ -817,7 +834,9 @@ jobs:
       - name: Flutter build macOS (generate ephemeral files)
         run: |
           flutter config --no-enable-swift-package-manager
-          flutter build macos --release --build-number "$MACOS_BUILD_NUMBER"
+          # Match the settings build_macos passes as xcargs.
+          flutter build macos --release --build-number "$MACOS_BUILD_NUMBER" \
+            --obfuscate --split-debug-info=build/symbols
         working-directory: flutter/packages/${{ matrix.app }}
 
       - name: Fastlane build macOS
@@ -837,6 +856,19 @@ jobs:
           name: macos-build-logs-${{ matrix.app }}
           path: /tmp/xcodebuild-macos-logs/
           if-no-files-found: ignore
+
+      # See the iOS job: build_macos archives obfuscated, so these maps are the
+      # only way to read Dart frames in a macOS crash report.
+      - name: Upload Dart symbol maps
+        uses: actions/upload-artifact@v4
+        with:
+          name: dart-symbols-macos-${{ matrix.app }}
+          retention-days: 90
+          # warn, not error, until a real run confirms the archive writes here:
+          # a wrong path must not block a store release on its first use. Tighten
+          # to error once the artifact shows up.
+          if-no-files-found: warn
+          path: flutter/packages/${{ matrix.app }}/build/symbols
 
       - name: Fastlane upload macOS
         env:

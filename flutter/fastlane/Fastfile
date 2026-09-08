@@ -250,6 +250,13 @@ lane :ci_build do
   bundle_id = "org.growerp.#{app_name}"
   profile_name = required_env!("MATCH_IOS_PROFILE_NAME")
   workspace_path = File.expand_path("../packages/#{app_name}/ios/Runner.xcworkspace", __dir__)
+  # Dart obfuscation is driven by Xcode build settings, not the flutter CLI:
+  # xcode_backend.dart forwards DART_OBFUSCATION / SPLIT_DEBUG_INFO straight to
+  # `flutter assemble`, so passing them as xcargs is what makes gym's archive
+  # obfuscated. Without SPLIT_DEBUG_INFO the Dart frames in App Store crash
+  # reports are unreadable, so the CI job uploads this directory.
+  symbols_path = File.expand_path("../packages/#{app_name}/build/symbols", __dir__)
+  FileUtils.mkdir_p(symbols_path)
   build_app(
     workspace: workspace_path,
     scheme: "Runner",
@@ -265,6 +272,8 @@ lane :ci_build do
     xcargs: [
       "GCC_OPTIMIZATION_LEVEL=s",
       "SWIFT_COMPILATION_MODE=wholemodule",
+      "DART_OBFUSCATION=true",
+      "SPLIT_DEBUG_INFO=\"#{symbols_path}\"",
       "CODE_SIGN_STYLE=Manual",
       "DEVELOPMENT_TEAM=P64T65C668",
       "PROVISIONING_PROFILE_SPECIFIER=\"#{profile_name}\""
@@ -559,6 +568,10 @@ lane :build_macos do
   profile   = required_env!("MATCH_PROFILE_NAME")
   bundle_id = required_env!("BUNDLE_ID")
 
+  # See ci_build: obfuscation has to travel as Xcode build settings.
+  symbols_path = File.expand_path("../packages/#{app}/build/symbols", __dir__)
+  FileUtils.mkdir_p(symbols_path)
+
   build_mac_app(
     workspace:            "packages/#{app}/macos/Runner.xcworkspace",
     scheme:               "Runner",
@@ -575,6 +588,8 @@ lane :build_macos do
     xcargs: [
       "CURRENT_PROJECT_VERSION=#{build_num}",
       "DEVELOPMENT_TEAM=P64T65C668",
+      "DART_OBFUSCATION=true",
+      "SPLIT_DEBUG_INFO=\"#{symbols_path}\"",
       "CODE_SIGN_STYLE=Manual",
       "PROVISIONING_PROFILE_SPECIFIER=\"#{profile}\""
     ].join(" "),
