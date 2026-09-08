@@ -235,15 +235,18 @@ jobs:
 
           API_KEY_FILE="${{ steps.asc-key.outputs.api_key_path }}"
 
-          # --use_live_version: without it deliver looks for an *editable*
-          # version and silently downloads nothing (exit 0) whenever the app
-          # sits in Waiting for Review / Pending Developer Release. The live
-          # listing is exactly what this workflow is meant to pull back.
+          # --force is mandatory here. deliver's download_metadata calls
+          # force_overwrite_metadata?, which asks "Do you want to overwrite
+          # existing metadata" only `if UI.interactive?` and then does
+          # `return 0 unless res` — so on CI it exits 0 having downloaded
+          # nothing at all. That silent no-op is why the repo copies never
+          # changed. (use_live_version has no effect on this subcommand: it
+          # always reads get_latest_app_store_version.)
           bundle exec fastlane deliver download_metadata \
             --api_key_path "$API_KEY_FILE" \
             --metadata_path "$METADATA_PATH" \
             --app_identifier "org.growerp.${APP_NAME}" \
-            --use_live_version true
+            --force true
 
           bundle exec fastlane deliver download_screenshots \
             --api_key_path "$API_KEY_FILE" \
@@ -333,14 +336,14 @@ jobs:
 
           API_KEY_FILE="${{ steps.asc-key.outputs.api_key_path }}"
 
-          # --use_live_version: see the iOS job — without it deliver finds no
-          # editable version and writes nothing at all, exit 0.
+          # --force: see the iOS job — without it deliver returns 0 without
+          # downloading anything whenever it cannot prompt interactively.
           bundle exec fastlane deliver download_metadata \
             --api_key_path "$API_KEY_FILE" \
             --metadata_path "$METADATA_PATH" \
             --app_identifier "$BUNDLE_ID" \
             --platform osx \
-            --use_live_version true
+            --force true
 
           rm -f "$API_KEY_FILE"
 
