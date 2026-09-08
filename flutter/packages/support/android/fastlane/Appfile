@@ -1,2 +1,3 @@
-json_key_file("/home/hans/secrets/android/growerp-b3757eb8059d.json") if File.exist?("/home/hans/secrets/android/growerp-b3757eb8059d.json")
+google_play_json_key_file = ENV["SUPPLY_JSON_KEY_FILE"] || ENV["GOOGLE_PLAY_JSON_KEY_FILE"] || "/home/hans/secrets/android/growerp-b3757eb8059d.json"
+json_key_file(google_play_json_key_file) if google_play_json_key_file && File.exist?(google_play_json_key_file)
 package_name("org.growerp.support") # e.g. com.krausefx.app

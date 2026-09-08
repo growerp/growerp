@@ -531,7 +531,6 @@ jobs:
           for app in "${app_list[@]}"; do
             for sub in android/fastlane/metadata \
                        ios/fastlane/metadata \
-                       ios/fastlane/screenshots \
                        macos/fastlane/metadata \
                        windows/fastlane/metadata; do
               dir="flutter/packages/${app}/${sub}"
@@ -540,6 +539,15 @@ jobs:
               # on the last iteration does not fail the loop under `set -e`.
               if [ -d "$dir" ]; then git add -A "$dir"; fi
             done
+
+            # iOS screenshots are gitignored (bare `screenshots` in
+            # flutter/.gitignore) and `git add` errors when the pathspec names
+            # an ignored path outright. Publishing regenerates them from the
+            # screenshots.yml artifact, so the repo copies are not a source of
+            # truth — -u keeps the handful of already-tracked files in sync and
+            # never touches ignored untracked ones.
+            shots="flutter/packages/${app}/ios/fastlane/screenshots"
+            if [ -d "$shots" ]; then git add -u "$shots"; fi
           done
 
           echo "=== git status ==="
