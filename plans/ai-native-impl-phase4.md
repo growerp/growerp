@@ -125,13 +125,14 @@ delegation; no cross-tenant teams.
    gate all still work; `melos analyze` clean; `gradlew :runtime:component:moqui-adk:build`.
 
 ## ADK version note
-- **Java ADK** (`com.google.adk:google-adk`, used by `moqui-adk`) — project pins **1.3.0**;
-  latest on Maven Central is **1.4.0**. There is **no Java 2.0**. All Phase-4 primitives
-  (`AgentTool`, `SequentialAgent`/`ParallelAgent`/`LoopAgent`, `subAgents` transfer) exist in
-  1.3.0 (verified in the bundled jar) and 1.4.0 — so this plan is buildable as-is. Optional
-  low-risk bump 1.3.0 → 1.4.0 in `moqui-adk/build.gradle` (`compileOnly`/`adkDevAssets`); first
-  confirm the version the **Moqui framework** ships at runtime matches, since ADK is declared
-  `runtimeOnly` there and `compileOnly` here.
+- **Java ADK** (`com.google.adk:google-adk`, used by `moqui-adk`) — project now pins **1.9.0**
+  (bumped from 1.3.0; 1.9.0 is the current Maven Central release). There is **no Java 2.0**.
+  All Phase-4 primitives (`AgentTool`, `SequentialAgent`/`ParallelAgent`/`LoopAgent`,
+  `subAgents` transfer) exist unchanged in 1.9.0 — the 1.3.0 → 1.9.0 API delta over every type
+  this component uses is purely additive. The version is pinned in **three** places that must
+  move together: `compileOnly`/`adkDevAssets` in `moqui-adk/build.gradle` and `runtimeOnly` in
+  the **Moqui framework** `build.gradle` (the framework ships the jar at runtime; the component
+  only compiles against it).
 - **ADK 2.0 is Python-only** (`adk.dev/2.0`): graph workflows + collaborative agents — a richer
   orchestration model than the Java workflow agents. Adopting it would require running agents in
   a **separate Python service** (route via the existing non-Google `llmProvider` side-registry /

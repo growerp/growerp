@@ -32,7 +32,7 @@ A native Moqui component that integrates the [Google ADK Java SDK](https://githu
 | Gradle | via `moqui/gradlew` |
 | Google Gemini API key | [Get one free](https://aistudio.google.com/app/apikey) |
 
-The Google ADK runtime JARs (`google-adk:1.3.0` and transitive deps) are declared in the Moqui framework `build.gradle` as `runtimeOnly` dependencies — they ship inside `moqui.war` and are **not** bundled in the component `lib/` directory.
+The Google ADK runtime JARs (`google-adk:1.9.0` and transitive deps) are declared in the Moqui framework `build.gradle` as `runtimeOnly` dependencies — they ship inside `moqui.war` and are **not** bundled in the component `lib/` directory.
 
 ---
 
@@ -46,7 +46,7 @@ In `moqui/framework/build.gradle`, add to the `dependencies` block:
 
 ```groovy
 // Google ADK — required by moqui-adk component for LLM agent support
-runtimeOnly 'com.google.adk:google-adk:1.3.0' // Apache 2.0
+runtimeOnly 'com.google.adk:google-adk:1.9.0' // Apache 2.0
 ```
 
 > This is already present in the growerp fork of moqui-framework. Skip this step if using that fork.
@@ -69,7 +69,7 @@ cd moqui
 ```
 
 This runs the `extractAdkBrowserAssets` task which:
-- Downloads `google-adk-dev:1.3.0` (contains the pre-built Angular SPA)
+- Downloads `google-adk-dev:1.9.0` (contains the pre-built Angular SPA)
 - Extracts the browser assets to `component/moqui-adk/screen/adk-ui/`
 - Patches `index.html` `<base href>` to `/adk/`
 - Patches `assets/config/runtime-config.json` `backendUrl` to `/adk`
@@ -311,7 +311,7 @@ Moqui Quartz scheduler (every minute)
 
 ### Session persistence
 
-ADK Java 1.3.0 ships only `InMemorySessionService` and `VertexAiSessionService`. This component provides **`MoquiSessionService`** — a custom `BaseSessionService` implementation that stores sessions and events in Moqui's own database:
+ADK Java 1.9.0 ships only `InMemorySessionService` and `VertexAiSessionService`. This component provides **`MoquiSessionService`** — a custom `BaseSessionService` implementation that stores sessions and events in Moqui's own database:
 
 - `AdkSession` — one row per session (state JSON, userId, configId, timestamps)
 - `AdkSessionEvent` — one row per event/message (full event JSON in chronological order)
@@ -497,17 +497,6 @@ Check:
 ---
 
 ## Development
-
-### ADK class patches
-
-The `patches/` directory contains compiled `.class` files that override classes in the embedded `google-adk` JAR (e.g. `Runner`, `McpToolset`, `SseServerParameters`). These cannot live in the component `lib/` — they must be on the JVM classpath **before** the WAR's own JARs, which means they must sit in the Moqui working directory (next to `moqui.war`) so that `java -cp . moqui.war` picks them up first.
-
-The `copyAdkPatches` Gradle task (run automatically as part of `jar`) copies them there:
-
-```bash
-cd moqui
-./gradlew :runtime:component:moqui-adk:copyAdkPatches
-```
 
 ### Rebuild after Groovy changes
 
