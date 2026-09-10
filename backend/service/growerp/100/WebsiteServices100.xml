@@ -1543,6 +1543,16 @@ limitations under the License.
                         in-map="[ownerPartyId: ownerPartyId, toAddresses: email,
                             subject: 'Your download: ' + magnetTitle,
                             bodyHtml: magnetBody]" />
+                    <!-- lead magnet downloads also go on the mailing list; only this
+                         branch subscribes, so ordinary tenant contact forms never
+                         reach the (GrowERP global) birdSend Interface configuration.
+                         The service no-ops when no api key is configured. -->
+                    <set field="nameSpacePos" from="visitorName.trim().indexOf(' ')" />
+                    <service-call name="growerp.100.BirdSendServices100.registerAdd#UserToGroup"
+                        async="true" ignore-error="true"
+                        in-map="[email: email,
+                            firstName: nameSpacePos > 0 ? visitorName.trim().substring(0, nameSpacePos) : visitorName.trim(),
+                            lastName: nameSpacePos > 0 ? visitorName.trim().substring(nameSpacePos + 1) : 'website']" />
                 </else-if>
             </if>
             <!-- notify the company admin when email is configured -->

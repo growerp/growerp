@@ -115,6 +115,23 @@
             </div>
         </div>
     </section>
+    <!-- Free guide lead magnet -->
+    <section class="max-w-container mx-auto px-4 md:px-12 py-12 relative">
+        <div class="l-glass rounded-2xl p-8 md:p-10 flex flex-col md:flex-row items-center gap-8">
+            <div class="w-16 h-16 shrink-0 rounded-2xl bg-surface-container flex items-center justify-center border border-outline-variant/30 text-primary">
+                <span class="material-symbols-outlined icon-fill text-[32px]">menu_book</span>
+            </div>
+            <div class="flex-1 text-center md:text-left">
+                <span class="font-label text-xs uppercase tracking-wider text-primary">Free guide</span>
+                <h3 class="font-display text-2xl font-semibold text-on-surface mt-2 mb-2">From Spreadsheet Chaos to Automated Clarity</h3>
+                <p class="text-on-surface-variant leading-relaxed">The small business guide to cloud ERP: spot the bottlenecks, compare cloud against on-premise, and run a six-phase implementation that stays on budget. Sent straight to your inbox.</p>
+            </div>
+            <a href="/landing/cloud-erp-guide" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-8 py-4 rounded-lg l-glow transition-all active:scale-95 text-center shrink-0">
+                Get the Free Guide
+            </a>
+        </div>
+    </section>
+
     <!-- Platform Downloads -->
     <section class="max-w-container mx-auto px-4 md:px-12 pb-8 relative">
         <div class="l-glass rounded-2xl p-8 text-center">
@@ -1114,5 +1131,109 @@ If you have any questions about this Privacy Policy, please contact us at: suppo
          setup#MainOrganization, with GROWERP-owned browse/search categories). This file
          only supplies the official marketing wiki + content; complete#TenantSetup repoints
          that existing store at GROWERP_WS / GROWERP_ROOT (see TenantServices100.xml). -->
+
+
+    <!-- ================================================================
+         LEAD MAGNET LANDING PAGE
+         "From Spreadsheet Chaos to Automated Clarity" (PDF on Google Drive)
+         Served by pop-rest-store/screen/landingPage.xml at
+         /landing/cloud-erp-guide. ctaActionType 'url' + ctaFormId means the
+         hero CTA scrolls to the lead-capture form; submit#WebsiteForm reads
+         ctaButtonLink from this row (never from the browser) and mails it.
+         ================================================================ -->
+
+    <!-- Gate form. NOTE: WebsiteForm.ownerPartyId holds the COMPANY partyId
+         (100001 = GROWERP company, same assumption as ErpLandingPageData.xml);
+         submit#WebsiteForm resolves the tenant owner from that company's
+         Party.ownerPartyId. No emailTemplateId: that selects the
+         send#DirectEmail download-link branch. -->
+    <growerp.website.WebsiteForm formId="GROWERP_GUIDE_FORM" pseudoId="cloud-erp-guide-form"
+        ownerPartyId="100001"
+        formName="Cloud ERP Guide Download"
+        title="From Spreadsheet Chaos to Automated Clarity"
+        submitLabel="Send Me the Guide"
+        successMessage="Check your inbox &#8212; the download link is on its way." />
+
+    <!-- fieldType matters: the address comes from the first 'email' field, the
+         greeting name from the first non-empty 'text' field -->
+    <growerp.website.WebsiteFormField formId="GROWERP_GUIDE_FORM" fieldId="GG_NAME"
+        sequenceNum="10" label="Name" fieldType="text" isRequired="Y" />
+    <growerp.website.WebsiteFormField formId="GROWERP_GUIDE_FORM" fieldId="GG_EMAIL"
+        sequenceNum="20" label="Work Email" fieldType="email" isRequired="Y" />
+
+    <growerp.landing.LandingPage landingPageId="GROWERP_GUIDE" pseudoId="cloud-erp-guide"
+        ownerPartyId="GROWERP" companyPartyId="100001"
+        title="From Spreadsheet Chaos to Automated Clarity"
+        hookType="frustration" theme="dark" status="ACTIVE"
+        headline="From Spreadsheet Chaos to Automated Clarity"
+        subheading="The small business guide to cloud ERP. Spot the bottlenecks that are capping your growth, compare cloud against enterprise complexity, and run a six-phase implementation that stays on budget."
+        privacyPolicyUrl="/content/privacy"
+        ctaActionType="url"
+        ctaButtonLink="https://drive.google.com/uc?export=download&amp;id=1G7p9ShafbXEsWlv3FFv3o5lK65OXaAwb"
+        ctaFormId="GROWERP_GUIDE_FORM" />
+
+    <growerp.landing.PageSection pageSectionId="GG_STATS_SECTION" pseudoId="gg-stats"
+        landingPageId="GROWERP_GUIDE" sectionSequence="10" sectionType="stats"
+        contentJson="[{&quot;value&quot;:&quot;5&quot;,&quot;label&quot;:&quot;Chapters, no vendor fluff&quot;},{&quot;value&quot;:&quot;6&quot;,&quot;label&quot;:&quot;Implementation phases&quot;},{&quot;value&quot;:&quot;3&quot;,&quot;label&quot;:&quot;Day-one quick-start sequences&quot;}]" />
+
+    <growerp.landing.PageSection pageSectionId="GG_CARDS_SECTION" pseudoId="gg-cards"
+        landingPageId="GROWERP_GUIDE" sectionSequence="20" sectionType="cards"
+        sectionTitle="What Is Inside the Guide"
+        sectionDescription="Five chapters that take you from recognising the cost of manual bookkeeping to running your first automated workflow. It opens with where the money leaks and how to pick a system that fits a small business."
+        contentJson="[
+          {&quot;tag&quot;:&quot;Chapter 1&quot;,&quot;title&quot;:&quot;The Small Business Bottleneck&quot;,&quot;description&quot;:&quot;The &apos;Silo Effect&apos; keeps financial, sales and supply chain data trapped in departmental islands. A symptom-to-solution framework shows what each kind of manual chaos actually costs you.&quot;,&quot;points&quot;:[&quot;Spreadsheet chaos: stale supplier lists, duplicates, undocumented tribal knowledge&quot;,&quot;Reporting lags: why closing the books still takes days or weeks&quot;,&quot;Manual intervention costs: re-keying data between disconnected systems&quot;,&quot;What an integrated system of record replaces each of them with&quot;],&quot;footer&quot;:&quot;Recognise the cost&quot;},
+          {&quot;tag&quot;:&quot;Chapter 2&quot;,&quot;title&quot;:&quot;Simple Cloud ERP vs Enterprise Complexity&quot;,&quot;description&quot;:&quot;A side-by-side comparison of the on-premise model and a cloud ERP, scored on the four things that decide whether a small business can actually carry the system.&quot;,&quot;points&quot;:[&quot;Upfront capital against a predictable monthly subscription&quot;,&quot;In-house IT staff against consumer-grade UX and high adoption&quot;,&quot;Disruptive manual upgrades against automatic updates&quot;,&quot;Local server footprint against zero hardware requirements&quot;],&quot;footer&quot;:&quot;Choose the right scale&quot;}
+        ]" />
+
+    <growerp.landing.PageSection pageSectionId="GG_TIMELINE_SECTION" pseudoId="gg-timeline"
+        landingPageId="GROWERP_GUIDE" sectionSequence="30" sectionType="timeline"
+        sectionTitle="The 6-Step Implementation Roadmap"
+        sectionDescription="Chapter 3 in full: implementation is not a software installation, it is an organisational evolution. Each phase in the guide carries a pro-tip drawn from real deployments."
+        contentJson="[
+          {&quot;title&quot;:&quot;Phase 1 &#8212; Discovery &amp; Planning&quot;,&quot;description&quot;:&quot;Set clear objectives and assemble the core team, including an executive sponsor and the people you cannot do without. Define what &apos;done&apos; looks like or scope creep will define it for you.&quot;},
+          {&quot;title&quot;:&quot;Phase 2 &#8212; Design &amp; Workflow Mapping&quot;,&quot;description&quot;:&quot;Capture tribal knowledge in a formal needs assessment and run a gap analysis. Where habit conflicts with best practice, adjust the process before you customise the system.&quot;},
+          {&quot;title&quot;:&quot;Phase 3 &#8212; Configuration &amp; Operational Controls&quot;,&quot;description&quot;:&quot;Build the core: chart of accounts, cost centres, user roles, and approval hierarchies that make the system enforce your business rules.&quot;},
+          {&quot;title&quot;:&quot;Phase 4 &#8212; Data Migration &amp; Hygiene&quot;,&quot;description&quot;:&quot;Move only what Day 1 needs. Migration is your chance to clean house, not to carry five years of dead records into a new system.&quot;},
+          {&quot;title&quot;:&quot;Phase 5 &#8212; Rigorous Testing&quot;,&quot;description&quot;:&quot;Run a conference room pilot with real business scenarios, then user acceptance testing. If staff cannot complete a standard transaction unaided, the configuration is not finished.&quot;},
+          {&quot;title&quot;:&quot;Phase 6 &#8212; Deployment &amp; Support&quot;,&quot;description&quot;:&quot;Big bang or phased roll-out, your project team is on the floor on Day 1. Post-launch starts a continuous optimisation cycle, not the end of the project.&quot;}
+        ]" />
+
+    <growerp.landing.PageSection pageSectionId="GG_CARDS2_SECTION" pseudoId="gg-cards2"
+        landingPageId="GROWERP_GUIDE" sectionSequence="35" sectionType="cards"
+        sectionTitle="Then: Migrate Clean and Go Live"
+        sectionDescription="The last two chapters cover the step most implementations underestimate, and the first day in your new system."
+        contentJson="[
+          {&quot;tag&quot;:&quot;Chapter 4&quot;,&quot;title&quot;:&quot;Data Migration and the &apos;Clean Core&apos; Strategy&quot;,&quot;description&quot;:&quot;Migration is the most common failure point, and it is rarely the software&apos;s fault. Five checks keep your new system standard, scalable and cheap to update.&quot;,&quot;points&quot;:[&quot;Audit historical data and weed out obsolete suppliers and closed accounts&quot;,&quot;Cleanse duplicates so your single source of truth is actually true&quot;,&quot;Define scope: which open transactions move, what stays archived&quot;,&quot;Map legacy fields to GrowERP CSV formats and test-load a sample batch&quot;],&quot;footer&quot;:&quot;Avoid the pitfalls&quot;},
+          {&quot;tag&quot;:&quot;Chapter 5&quot;,&quot;title&quot;:&quot;GrowERP Quick-Start: Setup to First Workflow&quot;,&quot;description&quot;:&quot;Three sequences that take you from an empty system to a live, automated transaction in record time.&quot;,&quot;points&quot;:[&quot;Company profile and operational controls: tax IDs, currency, PO numbering&quot;,&quot;Categories and catalog imported in the GrowERP CSV format&quot;,&quot;Ledger automation: one purchase-to-pay transaction, invoice received to paid&quot;,&quot;A 30-day post-launch review to fix the friction points you find&quot;],&quot;footer&quot;:&quot;Get operational&quot;}
+        ]" />
+
+    <!-- benefits section must stay LAST: the renderer pairs a trailing benefits
+         section two-column with the lead-capture form -->
+    <growerp.landing.PageSection pageSectionId="GG_BENEFITS_SECTION" pseudoId="gg-benefits"
+        landingPageId="GROWERP_GUIDE" sectionSequence="40" sectionType="benefits"
+        sectionTitle="Get the Free Guide"
+        sectionDescription="Plain English, written for business owners rather than IT departments. Tell us where to send it and the download link is in your inbox in a minute."
+        contentJson="[
+          {&quot;icon&quot;:&quot;📊&quot;,&quot;text&quot;:&quot;A symptom-to-solution framework for manual bookkeeping chaos&quot;},
+          {&quot;icon&quot;:&quot;☁️&quot;,&quot;text&quot;:&quot;Cloud against on-premise, scored on cost, IT load and upgrades&quot;},
+          {&quot;icon&quot;:&quot;🗺️&quot;,&quot;text&quot;:&quot;The 6-phase implementation roadmap with a pro-tip per phase&quot;},
+          {&quot;icon&quot;:&quot;✅&quot;,&quot;text&quot;:&quot;A 5-point Clean Core data migration checklist&quot;},
+          {&quot;icon&quot;:&quot;🚀&quot;,&quot;text&quot;:&quot;A day-one GrowERP quick-start: setup to first automated workflow&quot;}
+        ]" />
+
+    <growerp.landing.CredibilityInfo credibilityInfoId="GG_CRED_INFO" pseudoId="gg-cred"
+        landingPageId="GROWERP_GUIDE"
+        creatorBio="GrowERP is built by AntWebsystems Co., Ltd, an officially registered software development company in Thailand under European management."
+        backgroundText="Years of building and extending enterprise-grade ERP and CRM systems, as top contributors and committers to major open-source frameworks, went into this guide. It is the low-friction path we use with our own customers." />
+
+    <growerp.landing.CredibilityStatistic credibilityStatisticId="GG_STAT_1" pseudoId="gg-stat-1"
+        credibilityInfoId="GG_CRED_INFO" sequence="1"
+        statistic="Installations supported in North America, Europe and Asia" />
+    <growerp.landing.CredibilityStatistic credibilityStatisticId="GG_STAT_2" pseudoId="gg-stat-2"
+        credibilityInfoId="GG_CRED_INFO" sequence="2"
+        statistic="Fully open source: inspect the code, customise modules, own your infrastructure" />
+    <growerp.landing.CredibilityStatistic credibilityStatisticId="GG_STAT_3" pseudoId="gg-stat-3"
+        credibilityInfoId="GG_CRED_INFO" sequence="3"
+        statistic="Agile delivery: partners and customers see progress daily" />
 
 </entity-facade-xml>
