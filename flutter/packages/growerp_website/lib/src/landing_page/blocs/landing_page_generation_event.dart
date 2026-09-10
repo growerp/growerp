@@ -24,6 +24,8 @@ class GenerateLandingPageRequested extends LandingPageGenerationEvent {
   final String? industry;
   final String? tone; // 'professional', 'casual', 'inspirational'
   final int? numSections; // 3-7
+  final String? downloadUrl; // lead magnet link, emailed after the form
+  final String? downloadDescription; // what is in the download
 
   const GenerateLandingPageRequested({
     required this.businessDescription,
@@ -31,6 +33,8 @@ class GenerateLandingPageRequested extends LandingPageGenerationEvent {
     this.industry,
     this.tone = 'professional',
     this.numSections = 5,
+    this.downloadUrl,
+    this.downloadDescription,
   });
 
   @override
@@ -40,6 +44,8 @@ class GenerateLandingPageRequested extends LandingPageGenerationEvent {
         industry,
         tone,
         numSections,
+        downloadUrl,
+        downloadDescription,
       ];
 }
 

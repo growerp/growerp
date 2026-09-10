@@ -59,6 +59,8 @@ class LandingPageGenerationBloc
         industry: event.industry,
         tone: event.tone ?? 'professional',
         numSections: event.numSections ?? 5,
+        downloadUrl: event.downloadUrl,
+        downloadDescription: event.downloadDescription,
       );
 
       emit(state.copyWith(

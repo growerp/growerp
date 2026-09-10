@@ -158,6 +158,10 @@
         <iframe id="assessment-iframe" style="width: 100%; height: 100%; border: none;"></iframe>
     </div>
 
+    <#-- the lead-capture form gates both a plain 'form' CTA and a 'url' CTA whose
+         download link is emailed to the visitor instead of linked directly -->
+    <#assign formCta = ctaFormId?? && ctaActionType?? && (ctaActionType == 'form' || ctaActionType == 'url')>
+
     <!-- Hero Section -->
     <section class="hero-section">
         <div class="hero-content">
@@ -169,7 +173,7 @@
                     <span id="button-loader" style="display: none; width: 16px; height: 16px; border: 2px solid var(--accent1); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; margin-right: 8px; vertical-align: middle;"></span>
                     Start Free Assessment →
                 </button>
-            <#elseif ctaActionType?? && ctaActionType == 'form' && ctaFormId??>
+            <#elseif formCta>
                 <a href="#growerp-form-section" class="cta-button">Get Started →</a>
             <#elseif ctaButtonLink??>
                 <a href="${ctaButtonLink}" class="cta-button">Get Started →</a>
@@ -196,7 +200,7 @@
             <#assign lastSectionIsBenefits = (section_index == (sections?size - 1)) && section.sectionType == 'benefits'>
             <#-- when the CTA is a form and this is the last section and it's a benefits
                  list, pair it two-column with the form instead of rendering it alone -->
-            <#if !(ctaActionType?? && ctaActionType == 'form' && ctaFormId?? && lastSectionIsBenefits)>
+            <#if !(formCta && lastSectionIsBenefits)>
                 <section class="section">
                     <div class="section-content">
                         <#if section.sectionTitle?has_content><h2>${section.sectionTitle}</h2></#if>
@@ -251,7 +255,7 @@
     </#if>
 
     <!-- CTA: form section (bottom), paired with the last benefits section when present -->
-    <#if ctaActionType?? && ctaActionType == 'form' && ctaFormId??>
+    <#if formCta>
         <section class="section" id="growerp-form-section">
             <div class="section-content">
                 <#assign benefitsSection = "">
@@ -267,11 +271,11 @@
                                 </#list>
                             </ul>
                         </div>
-                        <div id="growerp-form-holder" data-growerp-form="${ctaFormId}"></div>
+                        <div id="growerp-form-holder" data-growerp-form="${ctaFormId}" data-growerp-landing-page="${ctaLandingPageId!}"></div>
                     </div>
                 <#else>
                     <div style="max-width:480px;margin:0 auto;">
-                        <div id="growerp-form-holder" data-growerp-form="${ctaFormId}"></div>
+                        <div id="growerp-form-holder" data-growerp-form="${ctaFormId}" data-growerp-landing-page="${ctaLandingPageId!}"></div>
                     </div>
                 </#if>
             </div>

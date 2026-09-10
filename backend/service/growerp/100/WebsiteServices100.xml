@@ -1417,6 +1417,9 @@ limitations under the License.
             <parameter name="formId" required="true" />
             <!-- JSON object string: {"fieldId": "value", ...} -->
             <parameter name="valuesJson" required="true" />
+            <!-- set by the landing page form widget: the download link to email is
+                 resolved server-side from the landing page, never sent by the browser -->
+            <parameter name="landingPageId" />
         </in-parameters>
         <out-parameters>
             <parameter name="successMessage" />
@@ -1508,6 +1511,14 @@ limitations under the License.
                         emailAddress: email, firstName: visitorName,
                         partyId: visitorPartyId]" />
             </if>
+            <!-- lead magnet: when the form gates a landing page whose CTA is a download
+                 link, take that link from the landing page row (never from the request) -->
+            <set field="downloadUrl" from="null" />
+            <if condition="landingPageId">
+                <entity-find-one entity-name="growerp.landing.LandingPage"
+                    value-field="landingPage" />
+                <set field="downloadUrl" from="landingPage?.ctaButtonLink" />
+            </if>
             <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="emailServer">
                 <field-map field-name="emailServerId" value="SYSTEM" />
             </entity-find-one>
@@ -1521,6 +1532,18 @@ limitations under the License.
                     in-map="[emailTemplateId: form.emailTemplateId,
                         toAddresses: email,
                         bodyParameters: [firstName: visitorName, email: email]]" />
+                <!-- no template: mail the download link itself, through the owner company's
+                     own SMTP settings (send#DirectEmail, never the SYSTEM server) -->
+                <else-if condition="downloadUrl &amp;&amp; !email.contains('example.com')">
+                    <set field="magnetTitle" from="form.title ?: form.formName ?: 'your download'" />
+                    <set field="magnetBody"
+                        value="&lt;p&gt;Hi ${visitorName},&lt;/p&gt;&lt;p&gt;Here is the download you asked for:&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;${downloadUrl}&quot;&gt;${magnetTitle}&lt;/a&gt;&lt;/p&gt;" />
+                    <service-call name="growerp.100.GeneralServices100.send#DirectEmail"
+                        async="true" ignore-error="true"
+                        in-map="[ownerPartyId: ownerPartyId, toAddresses: email,
+                            subject: 'Your download: ' + magnetTitle,
+                            bodyHtml: magnetBody]" />
+                </else-if>
             </if>
             <!-- notify the company admin when email is configured -->
             <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany"

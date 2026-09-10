@@ -480,31 +480,32 @@ Service definitions for landing page, sections, credibility, and CTA management
         <return error="true" message="Landing page not found or access denied" />
       </if>
 
+      <!-- keep the page's own pseudoId; only mint one for a row that has none -->
       <if condition="!pseudoId">
-        <!-- Generate unique pseudoId within the tenant only if not provided -->
+        <set field="pseudoId" from="existingPage.pseudoId" />
+      </if>
+      <if condition="!pseudoId">
         <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
           in-map="[ownerPartyId: ownerPartyId, seqName: 'landingPage']" out-map="context" />
         <set field="pseudoId" from="seqNum" />
       </if>
 
-      <!-- Update landing page with provided fields -->
-      <service-call name="update#LandingPage"
-        in-map="[
-        landingPageId: landingPageId,
-        pseudoId: pseudoId,
-        title: title ?: existingPage.title,
-        hookType: hookType ?: existingPage.hookType,
-        headline: headline ?: existingPage.headline,
-        subheading: subheading,
-        privacyPolicyUrl: privacyPolicyUrl,
-        ctaActionType: ctaActionType,
-        ctaAssessmentId: ctaAssessmentId,
-        ctaButtonLink: ctaButtonLink,
-        ctaFormId: ctaFormId,
-        theme: theme ?: existingPage.theme,
-        status: status ?: existingPage.status,
-        lastModifiedDate: ec.user.nowTimestamp
-      ]" />
+      <!-- Update only the fields the caller actually sent: a parameter that was not sent
+           is absent from the context, while one sent as null is present and clears the
+           field. Passing every field would wipe whatever a partial update left out. -->
+      <set field="updateMap"
+        from="[landingPageId: landingPageId, pseudoId: pseudoId,
+              lastModifiedDate: ec.user.nowTimestamp]" />
+      <set field="updatableFields"
+        from="['title', 'hookType', 'headline', 'subheading', 'privacyPolicyUrl',
+              'ctaActionType', 'ctaAssessmentId', 'ctaButtonLink', 'ctaFormId',
+              'theme', 'status']" />
+      <iterate list="updatableFields" entry="fieldName">
+        <if condition="context.containsKey(fieldName)">
+          <set field="updateMap" from="updateMap + [(fieldName): context.get(fieldName)]" />
+        </if>
+      </iterate>
+      <service-call name="update#LandingPage" in-map="updateMap" />
 
       <!-- Fetch the complete landing page using list service for consistency -->
       <service-call name="growerp.100.LandingPageServices100.list#LandingPages"
@@ -1432,6 +1433,15 @@ Service definitions for landing page, sections, credibility, and CTA management
       </parameter>
       <parameter name="numSections" type="Integer" default="5">
         <description>Number of page sections to generate (3-7)</description>
+      </parameter>
+      <parameter name="downloadUrl">
+        <description>Optional lead magnet download link (e.g. a PDF). When given no
+          assessment is generated: the page summarizes the download instead and gets a
+          lead-capture form whose submit emails this link.</description>
+      </parameter>
+      <parameter name="downloadDescription">
+        <description>Optional description of what the download contains, used to write
+          the summary section</description>
       </parameter>
     </in-parameters>
     <out-parameters>

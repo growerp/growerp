@@ -43,9 +43,75 @@ try {
     // Load the shared LLM helper; it resolves provider, model and key per tenant
     def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
     
+    // A download link turns this into a lead magnet page: the visitor gets the link by
+    // email after a short form, so no assessment is generated and the copy must never
+    // mention one - it summarizes what is in the download instead.
+    def dlUrl = context.downloadUrl
+    def isLeadMagnet = dlUrl as boolean
+
+    def assessmentSpec = isLeadMagnet ? """
+DOWNLOAD REQUIREMENTS (Must be included):
+The call to action is a free downloadable document the visitor receives by email.
+${downloadDescription ? "WHAT THE DOWNLOAD CONTAINS: ${downloadDescription}" : ""}
+- One of the generated sections MUST be titled around what is inside the download and
+  list the concrete takeaways the reader gets from it.
+- Do NOT mention an assessment, quiz, questionnaire, test, score or readiness check
+  anywhere in the page - there is none.
+- The call to action is about getting the document, e.g. "Get the free guide".
+""" : """
+ASSESSMENT REQUIREMENTS (Must be included):
+Generate a 15-question "Business Readiness Assessment" divided into two parts:
+
+Part A: 10 Best Practices Questions (Scoring)
+- Generate 10 specific MultipleChoice questions that determine if the user follows industry best practices.
+- Each question must have 2-4 options with a score (0-100) indicating readiness.
+- High scores indicate good practices; low scores indicate needs improvement.
+
+Part B: 5 Sales Qualification Questions (Specific Format)
+- Question 1: "Which best describes your current situation?" (Options: Stagnant, Slow Growth, Rapid Growth, etc.)
+- Question 2: "Which is the most important desired outcome for you to achieve in the next 90 days?" (Options: Increase revenue, Improve efficiency, etc.)
+- Question 3: "What is the obstacle that you think is stopping you, or what have you tried that hasn\'t worked in the past?" (Options: specific obstacles)
+- Question 4: "Which solution do you think would suit you best?" (Options MUST hint at budget: "Education/Training", "One-to-one Coaching", "Software", "I want someone to do it all for me")
+- Question 5: "Is there anything else that you think we need to know about?" (Type: Text, No options)
+
+SCORING THRESHOLDS:
+- Define 3 scoring ranges (Critical, Needs Work, Ready) based on the total possible score from Part A.
+"""
+
+    def assessmentJson = isLeadMagnet ? """
+  "leadMagnet": {
+    "title": "Form title, e.g. Download the free guide",
+    "submitLabel": "Form button label",
+    "successMessage": "Shown after submit, tells them to check their inbox"
+  },""" : """
+  "assessment": {
+    "title": "Assessment Title",
+    "description": "Assessment Description",
+    "questions": [
+      {
+        "text": "Question Text",
+        "description": "Short description",
+        "type": "MultipleChoice", 
+        "sequence": 1,
+        "options": [
+          {"text": "Option Text", "score": 10, "sequence": 1}
+        ]
+      }
+    ],
+    "scoringThresholds": [
+       {"minScore": 0, "maxScore": 30, "status": "Critical", "description": "Urgent help needed"},
+       {"minScore": 31, "maxScore": 70, "status": "NeedsWork", "description": "Improvement needed"},
+       {"minScore": 71, "maxScore": 100, "status": "Ready", "description": "Ready for growth"}
+    ]
+  },"""
+
+    def ctaJson = isLeadMagnet
+        ? '{"text": "Get the free guide", "description": "Send it to my inbox"}'
+        : '{"text": "Start Assessment", "description": "Take the quiz now"}'
+
     // Step 3: Construct comprehensive prompt for ALL landing page components in single call
     def generationPrompt = """
-Generate a COMPLETE, production-ready landing page AND a Business Readiness Assessment in a single comprehensive response.
+Generate a COMPLETE, production-ready landing page ${isLeadMagnet ? 'for a free downloadable guide' : 'AND a Business Readiness Assessment'} in a single comprehensive response.
 
 BUSINESS DESCRIPTION:
 ${businessDescription}
@@ -69,24 +135,7 @@ REQUIREMENTS:
 7. Call-to-action section with primary and secondary actions
 8. FAQ or Objection-handling section if applicable
 
-ASSESSMENT REQUIREMENTS (Must be included):
-Generate a 15-question "Business Readiness Assessment" divided into two parts:
-
-Part A: 10 Best Practices Questions (Scoring)
-- Generate 10 specific MultipleChoice questions that determine if the user follows industry best practices.
-- Each question must have 2-4 options with a score (0-100) indicating readiness.
-- High scores indicate good practices; low scores indicate needs improvement.
-
-Part B: 5 Sales Qualification Questions (Specific Format)
-- Question 1: "Which best describes your current situation?" (Options: Stagnant, Slow Growth, Rapid Growth, etc.)
-- Question 2: "Which is the most important desired outcome for you to achieve in the next 90 days?" (Options: Increase revenue, Improve efficiency, etc.)
-- Question 3: "What is the obstacle that you think is stopping you, or what have you tried that hasn't worked in the past?" (Options: specific obstacles)
-- Question 4: "Which solution do you think would suit you best?" (Options MUST hint at budget: "Education/Training", "One-to-one Coaching", "Software", "I want someone to do it all for me")
-- Question 5: "Is there anything else that you think we need to know about?" (Type: Text, No options)
-
-SCORING THRESHOLDS:
-- Define 3 scoring ranges (Critical, Needs Work, Ready) based on the total possible score from Part A.
-
+${assessmentSpec}
 RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this exact structure:
 {
   "title": "Compelling Landing Page Title",
@@ -114,30 +163,8 @@ RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this ex
       {"label": "Stat Label", "value": "Stat Value"}
     ]
   },
-  "assessment": {
-    "title": "Assessment Title",
-    "description": "Assessment Description",
-    "questions": [
-      {
-        "text": "Question Text",
-        "description": "Short description",
-        "type": "MultipleChoice", 
-        "sequence": 1,
-        "options": [
-          {"text": "Option Text", "score": 10, "sequence": 1}
-        ]
-      }
-    ],
-    "scoringThresholds": [
-       {"minScore": 0, "maxScore": 30, "status": "Critical", "description": "Urgent help needed"},
-       {"minScore": 31, "maxScore": 70, "status": "NeedsWork", "description": "Improvement needed"},
-       {"minScore": 71, "maxScore": 100, "status": "Ready", "description": "Ready for growth"}
-    ]
-  },
-  "cta": {
-    "text": "Start Assessment",
-    "description": "Take the quiz now"
-  }
+${assessmentJson}
+  "cta": ${ctaJson}
 }
 """
     
@@ -166,7 +193,9 @@ RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this ex
         ownerPartyId: ownerPartyId,
         companyPartyId: companyPartyId,
         pseudoId: pseudoId,
-        ctaActionType: 'assessment' // Default to assessment for this flow (lowercase to match FTL template)
+        // lowercase to match the FTL template; 'url' pages get their gate form below
+        ctaActionType: isLeadMagnet ? 'url' : 'assessment',
+        ctaButtonLink: isLeadMagnet ? dlUrl : null
     ]
     
     def createPageResult = ec.service.sync().name("create#growerp.landing.LandingPage")
@@ -175,6 +204,29 @@ RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this ex
     
     def landingPageId = createPageResult.landingPageId
     ec.logger.info("Created landing page: ID=${landingPageId}, pseudoId=${pseudoId}")
+
+    // Step 6b: lead magnet - a name/email form gates the download; submit#WebsiteForm
+    // mails the landing page's ctaButtonLink to the address entered here
+    if (isLeadMagnet) {
+        def magnet = contentData.leadMagnet ?: [:]
+        def formResult = ec.service.sync().name("growerp.100.WebsiteServices100.create#WebsiteForm")
+            .parameters([webForm: [
+                formName: contentData.title ?: 'Download',
+                title: magnet.title ?: 'Get the free guide',
+                submitLabel: magnet.submitLabel ?: 'Send it to me',
+                successMessage: magnet.successMessage
+                    ?: 'Thank you, the download link is on its way to your inbox.',
+                fields: [
+                    [sequenceNum: 10, label: 'Name', fieldType: 'text', isRequired: 'Y'],
+                    [sequenceNum: 20, label: 'Email', fieldType: 'email', isRequired: 'Y']
+                ]]])
+            .call()
+        def ctaFormId = formResult?.webForm?.formId
+        ec.service.sync().name("growerp.100.LandingPageServices100.update#LandingPage")
+            .parameters([landingPageId: landingPageId, ctaFormId: ctaFormId])
+            .call()
+        ec.logger.info("Created lead magnet form ${ctaFormId} for landing page ${landingPageId}")
+    }
     
     // Step 7: Create page sections
     def sectionCount = 0
@@ -286,8 +338,8 @@ RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this ex
         ec.logger.info("Created credibility info")
     }
     
-    // Step 9: Create Assessment
-    if (contentData.assessment) {
+    // Step 9: Create Assessment (never for a lead magnet page)
+    if (!isLeadMagnet && contentData.assessment) {
         def assessmentPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
             .parameters([ownerPartyId: ownerPartyId, seqName: 'assessment'])
             .call().seqNum

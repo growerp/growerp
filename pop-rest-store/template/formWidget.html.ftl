@@ -63,10 +63,13 @@
       btn.disabled = true;
       status.className = 'growerp-form-status';
       status.textContent = '...';
+      var payload = {formId: def.formId, valuesJson: JSON.stringify(values)};
+      // lead magnet: the backend reads the download link from this landing page
+      if (holder.dataset.growerpLandingPage) payload.landingPageId = holder.dataset.growerpLandingPage;
       fetch(apiBase, {
         method: 'POST',
         headers: {'Content-Type':'application/json','Accept':'application/json'},
-        body: JSON.stringify({formId: def.formId, valuesJson: JSON.stringify(values)})
+        body: JSON.stringify(payload)
       }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
         .then(function(res){
           if (res.ok) {

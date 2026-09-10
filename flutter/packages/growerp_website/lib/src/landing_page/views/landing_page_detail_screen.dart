@@ -813,6 +813,17 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                         ),
                       ],
                     ),
+                  // lead magnet: with a form the link is not shown on the page but
+                  // emailed to the visitor after the form is submitted
+                  if (_selectedCtaActionType == 'Url')
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: _buildCtaFormPicker(
+                        const Key('ctaUrlFormDropdown'),
+                        label: 'Gate with form (optional)',
+                        hint: 'Email the link after this form is submitted',
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -901,7 +912,9 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
                       ctaType == 'assessment' ? _selectedCtaAssessmentId : null,
                   ctaButtonLink:
                       ctaType == 'url' ? _ctaLinkController.text : null,
-                  ctaFormId: ctaType == 'form' ? _selectedCtaFormId : null,
+                  ctaFormId: ctaType == 'form' || ctaType == 'url'
+                      ? _selectedCtaFormId
+                      : null,
                   theme: _selectedTheme.toLowerCase(),
                 );
 
@@ -977,16 +990,18 @@ class LandingPageDetailScreenState extends State<LandingPageDetailScreen> {
     );
   }
 
-  Widget _buildCtaFormPicker(Key key) {
+  Widget _buildCtaFormPicker(Key key,
+      {String label = 'CTA Form',
+      String hint = 'Select a lead-capture form'}) {
     return DropdownButtonFormField<String>(
       key: key,
-      decoration: const InputDecoration(
-        labelText: 'CTA Form',
-        hintText: 'Select a lead-capture form',
-        prefixIcon: Icon(Icons.dynamic_form),
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        prefixIcon: const Icon(Icons.dynamic_form),
         isDense: true,
         contentPadding:
-            EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
       initialValue: _selectedCtaFormId,
       items: _websiteForms.map((form) {

@@ -36,6 +36,8 @@ class GenerateLandingPageDialog extends StatefulWidget {
 class _GenerateLandingPageDialogState extends State<GenerateLandingPageDialog> {
   final _descriptionController = TextEditingController();
   final _audienceController = TextEditingController();
+  final _downloadUrlController = TextEditingController();
+  final _downloadDescriptionController = TextEditingController();
   String? _selectedTone = 'professional';
   int _selectedSections = 5;
 
@@ -169,6 +171,33 @@ class _GenerateLandingPageDialogState extends State<GenerateLandingPageDialog> {
                 hintText: 'E.g., Small business owners with 1-10 employees...',
               ),
             ),
+            const SizedBox(height: 16),
+
+            // Lead magnet: with a link no assessment is generated, the page
+            // summarizes the download and the link is emailed after the form
+            TextField(
+              key: const Key('downloadUrl'),
+              controller: _downloadUrlController,
+              onChanged: (_) => setState(() {}),
+              decoration: const InputDecoration(
+                labelText: 'Download link (optional)',
+                hintText: 'https://example.com/guide.pdf',
+                helperText:
+                    'Emailed to the visitor after a short form, instead of an assessment',
+              ),
+            ),
+            if (_downloadUrlController.text.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              TextField(
+                key: const Key('downloadDescription'),
+                controller: _downloadDescriptionController,
+                maxLines: 2,
+                decoration: const InputDecoration(
+                  labelText: "What's in the download (optional)",
+                  hintText: 'E.g., a 12-page checklist for migrating off spreadsheets...',
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
 
             // Advanced Options
@@ -311,6 +340,12 @@ class _GenerateLandingPageDialogState extends State<GenerateLandingPageDialog> {
                 : _audienceController.text,
             tone: _selectedTone,
             numSections: _selectedSections,
+            downloadUrl: _downloadUrlController.text.isEmpty
+                ? null
+                : _downloadUrlController.text,
+            downloadDescription: _downloadDescriptionController.text.isEmpty
+                ? null
+                : _downloadDescriptionController.text,
           ),
         );
   }
@@ -319,6 +354,8 @@ class _GenerateLandingPageDialogState extends State<GenerateLandingPageDialog> {
   void dispose() {
     _descriptionController.dispose();
     _audienceController.dispose();
+    _downloadUrlController.dispose();
+    _downloadDescriptionController.dispose();
     super.dispose();
   }
 }

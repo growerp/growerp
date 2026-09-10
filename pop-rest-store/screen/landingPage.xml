@@ -60,6 +60,9 @@ along with this software (see the LICENSE.md file). If not, see
         <set field="ctaAssessmentId" from="landingPage?.ctaAssessmentId"/>
         <set field="ctaButtonLink" from="landingPage?.ctaButtonLink"/>
         <set field="ctaFormId" from="landingPage?.ctaFormId"/>
+        <!-- resolved id (the screen parameter may be empty when addressed by pseudoId);
+             posted with the form so submit#WebsiteForm can look up the download link -->
+        <set field="ctaLandingPageId" from="landingPage?.landingPageId"/>
         <set field="theme" from="landingPage?.theme ?: 'light'"/>
 
         <!-- Parse each section's contentJson into a 'rows' list here (not in the
@@ -99,7 +102,8 @@ along with this software (see the LICENSE.md file). If not, see
         </section>
         <!-- lead-capture form widget: only when this page's CTA is a form; separate
              section so it renders after the page (same pattern as store.xml chat-button) -->
-        <section name="landing-form" condition="landingPage != null &amp;&amp; ctaActionType == 'form' &amp;&amp; ctaFormId != null">
+        <!-- also for a 'url' CTA: there the form gates a download link (lead magnet) -->
+        <section name="landing-form" condition="landingPage != null &amp;&amp; ctaFormId != null &amp;&amp; (ctaActionType == 'form' || ctaActionType == 'url')">
             <widgets>
                 <render-mode>
                     <text type="html" location="component://PopRestStore/template/formWidget.html.ftl"/>

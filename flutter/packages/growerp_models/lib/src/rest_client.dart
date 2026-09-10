@@ -1542,6 +1542,8 @@ abstract class RestClient {
     @Field() String? industry,
     @Field() String tone = 'professional',
     @Field() int numSections = 5,
+    @Field() String? downloadUrl,
+    @Field() String? downloadDescription,
   });
 
   // ============================================
