@@ -823,6 +823,18 @@ Service definitions for assessment management and completion
                 </service-call>
             </if>
 
+            <!-- GrowERP-owned assessments feed the mailing list. The birdSend Interface row
+                 is global GrowERP configuration with no owner, so tenant assessments must
+                 never reach it. Async and ignore-error so an outbound failure cannot break
+                 a public submit; the service no-ops when no api key is configured. -->
+            <if
+                condition="ownerPartyId == 'GROWERP' &amp;&amp; !respondentEmail.contains('example.com')">
+                <service-call name="growerp.100.BirdSendServices100.registerAdd#UserToGroup"
+                    async="true" ignore-error="true"
+                    in-map="[email: respondentEmail, firstName: firstName,
+                        lastName: lastName ?: 'assessment']" />
+            </if>
+
             <!-- Send assessment results email with PDF -->
             <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="emailExist">
                 <field-map field-name="emailServerId" value="SYSTEM" />

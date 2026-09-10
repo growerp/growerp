@@ -131,6 +131,22 @@
             </a>
         </div>
     </section>
+    <!-- ERP readiness assessment -->
+    <section class="max-w-container mx-auto px-4 md:px-12 py-12 relative">
+        <div class="l-glass rounded-2xl p-8 md:p-10 flex flex-col md:flex-row items-center gap-8">
+            <div class="w-16 h-16 shrink-0 rounded-2xl bg-surface-container flex items-center justify-center border border-outline-variant/30 text-primary">
+                <span class="material-symbols-outlined icon-fill text-[32px]">fact_check</span>
+            </div>
+            <div class="flex-1 text-center md:text-left">
+                <span class="font-label text-xs uppercase tracking-wider text-primary">Free assessment</span>
+                <h3 class="font-display text-2xl font-semibold text-on-surface mt-2 mb-2">How ready is your business for ERP?</h3>
+                <p class="text-on-surface-variant leading-relaxed">A two-minute check on how you run orders, stock and the books today. You get a personalized report on where the process gaps are and which modules close them, mailed straight to your inbox.</p>
+            </div>
+            <a href="/landing/erp-landing-page" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-8 py-4 rounded-lg l-glow transition-all active:scale-95 text-center shrink-0">
+                Start the Assessment
+            </a>
+        </div>
+    </section>
 
     <!-- Platform Downloads -->
     <section class="max-w-container mx-auto px-4 md:px-12 pb-8 relative">

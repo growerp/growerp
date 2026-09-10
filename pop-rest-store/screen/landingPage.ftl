@@ -349,8 +349,10 @@
                 hideSpinner();
                 enableAssessmentButtons();
             } else if (assessmentDisplayed && event.data.type === 'assessment-complete') {
+                // the Flutter app already showed the thank-you and results-on-the-way
+                // screen, so send the visitor on to the website home page
                 closeAssessment();
-                alert('Thank you for completing the assessment! You should receive your results shortly.');
+                window.location.href = '/';
             } else if (assessmentDisplayed && event.data.type === 'assessment-close') {
                 closeAssessment();
             }
