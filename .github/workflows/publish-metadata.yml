@@ -565,11 +565,19 @@ jobs:
 
           # Read metadata from fastlane directory
           metadata_dir = Path(f'flutter/packages/{app_name}/windows/fastlane/metadata/en-US')
+          def read_field(name):
+              f = metadata_dir / name
+              return f.read_text().strip() if f.exists() else ''
+
+          # Partner Center takes at most 7 search terms of 30 characters each.
+          keywords = [k.strip() for k in read_field('keywords.txt').split(',') if k.strip()]
+          keywords = [k for k in keywords if len(k) <= 30][:7]
+
           metadata = {
-              'description': (metadata_dir / 'description.txt').read_text().strip() if (metadata_dir / 'description.txt').exists() else '',
-              'shortDescription': (metadata_dir / 'short_description.txt').read_text().strip() if (metadata_dir / 'short_description.txt').exists() else '',
-              'releaseNotes': (metadata_dir / 'release_notes.txt').read_text().strip() if (metadata_dir / 'release_notes.txt').exists() else '',
-              'keywords': (metadata_dir / 'keywords.txt').read_text().strip() if (metadata_dir / 'keywords.txt').exists() else '',
+              'description': read_field('description.txt'),
+              'shortDescription': read_field('short_description.txt'),
+              'releaseNotes': read_field('release_notes.txt'),
+              'keywords': keywords,
           }
 
           # Read screenshots if available
@@ -632,20 +640,23 @@ jobs:
           sub_id = sub['id']
           print(f'Created submission {sub_id}')
 
-          # Update listing with metadata + screenshots (en-US is default)
+          # Update listing with metadata + screenshots (en-US is default).
+          # The submission API keeps listing text under listings[lang].baseListing —
+          # fields written at the listing root are silently ignored.
           listings = sub.get('listings', {})
           if 'en-us' not in listings:
               listings['en-us'] = {}
-              
-          listings['en-us'].update(metadata)
-          
+          base_listing = listings['en-us'].setdefault('baseListing', {})
+
+          base_listing.update(metadata)
+
           if screenshots:
               # Preserve non-screenshot images (like StoreLogo)
-              old_images = listings['en-us'].get('images', [])
+              old_images = base_listing.get('images', [])
               new_images = [img for img in old_images if img.get('imageType') != 'Screenshot']
               new_images.extend(screenshots)
-              listings['en-us']['images'] = new_images
-              
+              base_listing['images'] = new_images
+
           sub['listings'] = listings
 
           # A cloned submission from an app whose baseline never set this returns

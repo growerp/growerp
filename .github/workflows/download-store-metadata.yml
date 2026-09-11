@@ -431,12 +431,18 @@ jobs:
               # Extract store listing (usually first listing is en-US)
               listings = sub_data.get('listings', {})
               if listings:
+                  # Listing text lives under listings[lang].baseListing, not at the
+                  # listing root — reading the root yields nothing but empty strings.
                   first_listing = next(iter(listings.values()), {})
+                  base_listing = first_listing.get('baseListing', {})
+                  keywords = base_listing.get('keywords', '')
+                  if isinstance(keywords, list):
+                      keywords = ', '.join(keywords)
                   metadata = {
-                      'description': first_listing.get('description', ''),
-                      'short_description': first_listing.get('shortDescription', ''),
-                      'release_notes': first_listing.get('releaseNotes', ''),
-                      'keywords': first_listing.get('keywords', ''),
+                      'description': base_listing.get('description', ''),
+                      'short_description': base_listing.get('shortDescription', ''),
+                      'release_notes': base_listing.get('releaseNotes', ''),
+                      'keywords': keywords,
                   }
 
           # No published listing to mirror: write nothing at all. Writing empty

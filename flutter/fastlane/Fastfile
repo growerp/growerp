@@ -453,7 +453,7 @@ lane :upload_macos do
   end
 
   if submit_for_review
-    metadata_path = File.expand_path("../packages/#{app_name}/ios/fastlane/metadata", __dir__)
+    metadata_path = File.expand_path("../packages/#{app_name}/macos/fastlane/metadata", __dir__)
     upload_to_app_store(
       api_key:                    api_key,
       app_identifier:             "org.growerp.#{app_name}",
@@ -521,7 +521,7 @@ lane :upload_metadata_macos do
     is_key_content_base64: true,
     in_house:              false
   )
-  metadata_path    = File.expand_path("../packages/#{app_name}/ios/fastlane/metadata", __dir__)
+  metadata_path    = File.expand_path("../packages/#{app_name}/macos/fastlane/metadata", __dir__)
   screenshots_path = File.expand_path("../packages/#{app_name}/macos/fastlane/screenshots", __dir__)
   has_screenshots  = Dir.exist?(screenshots_path) && !Dir.empty?(screenshots_path)
 
