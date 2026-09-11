@@ -52,6 +52,11 @@ platform :android do
     end
 
   lane :upload_metadata do
+    # sync_image_upload deletes Play Store images that are not present locally,
+    # so the caller sets SKIP_PLAY_IMAGES when it has no screenshots to sync —
+    # otherwise an empty local dir would wipe the live listing's screenshots.
+    skip_images = ENV['SKIP_PLAY_IMAGES'] == 'true'
+    UI.important("SKIP_PLAY_IMAGES set — uploading listing text only") if skip_images
     upload_to_play_store(
       json_key:                ENV['GOOGLE_PLAY_JSON_KEY_FILE'],
       track:                   'production',
@@ -59,9 +64,9 @@ platform :android do
       skip_upload_apk:         true,
       skip_upload_metadata:    false,
       skip_upload_changelogs:  true,
-      skip_upload_screenshots: false,
-      skip_upload_images:      false,
-      sync_image_upload:       true
+      skip_upload_screenshots: skip_images,
+      skip_upload_images:      skip_images,
+      sync_image_upload:       !skip_images
     )
   end
 end

@@ -378,6 +378,24 @@ jobs:
           seven_dir="$base/sevenInchScreenshots"
           ten_dir="$base/tenInchScreenshots"
           mkdir -p "$phone_dir" "$seven_dir" "$ten_dir"
+
+          # The artifact download is best-effort (if_no_artifact_found: warn +
+          # continue-on-error), so it can legitimately yield nothing — an expired
+          # artifact, or screenshots.yml never run on this branch. Clearing the
+          # image dirs in that case would leave them empty, and the Fastlane lane
+          # runs with sync_image_upload, which deletes Play Store images that are
+          # not present locally. That silently wipes the screenshots off the live
+          # listing. Leave the dirs untouched and skip the image sync instead.
+          shopt -s nullglob
+          available=( framed-screenshots/*-"$APP"-*_framed.png )
+          if [[ ${#available[@]} -eq 0 ]]; then
+            echo "::warning::Android $APP: no framed screenshots in the artifact — "\
+                 "uploading listing text only, leaving the Play Store images as they are. "\
+                 "Run the Create Store Screenshots workflow to refresh them."
+            echo "SKIP_PLAY_IMAGES=true" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
           rm -f "$phone_dir"/*.png "$seven_dir"/*.png "$ten_dir"/*.png
 
           # ordered_sources: dashboard (main menu) first, so it also sorts first
@@ -433,6 +451,7 @@ jobs:
       - name: Fastlane upload Android metadata
         env:
           GOOGLE_PLAY_JSON_KEY_DATA: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          SKIP_PLAY_IMAGES: ${{ env.SKIP_PLAY_IMAGES }}
         run: |
           export KEY_FILE="/tmp/gplay_key_${{ matrix.app }}.json"
           python3 - << 'PYEOF'
