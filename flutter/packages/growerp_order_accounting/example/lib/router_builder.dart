@@ -134,6 +134,14 @@ const orderAccountingMenuConfig = MenuConfiguration(
       widgetName: 'CashBookList',
     ),
     MenuItem(
+      menuItemId: 'OA_CASHBOOK_CAT',
+      title: 'Categories',
+      route: '/accounting/cashbook-categories',
+      iconName: 'format_list_bulleted',
+      sequenceNum: 63,
+      widgetName: 'CashBookCategoryList',
+    ),
+    MenuItem(
       menuItemId: 'OA_PROFITLOSS',
       title: 'Profit & Loss',
       route: '/accounting/profit-loss',
@@ -246,6 +254,9 @@ GoRouter createOrderAccountingExampleRouter() {
         ),
       ),
       '/accounting/cashbook' => const CashBookList(key: Key('CashBookList')),
+      '/accounting/cashbook-categories' => const CashBookCategoryList(
+        key: Key('CashBookCategoryList'),
+      ),
       '/accounting/profit-loss' => const ProfitLossForm(
         key: Key('ProfitLossForm'),
       ),

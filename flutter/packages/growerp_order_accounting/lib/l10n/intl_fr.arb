@@ -390,5 +390,14 @@
   "plNoData": "Aucun revenu ou dépense comptabilisé sur cette période",
   "exportCsv": "Exporter CSV",
   "exportDone": "{fileName} exporté",
-  "delete": "Supprimer"
+  "delete": "Supprimer",
+  "cashBookCategory": "Catégorie",
+  "cashBookCategories": "Catégories",
+  "newCashBookCategory": "Nouvelle catégorie",
+  "cashBookCategoryName": "Nom",
+  "cashBookCategoryInUse": "Utilisée",
+  "cashBookCategoryHelp": "Les catégories désactivées restent dans les rapports, elles ne sont plus proposées dans le livre de caisse",
+  "searchCashBookCategoryHint": "Rechercher une catégorie",
+  "cashBookCategoryAddSuccess": "Catégorie ajoutée",
+  "cashBookCategoryUpdateSuccess": "Catégorie modifiée"
 }

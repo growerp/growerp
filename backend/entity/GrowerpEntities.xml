@@ -37,6 +37,12 @@ limitations under the License.
         </index>
     </extend-entity>
 
+    <extend-entity entity-name="GlAccountOrganization" package="mantle.ledger.account">
+        <!-- Y/N: offered as a category in the cash book of this company.
+             null means never configured: the default freelancer set is used. -->
+        <field name="isCashBookCategory" type="text-indicator" />
+    </extend-entity>
+
     <extend-entity entity-name="UserAccount" package="moqui.security">
         <field name="telephoneNumber" type="text-medium">
             <description>The telephone number to use for forgot password chats and other system messages.</description>

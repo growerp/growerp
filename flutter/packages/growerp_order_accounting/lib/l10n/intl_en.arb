@@ -1490,75 +1490,167 @@
     "description": "Empty-state hint on the revenue/expense dashboard chart"
   },
   "cashBook": "Cash Book",
-  "@cashBook": {"description": "Title of the simplified cash in / cash out list"},
+  "@cashBook": {
+    "description": "Title of the simplified cash in / cash out list"
+  },
   "cashIn": "Money in",
-  "@cashIn": {"description": "Money received (income)"},
+  "@cashIn": {
+    "description": "Money received (income)"
+  },
   "cashOut": "Money out",
-  "@cashOut": {"description": "Money paid (expense)"},
+  "@cashOut": {
+    "description": "Money paid (expense)"
+  },
   "cashAll": "All",
-  "@cashAll": {"description": "Filter showing both directions"},
+  "@cashAll": {
+    "description": "Filter showing both directions"
+  },
   "cashBookEntry": "Cash book entry",
-  "@cashBookEntry": {"description": "Dialog title for an existing entry"},
+  "@cashBookEntry": {
+    "description": "Dialog title for an existing entry"
+  },
   "newCashBookEntry": "New cash book entry",
-  "@newCashBookEntry": {"description": "Dialog title for a new entry"},
+  "@newCashBookEntry": {
+    "description": "Dialog title for a new entry"
+  },
   "searchCashBookHint": "Search description, id or party",
-  "@searchCashBookHint": {"description": "Search field hint"},
+  "@searchCashBookHint": {
+    "description": "Search field hint"
+  },
   "cashCategory": "Category",
-  "@cashCategory": {"description": "Income or expense ledger account of an entry"},
+  "@cashCategory": {
+    "description": "Income or expense ledger account of an entry"
+  },
   "cashCategoryRequired": "Select a category",
-  "@cashCategoryRequired": {"description": "Validation when no category chosen"},
+  "@cashCategoryRequired": {
+    "description": "Validation when no category chosen"
+  },
   "cashAmountInvalid": "Enter an amount larger than zero",
-  "@cashAmountInvalid": {"description": "Validation for amount field"},
+  "@cashAmountInvalid": {
+    "description": "Validation for amount field"
+  },
   "cashParty": "Customer / supplier (optional)",
-  "@cashParty": {"description": "Optional counterparty field label"},
+  "@cashParty": {
+    "description": "Optional counterparty field label"
+  },
   "cashSource": "Source",
-  "@cashSource": {"description": "Column: where the entry came from"},
+  "@cashSource": {
+    "description": "Column: where the entry came from"
+  },
   "cashSourceManual": "Manual",
-  "@cashSourceManual": {"description": "Entry typed in the cash book"},
+  "@cashSourceManual": {
+    "description": "Entry typed in the cash book"
+  },
   "cashSourceInvoice": "Invoice",
-  "@cashSourceInvoice": {"description": "Entry posted by an invoice"},
+  "@cashSourceInvoice": {
+    "description": "Entry posted by an invoice"
+  },
   "cashSourcePayment": "Payment",
-  "@cashSourcePayment": {"description": "Entry posted by a payment"},
+  "@cashSourcePayment": {
+    "description": "Entry posted by a payment"
+  },
   "cashReadOnly": "This entry was created by an invoice or payment and can only be changed there.",
-  "@cashReadOnly": {"description": "Notice on read-only entries"},
+  "@cashReadOnly": {
+    "description": "Notice on read-only entries"
+  },
   "cashDeleteConfirm": "Delete this cash book entry?",
-  "@cashDeleteConfirm": {"description": "Delete confirmation question"},
+  "@cashDeleteConfirm": {
+    "description": "Delete confirmation question"
+  },
   "cashTotalIn": "In",
-  "@cashTotalIn": {"description": "Totals bar label"},
+  "@cashTotalIn": {
+    "description": "Totals bar label"
+  },
   "cashTotalOut": "Out",
-  "@cashTotalOut": {"description": "Totals bar label"},
+  "@cashTotalOut": {
+    "description": "Totals bar label"
+  },
   "cashNet": "Net",
-  "@cashNet": {"description": "Totals bar label"},
+  "@cashNet": {
+    "description": "Totals bar label"
+  },
   "noCashBookEntries": "No cash book entries yet: use + to record money in or out",
-  "@noCashBookEntries": {"description": "Empty list message"},
+  "@noCashBookEntries": {
+    "description": "Empty list message"
+  },
   "cashBookAddSuccess": "Cash book entry added",
-  "@cashBookAddSuccess": {"description": "Snack bar after add"},
+  "@cashBookAddSuccess": {
+    "description": "Snack bar after add"
+  },
   "cashBookUpdateSuccess": "Cash book entry updated",
-  "@cashBookUpdateSuccess": {"description": "Snack bar after update"},
+  "@cashBookUpdateSuccess": {
+    "description": "Snack bar after update"
+  },
   "cashBookDeleteSuccess": "Cash book entry deleted",
-  "@cashBookDeleteSuccess": {"description": "Snack bar after delete"},
+  "@cashBookDeleteSuccess": {
+    "description": "Snack bar after delete"
+  },
   "profitLoss": "Profit & Loss",
-  "@profitLoss": {"description": "Profit & loss report title"},
+  "@profitLoss": {
+    "description": "Profit & loss report title"
+  },
   "taxSummary": "Tax Summary",
-  "@taxSummary": {"description": "Yearly tax summary title"},
+  "@taxSummary": {
+    "description": "Yearly tax summary title"
+  },
   "taxSummaryHint": "Yearly income and expenses by category for your self-employment tax filing. Export to CSV to hand over or keep.",
-  "@taxSummaryHint": {"description": "Explanation under the tax summary title"},
+  "@taxSummaryHint": {
+    "description": "Explanation under the tax summary title"
+  },
   "plIncome": "Income",
-  "@plIncome": {"description": "Report section"},
+  "@plIncome": {
+    "description": "Report section"
+  },
   "plExpenses": "Expenses",
-  "@plExpenses": {"description": "Report section"},
+  "@plExpenses": {
+    "description": "Report section"
+  },
   "plTotalIncome": "Total income",
-  "@plTotalIncome": {"description": "Report total line"},
+  "@plTotalIncome": {
+    "description": "Report total line"
+  },
   "plTotalExpenses": "Total expenses",
-  "@plTotalExpenses": {"description": "Report total line"},
+  "@plTotalExpenses": {
+    "description": "Report total line"
+  },
   "plNetProfit": "Net profit",
-  "@plNetProfit": {"description": "Report net line"},
+  "@plNetProfit": {
+    "description": "Report net line"
+  },
   "plNoData": "No income or expenses posted in this period",
-  "@plNoData": {"description": "Empty report message"},
+  "@plNoData": {
+    "description": "Empty report message"
+  },
   "exportCsv": "Export CSV",
-  "@exportCsv": {"description": "Export button"},
+  "@exportCsv": {
+    "description": "Export button"
+  },
   "exportDone": "Exported {fileName}",
-  "@exportDone": {"description": "Snack bar after a CSV export", "placeholders": {"fileName": {"type": "String"}}},
+  "@exportDone": {
+    "description": "Snack bar after a CSV export",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
   "delete": "Delete",
-  "@delete": {"description": "Delete button text"}
+  "@delete": {
+    "description": "Delete button text"
+  },
+  "cashBookCategory": "Category",
+  "cashBookCategories": "Categories",
+  "newCashBookCategory": "New category",
+  "cashBookCategoryName": "Name",
+  "cashBookCategoryInUse": "In use",
+  "@cashBookCategoryInUse": {
+    "description": "Switch: is this category offered in the cash book?"
+  },
+  "cashBookCategoryHelp": "Switched off categories stay in the reports, they are only no longer offered in the cash book",
+  "@cashBookCategoryHelp": {
+    "description": "Explains that switching a category off does not change the reports"
+  },
+  "searchCashBookCategoryHint": "Search category",
+  "cashBookCategoryAddSuccess": "Category added",
+  "cashBookCategoryUpdateSuccess": "Category updated"
 }

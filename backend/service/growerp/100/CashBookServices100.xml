@@ -47,11 +47,91 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="get" noun="DefaultCashBookCategoryCodes">
+        <description>Internal: the account codes a company starts with as cash book categories.
+            A freelancer books against a handful of categories, not against the ~95 income and
+            expense accounts of the full chart of accounts. Codes are the account codes of the
+            shipped chart (ZaaGlAccountsInstallData.xml), which every company clones.</description>
+        <out-parameters>
+            <parameter name="incomeCodes" type="List" />
+            <parameter name="expenseCodes" type="List" />
+            <parameter name="defaultCodes" type="List" />
+        </out-parameters>
+        <actions>
+            <set field="incomeCodes"
+                from="['41100',  /* Product Sales */
+                       '41200',  /* Service Sales */
+                       '41900',  /* Miscellaneous Sales */
+                       '81000']  /* Investment and Gains Income */" />
+            <set field="expenseCodes"
+                from="['51100',  /* Merchandise Purchases */
+                       '61110',  /* Rent Expense */
+                       '61300',  /* Repairs and Maintenance */
+                       '61400',  /* Communications: phone and internet */
+                       '61630',  /* Outside Computer Services: software, hosting */
+                       '62100',  /* Advertising */
+                       '63110',  /* Wages - Employee: assistants */
+                       '64100',  /* Legal Fees */
+                       '64200',  /* Accounting Fees */
+                       '64900',  /* Other Consulting Fees */
+                       '65210',  /* Stationery and Supplies */
+                       '65310',  /* Postage Expense */
+                       '66100',  /* Outside Labor and Services: subcontractors */
+                       '67200',  /* Depreciation - Equipment */
+                       '67240',  /* Depreciation - Vehicles */
+                       '68100',  /* Travel and Entertainment */
+                       '69000',  /* Insurance */
+                       '74000',  /* Tax Expense - Other */
+                       '78000',  /* Other Operating Expenses */
+                       '79900']  /* Other Non-operating Expenses: bank and payment fees */" />
+            <set field="defaultCodes" from="incomeCodes + expenseCodes" />
+        </actions>
+    </service>
+
+    <service verb="init" noun="CashBookCategories">
+        <description>Internal: store the default category selection on the ledger accounts of a
+            company. Does nothing when the company already made a choice, so it is safe to call
+            from tenant setup as well as before every category change.</description>
+        <in-parameters>
+            <parameter name="companyPartyId" required="true" />
+        </in-parameters>
+        <actions>
+            <!-- a single configured account means the company has its own selection -->
+            <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
+                list="configured" limit="1">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+                <econdition field-name="isCashBookCategory" operator="is-not-null" />
+            </entity-find>
+            <if condition="configured">
+                <return />
+            </if>
+            <service-call name="growerp.100.CashBookServices100.get#DefaultCashBookCategoryCodes"
+                out-map="context" />
+            <iterate list="[true, false]" entry="isIncome">
+                <service-call name="growerp.100.CashBookServices100.get#CashBookCategory"
+                    in-map="[isIncome: isIncome, companyPartyId: companyPartyId]"
+                    out-map="categoryOut" />
+                <iterate list="categoryOut.glAccounts" entry="glAccount">
+                    <service-call name="update#mantle.ledger.account.GlAccountOrganization"
+                        in-map="[glAccountId: glAccount.glAccountId,
+                            organizationPartyId: companyPartyId,
+                            isCashBookCategory:
+                                defaultCodes.contains(glAccount.accountCode) ? 'Y' : 'N']" />
+                </iterate>
+            </iterate>
+        </actions>
+    </service>
+
     <service verb="get" noun="CashBookCategory">
         <description>Income (isIncome=true) or expense (isIncome=false) ledger accounts of the
-            company, used as the categories of the cash book.</description>
+            company, used as the categories of the cash book. With usedOnly only the categories
+            the company actually uses are returned: that is what the cash book offers. The
+            Profit &amp; Loss report needs them all, because invoices and payments post on
+            accounts which are not offered as a category.</description>
         <in-parameters>
             <parameter name="isIncome" type="Boolean" default="true" />
+            <parameter name="usedOnly" type="Boolean" default="false" />
+            <parameter name="companyPartyId" /><!-- internal use, else the company of the user -->
         </in-parameters>
         <out-parameters>
             <parameter name="glAccounts" type="List">
@@ -60,12 +140,20 @@ limitations under the License.
                     <parameter name="accountCode" />
                     <parameter name="accountName" />
                     <parameter name="isDebit" type="Boolean" />
+                    <parameter name="isUsed" type="Boolean" />
                 </parameter>
             </parameter>
         </out-parameters>
         <actions>
+            <!-- get#RelatedCompanyAndOwner overwrites companyPartyId, so keep the given one -->
+            <set field="inCompanyPartyId" from="companyPartyId" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="inCompanyPartyId">
+                <set field="companyPartyId" from="inCompanyPartyId" />
+            </if>
+            <service-call name="growerp.100.CashBookServices100.get#DefaultCashBookCategoryCodes"
+                out-map="context" />
             <set field="parentClassIds"
                 from="isIncome ? ['REVENUE', 'INCOME'] : ['COST_OF_SALES', 'EXPENSE', 'NON_OP_EXPENSE']" />
             <!-- the class hierarchy is root(DEBIT/CREDIT) > parent > class > detail:
@@ -85,13 +173,162 @@ limitations under the License.
             </entity-find>
             <set field="glAccounts" from="[]" />
             <iterate list="dbGlAccounts" entry="glAccount">
+                <!-- not configured yet: the default set decides -->
+                <set field="isUsed"
+                    from="glAccount.isCashBookCategory != null
+                        ? glAccount.isCashBookCategory == 'Y'
+                        : defaultCodes.contains(glAccount.accountCode)" />
+                <if condition="usedOnly &amp;&amp; !isUsed">
+                    <continue />
+                </if>
                 <set field="glAccountOut"
                     from="[glAccountId: glAccount.glAccountId,
                         accountCode: glAccount.accountCode,
                         accountName: ec.l10n.localize(glAccount.accountName),
-                        isDebit: glAccount.isDebit == 'Y']" />
+                        isDebit: glAccount.isDebit == 'Y',
+                        isUsed: isUsed]" />
                 <script>glAccounts.add(glAccountOut)</script>
             </iterate>
+        </actions>
+    </service>
+
+    <service verb="update" noun="CashBookCategory">
+        <description>Switch a category on or off for the cash book, or rename it. Switching off
+            only removes it from the cash book selection list: existing entries and the
+            Profit &amp; Loss report are not changed.</description>
+        <in-parameters>
+            <parameter name="glAccountId" required="true" />
+            <parameter name="isUsed" type="Boolean" />
+            <parameter name="accountName" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="glAccount" type="Map">
+                <parameter name="glAccountId" />
+                <parameter name="accountCode" />
+                <parameter name="accountName" />
+                <parameter name="isDebit" type="Boolean" />
+                <parameter name="isUsed" type="Boolean" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.CashBookServices100.init#CashBookCategories"
+                in-map="[companyPartyId: companyPartyId]" />
+            <!-- the account id comes from the client: it has to be one of this company -->
+            <entity-find-one entity-name="mantle.ledger.account.GlAccountOrganization"
+                value-field="glAccountOrg">
+                <field-map field-name="glAccountId" />
+                <field-map field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find-one>
+            <if condition="!glAccountOrg">
+                <return error="true" message="Category ${glAccountId} not found!" />
+            </if>
+            <if condition="isUsed != null">
+                <service-call name="update#mantle.ledger.account.GlAccountOrganization"
+                    in-map="[glAccountId: glAccountId, organizationPartyId: companyPartyId,
+                        isCashBookCategory: isUsed ? 'Y' : 'N']" />
+            </if>
+            <if condition="accountName">
+                <entity-find-one entity-name="mantle.ledger.account.GlAccount"
+                    value-field="dbGlAccount">
+                    <field-map field-name="glAccountId" />
+                </entity-find-one>
+                <!-- the screen shows the localized name, so an unchanged name comes back
+                     translated: keep the stored original, only a real edit overwrites it -->
+                <if
+                    condition="accountName != ec.l10n.localize(dbGlAccount.accountName)">
+                    <service-call name="update#mantle.ledger.account.GlAccount"
+                        in-map="[glAccountId: glAccountId, accountName: accountName]" />
+                </if>
+            </if>
+            <service-call name="growerp.100.CashBookServices100.get#CashBookCategoryById"
+                in-map="[glAccountId: glAccountId]" out-map="context" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="CashBookCategoryById">
+        <description>Internal: a single category in the shape of the category list.</description>
+        <in-parameters>
+            <parameter name="glAccountId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="glAccount" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.CashBookServices100.get#DefaultCashBookCategoryCodes"
+                out-map="context" />
+            <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
+                list="dbGlAccounts" limit="1">
+                <econdition field-name="glAccountId" />
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find>
+            <if condition="!dbGlAccounts">
+                <return error="true" message="Category ${glAccountId} not found!" />
+            </if>
+            <set field="dbGlAccount" from="dbGlAccounts[0]" />
+            <set field="glAccount"
+                from="[glAccountId: dbGlAccount.glAccountId,
+                    accountCode: dbGlAccount.accountCode,
+                    accountName: ec.l10n.localize(dbGlAccount.accountName),
+                    isDebit: dbGlAccount.isDebit == 'Y',
+                    isUsed: dbGlAccount.isCashBookCategory != null
+                        ? dbGlAccount.isCashBookCategory == 'Y'
+                        : defaultCodes.contains(dbGlAccount.accountCode)]" />
+        </actions>
+    </service>
+
+    <service verb="create" noun="CashBookCategory">
+        <description>Add an own income or expense category: creates a ledger account below
+            'Miscellaneous Sales' (income) or 'Other Operating Expenses' (expense) and switches
+            it on for the cash book.</description>
+        <in-parameters>
+            <parameter name="accountName" required="true" />
+            <parameter name="isIncome" type="Boolean" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="glAccount" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.CashBookServices100.init#CashBookCategories"
+                in-map="[companyPartyId: companyPartyId]" />
+            <!-- own categories live in a range below the 'other' account of their kind -->
+            <set field="firstCode" from="isIncome ? 41910 : 78010" />
+            <set field="lastCode" from="isIncome ? 41990 : 78090" />
+            <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
+                list="usedCodes">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+                <econdition field-name="accountCode" operator="greater-equals"
+                    from="firstCode.toString()" />
+                <econdition field-name="accountCode" operator="less-equals"
+                    from="lastCode.toString()" />
+                <select-field field-name="accountCode" />
+            </entity-find>
+            <set field="newCode" from="firstCode" />
+            <iterate list="usedCodes" entry="usedCode">
+                <if condition="usedCode.accountCode?.isNumber() &amp;&amp;
+                        (usedCode.accountCode as Integer) >= newCode">
+                    <set field="newCode" from="(usedCode.accountCode as Integer) + 10" />
+                </if>
+            </iterate>
+            <if condition="newCode > lastCode">
+                <return error="true"
+                    message="No more room for own categories, remove an unused one first" />
+            </if>
+            <service-call name="growerp.100.AccountingServices100.create#GlAccount"
+                in-map="[glAccount: [accountCode: newCode.toString(), accountName: accountName,
+                    accountClass: [classId: isIncome ? 'OTHER_REVENUE' : 'GEN_ADMIN_EXPENSE'],
+                    accountType: isIncome ? [accountTypeId: 'GatSales'] : null]]"
+                out-map="createOut" />
+            <service-call name="update#mantle.ledger.account.GlAccountOrganization"
+                in-map="[glAccountId: createOut.glAccount.glAccountId,
+                    organizationPartyId: companyPartyId, isCashBookCategory: 'Y']" />
+            <service-call name="growerp.100.CashBookServices100.get#CashBookCategoryById"
+                in-map="[glAccountId: createOut.glAccount.glAccountId]" out-map="context" />
         </actions>
     </service>
 
@@ -502,8 +739,11 @@ limitations under the License.
             <parameter name="total" type="BigDecimal" />
         </out-parameters>
         <actions>
+            <!-- the report covers every income/expense account, also the ones the company
+                 does not offer as a cash book category: invoices and payments post on them too -->
             <service-call name="growerp.100.CashBookServices100.get#CashBookCategory"
-                in-map="[isIncome: isIncome]" out-map="categoryOut" />
+                in-map="[isIncome: isIncome, usedOnly: false,
+                    companyPartyId: companyPartyId]" out-map="categoryOut" />
             <set field="accountIds" from="categoryOut.glAccounts*.glAccountId" />
             <set field="lines" from="[]" />
             <set field="total" from="BigDecimal.ZERO" />

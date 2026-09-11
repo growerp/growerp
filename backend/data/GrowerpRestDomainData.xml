@@ -73,6 +73,7 @@ when the organization's menu shows it a screen that drives that domain.
     <!-- GROWERP_ACCOUNTING -->
     <growerp.menu.WidgetDomain widgetName="BalanceSheetForm" artifactGroupId="GROWERP_ACCOUNTING"/>
     <growerp.menu.WidgetDomain widgetName="BalanceSummaryList" artifactGroupId="GROWERP_ACCOUNTING"/>
+    <growerp.menu.WidgetDomain widgetName="CashBookCategoryList" artifactGroupId="GROWERP_ACCOUNTING"/>
     <growerp.menu.WidgetDomain widgetName="CashBookList" artifactGroupId="GROWERP_ACCOUNTING"/>
     <growerp.menu.WidgetDomain widgetName="GlAccountList" artifactGroupId="GROWERP_ACCOUNTING"/>
     <growerp.menu.WidgetDomain widgetName="GlAccountTranslationList" artifactGroupId="GROWERP_ACCOUNTING"/>

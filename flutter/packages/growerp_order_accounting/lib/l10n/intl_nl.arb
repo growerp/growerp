@@ -390,5 +390,14 @@
   "plNoData": "Geen inkomsten of uitgaven geboekt in deze periode",
   "exportCsv": "Exporteer CSV",
   "exportDone": "{fileName} geëxporteerd",
-  "delete": "Verwijderen"
+  "delete": "Verwijderen",
+  "cashBookCategory": "Categorie",
+  "cashBookCategories": "Categorieën",
+  "newCashBookCategory": "Nieuwe categorie",
+  "cashBookCategoryName": "Naam",
+  "cashBookCategoryInUse": "In gebruik",
+  "cashBookCategoryHelp": "Uitgezette categorieën blijven in de rapporten staan, ze worden alleen niet meer aangeboden in het kasboek",
+  "searchCashBookCategoryHint": "Zoek categorie",
+  "cashBookCategoryAddSuccess": "Categorie toegevoegd",
+  "cashBookCategoryUpdateSuccess": "Categorie bijgewerkt"
 }

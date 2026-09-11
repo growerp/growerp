@@ -108,6 +108,7 @@ Map<String, GrowerpWidgetBuilder> getOrderAccountingWidgets() {
     'BalanceSheetForm': (args) => const BalanceSheetForm(),
     'BalanceSummaryList': (args) => const BalanceSummaryList(),
     // simplified cash in / cash out bookkeeping
+    'CashBookCategoryList': (args) => const CashBookCategoryList(),
     'CashBookList': (args) => const CashBookList(),
     'ProfitLossForm': (args) => const ProfitLossForm(),
     'TaxSummaryForm': (args) => const TaxSummaryForm(),
@@ -152,8 +153,9 @@ FinDocList _finDocListFromArgs(
     sales: sales,
     docType: docType,
     openNew: _truthy(args?['openNew']),
-    openFinDocId: (args?['finDocId'] ?? args?['pseudoId'] ?? args?['openFinDocId'])
-        ?.toString(),
+    openFinDocId:
+        (args?['finDocId'] ?? args?['pseudoId'] ?? args?['openFinDocId'])
+            ?.toString(),
     presetStatus: _parsePresetStatus(args?['presetStatus']),
   );
 }
@@ -185,10 +187,18 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
     ),
     WidgetMetadata(
       widgetName: 'SalesOrderList',
-      description: 'List of sales orders from customers. Use openNew=true to '
+      description:
+          'List of sales orders from customers. Use openNew=true to '
           'enter a new order, or finDocId+presetStatus=approved to approve one.',
       iconName: 'shopping_cart',
-      keywords: ['order', 'sales', 'customer order', 'SO', 'enter order', 'approve order'],
+      keywords: [
+        'order',
+        'sales',
+        'customer order',
+        'SO',
+        'enter order',
+        'approve order',
+      ],
       parameters: {
         'openNew': 'true → open the new sales order entry dialog',
         'finDocId': 'open this order (orderId or pseudoId)',
@@ -250,10 +260,18 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
     ),
     WidgetMetadata(
       widgetName: 'PurchaseOrderList',
-      description: 'List of purchase orders to suppliers. Use openNew=true to '
+      description:
+          'List of purchase orders to suppliers. Use openNew=true to '
           'enter a new order, or finDocId+presetStatus=approved to approve one.',
       iconName: 'shopping_bag',
-      keywords: ['order', 'purchase', 'supplier order', 'vendor order', 'PO', 'approve order'],
+      keywords: [
+        'order',
+        'purchase',
+        'supplier order',
+        'vendor order',
+        'PO',
+        'approve order',
+      ],
       parameters: {
         'openNew': 'true → open the new purchase order entry dialog',
         'finDocId': 'open this order (orderId or pseudoId)',
@@ -282,7 +300,8 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
     ),
     WidgetMetadata(
       widgetName: 'IncomingShipmentList',
-      description: 'List of shipments received from suppliers. Pass finDocId of '
+      description:
+          'List of shipments received from suppliers. Pass finDocId of '
           'an approved incoming shipment to open its receive screen.',
       iconName: 'local_shipping',
       keywords: [
@@ -294,7 +313,8 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
         'goods receipt',
       ],
       parameters: {
-        'finDocId': 'open this shipment (shipmentId or pseudoId); an approved '
+        'finDocId':
+            'open this shipment (shipmentId or pseudoId); an approved '
             'incoming shipment opens the receive dialog',
       },
       builder: (args) =>
@@ -365,7 +385,8 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
     ),
     WidgetMetadata(
       widgetName: 'CashBookList',
-      description: 'Simplified cash book: money in and money out entries '
+      description:
+          'Simplified cash book: money in and money out entries '
           'booked on income and expense categories',
       iconName: 'account_balance_wallet',
       keywords: [
@@ -381,8 +402,25 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
       builder: (args) => const CashBookList(),
     ),
     WidgetMetadata(
+      widgetName: 'CashBookCategoryList',
+      description:
+          'The income and expense categories the cash book offers, '
+          'switch them on or off and add categories of your own',
+      iconName: 'format_list_bulleted',
+      keywords: [
+        'category',
+        'categories',
+        'cash book',
+        'income',
+        'expense',
+        'bookkeeping',
+      ],
+      builder: (args) => const CashBookCategoryList(),
+    ),
+    WidgetMetadata(
       widgetName: 'ProfitLossForm',
-      description: 'Simple profit and loss report: income and expenses per '
+      description:
+          'Simple profit and loss report: income and expenses per '
           'account for a year, quarter or month',
       iconName: 'assessment',
       keywords: ['profit', 'loss', 'P&L', 'income statement', 'result'],
@@ -390,10 +428,17 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
     ),
     WidgetMetadata(
       widgetName: 'TaxSummaryForm',
-      description: 'Yearly income and expenses by category for the '
+      description:
+          'Yearly income and expenses by category for the '
           'self-employment tax filing, exportable as CSV',
       iconName: 'summarize',
-      keywords: ['tax', 'tax summary', 'self-employment', 'schedule C', 'yearly'],
+      keywords: [
+        'tax',
+        'tax summary',
+        'self-employment',
+        'schedule C',
+        'yearly',
+      ],
       builder: (args) => const TaxSummaryForm(),
     ),
   ];

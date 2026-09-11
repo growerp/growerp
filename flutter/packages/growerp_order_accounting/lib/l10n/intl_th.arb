@@ -390,5 +390,14 @@
   "plNoData": "ไม่มีรายได้หรือค่าใช้จ่ายในช่วงเวลานี้",
   "exportCsv": "ส่งออก CSV",
   "exportDone": "ส่งออก {fileName} แล้ว",
-  "delete": "ลบ"
+  "delete": "ลบ",
+  "cashBookCategory": "หมวดหมู่",
+  "cashBookCategories": "หมวดหมู่",
+  "newCashBookCategory": "หมวดหมู่ใหม่",
+  "cashBookCategoryName": "ชื่อ",
+  "cashBookCategoryInUse": "ใช้งาน",
+  "cashBookCategoryHelp": "หมวดหมู่ที่ปิดไว้ยังคงอยู่ในรายงาน เพียงแต่ไม่แสดงให้เลือกในสมุดเงินสด",
+  "searchCashBookCategoryHint": "ค้นหาหมวดหมู่",
+  "cashBookCategoryAddSuccess": "เพิ่มหมวดหมู่แล้ว",
+  "cashBookCategoryUpdateSuccess": "แก้ไขหมวดหมู่แล้ว"
 }

@@ -3,3 +3,8 @@ export 'views/cash_book_list.dart';
 export 'views/cash_book_dialog.dart';
 export 'views/profit_loss_form.dart';
 export 'widgets/cash_book_list_styled_data.dart';
+export 'category/blocs/cash_book_category_bloc.dart';
+export 'category/views/cash_book_category_list.dart';
+export 'category/views/cash_book_category_dialog.dart';
+export 'category/widgets/cash_book_category_list_styled_data.dart';
+export 'category/integration_test/cash_book_category_test.dart';

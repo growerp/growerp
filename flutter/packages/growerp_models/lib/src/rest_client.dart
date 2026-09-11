@@ -994,6 +994,21 @@ abstract class RestClient {
   @GET("rest/s1/growerp/100/CashBookCategory")
   Future<GlAccounts> getCashBookCategory({
     @Query('isIncome') required bool isIncome,
+    // only the categories the company uses: what the cash book offers
+    @Query('usedOnly') bool? usedOnly,
+  });
+
+  @POST("rest/s1/growerp/100/CashBookCategory")
+  Future<GlAccount> createCashBookCategory({
+    @Field() required String accountName,
+    @Field() required bool isIncome,
+  });
+
+  @PATCH("rest/s1/growerp/100/CashBookCategory")
+  Future<GlAccount> updateCashBookCategory({
+    @Field() required String glAccountId,
+    @Field() bool? isUsed,
+    @Field() String? accountName,
   });
 
   @GET("rest/s1/growerp/100/ProfitLoss")

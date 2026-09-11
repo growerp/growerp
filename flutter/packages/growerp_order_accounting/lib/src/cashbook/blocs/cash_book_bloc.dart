@@ -197,9 +197,15 @@ class CashBookBloc extends Bloc<CashBookEvent, CashBookState> {
   ) async {
     if (state.incomeCategories.isNotEmpty && !event.refresh) return;
     try {
-      GlAccounts income = await restClient.getCashBookCategory(isIncome: true);
+      // only the categories the company uses: the full chart of accounts is
+      // far too long to pick from, see the cash book category screen
+      GlAccounts income = await restClient.getCashBookCategory(
+        isIncome: true,
+        usedOnly: true,
+      );
       GlAccounts expenses = await restClient.getCashBookCategory(
         isIncome: false,
+        usedOnly: true,
       );
       return emit(
         state.copyWith(

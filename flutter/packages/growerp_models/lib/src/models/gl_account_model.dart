@@ -36,6 +36,10 @@ abstract class GlAccount with _$GlAccount {
     Decimal? postedDebits,
     Decimal? postedCredits,
     Decimal? postedBalance,
+
+    /// only filled in by the cash book category services: is this account
+    /// offered as a category in the cash book of the company?
+    bool? isUsed,
     @Default([]) List<GlAccount> children,
   }) = _GlAccount;
 

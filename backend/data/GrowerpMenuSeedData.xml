@@ -404,7 +404,7 @@ limitations under the License.
     <growerp.menu.MenuItem menuItemId="FREELANCE_BK_TAX" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_BOOKKEEPING"
         title="Tax Summary" iconName="summarize" widgetName="TaxSummaryForm" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_BK_CAT" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_BOOKKEEPING"
-        title="Categories" iconName="format_list_bulleted" widgetName="GlAccountList" sequenceNum="40"/>
+        title="Categories" iconName="format_list_bulleted" widgetName="CashBookCategoryList" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_SYSTEM_SETUP" menuConfigurationId="FREELANCE_DEFAULT"
         title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
         userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="999"/>

@@ -218,8 +218,10 @@ class CashBookDialogState extends State<CashBookDialog> {
                       DropdownMenuItem(
                         key: Key('category${category.glAccountId}'),
                         value: category.glAccountId,
+                        // the account code behind a category means nothing to
+                        // the user of the cash book, only the name is shown
                         child: Text(
-                          '${category.accountCode} ${category.accountName}',
+                          category.accountName ?? '',
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),

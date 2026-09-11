@@ -85,6 +85,9 @@ limitations under the License.
                 <service-call name="create#mantle.ledger.account.GlAccountOrganization"
                     in-map="[glAccountId: result.glAccountId, organizationPartyId: organizationPartyId]" />
             </iterate>
+            <!-- select the accounts the cash book offers as a category -->
+            <service-call name="growerp.100.CashBookServices100.init#CashBookCategories"
+                in-map="[companyPartyId: organizationPartyId]" />
             <!-- glAccount type default -->
             <entity-find entity-name="mantle.ledger.config.GlAccountTypeDefault" list="typeDefaults">
                 <econdition field-name="organizationPartyId" from="sourcePartyId" />

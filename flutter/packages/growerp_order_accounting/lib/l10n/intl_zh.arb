@@ -390,5 +390,14 @@
   "plNoData": "本期间没有已过账的收入或支出",
   "exportCsv": "导出 CSV",
   "exportDone": "已导出 {fileName}",
-  "delete": "删除"
+  "delete": "删除",
+  "cashBookCategory": "类别",
+  "cashBookCategories": "类别",
+  "newCashBookCategory": "新建类别",
+  "cashBookCategoryName": "名称",
+  "cashBookCategoryInUse": "使用中",
+  "cashBookCategoryHelp": "已关闭的类别仍会出现在报表中，只是不再出现在现金账簿的选项里",
+  "searchCashBookCategoryHint": "搜索类别",
+  "cashBookCategoryAddSuccess": "类别已添加",
+  "cashBookCategoryUpdateSuccess": "类别已更新"
 }
