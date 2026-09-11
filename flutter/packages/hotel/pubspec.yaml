@@ -1,7 +1,7 @@
 name: hotel
 resolution: workspace
 description: "Manage rooms, reservations, check-in and guest billing in one app."
-version: 1.18.4+78
+version: 1.18.6+78
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 publish_to: none

@@ -1,7 +1,7 @@
 name: rental
 resolution: workspace
 description: "Schedule rentals, track availability and bill every asset on time."
-version: 1.18.4+20
+version: 1.18.6+20
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 publish_to: none
