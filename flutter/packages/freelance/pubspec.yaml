@@ -1,6 +1,9 @@
 name: freelance
 resolution: workspace
+description: "Track billable time, set rates and invoice clients in minutes."
 version: 1.18.5+26
+repository: https://github.com/growerp/growerp
+homepage: https://www.growerp.com
 publish_to: none
 
 environment:
@@ -80,6 +83,7 @@ flutter_intl:
 
 msix_config:
   display_name: GrowERP-Freelance
+  description: "Track billable time, set rates and invoice clients in minutes."
   publisher: CN=68EEF479-7015-49FC-9C60-33E5A2EB731C
   publisher_display_name: "AntWebsystems Co.,Ltd"
   identity_name: AntWebsystemsCo.LTD.growerp-freelance

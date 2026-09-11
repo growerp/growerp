@@ -1,15 +1,17 @@
 name: growerp-support
 base: core22
 version: "1.14.3"
-summary: GrowERP support - Business Management System
+summary: "GrowERP platform operations: companies, apps and infrastructure"
 description: |
-  GrowERP support is the system support package and provides management capabilities including:
+  Operate the GrowERP platform itself. GrowERP Support is the control app for the people running a GrowERP installation: see the companies on the system, the apps they use, and whether the backend behind them is healthy.
 
-  - Registered company management
-  - app management
-    
-  This snap packages the Linux desktop version of the GrowERP support application,
-  providing a complete business management solution for Linux systems.
+  - Registered company and subscription management
+  - App and instance administration
+  - Live REST statistics for the backend services
+  - Infrastructure health monitoring
+  - Support chat and follow-up activities
+
+  This snap packages the Linux desktop version of the GrowERP Support application. Intended for GrowERP system administrators and hosting partners rather than end users.
 
 grade: stable
 confinement: strict

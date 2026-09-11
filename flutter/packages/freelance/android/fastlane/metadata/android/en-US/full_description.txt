@@ -1,0 +1,15 @@
+Get paid for every hour you work. GrowERP Freelance turns tracked time into sent invoices without spreadsheets: log time against a client or project, apply the right rate, and generate the invoice in a couple of taps.
+
+Key Features:
+• Time entries per client, project and task
+• Rate cards, so each client bills at the right price
+• One-tap invoices generated from approved time
+• Cash in / cash out book for everything else
+• Profit and loss, ready for your accountant
+• Clients, contacts and follow-up activities
+• Quotations and orders when a job grows
+• Your own website and portfolio, managed in-app
+
+Made for independent professionals — consultants, developers, designers, coaches and anyone billing by the hour or by the day. Log time on your phone between jobs, then invoice from your desktop in the evening; it is the same data either way. GrowERP is open source and runs on the Moqui and Apache OFBiz business platforms — no licence fees, no lock-in.
+
+Accessible on Windows, macOS, iOS, Android, and web browsers. All synchronized in real-time.

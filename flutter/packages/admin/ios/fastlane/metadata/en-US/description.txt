@@ -1,2 +1,16 @@
-GrowERP is a Flutter front-end for currently either Moqui or Apache OFBiz being multi company and currency. All modules can be run unchanged, natively on currently Mobile(IOS,Android) and in the browser Linux, Mac and Windows will be available soon. GrowERP is provided for the smaller businesses like hotels, restaurants, freelancers, dentists and e-commerce businesses and to larger companies wanting a mobile app for a particular ERP system function.  All apps including this one have full state management and automated tests covering at least 50% of the app and can be tried in the browser and downloaded frpm any store.  All apps are available on github: https://github.com/growerp/growerp
-GrowERP is an initiative of AntWebsystems Co.Ltd.
+Run your entire business from a single app. GrowERP Admin brings inventory, sales, purchasing, people and the books together, so you always know what you have, what you owe and what you have earned.
+
+Key Features:
+• Dashboard with live sales, stock and cash figures
+• Products, price lists and stock across multiple warehouses
+• Sales orders, quotations, customers and suppliers
+• Purchase orders, receipts and supplier invoices
+• Invoicing, payments and a full general ledger
+• Employees, departments, leave and onboarding
+• Campaigns, website and knowledge base built in
+• AI agents that handle routine work for you
+• Multiple companies and currencies in one account
+
+Whether you run a shop, a workshop or a service company, GrowERP grows with you: start with the parts you need today and switch the rest on when you need them. Everything syncs in real time, so your team sees the same numbers wherever they work. GrowERP is open source and runs on the Moqui and Apache OFBiz business platforms — no licence fees, no lock-in.
+
+Accessible on iPhone, iPad, Mac, Windows, Android and web browsers. All synchronized in real-time.

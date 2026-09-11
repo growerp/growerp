@@ -63,6 +63,7 @@ flutter:
 
 msix_config:
   display_name: GrowERP-Agents
+  description: "Run, schedule and approve AI agents with a full audit trail."
   publisher: CN=68EEF479-7015-49FC-9C60-33E5A2EB731C
   publisher_display_name: "AntWebsystems Co.,Ltd"
   identity_name: AntWebsystemsCo.LTD.GrowERP-Agents

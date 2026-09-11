@@ -1,1 +1,1 @@
-ofbiz moqui erp business opensource
+marketing,campaigns,leads,crm,socialmedia,outreach,website,content,cms,funnel

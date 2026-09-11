@@ -1,20 +1,18 @@
 name: growerp-agents
 base: core22
 version: "1.16.31"
-summary: GrowERP Agents - AI Agent Governance & Management
+summary: Run, schedule and approve AI agents with a full audit trail
 description: |
-  GrowERP Agents is a comprehensive AI agent governance application built
-  with Flutter. It provides business management capabilities including:
+  Put AI to work in your business without losing control of it. GrowERP Agents lets you run AI agents against your own company data, schedule them, and approve what they do before it happens — with every action recorded.
 
-  - AI agent chat and interactive sessions
-  - Agent job scheduling, approvals, and action audit trails
-  - Company and employee organization management
-  - Website and system setup
-  - Activity tracking and reporting
+  - Chat with agents that can see your business data
+  - Scheduled agent jobs and approvals
+  - Full audit trail of every agent action
+  - Knowledge base and wiki as source material
+  - Tools and integrations, switched on per agent
+  - Company, employee and website administration
 
-  This snap packages the Linux desktop version of the GrowERP Agents
-  application, providing a complete AI agent governance solution for Linux
-  systems.
+  This snap packages the Linux desktop version of the GrowERP Agents application. For owners and managers who want the productivity of AI assistants and the accountability of a real system of record: nothing happens off the books, and you can always see who — or what — did it.
 
 grade: stable
 confinement: strict

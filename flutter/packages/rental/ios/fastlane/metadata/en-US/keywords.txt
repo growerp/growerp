@@ -1,1 +1,1 @@
-ofbiz moqui erp business opensource
+rental,hire,equipment,booking,reservations,fleet,availability,assets,invoicing

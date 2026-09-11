@@ -1,1 +1,1 @@
-ERP frontend for OFBiz & Moqui
+Book, track and bill assets

@@ -1,2 +1,15 @@
-GrowERP is a Flutter front-end for currently either Moqui or Apache OFBiz being multi company and currency. All modules can be run unchanged, natively on currently Mobile(IOS,Android) and in the browser Linux, Mac and Windows will be available soon. GrowERP is provided for the smaller businesses like hotels, restaurants, freelancers, dentists and e-commerce businesses and to larger companies wanting a mobile app for a particular ERP system function.  All apps including this one have full state management and automated tests covering at least 50% of the app and can be tried in the browser and downloaded frpm any store.  All apps are available on github: https://github.com/growerp/growerp
-GrowERP is an initiative of AntWebsystems Co.Ltd.
+Put AI to work in your business without losing control of it. GrowERP Agents lets you run AI agents against your own company data, schedule them, and approve what they do before it happens — with every action recorded.
+
+Key Features:
+• Chat with agents that can see your business data
+• Scheduled agent jobs that run on their own
+• Approval step before an agent changes anything
+• Full audit trail of every action an agent took
+• Knowledge base and wiki as the agents' source material
+• Tools and integrations, switched on per agent
+• Company, employee and website administration
+• Multiple companies, each with their own agents
+
+For owners and managers who want the productivity of AI assistants and the accountability of a real system of record: nothing happens off the books, and you can always see who — or what — did it. GrowERP is open source and runs on the Moqui and Apache OFBiz business platforms — no licence fees, no lock-in.
+
+Accessible on iPhone, iPad, Mac, Windows, Android and web browsers. All synchronized in real-time.

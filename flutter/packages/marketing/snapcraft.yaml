@@ -1,21 +1,18 @@
 name: growerp-marketing
 base: core22
 version: "1.16.31"
-summary: GrowERP Marketing - Marketing & Website Management
+summary: Campaigns, leads, social outreach and your website in one open app
 description: |
-  GrowERP Marketing is a comprehensive marketing management application
-  built with Flutter. It provides business management capabilities
-  including:
+  Turn attention into orders. GrowERP Marketing keeps campaigns, outreach, your website and your leads in one place, so the message you publish and the follow-up you send come from the same customer record.
 
-  - Marketing campaign and social media post management
-  - Website and content management
-  - Order processing and accounting
-  - Activity tracking and reporting
-  - Customer relationship management (CRM)
+  - Campaigns with content and results in one view
+  - Social posts scheduled and published from the app
+  - Lead and opportunity tracking through to the order
+  - Outreach lists and follow-up activities
+  - Website, blog and wiki content management
+  - Product catalogue, orders and accounting
 
-  This snap packages the Linux desktop version of the GrowERP Marketing
-  application, providing a complete marketing management solution for Linux
-  systems.
+  This snap packages the Linux desktop version of the GrowERP Marketing application. For small teams and one-person marketing departments tired of paying for four tools that do not talk to each other. Draft on a laptop, approve from a phone, publish everywhere.
 
 grade: stable
 confinement: strict

@@ -1,1 +1,1 @@
-ai agents erp moqui business opensource
+ai,agents,automation,assistant,approvals,audit,knowledgebase,workflow,jobs

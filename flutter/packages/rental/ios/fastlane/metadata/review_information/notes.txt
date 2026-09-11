@@ -1,1 +1,5 @@
+Know where every item is, who has it and when it comes back. GrowERP Rental runs a hire business end to end: check availability on a visual planner, book the item out, and bill the rental for as long as it stays out.
 
+Sign in with the demo account supplied in the review information fields. The app connects to the public GrowERP demo backend automatically; no server configuration is required. After signing in, dismiss the onboarding dialog to reach the main dashboard — the menu then gives access to every area described in the listing. All data in the demo company is test data and may be changed freely.
+
+GrowERP is open source; the full source of this app is at https://github.com/growerp/growerp

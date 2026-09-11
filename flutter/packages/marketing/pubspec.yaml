@@ -1,6 +1,9 @@
 name: marketing
 resolution: workspace
+description: "Plan campaigns, reach leads and keep your website current."
 version: 1.18.5+19
+repository: https://github.com/growerp/growerp
+homepage: https://www.growerp.com
 publish_to: none
 
 environment:
@@ -76,6 +79,7 @@ flutter_intl:
 
 msix_config:
   display_name: GrowERP-Marketing
+  description: "Plan campaigns, reach leads and keep your website current."
   publisher: CN=68EEF479-7015-49FC-9C60-33E5A2EB731C
   publisher_display_name: "AntWebsystems Co.,Ltd"
   identity_name: AntWebsystemsCo.LTD.GrowERP-Marketing

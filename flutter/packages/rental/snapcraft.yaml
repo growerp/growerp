@@ -1,21 +1,18 @@
 name: growerp-rental
 base: core22
 version: "1.16.31"
-summary: GrowERP Rental - Equipment Rental Management
+summary: Schedule rentals, track asset availability and bill every hire on time
 description: |
-  GrowERP Rental is a comprehensive equipment rental management application
-  built with Flutter. It provides business management capabilities
-  including:
+  Know where every item is, who has it and when it comes back. GrowERP Rental runs a hire business end to end: check availability on a visual planner, book the item out, and bill the rental for as long as it stays out.
 
-  - Equipment reservation and rental scheduling (Gantt view)
-  - Rate cards and rental pricing management
-  - Order processing and accounting
-  - Activity tracking and reporting
-  - Customer relationship management (CRM)
+  - Reservation and availability planner (Gantt view)
+  - Rate cards by hour, day, week or month
+  - Asset register with condition and maintenance history
+  - Recurring billing for long-running rentals
+  - Contracts, deposits, returns and invoicing
+  - Customers, quotations, orders and accounting
 
-  This snap packages the Linux desktop version of the GrowERP Rental
-  application, providing a complete equipment rental management solution for
-  Linux systems.
+  This snap packages the Linux desktop version of the GrowERP Rental application. Built for equipment hire, tool and machine rental, vehicle fleets, event and party hire, and anyone renting out property. Counter staff can book from a tablet while the workshop updates maintenance from a phone.
 
 grade: stable
 confinement: strict

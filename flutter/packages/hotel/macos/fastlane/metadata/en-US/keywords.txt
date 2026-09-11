@@ -1,1 +1,1 @@
-ofbiz moqui erp business opensource
+hotel,pms,reservations,booking,frontdesk,housekeeping,guesthouse,bnb,hostel,rooms

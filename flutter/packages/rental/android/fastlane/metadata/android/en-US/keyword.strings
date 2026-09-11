@@ -1,2 +1,7 @@
 # keyword.strings
-"dashboard" = "ERP";
+"dashboard" = "OVERVIEW";
+"company" = "COMPANY";
+"catalog" = "ASSETS";
+"sales" = "RENTALS";
+"accounting" = "ACCOUNTING";
+"ledger" = "LEDGER";

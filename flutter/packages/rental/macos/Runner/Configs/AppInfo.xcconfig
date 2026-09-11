@@ -11,4 +11,4 @@ PRODUCT_NAME = rental
 PRODUCT_BUNDLE_IDENTIFIER = org.growerp.rental
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 org.growerp. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 AntWebsystems Co.,Ltd. All rights reserved.

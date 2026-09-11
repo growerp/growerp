@@ -5,7 +5,7 @@
     "display": "standalone",
     "background_color": "#030303",
     "theme_color": "#006B5A",
-    "description": "GrowERP Admin.",
+    "description": "Run inventory, sales, purchasing, HR and accounting from one open app.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

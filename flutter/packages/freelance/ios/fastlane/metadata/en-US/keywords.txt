@@ -1,1 +1,1 @@
-ofbiz moqui erp business opensource
+freelance,timetracking,invoicing,billing,hours,consultant,selfemployed,rates,clients

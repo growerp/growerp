@@ -1,1 +1,1 @@
-Latest updates, improvements, and bug fixes. For detailed release notes, visit https://github.com/growerp/growerp/releases
+Improvements and fixes throughout the app. For the full change log, visit https://github.com/growerp/growerp/releases

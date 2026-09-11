@@ -1,1 +1,13 @@
-Support App to control the GrowERP Saas applications
+Operate the GrowERP platform itself. GrowERP Support is the control app for the people running a GrowERP installation: see the companies on the system, the apps they use, and whether the backend behind them is healthy.
+
+Key Features:
+• Registered companies and their subscriptions
+• App and instance administration per company
+• Live REST statistics for the backend services
+• Infrastructure health and resource monitoring
+• Support chat with the companies on the system
+• Activities and follow-up for support requests
+
+Intended for GrowERP system administrators and hosting partners rather than end users. GrowERP is open source and runs on the Moqui and Apache OFBiz business platforms — no licence fees, no lock-in.
+
+Available on Android and as a Linux snap.

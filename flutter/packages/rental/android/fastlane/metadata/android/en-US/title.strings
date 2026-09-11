@@ -1,7 +1,7 @@
 # title.strings
-"dashboard" = "Application Dashboard.";
+"dashboard" = "Your rentals at a glance";
 "company" = "Company Information";
-"catalog" = "Products & Assets & Categories";
-"sales" = "Sales orders & Customers";
+"catalog" = "Rental assets & categories";
+"sales" = "Rentals, orders & customers";
 "accounting" = "Accounting Dashboard";
 "ledger" = "Ledger tree & transactions";

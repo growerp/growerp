@@ -1,5 +1,6 @@
 name: admin
 resolution: workspace
+description: "Run inventory, sales, purchasing, HR and accounting from one open app."
 version: 1.18.4+129
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
@@ -74,6 +75,7 @@ flutter_launcher_icons:
 
 msix_config:
   display_name: GrowERP
+  description: "Run inventory, sales, purchasing, HR and accounting from one open app."
   publisher: CN=68EEF479-7015-49FC-9C60-33E5A2EB731C
   publisher_display_name: "AntWebsystems Co.,Ltd"
   identity_name: AntWebsystemsCo.LTD.GrowERP

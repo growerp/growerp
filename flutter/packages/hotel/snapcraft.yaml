@@ -1,20 +1,19 @@
 name: growerp-hotel
 base: core22
 version: "1.14.3"
-summary: GrowERP Hotel - Business Management System
+summary: "Property management for hotels: rooms, reservations, housekeeping, billing"
 description: |
-  GrowERP Hotel is a comprehensive ERP (Enterprise Resource Planning) application 
-  built with Flutter. It provides business management capabilities including:
+  Keep every room, booking and guest folio in one place. GrowERP Hotel takes a property from enquiry to paid invoice: see availability at a glance, check guests in and out in seconds, and let housekeeping and the front desk work from the same live plan.
 
-  - Hotel room management
-  - check-in and check-out
-  - Order processing and accounting
-  - Marketing and website management
-  - Activity tracking and reporting
-  - Customer relationship management (CRM)
+  - Room plan with drag-and-drop reservations
+  - Check-in, check-out and guest history
+  - Housekeeping status per room
+  - Room types, rates and seasonal pricing
+  - Guest folios, invoices, payments and accounting
+  - Hotel website and content management
+  - Multiple properties and currencies in one account
 
-  This snap packages the Linux desktop version of the GrowERP Hotel application,
-  providing a complete business management solution for Linux systems.
+  This snap packages the Linux desktop version of the GrowERP Hotel application. Built for independent hotels, guest houses, hostels and B&Bs that want a real property management system without a per-room subscription. Staff can work from a tablet at the desk, a phone on the floor, or a browser at home.
 
 grade: stable
 confinement: strict

@@ -1,0 +1,15 @@
+Turn attention into orders. GrowERP Marketing keeps campaigns, outreach, your website and your leads in one place, so the message you publish and the follow-up you send come from the same customer record.
+
+Key Features:
+• Campaigns with the content and the results in one view
+• Social posts scheduled and published from the app
+• Lead and opportunity tracking, from first touch to order
+• Outreach lists and follow-up activities per contact
+• Website pages, blog and images, edited in-app
+• Knowledge base and wiki for your team
+• Product catalogue and orders, ready to sell
+• AI agents that draft and schedule routine content
+
+For small teams and one-person marketing departments tired of paying for four tools that do not talk to each other. Draft on a laptop, approve from a phone, publish everywhere. GrowERP is open source and runs on the Moqui and Apache OFBiz business platforms — no licence fees, no lock-in.
+
+Made for Windows, and synchronized in real time with the macOS, iPhone, iPad, Android and web versions.

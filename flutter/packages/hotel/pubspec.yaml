@@ -1,5 +1,6 @@
 name: hotel
 resolution: workspace
+description: "Manage rooms, reservations, check-in and guest billing in one app."
 version: 1.18.4+78
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
@@ -61,6 +62,7 @@ flutter_launcher_icons:
 
 msix_config:
   display_name: GrowERP-Hotel
+  description: "Manage rooms, reservations, check-in and guest billing in one app."
   publisher: CN=68EEF479-7015-49FC-9C60-33E5A2EB731C
   publisher_display_name: "AntWebsystems Co.,Ltd"
   identity_name: AntWebsystemsCo.LTD.GrowERP-Hotel

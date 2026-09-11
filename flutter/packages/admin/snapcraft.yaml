@@ -1,20 +1,19 @@
 name: growerp-admin
 base: core22
 version: "1.14.3"
-summary: GrowERP Admin - Business Management System
+summary: Run inventory, sales, purchasing, HR and accounting from one open app
 description: |
-  GrowERP Admin is a comprehensive ERP (Enterprise Resource Planning) application 
-  built with Flutter. It provides business management capabilities including:
+  Run your entire business from a single app. GrowERP Admin brings inventory, sales, purchasing, people and the books together, so you always know what you have, what you owe and what you have earned.
 
-  - User and company management
-  - Inventory tracking and management
-  - Order processing and accounting
-  - Marketing and website management
-  - Activity tracking and reporting
-  - Customer relationship management (CRM)
+  - Products, stock and multiple warehouses
+  - Sales orders, quotations, customers and suppliers
+  - Purchase orders, receipts and supplier invoices
+  - Invoicing, payments and a full general ledger
+  - Employees, departments, leave and onboarding
+  - Campaigns, website, wiki and AI agents
+  - Multiple companies and currencies in one account
 
-  This snap packages the Linux desktop version of the GrowERP Admin application,
-  providing a complete business management solution for Linux systems.
+  This snap packages the Linux desktop version of the GrowERP Admin application. Whether you run a shop, a workshop or a service company, GrowERP grows with you: start with the parts you need today and switch the rest on when you need them. Everything syncs in real time, so your team sees the same numbers wherever they work.
 
 grade: stable
 confinement: strict

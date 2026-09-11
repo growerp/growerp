@@ -1,1 +1,1 @@
-ERP, enterprise resource planning, inventory management, sales, purchasing, accounting, business management, SMB, small business, invoicing, ledger, employees, HR, financial reporting
+ERP, inventory management, invoicing, accounting, sales orders, small business, open source

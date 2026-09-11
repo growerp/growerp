@@ -1,1 +1,1 @@
-hotel management, property management system, PMS, hospitality, reservations, bookings, guest management, rooms, housekeeping, rate management, multi-property, small hotel, boutique hotel
+hotel management, PMS, reservations, front desk, housekeeping, guest billing, open source

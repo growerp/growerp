@@ -1,2 +1,16 @@
-GrowERP is a Flutter front-end for currently either Moqui or Apache OFBiz being multi company and currency. All modules can be run unchanged, natively on currently Mobile(IOS,Android) and in the browser Linux, Mac and Windows will be available soon. GrowERP is provided for the smaller businesses like hotels, restaurants, retailers, dentists and e-commerce businesses and to larger companies wanting a mobile app for a particular ERP system function.  All apps including this one have full state management and automated tests covering at least 50% of the app and can be tried in the browser and downloaded from either the App- or Play-Store.  All apps are available on github: https://github.com/growerp/growerp
-GrowERP is an initiative of AntWebsystems Co.Ltd.
+Know where every item is, who has it and when it comes back. GrowERP Rental runs a hire business end to end: check availability on a visual planner, book the item out, and bill the rental for as long as it stays out.
+
+Key Features:
+• Planner showing every asset and every booking
+• Instant availability check before you promise a date
+• Rate cards by hour, day, week or month
+• Asset register with condition and maintenance history
+• Recurring billing for long-running rentals
+• Reservations, contracts, deposits and returns
+• Invoices, payments and full accounting
+• Customers, quotations and follow-up activities
+• Multiple locations and currencies in one account
+
+Built for equipment hire, tool and machine rental, vehicle fleets, event and party hire, and anyone renting out property. Counter staff can book from a tablet while the workshop updates maintenance from a phone. GrowERP is open source and runs on the Moqui and Apache OFBiz business platforms — no licence fees, no lock-in.
+
+Accessible on iPhone, iPad, Mac, Windows, Android and web browsers. All synchronized in real-time.

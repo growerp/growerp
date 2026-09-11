@@ -1,1 +1,5 @@
+Put AI to work in your business without losing control of it. GrowERP Agents lets you run AI agents against your own company data, schedule them, and approve what they do before it happens — with every action recorded.
 
+Sign in with the demo account supplied in the review information fields. The app connects to the public GrowERP demo backend automatically; no server configuration is required. After signing in, dismiss the onboarding dialog to reach the main dashboard — the menu then gives access to every area described in the listing. All data in the demo company is test data and may be changed freely.
+
+GrowERP is open source; the full source of this app is at https://github.com/growerp/growerp

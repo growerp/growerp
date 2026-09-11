@@ -1,22 +1,18 @@
 name: growerp-freelance
 base: core22
 version: "1.16.31"
-summary: GrowERP Freelance - Freelance Time & Billing Management
+summary: Track billable time, apply rates and invoice clients from one app
 description: |
-  GrowERP Freelance is a comprehensive time tracking and billing application
-  built with Flutter. It provides freelance business management capabilities
-  including:
+  Get paid for every hour you work. GrowERP Freelance turns tracked time into sent invoices without spreadsheets: log time against a client or project, apply the right rate, and generate the invoice in a couple of taps.
 
-  - Time entry tracking against projects and clients
+  - Time entries per client, project and task
   - Rate cards and billing rate management
-  - Invoice generation from tracked time entries
-  - Order processing and accounting
-  - Activity tracking and reporting
-  - Customer relationship management (CRM)
+  - Invoices generated from approved time entries
+  - Cash in / cash out book and profit and loss
+  - Clients, quotations, orders and activities
+  - Your own website and portfolio
 
-  This snap packages the Linux desktop version of the GrowERP Freelance
-  application, providing a complete freelance business management solution
-  for Linux systems.
+  This snap packages the Linux desktop version of the GrowERP Freelance application. Made for independent professionals — consultants, developers, designers, coaches and anyone billing by the hour or by the day. Log time on your phone between jobs, then invoice from your desktop in the evening; it is the same data either way.
 
 grade: stable
 confinement: strict

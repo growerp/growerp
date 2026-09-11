@@ -1,16 +1,16 @@
-GrowERP Hotel is a comprehensive property management system (PMS) designed specifically for hotels, hostels, and hospitality businesses. Streamline your operations with integrated reservation management, housekeeping coordination, guest services, and financial reporting.
+Keep every room, booking and guest folio in one place. GrowERP Hotel takes a property from enquiry to paid invoice: see availability at a glance, check guests in and out in seconds, and let housekeeping and the front desk work from the same live plan.
 
 Key Features:
-• Easy-to-use reservation and booking management
-• Room and occupancy tracking
-• Housekeeping task assignments and status
-• Guest profiles and communication
-• Rate management and pricing rules
-• Gantt chart for visual room scheduling
-• Financial reporting and ledger
-• Multi-property management support
-• Real-time synchronization across all devices
+• Room plan with drag-and-drop reservations
+• Fast check-in and check-out with guest history
+• Housekeeping status per room, updated live
+• Room types, rates and seasonal pricing
+• Guest folios, invoices, payments and receipts
+• Extras and services charged straight to the room
+• Revenue, occupancy and accounting reports
+• Your hotel website and content, managed in-app
+• Multiple properties and currencies in one account
 
-From boutique hotels to large properties, GrowERP Hotel provides the tools you need to deliver exceptional guest experiences while optimizing your operations. Built on modern technology and designed for hospitality professionals.
+Built for independent hotels, guest houses, hostels and B&Bs that want a real property management system without a per-room subscription. Staff can work from a tablet at the desk, a phone on the floor, or a browser at home. GrowERP is open source and runs on the Moqui and Apache OFBiz business platforms — no licence fees, no lock-in.
 
-Accessible on Windows, macOS, iOS, Android, and web browsers. All synchronized in real-time.
+Made for Windows, and synchronized in real time with the macOS, iPhone, iPad, Android and web versions.
