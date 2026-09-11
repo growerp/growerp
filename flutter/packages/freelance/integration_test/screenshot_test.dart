@@ -20,7 +20,7 @@ screens:
   - route: /             title: "Dashboard"     wait_key: refresh
   - route: /tasks        title: "Tasks"
   - route: /orders       title: "Orders"
-  - route: /acct-sales   title: "Sales invoices"
+  - route: /invoices     title: "Invoices"
   - route: /bookkeeping  title: "Bookkeeping"
 */
 
@@ -193,8 +193,8 @@ void main() {
     await _selectOption(tester, route: '/orders', formKey: '/orders');
     await _screenshot(binding, tester, 'orders');
 
-    await _selectOption(tester, route: '/acct-sales', formKey: '/acct-sales');
-    await _screenshot(binding, tester, 'sales_invoices');
+    await _selectOption(tester, route: '/invoices', formKey: '/invoices');
+    await _screenshot(binding, tester, 'invoices');
 
     await _selectOption(tester, route: '/bookkeeping', formKey: '/bookkeeping');
     await _screenshot(binding, tester, 'bookkeeping');

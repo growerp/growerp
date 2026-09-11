@@ -305,10 +305,8 @@ limitations under the License.
         title="Orders" route="/orders" iconName="shopping_cart" widgetName="SalesOrderList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="50"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_WEBSITE" menuConfigurationId="FREELANCE_DEFAULT" 
         title="Website" route="/website" iconName="web" widgetName="WebsiteDialog" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="60"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_ACC_SALES" menuConfigurationId="FREELANCE_DEFAULT" itemKey="salesInvoicesNotPaidCount"
-        title="Acct Sales" route="/acct-sales" iconName="receipt_long" widgetName="SalesInvoiceList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="70"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_ACC_PURCHASE" menuConfigurationId="FREELANCE_DEFAULT" itemKey="purchInvoicesNotPaidCount"
-        title="Acct Purchase" route="/acct-purchase" iconName="receipt" widgetName="PurchaseInvoiceList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="71"/>
+    <growerp.menu.MenuItem menuItemId="FREELANCE_INVOICES" menuConfigurationId="FREELANCE_DEFAULT" itemKey="salesInvoicesNotPaidCount"
+        title="Invoices" route="/invoices" iconName="receipt_long" widgetName="SalesInvoiceList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="70"/>
     <!-- simplified cash in / cash out bookkeeping instead of the full ledger screens -->
     <growerp.menu.MenuItem menuItemId="FREELANCE_BOOKKEEPING" menuConfigurationId="FREELANCE_DEFAULT" 
         title="Bookkeeping" route="/bookkeeping" iconName="account_balance_wallet" widgetName="CashBookList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="72"/>
@@ -370,18 +368,15 @@ limitations under the License.
         title="Purchase orders" iconName="home" widgetName="PurchaseOrderList" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_ORD_SUPP" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ORDERS"
         title="suppliers" iconName="business" widgetName="UserListSupplier" sequenceNum="40"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_ACCS_INV" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_SALES"
+    <!-- customers/suppliers are reachable from CRM and Orders, not repeated here -->
+    <growerp.menu.MenuItem menuItemId="FREELANCE_INV_SALES" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_INVOICES"
         title="Sales Invoices" iconName="shopping_cart" widgetName="SalesInvoiceList" sequenceNum="10"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_ACCS_PAY" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_SALES"
+    <growerp.menu.MenuItem menuItemId="FREELANCE_INV_IN" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_INVOICES"
         title="Incoming Payments" iconName="input" widgetName="SalesPaymentList" sequenceNum="20"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_ACCS_CUST" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_SALES"
-        title="customers" iconName="school" widgetName="UserListCustomer" sequenceNum="30"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_ACCP_INV" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_PURCHASE"
-        title="Purchase Invoices" iconName="shopping_bag" widgetName="PurchaseInvoiceList" sequenceNum="10"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_ACCP_PAY" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_PURCHASE"
-        title="Outgoing Payments" iconName="output" widgetName="PurchasePaymentList" sequenceNum="20"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_ACCP_SUPP" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_PURCHASE"
-        title="suppliers" iconName="business" widgetName="UserListSupplier" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="FREELANCE_INV_PURCH" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_INVOICES"
+        title="Purchase Invoices" iconName="shopping_bag" widgetName="PurchaseInvoiceList" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="FREELANCE_INV_OUT" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_INVOICES"
+        title="Outgoing Payments" iconName="output" widgetName="PurchasePaymentList" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_BK_CASH" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_BOOKKEEPING"
         title="Cash Book" iconName="account_balance_wallet" widgetName="CashBookList" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_BK_PL" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_BOOKKEEPING"

@@ -21,7 +21,7 @@ class AccountingForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const AccountingDashboard(
-      menuOptionPrefix: 'FREELANCE_ACC_',
+      menuOptionPrefix: 'FREELANCE_INV_',
     );
   }
 }

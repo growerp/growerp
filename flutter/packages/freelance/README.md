@@ -31,7 +31,8 @@ also get:
 - **Catalog** — Products, Categories
 - **Orders** — Sales/Purchase Orders, Customers, Suppliers
 - **Website** — public site settings
-- **Acct Sales / Acct Purchase** — invoices and payments both directions
+- **Invoices** — sales and purchase invoices with their incoming and
+  outgoing payments
 - **Bookkeeping** — simplified cash in / cash out bookkeeping: cash book,
   profit & loss, yearly tax summary (CSV export) and the income/expense
   categories
@@ -77,8 +78,9 @@ assistant. Admins see everyone; others see only their own.
 
 - **CRM** for leads/opportunities, **Orders** for sales/purchase orders,
   **Catalog** for products and services.
-- **Acct Sales/Purchase** cover invoicing; invoices/orders support PDF
-  printing.
+- **Invoices** covers invoicing in both directions (client invoices from
+  your hours, self-billing invoices for assistants) and the payments
+  against them; invoices/orders support PDF printing.
 - **Bookkeeping** is the simplified "money in / money out" cash book for a
   freelancer: record income and expenses on a category, back-date them, see
   a simple Profit & Loss per year/quarter/month and export the yearly Tax
