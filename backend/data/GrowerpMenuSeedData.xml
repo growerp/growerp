@@ -300,11 +300,11 @@ limitations under the License.
     <growerp.menu.MenuItem menuItemId="FREELANCE_OUTREACH" menuConfigurationId="FREELANCE_DEFAULT" 
         title="Outreach" route="/outreach" iconName="send" widgetName="CampaignListScreen" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="38"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_CATALOG" menuConfigurationId="FREELANCE_DEFAULT" itemKey="products"
-        title="Catalog" route="/catalog" iconName="category" widgetName="ProductList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="40"/>
+        title="Catalog" route="/catalog" iconName="category" widgetName="ProductList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="55"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_ORDERS" menuConfigurationId="FREELANCE_DEFAULT" itemKey="openSlsOrders"
         title="Orders" route="/orders" iconName="shopping_cart" widgetName="SalesOrderList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="50"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_WEBSITE" menuConfigurationId="FREELANCE_DEFAULT" 
-        title="Website" route="/website" iconName="web" widgetName="WebsiteDialog" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="60"/>
+        title="Website" route="/website" iconName="web" widgetName="WebsiteDialog" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="27"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_INVOICES" menuConfigurationId="FREELANCE_DEFAULT" itemKey="salesInvoicesNotPaidCount"
         title="Invoices" route="/invoices" iconName="receipt_long" widgetName="SalesInvoiceList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="70"/>
     <!-- simplified cash in / cash out bookkeeping instead of the full ledger screens -->
