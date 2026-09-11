@@ -230,8 +230,7 @@ jobs:
           set -euo pipefail
           APP_NAME="${{ matrix.app }}"
           METADATA_PATH="$(pwd)/packages/${APP_NAME}/ios/fastlane/metadata"
-          SCREENSHOTS_PATH="$(pwd)/packages/${APP_NAME}/ios/fastlane/screenshots"
-          mkdir -p "$METADATA_PATH" "$SCREENSHOTS_PATH"
+          mkdir -p "$METADATA_PATH"
 
           API_KEY_FILE="${{ steps.asc-key.outputs.api_key_path }}"
 
@@ -248,12 +247,6 @@ jobs:
             --app_identifier "org.growerp.${APP_NAME}" \
             --force true
 
-          bundle exec fastlane deliver download_screenshots \
-            --api_key_path "$API_KEY_FILE" \
-            --screenshots_path "$SCREENSHOTS_PATH" \
-            --app_identifier "org.growerp.${APP_NAME}" \
-            --use_live_version true
-
           rm -f "$API_KEY_FILE"
 
           if [ -z "$(find "$METADATA_PATH" -type f -print -quit)" ]; then
@@ -261,21 +254,11 @@ jobs:
           fi
         working-directory: flutter
 
-      # Two separate artifacts, one directory each: with two paths in one
-      # artifact the archive root would shift depending on whether the
-      # screenshots dir came back empty.
       - name: Upload downloaded iOS metadata
         uses: actions/upload-artifact@v4
         with:
           name: ios-metadata-${{ matrix.app }}
           path: flutter/packages/${{ matrix.app }}/ios/fastlane/metadata/
-          retention-days: 1
-
-      - name: Upload downloaded iOS screenshots
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-screenshots-${{ matrix.app }}
-          path: flutter/packages/${{ matrix.app }}/ios/fastlane/screenshots/
           retention-days: 1
 
   # ───────────────────────────────────────────────────────────────────────────
@@ -554,7 +537,6 @@ jobs:
             echo "=== $app"
             restore "android-metadata-${app}"  "flutter/packages/${app}/android/fastlane/metadata/android"
             restore "ios-metadata-${app}"      "flutter/packages/${app}/ios/fastlane/metadata"
-            restore "ios-screenshots-${app}"   "flutter/packages/${app}/ios/fastlane/screenshots"
             restore "macos-metadata-${app}"    "flutter/packages/${app}/macos/fastlane/metadata"
             # noprune: fastlane mirrors a store listing in full, but the Windows
             # job maps four hand-picked Partner Center fields and omits any that
@@ -590,21 +572,6 @@ jobs:
               # on the last iteration does not fail the loop under `set -e`.
               if [ -d "$dir" ]; then git add -A "$dir"; fi
             done
-
-            # iOS screenshots are gitignored (bare `screenshots` in
-            # flutter/.gitignore) and `git add` errors when the pathspec names
-            # an ignored path outright. Publishing regenerates them from the
-            # screenshots.yml artifact, so the repo copies are not a source of
-            # truth — -u keeps the handful of already-tracked files in sync and
-            # never touches ignored untracked ones.
-            # ls-files guard: `git add -u` exits 128 ("pathspec did not match any
-            # file(s) known to git") when the directory exists but holds nothing
-            # tracked — which is every app whose screenshots are only ignored
-            # downloads.
-            shots="flutter/packages/${app}/ios/fastlane/screenshots"
-            if [ -d "$shots" ] && [ -n "$(git ls-files -- "$shots")" ]; then
-              git add -u "$shots"
-            fi
           done
 
           echo "=== git status ==="
