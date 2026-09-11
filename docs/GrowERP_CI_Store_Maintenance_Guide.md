@@ -1,12 +1,14 @@
 # GrowERP CI Store Maintenance & Release User Guide
 
-**Version:** 1.0
+**Version:** 1.1
 **Target Audience:** Release Managers, DevOps Engineers, and Flutter Developers
 
 ## Table of Contents
 1. [Overview](#1-overview)
 2. [The 30+ App Ecosystem](#2-the-30-app-ecosystem)
 3. [The 6-Step Hybrid Release Workflow](#3-the-6-step-hybrid-release-workflow)
+   - [3.1 Runbook: Publishing a New Version to All Stores](#31-runbook-publishing-a-new-version-to-all-stores)
+   - [Where the listing text lives](#where-the-listing-text-lives)
 4. [Nightly Integration Tests & Status Checks](#4-nightly-integration-tests--status-checks)
 5. [Global App Store Integration](#5-global-app-store-integration)
 6. [The Live Status Report Matrix](#6-the-live-status-report-matrix)
@@ -45,7 +47,7 @@ pre-requisite:
 - All CI tests passed.
 
 1. **CI: Download Metadata** 
-   - Before any upload occurs, the pipeline pulls down the current store metadata for existing apps. This ensures we are always working from the latest baseline and prevents accidental overwrites of live text.
+   - `download-store-metadata.yml` pulls the live listings back into the repo, so anything a colleague edited directly in a store console is captured before we start. It is a re-sync step, not a safety net: the repo holds the curated text and the store is overwritten from it in step 3, so **publish before you download** — a download run against listings that were never published replaces the repo copy with whatever happens to be live.
 2. **CI & Manual: Asset Generation** 
    - **CI:** Automatically executes Fastlane scripts to capture and format localized screenshots from our headless UI tests. 
    - **Manual:** Marketing and release managers manually write, review, and refine the localized metadata descriptions for every app.
@@ -58,6 +60,90 @@ pre-requisite:
    - Store compliance teams (Apple, Google, etc.) review the binaries. If rejections occur, our team intercepts the store feedback, patches the issues (metadata or code), and resubmits. This cycle repeats until all apps are approved.
 6. **CI: Release to Production** 
    - Once all apps clear the review queues, the CI pipeline is triggered again to promote the builds from staging to production, officially releasing them to the public storefronts.
+
+---
+
+### 3.1 Runbook: Publishing a New Version to All Stores
+
+The six steps above describe the shape of a release. This is the concrete sequence, with the
+workflow to dispatch at each point and what to check before moving on. Everything here is
+`workflow_dispatch` — nothing in the store path runs automatically.
+
+**Before you start**
+
+- Staging is on the new tag, the draft GitHub release exists, and CI is green (see
+  [Version Management & Release Process](#version-management--release-process)).
+- The listing text in the repo is the text you want live. It is hand-written and committed
+  under `flutter/packages/<app>/`; see [Where the listing text lives](#where-the-listing-text-lives).
+
+| # | Action | Workflow | Wait for |
+|---|--------|----------|----------|
+| 1 | Refresh screenshots | `screenshots.yml` | Full run (>1 h). Produces the `framed-screenshots` artifact every later step reads. |
+| 2 | Review listing text | — (manual, in the repo) | Your own edits committed and pushed. |
+| 3 | Create the editable Apple version | App Store Connect, or step 5 | Each iOS/macOS app sits in `PREPARE_FOR_SUBMISSION`. |
+| 4 | Upload listing text + screenshots | `publish-metadata.yml` | Every job green **and** no skip warnings (see below). |
+| 5 | Build and submit binaries | `publish-binary.yml` | Builds uploaded, submissions created. |
+| 6 | Fix rejections and resubmit | manual + re-run 4 / 5 | All stores out of the review queue. |
+| 7 | Release approved builds to the public | `release-approved.yml` | Each store reports released or "nothing held". |
+| 8 | Optional: mirror the live listings back | `download-store-metadata.yml` | Commit diff is empty. |
+
+**Why step 3 exists.** Apple attaches metadata to an App Store *version*, not to the app. If every
+version of an app is live or in review, `publish-metadata.yml` logs
+`No editable iOS version — all versions are in review or live. Skipping upload.` and the job
+still goes **green** having uploaded nothing. Either create the next version in App Store Connect
+first, or run `publish-binary.yml` (step 5) before `publish-metadata.yml` (step 4) — uploading the
+binary creates the version that metadata can then attach to. The other four stores have no such
+constraint.
+
+**Can metadata be uploaded at any time?**
+
+| Store | Any time? | Constraint |
+|-------|-----------|------------|
+| Snap | Yes | Written straight to the dashboard, live immediately, no review. |
+| Google Play | Yes | Listing-only edit, independent of release tracks. Play reviews listing changes before they appear. |
+| Microsoft | Usually | Blocked while a submission it cannot delete is in flight (first-time onboarding in certification, or a draft started by hand in Partner Center). |
+| Apple (iOS + macOS) | **No** | Needs a version in an editable state — see step 3. |
+
+**A green run does not prove anything uploaded.** Three paths exit 0 without uploading, by design.
+After every `publish-metadata.yml` run, scan the job logs for:
+
+- `No editable iOS version` / `No editable macOS version` — Apple metadata was skipped;
+  do step 3 and re-run.
+- `skipped — an in-progress submission exists` — Windows was skipped; clear the draft submission
+  in Partner Center and re-run.
+- `no framed screenshots in the artifact` — the Play upload sent listing text only and left the
+  store's screenshots untouched. Re-run `screenshots.yml` (step 1) and repeat step 4.
+
+**Screenshots are not stored in the repo.** `screenshots.yml` captures, frames and resizes them,
+then publishes them as the `framed-screenshots` artifact; `publish-metadata.yml` downloads that
+artifact and lays the images out per store inside the runner. The only screenshots committed to
+git are the `admin` and `hotel` Android sets embedded in the top-level `README.md`, which
+`screenshots.yml` refreshes on its own. GitHub expires artifacts (90 days by default), so a
+release that runs long enough can lose the screenshots between step 1 and step 4 — the
+`no framed screenshots` warning above is what that looks like.
+
+---
+
+### Where the listing text lives
+
+All listing copy is hand-written and committed. `publish-metadata.yml` uploads exactly what is in
+these files; nothing is generated at publish time.
+
+| Store | Path under `flutter/packages/<app>/` | Fields |
+|-------|--------------------------------------|--------|
+| Google Play | `android/fastlane/metadata/android/en-US/` | `title.txt` (≤30), `short_description.txt` (≤80), `full_description.txt` (≤4000), plus `images/featureGraphic.jpeg` and `images/icon.jpeg` |
+| App Store | `ios/fastlane/metadata/` | `en-US/{name,subtitle,description,keywords,promotional_text,release_notes,*_url}.txt`, `copyright.txt`, `primary_category.txt`, `review_information/` |
+| Mac App Store | `macos/fastlane/metadata/` | Same field set as iOS, uploaded independently — the two are **not** shared |
+| Microsoft Store | `windows/fastlane/metadata/en-US/` | `description.txt`, `short_description.txt`, `keywords.txt` (≤7 comma-separated terms, ≤30 chars each), `release_notes.txt` |
+| Snap Store | `snapcraft.yaml` | `summary` (≤79), `description` |
+
+Field limits worth remembering because the store rejects the upload rather than truncating:
+Apple `subtitle` ≤30, `keywords` ≤100 characters comma-separated with no spaces,
+`promotional_text` ≤170. Play `short_description` ≤80.
+
+`changelogs/default.txt` under the Play metadata directory is **not** uploaded — every Android
+Fastfile sets `skip_upload_changelogs: true`. Release notes reach Play through the binary
+workflow, not this one.
 
 ---
 
@@ -290,6 +376,9 @@ This document describes all GitHub Actions workflows used in the GrowERP reposit
    - [Release Approved Submissions (`release-approved.yml`)](#4-release-approved-submissions-release-approvedyml)
    - [Stage to Production (`stage-to-production.yml`)](#5-stage-to-production-stage-to-productionyml)
    - [Revert Production Update (`revert-last-sync.yml`)](#6-revert-production-update-revert-last-syncyml)
+   - [Publish Metadata to Stores (`publish-metadata.yml`)](#7-publish-metadata-to-stores-publish-metadatayml)
+   - [Create Store Screenshots (`screenshots.yml`)](#8-create-store-screenshots-screenshotsyml)
+   - [Download Store Metadata (`download-store-metadata.yml`)](#9-download-store-metadata-download-store-metadatayml)
 4. [Secrets Reference](#secrets-reference)
    - [Automatic Secrets](#automatic-secrets)
    - [Production Server Secrets](#production-server-secrets)
@@ -307,7 +396,7 @@ This document describes all GitHub Actions workflows used in the GrowERP reposit
 
 ###### Overview
 
-GrowERP uses ten GitHub Actions workflows to automate testing, releasing Docker images, and publishing to platform stores. All workflows live in `.github/workflows/`. The six documented in detail below are the release path; the remaining four support it.
+GrowERP uses ten GitHub Actions workflows to automate testing, releasing Docker images, and publishing to platform stores. All workflows live in `.github/workflows/`. The nine documented in detail below are the release path; `match-bootstrap.yml` is a one-time setup helper.
 
 ```
 .github/workflows/
@@ -335,6 +424,9 @@ GrowERP uses ten GitHub Actions workflows to automate testing, releasing Docker 
 | Release Approved Submissions | Manual | macOS / Ubuntu / Windows | See [Secrets Reference](#secrets-reference) |
 | Stage to Production | Manual | `ubuntu-latest` | `PROD_SSH_USER`, `PROD_SSH_KEY` |
 | Revert Production Update | Manual | `ubuntu-latest` | `PROD_SSH_USER`, `PROD_SSH_KEY` |
+| Publish Metadata to Stores | Manual | macOS / Ubuntu | Store API secrets (see [Secrets Reference](#secrets-reference)) |
+| Create Store Screenshots | Manual | `ubuntu-latest` | None |
+| Download Store Metadata | Manual | macOS / Ubuntu | Store API secrets (see [Secrets Reference](#secrets-reference)) |
 
 ---
 
@@ -604,6 +696,131 @@ If no held version is found for a given app/platform combination, the job exits 
 |--------|-------------|
 | `PROD_SSH_USER` | SSH username on `growerp.com` |
 | `PROD_SSH_KEY` | SSH private key for the production server |
+
+---
+
+
+####### 7. Publish Metadata to Stores (`publish-metadata.yml`)
+
+**Purpose:** Uploads listing text and screenshots to all five stores. No build step — it reads the
+committed metadata files and the `framed-screenshots` artifact and calls the store APIs.
+
+**Trigger:** Manual only (`workflow_dispatch`).
+
+**Concurrency:** `store-metadata-upload`, never cancelled.
+
+**Manual Input Variables:**
+
+| Input | Type | Default | Description |
+|-------|------|---------|-------------|
+| `app_admin` … `app_marketing` | boolean | `true` | One checkbox per app (admin, hotel, freelance, support, agents, rental, marketing). |
+| `store_ios` / `store_macos` / `store_android` / `store_windows` / `store_snap` | boolean | `true` | Stores to upload to. |
+
+Apps are intersected with `storeApps` in `flutter/release/release_config.json`, so an app is only
+uploaded to the stores it is published on (`support` is android + snap only).
+
+**What each job does:**
+
+| Job | Reads | Uploads via |
+|-----|-------|-------------|
+| `upload-metadata-ios` | `packages/<app>/ios/fastlane/metadata` | Fastlane `deliver`, `skip_binary_upload: true` |
+| `upload-metadata-macos` | `packages/<app>/macos/fastlane/metadata` | Same, platform `MAC_OS` |
+| `upload-metadata-android` | `android/fastlane/metadata/android/en-US` | Fastlane `upload_to_play_store`, production track, no AAB |
+| `upload-metadata-windows` | `windows/fastlane/metadata/en-US` | Partner Center Ingestion API |
+| `upload-metadata-snap` | `snapcraft.yaml` `summary` + `description` | Snapcraft dashboard metadata endpoint |
+
+Screenshots for every job come from the `framed-screenshots` artifact produced by
+`screenshots.yml`, downloaded with `if_no_artifact_found: warn` — the artifact is optional and its
+absence never fails the run.
+
+**Three ways this workflow exits green without uploading:**
+
+1. **iOS/macOS — no editable version.** Metadata attaches to an App Store version, and only
+   `PREPARE_FOR_SUBMISSION`, `DEVELOPER_REJECTED`, `REJECTED`, `METADATA_REJECTED`,
+   `WAITING_FOR_UPLOAD` or `INVALID_BINARY` accept it. Anything live or in review logs
+   `No editable iOS version` and skips. Editing the live version is deliberately disabled —
+   fastlane 2.232.2 raises a `promotional_text` `NilClass` error against a Ready for Sale version.
+2. **Windows — undeletable pending submission.** The uploader clones a new submission, which
+   requires deleting any pending one first. A submission still in certification, or a draft
+   started by hand in Partner Center, cannot be deleted; the job warns and exits.
+3. **Android — no screenshots in the artifact.** The Play lane runs with `sync_image_upload`,
+   which deletes store images not present locally, so an empty local directory would wipe the
+   live listing's screenshots. The extract step checks the artifact first and, finding nothing,
+   sets `SKIP_PLAY_IMAGES`, leaves the directories alone and uploads listing text only.
+
+Always read the job logs, not just the status ticks.
+
+**Secrets required:** Same as Publish to Stores — no additional secrets needed.
+
+---
+
+####### 8. Create Store Screenshots (`screenshots.yml`)
+
+**Purpose:** Runs each app's screenshot integration test on seven device profiles, applies
+Fastlane frameit device frames, adds captions, and resizes to each store's required dimensions.
+
+**Trigger:** Manual only (`workflow_dispatch`).
+
+**Concurrency:** `screenshots-<ref>`, cancel-in-progress.
+
+**Manual Input Variables:**
+
+| Input | Type | Default | Description |
+|-------|------|---------|-------------|
+| `apps` | string | `all` | `all` = every `storeApps` app that has `integration_test/screenshot_test.dart`, or a comma-separated list. Naming an app without that test is an error; `all` skips it silently. |
+| `commit_screenshots` | boolean | `true` | Commit the refreshed README and website-hero images back to the branch. |
+
+**Device profiles:** `phone`, `tablet7`, `tablet10` (Play), `iphone`, `ipad_pro` (App Store),
+`macos`, `windows`.
+
+**Outputs:**
+
+- **`framed-screenshots` artifact** — every `*_framed.png`. This is what `publish-metadata.yml`
+  consumes, and the only route by which screenshots reach a store.
+- **A commit**, when `commit_screenshots` is true, covering only the `admin` and `hotel` Android
+  image sets embedded in the top-level `README.md` plus the storefront hero at
+  `pop-rest-store/screen/store/assets/dashboard-screenshot.png`. Nothing else is committed.
+
+**Captions** come from `title.strings` and `keyword.strings` next to each app's metadata; the
+keyword is the small coloured line above the title. Apps without those files get uncaptioned
+frames.
+
+Runs take well over an hour, so the commit step rebases onto the branch tip and retries rather
+than force-pushing.
+
+**Secrets required:** None — the tests run against a throwaway backend in the runner.
+
+---
+
+####### 9. Download Store Metadata (`download-store-metadata.yml`)
+
+**Purpose:** Pulls the live listings back out of the stores and commits them, to re-sync the repo
+after someone edits a listing directly in a store console.
+
+**Trigger:** Manual only (`workflow_dispatch`).
+
+**Concurrency:** `store-metadata-download`, never cancelled.
+
+**Manual Input Variables:**
+
+| Input | Type | Default | Description |
+|-------|------|---------|-------------|
+| `apps` | string | `all` | `all` or a comma-separated list of `storeApps` entries. |
+| `stores` | string | `all` | `all` or a comma-separated list: `ios`, `macos`, `android`, `windows`. Snap listings are not downloaded — `snapcraft.yaml` is the source of truth there. |
+
+**This workflow treats the store as authoritative.** Android, iOS and macOS restores *prune*:
+repo files the store does not return are deleted, except `*.strings`, `review_information/**`,
+`screenshots/**` and `README.txt`. Windows restores with `noprune`, because its job maps only four
+hand-picked Partner Center fields and pruning on that partial view would delete the rest.
+
+The practical consequence: **push before you pull.** Run `publish-metadata.yml` first so the
+stores hold the curated text, after which a download is a no-op. Running a download against
+listings that were never published will overwrite the repo copy with whatever is live.
+
+Screenshots are not downloaded. They are regenerated from `screenshots.yml`, and the iOS
+screenshot directory is gitignored, so anything pulled into it could never be committed.
+
+**Secrets required:** Same as Publish to Stores — no additional secrets needed.
 
 ---
 
