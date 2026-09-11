@@ -1295,6 +1295,9 @@ String? getStatsForRoute(BuildContext context, String? route, Stats? stats) {
     case '/users':
       return '${l.admins}: ${stats.admins}\n'
           '${l.employees}: ${stats.employees}';
+    case '/hr':
+      return '${l.onboarding}: ${stats.hrOnboarding}\n'
+          '${l.leaveRequests}: ${stats.hrLeaveRequests}';
     case '/opportunities':
       return '${l.opportunities}: ${stats.opportunities}';
     case '/tasks':

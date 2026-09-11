@@ -302,6 +302,25 @@ const Map<String, AppBlock> appBlocks = {
       widgetName: 'CourseList',
     ),
   ),
+  'hr': AppBlock(
+    key: 'hr',
+    package: 'growerp_hr',
+    version: '^1.0.0',
+    importUri: 'package:growerp_hr/growerp_hr.dart',
+    description:
+        'Employees with onboarding checklist, departments, job titles and '
+        'leave requests with approval, plus employee self service.',
+    widgetsFn: 'getHrWidgets',
+    blocProvidersFn: 'getHrBlocProviders',
+    providerTakesAppId: false,
+    localizationsDelegate: 'HrLocalizations.delegate',
+    menuItem: BlockMenuItem(
+      title: 'HR',
+      route: '/hr',
+      iconName: 'badge',
+      widgetName: 'MyHrView',
+    ),
+  ),
   'rental': AppBlock(
     key: 'rental',
     package: 'growerp_rental',

@@ -124,6 +124,14 @@ when the organization's menu shows it a screen that drives that domain.
     <growerp.menu.WidgetDomain widgetName="RoutingList" artifactGroupId="GROWERP_MANUFACTURING"/>
     <growerp.menu.WidgetDomain widgetName="WorkOrderList" artifactGroupId="GROWERP_MANUFACTURING"/>
 
+    <!-- GROWERP_HR -->
+    <growerp.menu.WidgetDomain widgetName="MyHrView" artifactGroupId="GROWERP_HR"/>
+    <growerp.menu.WidgetDomain widgetName="EmployeeList" artifactGroupId="GROWERP_HR"/>
+    <growerp.menu.WidgetDomain widgetName="LeaveRequestList" artifactGroupId="GROWERP_HR"/>
+    <growerp.menu.WidgetDomain widgetName="DepartmentList" artifactGroupId="GROWERP_HR"/>
+    <growerp.menu.WidgetDomain widgetName="JobTitleList" artifactGroupId="GROWERP_HR"/>
+    <growerp.menu.WidgetDomain widgetName="OnboardingTaskList" artifactGroupId="GROWERP_HR"/>
+
     <!-- GROWERP_TRAINING -->
     <growerp.menu.WidgetDomain widgetName="CourseList" artifactGroupId="GROWERP_TRAINING"/>
     <growerp.menu.WidgetDomain widgetName="CourseMediaList" artifactGroupId="GROWERP_TRAINING"/>

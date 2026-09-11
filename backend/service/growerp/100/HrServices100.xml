@@ -1,0 +1,1086 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <!-- ============ HR: departments, job titles, employees, onboarding, leave ============
+         GROWERP_M_EMPLOYEE has write access on the whole HR REST domain because the
+         self-service screen is visible to them, so every service below checks
+         isAdmin or restricts to the caller's own party. -->
+
+    <!-- ===================== departments (mantle Party, role OrgDepartment) ===================== -->
+
+    <service verb="get" noun="Departments">
+        <in-parameters>
+            <parameter name="partyId" />
+            <parameter name="start" type="Integer" default-value="0" />
+            <parameter name="limit" type="Integer" default-value="20" />
+            <parameter name="search" default="null" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="departments" type="List">
+                <parameter name="department" type="Map">
+                    <parameter name="partyId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="name" />
+                    <parameter name="managerPartyId" />
+                    <parameter name="managerName" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="search != null">
+                <set field="search" value="%${search}%" />
+            </if>
+            <entity-find entity-name="growerp.hr.DepartmentView" list="items"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="companyPartyId" />
+                <econdition field-name="relThruDate" operator="is-null" />
+                <econdition field-name="disabled" operator="not-equals" value="Y" or-null="true" />
+                <econdition field-name="partyId" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="pseudoId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="name" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="name" />
+            </entity-find>
+            <set field="departments" from="[]" />
+            <iterate list="items" entry="item">
+                <script>departments.add([partyId: item.partyId, pseudoId: item.pseudoId,
+                    name: item.name, managerPartyId: item.managerPartyId,
+                    managerName: item.managerPartyId ?
+                        "${item.managerFirstName ?: ''} ${item.managerLastName ?: ''}".trim() : null])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="set" noun="DepartmentManager"><!-- internal -->
+        <in-parameters>
+            <parameter name="departmentPartyId" required="true" />
+            <parameter name="managerPartyId" />
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="mantle.party.PartyRelationship" list="oldRels" for-update="true">
+                <econdition field-name="toPartyId" from="departmentPartyId" />
+                <econdition field-name="relationshipTypeEnumId" value="PrtManager" />
+                <econdition field-name="thruDate" operator="is-null" />
+            </entity-find>
+            <iterate list="oldRels" entry="oldRel">
+                <if condition="oldRel.fromPartyId == managerPartyId">
+                    <return /><!-- unchanged -->
+                </if>
+                <set field="oldRel.thruDate" from="ec.user.nowTimestamp" />
+                <entity-update value-field="oldRel" />
+            </iterate>
+            <if condition="managerPartyId">
+                <service-call name="store#mantle.party.PartyRole"
+                    in-map="[partyId: managerPartyId, roleTypeId: 'Manager']" />
+                <service-call name="create#mantle.party.PartyRelationship"
+                    in-map="[fromPartyId: managerPartyId, fromRoleTypeId: 'Manager',
+                        toPartyId: departmentPartyId, toRoleTypeId: 'OrgDepartment',
+                        relationshipTypeEnumId: 'PrtManager', fromDate: ec.user.nowTimestamp]" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="create" noun="Department">
+        <in-parameters>
+            <parameter name="department" type="Map" required="true">
+                <parameter name="pseudoId" />
+                <parameter name="name" required="true" />
+                <parameter name="managerPartyId" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="department" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <if condition="!isAdmin">
+                <return error="true" message="Only admins can create departments" />
+            </if>
+            <if condition="!department.pseudoId">
+                <!-- departments are parties, so they share the 'party' pseudoId sequence
+                     (Party has a unique index on pseudoId + ownerPartyId) -->
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'party']"
+                    out-map="context" />
+                <set field="department.pseudoId" from="seqNum" />
+            </if>
+            <service-call name="create#mantle.party.Party" out-map="context"
+                in-map="[pseudoId: department.pseudoId, partyTypeEnumId: 'PtyOrganization',
+                    ownerPartyId: ownerPartyId]" />
+            <service-call name="create#mantle.party.Organization"
+                in-map="[partyId: partyId, organizationName: department.name]" />
+            <service-call name="create#mantle.party.PartyRole"
+                in-map="[partyId: partyId, roleTypeId: 'OrgDepartment']" />
+            <service-call name="create#mantle.party.PartyRelationship"
+                in-map="[fromPartyId: partyId, fromRoleTypeId: 'OrgDepartment',
+                    toPartyId: companyPartyId, toRoleTypeId: 'OrgInternal',
+                    relationshipTypeEnumId: 'PrtOrgRollup', fromDate: ec.user.nowTimestamp]" />
+            <service-call name="growerp.100.HrServices100.set#DepartmentManager"
+                in-map="[departmentPartyId: partyId, managerPartyId: department.managerPartyId]" />
+            <service-call name="growerp.100.HrServices100.get#Departments"
+                in-map="[partyId: partyId]" out-map="context" />
+            <set field="department" from="departments[0]" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="Department">
+        <in-parameters>
+            <parameter name="department" type="Map" required="true">
+                <parameter name="partyId" required="true" />
+                <parameter name="pseudoId" />
+                <parameter name="name" />
+                <parameter name="managerPartyId" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="department" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <if condition="!isAdmin">
+                <return error="true" message="Only admins can update departments" />
+            </if>
+            <entity-find entity-name="growerp.hr.DepartmentView" list="items" limit="1">
+                <econdition field-name="partyId" from="department.partyId" />
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="companyPartyId" />
+                <econdition field-name="relThruDate" operator="is-null" />
+            </entity-find>
+            <if condition="!items">
+                <return error="true" message="Department ${department.partyId} not found!" />
+            </if>
+            <if condition="department.name">
+                <service-call name="update#mantle.party.Organization"
+                    in-map="[partyId: department.partyId, organizationName: department.name]" />
+            </if>
+            <service-call name="growerp.100.HrServices100.set#DepartmentManager"
+                in-map="[departmentPartyId: department.partyId,
+                    managerPartyId: department.managerPartyId]" />
+            <service-call name="growerp.100.HrServices100.get#Departments"
+                in-map="[partyId: department.partyId]" out-map="context" />
+            <set field="department" from="departments[0]" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="Department">
+        <in-parameters>
+            <parameter name="department" type="Map" required="true">
+                <parameter name="partyId" required="true" />
+            </parameter>
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <if condition="!isAdmin">
+                <return error="true" message="Only admins can delete departments" />
+            </if>
+            <entity-find entity-name="growerp.hr.DepartmentView" list="items" limit="1">
+                <econdition field-name="partyId" from="department.partyId" />
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="companyPartyId" />
+            </entity-find>
+            <if condition="!items">
+                <return error="true" message="Department ${department.partyId} not found!" />
+            </if>
+            <entity-find-count entity-name="growerp.hr.EmployeeDetail" count-field="employeeCount">
+                <econdition field-name="departmentPartyId" from="department.partyId" />
+            </entity-find-count>
+            <if condition="employeeCount > 0">
+                <return error="true"
+                    message="Department ${items[0].name} still has ${employeeCount} employee(s)" />
+            </if>
+            <entity-delete-by-condition entity-name="mantle.party.PartyRelationship">
+                <econdition field-name="fromPartyId" from="department.partyId" />
+            </entity-delete-by-condition>
+            <entity-delete-by-condition entity-name="mantle.party.PartyRelationship">
+                <econdition field-name="toPartyId" from="department.partyId" />
+            </entity-delete-by-condition>
+            <entity-delete-by-condition entity-name="mantle.party.PartyRole">
+                <econdition field-name="partyId" from="department.partyId" />
+            </entity-delete-by-condition>
+            <entity-delete-by-condition entity-name="mantle.party.Organization">
+                <econdition field-name="partyId" from="department.partyId" />
+            </entity-delete-by-condition>
+            <entity-delete-by-condition entity-name="mantle.party.Party">
+                <econdition field-name="partyId" from="department.partyId" />
+            </entity-delete-by-condition>
+        </actions>
+    </service>
+
+    <!-- ===================== job titles ===================== -->
+
+    <service verb="get" noun="JobTitles">
+        <in-parameters>
+            <parameter name="jobTitleId" />
+            <parameter name="start" type="Integer" default-value="0" />
+            <parameter name="limit" type="Integer" default-value="20" />
+            <parameter name="search" default="null" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="jobTitles" type="List">
+                <parameter name="jobTitle" type="Map">
+                    <parameter name="jobTitleId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="title" />
+                    <parameter name="description" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="search != null">
+                <set field="search" value="%${search}%" />
+            </if>
+            <entity-find entity-name="growerp.hr.JobTitle" list="items"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="jobTitleId" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="pseudoId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="title" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="title" />
+            </entity-find>
+            <set field="jobTitles" from="[]" />
+            <iterate list="items" entry="item">
+                <script>jobTitles.add([jobTitleId: item.jobTitleId, pseudoId: item.pseudoId,
+                    title: item.title, description: item.description])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="JobTitle">
+        <in-parameters>
+            <parameter name="jobTitle" type="Map" required="true">
+                <parameter name="pseudoId" />
+                <parameter name="title" required="true" />
+                <parameter name="description" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="jobTitle" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <if condition="!isAdmin">
+                <return error="true" message="Only admins can create job titles" />
+            </if>
+            <if condition="!jobTitle.pseudoId">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'jobTitle']"
+                    out-map="context" />
+                <set field="jobTitle.pseudoId" from="seqNum" />
+            </if>
+            <service-call name="create#growerp.hr.JobTitle" out-map="context"
+                in-map="[pseudoId: jobTitle.pseudoId, ownerPartyId: ownerPartyId,
+                    title: jobTitle.title, description: jobTitle.description]" />
+            <service-call name="growerp.100.HrServices100.get#JobTitles"
+                in-map="[jobTitleId: jobTitleId]" out-map="context" />
+            <set field="jobTitle" from="jobTitles[0]" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="JobTitle">
+        <in-parameters>
+            <parameter name="jobTitle" type="Map" required="true">
+                <parameter name="jobTitleId" required="true" />
+                <parameter name="pseudoId" />
+                <parameter name="title" />
+                <parameter name="description" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="jobTitle" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <if condition="!isAdmin">
+                <return error="true" message="Only admins can update job titles" />
+            </if>
+            <entity-find entity-name="growerp.hr.JobTitle" list="items" for-update="true" limit="1">
+                <econdition field-name="jobTitleId" from="jobTitle.jobTitleId" />
+                <econdition field-name="ownerPartyId" />
+            </entity-find>
+            <if condition="!items">
+                <return error="true" message="Job title ${jobTitle.jobTitleId} not found!" />
+            </if>
+            <set field="items[0].title" from="jobTitle.title ?: items[0].title" />
+            <set field="items[0].description" from="jobTitle.description" />
+            <entity-update value-field="items[0]" />
+            <service-call name="growerp.100.HrServices100.get#JobTitles"
+                in-map="[jobTitleId: jobTitle.jobTitleId]" out-map="context" />
+            <set field="jobTitle" from="jobTitles[0]" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="JobTitle">
+        <in-parameters>
+            <parameter name="jobTitle" type="Map" required="true">
+                <parameter name="jobTitleId" required="true" />
+            </parameter>
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <if condition="!isAdmin">
+                <return error="true" message="Only admins can delete job titles" />
+            </if>
+            <entity-find entity-name="growerp.hr.JobTitle" list="items" limit="1">
+                <econdition field-name="jobTitleId" from="jobTitle.jobTitleId" />
+                <econdition field-name="ownerPartyId" />
+            </entity-find>
+            <if condition="!items">
+                <return error="true" message="Job title ${jobTitle.jobTitleId} not found!" />
+            </if>
+            <entity-find-count entity-name="growerp.hr.EmployeeDetail" count-field="employeeCount">
+                <econdition field-name="jobTitleId" from="jobTitle.jobTitleId" />
+            </entity-find-count>
+            <if condition="employeeCount > 0">
+                <return error="true"
+                    message="Job title ${items[0].title} is still used by ${employeeCount} employee(s)" />
+            </if>
+            <entity-delete value-field="items[0]" />
+        </actions>
+    </service>
+
+    <!-- ===================== onboarding checklist template ===================== -->
+
+    <service verb="get" noun="OnboardingTasks">
+        <in-parameters>
+            <parameter name="onboardingTaskId" />
+            <parameter name="start" type="Integer" default-value="0" />
+            <parameter name="limit" type="Integer" default-value="20" />
+            <parameter name="search" default="null" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="onboardingTasks" type="List">
+                <parameter name="onboardingTask" type="Map">
+                    <parameter name="onboardingTaskId" />
+                    <parameter name="description" />
+                    <parameter name="sequenceNum" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="search != null">
+                <set field="search" value="%${search}%" />
+            </if>
+            <entity-find entity-name="growerp.hr.OnboardingTask" list="items"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="onboardingTaskId" ignore-if-empty="true" />
+                <econdition field-name="description" ignore-case="true"
+                    operator="like" from="search" ignore-if-empty="true" />
+                <order-by field-name="sequenceNum,description" />
+            </entity-find>
+            <set field="onboardingTasks" from="[]" />
+            <iterate list="items" entry="item">
+                <script>onboardingTasks.add([onboardingTaskId: item.onboardingTaskId,
+                    description: item.description, sequenceNum: item.sequenceNum])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="OnboardingTask">
+        <in-parameters>
+            <parameter name="onboardingTask" type="Map" required="true">
+                <parameter name="description" required="true" />
+                <parameter name="sequenceNum" type="Integer" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="onboardingTask" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <if condition="!isAdmin">
+                <return error="true" message="Only admins can create onboarding tasks" />
+            </if>
+            <service-call name="create#growerp.hr.OnboardingTask" out-map="context"
+                in-map="[ownerPartyId: ownerPartyId, description: onboardingTask.description,
+                    sequenceNum: onboardingTask.sequenceNum ?: 0]" />
+            <service-call name="growerp.100.HrServices100.get#OnboardingTasks"
+                in-map="[onboardingTaskId: onboardingTaskId]" out-map="context" />
+            <set field="onboardingTask" from="onboardingTasks[0]" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="OnboardingTask">
+        <in-parameters>
+            <parameter name="onboardingTask" type="Map" required="true">
+                <parameter name="onboardingTaskId" required="true" />
+                <parameter name="description" />
+                <parameter name="sequenceNum" type="Integer" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="onboardingTask" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <if condition="!isAdmin">
+                <return error="true" message="Only admins can update onboarding tasks" />
+            </if>
+            <entity-find entity-name="growerp.hr.OnboardingTask" list="items" for-update="true" limit="1">
+                <econdition field-name="onboardingTaskId" from="onboardingTask.onboardingTaskId" />
+                <econdition field-name="ownerPartyId" />
+            </entity-find>
+            <if condition="!items">
+                <return error="true"
+                    message="Onboarding task ${onboardingTask.onboardingTaskId} not found!" />
+            </if>
+            <set field="items[0].description" from="onboardingTask.description ?: items[0].description" />
+            <set field="items[0].sequenceNum" from="onboardingTask.sequenceNum ?: items[0].sequenceNum" />
+            <entity-update value-field="items[0]" />
+            <service-call name="growerp.100.HrServices100.get#OnboardingTasks"
+                in-map="[onboardingTaskId: onboardingTask.onboardingTaskId]" out-map="context" />
+            <set field="onboardingTask" from="onboardingTasks[0]" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="OnboardingTask">
+        <in-parameters>
+            <parameter name="onboardingTask" type="Map" required="true">
+                <parameter name="onboardingTaskId" required="true" />
+            </parameter>
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <if condition="!isAdmin">
+                <return error="true" message="Only admins can delete onboarding tasks" />
+            </if>
+            <entity-find entity-name="growerp.hr.OnboardingTask" list="items" limit="1">
+                <econdition field-name="onboardingTaskId" from="onboardingTask.onboardingTaskId" />
+                <econdition field-name="ownerPartyId" />
+            </entity-find>
+            <if condition="!items">
+                <return error="true"
+                    message="Onboarding task ${onboardingTask.onboardingTaskId} not found!" />
+            </if>
+            <entity-delete-by-condition entity-name="growerp.hr.EmployeeOnboardingTask">
+                <econdition field-name="onboardingTaskId" from="onboardingTask.onboardingTaskId" />
+            </entity-delete-by-condition>
+            <entity-delete value-field="items[0]" />
+        </actions>
+    </service>
+
+    <!-- ===================== employees ===================== -->
+
+    <service verb="get" noun="Employees">
+        <description>Employees of the company with their HR detail and onboarding
+            checklist. Non-admins only get their own record.</description>
+        <in-parameters>
+            <parameter name="partyId" />
+            <parameter name="start" type="Integer" default-value="0" />
+            <parameter name="limit" type="Integer" default-value="20" />
+            <parameter name="search" default="null" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="employees" type="List">
+                <parameter name="employee" type="Map">
+                    <parameter name="partyId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="firstName" />
+                    <parameter name="lastName" />
+                    <parameter name="email" />
+                    <parameter name="loginName" />
+                    <parameter name="jobTitleId" />
+                    <parameter name="jobTitle" />
+                    <parameter name="departmentPartyId" />
+                    <parameter name="department" />
+                    <parameter name="managerPartyId" />
+                    <parameter name="managerName" />
+                    <parameter name="hireDate" />
+                    <parameter name="statusId" />
+                    <parameter name="onboardingTasks" type="List" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <if condition="!isAdmin">
+                <set field="partyId" from="userPartyId" />
+            </if>
+            <if condition="search != null">
+                <set field="search" value="%${search}%" />
+            </if>
+            <entity-find entity-name="growerp.hr.EmployeeView" list="items"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="companyPartyId" />
+                <econdition field-name="relThruDate" operator="is-null" />
+                <econdition field-name="disabled" operator="not-equals" value="Y" or-null="true" />
+                <econdition field-name="partyId" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="pseudoId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="firstName" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="lastName" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="email" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="lastName,firstName" />
+            </entity-find>
+            <entity-find entity-name="growerp.hr.OnboardingTask" list="templates">
+                <econdition field-name="ownerPartyId" />
+                <order-by field-name="sequenceNum,description" />
+            </entity-find>
+            <set field="employees" from="[]" />
+            <iterate list="items" entry="item">
+                <entity-find entity-name="growerp.hr.EmployeeOnboardingTask" list="doneList">
+                    <econdition field-name="partyId" from="item.partyId" />
+                </entity-find>
+                <set field="doneIds" from="doneList*.onboardingTaskId" />
+                <set field="onboardingTasks" from="[]" />
+                <iterate list="templates" entry="template">
+                    <script>onboardingTasks.add([onboardingTaskId: template.onboardingTaskId,
+                        description: template.description, sequenceNum: template.sequenceNum,
+                        completed: doneIds.contains(template.onboardingTaskId)])</script>
+                </iterate>
+                <script>employees.add([partyId: item.partyId, pseudoId: item.pseudoId,
+                    firstName: item.firstName, lastName: item.lastName,
+                    email: item.email, loginName: item.loginName,
+                    jobTitleId: item.jobTitleId, jobTitle: item.jobTitle,
+                    departmentPartyId: item.departmentPartyId, department: item.department,
+                    managerPartyId: item.managerPartyId,
+                    managerName: item.managerPartyId ?
+                        "${item.managerFirstName ?: ''} ${item.managerLastName ?: ''}".trim() : null,
+                    hireDate: item.hireDate ? ec.l10n.format(item.hireDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
+                    statusId: item.statusId ?: 'HremOnboarding',
+                    onboardingTasks: onboardingTasks])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="Employee">
+        <description>Onboard a new employee: creates the user (login, EMPLOYEE group,
+            OrgInternal relationship) and the HR detail in status Onboarding.</description>
+        <in-parameters>
+            <parameter name="employee" type="Map" required="true">
+                <parameter name="firstName" required="true" />
+                <parameter name="lastName" required="true" />
+                <parameter name="email" required="true" />
+                <parameter name="jobTitleId" />
+                <parameter name="departmentPartyId" />
+                <parameter name="managerPartyId" />
+                <parameter name="hireDate" type="Timestamp" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="employee" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <if condition="!isAdmin">
+                <return error="true" message="Only admins can create employees" />
+            </if>
+            <service-call name="growerp.100.PartyServices100.create#User" out-map="context"
+                in-map="[user: [firstName: employee.firstName, lastName: employee.lastName,
+                    email: employee.email, loginName: employee.email, role: 'OrgInternal',
+                    userGroupId: 'GROWERP_M_EMPLOYEE',
+                    company: [partyId: companyPartyId, role: 'OrgInternal']],
+                    trustGroup: true]" />
+            <service-call name="create#growerp.hr.EmployeeDetail"
+                in-map="[partyId: user.partyId, ownerPartyId: ownerPartyId,
+                    jobTitleId: employee.jobTitleId, departmentPartyId: employee.departmentPartyId,
+                    managerPartyId: employee.managerPartyId, hireDate: employee.hireDate,
+                    statusId: 'HremOnboarding']" />
+            <service-call name="growerp.100.HrServices100.get#Employees"
+                in-map="[partyId: user.partyId]" out-map="context" />
+            <set field="employee" from="employees[0]" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="Employee">
+        <in-parameters>
+            <parameter name="employee" type="Map" required="true">
+                <parameter name="partyId" required="true" />
+                <parameter name="jobTitleId" />
+                <parameter name="departmentPartyId" />
+                <parameter name="managerPartyId" />
+                <parameter name="hireDate" type="Timestamp" />
+                <parameter name="statusId" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="employee" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <if condition="!isAdmin">
+                <return error="true" message="Only admins can update employees" />
+            </if>
+            <entity-find entity-name="growerp.hr.EmployeeView" list="items" limit="1">
+                <econdition field-name="partyId" from="employee.partyId" />
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="companyPartyId" />
+                <econdition field-name="relThruDate" operator="is-null" />
+            </entity-find>
+            <if condition="!items">
+                <return error="true" message="Employee ${employee.partyId} not found!" />
+            </if>
+            <set field="terminationDate" from="null" />
+            <if condition="employee.statusId == 'HremOffboarded' &amp;&amp; items[0].statusId != 'HremOffboarded'">
+                <set field="terminationDate" from="ec.user.nowTimestamp" />
+            </if>
+            <service-call name="store#growerp.hr.EmployeeDetail"
+                in-map="[partyId: employee.partyId, ownerPartyId: ownerPartyId,
+                    jobTitleId: employee.jobTitleId, departmentPartyId: employee.departmentPartyId,
+                    managerPartyId: employee.managerPartyId, hireDate: employee.hireDate,
+                    statusId: employee.statusId ?: items[0].statusId ?: 'HremOnboarding',
+                    terminationDate: terminationDate]" />
+            <service-call name="growerp.100.HrServices100.get#Employees"
+                in-map="[partyId: employee.partyId]" out-map="context" />
+            <set field="employee" from="employees[0]" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="EmployeeOnboardingTask">
+        <description>Tick or untick one checklist item for an employee (admin only)</description>
+        <in-parameters>
+            <parameter name="partyId" required="true" />
+            <parameter name="onboardingTaskId" required="true" />
+            <parameter name="completed" type="Boolean" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="employee" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <if condition="!isAdmin">
+                <return error="true" message="Only admins can update the onboarding checklist" />
+            </if>
+            <entity-find-one entity-name="growerp.hr.OnboardingTask" value-field="template">
+                <field-map field-name="onboardingTaskId" />
+            </entity-find-one>
+            <if condition="!template || template.ownerPartyId != ownerPartyId">
+                <return error="true" message="Onboarding task ${onboardingTaskId} not found!" />
+            </if>
+            <if condition="completed">
+                <service-call name="store#growerp.hr.EmployeeOnboardingTask"
+                    in-map="[partyId: partyId, onboardingTaskId: onboardingTaskId,
+                        completedDate: ec.user.nowTimestamp, completedByPartyId: userPartyId]" />
+                <else>
+                    <entity-delete-by-condition entity-name="growerp.hr.EmployeeOnboardingTask">
+                        <econdition field-name="partyId" />
+                        <econdition field-name="onboardingTaskId" />
+                    </entity-delete-by-condition>
+                </else>
+            </if>
+            <service-call name="growerp.100.HrServices100.get#Employees"
+                in-map="[partyId: partyId]" out-map="context" />
+            <set field="employee" from="employees[0]" />
+        </actions>
+    </service>
+
+    <!-- ===================== leave ===================== -->
+
+    <service verb="count" noun="LeaveDays"><!-- internal: weekdays Mon-Fri inclusive -->
+        <in-parameters>
+            <parameter name="fromDate" type="Timestamp" required="true" />
+            <parameter name="thruDate" type="Timestamp" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="days" type="BigDecimal" />
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                def from = fromDate.toLocalDateTime().toLocalDate()
+                def thru = thruDate.toLocalDateTime().toLocalDate()
+                int n = 0
+                for (def d = from; !d.isAfter(thru); d = d.plusDays(1)) {
+                    if (d.dayOfWeek.value < 6) n++
+                }
+                days = new BigDecimal(n)
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="get" noun="LeaveRequests">
+        <description>Leave requests of the company; non-admins only get their own.</description>
+        <in-parameters>
+            <parameter name="leaveRequestId" />
+            <parameter name="partyId" />
+            <parameter name="statusId" />
+            <parameter name="start" type="Integer" default-value="0" />
+            <parameter name="limit" type="Integer" default-value="20" />
+            <parameter name="search" default="null" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="leaveRequests" type="List">
+                <parameter name="leaveRequest" type="Map">
+                    <parameter name="leaveRequestId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="partyId" />
+                    <parameter name="employeeName" />
+                    <parameter name="leaveTypeEnumId" />
+                    <parameter name="fromDate" />
+                    <parameter name="thruDate" />
+                    <parameter name="days" />
+                    <parameter name="statusId" />
+                    <parameter name="reason" />
+                    <parameter name="comments" />
+                    <parameter name="approverPartyId" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <if condition="!isAdmin">
+                <set field="partyId" from="userPartyId" />
+            </if>
+            <if condition="search != null">
+                <set field="search" value="%${search}%" />
+            </if>
+            <entity-find entity-name="growerp.hr.LeaveRequest" list="items"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="leaveRequestId" ignore-if-empty="true" />
+                <econdition field-name="partyId" ignore-if-empty="true" />
+                <econdition field-name="statusId" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="pseudoId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="reason" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="-createdDate" />
+            </entity-find>
+            <set field="leaveRequests" from="[]" />
+            <iterate list="items" entry="item">
+                <entity-find-one entity-name="mantle.party.Person" value-field="person" cache="true">
+                    <field-map field-name="partyId" from="item.partyId" />
+                </entity-find-one>
+                <script>leaveRequests.add([leaveRequestId: item.leaveRequestId,
+                    pseudoId: item.pseudoId, partyId: item.partyId,
+                    employeeName: "${person?.firstName ?: ''} ${person?.lastName ?: ''}".trim(),
+                    leaveTypeEnumId: item.leaveTypeEnumId,
+                    fromDate: ec.l10n.format(item.fromDate, 'yyyy-MM-dd HH:mm:ssZ'),
+                    thruDate: ec.l10n.format(item.thruDate, 'yyyy-MM-dd HH:mm:ssZ'),
+                    days: item.days?.toString(), statusId: item.statusId,
+                    reason: item.reason,
+                    comments: item.comments, approverPartyId: item.approverPartyId])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="LeaveRequest">
+        <in-parameters>
+            <parameter name="leaveRequest" type="Map" required="true">
+                <parameter name="partyId" />
+                <parameter name="leaveTypeEnumId" required="true" />
+                <parameter name="fromDate" type="Timestamp" required="true" />
+                <parameter name="thruDate" type="Timestamp" required="true" />
+                <parameter name="reason" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="leaveRequest" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <if condition="!isAdmin || !leaveRequest.partyId">
+                <set field="leaveRequest.partyId" from="userPartyId" />
+            </if>
+            <if condition="leaveRequest.thruDate.before(leaveRequest.fromDate)">
+                <return error="true" message="Leave end date is before the start date" />
+            </if>
+            <entity-find-one entity-name="mantle.party.Party" value-field="party">
+                <field-map field-name="partyId" from="leaveRequest.partyId" />
+            </entity-find-one>
+            <if condition="!party || party.ownerPartyId != ownerPartyId">
+                <return error="true" message="Employee ${leaveRequest.partyId} not found!" />
+            </if>
+            <service-call name="growerp.100.HrServices100.count#LeaveDays" out-map="context"
+                in-map="[fromDate: leaveRequest.fromDate, thruDate: leaveRequest.thruDate]" />
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'leaveRequest']"
+                out-map="context" />
+            <service-call name="create#growerp.hr.LeaveRequest" out-map="context"
+                in-map="[pseudoId: seqNum, ownerPartyId: ownerPartyId,
+                    partyId: leaveRequest.partyId, leaveTypeEnumId: leaveRequest.leaveTypeEnumId,
+                    fromDate: leaveRequest.fromDate, thruDate: leaveRequest.thruDate,
+                    days: days, statusId: 'HrlsPending', reason: leaveRequest.reason,
+                    createdDate: ec.user.nowTimestamp]" />
+            <service-call name="growerp.100.HrServices100.get#LeaveRequests"
+                in-map="[leaveRequestId: leaveRequestId]" out-map="context" />
+            <set field="leaveRequest" from="leaveRequests[0]" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="LeaveRequest">
+        <description>The requester can change or cancel a pending request; admins can
+            approve or reject it.</description>
+        <in-parameters>
+            <parameter name="leaveRequest" type="Map" required="true">
+                <parameter name="leaveRequestId" required="true" />
+                <parameter name="leaveTypeEnumId" />
+                <parameter name="fromDate" type="Timestamp" />
+                <parameter name="thruDate" type="Timestamp" />
+                <parameter name="reason" />
+                <parameter name="statusId" />
+                <parameter name="comments" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="leaveRequest" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <entity-find entity-name="growerp.hr.LeaveRequest" list="items" for-update="true" limit="1">
+                <econdition field-name="leaveRequestId" from="leaveRequest.leaveRequestId" />
+                <econdition field-name="ownerPartyId" />
+            </entity-find>
+            <if condition="!items">
+                <return error="true"
+                    message="Leave request ${leaveRequest.leaveRequestId} not found!" />
+            </if>
+            <set field="old" from="items[0]" />
+            <set field="isOwn" from="old.partyId == userPartyId" />
+            <if condition="!isAdmin &amp;&amp; !isOwn">
+                <return error="true" message="Only admins can update leave requests of others" />
+            </if>
+            <!-- the original status decides what may be changed; old.statusId
+                 itself is updated below -->
+            <set field="oldStatus" from="old.statusId" />
+            <set field="newStatus" from="leaveRequest.statusId" />
+            <if condition="oldStatus != 'HrlsPending'">
+                <return error="true"
+                    message="Leave request ${old.pseudoId} is ${oldStatus}, it cannot be changed" />
+            </if>
+            <if condition="newStatus &amp;&amp; newStatus != oldStatus">
+                <if condition="newStatus == 'HrlsCancelled'">
+                    <if condition="!isOwn &amp;&amp; !isAdmin">
+                        <return error="true" message="Only the requester can cancel" />
+                    </if>
+                    <set field="old.statusId" from="newStatus" />
+                    <else-if condition="newStatus == 'HrlsApproved' || newStatus == 'HrlsRejected'">
+                        <if condition="!isAdmin">
+                            <return error="true" message="Only admins can approve or reject" />
+                        </if>
+                        <set field="old.statusId" from="newStatus" />
+                        <set field="old.approverPartyId" from="userPartyId" />
+                        <set field="old.approvedDate" from="ec.user.nowTimestamp" />
+                    </else-if>
+                    <else>
+                        <return error="true" message="Status ${newStatus} not allowed" />
+                    </else>
+                </if>
+            </if>
+            <if condition="leaveRequest.fromDate || leaveRequest.thruDate || leaveRequest.leaveTypeEnumId || leaveRequest.reason != null">
+                <set field="old.fromDate" from="leaveRequest.fromDate ?: old.fromDate" />
+                <set field="old.thruDate" from="leaveRequest.thruDate ?: old.thruDate" />
+                <set field="old.leaveTypeEnumId" from="leaveRequest.leaveTypeEnumId ?: old.leaveTypeEnumId" />
+                <if condition="leaveRequest.reason != null">
+                    <set field="old.reason" from="leaveRequest.reason" />
+                </if>
+                <if condition="old.thruDate.before(old.fromDate)">
+                    <return error="true" message="Leave end date is before the start date" />
+                </if>
+                <service-call name="growerp.100.HrServices100.count#LeaveDays" out-map="context"
+                    in-map="[fromDate: old.fromDate, thruDate: old.thruDate]" />
+                <set field="old.days" from="days" />
+            </if>
+            <if condition="leaveRequest.comments != null">
+                <set field="old.comments" from="leaveRequest.comments" />
+            </if>
+            <entity-update value-field="old" />
+            <service-call name="growerp.100.HrServices100.get#LeaveRequests"
+                in-map="[leaveRequestId: leaveRequest.leaveRequestId]" out-map="context" />
+            <set field="leaveRequest" from="leaveRequests[0]" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="LeaveRequest">
+        <in-parameters>
+            <parameter name="leaveRequest" type="Map" required="true">
+                <parameter name="leaveRequestId" required="true" />
+            </parameter>
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <entity-find entity-name="growerp.hr.LeaveRequest" list="items" limit="1">
+                <econdition field-name="leaveRequestId" from="leaveRequest.leaveRequestId" />
+                <econdition field-name="ownerPartyId" />
+            </entity-find>
+            <if condition="!items">
+                <return error="true"
+                    message="Leave request ${leaveRequest.leaveRequestId} not found!" />
+            </if>
+            <if condition="!isAdmin &amp;&amp; items[0].partyId != userPartyId">
+                <return error="true" message="Only admins can delete leave requests of others" />
+            </if>
+            <if condition="items[0].statusId != 'HrlsPending'">
+                <return error="true" message="Only pending leave requests can be deleted" />
+            </if>
+            <entity-delete value-field="items[0]" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="LeaveAllowances">
+        <description>Balance per leave type for one employee and year:
+            allowance, used (approved days) and remaining.</description>
+        <in-parameters>
+            <parameter name="partyId" />
+            <parameter name="year" type="Integer" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="leaveBalances" type="List">
+                <parameter name="leaveBalance" type="Map">
+                    <parameter name="partyId" />
+                    <parameter name="leaveTypeEnumId" />
+                    <parameter name="year" />
+                    <parameter name="allowance" />
+                    <parameter name="used" />
+                    <parameter name="remaining" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <if condition="!isAdmin || !partyId">
+                <set field="partyId" from="userPartyId" />
+            </if>
+            <if condition="!year">
+                <set field="year" from="ec.user.nowTimestamp.toLocalDateTime().getYear()" />
+            </if>
+            <set field="yearStart" from="java.sql.Timestamp.valueOf(year.toString() + '-01-01 00:00:00')" />
+            <set field="yearEnd" from="java.sql.Timestamp.valueOf(year.toString() + '-12-31 23:59:59')" />
+            <entity-find entity-name="moqui.basic.Enumeration" list="types" cache="true">
+                <econdition field-name="enumTypeId" value="HrLeaveType" />
+                <order-by field-name="sequenceNum" />
+            </entity-find>
+            <set field="leaveBalances" from="[]" />
+            <iterate list="types" entry="type">
+                <entity-find-one entity-name="growerp.hr.LeaveAllowance" value-field="allowanceRow">
+                    <field-map field-name="partyId" />
+                    <field-map field-name="leaveTypeEnumId" from="type.enumId" />
+                    <field-map field-name="leaveYear" from="year" />
+                </entity-find-one>
+                <entity-find entity-name="growerp.hr.LeaveRequest" list="approved">
+                    <econdition field-name="partyId" />
+                    <econdition field-name="leaveTypeEnumId" from="type.enumId" />
+                    <econdition field-name="statusId" value="HrlsApproved" />
+                    <econdition field-name="fromDate" operator="greater-equals" from="yearStart" />
+                    <econdition field-name="fromDate" operator="less-equals" from="yearEnd" />
+                </entity-find>
+                <set field="used" from="approved.sum { it.days ?: 0 } ?: 0" />
+                <set field="allowance" from="allowanceRow?.days ?: 0" />
+                <script>leaveBalances.add([partyId: partyId, leaveTypeEnumId: type.enumId,
+                    year: year, allowance: allowance.toString(), used: used.toString(),
+                    remaining: (allowance - used).toString()])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="update" noun="LeaveAllowance">
+        <in-parameters>
+            <parameter name="partyId" required="true" />
+            <parameter name="leaveTypeEnumId" required="true" />
+            <parameter name="year" type="Integer" required="true" />
+            <parameter name="days" type="BigDecimal" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="leaveBalances" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="isAdmin"
+                from="ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <if condition="!isAdmin">
+                <return error="true" message="Only admins can set leave allowances" />
+            </if>
+            <entity-find-one entity-name="mantle.party.Party" value-field="party">
+                <field-map field-name="partyId" />
+            </entity-find-one>
+            <if condition="!party || party.ownerPartyId != ownerPartyId">
+                <return error="true" message="Employee ${partyId} not found!" />
+            </if>
+            <service-call name="store#growerp.hr.LeaveAllowance"
+                in-map="[partyId: partyId, leaveTypeEnumId: leaveTypeEnumId,
+                    leaveYear: year, ownerPartyId: ownerPartyId, days: days]" />
+            <service-call name="growerp.100.HrServices100.get#LeaveAllowances"
+                in-map="[partyId: partyId, year: year]" out-map="context" />
+        </actions>
+    </service>
+</services>

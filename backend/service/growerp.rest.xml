@@ -1552,6 +1552,99 @@ limitations under the License.
                 <service name="growerp.100.LinerServices100.delete#LinerPanel" />
             </method>
         </resource>
+        <!-- HR: departments, job titles, employees, onboarding, leave -->
+        <resource name="Departments">
+            <method type="get">
+                <service name="growerp.100.HrServices100.get#Departments" />
+            </method>
+        </resource>
+        <resource name="Department">
+            <method type="post">
+                <service name="growerp.100.HrServices100.create#Department" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.HrServices100.update#Department" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.HrServices100.delete#Department" />
+            </method>
+        </resource>
+        <resource name="JobTitles">
+            <method type="get">
+                <service name="growerp.100.HrServices100.get#JobTitles" />
+            </method>
+        </resource>
+        <resource name="JobTitle">
+            <method type="post">
+                <service name="growerp.100.HrServices100.create#JobTitle" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.HrServices100.update#JobTitle" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.HrServices100.delete#JobTitle" />
+            </method>
+        </resource>
+        <resource name="OnboardingTasks">
+            <method type="get">
+                <service name="growerp.100.HrServices100.get#OnboardingTasks" />
+            </method>
+        </resource>
+        <resource name="OnboardingTask">
+            <method type="post">
+                <service name="growerp.100.HrServices100.create#OnboardingTask" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.HrServices100.update#OnboardingTask" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.HrServices100.delete#OnboardingTask" />
+            </method>
+        </resource>
+        <resource name="Employees">
+            <method type="get">
+                <service name="growerp.100.HrServices100.get#Employees" />
+            </method>
+        </resource>
+        <resource name="Employee">
+            <method type="post">
+                <service name="growerp.100.HrServices100.create#Employee" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.HrServices100.update#Employee" />
+            </method>
+        </resource>
+        <resource name="EmployeeOnboardingTask">
+            <method type="patch">
+                <service name="growerp.100.HrServices100.update#EmployeeOnboardingTask" />
+            </method>
+        </resource>
+        <resource name="LeaveRequests">
+            <method type="get">
+                <service name="growerp.100.HrServices100.get#LeaveRequests" />
+            </method>
+        </resource>
+        <resource name="LeaveRequest">
+            <method type="post">
+                <service name="growerp.100.HrServices100.create#LeaveRequest" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.HrServices100.update#LeaveRequest" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.HrServices100.delete#LeaveRequest" />
+            </method>
+        </resource>
+        <resource name="LeaveAllowances">
+            <method type="get">
+                <service name="growerp.100.HrServices100.get#LeaveAllowances" />
+            </method>
+        </resource>
+        <resource name="LeaveAllowance">
+            <method type="patch">
+                <service name="growerp.100.HrServices100.update#LeaveAllowance" />
+            </method>
+        </resource>
         <!-- agent control dashboard aggregates -->
         <resource name="AgentControlDashboard">
             <method type="get">

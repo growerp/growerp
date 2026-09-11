@@ -128,3 +128,13 @@ export 'adk_knowledge_model.dart';
 export 'wiki_model.dart';
 // Course models
 export 'course_model.dart';
+// HR models
+export 'employee_status_model.dart';
+export 'leave_type_model.dart';
+export 'leave_status_model.dart';
+export 'department_model.dart';
+export 'job_title_model.dart';
+export 'onboarding_task_model.dart';
+export 'employee_model.dart';
+export 'leave_request_model.dart';
+export 'leave_balance_model.dart';

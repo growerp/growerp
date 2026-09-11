@@ -86,8 +86,9 @@ abstract class RestClient {
 
   @GET("rest/s1/growerp/100/TempResetPassword")
   @Extra({'noApiKey': true})
-  Future<String> getTempResetPassword(
-      {@Query('username') required String username});
+  Future<String> getTempResetPassword({
+    @Query('username') required String username,
+  });
 
   @POST("rest/s1/growerp/100/Password")
   @Extra({'noApiKey': true})
@@ -175,9 +176,7 @@ abstract class RestClient {
   });
 
   @DELETE("rest/s1/growerp/100/WebsiteConversion")
-  Future<void> deleteWebsiteConversion({
-    @Field() required String conversionId,
-  });
+  Future<void> deleteWebsiteConversion({@Field() required String conversionId});
 
   /// rebuild the owner-import XML of a live website so it can be installed elsewhere
   @GET("rest/s1/growerp/100/WebsiteConversion/export")
@@ -247,30 +246,35 @@ abstract class RestClient {
 
   @POST("rest/s1/growerp/100/EmailTemplate")
   Future<EmailTemplate> updateEmailTemplate(
-      @Field() EmailTemplate emailTemplate);
+    @Field() EmailTemplate emailTemplate,
+  );
 
   @DELETE("rest/s1/growerp/100/EmailTemplate")
   Future<EmailTemplate> deleteEmailTemplate(
-      @Field() EmailTemplate emailTemplate);
+    @Field() EmailTemplate emailTemplate,
+  );
 
   @GET("rest/s1/growerp/100/SystemSettings")
   Future<SystemSettings> getSystemSettings();
 
   @POST("rest/s1/growerp/100/SystemSettings")
   Future<SystemSettings> updateSystemSettings(
-      @Body() Map<String, dynamic> systemSettings);
+    @Body() Map<String, dynamic> systemSettings,
+  );
 
   @GET("rest/s1/growerp/100/SystemDefault")
   Future<SystemDefault> getSystemDefault();
 
   @POST("rest/s1/growerp/100/SystemDefault")
   Future<SystemDefault> updateSystemDefault(
-      @Body() Map<String, dynamic> systemDefault);
+    @Body() Map<String, dynamic> systemDefault,
+  );
 
   /// override one tenant's monthly LLM token limit, null limit clears the override
   @POST("rest/s1/growerp/100/OwnerTokenLimit")
   Future<void> updateOwnerTokenLimit(
-      @Body() Map<String, dynamic> ownerTokenLimit);
+    @Body() Map<String, dynamic> ownerTokenLimit,
+  );
 
   // countries not used
   @GET("rest/s1/growerp/100/Countries")
@@ -521,7 +525,9 @@ abstract class RestClient {
   });
 
   @POST("rest/s1/growerp/100/RentalPrice")
-  Future<RentalPrice> createRentalPrice(@Body() Map<String, dynamic> rentalPrice);
+  Future<RentalPrice> createRentalPrice(
+    @Body() Map<String, dynamic> rentalPrice,
+  );
 
   @PATCH("rest/s1/growerp/100/RentalPrice")
   Future<void> updateRentalPrice(@Body() Map<String, dynamic> rentalPrice);
@@ -706,21 +712,22 @@ abstract class RestClient {
   Future<Routing> deleteRouting({@Field() required Routing routing});
 
   @GET("rest/s1/growerp/100/RoutingTasks")
-  Future<RoutingTasks> getRoutingTasks({
-    @Query('routingId') String? routingId,
-  });
+  Future<RoutingTasks> getRoutingTasks({@Query('routingId') String? routingId});
 
   @POST("rest/s1/growerp/100/RoutingTask")
-  Future<RoutingTask> createRoutingTask(
-      {@Field() required RoutingTask routingTask});
+  Future<RoutingTask> createRoutingTask({
+    @Field() required RoutingTask routingTask,
+  });
 
   @PATCH("rest/s1/growerp/100/RoutingTask")
-  Future<RoutingTask> updateRoutingTask(
-      {@Field() required RoutingTask routingTask});
+  Future<RoutingTask> updateRoutingTask({
+    @Field() required RoutingTask routingTask,
+  });
 
   @DELETE("rest/s1/growerp/100/RoutingTask")
-  Future<RoutingTask> deleteRoutingTask(
-      {@Field() required RoutingTask routingTask});
+  Future<RoutingTask> deleteRoutingTask({
+    @Field() required RoutingTask routingTask,
+  });
 
   // liner
   @GET("rest/s1/growerp/100/LinerTypes")
@@ -748,16 +755,141 @@ abstract class RestClient {
   });
 
   @POST("rest/s1/growerp/100/LinerPanel")
-  Future<LinerPanel> createLinerPanel(
-      {@Field() required LinerPanel linerPanel});
+  Future<LinerPanel> createLinerPanel({
+    @Field() required LinerPanel linerPanel,
+  });
 
   @PATCH("rest/s1/growerp/100/LinerPanel")
-  Future<LinerPanel> updateLinerPanel(
-      {@Field() required LinerPanel linerPanel});
+  Future<LinerPanel> updateLinerPanel({
+    @Field() required LinerPanel linerPanel,
+  });
 
   @DELETE("rest/s1/growerp/100/LinerPanel")
-  Future<LinerPanel> deleteLinerPanel(
-      {@Field() required LinerPanel linerPanel});
+  Future<LinerPanel> deleteLinerPanel({
+    @Field() required LinerPanel linerPanel,
+  });
+
+  // hr
+  @GET("rest/s1/growerp/100/Departments")
+  Future<Departments> getDepartments({
+    @Query('partyId') String? partyId,
+    @Query('search') String? search,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @POST("rest/s1/growerp/100/Department")
+  Future<Department> createDepartment({
+    @Field() required Department department,
+  });
+
+  @PATCH("rest/s1/growerp/100/Department")
+  Future<Department> updateDepartment({
+    @Field() required Department department,
+  });
+
+  @DELETE("rest/s1/growerp/100/Department")
+  Future<void> deleteDepartment({@Field() required Department department});
+
+  @GET("rest/s1/growerp/100/JobTitles")
+  Future<JobTitles> getJobTitles({
+    @Query('jobTitleId') String? jobTitleId,
+    @Query('search') String? search,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @POST("rest/s1/growerp/100/JobTitle")
+  Future<JobTitle> createJobTitle({@Field() required JobTitle jobTitle});
+
+  @PATCH("rest/s1/growerp/100/JobTitle")
+  Future<JobTitle> updateJobTitle({@Field() required JobTitle jobTitle});
+
+  @DELETE("rest/s1/growerp/100/JobTitle")
+  Future<void> deleteJobTitle({@Field() required JobTitle jobTitle});
+
+  @GET("rest/s1/growerp/100/OnboardingTasks")
+  Future<OnboardingTasks> getOnboardingTasks({
+    @Query('onboardingTaskId') String? onboardingTaskId,
+    @Query('search') String? search,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @POST("rest/s1/growerp/100/OnboardingTask")
+  Future<OnboardingTask> createOnboardingTask({
+    @Field() required OnboardingTask onboardingTask,
+  });
+
+  @PATCH("rest/s1/growerp/100/OnboardingTask")
+  Future<OnboardingTask> updateOnboardingTask({
+    @Field() required OnboardingTask onboardingTask,
+  });
+
+  @DELETE("rest/s1/growerp/100/OnboardingTask")
+  Future<void> deleteOnboardingTask({
+    @Field() required OnboardingTask onboardingTask,
+  });
+
+  @GET("rest/s1/growerp/100/Employees")
+  Future<Employees> getEmployees({
+    @Query('partyId') String? partyId,
+    @Query('search') String? search,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @POST("rest/s1/growerp/100/Employee")
+  Future<Employee> createEmployee({@Field() required Employee employee});
+
+  @PATCH("rest/s1/growerp/100/Employee")
+  Future<Employee> updateEmployee({@Field() required Employee employee});
+
+  @PATCH("rest/s1/growerp/100/EmployeeOnboardingTask")
+  Future<Employee> updateEmployeeOnboardingTask({
+    @Field() required String partyId,
+    @Field() required String onboardingTaskId,
+    @Field() required bool completed,
+  });
+
+  @GET("rest/s1/growerp/100/LeaveRequests")
+  Future<LeaveRequests> getLeaveRequests({
+    @Query('leaveRequestId') String? leaveRequestId,
+    @Query('partyId') String? partyId,
+    @Query('statusId') String? statusId,
+    @Query('search') String? search,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @POST("rest/s1/growerp/100/LeaveRequest")
+  Future<LeaveRequest> createLeaveRequest({
+    @Field() required LeaveRequest leaveRequest,
+  });
+
+  @PATCH("rest/s1/growerp/100/LeaveRequest")
+  Future<LeaveRequest> updateLeaveRequest({
+    @Field() required LeaveRequest leaveRequest,
+  });
+
+  @DELETE("rest/s1/growerp/100/LeaveRequest")
+  Future<void> deleteLeaveRequest({
+    @Field() required LeaveRequest leaveRequest,
+  });
+
+  @GET("rest/s1/growerp/100/LeaveAllowances")
+  Future<LeaveBalances> getLeaveAllowances({
+    @Query('partyId') String? partyId,
+    @Query('year') int? year,
+  });
+
+  @PATCH("rest/s1/growerp/100/LeaveAllowance")
+  Future<LeaveBalances> updateLeaveAllowance({
+    @Field() required String partyId,
+    @Field() required String leaveTypeEnumId,
+    @Field() required int year,
+    @Field() required String days,
+  });
 
   // accounting
   @GET("rest/s1/growerp/100/Ledger")
@@ -2320,9 +2452,7 @@ abstract class RestClient {
   Future<AdkJobs> getAdkJobs({@Query('search') String? search});
 
   @POST("rest/s1/growerp/100/AdkJob/{jobName}/clearLock")
-  Future<void> clearAdkJobLock({
-    @Path() required String jobName,
-  });
+  Future<void> clearAdkJobLock({@Path() required String jobName});
 
   @POST("rest/s1/growerp/100/AdkJob/{jobName}/paused")
   Future<void> updateAdkJobPaused({

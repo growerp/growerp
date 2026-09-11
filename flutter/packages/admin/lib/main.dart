@@ -14,6 +14,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:growerp_activity/growerp_activity.dart';
+import 'package:growerp_hr/growerp_hr.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_adk/growerp_adk.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
@@ -238,6 +239,7 @@ List<LocalizationsDelegate> delegates = [
   WebsiteLocalizations.delegate,
   SalesLocalizations.delegate,
   ActivityLocalizations.delegate,
+  HrLocalizations.delegate,
   WikiLocalizations.delegate,
   DemosLocalizations.delegate,
   ManufLinerLocalizations.delegate,
@@ -256,6 +258,7 @@ List<Map<String, GrowerpWidgetBuilder>> adminWidgetRegistrations = [
   getManufacturingWidgets(),
   getOrderAccountingWidgets(),
   getActivityWidgets(),
+  getHrWidgets(),
   getMarketingWidgets(),
   getOutreachWidgets(),
   getSalesWidgets(),
@@ -289,6 +292,7 @@ List<WidgetMetadata> adminWidgetMetadata = [
   ...getManufacturingWidgetsWithMetadata(),
   ...getOrderAccountingWidgetsWithMetadata(),
   ...getActivityWidgetsWithMetadata(),
+  ...getHrWidgetsWithMetadata(),
   ...getMarketingWidgetsWithMetadata(),
   ...getOutreachWidgetsWithMetadata(),
   ...getSalesWidgetsWithMetadata(),
@@ -313,5 +317,6 @@ List<BlocProvider> getAdminBlocProviders(
     ...getOutreachBlocProviders(restClient),
     ...getWebsiteBlocProviders(restClient, applicationId),
     ...getCoursesBlocProviders(restClient),
+    ...getHrBlocProviders(restClient),
   ];
 }

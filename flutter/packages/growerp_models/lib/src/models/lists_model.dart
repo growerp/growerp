@@ -423,3 +423,61 @@ abstract class EmailTemplates with _$EmailTemplates {
   factory EmailTemplates.fromJson(Map<String, dynamic> json) =>
       _$EmailTemplatesFromJson(json);
 }
+
+@freezed
+abstract class Departments with _$Departments {
+  factory Departments({@Default([]) List<Department> departments}) =
+      _Departments;
+  Departments._();
+
+  factory Departments.fromJson(Map<String, dynamic> json) =>
+      _$DepartmentsFromJson(json);
+}
+
+@freezed
+abstract class JobTitles with _$JobTitles {
+  factory JobTitles({@Default([]) List<JobTitle> jobTitles}) = _JobTitles;
+  JobTitles._();
+
+  factory JobTitles.fromJson(Map<String, dynamic> json) =>
+      _$JobTitlesFromJson(json);
+}
+
+@freezed
+abstract class OnboardingTasks with _$OnboardingTasks {
+  factory OnboardingTasks({@Default([]) List<OnboardingTask> onboardingTasks}) =
+      _OnboardingTasks;
+  OnboardingTasks._();
+
+  factory OnboardingTasks.fromJson(Map<String, dynamic> json) =>
+      _$OnboardingTasksFromJson(json);
+}
+
+@freezed
+abstract class Employees with _$Employees {
+  factory Employees({@Default([]) List<Employee> employees}) = _Employees;
+  Employees._();
+
+  factory Employees.fromJson(Map<String, dynamic> json) =>
+      _$EmployeesFromJson(json);
+}
+
+@freezed
+abstract class LeaveRequests with _$LeaveRequests {
+  factory LeaveRequests({@Default([]) List<LeaveRequest> leaveRequests}) =
+      _LeaveRequests;
+  LeaveRequests._();
+
+  factory LeaveRequests.fromJson(Map<String, dynamic> json) =>
+      _$LeaveRequestsFromJson(json);
+}
+
+@freezed
+abstract class LeaveBalances with _$LeaveBalances {
+  factory LeaveBalances({@Default([]) List<LeaveBalance> leaveBalances}) =
+      _LeaveBalances;
+  LeaveBalances._();
+
+  factory LeaveBalances.fromJson(Map<String, dynamic> json) =>
+      _$LeaveBalancesFromJson(json);
+}

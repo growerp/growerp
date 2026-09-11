@@ -117,6 +117,55 @@ class WorkOrderStatusValConverter
   }
 }
 
+class EmployeeStatusConverter
+    implements JsonConverter<EmployeeStatus?, String?> {
+  const EmployeeStatusConverter();
+
+  @override
+  EmployeeStatus? fromJson(String? json) {
+    if (json == null) return null;
+    return EmployeeStatus.getByValue(json);
+  }
+
+  @override
+  String? toJson(EmployeeStatus? object) {
+    if (object == null) return null;
+    return object.toString();
+  }
+}
+
+class LeaveTypeConverter implements JsonConverter<LeaveType?, String?> {
+  const LeaveTypeConverter();
+
+  @override
+  LeaveType? fromJson(String? json) {
+    if (json == null) return null;
+    return LeaveType.getByValue(json);
+  }
+
+  @override
+  String? toJson(LeaveType? object) {
+    if (object == null) return null;
+    return object.toString();
+  }
+}
+
+class LeaveStatusConverter implements JsonConverter<LeaveStatus?, String?> {
+  const LeaveStatusConverter();
+
+  @override
+  LeaveStatus? fromJson(String? json) {
+    if (json == null) return null;
+    return LeaveStatus.getByValue(json);
+  }
+
+  @override
+  String? toJson(LeaveStatus? object) {
+    if (object == null) return null;
+    return object.toString();
+  }
+}
+
 class FinDocStatusValConverter
     implements JsonConverter<FinDocStatusVal?, String?> {
   const FinDocStatusValConverter();

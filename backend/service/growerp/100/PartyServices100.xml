@@ -558,6 +558,9 @@ limitations under the License.
                         operator="like" from="search" ignore-if-empty="true" />
                 </econditions>
                 <econdition field-name="companyRole" ignore-if-empty="true" />
+                <!-- HR departments are organization parties too; never list them as companies -->
+                <econdition field-name="companyRole" operator="not-equals" value="OrgDepartment"
+                    or-null="true" />
                 <econdition field-name="customerStatusId" operator="in" from="leadStatusList"
                     or-null="true" ignore-if-empty="true" />
                 <econdition field-name="customerStatusId" ignore-if-empty="true" />

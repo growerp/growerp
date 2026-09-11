@@ -442,5 +442,7 @@
   "showOutreachGuideHelp": "Añade la pestaña Guía al menú de outreach solo para usted.",
   "@showOutreachGuideHelp": {
     "description": "System setup: help text for the outreach setup guide switch"
-  }
+  },
+  "onboarding": "Incorporación",
+  "leaveRequests": "Solicitudes de permiso"
 }

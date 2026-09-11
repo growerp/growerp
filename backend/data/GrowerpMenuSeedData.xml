@@ -76,6 +76,8 @@ limitations under the License.
         title="organization" route="/companies" iconName="business" widgetName="ShowCompanyDialog"
         userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN","GROWERP_M_EMPLOYEE","GROWERP_M_OTHER"]'
         updateGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN","GROWERP_M_EMPLOYEE"]' sequenceNum="80"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_HR" menuConfigurationId="ADMIN_DEFAULT"
+        title="HR" route="/hr" iconName="badge" widgetName="MyHrView" sequenceNum="85"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_CATALOG" menuConfigurationId="ADMIN_DEFAULT" itemKey="products"
         title="catalog" route="/catalog" iconName="category" widgetName="ProductList" sequenceNum="90"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ORDERS" menuConfigurationId="ADMIN_DEFAULT" itemKey="openSlsOrders"
@@ -182,6 +184,24 @@ limitations under the License.
         title="Course Media" iconName="auto_awesome" widgetName="CourseMediaList" sequenceNum="30"/>
 
     <!-- ADMIN_CATALOG children -->
+    <!-- HR tabs: My HR for every internal user, the rest for admins only -->
+    <growerp.menu.MenuItem menuItemId="ADMIN_HR_MY" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_HR"
+        title="My HR" iconName="person" widgetName="MyHrView" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_HR_EMPLOYEES" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_HR"
+        title="Employees" iconName="people" widgetName="EmployeeList"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_HR_LEAVE" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_HR"
+        title="Leave Requests" iconName="luggage" widgetName="LeaveRequestList"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_HR_DEPARTMENTS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_HR"
+        title="Departments" iconName="apartment" widgetName="DepartmentList"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="40"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_HR_JOB_TITLES" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_HR"
+        title="Job Titles" iconName="work" widgetName="JobTitleList"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="50"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_HR_ONBOARDING" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_HR"
+        title="Onboarding Tasks" iconName="checklist" widgetName="OnboardingTaskList"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="60"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_CAT_PRODUCTS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_CATALOG"
         title="Products" iconName="home" widgetName="ProductList" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_CAT_ASSETS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_CATALOG"

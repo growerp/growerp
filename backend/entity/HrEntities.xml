@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!--  Human resources: employees, onboarding, leave            -->
+    <!--  A department is a mantle Party (PtyOrganization) with    -->
+    <!--  PartyRole OrgDepartment and a PrtOrgRollup relationship  -->
+    <!--  to the company; it has no entity of its own.             -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="JobTitle" package="growerp.hr">
+        <field name="jobTitleId" type="id" is-pk="true" />
+        <field name="pseudoId" type="id" />
+        <field name="ownerPartyId" type="id" />
+        <field name="title" type="text-medium" />
+        <field name="description" type="text-long" />
+        <relationship type="one" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+    </entity>
+
+    <entity entity-name="EmployeeDetail" package="growerp.hr">
+        <description>HR fields of an employee; the employee itself is the Person with a
+            PrtEmployee relationship to the company.</description>
+        <field name="partyId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" />
+        <field name="jobTitleId" type="id" />
+        <field name="departmentPartyId" type="id" />
+        <field name="managerPartyId" type="id" />
+        <field name="hireDate" type="date-time" />
+        <field name="statusId" type="id" />
+        <field name="terminationDate" type="date-time" />
+        <relationship type="one" related="mantle.party.Party">
+            <key-map field-name="partyId" />
+        </relationship>
+        <relationship type="one" related="growerp.hr.JobTitle">
+            <key-map field-name="jobTitleId" />
+        </relationship>
+        <relationship type="one" title="Department" related="mantle.party.Party">
+            <key-map field-name="departmentPartyId" related="partyId" />
+        </relationship>
+        <relationship type="one" related="moqui.basic.StatusItem">
+            <key-map field-name="statusId" />
+        </relationship>
+    </entity>
+
+    <entity entity-name="OnboardingTask" package="growerp.hr">
+        <description>Company-wide onboarding checklist template item.</description>
+        <field name="onboardingTaskId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" />
+        <field name="description" type="text-medium" />
+        <field name="sequenceNum" type="number-integer" />
+        <relationship type="one" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+    </entity>
+
+    <entity entity-name="EmployeeOnboardingTask" package="growerp.hr">
+        <description>Completion of a checklist item for one employee; absence = not done.</description>
+        <field name="partyId" type="id" is-pk="true" />
+        <field name="onboardingTaskId" type="id" is-pk="true" />
+        <field name="completedDate" type="date-time" />
+        <field name="completedByPartyId" type="id" />
+        <relationship type="one" related="growerp.hr.OnboardingTask">
+            <key-map field-name="onboardingTaskId" />
+        </relationship>
+    </entity>
+
+    <entity entity-name="LeaveAllowance" package="growerp.hr">
+        <field name="partyId" type="id" is-pk="true" />
+        <field name="leaveTypeEnumId" type="id" is-pk="true" />
+        <field name="leaveYear" type="number-integer" is-pk="true" />
+        <field name="ownerPartyId" type="id" />
+        <field name="days" type="number-decimal" />
+        <relationship type="one" title="HrLeaveType" related="moqui.basic.Enumeration">
+            <key-map field-name="leaveTypeEnumId" related="enumId" />
+        </relationship>
+    </entity>
+
+    <entity entity-name="LeaveRequest" package="growerp.hr">
+        <field name="leaveRequestId" type="id" is-pk="true" />
+        <field name="pseudoId" type="id" />
+        <field name="ownerPartyId" type="id" />
+        <field name="partyId" type="id" />
+        <field name="leaveTypeEnumId" type="id" />
+        <field name="fromDate" type="date-time" />
+        <field name="thruDate" type="date-time" />
+        <field name="days" type="number-decimal" />
+        <field name="statusId" type="id" />
+        <field name="reason" type="text-long" />
+        <field name="approverPartyId" type="id" />
+        <field name="approvedDate" type="date-time" />
+        <field name="comments" type="text-long" />
+        <field name="createdDate" type="date-time" />
+        <relationship type="one" related="mantle.party.Party">
+            <key-map field-name="partyId" />
+        </relationship>
+        <relationship type="one" title="HrLeaveType" related="moqui.basic.Enumeration">
+            <key-map field-name="leaveTypeEnumId" related="enumId" />
+        </relationship>
+        <relationship type="one" related="moqui.basic.StatusItem">
+            <key-map field-name="statusId" />
+        </relationship>
+    </entity>
+
+    <!-- employees of a company: Person with an active PrtEmployee relationship to the
+         company (OrgInternal), with the optional HR detail joined in -->
+    <view-entity entity-name="EmployeeView" package="growerp.hr">
+        <member-entity entity-alias="REL" entity-name="mantle.party.PartyRelationship">
+            <entity-condition>
+                <econdition field-name="relationshipTypeEnumId" value="PrtEmployee" />
+                <econdition field-name="toRoleTypeId" value="OrgInternal" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party" join-from-alias="REL">
+            <key-map field-name="fromPartyId" related="partyId" />
+        </member-entity>
+        <member-entity entity-alias="PERSON" entity-name="mantle.party.Person" join-from-alias="PTY">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <member-entity entity-alias="ACCT" entity-name="moqui.security.UserAccount"
+            join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <member-entity entity-alias="DETAIL" entity-name="growerp.hr.EmployeeDetail"
+            join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <member-entity entity-alias="JT" entity-name="growerp.hr.JobTitle"
+            join-from-alias="DETAIL" join-optional="true">
+            <key-map field-name="jobTitleId" />
+        </member-entity>
+        <member-entity entity-alias="DEPT" entity-name="mantle.party.Organization"
+            join-from-alias="DETAIL" join-optional="true">
+            <key-map field-name="departmentPartyId" related="partyId" />
+        </member-entity>
+        <member-entity entity-alias="MGR" entity-name="mantle.party.Person"
+            join-from-alias="DETAIL" join-optional="true">
+            <key-map field-name="managerPartyId" related="partyId" />
+        </member-entity>
+        <alias name="partyId" entity-alias="PTY" />
+        <alias name="pseudoId" entity-alias="PTY" />
+        <alias name="ownerPartyId" entity-alias="PTY" />
+        <alias name="disabled" entity-alias="PTY" />
+        <alias name="companyPartyId" field="toPartyId" entity-alias="REL" />
+        <alias name="relThruDate" field="thruDate" entity-alias="REL" />
+        <alias name="firstName" entity-alias="PERSON" />
+        <alias name="lastName" entity-alias="PERSON" />
+        <alias name="email" field="emailAddress" entity-alias="ACCT" />
+        <alias name="loginName" field="username" entity-alias="ACCT" />
+        <alias name="jobTitleId" entity-alias="DETAIL" />
+        <alias name="jobTitle" field="title" entity-alias="JT" />
+        <alias name="departmentPartyId" entity-alias="DETAIL" />
+        <alias name="department" field="organizationName" entity-alias="DEPT" />
+        <alias name="managerPartyId" entity-alias="DETAIL" />
+        <alias name="managerFirstName" field="firstName" entity-alias="MGR" />
+        <alias name="managerLastName" field="lastName" entity-alias="MGR" />
+        <alias name="hireDate" entity-alias="DETAIL" />
+        <alias name="statusId" entity-alias="DETAIL" />
+    </view-entity>
+
+    <!-- departments of a company: Organization party with an active PrtOrgRollup
+         relationship to the company and its optional PrtManager -->
+    <view-entity entity-name="DepartmentView" package="growerp.hr">
+        <member-entity entity-alias="REL" entity-name="mantle.party.PartyRelationship">
+            <entity-condition>
+                <econdition field-name="relationshipTypeEnumId" value="PrtOrgRollup" />
+                <econdition field-name="fromRoleTypeId" value="OrgDepartment" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="PTY" entity-name="mantle.party.Party" join-from-alias="REL">
+            <key-map field-name="fromPartyId" related="partyId" />
+        </member-entity>
+        <member-entity entity-alias="ORG" entity-name="mantle.party.Organization" join-from-alias="PTY">
+            <key-map field-name="partyId" />
+        </member-entity>
+        <member-entity entity-alias="MGRREL" entity-name="mantle.party.PartyRelationship"
+            join-from-alias="PTY" join-optional="true">
+            <key-map field-name="partyId" related="toPartyId" />
+            <entity-condition>
+                <econdition field-name="relationshipTypeEnumId" value="PrtManager" />
+                <econdition field-name="thruDate" operator="is-null" />
+            </entity-condition>
+        </member-entity>
+        <member-entity entity-alias="MGR" entity-name="mantle.party.Person"
+            join-from-alias="MGRREL" join-optional="true">
+            <key-map field-name="fromPartyId" related="partyId" />
+        </member-entity>
+        <alias name="partyId" entity-alias="PTY" />
+        <alias name="pseudoId" entity-alias="PTY" />
+        <alias name="ownerPartyId" entity-alias="PTY" />
+        <alias name="disabled" entity-alias="PTY" />
+        <alias name="companyPartyId" field="toPartyId" entity-alias="REL" />
+        <alias name="relThruDate" field="thruDate" entity-alias="REL" />
+        <alias name="name" field="organizationName" entity-alias="ORG" />
+        <alias name="managerPartyId" field="fromPartyId" entity-alias="MGRREL" />
+        <alias name="managerFirstName" field="firstName" entity-alias="MGR" />
+        <alias name="managerLastName" field="lastName" entity-alias="MGR" />
+    </view-entity>
+</entities>

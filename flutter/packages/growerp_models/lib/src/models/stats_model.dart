@@ -46,6 +46,8 @@ abstract class Stats with _$Stats {
     @Default(0) int requests,
     @Default(0) int todoActivities,
     @Default(0) int eventActivities,
+    @Default(0) int hrOnboarding,
+    @Default(0) int hrLeaveRequests,
   }) = _Stats;
 
   factory Stats.fromJson(Map<String, dynamic> json) =>

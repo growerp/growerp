@@ -1353,5 +1353,7 @@
   "showOutreachGuideHelp": "เพิ่มแท็บคู่มือในเมนู outreach เฉพาะสำหรับคุณเท่านั้น",
   "@showOutreachGuideHelp": {
     "description": "System setup: help text for the outreach setup guide switch"
-  }
+  },
+  "onboarding": "การปฐมนิเทศ",
+  "leaveRequests": "คำขอลา"
 }

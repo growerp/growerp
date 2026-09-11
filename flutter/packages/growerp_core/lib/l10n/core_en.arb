@@ -1766,5 +1766,13 @@
   "writeImpliesView": "Write access also grants view access",
   "@writeImpliesView": {
     "description": "Explains the subset rule in the security dialog"
+  },
+  "onboarding": "Onboarding",
+  "leaveRequests": "Leave requests",
+  "@onboarding": {
+    "description": "Employees still being onboarded, HR dashboard tile"
+  },
+  "@leaveRequests": {
+    "description": "Number of leave requests waiting for approval"
   }
 }

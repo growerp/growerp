@@ -18,6 +18,8 @@ workspace:
   - packages/growerp_core/example
   - packages/growerp_courses
   - packages/growerp_courses/example
+  - packages/growerp_hr
+  - packages/growerp_hr/example
   - packages/growerp_inventory
   - packages/growerp_inventory/example
   - packages/growerp_manufacturing
@@ -82,6 +84,8 @@ melos:
     - packages/growerp_wiki/example
     - packages/growerp_activity
     - packages/growerp_activity/example
+    - packages/growerp_hr
+    - packages/growerp_hr/example
     - packages/growerp_adk
     - packages/growerp_adk/example
     - packages/growerp_marketing

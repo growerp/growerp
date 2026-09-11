@@ -347,6 +347,18 @@ limitations under the License.
                 <econdition field-name="accountPartyId"
                     from="ec.user.userAccount.partyId"/>
             </entity-find-count>
+            <!-- HR counts are cheap and always current, so they are not part
+                 of the periodically calculated Statistics entity -->
+            <entity-find-count count-field="hrOnboarding"
+                entity-name="growerp.hr.EmployeeDetail">
+                <econdition field-name="ownerPartyId"/>
+                <econdition field-name="statusId" value="HremOnboarding"/>
+            </entity-find-count>
+            <entity-find-count count-field="hrLeaveRequests"
+                entity-name="growerp.hr.LeaveRequest">
+                <econdition field-name="ownerPartyId"/>
+                <econdition field-name="statusId" value="HrlsPending"/>
+            </entity-find-count>
             <if condition="st">
                 <set field="stats"
                     from="[
@@ -372,6 +384,8 @@ limitations under the License.
                         incomingShipments: st.incomingShipments,
                         whLocations: st.whLocations,
                         requests: st.requests,
+                        hrOnboarding: hrOnboarding,
+                        hrLeaveRequests: hrLeaveRequests,
                     ]"/>
                 <else>
                     <set field="stats"
@@ -398,6 +412,8 @@ limitations under the License.
                         incomingShipments: 0,
                         whLocations: 0,
                         requests: 0,
+                        hrOnboarding: hrOnboarding,
+                        hrLeaveRequests: hrLeaveRequests,
                         notReadChatRooms: chatRooms
                         ]"/>
                 </else>

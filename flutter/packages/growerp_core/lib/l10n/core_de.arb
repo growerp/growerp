@@ -1353,5 +1353,7 @@
   "showOutreachGuideHelp": "Fügt das Register „Anleitung“ nur für Sie zum Outreach-Menü hinzu.",
   "@showOutreachGuideHelp": {
     "description": "System setup: help text for the outreach setup guide switch"
-  }
+  },
+  "onboarding": "Einarbeitung",
+  "leaveRequests": "Urlaubsanträge"
 }

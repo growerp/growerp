@@ -1353,5 +1353,7 @@
   "showOutreachGuideHelp": "Ajoute l'onglet Guide au menu outreach pour vous uniquement.",
   "@showOutreachGuideHelp": {
     "description": "System setup: help text for the outreach setup guide switch"
-  }
+  },
+  "onboarding": "Intégration",
+  "leaveRequests": "Demandes de congé"
 }
