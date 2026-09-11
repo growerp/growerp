@@ -21,7 +21,7 @@ screens:
   - route: /tasks        title: "Tasks"
   - route: /orders       title: "Orders"
   - route: /acct-sales   title: "Sales invoices"
-  - route: /acct-ledger  title: "Ledger"
+  - route: /bookkeeping  title: "Bookkeeping"
 */
 
 import 'dart:io';
@@ -196,7 +196,7 @@ void main() {
     await _selectOption(tester, route: '/acct-sales', formKey: '/acct-sales');
     await _screenshot(binding, tester, 'sales_invoices');
 
-    await _selectOption(tester, route: '/acct-ledger', formKey: '/acct-ledger');
-    await _screenshot(binding, tester, 'ledger');
+    await _selectOption(tester, route: '/bookkeeping', formKey: '/bookkeeping');
+    await _screenshot(binding, tester, 'bookkeeping');
   });
 }

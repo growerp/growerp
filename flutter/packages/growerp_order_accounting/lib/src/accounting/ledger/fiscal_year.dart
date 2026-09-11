@@ -15,6 +15,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
 
 /// Name of the fiscal year we are in now, like Y2026.
 /// The accounting year can start in any month, so in the months before its
@@ -37,3 +38,18 @@ int fiscalYearStartMonth(BuildContext context) =>
         ?.company
         ?.fiscalYearStartMonth ??
     1;
+
+/// Year part of a period name: Y2025, Y2025q1 and Y2025m01 all give 2025.
+int yearFromPeriodName(String periodName) =>
+    int.tryParse(
+      periodName.length >= 5 ? periodName.substring(1, 5) : periodName,
+    ) ??
+    DateTime.now().year;
+
+/// The same period name shifted to another [year]: Y2025q1 -> Y2026q1.
+String periodNameForYear(String periodName, int year) =>
+    'Y$year${periodName.length > 5 ? periodName.substring(5) : ''}';
+
+/// Whether [timePeriods] hold any period of [year].
+bool periodYearExists(List<TimePeriod> timePeriods, int year) =>
+    timePeriods.any((period) => period.periodName.startsWith('Y$year'));

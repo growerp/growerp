@@ -1202,6 +1202,7 @@ limitations under the License.
         <alias name="accountCode" entity-alias="GLAC" />
         <alias name="accountName" entity-alias="GLAC" />
         <alias name="amount" entity-alias="ATE" />
+        <alias name="otherPartyId" entity-alias="ATX" />
         <alias name="otherCompanyPartyId" field="partyId" entity-alias="CORG" />
         <alias name="otherCompanyName" field="organizationName" entity-alias="CORG" />
     </view-entity>

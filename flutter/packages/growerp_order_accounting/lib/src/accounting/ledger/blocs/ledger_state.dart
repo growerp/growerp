@@ -20,6 +20,7 @@ class LedgerState extends Equatable {
   const LedgerState({
     this.status = LedgerStatus.initial,
     this.ledgerReport,
+    this.profitLoss,
     this.timePeriods = const [],
     this.message,
   });
@@ -28,23 +29,26 @@ class LedgerState extends Equatable {
   final List<TimePeriod> timePeriods;
   final String? message;
   final LedgerReport? ledgerReport;
+  final ProfitLoss? profitLoss;
 
   LedgerState copyWith({
     LedgerStatus? status,
     List<TimePeriod>? timePeriods,
     String? message,
     LedgerReport? ledgerReport,
+    ProfitLoss? profitLoss,
   }) {
     return LedgerState(
       status: status ?? this.status,
       timePeriods: timePeriods ?? this.timePeriods,
       ledgerReport: ledgerReport ?? this.ledgerReport,
+      profitLoss: profitLoss ?? this.profitLoss,
       message: message,
     );
   }
 
   @override
-  List<Object?> get props => [status, ledgerReport, timePeriods];
+  List<Object?> get props => [status, ledgerReport, profitLoss, timePeriods];
 
   @override
   String toString() =>

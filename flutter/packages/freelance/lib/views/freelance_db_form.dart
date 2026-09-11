@@ -72,7 +72,7 @@ class FreelanceDbForm extends StatelessWidget {
                   '/orders',
                   '/acct-sales',
                   '/acct-purchase',
-                  '/acct-ledger',
+                  '/bookkeeping',
                 },
                 chartBuilder: (route) {
                   if (route == '/tasks') {
@@ -99,12 +99,7 @@ class FreelanceDbForm extends StatelessWidget {
                   if (route == '/acct-purchase') {
                     return const AcctPurchaseDashboardChartMini();
                   }
-                  if (route == '/acct-ledger') {
-                    return const LedgerDashboardChartMini();
-                  }
-                  if (route == '/acct-reports' ||
-                      route == '/accounting' ||
-                      route == '/accounting/reports') {
+                  if (route == '/bookkeeping') {
                     return const RevenueExpenseChartMini();
                   }
                   return null;

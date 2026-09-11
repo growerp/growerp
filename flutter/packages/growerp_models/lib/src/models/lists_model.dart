@@ -219,6 +219,16 @@ abstract class Locations with _$Locations {
 }
 
 @freezed
+abstract class CashBookEntries with _$CashBookEntries {
+  factory CashBookEntries({@Default([]) List<CashBookEntry> cashBookEntries}) =
+      _CashBookEntries;
+  CashBookEntries._();
+
+  factory CashBookEntries.fromJson(Map<String, dynamic> json) =>
+      _$CashBookEntriesFromJson(json);
+}
+
+@freezed
 abstract class TimePeriods with _$TimePeriods {
   factory TimePeriods({@Default([]) List<TimePeriod> timePeriods}) =
       _TimePeriods;

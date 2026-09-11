@@ -1,0 +1,546 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!--
+    Simplified "Cash In / Cash Out" bookkeeping on top of the ledger.
+
+    Every cash book entry is a posted AcctgTrans with two entries: the company's
+    cash & bank account on one side and an income or expense account (the
+    "category") on the other. Because the entries live in the ledger the
+    Profit & Loss report simply reads the income statement.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <service verb="get" noun="CashGlAccount">
+        <description>The cash &amp; bank ledger account of the company: the account configured for
+            cash payments.</description>
+        <in-parameters>
+            <parameter name="companyPartyId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="cashGlAccountId" />
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.ledger.config.PaymentInstrumentGlAccount"
+                list="instrumentAccounts" limit="1">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+                <econdition field-name="paymentInstrumentEnumId" value="PiCash" />
+                <econdition field-name="glAccountId" operator="is-not-null" />
+            </entity-find>
+            <if condition="!instrumentAccounts">
+                <return error="true"
+                    message="No cash ledger account configured for company ${companyPartyId}" />
+            </if>
+            <set field="cashGlAccountId" from="instrumentAccounts[0].glAccountId" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="CashBookCategory">
+        <description>Income (isIncome=true) or expense (isIncome=false) ledger accounts of the
+            company, used as the categories of the cash book.</description>
+        <in-parameters>
+            <parameter name="isIncome" type="Boolean" default="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="glAccounts" type="List">
+                <parameter name="glAccount" type="Map">
+                    <parameter name="glAccountId" />
+                    <parameter name="accountCode" />
+                    <parameter name="accountName" />
+                    <parameter name="isDebit" type="Boolean" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="parentClassIds"
+                from="isIncome ? ['REVENUE', 'INCOME'] : ['COST_OF_SALES', 'EXPENSE', 'NON_OP_EXPENSE']" />
+            <!-- the class hierarchy is root(DEBIT/CREDIT) > parent > class > detail:
+                collect every class below the selected parents -->
+            <entity-find entity-name="growerp.ledger.account.GlAccountClassAndLevels"
+                list="classLevels">
+                <econdition field-name="parentClassId" operator="in" from="parentClassIds" />
+                <select-field field-name="classId,detailClassId" />
+            </entity-find>
+            <set field="classIds"
+                from="(parentClassIds + classLevels*.classId + classLevels*.detailClassId).findAll({ it }).unique()" />
+            <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization"
+                list="dbGlAccounts">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+                <econdition field-name="glAccountClassEnumId" operator="in" from="classIds" />
+                <order-by field-name="accountCode" />
+            </entity-find>
+            <set field="glAccounts" from="[]" />
+            <iterate list="dbGlAccounts" entry="glAccount">
+                <set field="glAccountOut"
+                    from="[glAccountId: glAccount.glAccountId,
+                        accountCode: glAccount.accountCode,
+                        accountName: ec.l10n.localize(glAccount.accountName),
+                        isDebit: glAccount.isDebit == 'Y']" />
+                <script>glAccounts.add(glAccountOut)</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="get" noun="CashBookEntry">
+        <description>Cash book: every ledger transaction touching the cash &amp; bank account,
+            manual entries as well as invoice payments. Direction is seen from the cash account:
+            a debit is money in, a credit money out.</description>
+        <in-parameters>
+            <parameter name="transactionId" />
+            <parameter name="isIncome" type="Boolean" />
+            <parameter name="fromDate" type="Timestamp" />
+            <parameter name="thruDate" type="Timestamp" />
+            <parameter name="search" />
+            <parameter name="start" default-value="0" type="Integer" />
+            <parameter name="limit" default-value="20" type="Integer" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="cashBookEntries" type="List">
+                <parameter name="cashBookEntry" type="Map">
+                    <parameter name="transactionId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="date" />
+                    <parameter name="isIncome" type="Boolean" />
+                    <parameter name="amount" />
+                    <parameter name="category" type="Map">
+                        <parameter name="glAccountId" />
+                        <parameter name="accountCode" />
+                        <parameter name="accountName" />
+                    </parameter>
+                    <parameter name="description" />
+                    <parameter name="otherCompany" type="Map">
+                        <parameter name="partyId" />
+                        <parameter name="name" />
+                    </parameter>
+                    <parameter name="otherUser" type="Map">
+                        <parameter name="partyId" />
+                        <parameter name="firstName" />
+                        <parameter name="lastName" />
+                    </parameter>
+                    <parameter name="source" />
+                    <parameter name="isPosted" type="Boolean" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.CashBookServices100.get#CashGlAccount"
+                in-map="[companyPartyId: companyPartyId]" out-map="context" />
+            <if condition="isIncome != null">
+                <set field="debitCreditFlag" from="isIncome ? 'D' : 'C'" />
+            </if>
+            <if condition="search">
+                <set field="search" from="'%' + search + '%'" />
+            </if>
+            <entity-find entity-name="growerp.account.AcctgTransAndEntryAndCompany"
+                list="cashEntries" offset="start" limit="limit">
+                <econdition field-name="companyPartyId" from="companyPartyId" />
+                <econdition field-name="glAccountId" from="cashGlAccountId" />
+                <econdition field-name="transactionId" from="transactionId" ignore-if-empty="true" />
+                <econdition field-name="debitCreditFlag" from="debitCreditFlag"
+                    ignore-if-empty="true" />
+                <econdition field-name="transactionDate" operator="greater-equals" from="fromDate"
+                    ignore-if-empty="true" />
+                <econdition field-name="transactionDate" operator="less-equals" from="thruDate"
+                    ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="transDescription" operator="like" ignore-case="true"
+                        from="search" ignore-if-empty="true" />
+                    <econdition field-name="pseudoId" operator="like" ignore-case="true"
+                        from="search" ignore-if-empty="true" />
+                    <econdition field-name="otherCompanyName" operator="like" ignore-case="true"
+                        from="search" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="-transactionDate,-transactionId" />
+            </entity-find>
+            <set field="cashBookEntries" from="[]" />
+            <iterate list="cashEntries" entry="cashEntry">
+                <!-- the category is the account on the other side of the transaction -->
+                <entity-find entity-name="growerp.account.AcctgEntryAndGlAccount" list="otherEntries"
+                    limit="1">
+                    <econdition field-name="transactionId" from="cashEntry.transactionId" />
+                    <econdition field-name="glAccountId" operator="not-equals" from="cashGlAccountId" />
+                </entity-find>
+                <set field="category" from="null" />
+                <if condition="otherEntries">
+                    <set field="category"
+                        from="[glAccountId: otherEntries[0].glAccountId,
+                            accountCode: otherEntries[0].accountCode,
+                            accountName: ec.l10n.localize(otherEntries[0].accountName)]" />
+                </if>
+                <set field="otherCompany" from="null" />
+                <set field="otherUser" from="null" />
+                <if condition="cashEntry.otherPartyId">
+                    <if condition="cashEntry.otherCompanyName">
+                        <then>
+                            <set field="otherCompany"
+                                from="[partyId: cashEntry.otherPartyId, name: cashEntry.otherCompanyName]" />
+                        </then>
+                        <else>
+                            <entity-find-one entity-name="mantle.party.Person" value-field="person">
+                                <field-map field-name="partyId" from="cashEntry.otherPartyId" />
+                            </entity-find-one>
+                            <if condition="person">
+                                <set field="otherUser"
+                                    from="[partyId: person.partyId, firstName: person.firstName,
+                                        lastName: person.lastName]" />
+                            </if>
+                        </else>
+                    </if>
+                </if>
+                <set field="source"
+                    from="cashEntry.invoiceId ? 'invoice' : (cashEntry.paymentId ? 'payment' : 'manual')" />
+                <set field="cashBookEntry"
+                    from="[transactionId: cashEntry.transactionId,
+                        pseudoId: cashEntry.pseudoId,
+                        date: cashEntry.transactionDate
+                            ? ec.l10n.format(cashEntry.transactionDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
+                        isIncome: cashEntry.debitCreditFlag == 'D',
+                        amount: cashEntry.amount?.toString(),
+                        category: category,
+                        description: cashEntry.transDescription ?: '',
+                        otherCompany: otherCompany,
+                        otherUser: otherUser,
+                        source: source,
+                        isPosted: cashEntry.isPosted == 'Y']" />
+                <script>cashBookEntries.add(cashBookEntry)</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="CashBookEntry">
+        <description>Record money in or out as a posted ledger transaction against the cash
+            account and an income/expense category account.</description>
+        <in-parameters>
+            <parameter name="cashBookEntry" type="Map" required="true">
+                <parameter name="pseudoId" />
+                <parameter name="isIncome" type="Boolean" required="true" />
+                <parameter name="amount" type="BigDecimal" required="true" />
+                <parameter name="date" type="Timestamp" />
+                <parameter name="description" />
+                <parameter name="category" type="Map" required="true">
+                    <parameter name="glAccountId" required="true" />
+                </parameter>
+                <parameter name="otherCompany" type="Map">
+                    <parameter name="partyId" />
+                </parameter>
+                <parameter name="otherUser" type="Map">
+                    <parameter name="partyId" />
+                </parameter>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="cashBookEntry" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.CashBookServices100.get#CashGlAccount"
+                in-map="[companyPartyId: companyPartyId]" out-map="context" />
+            <if condition="cashBookEntry.amount &lt;= 0">
+                <return error="true" message="Amount must be larger than zero" />
+            </if>
+            <if condition="!cashBookEntry.pseudoId">
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'transaction']"
+                    out-map="context" />
+                <set field="cashBookEntry.pseudoId" from="seqNum" />
+            </if>
+            <service-call name="mantle.ledger.LedgerServices.create#AcctgTrans"
+                in-map="[acctgTransTypeEnumId: 'AttInternal',
+                    organizationPartyId: companyPartyId,
+                    otherPartyId: cashBookEntry.otherCompany?.partyId ?: cashBookEntry.otherUser?.partyId,
+                    description: cashBookEntry.description,
+                    transactionDate: cashBookEntry.date ?: ec.user.nowTimestamp,
+                    isPosted: 'N',
+                    pseudoId: cashBookEntry.pseudoId]"
+                out-map="context" />
+            <service-call name="growerp.100.CashBookServices100.post#CashBookEntry"
+                in-map="[acctgTransId: acctgTransId, cashGlAccountId: cashGlAccountId,
+                    cashBookEntry: cashBookEntry]" />
+            <service-call name="growerp.100.CashBookServices100.get#CashBookEntry"
+                in-map="[transactionId: acctgTransId]" out-map="context" />
+            <set field="cashBookEntry" from="cashBookEntries ? cashBookEntries[0] : null" />
+        </actions>
+    </service>
+
+    <service verb="post" noun="CashBookEntry">
+        <description>Internal: write the two entries of a cash book transaction and post it.</description>
+        <in-parameters>
+            <parameter name="acctgTransId" required="true" />
+            <parameter name="cashGlAccountId" required="true" />
+            <parameter name="cashBookEntry" type="Map" required="true" />
+        </in-parameters>
+        <actions>
+            <!-- money in: debit cash, credit income; money out: debit expense, credit cash -->
+            <service-call name="mantle.ledger.LedgerServices.create#AcctgTransEntry"
+                in-map="[acctgTransId: acctgTransId, glAccountId: cashGlAccountId,
+                    debitCreditFlag: cashBookEntry.isIncome ? 'D' : 'C',
+                    amount: cashBookEntry.amount]" />
+            <service-call name="mantle.ledger.LedgerServices.create#AcctgTransEntry"
+                in-map="[acctgTransId: acctgTransId, glAccountId: cashBookEntry.category.glAccountId,
+                    debitCreditFlag: cashBookEntry.isIncome ? 'C' : 'D',
+                    amount: cashBookEntry.amount]" />
+            <service-call name="mantle.ledger.LedgerServices.post#AcctgTrans"
+                in-map="[acctgTransId: acctgTransId]" />
+            <!-- a refused posting is parked in the error journal; returning an error here would
+                roll that away again, so report it as a warning -->
+            <entity-find-one entity-name="mantle.ledger.transaction.AcctgTrans"
+                value-field="postedAcctgTrans" />
+            <if condition="postedAcctgTrans?.isPosted != 'Y'">
+                <message public="true" type="warning">Transaction ${acctgTransId} could not be posted and was saved in error journal ${postedAcctgTrans?.glJournalId} for correction.</message>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="find" noun="ManualCashBookTrans">
+        <description>Internal: the transaction of a manual cash book entry, refusing entries that
+            came from invoices or payments.</description>
+        <in-parameters>
+            <parameter name="transactionId" required="true" />
+            <parameter name="companyPartyId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="acctgTrans" type="EntityValue" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.ledger.transaction.AcctgTrans"
+                value-field="acctgTrans" for-update="true">
+                <field-map field-name="acctgTransId" from="transactionId" />
+                <field-map field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find-one>
+            <if condition="!acctgTrans">
+                <return error="true" message="Cash book entry ${transactionId} not found" />
+            </if>
+            <if condition="acctgTrans.invoiceId || acctgTrans.paymentId">
+                <return error="true"
+                    message="Cash book entry ${transactionId} comes from an invoice or payment and cannot be changed here" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="update" noun="CashBookEntry">
+        <description>Change a manual cash book entry: un-post, rewrite header and entries, re-post.</description>
+        <in-parameters>
+            <parameter name="cashBookEntry" type="Map" required="true">
+                <parameter name="transactionId" required="true" />
+                <parameter name="pseudoId" />
+                <parameter name="isIncome" type="Boolean" required="true" />
+                <parameter name="amount" type="BigDecimal" required="true" />
+                <parameter name="date" type="Timestamp" />
+                <parameter name="description" />
+                <parameter name="category" type="Map" required="true">
+                    <parameter name="glAccountId" required="true" />
+                </parameter>
+                <parameter name="otherCompany" type="Map">
+                    <parameter name="partyId" />
+                </parameter>
+                <parameter name="otherUser" type="Map">
+                    <parameter name="partyId" />
+                </parameter>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="cashBookEntry" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.CashBookServices100.get#CashGlAccount"
+                in-map="[companyPartyId: companyPartyId]" out-map="context" />
+            <service-call name="growerp.100.CashBookServices100.find#ManualCashBookTrans"
+                in-map="[transactionId: cashBookEntry.transactionId, companyPartyId: companyPartyId]"
+                out-map="context" />
+            <if condition="cashBookEntry.amount &lt;= 0">
+                <return error="true" message="Amount must be larger than zero" />
+            </if>
+            <if condition="acctgTrans.isPosted == 'Y'">
+                <service-call name="mantle.ledger.LedgerServices.unpost#AcctgTrans"
+                    in-map="[acctgTransId: acctgTrans.acctgTransId]" />
+            </if>
+            <service-call name="update#mantle.ledger.transaction.AcctgTrans"
+                in-map="[acctgTransId: acctgTrans.acctgTransId,
+                    description: cashBookEntry.description,
+                    transactionDate: cashBookEntry.date ?: acctgTrans.transactionDate,
+                    otherPartyId: cashBookEntry.otherCompany?.partyId ?: cashBookEntry.otherUser?.partyId,
+                    pseudoId: cashBookEntry.pseudoId ?: acctgTrans.pseudoId]" />
+            <entity-delete-by-condition entity-name="mantle.ledger.transaction.AcctgTransEntry">
+                <econdition field-name="acctgTransId" from="acctgTrans.acctgTransId" />
+            </entity-delete-by-condition>
+            <service-call name="growerp.100.CashBookServices100.post#CashBookEntry"
+                in-map="[acctgTransId: acctgTrans.acctgTransId, cashGlAccountId: cashGlAccountId,
+                    cashBookEntry: cashBookEntry]" />
+            <service-call name="growerp.100.CashBookServices100.get#CashBookEntry"
+                in-map="[transactionId: acctgTrans.acctgTransId]" out-map="context" />
+            <set field="cashBookEntry" from="cashBookEntries ? cashBookEntries[0] : null" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="CashBookEntry">
+        <description>Remove a manual cash book entry: un-post and delete the transaction.</description>
+        <in-parameters>
+            <parameter name="transactionId" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.CashBookServices100.find#ManualCashBookTrans"
+                in-map="[transactionId: transactionId, companyPartyId: companyPartyId]"
+                out-map="context" />
+            <if condition="acctgTrans.isPosted == 'Y'">
+                <service-call name="mantle.ledger.LedgerServices.unpost#AcctgTrans"
+                    in-map="[acctgTransId: acctgTrans.acctgTransId]" />
+            </if>
+            <service-call name="mantle.ledger.LedgerServices.delete#AcctgTrans"
+                in-map="[acctgTransId: acctgTrans.acctgTransId]" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="ProfitLoss">
+        <description>Simple profit &amp; loss for a period: income and expense accounts with the
+            amounts posted in the period, totals and net profit. Summed straight from the posted
+            transaction entries, so it is always current (the GL summaries the other reports use
+            are only refreshed by an hourly job).</description>
+        <in-parameters>
+            <parameter name="periodName" /> <!-- Ynnnn, Ynnnnqn or Ynnnnmnn -->
+        </in-parameters>
+        <out-parameters>
+            <parameter name="profitLoss" type="Map">
+                <parameter name="period" type="Map">
+                    <parameter name="periodId" />
+                    <parameter name="periodName" />
+                    <parameter name="periodType" />
+                    <parameter name="fromDate" />
+                    <parameter name="thruDate" />
+                    <parameter name="isClosed" type="Boolean" />
+                </parameter>
+                <parameter name="income" type="List">
+                    <parameter name="line" type="Map">
+                        <parameter name="glAccountId" />
+                        <parameter name="accountCode" />
+                        <parameter name="accountName" />
+                        <parameter name="amount" />
+                    </parameter>
+                </parameter>
+                <parameter name="expenses" type="List">
+                    <parameter name="line" type="Map">
+                        <parameter name="glAccountId" />
+                        <parameter name="accountCode" />
+                        <parameter name="accountName" />
+                        <parameter name="amount" />
+                    </parameter>
+                </parameter>
+                <parameter name="totalIncome" />
+                <parameter name="totalExpenses" />
+                <parameter name="netProfit" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="mantle.party.time.TimePeriod" list="periods">
+                <econdition field-name="partyId" from="companyPartyId" />
+                <econdition field-name="periodName" from="periodName" ignore-if-empty="true" />
+                <order-by field-name="-periodName" />
+            </entity-find>
+            <if condition="!periods">
+                <return error="true"
+                    message="Profit/loss: period ${periodName ?: ''} not found for company ${companyPartyId}" />
+            </if>
+            <set field="period" from="periods[0]" />
+            <service-call name="growerp.100.CashBookServices100.sum#ProfitLossLines"
+                in-map="[companyPartyId: companyPartyId, isIncome: true,
+                    fromDate: period.fromDate, thruDate: period.thruDate]"
+                out-map="incomeOut" />
+            <service-call name="growerp.100.CashBookServices100.sum#ProfitLossLines"
+                in-map="[companyPartyId: companyPartyId, isIncome: false,
+                    fromDate: period.fromDate, thruDate: period.thruDate]"
+                out-map="expenseOut" />
+            <set field="typeConvert"
+                from="['FiscalYear': 'Y', 'FiscalQuarter': 'Q', 'FiscalMonth': 'M']" type="NewMap" />
+            <set field="profitLoss"
+                from="[period: [periodId: period.timePeriodId,
+                        periodName: period.periodName,
+                        periodType: typeConvert[period.timePeriodTypeId],
+                        fromDate: period.fromDate.toString(),
+                        thruDate: period.thruDate.toString(),
+                        isClosed: period.isClosed == 'Y'],
+                    income: incomeOut.lines,
+                    expenses: expenseOut.lines,
+                    totalIncome: incomeOut.total.toString(),
+                    totalExpenses: expenseOut.total.toString(),
+                    netProfit: (incomeOut.total - expenseOut.total).toString()]" />
+        </actions>
+    </service>
+
+    <service verb="sum" noun="ProfitLossLines">
+        <description>Internal: posted amounts per income (credit balance) or expense (debit
+            balance) account within a date range, period-closing transactions excluded.</description>
+        <in-parameters>
+            <parameter name="companyPartyId" required="true" />
+            <parameter name="isIncome" type="Boolean" required="true" />
+            <parameter name="fromDate" type="Timestamp" required="true" />
+            <parameter name="thruDate" type="Timestamp" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="lines" type="List" />
+            <parameter name="total" type="BigDecimal" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.CashBookServices100.get#CashBookCategory"
+                in-map="[isIncome: isIncome]" out-map="categoryOut" />
+            <set field="accountIds" from="categoryOut.glAccounts*.glAccountId" />
+            <set field="lines" from="[]" />
+            <set field="total" from="BigDecimal.ZERO" />
+            <if condition="!accountIds">
+                <return />
+            </if>
+            <!-- thruDate is the last day of the period (a date), so include that whole day -->
+            <set field="thruDateEnd"
+                from="new java.sql.Timestamp(thruDate.time + 24L * 60 * 60 * 1000)" />
+            <entity-find entity-name="growerp.account.AcctgTransAndEntryAndCompany" list="entries">
+                <econdition field-name="companyPartyId" from="companyPartyId" />
+                <econdition field-name="glAccountId" operator="in" from="accountIds" />
+                <econdition field-name="isPosted" value="Y" />
+                <econdition field-name="typeId" operator="not-in"
+                    from="['AttPeriodClosing', 'AttNetIncomeClosing']" />
+                <econdition field-name="transactionDate" operator="greater-equals" from="fromDate" />
+                <econdition field-name="transactionDate" operator="less" from="thruDateEnd" />
+                <select-field field-name="glAccountId,debitCreditFlag,amount" />
+            </entity-find>
+            <set field="amountByAccount" from="[:]" />
+            <iterate list="entries" entry="entry">
+                <!-- income accounts grow with credits, expense accounts with debits -->
+                <set field="signed"
+                    from="(entry.debitCreditFlag == 'C') == isIncome ? entry.amount : entry.amount.negate()" />
+                <set field="amountByAccount[entry.glAccountId]"
+                    from="(amountByAccount[entry.glAccountId] ?: BigDecimal.ZERO) + signed" />
+            </iterate>
+            <iterate list="categoryOut.glAccounts" entry="glAccount">
+                <set field="amount" from="amountByAccount[glAccount.glAccountId]" />
+                <if condition="amount &amp;&amp; amount != 0">
+                    <set field="line"
+                        from="[glAccountId: glAccount.glAccountId, accountCode: glAccount.accountCode,
+                            accountName: glAccount.accountName, amount: amount.toString()]" />
+                    <set field="lines" from="lines + [line]" />
+                    <set field="total" from="total + amount" />
+                </if>
+            </iterate>
+        </actions>
+    </service>
+</services>

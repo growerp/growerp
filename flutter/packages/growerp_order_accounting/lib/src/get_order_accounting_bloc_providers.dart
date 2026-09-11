@@ -118,6 +118,7 @@ List<BlocProvider> getOrderAccountingBlocProviders(
     BlocProvider<LedgerJournalBloc>(
       create: (context) => LedgerJournalBloc(restClient),
     ),
+    BlocProvider<CashBookBloc>(create: (context) => CashBookBloc(restClient)),
   ];
   return blocProviders;
 }

@@ -59,7 +59,8 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
         periodType: periodType,
       );
 
-      late final LedgerReport result;
+      LedgerReport? result;
+      ProfitLoss? profitLoss;
       switch (event.reportType) {
         case ReportType.ledger:
           result = await restClient.getLedger();
@@ -75,12 +76,17 @@ class LedgerBloc extends Bloc<LedgerEvent, LedgerState> {
           result = await restClient.getOperatingRevenueExpenseChart(
             periodName: event.periodName,
           );
+        case ReportType.profitLoss:
+          profitLoss = await restClient.getProfitLoss(
+            periodName: event.periodName,
+          );
       }
 
       return emit(
         state.copyWith(
           status: LedgerStatus.success,
           ledgerReport: result,
+          profitLoss: profitLoss,
           timePeriods: timePeriods.timePeriods,
         ),
       );

@@ -107,6 +107,10 @@ Map<String, GrowerpWidgetBuilder> getOrderAccountingWidgets() {
     'RevenueExpenseChart': (args) => const RevenueExpenseChart(),
     'BalanceSheetForm': (args) => const BalanceSheetForm(),
     'BalanceSummaryList': (args) => const BalanceSummaryList(),
+    // simplified cash in / cash out bookkeeping
+    'CashBookList': (args) => const CashBookList(),
+    'ProfitLossForm': (args) => const ProfitLossForm(),
+    'TaxSummaryForm': (args) => const TaxSummaryForm(),
     'TimePeriodListForm': (args) => const TimePeriodListForm(),
     'ItemTypeList': (args) => const ItemTypeList(),
     'PaymentTypeList': (args) =>
@@ -358,6 +362,39 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
         'chart',
       ],
       builder: (args) => const RevenueExpenseChart(),
+    ),
+    WidgetMetadata(
+      widgetName: 'CashBookList',
+      description: 'Simplified cash book: money in and money out entries '
+          'booked on income and expense categories',
+      iconName: 'account_balance_wallet',
+      keywords: [
+        'cash',
+        'cash book',
+        'money in',
+        'money out',
+        'income',
+        'expense',
+        'bookkeeping',
+        'receipt',
+      ],
+      builder: (args) => const CashBookList(),
+    ),
+    WidgetMetadata(
+      widgetName: 'ProfitLossForm',
+      description: 'Simple profit and loss report: income and expenses per '
+          'account for a year, quarter or month',
+      iconName: 'assessment',
+      keywords: ['profit', 'loss', 'P&L', 'income statement', 'result'],
+      builder: (args) => const ProfitLossForm(),
+    ),
+    WidgetMetadata(
+      widgetName: 'TaxSummaryForm',
+      description: 'Yearly income and expenses by category for the '
+          'self-employment tax filing, exportable as CSV',
+      iconName: 'summarize',
+      keywords: ['tax', 'tax summary', 'self-employment', 'schedule C', 'yearly'],
+      builder: (args) => const TaxSummaryForm(),
     ),
   ];
 }

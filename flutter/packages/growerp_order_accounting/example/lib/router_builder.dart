@@ -126,6 +126,22 @@ const orderAccountingMenuConfig = MenuConfiguration(
       widgetName: 'RevenueExpense',
     ),
     MenuItem(
+      menuItemId: 'OA_CASHBOOK',
+      title: 'Cash Book',
+      route: '/accounting/cashbook',
+      iconName: 'account_balance_wallet',
+      sequenceNum: 61,
+      widgetName: 'CashBookList',
+    ),
+    MenuItem(
+      menuItemId: 'OA_PROFITLOSS',
+      title: 'Profit & Loss',
+      route: '/accounting/profit-loss',
+      iconName: 'assessment',
+      sequenceNum: 62,
+      widgetName: 'ProfitLossForm',
+    ),
+    MenuItem(
       menuItemId: 'OA_SETUP',
       title: 'Setup',
       route: '/accounting/setup',
@@ -225,8 +241,13 @@ GoRouter createOrderAccountingExampleRouter() {
         key: Key('LedgerJournalListLedgerJournal'),
       ),
       '/accounting/reports' => Builder(
-        builder: (context) =>
-            Center(child: Text(OrderAccountingLocalizations.of(context)!.reports)),
+        builder: (context) => Center(
+          child: Text(OrderAccountingLocalizations.of(context)!.reports),
+        ),
+      ),
+      '/accounting/cashbook' => const CashBookList(key: Key('CashBookList')),
+      '/accounting/profit-loss' => const ProfitLossForm(
+        key: Key('ProfitLossForm'),
       ),
       '/accounting/setup' => const PaymentTypeList(),
       '/accounting/setup/item-types' => const ItemTypeList(),

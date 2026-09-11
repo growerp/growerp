@@ -833,6 +833,40 @@ abstract class RestClient {
     @Query('periodName') String? periodName,
   });
 
+  // simplified cash in / cash out bookkeeping
+  @GET("rest/s1/growerp/100/CashBookEntry")
+  Future<CashBookEntries> getCashBookEntry({
+    @Query('transactionId') String? transactionId,
+    @Query('isIncome') bool? isIncome,
+    @Query('fromDate') String? fromDate,
+    @Query('thruDate') String? thruDate,
+    @Query('search') String? searchString,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @POST("rest/s1/growerp/100/CashBookEntry")
+  Future<CashBookEntry> createCashBookEntry({
+    @Field() required CashBookEntry cashBookEntry,
+  });
+
+  @PATCH("rest/s1/growerp/100/CashBookEntry")
+  Future<CashBookEntry> updateCashBookEntry({
+    @Field() required CashBookEntry cashBookEntry,
+  });
+
+  @DELETE("rest/s1/growerp/100/CashBookEntry")
+  Future<void> deleteCashBookEntry({@Field() required String transactionId});
+
+  /// income (isIncome=true) or expense ledger accounts used as categories
+  @GET("rest/s1/growerp/100/CashBookCategory")
+  Future<GlAccounts> getCashBookCategory({
+    @Query('isIncome') required bool isIncome,
+  });
+
+  @GET("rest/s1/growerp/100/ProfitLoss")
+  Future<ProfitLoss> getProfitLoss({@Query('periodName') String? periodName});
+
   @GET("rest/s1/growerp/100/AccountClass")
   Future<AccountClasses> getAccountClass({
     @Query('limit') int? limit,

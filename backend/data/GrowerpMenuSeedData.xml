@@ -309,12 +309,9 @@ limitations under the License.
         title="Acct Sales" route="/acct-sales" iconName="receipt_long" widgetName="SalesInvoiceList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="70"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_ACC_PURCHASE" menuConfigurationId="FREELANCE_DEFAULT" itemKey="purchInvoicesNotPaidCount"
         title="Acct Purchase" route="/acct-purchase" iconName="receipt" widgetName="PurchaseInvoiceList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="71"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_ACC_LEDGER" menuConfigurationId="FREELANCE_DEFAULT" 
-        title="Acct Ledger" route="/acct-ledger" iconName="account_balance" widgetName="LedgerTreeForm" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="72"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_ACC_REPORTS" menuConfigurationId="FREELANCE_DEFAULT" 
-        title="Acct Reports" route="/acct-reports" iconName="assessment" widgetName="RevenueExpenseChart" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="73"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_ACC_SETUP" menuConfigurationId="FREELANCE_DEFAULT" 
-        title="Acct Setup" route="/acct-setup" iconName="settings" widgetName="TimePeriodListForm" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="74"/>
+    <!-- simplified cash in / cash out bookkeeping instead of the full ledger screens -->
+    <growerp.menu.MenuItem menuItemId="FREELANCE_BOOKKEEPING" menuConfigurationId="FREELANCE_DEFAULT" 
+        title="Bookkeeping" route="/bookkeeping" iconName="account_balance_wallet" widgetName="CashBookList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="72"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_ABOUT" menuConfigurationId="FREELANCE_DEFAULT" 
         title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="80"/>
 
@@ -385,26 +382,14 @@ limitations under the License.
         title="Outgoing Payments" iconName="output" widgetName="PurchasePaymentList" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_ACCP_SUPP" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_PURCHASE"
         title="suppliers" iconName="business" widgetName="UserListSupplier" sequenceNum="30"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_ACCL_TREE" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_LEDGER"
-        title="Ledger" iconName="account_balance" widgetName="LedgerTreeForm" sequenceNum="10"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_ACCL_ACCT" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_LEDGER"
-        title="Ledger Accounts" iconName="format_list_bulleted" widgetName="GlAccountList" sequenceNum="20"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_ACCL_TRANS" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_LEDGER"
-        title="transactions" iconName="view_list" widgetName="TransactionList" sequenceNum="30"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_ACCL_JOUR" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_LEDGER"
-        title="Ledger Journals" iconName="checklist" widgetName="LedgerJournalList" sequenceNum="40"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_ACCR_REV" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_REPORTS"
-        title="Revenue/Expenses" iconName="assessment" widgetName="RevenueExpenseChart" sequenceNum="10"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_ACCR_BAL" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_REPORTS"
-        title="Balance Sheet" iconName="list" widgetName="BalanceSheetForm" sequenceNum="20"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_ACCR_SUM" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_REPORTS"
-        title="Balance Summary" iconName="list" widgetName="BalanceSummaryList" sequenceNum="30"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_ACCU_PER" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_SETUP"
-        title="setUp" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="10"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_ACCU_ITEM" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_SETUP"
-        title="Item Types" iconName="list" widgetName="ItemTypeList" sequenceNum="20"/>
-    <growerp.menu.MenuItem menuItemId="FREELANCE_ACCU_PAY" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_ACC_SETUP"
-        title="Payment Types" iconName="list" widgetName="PaymentTypeList" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="FREELANCE_BK_CASH" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_BOOKKEEPING"
+        title="Cash Book" iconName="account_balance_wallet" widgetName="CashBookList" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="FREELANCE_BK_PL" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_BOOKKEEPING"
+        title="Profit &amp; Loss" iconName="assessment" widgetName="ProfitLossForm" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="FREELANCE_BK_TAX" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_BOOKKEEPING"
+        title="Tax Summary" iconName="summarize" widgetName="TaxSummaryForm" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="FREELANCE_BK_CAT" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_BOOKKEEPING"
+        title="Categories" iconName="format_list_bulleted" widgetName="GlAccountList" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_SYSTEM_SETUP" menuConfigurationId="FREELANCE_DEFAULT"
         title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
         userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="999"/>

@@ -50,6 +50,8 @@ export 'content_model.dart';
 export 'obsidian_model.dart';
 export 'time_period_model.dart';
 export 'ledger_report_model.dart';
+export 'cash_book_entry_model.dart';
+export 'profit_loss_model.dart';
 export 'opportunity_stages_model.dart';
 export 'opportunity_model.dart';
 export 'opportunity_summary_model.dart';

@@ -946,6 +946,30 @@ limitations under the License.
                 <service name="growerp.100.AccountingServices100.get#BalanceSummary" />
             </method>
         </resource>
+        <resource name="CashBookEntry">
+            <method type="get">
+                <service name="growerp.100.CashBookServices100.get#CashBookEntry" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.CashBookServices100.create#CashBookEntry" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.CashBookServices100.update#CashBookEntry" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.CashBookServices100.delete#CashBookEntry" />
+            </method>
+        </resource>
+        <resource name="CashBookCategory">
+            <method type="get">
+                <service name="growerp.100.CashBookServices100.get#CashBookCategory" />
+            </method>
+        </resource>
+        <resource name="ProfitLoss">
+            <method type="get">
+                <service name="growerp.100.CashBookServices100.get#ProfitLoss" />
+            </method>
+        </resource>
         <resource name="OperatingRevenueExpenseChart">
             <method type="get">
                 <service name="growerp.100.AccountingServices100.get#OperatingRevenueExpenseChart" />

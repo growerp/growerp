@@ -32,9 +32,9 @@ also get:
 - **Orders** — Sales/Purchase Orders, Customers, Suppliers
 - **Website** — public site settings
 - **Acct Sales / Acct Purchase** — invoices and payments both directions
-- **Acct Ledger** — chart of accounts, transactions, journals
-- **Acct Reports** — revenue/expenses, balance sheet, balance summary
-- **Acct Setup** — periods, item types, payment types
+- **Bookkeeping** — simplified cash in / cash out bookkeeping: cash book,
+  profit & loss, yearly tax summary (CSV export) and the income/expense
+  categories
 - **System Setup** — AI provider/model settings
 
 Your profile and company details are reachable from the drawer.
@@ -77,9 +77,13 @@ assistant. Admins see everyone; others see only their own.
 
 - **CRM** for leads/opportunities, **Orders** for sales/purchase orders,
   **Catalog** for products and services.
-- **Acct Sales/Purchase**, **Acct Ledger** and **Acct Reports** cover
-  invoicing, bookkeeping and financial reporting. Invoices/orders support
-  PDF printing.
+- **Acct Sales/Purchase** cover invoicing; invoices/orders support PDF
+  printing.
+- **Bookkeeping** is the simplified "money in / money out" cash book for a
+  freelancer: record income and expenses on a category, back-date them, see
+  a simple Profit & Loss per year/quarter/month and export the yearly Tax
+  Summary as CSV for the self-employment tax filing. Every entry is a posted
+  ledger transaction, so paid invoices show up in the same cash book.
 
 ## Marketing, outreach and website
 
