@@ -60,47 +60,47 @@ limitations under the License.
     <growerp.menu.MenuItem menuItemId="ADMIN_MARKETING" menuConfigurationId="ADMIN_DEFAULT"
         title="Marketing" route="/marketing" iconName="campaign" widgetName="ContentPlanList" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_WEBSITE" menuConfigurationId="ADMIN_DEFAULT"
-        title="Website" route="/website" iconName="web" widgetName="WebsiteDialog" sequenceNum="35"/>
+        title="Website" route="/website" iconName="web" widgetName="WebsiteDialog" sequenceNum="160"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_OUTREACH" menuConfigurationId="ADMIN_DEFAULT"
         title="Outreach" route="/outreach" iconName="send" widgetName="CampaignListScreen" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ACC_REPORTS" menuConfigurationId="ADMIN_DEFAULT"
-        title="Acct Reports" route="/acct-reports" iconName="assessment" widgetName="RevenueExpenseChart" sequenceNum="50"/>
+        title="Acct Reports" route="/acct-reports" iconName="assessment" widgetName="RevenueExpenseChart" sequenceNum="140"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_AGENT_CONTROL" menuConfigurationId="ADMIN_DEFAULT"
-        title="Agent Control" route="/agent-control" iconName="smart_toy" widgetName="AdkAgentListView" sequenceNum="60"/>
+        title="Agent Control" route="/agent-control" iconName="smart_toy" widgetName="AdkAgentListView" sequenceNum="50"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_KNOWLEDGE" menuConfigurationId="ADMIN_DEFAULT"
-        title="Knowledge" route="/knowledge" iconName="menu_book" widgetName="AdkKnowledgeView" sequenceNum="65"/>
+        title="Knowledge" route="/knowledge" iconName="menu_book" widgetName="AdkKnowledgeView" sequenceNum="190"/>
     <!-- Outside users (GROWERP_M_OTHER) reach only their own company details here;
          every other screen is default deny for them. Read only: they are absent
          from updateGroupsJson. -->
     <growerp.menu.MenuItem menuItemId="ADMIN_ORG" menuConfigurationId="ADMIN_DEFAULT"
         title="organization" route="/companies" iconName="business" widgetName="ShowCompanyDialog"
         userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN","GROWERP_M_EMPLOYEE","GROWERP_M_OTHER"]'
-        updateGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN","GROWERP_M_EMPLOYEE"]' sequenceNum="80"/>
+        updateGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN","GROWERP_M_EMPLOYEE"]' sequenceNum="150"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_HR" menuConfigurationId="ADMIN_DEFAULT"
-        title="HR" route="/hr" iconName="badge" widgetName="MyHrView" sequenceNum="85"/>
+        title="HR" route="/hr" iconName="badge" widgetName="MyHrView" sequenceNum="60"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_CATALOG" menuConfigurationId="ADMIN_DEFAULT" itemKey="products"
-        title="catalog" route="/catalog" iconName="category" widgetName="ProductList" sequenceNum="90"/>
+        title="catalog" route="/catalog" iconName="category" widgetName="ProductList" sequenceNum="70"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ORDERS" menuConfigurationId="ADMIN_DEFAULT" itemKey="openSlsOrders"
-        title="orders" route="/orders" iconName="shopping_cart" widgetName="SalesOrderList" sequenceNum="100"/>
+        title="orders" route="/orders" iconName="shopping_cart" widgetName="SalesOrderList" sequenceNum="80"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_MANUFACTURING" menuConfigurationId="ADMIN_DEFAULT"
-        title="Manufacturing" route="/manufacturing" iconName="precision_manufacturing" widgetName="WorkOrderList" sequenceNum="110"/>
+        title="Manufacturing" route="/manufacturing" iconName="precision_manufacturing" widgetName="WorkOrderList" sequenceNum="100"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_INVENTORY" menuConfigurationId="ADMIN_DEFAULT" itemKey="outgoingShipments"
-        title="inventory" route="/inventory" iconName="warehouse" widgetName="OutgoingShipmentList" sequenceNum="120"/>
+        title="inventory" route="/inventory" iconName="warehouse" widgetName="OutgoingShipmentList" sequenceNum="90"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ACC_SALES" menuConfigurationId="ADMIN_DEFAULT" itemKey="salesInvoicesNotPaidCount"
-        title="Acct Sales" route="/acct-sales" iconName="receipt_long" widgetName="SalesInvoiceList" sequenceNum="130"/>
+        title="Acct Sales" route="/acct-sales" iconName="receipt_long" widgetName="SalesInvoiceList" sequenceNum="110"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ACC_PURCHASE" menuConfigurationId="ADMIN_DEFAULT" itemKey="purchInvoicesNotPaidCount"
-        title="Acct Purchase" route="/acct-purchase" iconName="receipt" widgetName="PurchaseInvoiceList" sequenceNum="140"/>
+        title="Acct Purchase" route="/acct-purchase" iconName="receipt" widgetName="PurchaseInvoiceList" sequenceNum="120"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ACC_LEDGER" menuConfigurationId="ADMIN_DEFAULT"
-        title="Acct Ledger" route="/acct-ledger" iconName="account_balance" widgetName="LedgerTreeForm" sequenceNum="150"/>
+        title="Acct Ledger" route="/acct-ledger" iconName="account_balance" widgetName="LedgerTreeForm" sequenceNum="130"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_COURSES" menuConfigurationId="ADMIN_DEFAULT"
-        title="Courses" route="/courses" iconName="school" widgetName="CourseList" sequenceNum="160"/>
+        title="Courses" route="/courses" iconName="school" widgetName="CourseList" sequenceNum="200"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_SYSTEM_SETUP" menuConfigurationId="ADMIN_DEFAULT"
         title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
         userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="170"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ACC_SETUP" menuConfigurationId="ADMIN_DEFAULT"
         title="Acct Setup" route="/acct-setup" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="180"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ABOUT" menuConfigurationId="ADMIN_DEFAULT"
-        title="about" route="/about" iconName="info" widgetName="AboutForm" image="packages/growerp_core/images/infoGrey.png" selectedImage="packages/growerp_core/images/info.png" sequenceNum="190"/>
+        title="about" route="/about" iconName="info" widgetName="AboutForm" image="packages/growerp_core/images/infoGrey.png" selectedImage="packages/growerp_core/images/info.png" sequenceNum="210"/>
 
     <!-- ADMIN_ORG children (tabs) -->
     <growerp.menu.MenuItem menuItemId="ADMIN_ORG_COMPANY" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ORG"
