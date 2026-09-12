@@ -28,11 +28,6 @@ def release_pending_versions(app, platform_filter)
   released
 end
 
-# States in which Apple already has the previous submission and will not accept
-# a new one. deliver fails with "reject_if_possible doesn't work when using
-# submit_build. The app store version is in Waiting For Review".
-REVIEW_BLOCKING_STATES = %w[WAITING_FOR_REVIEW IN_REVIEW].freeze
-
 # States that only ever occur once an app has been through review at least once.
 # If a platform has no version in any of these, it has never been published and
 # its first App Store version cannot be submitted for review from CI (the auto-
@@ -45,13 +40,38 @@ PUBLISHED_STATES = %w[
   REPLACED_WITH_NEW_VERSION DEVELOPER_REMOVED_FROM_SALE REMOVED_FROM_SALE
 ].freeze
 
-# Is App Store Connect able to accept a new version submission right now?
-# A version in PENDING_DEVELOPER_RELEASE blocks creating a new version, so
-# release it first and wait until it leaves that state. A version already
-# queued for review cannot be displaced — report that so the caller can upload
-# the build without submitting it. A never-published app likewise can't be
-# submitted, so it also falls back to a TestFlight-only upload.
-def submit_slot_available?(api_key, bundle_id, platform_filter)
+# A submission queued but not yet picked up by a reviewer can be cancelled
+# without interrupting anyone, which returns its version to an editable state.
+# An IN_REVIEW submission is left alone and simply blocks the run.
+def cancel_waiting_review_submission(app, bundle_id, platform_filter)
+  submission = app.get_in_progress_review_submission(platform: platform_filter)
+  return if submission.nil? || submission.state != "WAITING_FOR_REVIEW"
+
+  UI.important(
+    "#{bundle_id} (#{platform_filter}) has a WAITING_FOR_REVIEW submission; " \
+    "cancelling it to submit the new build."
+  )
+  submission.cancel_submission
+end
+
+# How long to wait for App Store Connect to accept the new version. Releasing
+# or cancelling the previous one is not instant: the released version travels
+# through PENDING_APPLE_RELEASE and the app-level App Info stays locked while it
+# does, so a single check right after the request reports a false "blocked".
+SETTLE_ATTEMPTS = 30
+SETTLE_INTERVAL = 20
+
+# Make App Store Connect ready to accept `version_string`, creating the App
+# Store version if it doesn't exist yet, and return true once it is ready.
+#
+# Apple allows one editable version at a time, so the previous one has to go
+# first: a version in PENDING_DEVELOPER_RELEASE is released, one merely queued
+# for review is cancelled. Both take minutes to settle, hence the poll.
+#
+# Returns false only for a never-published app, whose first version Apple cannot
+# review from CI — that one still gets a TestFlight upload. Every other blocker
+# raises, so a green stable-track run always means the build was submitted.
+def prepare_edit_version!(api_key, bundle_id, platform_filter, version_string)
   require "spaceship"
   Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: api_key)
   app = Spaceship::ConnectAPI::App.find(bundle_id)
@@ -67,73 +87,112 @@ def submit_slot_available?(api_key, bundle_id, platform_filter)
     return false
   end
 
-  if release_pending_versions(app, platform_filter)
-    30.times do
-      pending = app.get_app_store_versions(
-        filter: { "appStoreState" => "PENDING_DEVELOPER_RELEASE", "platform" => platform_filter }
-      )
-      break if pending.empty?
-      UI.message("Waiting for previous version to leave PENDING_DEVELOPER_RELEASE...")
-      sleep(10)
-    end
-  end
+  release_pending_versions(app, platform_filter)
+  cancel_waiting_review_submission(app, bundle_id, platform_filter)
 
-  blocking = REVIEW_BLOCKING_STATES.flat_map do |state|
-    app.get_app_store_versions(
-      filter: { "appStoreState" => state, "platform" => platform_filter }
-    )
-  end
-  unless blocking.empty?
-    if blocking.first.app_store_state == "WAITING_FOR_REVIEW"
-      # Not yet picked up by a reviewer, so cancelling it doesn't interrupt anyone
-      # (unlike IN_REVIEW below, which is left alone). Free the slot and continue.
-      UI.important(
-        "#{bundle_id} (#{platform_filter}) has v#{blocking.first.version_string} " \
-        "WAITING_FOR_REVIEW; cancelling it to submit the new build."
-      )
-      submission = app.get_in_progress_review_submission(platform: platform_filter)
-      submission&.cancel_submission
-
-      cleared = false
-      30.times do
-        sleep(10)
-        still_blocking = app.get_in_progress_review_submission(platform: platform_filter)
-        if still_blocking.nil? || still_blocking.state != "WAITING_FOR_REVIEW"
-          cleared = true
-          break
-        end
+  SETTLE_ATTEMPTS.times do |attempt|
+    edit = app.get_edit_app_store_version(platform: platform_filter)
+    outcome = "reused"
+    if edit.nil? || edit.version_string != version_string
+      outcome = edit.nil? ? "created" : "renamed"
+      begin
+        # Creates the version when there is none, renames a leftover editable
+        # one (e.g. a rejected version from a previous cycle) otherwise.
+        app.ensure_version!(version_string, platform: platform_filter)
+        edit = app.get_edit_app_store_version(platform: platform_filter)
+      rescue StandardError => e
+        UI.verbose("Cannot set version #{version_string} yet: #{e.message}")
+        edit = nil
       end
-
-      unless cleared
-        UI.important(
-          "#{bundle_id} (#{platform_filter}): cancelling the WAITING_FOR_REVIEW submission " \
-          "did not clear in time; uploading the build without submitting for review."
-        )
-        return false
-      end
-    else
-      UI.important(
-        "#{bundle_id} (#{platform_filter}) has v#{blocking.first.version_string} in " \
-        "#{blocking.first.app_store_state}; uploading the build without submitting for review."
-      )
-      return false
     end
-  end
 
-  # deliver also needs an editable App Info (app-level metadata: name, category,
-  # etc. — a separate Apple resource from the App Store Version checked above)
-  # to submit. When it's locked (e.g. still IN_REVIEW/PENDING_RELEASE from a
-  # prior release), upload_to_app_store retries "Cannot find edit app info" for
-  # ~20 minutes and then hard-fails. Check upfront and fall back to TestFlight.
-  unless app.fetch_edit_app_info
-    UI.important(
-      "#{bundle_id} (#{platform_filter}) has no editable App Info right now; " \
-      "uploading the build without submitting for review."
+    # deliver also needs an editable App Info (app-level metadata: name,
+    # category — a separate Apple resource from the version above) to submit.
+    # While it's locked, upload_to_app_store retries "Cannot find edit app info"
+    # for ~20 minutes and then hard-fails, so wait for it here instead.
+    if edit && edit.version_string == version_string && app.fetch_edit_app_info
+      UI.success(
+        "#{bundle_id} (#{platform_filter}): editable version #{version_string} ready (#{outcome})."
+      )
+      return true
+    end
+
+    blocker = app.get_pending_release_app_store_version(platform: platform_filter) ||
+              app.get_in_review_app_store_version(platform: platform_filter)
+    reason = if blocker
+               "v#{blocker.version_string} is #{blocker.app_version_state}"
+             elsif edit
+               "App Info is still locked"
+             else
+               "no editable version yet"
+             end
+    UI.message(
+      "#{bundle_id} (#{platform_filter}): waiting for the submit slot — " \
+      "#{reason} (#{attempt + 1}/#{SETTLE_ATTEMPTS})"
     )
-    return false
+    sleep(SETTLE_INTERVAL) unless attempt == SETTLE_ATTEMPTS - 1
   end
 
-  true
+  blocker = app.get_pending_release_app_store_version(platform: platform_filter) ||
+            app.get_in_review_app_store_version(platform: platform_filter)
+  held = blocker ? " v#{blocker.version_string} is #{blocker.app_version_state}." : ""
+  UI.user_error!(
+    "#{bundle_id} (#{platform_filter}): App Store Connect did not accept version " \
+    "#{version_string} within #{SETTLE_ATTEMPTS * SETTLE_INTERVAL / 60} minutes.#{held} " \
+    "Clear the blocking version — release-approved.yml releases an approved build, " \
+    "or reject the submission in App Store Connect — and re-run."
+  )
+end
+
+# Shorter wait than the binary lanes get: nothing in the metadata lanes frees
+# the submit slot, so this only rides out a lock that is already clearing.
+METADATA_ATTEMPTS = 10
+
+# The version metadata gets written to. deliver needs an editable App Store
+# version *and* an editable App Info — name, subtitle and privacy URL live on
+# the app, not on the version — and Apple exposes neither while the previous
+# version is in review or still being released.
+#
+# Raises when there is nothing to write to, rather than exiting green having
+# uploaded nothing: a listing that silently stayed stale is worse than a red run.
+def await_editable_version!(app, bundle_id, platform_filter)
+  METADATA_ATTEMPTS.times do |attempt|
+    edit = app.get_edit_app_store_version(platform: platform_filter)
+    if edit && app.fetch_edit_app_info
+      UI.success("#{bundle_id} (#{platform_filter}): writing metadata to v#{edit.version_string}.")
+      return edit
+    end
+
+    blocker = app.get_pending_release_app_store_version(platform: platform_filter) ||
+              app.get_in_review_app_store_version(platform: platform_filter)
+    reason = if blocker
+               "v#{blocker.version_string} is #{blocker.app_version_state}"
+             elsif edit
+               "App Info is still locked"
+             else
+               "no editable version"
+             end
+    UI.message(
+      "#{bundle_id} (#{platform_filter}): waiting for an editable version — " \
+      "#{reason} (#{attempt + 1}/#{METADATA_ATTEMPTS})"
+    )
+    sleep(SETTLE_INTERVAL) unless attempt == METADATA_ATTEMPTS - 1
+  end
+
+  UI.user_error!(
+    "#{bundle_id} (#{platform_filter}): no editable version to write metadata to — " \
+    "every version is in review or live. Create the next version in App Store Connect, " \
+    "or run publish-binary.yml first: it creates the version metadata attaches to."
+  )
+end
+
+# Marketing version the binary carries, read from the pubspec the bump-version
+# job produced. Same source the build used, so the two cannot disagree.
+def target_version(app_name)
+  pubspec = File.expand_path("../packages/#{app_name}/pubspec.yaml", __dir__)
+  match = File.read(pubspec).match(/^version:\s*(\d+\.\d+\.\d+)/)
+  UI.user_error!("No version found in #{pubspec}") unless match
+  match[1]
 end
 
 # States in which a version has not gone live yet, so its release type still
@@ -292,9 +351,11 @@ lane :upload do
   submit_for_review = ENV.fetch("SUBMIT_FOR_REVIEW", "false") == "true"
   if submit_for_review
     app_name = required_env!("APP_NAME")
-    # A version already queued at Apple cannot be replaced — fall back to a
-    # TestFlight-only upload so the build still ships.
-    submit_for_review = submit_slot_available?(api_key, "org.growerp.#{app_name}", "IOS")
+    # Creates the App Store version the build is about to fill. Only a
+    # never-published app returns false (TestFlight); anything else raises.
+    submit_for_review = prepare_edit_version!(
+      api_key, "org.growerp.#{app_name}", "IOS", target_version(app_name)
+    )
   end
 
   if submit_for_review
@@ -346,17 +407,7 @@ lane :upload_metadata do
   asc_app = Spaceship::ConnectAPI::App.find("org.growerp.#{app_name}")
   UI.user_error!("App not found: org.growerp.#{app_name}") unless asc_app
 
-  editable_states = %w[
-    PREPARE_FOR_SUBMISSION DEVELOPER_REJECTED REJECTED
-    METADATA_REJECTED WAITING_FOR_UPLOAD INVALID_BINARY
-  ]
-  versions = asc_app.get_app_store_versions(filter: { "platform" => "IOS" })
-  editable = versions.any? { |v| editable_states.include?(v.app_store_state) }
-
-  unless editable
-    UI.important("No editable iOS version — all versions are in review or live. Skipping upload.")
-    next
-  end
+  await_editable_version!(asc_app, "org.growerp.#{app_name}", "IOS")
 
   upload_to_app_store(
     api_key:                    api_key,
@@ -446,10 +497,12 @@ lane :upload_macos do
   UI.user_error!("No .pkg found in #{export_dir}") if pkg.nil?
 
   submit_for_review = ENV.fetch("SUBMIT_FOR_REVIEW", "false") == "true"
-  # A version already queued at Apple cannot be replaced — fall back to a
-  # TestFlight-only upload so the build still ships.
+  # Creates the App Store version the build is about to fill. Only a
+  # never-published app returns false (TestFlight); anything else raises.
   if submit_for_review
-    submit_for_review = submit_slot_available?(api_key, "org.growerp.#{app_name}", "MAC_OS")
+    submit_for_review = prepare_edit_version!(
+      api_key, "org.growerp.#{app_name}", "MAC_OS", target_version(app_name)
+    )
   end
 
   if submit_for_review
@@ -532,17 +585,7 @@ lane :upload_metadata_macos do
   asc_app = Spaceship::ConnectAPI::App.find(bundle_id)
   UI.user_error!("App not found: #{bundle_id}") unless asc_app
 
-  editable_states = %w[
-    PREPARE_FOR_SUBMISSION DEVELOPER_REJECTED REJECTED
-    METADATA_REJECTED WAITING_FOR_UPLOAD INVALID_BINARY
-  ]
-  versions = asc_app.get_app_store_versions(filter: { "platform" => "MAC_OS" })
-  editable = versions.any? { |v| editable_states.include?(v.app_store_state) }
-
-  unless editable
-    UI.important("No editable macOS version — all versions are in review or live. Skipping upload.")
-    next
-  end
+  await_editable_version!(asc_app, bundle_id, "MAC_OS")
 
   upload_to_app_store(
     api_key:                    api_key,

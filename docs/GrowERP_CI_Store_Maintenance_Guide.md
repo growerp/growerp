@@ -80,20 +80,33 @@ workflow to dispatch at each point and what to check before moving on. Everythin
 |---|--------|----------|----------|
 | 1 | Refresh screenshots | `screenshots.yml` | Full run (>1 h). Produces the `framed-screenshots` artifact every later step reads. |
 | 2 | Review listing text | — (manual, in the repo) | Your own edits committed and pushed. |
-| 3 | Create the editable Apple version | App Store Connect, or step 5 | Each iOS/macOS app sits in `PREPARE_FOR_SUBMISSION`. |
+| 3 | Create the editable Apple version | App Store Connect — only if you want step 4 before step 5 | Each iOS/macOS app sits in `PREPARE_FOR_SUBMISSION`. |
 | 4 | Upload listing text + screenshots | `publish-metadata.yml` | Every job green **and** no skip warnings (see below). |
 | 5 | Build and submit binaries | `publish-binary.yml` | Builds uploaded, submissions created. |
 | 6 | Fix rejections and resubmit | manual + re-run 4 / 5 | All stores out of the review queue. |
 | 7 | Release approved builds to the public | `release-approved.yml` | Each store reports released or "nothing held". |
 | 8 | Optional: mirror the live listings back | `download-store-metadata.yml` | Commit diff is empty. |
 
-**Why step 3 exists.** Apple attaches metadata to an App Store *version*, not to the app. If every
-version of an app is live or in review, `publish-metadata.yml` logs
-`No editable iOS version — all versions are in review or live. Skipping upload.` and the job
-still goes **green** having uploaded nothing. Either create the next version in App Store Connect
-first, or run `publish-binary.yml` (step 5) before `publish-metadata.yml` (step 4) — uploading the
-binary creates the version that metadata can then attach to. The other four stores have no such
-constraint.
+**Why step 3 exists.** Apple attaches metadata to an App Store *version*, not to the app, so there
+has to be an editable one before `publish-metadata.yml` can write anything. If every version is
+live or in review the job now **fails** with
+`no editable version to write metadata to — every version is in review or live`, rather than
+exiting green having uploaded nothing. The other four stores have no such constraint.
+
+`publish-binary.yml` (step 5) creates that version itself, so step 3 is only needed when you want
+to upload metadata **before** the binary. On a stable-track run its Fastlane `upload` lane clears
+the submit slot first — releasing a version held in `PENDING_DEVELOPER_RELEASE`, cancelling one
+merely `WAITING_FOR_REVIEW` — then polls for up to 10 minutes for App Store Connect to hand back an
+editable version *and* an editable App Info, creating the version at the bumped number. Watch for
+these lines in the job log:
+
+- `admin (IOS): editable version 1.18.9 ready (created|renamed|reused)` — the version exists and
+  the build will be submitted against it.
+- `admin (IOS): waiting for the submit slot — v1.18.1 is PENDING_APPLE_RELEASE (4/30)` — normal
+  while a just-released version settles.
+- `App Store Connect did not accept version … within 10 minutes` — the run **fails** here. Clear
+  the blocking version (`release-approved.yml`, or reject the submission in App Store Connect) and
+  re-run; the binary is not shipped to TestFlight as a consolation.
 
 **Can metadata be uploaded at any time?**
 
@@ -104,11 +117,14 @@ constraint.
 | Microsoft | Usually | Blocked while a submission it cannot delete is in flight (first-time onboarding in certification, or a draft started by hand in Partner Center). |
 | Apple (iOS + macOS) | **No** | Needs a version in an editable state — see step 3. |
 
-**A green run does not prove anything uploaded.** Three paths exit 0 without uploading, by design.
-After every `publish-metadata.yml` run, scan the job logs for:
+**A green run does not prove anything uploaded.** Two paths still exit 0 without uploading, by
+design. After every `publish-metadata.yml` run, scan the job logs for:
 
-- `No editable iOS version` / `No editable macOS version` — Apple metadata was skipped;
-  do step 3 and re-run.
+- `has never been published; uploading to TestFlight` (in `publish-binary.yml`) — an app whose
+  first App Store version has never been through review. Apple cannot review it from CI, so the
+  build goes to TestFlight only. Complete the listing and submit that first version by hand; every
+  later run submits normally. This is the **only** case where a stable-track binary run skips the
+  submission and still passes.
 - `skipped — an in-progress submission exists` — Windows was skipped; clear the draft submission
   in Partner Center and re-run.
 - `no framed screenshots in the artifact` — the Play upload sent listing text only and left the
