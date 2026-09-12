@@ -120,11 +120,13 @@ these lines in the job log:
 **A green run does not prove anything uploaded.** Two paths still exit 0 without uploading, by
 design. After every `publish-metadata.yml` run, scan the job logs for:
 
-- `has never been published; uploading to TestFlight` (in `publish-binary.yml`) — an app whose
-  first App Store version has never been through review. Apple cannot review it from CI, so the
-  build goes to TestFlight only. Complete the listing and submit that first version by hand; every
-  later run submits normally. This is the **only** case where a stable-track binary run skips the
-  submission and still passes.
+- `has never been submitted for review; uploading to TestFlight` (in `publish-binary.yml`) — an
+  app whose listing has never been completed, so all it has is the empty version App Store Connect
+  created with the app record. Apple will not review that, so the build goes to TestFlight only.
+  Submit that first version by hand; every later run submits normally, **including** after a
+  rejection — a `DEVELOPER_REJECTED` or `REJECTED` version counts as submitted and gets refilled
+  and resubmitted. This is the **only** case where a stable-track binary run skips the submission
+  and still passes.
 - `skipped — an in-progress submission exists` — Windows was skipped; clear the draft submission
   in Partner Center and re-run.
 - `no framed screenshots in the artifact` — the Play upload sent listing text only and left the

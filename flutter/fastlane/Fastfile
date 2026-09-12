@@ -28,17 +28,35 @@ def release_pending_versions(app, platform_filter)
   released
 end
 
-# States that only ever occur once an app has been through review at least once.
-# If a platform has no version in any of these, it has never been published and
-# its first App Store version cannot be submitted for review from CI (the auto-
-# created PREPARE_FOR_SUBMISSION version has no listing/metadata yet, so deliver
-# fails with "appStoreVersions ... is not in valid state. This resource cannot
-# be reviewed"). Such apps get a TestFlight upload instead.
-PUBLISHED_STATES = %w[
-  READY_FOR_SALE PENDING_DEVELOPER_RELEASE PENDING_APPLE_RELEASE
-  PROCESSING_FOR_APP_STORE IN_REVIEW WAITING_FOR_REVIEW
+# States a version can only reach by having been submitted to Apple — live,
+# queued, or bounced back. What matters is that the listing was complete enough
+# to enter review, not that review ever passed: a DEVELOPER_REJECTED version was
+# submitted and withdrawn, and can be filled in and submitted again.
+#
+# A platform with no version in any of these has never been submitted at all, so
+# all it has is the PREPARE_FOR_SUBMISSION version App Store Connect creates with
+# the app record. That one has no completed listing and deliver rejects it with
+# "appStoreVersions ... is not in valid state. This resource cannot be reviewed",
+# so those get a TestFlight upload until the first version is submitted by hand.
+#
+# Both state fields are checked: appVersionState is current and appStoreState
+# deprecated, their vocabularies differ (READY_FOR_DISTRIBUTION vs
+# READY_FOR_SALE), and Apple does not populate them uniformly across apps.
+SUBMITTED_STATES = %w[
+  READY_FOR_SALE READY_FOR_DISTRIBUTION
+  PROCESSING_FOR_APP_STORE PROCESSING_FOR_DISTRIBUTION
+  PENDING_DEVELOPER_RELEASE PENDING_APPLE_RELEASE
+  IN_REVIEW WAITING_FOR_REVIEW ACCEPTED
+  DEVELOPER_REJECTED REJECTED METADATA_REJECTED INVALID_BINARY
   REPLACED_WITH_NEW_VERSION DEVELOPER_REMOVED_FROM_SALE REMOVED_FROM_SALE
 ].freeze
+
+def ever_submitted?(versions)
+  versions.any? do |v|
+    SUBMITTED_STATES.include?(v.app_store_state) ||
+      SUBMITTED_STATES.include?(v.app_version_state)
+  end
+end
 
 # A submission queued but not yet picked up by a reviewer can be cancelled
 # without interrupting anyone, which returns its version to an editable state.
@@ -78,10 +96,10 @@ def prepare_edit_version!(api_key, bundle_id, platform_filter, version_string)
   UI.user_error!("App not found: #{bundle_id}") unless app
 
   versions = app.get_app_store_versions(filter: { "platform" => platform_filter })
-  unless versions.any? { |v| PUBLISHED_STATES.include?(v.app_store_state) }
+  unless ever_submitted?(versions)
     UI.important(
-      "#{bundle_id} (#{platform_filter}) has never been published; uploading to " \
-      "TestFlight and skipping review submission. Complete the store listing and " \
+      "#{bundle_id} (#{platform_filter}) has never been submitted for review; uploading " \
+      "to TestFlight and skipping review submission. Complete the store listing and " \
       "submit the first version by hand, then stable-track runs will submit."
     )
     return false
