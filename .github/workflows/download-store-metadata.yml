@@ -497,7 +497,10 @@ jobs:
   # ───────────────────────────────────────────────────────────────────────────
   commit-metadata:
     needs: [ resolve-matrix, download-android, download-ios, download-macos, download-windows ]
-    if: always()
+    # always() to survive a failed download leg, but never without a resolved
+    # matrix: on a refused branch or a bad app name there is nothing to commit
+    # and the job only reported a misleading success.
+    if: always() && needs.resolve-matrix.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: write
