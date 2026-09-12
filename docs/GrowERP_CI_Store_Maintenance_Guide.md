@@ -825,6 +825,7 @@ after someone edits a listing directly in a store console.
 |-------|------|---------|-------------|
 | `apps` | string | `all` | `all` or a comma-separated list of `storeApps` entries. |
 | `stores` | string | `all` | `all` or a comma-separated list: `ios`, `macos`, `android`, `windows`. Snap listings are not downloaded — `snapcraft.yaml` is the source of truth there. |
+| `allow_non_default_branch` | boolean | `false` | Permits a run on a branch other than the default one. Without it the run fails immediately. |
 
 **This workflow treats the store as authoritative.** Android, iOS and macOS restores *prune*:
 repo files the store does not return are deleted, except `*.strings`, `review_information/**`,
@@ -837,6 +838,15 @@ listings that were never published will overwrite the repo copy with whatever is
 
 Screenshots are not downloaded. They are regenerated from `screenshots.yml`, and the iOS
 screenshot directory is gitignored, so anything pulled into it could never be committed.
+
+**The download commits to the ref it runs on.** A run dispatched on a feature branch pushes the
+refreshed listings to that branch and leaves `master` untouched, while still reporting success —
+that is how a wrong App Store demo account survived in `master` from April to September 2026.
+The workflow now refuses to start off the default branch unless `allow_non_default_branch` is
+ticked. Tick it only for a throwaway sync branch you intend to cherry-pick from, which is the
+safe way to pull store values (such as `review_information/demo_user.txt` and
+`demo_password.txt`) without letting the prune blank curated text that has not been published
+yet.
 
 **Secrets required:** Same as Publish to Stores — no additional secrets needed.
 
