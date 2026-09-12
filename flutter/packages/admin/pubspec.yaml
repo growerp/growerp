@@ -1,7 +1,7 @@
 name: admin
 resolution: workspace
 description: "Run inventory, sales, purchasing, HR and accounting from one open app."
-version: 1.18.9+132
+version: 1.18.10+133
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 publish_to: none
