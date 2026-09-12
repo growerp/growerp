@@ -1,1 +1,1 @@
-ofbiz moqui erp business opensource
+erp,inventory,invoicing,accounting,sales,purchasing,stock,ledger,hr,opensource

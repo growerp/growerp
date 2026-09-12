@@ -1,1 +1,1 @@
-ERP frontend for OFBiz & Moqui
+Run your whole business
