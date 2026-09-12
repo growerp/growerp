@@ -61,15 +61,17 @@ end
 # A submission queued but not yet picked up by a reviewer can be cancelled
 # without interrupting anyone, which returns its version to an editable state.
 # An IN_REVIEW submission is left alone and simply blocks the run.
+# Returns true when a submission was actually cancelled.
 def cancel_waiting_review_submission(app, bundle_id, platform_filter)
   submission = app.get_in_progress_review_submission(platform: platform_filter)
-  return if submission.nil? || submission.state != "WAITING_FOR_REVIEW"
+  return false if submission.nil? || submission.state != "WAITING_FOR_REVIEW"
 
   UI.important(
     "#{bundle_id} (#{platform_filter}) has a WAITING_FOR_REVIEW submission; " \
-    "cancelling it to submit the new build."
+    "cancelling it to make the version editable."
   )
   submission.cancel_submission
+  true
 end
 
 # How long to wait for App Store Connect to accept the new version. Releasing
@@ -166,6 +168,49 @@ end
 # the submit slot, so this only rides out a lock that is already clearing.
 METADATA_ATTEMPTS = 10
 
+# Apple counts a submitted version as "editable" (spaceship's
+# get_edit_app_store_version filter includes WAITING_FOR_REVIEW) and does accept
+# text metadata for it, but refuses screenshot changes with "Can't Delete
+# Screenshot After Submit for review". So for the metadata lanes a version in
+# that state is not editable at all.
+def awaiting_review?(version)
+  version.app_version_state == "WAITING_FOR_REVIEW" ||
+    version.app_store_state == "WAITING_FOR_REVIEW"
+end
+
+# Take a version queued for review back out of the queue so its screenshots can
+# be replaced. A WAITING_FOR_REVIEW submission has no reviewer assigned yet, so
+# cancelling costs only queue position, and the caller puts the version straight
+# back in once the upload is done. An IN_REVIEW submission is left alone —
+# await_editable_version! then reports it as the blocker.
+#
+# Returns true when a submission was cancelled, meaning the caller must re-submit.
+def unsubmit_for_metadata!(app, bundle_id, platform_filter)
+  return false unless cancel_waiting_review_submission(app, bundle_id, platform_filter)
+
+  METADATA_ATTEMPTS.times do |attempt|
+    edit = app.get_edit_app_store_version(platform: platform_filter)
+    unless edit && awaiting_review?(edit)
+      UI.success(
+        "#{bundle_id} (#{platform_filter}): submission cancelled; the version takes " \
+        "screenshots again and is re-submitted after the upload."
+      )
+      return true
+    end
+    UI.message(
+      "#{bundle_id} (#{platform_filter}): waiting for the cancelled submission to clear " \
+      "(#{attempt + 1}/#{METADATA_ATTEMPTS})"
+    )
+    sleep(SETTLE_INTERVAL) unless attempt == METADATA_ATTEMPTS - 1
+  end
+
+  UI.user_error!(
+    "#{bundle_id} (#{platform_filter}): v#{app.get_edit_app_store_version(platform: platform_filter)&.version_string} " \
+    "is still WAITING_FOR_REVIEW #{METADATA_ATTEMPTS * SETTLE_INTERVAL / 60} minutes after " \
+    "cancelling its submission. Re-run once App Store Connect has settled."
+  )
+end
+
 # The version metadata gets written to. deliver needs an editable App Store
 # version *and* an editable App Info — name, subtitle and privacy URL live on
 # the app, not on the version — and Apple exposes neither while the previous
@@ -176,14 +221,17 @@ METADATA_ATTEMPTS = 10
 def await_editable_version!(app, bundle_id, platform_filter)
   METADATA_ATTEMPTS.times do |attempt|
     edit = app.get_edit_app_store_version(platform: platform_filter)
-    if edit && app.fetch_edit_app_info
+    submitted = !edit.nil? && awaiting_review?(edit)
+    if edit && !submitted && app.fetch_edit_app_info
       UI.success("#{bundle_id} (#{platform_filter}): writing metadata to v#{edit.version_string}.")
       return edit
     end
 
     blocker = app.get_pending_release_app_store_version(platform: platform_filter) ||
               app.get_in_review_app_store_version(platform: platform_filter)
-    reason = if blocker
+    reason = if submitted
+               "v#{edit.version_string} is WAITING_FOR_REVIEW"
+             elsif blocker
                "v#{blocker.version_string} is #{blocker.app_version_state}"
              elsif edit
                "App Info is still locked"
@@ -422,24 +470,35 @@ lane :upload_metadata do
   # upload_to_app_store targets a "Ready for Sale" version via edit_live: true.
   require "spaceship"
   Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: api_key)
-  asc_app = Spaceship::ConnectAPI::App.find("org.growerp.#{app_name}")
-  UI.user_error!("App not found: org.growerp.#{app_name}") unless asc_app
+  bundle_id = "org.growerp.#{app_name}"
+  asc_app = Spaceship::ConnectAPI::App.find(bundle_id)
+  UI.user_error!("App not found: #{bundle_id}") unless asc_app
 
-  await_editable_version!(asc_app, "org.growerp.#{app_name}", "IOS")
+  # A version already queued for review keeps its screenshots frozen, so it comes
+  # out of the queue for the upload and goes straight back in below.
+  resubmit = unsubmit_for_metadata!(asc_app, bundle_id, "IOS")
 
-  upload_to_app_store(
+  await_editable_version!(asc_app, bundle_id, "IOS")
+
+  options = {
     api_key:                    api_key,
-    app_identifier:             "org.growerp.#{app_name}",
+    app_identifier:             bundle_id,
     skip_binary_upload:         true,
     skip_screenshots:           !has_screenshots,
     overwrite_screenshots:      has_screenshots,
     screenshots_path:           screenshots_path,
     metadata_path:              metadata_path,
-    submit_for_review:          false,
+    submit_for_review:          resubmit,
     run_precheck_before_submit: false,
     skip_app_version_update:    true,
     force:                      true,
-  )
+  }
+  # Only set when re-submitting: deliver writes releaseType whenever the option is
+  # present, and the metadata-only path must not touch it.
+  options[:automatic_release] = false if resubmit
+
+  upload_to_app_store(options)
+  ensure_manual_release(api_key, bundle_id, "IOS") if resubmit
 end
 
 lane :codesign_macos do
@@ -603,9 +662,12 @@ lane :upload_metadata_macos do
   asc_app = Spaceship::ConnectAPI::App.find(bundle_id)
   UI.user_error!("App not found: #{bundle_id}") unless asc_app
 
+  # See upload_metadata: screenshots are frozen while the version sits in review.
+  resubmit = unsubmit_for_metadata!(asc_app, bundle_id, "MAC_OS")
+
   await_editable_version!(asc_app, bundle_id, "MAC_OS")
 
-  upload_to_app_store(
+  options = {
     api_key:                    api_key,
     platform:                   "osx",
     app_identifier:             bundle_id,
@@ -614,11 +676,15 @@ lane :upload_metadata_macos do
     overwrite_screenshots:      has_screenshots,
     screenshots_path:           screenshots_path,
     metadata_path:              metadata_path,
-    submit_for_review:          false,
+    submit_for_review:          resubmit,
     run_precheck_before_submit: false,
     skip_app_version_update:    true,
     force:                      true,
-  )
+  }
+  options[:automatic_release] = false if resubmit
+
+  upload_to_app_store(options)
+  ensure_manual_release(api_key, bundle_id, "MAC_OS") if resubmit
 end
 
 lane :build_macos do
