@@ -1,7 +1,7 @@
 name: freelance
 resolution: workspace
 description: "Track billable time, set rates and invoice clients in minutes."
-version: 1.18.7+27
+version: 1.18.7+28
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 publish_to: none
