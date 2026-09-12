@@ -13,4 +13,4 @@ Key Features:
 
 Built for equipment hire, tool and machine rental, vehicle fleets, event and party hire, and anyone renting out property. Counter staff can book from a tablet while the workshop updates maintenance from a phone. GrowERP is open source and runs on the Moqui and Apache OFBiz business platforms — no licence fees, no lock-in.
 
-Accessible on Windows, macOS, iOS, Android, and web browsers. All synchronized in real-time.
+Accessible on Linux, Windows, macOS, iOS, Android, and web browsers. All synchronized in real-time.

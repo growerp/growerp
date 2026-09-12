@@ -14,6 +14,7 @@ description: |
   - Multiple companies and currencies in one account
 
   This snap packages the Linux desktop version of the GrowERP Admin application. Whether you run a shop, a workshop or a service company, GrowERP grows with you: start with the parts you need today and switch the rest on when you need them. Everything syncs in real time, so your team sees the same numbers wherever they work.
+  Made for Linux, and synchronized in real time with the iPhone, iPad, Mac, Windows, Android and web versions.
 
 grade: stable
 confinement: strict

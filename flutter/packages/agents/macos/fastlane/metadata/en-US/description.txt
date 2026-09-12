@@ -12,4 +12,4 @@ Key Features:
 
 For owners and managers who want the productivity of AI assistants and the accountability of a real system of record: nothing happens off the books, and you can always see who — or what — did it. GrowERP is open source and runs on the Moqui and Apache OFBiz business platforms — no licence fees, no lock-in.
 
-Made for the Mac, and synchronized in real time with the iPhone, iPad, Windows, Android and web versions.
+Made for the Mac, and synchronized in real time with the iPhone, iPad, Linux, Windows, Android and web versions.

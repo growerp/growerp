@@ -13,4 +13,4 @@ Key Features:
 
 Built for independent hotels, guest houses, hostels and B&Bs that want a real property management system without a per-room subscription. Staff can work from a tablet at the desk, a phone on the floor, or a browser at home. GrowERP is open source and runs on the Moqui and Apache OFBiz business platforms — no licence fees, no lock-in.
 
-Made for Windows, and synchronized in real time with the macOS, iPhone, iPad, Android and web versions.
+Made for Windows, and synchronized in real time with the Linux, macOS, iPhone, iPad, Android and web versions.

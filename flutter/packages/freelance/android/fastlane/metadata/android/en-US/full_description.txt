@@ -12,4 +12,4 @@ Key Features:
 
 Made for independent professionals — consultants, developers, designers, coaches and anyone billing by the hour or by the day. Log time on your phone between jobs, then invoice from your desktop in the evening; it is the same data either way. GrowERP is open source and runs on the Moqui and Apache OFBiz business platforms — no licence fees, no lock-in.
 
-Accessible on Windows, macOS, iOS, Android, and web browsers. All synchronized in real-time.
+Accessible on Linux, Windows, macOS, iOS, Android, and web browsers. All synchronized in real-time.

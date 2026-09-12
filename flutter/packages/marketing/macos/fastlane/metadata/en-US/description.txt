@@ -12,4 +12,4 @@ Key Features:
 
 For small teams and one-person marketing departments tired of paying for four tools that do not talk to each other. Draft on a laptop, approve from a phone, publish everywhere. GrowERP is open source and runs on the Moqui and Apache OFBiz business platforms — no licence fees, no lock-in.
 
-Made for the Mac, and synchronized in real time with the iPhone, iPad, Windows, Android and web versions.
+Made for the Mac, and synchronized in real time with the iPhone, iPad, Linux, Windows, Android and web versions.

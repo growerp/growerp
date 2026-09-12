@@ -11,6 +11,7 @@ Key Features:
 • AI agents that handle routine work for you
 • Multiple companies and currencies in one account
 
-Whether you run a shop, a workshop or a service company, GrowERP grows with you: start with the parts you need today and switch the rest on when you need them. Everything syncs in real time, so your team sees the same numbers wherever they work. GrowERP is open source and runs on the Moqui and Apache OFBiz business platforms — no licence fees, no lock-in.
+Whether you run a shop, a workshop or a service company, GrowERP grows with you: start with the parts you need today and switch the rest on when you need them. Everything syncs in real time, so your team sees the same numbers wherever they work.
+  Made for Linux, and synchronized in real time with the iPhone, iPad, Mac, Windows, Android and web versions. GrowERP is open source and runs on the Moqui and Apache OFBiz business platforms — no licence fees, no lock-in.
 
-Accessible on iPhone, iPad, Mac, Windows, Android and web browsers. All synchronized in real-time.
+Accessible on iPhone, iPad, Mac, Linux, Windows, Android and web browsers. All synchronized in real-time.
