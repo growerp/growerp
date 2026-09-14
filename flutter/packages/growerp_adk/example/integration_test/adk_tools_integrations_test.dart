@@ -13,6 +13,7 @@
  */
 
 import 'package:adk_example/router_builder.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
@@ -98,6 +99,7 @@ void main() {
         tester, '/systemSetup', 'SystemSetupDialog');
     expect(CommonTest.getTextFormField('smtpHost'), smtpHost,
         reason: 'system setup should show the configured SMTP host');
+
     await CommonTest.enterText(tester, 'storeHost', 'imap.example.com');
     await CommonTest.tapByKey(tester, 'saveEmailSettings',
         seconds: CommonTest.waitTime);
@@ -118,6 +120,24 @@ void main() {
     expect(CommonTest.getTextFormField('githubRepository'), githubRepo,
         reason: 'system setup save must not clear the GitHub repository');
     await CommonTest.tapByKey(tester, 'cancelGithubSettings');
+
+    // ── The house writing voice saves and survives, without clobbering AI ────
+    await CommonTest.selectOption(
+        tester, '/systemSetup', 'SystemSetupDialog');
+    const writingStyle = 'Write plainly. Open on the work in progress.';
+    await tester.ensureVisible(find.byKey(const Key('writingStyle')));
+    await CommonTest.enterText(tester, 'writingStyle', writingStyle);
+    await CommonTest.tapByKey(tester, 'saveAiSettings',
+        seconds: CommonTest.waitTime);
+    await CommonTest.waitForSnackbarToGo(tester);
+
+    await CommonTest.selectOption(
+        tester, '/systemSetup', 'SystemSetupDialog');
+    expect(CommonTest.getTextFormField('writingStyle'), writingStyle,
+        reason: 'the writing style should be stored on the tenant');
+    expect(CommonTest.getTextFormField('smtpHost'), smtpHost,
+        reason: 'saving the writing style must not clear the SMTP host');
+    await CommonTest.tapByKey(tester, 'cancelSettings');
 
     // ── The agent dialog shows the built-in Moqui server (read-only) ─────────
     await AdkTest.selectAgents(tester);

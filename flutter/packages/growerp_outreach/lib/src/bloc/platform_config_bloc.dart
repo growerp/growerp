@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -13,6 +15,7 @@ class PlatformConfigBloc
     on<PlatformConfigFetch>(_onPlatformConfigFetch);
     on<PlatformConfigUpdate>(_onPlatformConfigUpdate);
     on<PlatformConfigCreate>(_onPlatformConfigCreate);
+    on<PlatformConfigVerify>(_onPlatformConfigVerify);
     on<PlatformConfigDelete>(_onPlatformConfigDelete);
   }
 
@@ -88,6 +91,35 @@ class PlatformConfigBloc
         status: PlatformConfigStatus.success,
         configs: List.of(state.configs)..add(newConfig),
         message: 'Configuration created successfully',
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        status: PlatformConfigStatus.failure,
+        message: e.toString(),
+      ));
+    }
+  }
+
+  /// Probe the platform with the stored credentials, then reload the list so
+  /// the row carries the fresh lastCheckDate/lastCheckError. Emits [verified],
+  /// never [success]: a success with a message closes the detail dialog.
+  Future<void> _onPlatformConfigVerify(
+    PlatformConfigVerify event,
+    Emitter<PlatformConfigState> emit,
+  ) async {
+    emit(state.copyWith(status: PlatformConfigStatus.loading));
+    try {
+      dynamic result = await restClient.verifyPlatformConfiguration(
+        configId: event.configId,
+      );
+      // dio can hand back the body as a raw JSON string
+      if (result is String) result = jsonDecode(result);
+      final message = result['message']?.toString() ?? '';
+      final response = await restClient.listPlatformConfigurations();
+      emit(PlatformConfigState(
+        status: PlatformConfigStatus.verified,
+        configs: response.configs,
+        message: message,
       ));
     } catch (e) {
       emit(state.copyWith(

@@ -382,6 +382,11 @@
                     <econdition field-name="isEnabled" value="Y" />
                 </entity-find>
                 <set field="platforms" from="configs.collect { it.platform }" />
+                <!-- SUBSTACK_NOTE has no configuration row of its own: it shares the
+                     SUBSTACK credentials, so it can never appear in the list above. -->
+                <if condition="platforms.contains('SUBSTACK') &amp;&amp; !platforms.contains('SUBSTACK_NOTE')">
+                    <set field="platforms" from="platforms + ['SUBSTACK_NOTE']" />
+                </if>
             </if>
             <if condition="!platforms">
                 <return error="true"

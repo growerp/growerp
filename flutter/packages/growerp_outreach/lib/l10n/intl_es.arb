@@ -43,6 +43,7 @@
   "enabled": "Activado",
   "allowOutreachOnThisPlatform": "Permitir la divulgación en esta plataforma",
   "changeEmailServerSettings": "Cambiar la configuración del servidor de correo electrónico",
+  "testConnection": "Probar conexión",
   "deleteConfiguration": "Eliminar configuración",
   "delete": "Borrar",
   "noActiveCampaigns": "No hay campañas activas",

@@ -115,6 +115,23 @@ void main() {
     expect(CommonTest.getTextFormField('Username'), equals('test-user'),
         reason: 'username lost on update');
 
+    // Check the credentials: LinkedIn has no probe of its own, so this records a
+    // successful check without calling out. The point is that it does NOT pop
+    // the dialog the way a save does, and that it writes a visible result.
+    await tester.ensureVisible(find.byKey(const Key('testConnection')));
+    await CommonTest.tapByKey(tester, 'testConnection');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+    expect(
+      find.byKey(const Key('PlatformConfigDetail_linkedIn')),
+      findsOneWidget,
+      reason: 'a credential check must leave the detail dialog open',
+    );
+    expect(
+      find.byKey(const Key('lastCheckResult')),
+      findsOneWidget,
+      reason: 'the outcome of the credential check should be shown',
+    );
+
     // Close the dialog: it has no cancel button, saving pops it
     await tester.ensureVisible(find.byKey(const Key('Update')));
     await CommonTest.tapByKey(tester, 'Update');

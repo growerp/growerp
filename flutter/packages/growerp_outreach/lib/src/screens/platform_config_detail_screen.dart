@@ -103,6 +103,15 @@ class _PlatformConfigDetailScreenState
                   _isClosing = true;
                   Navigator.of(context).pop();
                 }
+                if (state.status == PlatformConfigStatus.verified) {
+                  HelperFunctions.showMessage(
+                    context,
+                    state.message ?? '',
+                    _configIn(state)?.lastCheckError == null
+                        ? Colors.green
+                        : Colors.red,
+                  );
+                }
                 if (state.status == PlatformConfigStatus.failure) {
                   HelperFunctions.showMessage(
                     context,
@@ -254,6 +263,11 @@ class _PlatformConfigDetailScreenState
                 ],
               ),
             ),
+            if (widget.config != null &&
+                widget.platform != OutreachPlatform.email) ...[
+              const SizedBox(height: 16),
+              _buildTestConnection(),
+            ],
             if (_helpSteps != null) ...[
               const SizedBox(height: 16),
               _buildHelpCard(),
@@ -455,6 +469,54 @@ class _PlatformConfigDetailScreenState
           const SizedBox(height: 8),
         ],
       ),
+    );
+  }
+
+  /// This platform's row as the bloc currently holds it, which is where the
+  /// verification outcome is persisted.
+  PlatformConfiguration? _configIn(PlatformConfigState state) {
+    final configId = widget.config?.configId;
+    if (configId == null) return null;
+    for (final config in state.configs) {
+      if (config.configId == configId) return config;
+    }
+    return null;
+  }
+
+  Widget _buildTestConnection() {
+    return BlocBuilder<PlatformConfigBloc, PlatformConfigState>(
+      builder: (context, state) {
+        final config = _configIn(state) ?? widget.config;
+        final error = config?.lastCheckError;
+        final checked = config?.lastCheckDate;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            OutlinedButton.icon(
+              key: const Key('testConnection'),
+              icon: const Icon(Icons.network_check),
+              label: Text(OutreachLocalizations.of(context)!.testConnection),
+              onPressed: state.status == PlatformConfigStatus.loading
+                  ? null
+                  : () => context.read<PlatformConfigBloc>().add(
+                        PlatformConfigVerify(widget.config!.configId!),
+                      ),
+            ),
+            if (checked != null) ...[
+              const SizedBox(height: 6),
+              Text(
+                error == null
+                    ? 'Credentials valid at ${checked.toLocal()}'
+                    : 'Last check failed: $error',
+                key: const Key('lastCheckResult'),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: error == null ? Colors.green[700] : Colors.red[700],
+                    ),
+              ),
+            ],
+          ],
+        );
+      },
     );
   }
 

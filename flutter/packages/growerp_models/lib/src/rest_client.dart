@@ -262,6 +262,13 @@ abstract class RestClient {
     @Body() Map<String, dynamic> systemSettings,
   );
 
+  /// Derive a house writing voice from samples of the tenant's own writing.
+  /// Returns writingStyle + sampleCount; nothing is saved by this call.
+  @POST("rest/s1/growerp/100/SystemSettings/generateWritingStyle")
+  Future<dynamic> generateWritingStyle({
+    @Field() required List<String> samples,
+  });
+
   @GET("rest/s1/growerp/100/SystemDefault")
   Future<SystemDefault> getSystemDefault();
 
@@ -1996,6 +2003,13 @@ abstract class RestClient {
   @DELETE("rest/s1/growerp/100/PlatformConfiguration")
   Future<void> deletePlatformConfiguration({
     @Query('configId') required String configId,
+  });
+
+  /// Check the stored credentials against the platform and record the outcome
+  /// on the configuration. Returns success/message/lastCheckDate.
+  @POST("rest/s1/growerp/100/PlatformConfiguration/verify")
+  Future<dynamic> verifyPlatformConfiguration({
+    @Field() required String configId,
   });
 
   // Send outreach email

@@ -35,6 +35,12 @@ class PlatformConfiguration {
   /// Last time platform was used
   final DateTime? lastUsedDate;
 
+  /// When the credentials were last verified
+  final DateTime? lastCheckDate;
+
+  /// Why the last verification failed; empty when the credentials were valid
+  final String? lastCheckError;
+
   const PlatformConfiguration({
     this.configId,
     this.ownerPartyId,
@@ -46,6 +52,8 @@ class PlatformConfiguration {
     this.username,
     this.password,
     this.lastUsedDate,
+    this.lastCheckDate,
+    this.lastCheckError,
   });
 
   factory PlatformConfiguration.fromJson(Map<String, dynamic> json) =>

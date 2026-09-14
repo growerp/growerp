@@ -1313,6 +1313,8 @@
             <parameter name="apiSecret" />
             <parameter name="username" />
             <parameter name="password" />
+            <parameter name="lastCheckDate" />
+            <parameter name="lastCheckError" />
             <parameter name="createdDate" />
             <parameter name="lastModifiedDate" />
         </out-parameters>
@@ -1336,6 +1338,9 @@
             <set field="apiSecret" from="conf.apiSecret" />
             <set field="username" from="conf.username" />
             <set field="password" from="conf.password" />
+            <set field="lastCheckDate"
+                from="conf.lastCheckDate ? ec.l10n.format(conf.lastCheckDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+            <set field="lastCheckError" from="conf.lastCheckError" />
             <set field="createdDate"
                 from="conf.createdDate ? ec.l10n.format(conf.createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
             <set field="lastModifiedDate"
@@ -1364,6 +1369,8 @@
             <parameter name="apiSecret" />
             <parameter name="username" />
             <parameter name="password" />
+            <parameter name="lastCheckDate" />
+            <parameter name="lastCheckError" />
             <parameter name="createdDate" />
             <parameter name="lastModifiedDate" />
         </out-parameters>
@@ -1374,6 +1381,21 @@
                  (SocialPost.platform, PlatformConfiguration lookups) — clients
                  such as the OutreachPlatform enum submit lowercase/camelCase -->
             <set field="platform" from="platform?.toUpperCase()" />
+            <!-- One row per owner+platform: a second one would make the publishers'
+                 entity-find-one on that pair throw. Re-creating updates instead. -->
+            <entity-find-one entity-name="growerp.marketing.PlatformConfiguration"
+                value-field="existing">
+                <field-map field-name="ownerPartyId" />
+                <field-map field-name="platform" />
+            </entity-find-one>
+            <if condition="existing">
+                <service-call out-map="context"
+                    name="growerp.100.OutreachServices100.update#PlatformConfiguration"
+                    in-map="[configId: existing.configId, isEnabled: isEnabled,
+                             dailyLimit: dailyLimit, apiKey: apiKey, apiSecret: apiSecret,
+                             username: username, password: password]" />
+                <return />
+            </if>
             <service-call name="create#growerp.marketing.PlatformConfiguration" out-map="context"
                 in-map="[
                          ownerPartyId: ownerPartyId,
@@ -1417,6 +1439,8 @@
             <parameter name="apiSecret" />
             <parameter name="username" />
             <parameter name="password" />
+            <parameter name="lastCheckDate" />
+            <parameter name="lastCheckError" />
             <parameter name="createdDate" />
             <parameter name="lastModifiedDate" />
         </out-parameters>
@@ -1446,10 +1470,141 @@
             <set field="apiSecret" from="conf.apiSecret" />
             <set field="username" from="conf.username" />
             <set field="password" from="conf.password" />
+            <set field="lastCheckDate"
+                from="conf.lastCheckDate ? ec.l10n.format(conf.lastCheckDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+            <set field="lastCheckError" from="conf.lastCheckError" />
             <set field="createdDate"
                 from="conf.createdDate ? ec.l10n.format(conf.createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
             <set field="lastModifiedDate"
                 from="conf.lastModifiedDate ? ec.l10n.format(conf.lastModifiedDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
+        </actions>
+    </service>
+
+    <service verb="verify" noun="PlatformConfiguration">
+        <description>Check stored credentials against the platform with one cheap read call
+            and record the outcome on the configuration, so an expired Substack cookie or X
+            token is visible before a scheduled publish silently fails on it.
+            Platforms without a check return success with a message saying so.</description>
+        <in-parameters>
+            <parameter name="configId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="success" type="Boolean" />
+            <parameter name="message" />
+            <parameter name="lastCheckDate" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="growerp.marketing.PlatformConfiguration"
+                value-field="conf">
+                <field-map field-name="configId" />
+            </entity-find-one>
+            <if condition="!conf || conf.ownerPartyId != ownerPartyId">
+                <return error="true" message="Platform configuration not found: ${configId}" />
+            </if>
+
+            <script><![CDATA[
+                import java.net.http.HttpClient
+                import java.net.http.HttpRequest
+                import java.net.http.HttpResponse
+                import java.time.Duration
+                import java.net.URLEncoder
+                import javax.crypto.Mac
+                import javax.crypto.spec.SecretKeySpec
+                import java.util.Base64
+                import java.util.UUID
+
+                success = false
+                message = null
+
+                def rfc3986Encode = { String s ->
+                    URLEncoder.encode(s, "UTF-8")
+                        .replace("+", "%20").replace("*", "%2A").replace("%7E", "~")
+                }
+
+                try {
+                    def httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15)).build()
+                    def platform = conf.platform
+
+                    if (platform == 'SUBSTACK' || platform == 'SUBSTACK_NOTE') {
+                        def sessionToken = conf.apiKey
+                        def publicationUrl = conf.username?.replaceAll('/+$', '')
+                        if (!sessionToken) { message = "Substack session token (apiKey) not configured" }
+                        else if (!publicationUrl) { message = "Substack publication URL (username) not configured" }
+                        else {
+                            def request = HttpRequest.newBuilder()
+                                .uri(URI.create("${publicationUrl}/api/v1/drafts?limit=1"))
+                                .header("Cookie", "substack.sid=${sessionToken}; connect.sid=${sessionToken}")
+                                .header("Referer", publicationUrl)
+                                .GET().timeout(Duration.ofSeconds(30)).build()
+                            def response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+                            if (response.statusCode() in [200, 201]) {
+                                success = true
+                                message = "Substack credentials are valid"
+                            } else {
+                                message = "Substack returned ${response.statusCode()}: " +
+                                    "${response.body()?.take(200)}"
+                            }
+                        }
+                    } else if (platform == 'TWITTER') {
+                        def consumerKey = conf.apiKey, consumerSecret = conf.apiSecret
+                        def accessToken = conf.username, tokenSecret = conf.password
+                        if (!consumerKey || !consumerSecret || !accessToken || !tokenSecret) {
+                            message = "X needs all four credentials: consumer key and secret, access token and secret"
+                        } else {
+                            def baseUrl = (System.getProperty('growerp.x.baseUrl') ?:
+                                'https://api.x.com').replaceAll('/+$', '')
+                            def apiUrl = "${baseUrl}/2/users/me"
+                            def oauthParams = [
+                                oauth_consumer_key    : consumerKey as String,
+                                oauth_nonce           : UUID.randomUUID().toString().replace("-", ""),
+                                oauth_signature_method: "HMAC-SHA1",
+                                oauth_timestamp       : (System.currentTimeMillis() / 1000L) as String,
+                                oauth_token           : accessToken as String,
+                                oauth_version         : "1.0"
+                            ]
+                            def paramString = oauthParams.sort().collect { k, v ->
+                                "${rfc3986Encode(k)}=${rfc3986Encode(v)}"
+                            }.join("&")
+                            def baseString = "GET&${rfc3986Encode(apiUrl)}&${rfc3986Encode(paramString)}"
+                            def signingKey = "${rfc3986Encode(consumerSecret as String)}&${rfc3986Encode(tokenSecret as String)}"
+                            def mac = Mac.getInstance("HmacSHA1")
+                            mac.init(new SecretKeySpec(signingKey.getBytes("UTF-8"), "HmacSHA1"))
+                            def signature = Base64.encoder.encodeToString(mac.doFinal(baseString.getBytes("UTF-8")))
+                            def authHeader = "OAuth " + (oauthParams + [oauth_signature: signature]).sort().collect { k, v ->
+                                "${rfc3986Encode(k)}=\"${rfc3986Encode(v)}\""
+                            }.join(", ")
+
+                            def request = HttpRequest.newBuilder()
+                                .uri(URI.create(apiUrl))
+                                .header("Authorization", authHeader)
+                                .GET().timeout(Duration.ofSeconds(30)).build()
+                            def response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+                            if (response.statusCode() == 200) {
+                                success = true
+                                message = "X credentials are valid"
+                            } else {
+                                message = "X returned ${response.statusCode()}: ${response.body()?.take(200)}"
+                            }
+                        }
+                    } else {
+                        success = true
+                        message = "No check implemented for ${platform}"
+                    }
+                } catch (Exception e) {
+                    message = "Verification failed: ${e.message}"
+                    ec.logger.error("Platform credential check error", e)
+                }
+            ]]></script>
+
+            <!-- entity-update, not update#Entity: a null in-parameter is skipped there,
+                 so a cleared error would never be written back -->
+            <set field="conf.lastCheckDate" from="ec.user.nowTimestamp" />
+            <set field="conf.lastCheckError" from="success ? null : message" />
+            <entity-update value-field="conf" />
+            <set field="lastCheckDate"
+                from="ec.l10n.format(ec.user.nowTimestamp, 'yyyy-MM-dd HH:mm:ssZ')" />
         </actions>
     </service>
 
@@ -1478,6 +1633,8 @@
                 <parameter name="apiSecret" />
                 <parameter name="username" />
                 <parameter name="password" />
+                <parameter name="lastCheckDate" />
+                <parameter name="lastCheckError" />
                 <parameter name="createdDate" />
                 <parameter name="lastModifiedDate" />
             </parameter>
@@ -1504,6 +1661,8 @@
                     apiSecret: conf.apiSecret,
                     username: conf.username,
                     password: conf.password,
+                    lastCheckDate: conf.lastCheckDate ? ec.l10n.format(conf.lastCheckDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
+                    lastCheckError: conf.lastCheckError,
                     createdDate: conf.createdDate ? ec.l10n.format(conf.createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
                     lastModifiedDate: conf.lastModifiedDate ? ec.l10n.format(conf.lastModifiedDate, 'yyyy-MM-dd HH:mm:ssZ') : null
                 ])</script>

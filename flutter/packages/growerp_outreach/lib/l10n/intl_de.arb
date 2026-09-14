@@ -43,6 +43,7 @@
   "enabled": "Aktiviert",
   "allowOutreachOnThisPlatform": "Outreach auf dieser Plattform zulassen",
   "changeEmailServerSettings": "E-Mail-Servereinstellungen ändern",
+  "testConnection": "Verbindung testen",
   "deleteConfiguration": "Konfiguration löschen",
   "delete": "Löschen",
   "noActiveCampaigns": "Keine aktiven Kampagnen",

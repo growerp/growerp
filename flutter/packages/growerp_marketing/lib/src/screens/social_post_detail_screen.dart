@@ -148,8 +148,9 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
     }
   }
 
-  /// No official write API for X/Twitter — copy the drafted text and open
-  /// X's compose intent (pre-fills the tweet) for the user to post manually.
+  /// Manual fallback for X/Twitter: posting normally goes through the API
+  /// (publish#SocialPostToX). This copies the drafted text and opens X's
+  /// compose intent so a post can still go out when the API call fails.
   Future<void> _copyAndOpenTwitter() async {
     final text = _finalContentController.text;
     await Clipboard.setData(ClipboardData(text: text));
@@ -502,8 +503,8 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
               ),
               const SizedBox(height: 6),
               Text(
-                'No automated posting for X/Twitter — copy the text, post it '
-                'yourself, then set status to PUBLISHED and Save.',
+                'Manual fallback — use this only if automated publishing fails. '
+                'Post it yourself, then set status to PUBLISHED and Save.',
                 style: Theme.of(context).textTheme.bodySmall,
                 textAlign: TextAlign.center,
               ),

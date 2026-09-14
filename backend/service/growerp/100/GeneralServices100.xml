@@ -2102,6 +2102,26 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="generate" noun="WritingStyle" authenticate="true">
+        <description>Derive a reusable house-voice instruction block from samples of the
+            tenant's own past writing (a folder of articles, newsletters, posts). Runs on the
+            tenant's own model, key and token allowance. Returns the text for review: the
+            caller edits it and saves it with update#SystemSettings, nothing is stored here.</description>
+        <in-parameters>
+            <parameter name="samples" type="List" required="true">
+                <description>Plain text of each sample document</description>
+                <parameter name="sample"/>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="writingStyle"/>
+            <parameter name="sampleCount" type="Integer"/>
+        </out-parameters>
+        <actions>
+            <script location="component://growerp/service/generateWritingStyleWithAI.groovy"/>
+        </actions>
+    </service>
+
     <service verb="update" noun="SystemSettings" authenticate="true">
         <description>Create or update SystemSettings for the current tenant. Also syncs SMTP/store
             fields into moqui.basic.email.EmailServer so built-in Moqui email services keep working.
@@ -2132,6 +2152,7 @@ limitations under the License.
             <parameter name="githubRepository"/>
             <parameter name="aiModelName"/>
             <parameter name="aiProvider"/>
+            <parameter name="writingStyle"/>
             <parameter name="ownTokenLimit" type="Integer">
                 <description>Tenant's own monthly token cap on its own API key; 0 = no cap.
                     Ignored when this tenant has no LLM API key of its own: the free system
@@ -2179,6 +2200,7 @@ limitations under the License.
             <if condition="storeMarkSeen != null"><set field="ss.storeMarkSeen" from="storeMarkSeen"/></if>
             <if condition="storeSkipSeen != null"><set field="ss.storeSkipSeen" from="storeSkipSeen"/></if>
             <if condition="mailUsername  != null"><set field="ss.mailUsername"  from="mailUsername"/></if>
+            <if condition="writingStyle  != null"><set field="ss.writingStyle"  from="writingStyle"/></if>
             <if condition="mailPassword &amp;&amp; mailPassword != '****'">
                 <set field="ss.mailPassword" from="mailPassword"/>
             </if>

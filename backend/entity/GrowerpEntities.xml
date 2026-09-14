@@ -471,6 +471,11 @@ limitations under the License.
                 system support in the Support app owner list; empty = use the system wide
                 default, 0 = unlimited for this tenant.</description>
         </field>
+        <field name="writingStyle" type="text-very-long">
+            <description>House writing voice injected into every AI content prompt of this
+                tenant; empty falls back to the built-in default. Derived from the tenant's
+                own past writing with generate#WritingStyle, then edited by hand.</description>
+        </field>
         <field name="ownTokenLimit" type="number-integer">
             <description>Tenant's own monthly token cap when generating on its own LlmConfig
                 API key, set by the tenant in System Settings; empty or 0 = no cap.</description>

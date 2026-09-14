@@ -39,6 +39,34 @@ class GeminiAiUtil {
     static final String OPENAI_URL = "https://api.openai.com/v1/chat/completions"
     static final int MAX_RETRIES = 3
 
+    /** Fallback house voice, used when the tenant left SystemSettings.writingStyle empty. */
+    static final String DEFAULT_HOUSE_VOICE = """- Write as the founder, in the first person: "I" for the work, "we" for the project.
+- Open on the work in progress — what you are building this week and the problem it ran into —
+  not on a sales hook.
+- Plain, direct, modest English. No hype, no superlatives, no manufactured urgency.
+- Be concrete: real product names, real numbers, the dead ends as well as the result.
+  Say plainly when something is still uncertain.
+- Short intro paragraph, then sub-headings, then numbered lists of practical steps.
+- For long form only, close with an offer of help and then exactly this sign-off line:
+  Thanks for reading, see you next week!"""
+
+    /**
+     * House writing voice for this tenant: SystemSettings.writingStyle when set,
+     * otherwise DEFAULT_HOUSE_VOICE. Injected into every prompt that writes prose.
+     */
+    static String houseVoice(def ec, String ownerPartyId) {
+        if (!ownerPartyId) return DEFAULT_HOUSE_VOICE
+        try {
+            def ss = ec.entity.find("growerp.general.SystemSettings")
+                .condition("ownerPartyId", ownerPartyId).disableAuthz().one()
+            def style = ss?.writingStyle as String
+            if (style?.trim()) return style.trim()
+        } catch (Exception e) {
+            ec.logger.warn("Could not read writingStyle for ${ownerPartyId}: ${e.message}")
+        }
+        return DEFAULT_HOUSE_VOICE
+    }
+
     /** Provider serving a model id, for rows stored before aiProvider existed. */
     static String providerForModel(String model) {
         if (!model) return "gemini"
@@ -498,6 +526,8 @@ the subject is a separate field and must not appear in the body.
                 return "- Professional tone\n- Clear call-to-action\n- Open with \"Hi {firstName},\" and close with a one-line sign-off\n- Body text only, the subject is set separately\n- Keep concise but complete"
             case 'SUBSTACK':
                 return "- Thoughtful, writer-style tone\n- Can be conversational\n- For notes: keep under 500 chars\n- For comments: be engaging and add value"
+            case 'SUBSTACK_NOTE':
+                return "- Short note, max 500 characters\n- One idea, conversational\n- No headline, no sign-off"
             default:
                 return "- Professional and concise\n- Clear message\n- Include call-to-action"
         }
@@ -533,6 +563,9 @@ LINK: ${targetUrl ?: '(none)'}
 MASTER CONTENT:
 ${body}
 
+HOUSE VOICE (how it must sound; wins over platform tone where they disagree):
+${houseVoice(ec, ownerPartyId)}
+
 PLATFORM + FORMAT REQUIREMENTS:
 ${getAdaptationRules(platform, contentType, targetUrl)}
 
@@ -561,6 +594,8 @@ Return ONLY the adapted content text, no explanations, no markdown code fences.
                 return "- Long-form ARTICLE, 700-1500 words\n- SEO-friendly headline as the first line\n- Sub-headings and short paragraphs\n- ${hasUrl ? 'Include the link inline where natural' : 'No link needed'}"
             case 'SUBSTACK':
                 return "- Newsletter voice, thoughtful and conversational\n- ${contentType == 'ARTICLE' ? 'Full issue with intro, body, sign-off' : 'Short note under 500 characters'}\n- ${hasUrl ? 'Include a subscribe/CTA link' : 'No link needed'}"
+            case 'SUBSTACK_NOTE':
+                return "- Short note, MAX 500 characters in total\n- One idea only, conversational, no headline and no sign-off\n- ${hasUrl ? 'End with the link' : 'No link needed'}"
             case 'EMAIL':
                 return "- ${contentType == 'MESSAGE' ? '1:1 email under ~120 words' : 'Broadcast newsletter, 200-400 words'}\n- Clear greeting and a one-line sign-off (Hans, GrowERP)\n- Single clear call-to-action\n- ${hasUrl ? 'Include the link once' : 'No link needed'}"
             default:

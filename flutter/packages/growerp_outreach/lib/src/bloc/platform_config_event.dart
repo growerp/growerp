@@ -29,6 +29,17 @@ class PlatformConfigCreate extends PlatformConfigEvent {
   List<Object> get props => [config];
 }
 
+/// Check the stored credentials against the platform without saving anything
+/// else; the result lands on the configuration as lastCheckDate/lastCheckError.
+class PlatformConfigVerify extends PlatformConfigEvent {
+  final String configId;
+
+  const PlatformConfigVerify(this.configId);
+
+  @override
+  List<Object> get props => [configId];
+}
+
 class PlatformConfigDelete extends PlatformConfigEvent {
   final String configId;
 

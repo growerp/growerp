@@ -148,6 +148,8 @@
                                  lastModifiedDate: ec.user.nowTimestamp]"/>
                     <set field="publishedCount" from="publishedCount + 1" type="Integer"/>
                     <script>publishedToday[limitKey] = publishedToday[limitKey] + 1</script>
+                    <set field="platformConfig.lastUsedDate" from="ec.user.nowTimestamp"/>
+                    <entity-update value-field="platformConfig"/>
                 <else/>
                     <service-call name="update#growerp.marketing.SocialPost"
                         in-map="[postId: post.postId,
@@ -268,6 +270,8 @@
                 <set field="status" value="PUBLISHED"/>
                 <set field="publishedUrl" from="publishResult.publishedUrl"/>
                 <set field="publishError" value=""/>
+                <set field="platformConfig.lastUsedDate" from="ec.user.nowTimestamp"/>
+                <entity-update value-field="platformConfig"/>
                 <else>
                     <service-call name="update#growerp.marketing.SocialPost"
                         in-map="[
@@ -692,7 +696,12 @@
     <service verb="publish" noun="SocialPostToX">
         <description>Publish a post to X (Twitter) via API v2, signed with OAuth 1.0a
             user-context (HMAC-SHA1). The JSON body is not part of the OAuth signature —
-            only the URL and OAuth parameters are signed.</description>
+            only the URL and OAuth parameters are signed.
+
+            finalContent is a thread: blank-line separated blocks, each at most 280
+            characters, posted in order and chained with reply.in_reply_to_tweet_id.
+            An over-long block fails the whole post instead of being truncated.
+            externalPostId and publishedUrl are those of the first tweet.</description>
         <in-parameters>
             <parameter name="post" type="org.moqui.entity.EntityValue" required="true"/>
             <parameter name="platformConfig" type="org.moqui.entity.EntityValue" required="true"/>
@@ -740,57 +749,82 @@
                     if (!accessToken)    { errorMessage = "X access token (username) not configured"; return }
                     if (!tokenSecret)    { errorMessage = "X access token secret (password) not configured"; return }
 
-                    def text = new StringBuilder()
-                    if (post.headline) text.append(post.headline).append("\n\n")
-                    text.append(post.finalContent ?: "")
-                    def tweetText = text.toString()
-                    if (tweetText.length() > 280) tweetText = tweetText.take(277) + "…"
+                    // The adaptation rule asks the AI for a thread: blank-line separated
+                    // blocks of max 280 characters. The headline is not prepended; the
+                    // first block already carries the hook.
+                    def segments = (post.finalContent as String ?: "").split(/\n\n+/)
+                        .collect { it.trim() }.findAll { it }
+                    if (!segments) { errorMessage = "No content to tweet"; return }
 
-                    def apiUrl = "https://api.x.com/2/tweets"
-                    def oauthParams = [
-                        oauth_consumer_key    : consumerKey as String,
-                        oauth_nonce           : UUID.randomUUID().toString().replace("-", ""),
-                        oauth_signature_method: "HMAC-SHA1",
-                        oauth_timestamp       : (System.currentTimeMillis() / 1000L) as String,
-                        oauth_token           : accessToken as String,
-                        oauth_version         : "1.0"
-                    ]
+                    def tooLong = segments.findIndexOf { it.length() > 280 }
+                    if (tooLong >= 0) {
+                        errorMessage = "Tweet ${tooLong + 1} of ${segments.size()} is " +
+                            "${segments[tooLong].length()} chars (max 280)"
+                        return
+                    }
 
-                    def paramString = oauthParams.sort().collect { k, v ->
-                        "${rfc3986Encode(k)}=${rfc3986Encode(v)}"
-                    }.join("&")
-                    def baseString = "POST&${rfc3986Encode(apiUrl)}&${rfc3986Encode(paramString)}"
+                    def baseUrl = (System.getProperty('growerp.x.baseUrl') ?:
+                        'https://api.x.com').replaceAll('/+$', '')
+                    def apiUrl = "${baseUrl}/2/tweets"
+
                     def signingKey = "${rfc3986Encode(consumerSecret as String)}&${rfc3986Encode(tokenSecret as String)}"
-
-                    def mac = Mac.getInstance("HmacSHA1")
-                    mac.init(new SecretKeySpec(signingKey.getBytes("UTF-8"), "HmacSHA1"))
-                    def signature = Base64.encoder.encodeToString(mac.doFinal(baseString.getBytes("UTF-8")))
-
-                    def authHeader = "OAuth " + (oauthParams + [oauth_signature: signature]).sort().collect { k, v ->
-                        "${rfc3986Encode(k)}=\"${rfc3986Encode(v)}\""
-                    }.join(", ")
+                    def authHeaderFor = { String url ->
+                        def oauthParams = [
+                            oauth_consumer_key    : consumerKey as String,
+                            oauth_nonce           : UUID.randomUUID().toString().replace("-", ""),
+                            oauth_signature_method: "HMAC-SHA1",
+                            oauth_timestamp       : (System.currentTimeMillis() / 1000L) as String,
+                            oauth_token           : accessToken as String,
+                            oauth_version         : "1.0"
+                        ]
+                        def paramString = oauthParams.sort().collect { k, v ->
+                            "${rfc3986Encode(k)}=${rfc3986Encode(v)}"
+                        }.join("&")
+                        def baseString = "POST&${rfc3986Encode(url)}&${rfc3986Encode(paramString)}"
+                        def mac = Mac.getInstance("HmacSHA1")
+                        mac.init(new SecretKeySpec(signingKey.getBytes("UTF-8"), "HmacSHA1"))
+                        def signature = Base64.encoder.encodeToString(mac.doFinal(baseString.getBytes("UTF-8")))
+                        return "OAuth " + (oauthParams + [oauth_signature: signature]).sort().collect { k, v ->
+                            "${rfc3986Encode(k)}=\"${rfc3986Encode(v)}\""
+                        }.join(", ")
+                    }
 
                     def httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15)).build()
-                    def request = HttpRequest.newBuilder()
-                        .uri(URI.create(apiUrl))
-                        .header("Authorization", authHeader)
-                        .header("Content-Type", "application/json")
-                        .POST(HttpRequest.BodyPublishers.ofString(JsonOutput.toJson([text: tweetText])))
-                        .timeout(Duration.ofSeconds(30))
-                        .build()
+                    def previousTweetId = null
 
-                    def response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-                    def responseBody = response.body()
-                    ec.logger.info("X API response [${response.statusCode()}]: ${responseBody?.take(500)}")
+                    segments.eachWithIndex { segment, idx ->
+                        if (errorMessage) return                     // a previous tweet failed
+                        def body = [text: segment]
+                        if (previousTweetId) body.reply = [in_reply_to_tweet_id: previousTweetId]
 
-                    if (response.statusCode() == 201) {
+                        def request = HttpRequest.newBuilder()
+                            .uri(URI.create(apiUrl))
+                            .header("Authorization", authHeaderFor(apiUrl))
+                            .header("Content-Type", "application/json")
+                            .POST(HttpRequest.BodyPublishers.ofString(JsonOutput.toJson(body)))
+                            .timeout(Duration.ofSeconds(30))
+                            .build()
+
+                        def response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+                        def responseBody = response.body()
+                        ec.logger.info("X API response [${response.statusCode()}] tweet ${idx + 1}/${segments.size()}: ${responseBody?.take(500)}")
+
+                        if (response.statusCode() != 201) {
+                            errorMessage = "X API error ${response.statusCode()} on tweet " +
+                                "${idx + 1} of ${segments.size()}: ${responseBody?.take(300)}" +
+                                (publishedUrl ? " — thread starts at ${publishedUrl}" : "")
+                            return
+                        }
                         def parsed = new JsonSlurper().parseText(responseBody)
-                        externalPostId = parsed?.data?.id as String
-                        publishedUrl = externalPostId ? "https://x.com/i/web/status/${externalPostId}" : "https://x.com/"
-                        success = true
-                    } else {
-                        errorMessage = "X API error ${response.statusCode()}: ${responseBody?.take(300)}"
+                        previousTweetId = parsed?.data?.id as String
+                        if (idx == 0) {
+                            externalPostId = previousTweetId
+                            publishedUrl = externalPostId ?
+                                "https://x.com/i/web/status/${externalPostId}" : "https://x.com/"
+                        }
                     }
+
+                    if (!errorMessage) success = true
                 } catch (Exception e) {
                     errorMessage = "X publishing failed: ${e.message}"
                     ec.logger.error("X publish error", e)

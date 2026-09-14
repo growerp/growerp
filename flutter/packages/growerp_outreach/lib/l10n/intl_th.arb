@@ -43,6 +43,7 @@
   "enabled": "เปิดใช้งานแล้ว",
   "allowOutreachOnThisPlatform": "อนุญาตให้เผยแพร่บนแพลตฟอร์มนี้",
   "changeEmailServerSettings": "เปลี่ยนการตั้งค่าเซิร์ฟเวอร์อีเมล",
+  "testConnection": "ทดสอบการเชื่อมต่อ",
   "deleteConfiguration": "ลบการกำหนดค่า",
   "delete": "ลบ",
   "noActiveCampaigns": "ไม่มีแคมเปญที่ทำงานอยู่",

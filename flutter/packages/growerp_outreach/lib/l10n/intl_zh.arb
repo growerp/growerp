@@ -43,6 +43,7 @@
   "enabled": "已启用",
   "allowOutreachOnThisPlatform": "允许在此平台开展外联",
   "changeEmailServerSettings": "更改邮件服务器设置",
+  "testConnection": "测试连接",
   "deleteConfiguration": "删除配置",
   "delete": "删除",
   "noActiveCampaigns": "没有进行中的活动",

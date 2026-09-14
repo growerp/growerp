@@ -55,6 +55,18 @@
                     def notesBaseUrl = (System.getProperty('growerp.substack.notesBaseUrl') ?:
                         'https://substack.com').replaceAll('/+$', '')
 
+                    // A note is short-form; the adaptation rule promises under 500 characters.
+                    // Refuse a wall of text rather than posting one.
+                    def noteText = (post.finalContent as String ?: "").trim()
+                    if (!noteText) {
+                        errorMessage = "No content to post as a note"
+                        return
+                    }
+                    if (noteText.length() > 500) {
+                        errorMessage = "Substack note is ${noteText.length()} chars (max 500)"
+                        return
+                    }
+
                     // Prosemirror doc: blank-line separated paragraphs (same as article publisher)
                     def paragraphs = (post.finalContent as String).split(/\n\n+/).collect { para ->
                         def lines = para.trim()

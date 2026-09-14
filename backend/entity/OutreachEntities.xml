@@ -119,6 +119,12 @@
             <description>Password for platform authentication (encrypted)</description>
         </field>
         <field name="lastUsedDate" type="date-time" />
+        <field name="lastCheckDate" type="date-time">
+            <description>When the credentials were last verified</description>
+        </field>
+        <field name="lastCheckError" type="text-medium">
+            <description>Why the last verification failed; empty when they were valid</description>
+        </field>
 
         <field name="createdDate" type="date-time" />
         <field name="lastModifiedDate" type="date-time" />
@@ -126,6 +132,10 @@
         <relationship type="one" related="mantle.party.Party">
             <key-map field-name="ownerPartyId" related="partyId" />
         </relationship>
+        <index name="PLAT_CONF_OWNER_PLAT" unique="true">
+            <index-field name="ownerPartyId" />
+            <index-field name="platform" />
+        </index>
     </entity>
 
     <!-- ========================================================= -->

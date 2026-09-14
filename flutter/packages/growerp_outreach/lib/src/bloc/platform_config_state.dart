@@ -1,6 +1,8 @@
 part of 'platform_config_bloc.dart';
 
-enum PlatformConfigStatus { initial, loading, success, failure }
+/// [verified] is its own status: the detail dialog pops on any [success] with a
+/// message, and a credential check must leave that dialog open.
+enum PlatformConfigStatus { initial, loading, success, verified, failure }
 
 class PlatformConfigState extends Equatable {
   final PlatformConfigStatus status;

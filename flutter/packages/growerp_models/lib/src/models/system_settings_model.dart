@@ -58,6 +58,9 @@ abstract class SystemSettings with _$SystemSettings {
     String? aiModelName,
     // Provider serving aiModelName: gemini, anthropic or openai.
     String? aiProvider,
+    // House writing voice injected into every AI content prompt; empty uses the
+    // built-in default.
+    String? writingStyle,
     // Tenant's own monthly token cap when running on its own API key; 0/null = no cap.
     int? ownTokenLimit,
     // Read-only: the free monthly allowance in effect (tenant override or system default).

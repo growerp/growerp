@@ -27,6 +27,12 @@ class PlatformConfigData {
   const PlatformConfigData({required this.platform, this.config});
 
   bool get isConfigured => config != null;
+
+  /// A configured platform whose last credential check failed: the row must
+  /// show it, otherwise an expired cookie or token only surfaces as a failed
+  /// publish hours later.
+  bool get credentialsFailed =>
+      config != null && (config!.lastCheckError ?? '').isNotEmpty;
 }
 
 /// Returns column definitions for platform config list based on device type
@@ -89,6 +95,17 @@ List<Widget> getPlatformConfigListRow({
     }
   }
 
+  final statusLabel = data.credentialsFailed
+      ? 'Credentials failed'
+      : data.isConfigured
+          ? 'Configured'
+          : 'Not Configured';
+  final statusColor = data.credentialsFailed
+      ? Colors.red
+      : data.isConfigured
+          ? Colors.green
+          : Colors.grey;
+
   List<Widget> cells = [];
 
   if (isPhone) {
@@ -96,9 +113,13 @@ List<Widget> getPlatformConfigListRow({
     cells.add(
       CircleAvatar(
         key: const Key('platformItem'),
-        backgroundColor: data.isConfigured ? Colors.green : Colors.grey,
+        backgroundColor: statusColor,
         child: Icon(
-          data.isConfigured ? Icons.check : Icons.circle_outlined,
+          data.credentialsFailed
+              ? Icons.priority_high
+              : data.isConfigured
+                  ? Icons.check
+                  : Icons.circle_outlined,
           color: Colors.white,
         ),
       ),
@@ -117,12 +138,9 @@ List<Widget> getPlatformConfigListRow({
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
           Text(
-            data.isConfigured ? 'Configured' : 'Not Configured',
+            statusLabel,
             key: Key('status$index'),
-            style: TextStyle(
-              fontSize: 12,
-              color: data.isConfigured ? Colors.green : Colors.grey,
-            ),
+            style: TextStyle(fontSize: 12, color: statusColor),
           ),
           Text(
             'Limit: ${data.config?.dailyLimit ?? "-"}',
@@ -141,8 +159,12 @@ List<Widget> getPlatformConfigListRow({
       Row(
         children: [
           Icon(
-            data.isConfigured ? Icons.check_circle : Icons.circle_outlined,
-            color: data.isConfigured ? Colors.green : Colors.grey,
+            data.credentialsFailed
+                ? Icons.error
+                : data.isConfigured
+                    ? Icons.check_circle
+                    : Icons.circle_outlined,
+            color: statusColor,
             size: 20,
           ),
           const SizedBox(width: 8),
@@ -158,9 +180,9 @@ List<Widget> getPlatformConfigListRow({
     // Status
     cells.add(
       Text(
-        data.isConfigured ? 'Configured' : 'Not Configured',
+        statusLabel,
         key: Key('status$index'),
-        style: TextStyle(color: data.isConfigured ? Colors.green : Colors.grey),
+        style: TextStyle(color: statusColor),
       ),
     );
 

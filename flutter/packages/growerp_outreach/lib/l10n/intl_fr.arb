@@ -43,6 +43,7 @@
   "enabled": "Activé",
   "allowOutreachOnThisPlatform": "Autoriser la prospection sur cette plateforme",
   "changeEmailServerSettings": "Modifier les paramètres du serveur de messagerie",
+  "testConnection": "Tester la connexion",
   "deleteConfiguration": "Supprimer la configuration",
   "delete": "Supprimer",
   "noActiveCampaigns": "Aucune campagne active",

@@ -172,6 +172,10 @@
   "@changeEmailServerSettings": {
     "description": "Change email server settings"
   },
+  "testConnection": "Test connection",
+  "@testConnection": {
+    "description": "Check the stored platform credentials"
+  },
   "deleteConfiguration": "Delete Configuration",
   "@deleteConfiguration": {
     "description": "Delete Configuration"

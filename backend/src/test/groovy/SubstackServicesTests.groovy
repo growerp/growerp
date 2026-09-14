@@ -142,6 +142,23 @@ class SubstackServicesTests extends Specification {
         post.publishedUrl == "${stubUrl}/note/c-555"
     }
 
+    def "an over-long note fails without calling Substack"() {
+        setup:
+        String postId = createPost([platform: 'SUBSTACK_NOTE', status: 'DRAFT',
+                finalContent: 'x' * 501])
+        EntityValue post = ec.entity.find('growerp.marketing.SocialPost')
+                .condition('postId', postId).one()
+
+        when:
+        Map out = ec.service.sync().name('growerp.100.SubstackServices100.publish#SubstackNote')
+                .parameters([post: post, platformConfig: platformConfig()]).disableAuthz().call()
+
+        then:
+        !out.success
+        out.errorMessage == 'Substack note is 501 chars (max 500)'
+        out.externalPostId == null
+    }
+
     def "add#SubstackSubscriber is idempotent and retries are skipped once synced"() {
         setup:
         String email = "trial${System.currentTimeMillis()}@growerp-test.com"

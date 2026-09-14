@@ -12,6 +12,9 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -53,6 +56,10 @@ class _SystemSetupAiViewState extends State<SystemSetupAiView> {
   /// The tenant's own monthly cap, editable only while running on an own key.
   final _ownTokenLimitCtrl = TextEditingController();
 
+  /// House writing voice used by every AI content prompt of this tenant.
+  final _writingStyleCtrl = TextEditingController();
+  bool _isDerivingStyle = false;
+
   /// Read-only: free allowance in effect and what was used of it this month.
   final _systemTokenLimitCtrl = TextEditingController();
   int? _systemTokenLimit;
@@ -77,6 +84,7 @@ class _SystemSetupAiViewState extends State<SystemSetupAiView> {
     }
     _ownTokenLimitCtrl.dispose();
     _systemTokenLimitCtrl.dispose();
+    _writingStyleCtrl.dispose();
     super.dispose();
   }
 
@@ -142,6 +150,7 @@ class _SystemSetupAiViewState extends State<SystemSetupAiView> {
       _ownTokenLimitCtrl.text = (s.ownTokenLimit ?? 0) > 0
           ? s.ownTokenLimit.toString()
           : '';
+      _writingStyleCtrl.text = s.writingStyle ?? '';
     } catch (e) {
       if (mounted) {
         HelperFunctions.showMessage(
@@ -180,6 +189,7 @@ class _SystemSetupAiViewState extends State<SystemSetupAiView> {
         payload['ownTokenLimit'] =
             int.tryParse(_ownTokenLimitCtrl.text.trim()) ?? 0;
       }
+      payload['writingStyle'] = _writingStyleCtrl.text.trim();
       await _restClient!.updateSystemSettings(payload);
       if (mounted) {
         HelperFunctions.showMessage(
@@ -213,6 +223,8 @@ class _SystemSetupAiViewState extends State<SystemSetupAiView> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _aiSettingsSection(),
+          const SizedBox(height: 24),
+          _writingStyleSection(),
           const SizedBox(height: 24),
           Center(child: _saveButton()),
         ],
@@ -301,6 +313,161 @@ class _SystemSetupAiViewState extends State<SystemSetupAiView> {
       );
     }
     return items;
+  }
+
+  // ── Writing style ───────────────────────────────────────────────────────
+
+  /// Read the picked documents and let the backend derive the house voice from
+  /// them. A whole archive is not needed: [_maxStyleSamples] files are enough to
+  /// characterise a voice and keep this to one AI call.
+  ///
+  /// Files, not a folder: a directory picker would mean reading them through
+  /// dart:io, which does not exist on the web. Selecting every file in a folder
+  /// (Ctrl/Cmd-A in the picker) does the same job on every platform.
+  static const int _maxStyleSamples = 20;
+  static const int _maxStyleSampleChars = 6000;
+  static const List<String> _styleExtensions = ['md', 'markdown', 'txt', 'text'];
+
+  Future<void> _deriveWritingStyle() async {
+    final samples = <String>[];
+    try {
+      final picked = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: _styleExtensions,
+        dialogTitle: 'Select up to $_maxStyleSamples documents you wrote',
+      );
+      if (picked.isEmpty) return;
+      final files = picked.toList()
+        ..sort((a, b) => b.name.compareTo(a.name)); // newest first by name
+      for (final f in files.take(_maxStyleSamples)) {
+        final bytes = await f.readAsBytes();
+        try {
+          samples.add(utf8.decode(bytes));
+        } catch (_) {
+          samples.add(String.fromCharCodes(bytes));
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        HelperFunctions.showMessage(
+          context,
+          'Could not read the files: $e',
+          Theme.of(context).colorScheme.error,
+        );
+      }
+      return;
+    }
+
+    final trimmed = samples
+        .map((t) => t.trim())
+        .where((t) => t.isNotEmpty)
+        .map(
+          (t) => t.length > _maxStyleSampleChars
+              ? t.substring(0, _maxStyleSampleChars)
+              : t,
+        )
+        .toList();
+    if (trimmed.isEmpty) {
+      if (mounted) {
+        HelperFunctions.showMessage(
+          context,
+          'No readable text files were selected',
+          Theme.of(context).colorScheme.error,
+        );
+      }
+      return;
+    }
+
+    setState(() => _isDerivingStyle = true);
+    try {
+      dynamic result = await _restClient!.generateWritingStyle(
+        samples: trimmed,
+      );
+      // dio can hand back the body as a raw JSON string
+      if (result is String) result = jsonDecode(result);
+      final style = result['writingStyle']?.toString() ?? '';
+      if (style.isEmpty) throw Exception('the AI returned nothing');
+      _writingStyleCtrl.text = style;
+      if (mounted) {
+        HelperFunctions.showMessage(
+          context,
+          'Derived from ${trimmed.length} documents — review it, then Save',
+          Theme.of(context).colorScheme.primary,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        HelperFunctions.showMessage(
+          context,
+          'Could not derive a writing style: $e',
+          Theme.of(context).colorScheme.error,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isDerivingStyle = false);
+    }
+  }
+
+  Widget _writingStyleSection() {
+    return GroupingDecorator(
+      decoratorKey: const Key('writingStyleSection'),
+      labelText: 'Writing style',
+      icon: Icons.edit_note,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'How everything the AI writes for you should sound. Leave it empty '
+            'to use the built-in default, or derive it from your own past '
+            'writing and edit the result.',
+            style: TextStyle(
+              fontSize: 14,
+              color: Theme.of(context).colorScheme.outline,
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            key: const Key('writingStyle'),
+            controller: _writingStyleCtrl,
+            minLines: 6,
+            maxLines: 14,
+            decoration: const InputDecoration(
+              labelText: 'House writing voice',
+              helperText:
+                  'Injected into every content prompt: articles, posts, notes '
+                  'and outreach messages.',
+              alignLabelWithHint: true,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            children: [
+              OutlinedButton.icon(
+                key: const Key('generateWritingStyle'),
+                icon: _isDerivingStyle
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.auto_awesome),
+                label: const Text('Generate from my writing…'),
+                onPressed: _isDerivingStyle ? null : _deriveWritingStyle,
+              ),
+              TextButton(
+                key: const Key('clearWritingStyle'),
+                onPressed: _isDerivingStyle
+                    ? null
+                    : () => setState(() => _writingStyleCtrl.clear()),
+                child: const Text('Reset to default'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _aiSettingsSection() {

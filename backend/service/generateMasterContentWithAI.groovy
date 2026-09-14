@@ -70,6 +70,9 @@ ${personaBlock}
 ANGLE (Pain-News-Prize): ${thePnp} — ${pnpGuide}
 BRIEF / OUTLINE: ${brief ?: title ?: '(none, choose a strong angle for the persona)'}
 
+HOUSE VOICE (how it must sound; wins over the persona tone where they disagree):
+${GeminiAiUtil.houseVoice(ec, ownerPartyId)}
+
 REQUIREMENTS:
 - Speak directly to the persona in their tone of voice.
 - Neutral formatting: no hashtags, no @mentions, no platform-specific styling (those are added on adaptation).

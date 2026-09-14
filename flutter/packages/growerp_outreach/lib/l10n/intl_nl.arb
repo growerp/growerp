@@ -43,6 +43,7 @@
   "enabled": "Ingeschakeld",
   "allowOutreachOnThisPlatform": "Outreach op dit platform toestaan",
   "changeEmailServerSettings": "E-mailserverinstellingen wijzigen",
+  "testConnection": "Verbinding testen",
   "deleteConfiguration": "Configuratie verwijderen",
   "delete": "Verwijderen",
   "noActiveCampaigns": "Geen actieve campagnes",
