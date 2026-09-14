@@ -19,15 +19,22 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
-import 'package:growerp_outreach/l10n/generated/outreach_localizations.dart';
+import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
-import '../bloc/outreach_campaign_bloc.dart';
-import '../bloc/outreach_message_bloc.dart';
-import '../bloc/outreach_message_event.dart';
-import '../bloc/outreach_message_state.dart';
-import '../bloc/platform_config_bloc.dart';
+import '../bloc/content_plan_bloc.dart';
+import '../bloc/content_plan_event.dart';
+import '../bloc/content_plan_state.dart';
+import '../bloc/master_content_bloc.dart';
+import '../bloc/master_content_event.dart';
+import '../bloc/master_content_state.dart';
+import '../bloc/persona_bloc.dart';
+import '../bloc/persona_event.dart';
+import '../bloc/persona_state.dart';
+import '../bloc/social_post_bloc.dart';
+import '../bloc/social_post_event.dart';
+import '../bloc/social_post_state.dart';
 
-/// One step in the outreach setup guide.
+/// One step in the marketing setup guide.
 class _GuideStep {
   const _GuideStep({
     required this.id,
@@ -36,7 +43,6 @@ class _GuideStep {
     required this.description,
     required this.status,
     this.targetWidgetName,
-    this.menuWidgetName,
     this.optional = false,
     this.checked,
   });
@@ -53,10 +59,6 @@ class _GuideStep {
   /// Widget name of the destination screen, looked up in the app menu.
   final String? targetWidgetName;
 
-  /// Widget name to look up in the menu, when the destination screen is a mode
-  /// of another screen and has no menu item of its own. Defaults to
-  /// [targetWidgetName].
-  final String? menuWidgetName;
   final bool optional;
 
   /// Live completion check, null when the step cannot be checked from data
@@ -64,31 +66,31 @@ class _GuideStep {
   final bool? checked;
 }
 
-/// Step-by-step guide showing how to run outreach, with live completion
-/// state and navigation to the screen belonging to each step.
-class OutreachSetupGuideScreen extends StatefulWidget {
-  const OutreachSetupGuideScreen({super.key, this.staticMenuConfig});
+/// Step-by-step guide through the content machine — persona, plan, write,
+/// approve, adapt, publish — with live completion state and navigation to the
+/// screen belonging to each step.
+class MarketingSetupGuideScreen extends StatefulWidget {
+  const MarketingSetupGuideScreen({super.key, this.staticMenuConfig});
 
   /// Menu configuration for apps without a [MenuConfigBloc] (example app).
   final MenuConfiguration? staticMenuConfig;
 
   @override
-  State<OutreachSetupGuideScreen> createState() =>
-      _OutreachSetupGuideScreenState();
+  State<MarketingSetupGuideScreen> createState() =>
+      _MarketingSetupGuideScreenState();
 }
 
 /// Widget name of this screen in the app menu, used to switch it off.
-const String _guideWidgetName = 'OutreachSetupGuideScreen';
+const String _guideWidgetName = 'MarketingSetupGuideScreen';
 
-/// Message template placeholder the campaign's landing page url replaces.
-/// Passed into the texts as a value because a literal { } in an arb message
-/// would be read as a placeholder.
-const String _landingPageToken = '{landingPageUrl}';
-
-class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
-  bool _smtpConfigured = false;
+class _MarketingSetupGuideScreenState extends State<MarketingSetupGuideScreen> {
   bool _llmConfigured = false;
   bool _ownVoice = false;
+
+  /// Platforms are configured in the outreach package. They are read straight
+  /// from the REST client rather than from its bloc, so this package keeps
+  /// depending only on core and models.
+  int _enabledPlatforms = 0;
 
   /// Ids of the steps without a live check that the user opened, kept on this
   /// device so the guide shows the same progress on the next visit.
@@ -105,24 +107,36 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
 
   /// (Re)loads everything the completion checks are based on.
   void _loadState() {
-    context.read<PlatformConfigBloc>().add(const PlatformConfigFetch());
-    context.read<OutreachCampaignBloc>().add(const OutreachCampaignFetch());
-    context.read<OutreachMessageBloc>().add(const OutreachMessageLoad());
+    context.read<PersonaBloc>().add(const PersonaFetch(refresh: true));
+    context.read<ContentPlanBloc>().add(const ContentPlanFetch(refresh: true));
+    context.read<MasterContentBloc>().add(
+      const MasterContentFetch(refresh: true),
+    );
+    context.read<SocialPostBloc>().add(const SocialPostFetch(refresh: true));
     _loadCompleted();
-    _fetchSystemSettings();
+    _fetchSettings();
   }
 
-  Future<void> _fetchSystemSettings() async {
+  Future<void> _fetchSettings() async {
+    final restClient = context.read<RestClient>();
     try {
-      final settings = await context.read<RestClient>().getSystemSettings();
+      final settings = await restClient.getSystemSettings();
       if (!mounted) return;
       setState(() {
-        _smtpConfigured = (settings.smtpHost ?? '').isNotEmpty;
         _llmConfigured = settings.llmConfigs.isNotEmpty;
         _ownVoice = (settings.writingStyle ?? '').isNotEmpty;
       });
     } catch (_) {
       // leave the step unchecked when the settings cannot be read
+    }
+    try {
+      final configs = await restClient.listPlatformConfigurations();
+      if (!mounted) return;
+      setState(() {
+        _enabledPlatforms = configs.configs.where((c) => c.isEnabled).length;
+      });
+    } catch (_) {
+      // an app without the outreach package cannot read them
     }
   }
 
@@ -149,7 +163,7 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
   }
 
   /// Switches the guide off for this user, in every app.
-  void _hideGuide(OutreachLocalizations localizations) {
+  void _hideGuide(MarketingLocalizations localizations) {
     // The menu reload disposes this screen, so take what is needed from the
     // context before the event is added.
     final messenger = ScaffoldMessenger.of(context);
@@ -160,17 +174,17 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
       ),
     );
     messenger.showSnackBar(
-      SnackBar(content: Text(localizations.guideHiddenMessage)),
+      SnackBar(content: Text(localizations.mktGuideHiddenMessage)),
     );
   }
 
-  Future<void> _confirmHideGuide(OutreachLocalizations localizations) async {
+  Future<void> _confirmHideGuide(MarketingLocalizations localizations) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         key: const Key('hideGuideDialog'),
-        title: Text(localizations.guideHideConfirmTitle),
-        content: Text(localizations.guideHideConfirmMessage),
+        title: Text(localizations.mktGuideHideConfirmTitle),
+        content: Text(localizations.mktGuideHideConfirmMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -179,7 +193,7 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
           TextButton(
             key: const Key('hideGuideConfirm'),
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(localizations.guideHide),
+            child: Text(localizations.mktGuideHide),
           ),
         ],
       ),
@@ -205,7 +219,7 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
   /// Storage key of the completed steps, per company and user.
   String get _completedKey {
     final authenticate = context.read<AuthBloc>().state.authenticate;
-    return 'outreachGuide_${authenticate?.company?.partyId ?? ''}'
+    return 'marketingGuide_${authenticate?.company?.partyId ?? ''}'
         '_${authenticate?.user?.userId ?? ''}';
   }
 
@@ -240,150 +254,136 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
   }
 
   List<_GuideStep> _steps(
-    OutreachLocalizations localizations,
-    PlatformConfigState platformState,
-    OutreachCampaignState campaignState,
-    OutreachMessageState messageState,
+    MarketingLocalizations localizations,
+    PersonaState personaState,
+    ContentPlanState planState,
+    MasterContentState contentState,
+    SocialPostState postState,
   ) {
-    final enabledPlatforms = platformState.configs.where((c) => c.isEnabled);
-    final campaigns = campaignState.campaigns;
-    final running = campaigns.where(
-      (c) =>
-          c.status == 'MKTG_CAMP_INPROGRESS' || c.status == 'MKTG_CAMP_APPROVED',
-    );
-    final messages = messageState.messages;
-    final sent = messages.where((m) => m.status == 'SENT');
-    final responded = messages.where((m) => m.status == 'RESPONDED');
+    final personas = personaState.personas;
+    final plans = planState.contentPlans;
+    final contents = contentState.masterContents;
+    final approved = contents.where((c) => c.approvedDate != null);
+    final posts = postState.socialPosts;
+    final published = posts.where((p) => p.status == 'PUBLISHED');
 
     return [
       _GuideStep(
         id: 'systemSetup',
-        icon: Icons.settings,
-        title: localizations.guideStep1Title,
-        description: localizations.guideStep1Desc,
+        icon: Icons.psychology,
+        title: localizations.mktGuideStep1Title,
+        description: localizations.mktGuideStep1Desc,
         targetWidgetName: 'SystemSetupDialog',
-        checked: _smtpConfigured && _llmConfigured,
-        // The voice is not part of the check: every message is written in the
-        // built-in default until the user replaces it, so an empty one is a
-        // hint, not a missing setting.
-        status: _smtpConfigured && _llmConfigured
-            ? (_ownVoice
-                ? localizations.guideStatusSystemOwnVoice
-                : localizations.guideStatusSystemOk)
-            : _llmConfigured
-                ? localizations.guideStatusSystemNoSmtp
-                : _smtpConfigured
-                    ? localizations.guideStatusSystemNoLlm
-                    : localizations.guideStatusSystemNothing,
+        checked: _llmConfigured,
+        status: !_llmConfigured
+            ? localizations.mktGuideStatusNoLlm
+            : _ownVoice
+                ? localizations.mktGuideStatusOwnVoice
+                : localizations.mktGuideStatusDefaultVoice,
+      ),
+      _GuideStep(
+        id: 'persona',
+        icon: Icons.person_outline,
+        title: localizations.mktGuideStep2Title,
+        description: localizations.mktGuideStep2Desc,
+        targetWidgetName: 'PersonaList',
+        checked: personas.isNotEmpty,
+        status: personas.isEmpty
+            ? localizations.mktGuideStatusNoPersonas
+            : localizations.mktGuideStatusPersonas(personas.length),
       ),
       _GuideStep(
         id: 'platforms',
         icon: Icons.public,
-        title: localizations.guideStep2Title,
-        description: localizations.guideStep2Desc,
+        title: localizations.mktGuideStep3Title,
+        description: localizations.mktGuideStep3Desc,
         targetWidgetName: 'PlatformConfigListScreen',
-        checked: enabledPlatforms.isNotEmpty,
-        status: enabledPlatforms.isEmpty
-            ? localizations.guideStatusNoPlatforms
-            : localizations.guideStatusPlatforms(enabledPlatforms.length),
+        checked: _enabledPlatforms > 0,
+        status: _enabledPlatforms == 0
+            ? localizations.mktGuideStatusNoPlatforms
+            : localizations.mktGuideStatusPlatforms(_enabledPlatforms),
       ),
       _GuideStep(
-        id: 'audience',
-        icon: Icons.people,
-        title: localizations.guideStep3Title,
-        description: localizations.guideStep3Desc,
-        targetWidgetName: 'PersonaList',
-        optional: true,
-        status: _statusOfOpened('audience', localizations),
+        id: 'contentPlan',
+        icon: Icons.calendar_month,
+        title: localizations.mktGuideStep4Title,
+        description: localizations.mktGuideStep4Desc,
+        targetWidgetName: 'ContentPlanList',
+        checked: plans.isNotEmpty,
+        status: plans.isEmpty
+            ? localizations.mktGuideStatusNoPlans
+            : localizations.mktGuideStatusPlans(plans.length),
       ),
       _GuideStep(
-        id: 'landingPage',
-        icon: Icons.web,
-        title: localizations.guideStepLandingTitle,
-        description: localizations.guideStepLandingDesc,
-        targetWidgetName: 'LandingPageList',
-        optional: true,
-        status: _statusOfOpened('landingPage', localizations),
+        id: 'masterContent',
+        icon: Icons.auto_awesome,
+        title: localizations.mktGuideStep5Title,
+        description: localizations.mktGuideStep5Desc,
+        targetWidgetName: 'MasterContentList',
+        checked: approved.isNotEmpty,
+        status: contents.isEmpty
+            ? localizations.mktGuideStatusNoContent
+            : approved.isEmpty
+                ? localizations.mktGuideStatusNotApproved(contents.length)
+                : localizations.mktGuideStatusApproved(
+                    approved.length,
+                    contents.length,
+                  ),
       ),
       _GuideStep(
-        id: 'campaign',
-        icon: Icons.campaign,
-        title: localizations.guideStep4Title,
-        description: localizations.guideStep4Desc(_landingPageToken),
-        targetWidgetName: 'CampaignListScreen',
-        checked: campaigns.isNotEmpty,
-        status: campaigns.isEmpty
-            ? localizations.guideStatusNoCampaigns
-            : localizations.guideStatusCampaigns(campaigns.length),
+        id: 'adapt',
+        icon: Icons.alt_route,
+        title: localizations.mktGuideStep6Title,
+        description: localizations.mktGuideStep6Desc,
+        targetWidgetName: 'SocialPostList',
+        checked: posts.isNotEmpty,
+        status: posts.isEmpty
+            ? localizations.mktGuideStatusNoVariants
+            : localizations.mktGuideStatusVariants(posts.length),
       ),
       _GuideStep(
-        id: 'recipients',
-        icon: Icons.group_add,
-        title: localizations.guideStep5Title,
-        description: localizations.guideStep5Desc,
-        targetWidgetName: 'CampaignListScreen',
-        checked: messages.isNotEmpty,
-        status: messages.isEmpty
-            ? localizations.guideStatusNoRecipients
-            : localizations.guideStatusRecipients(messages.length),
-      ),
-      _GuideStep(
-        id: 'automation',
-        icon: Icons.play_circle_outline,
-        title: localizations.guideStep6Title,
-        description: localizations.guideStep6Desc,
-        targetWidgetName: 'AutomationScreen',
-        checked: running.isNotEmpty,
-        status: running.isEmpty
-            ? localizations.guideStatusNotRunning
-            : localizations.guideStatusRunning(running.length),
-      ),
-      _GuideStep(
-        id: 'sendQueue',
+        id: 'publish',
         icon: Icons.send,
-        title: localizations.guideStep7Title,
-        description: localizations.guideStep7Desc,
-        targetWidgetName: 'LinkedInSendQueueScreen',
-        // the send queue is a mode of the Messages screen, it has no menu item
-        menuWidgetName: 'OutreachMessageList',
-        status: _statusOfOpened('sendQueue', localizations),
+        title: localizations.mktGuideStep7Title,
+        description: localizations.mktGuideStep7Desc,
+        targetWidgetName: 'SocialPostList',
+        checked: published.isNotEmpty,
+        status: published.isEmpty
+            ? localizations.mktGuideStatusNotPublished
+            : localizations.mktGuideStatusPublished(published.length),
       ),
       _GuideStep(
-        id: 'responses',
-        icon: Icons.message,
-        title: localizations.guideStep8Title,
-        description: localizations.guideStep8Desc,
-        targetWidgetName: 'OutreachMessageList',
-        checked: sent.isNotEmpty || responded.isNotEmpty,
-        status: sent.isEmpty && responded.isEmpty
-            ? localizations.guideStatusNoMessages
-            : localizations.guideStatusMessages(sent.length, responded.length),
-      ),
-      _GuideStep(
-        id: 'leads',
-        icon: Icons.person_add,
-        title: localizations.guideStep9Title,
-        description: localizations.guideStep9Desc,
-        targetWidgetName: 'UserListLead',
-        status: _statusOfOpened('leads', localizations),
+        id: 'engagements',
+        icon: Icons.thumb_up,
+        title: localizations.mktGuideStep8Title,
+        description: localizations.mktGuideStep8Desc,
+        targetWidgetName: 'SocialEngagementList',
+        optional: true,
+        status: _statusOfOpened('engagements', localizations),
       ),
     ];
   }
 
   /// Status of a step that is completed by opening it.
-  String _statusOfOpened(String id, OutreachLocalizations localizations) =>
+  String _statusOfOpened(String id, MarketingLocalizations localizations) =>
       _completed.contains(id)
-          ? localizations.guideStatusOpened
-          : localizations.guideStatusNotOpened;
+          ? localizations.mktGuideStatusOpened
+          : localizations.mktGuideStatusNotOpened;
 
   @override
   Widget build(BuildContext context) {
-    final localizations = OutreachLocalizations.of(context)!;
-    final platformState = context.watch<PlatformConfigBloc>().state;
-    final campaignState = context.watch<OutreachCampaignBloc>().state;
-    final messageState = context.watch<OutreachMessageBloc>().state;
-    final steps =
-        _steps(localizations, platformState, campaignState, messageState);
+    final localizations = MarketingLocalizations.of(context)!;
+    final personaState = context.watch<PersonaBloc>().state;
+    final planState = context.watch<ContentPlanBloc>().state;
+    final contentState = context.watch<MasterContentBloc>().state;
+    final postState = context.watch<SocialPostBloc>().state;
+    final steps = _steps(
+      localizations,
+      personaState,
+      planState,
+      contentState,
+      postState,
+    );
 
     final openStep = _openStep;
     if (openStep != null) {
@@ -397,7 +397,7 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
     }
 
     return Scaffold(
-      key: const Key('OutreachSetupGuide'),
+      key: const Key('MarketingSetupGuide'),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 800),
@@ -417,7 +417,7 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              localizations.guideTitle,
+                              localizations.mktGuideTitle,
                               style: Theme.of(context).textTheme.titleLarge,
                             ),
                           ),
@@ -426,18 +426,14 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
                             IconButton(
                               key: const Key('hideGuide'),
                               icon: const Icon(Icons.visibility_off),
-                              tooltip: localizations.guideHide,
+                              tooltip: localizations.mktGuideHide,
                               onPressed: () => _confirmHideGuide(localizations),
                             ),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        localizations.guideIntro(
-                          '{firstName}',
-                          '{company}',
-                          _landingPageToken,
-                        ),
+                        localizations.mktGuideIntro,
                         key: const Key('guideIntro'),
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
@@ -460,7 +456,7 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
   }
 
   /// The screen of [step] with a bar on top returning to the guide.
-  Widget _stepScreen(OutreachLocalizations localizations, _GuideStep step) {
+  Widget _stepScreen(MarketingLocalizations localizations, _GuideStep step) {
     final theme = Theme.of(context);
     final widgetName = step.targetWidgetName!;
 
@@ -478,7 +474,7 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
                 children: [
                   const Icon(Icons.arrow_back, size: 18),
                   const SizedBox(width: 8),
-                  Text(localizations.guideBackToGuide),
+                  Text(localizations.mktGuideBackToGuide),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -505,15 +501,13 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
   }
 
   Widget _stepCard(
-    OutreachLocalizations localizations,
+    MarketingLocalizations localizations,
     _GuideStep step,
     int index, {
     required bool isLast,
   }) {
     final theme = Theme.of(context);
-    final available = _isAvailable(
-      step.menuWidgetName ?? step.targetWidgetName,
-    );
+    final available = _isAvailable(step.targetWidgetName);
     final done = step.checked ?? _completed.contains(step.id);
 
     return Column(
@@ -527,7 +521,7 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
               if (!available) {
                 HelperFunctions.showMessage(
                   context,
-                  localizations.guideNotAvailable,
+                  localizations.mktGuideNotAvailable,
                   Colors.orange,
                 );
                 return;
@@ -563,7 +557,7 @@ class _OutreachSetupGuideScreenState extends State<OutreachSetupGuideScreen> {
                             ),
                             if (step.optional)
                               Text(
-                                '(${localizations.guideOptional})',
+                                '(${localizations.mktGuideOptional})',
                                 style: theme.textTheme.bodySmall,
                               ),
                           ],

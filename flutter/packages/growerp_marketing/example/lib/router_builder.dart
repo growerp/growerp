@@ -36,6 +36,14 @@ const marketingMenuConfig = MenuConfiguration(
       widgetName: 'MarketingDashboard',
     ),
     MenuItem(
+      itemKey: 'MKT_GUIDE',
+      title: 'Guide',
+      route: '/guide',
+      iconName: 'checklist',
+      sequenceNum: 15,
+      widgetName: 'MarketingSetupGuideScreen',
+    ),
+    MenuItem(
       itemKey: 'MKT_PERSONAS',
       title: 'Personas',
       route: '/personas',
@@ -70,6 +78,15 @@ const marketingMenuConfig = MenuConfiguration(
       sequenceNum: 70,
       widgetName: 'SocialPostList',
     ),
+    // Reached from the last guide step, which turns engagements into leads.
+    MenuItem(
+      itemKey: 'MKT_ENGAGEMENTS',
+      title: 'Engagements',
+      route: '/engagements',
+      iconName: 'thumb_up',
+      sequenceNum: 80,
+      widgetName: 'SocialEngagementList',
+    ),
   ],
 );
 
@@ -87,10 +104,13 @@ GoRouter createMarketingExampleRouter() {
     appTitle: 'GrowERP Marketing Example',
     dashboard: const MarketingDashboard(),
     widgetBuilder: (route) => switch (route) {
+      '/guide' =>
+        const MarketingSetupGuideScreen(staticMenuConfig: marketingMenuConfig),
       '/personas' => const PersonaList(),
       '/contentPlans' => const ContentPlanList(),
       '/masterContent' => const MasterContentList(),
       '/socialPosts' => const SocialPostList(),
+      '/engagements' => const SocialEngagementList(),
       _ => const MarketingDashboard(),
     },
   );

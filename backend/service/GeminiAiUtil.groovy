@@ -456,6 +456,9 @@ ${campaignTemplate}
 
 ACTION TYPE: ${actionType}
 
+HOUSE VOICE (how it must sound; wins over platform tone where they disagree):
+${houseVoice(ec, ownerPartyId)}
+
 PLATFORM REQUIREMENTS:
 ${getPlatformRequirements(platform, actionType)}
 
@@ -498,6 +501,9 @@ Keep it roughly the same length and keep all specific facts (names, companies, t
 Do not add claims that aren't already present. Do not add a greeting/sign-off if the draft doesn't have one.
 
 RECIPIENT: ${recipientName ?: '(unknown)'}${recipientTitle ? ' - ' + recipientTitle : ''}${recipientCompany ? ' at ' + recipientCompany : ''}
+
+HOUSE VOICE (polish towards this; do not add facts to reach it):
+${houseVoice(ec, ownerPartyId)}
 
 DRAFT MESSAGE:
 ${draftMessage}

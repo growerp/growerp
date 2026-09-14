@@ -145,6 +145,8 @@ limitations under the License.
         title="customers" iconName="school" widgetName="UserListCustomer" sequenceNum="40"/>
 
     <!-- ADMIN_MARKETING children -->
+    <growerp.menu.MenuItem menuItemId="ADMIN_MKTG_GUIDE" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MARKETING"
+        title="Guide" iconName="checklist" widgetName="MarketingSetupGuideScreen" sequenceNum="5"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_MKTG_CONTENT" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MARKETING"
         title="Content Plans" iconName="list" widgetName="ContentPlanList" sequenceNum="10"/>
     <!-- Content hub: author once, adapt per platform. Social Posts are managed
@@ -350,6 +352,8 @@ limitations under the License.
         title="leads" iconName="business" widgetName="UserListLead" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_CRM_CUST" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_CRM"
         title="customers" iconName="school" widgetName="UserListCustomer" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="FREELANCE_MKTG_GUIDE" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_MARKETING"
+        title="Guide" iconName="checklist" widgetName="MarketingSetupGuideScreen" sequenceNum="5"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_MKTG_CONTENT" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_MARKETING"
         title="Content Plans" iconName="list" widgetName="ContentPlanList" sequenceNum="10"/>
     <!-- Content hub: author once, adapt per platform. Social Posts are managed

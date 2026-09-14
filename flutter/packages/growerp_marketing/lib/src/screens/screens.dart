@@ -36,3 +36,6 @@ export 'email_sequence_dialog.dart';
 
 // Social engagement signals
 export 'social_engagement_list.dart';
+
+// Setup guide
+export 'marketing_setup_guide_screen.dart';

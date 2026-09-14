@@ -18,6 +18,7 @@ import '../growerp_marketing.dart';
 /// Returns widget mappings for the marketing package
 Map<String, GrowerpWidgetBuilder> getMarketingWidgets() {
   return {
+    'MarketingSetupGuideScreen': (args) => const MarketingSetupGuideScreen(),
     'ContentPlanList': (args) => const ContentPlanList(),
     'SocialPostList': (args) => const SocialPostList(),
     'MasterContentList': (args) => const MasterContentList(),
@@ -30,6 +31,13 @@ Map<String, GrowerpWidgetBuilder> getMarketingWidgets() {
 /// Returns widget metadata with icons for the marketing package
 List<WidgetMetadata> getMarketingWidgetsWithMetadata() {
   return [
+    WidgetMetadata(
+      widgetName: 'MarketingSetupGuideScreen',
+      description: 'Step by step guide through the content machine',
+      iconName: 'checklist',
+      keywords: ['guide', 'setup', 'marketing', 'content', 'steps'],
+      builder: (args) => const MarketingSetupGuideScreen(),
+    ),
     WidgetMetadata(
       widgetName: 'ContentPlanList',
       description: 'List of content marketing plans',

@@ -353,7 +353,7 @@
   "@guideStep1Title": {
     "description": "Outreach setup guide: guideStep1Title"
   },
-  "guideStep1Desc": "Configure your email server (SMTP) and AI API key",
+  "guideStep1Desc": "Configure your email server (SMTP), AI API key and the voice messages are written in",
   "@guideStep1Desc": {
     "description": "Outreach setup guide: guideStep1Desc"
   },
@@ -459,6 +459,10 @@
   "guideHiddenMessage": "Guide hidden. Switch it back on in System Setup.",
   "@guideHiddenMessage": {
     "description": "Outreach setup guide: guideHiddenMessage"
+  },
+  "guideStatusSystemOwnVoice": "Email server and AI key configured, writing in your own voice",
+  "@guideStatusSystemOwnVoice": {
+    "description": "Email server, AI key and writing voice configured"
   },
   "guideStatusSystemOk": "Email server and AI key configured",
   "@guideStatusSystemOk": {

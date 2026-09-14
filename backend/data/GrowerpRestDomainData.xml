@@ -109,6 +109,7 @@ when the organization's menu shows it a screen that drives that domain.
     <growerp.menu.WidgetDomain widgetName="LinkedInSendQueueScreen" artifactGroupId="GROWERP_MARKETING"/>
     <growerp.menu.WidgetDomain widgetName="MasterContentList" artifactGroupId="GROWERP_MARKETING"/>
     <growerp.menu.WidgetDomain widgetName="OutreachMessageList" artifactGroupId="GROWERP_MARKETING"/>
+    <growerp.menu.WidgetDomain widgetName="MarketingSetupGuideScreen" artifactGroupId="GROWERP_MARKETING"/>
     <growerp.menu.WidgetDomain widgetName="OutreachSetupGuideScreen" artifactGroupId="GROWERP_MARKETING"/>
     <growerp.menu.WidgetDomain widgetName="PersonaList" artifactGroupId="GROWERP_MARKETING"/>
     <growerp.menu.WidgetDomain widgetName="PlatformConfigListScreen" artifactGroupId="GROWERP_MARKETING"/>
