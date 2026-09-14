@@ -293,7 +293,8 @@ class _PlatformConfigDetailScreenState
         OutreachPlatform.substack => 'Paste value of substack.sid cookie',
         OutreachPlatform.linkedIn =>
           'Bearer token from LinkedIn developer portal',
-        OutreachPlatform.twitter => 'From your X developer app "Keys and tokens"',
+        OutreachPlatform.twitter =>
+          'From "OAuth 1.0 Keys" on your X app\'s Keys & Tokens tab',
         _ => 'Platform API key',
       };
 
@@ -317,7 +318,8 @@ class _PlatformConfigDetailScreenState
   String get _usernameHint => switch (widget.platform) {
         OutreachPlatform.substack => 'https://yourname.substack.com',
         OutreachPlatform.linkedIn => 'urn:li:person:AbCdEfGhIj',
-        OutreachPlatform.twitter => 'User-context access token (Read and Write)',
+        OutreachPlatform.twitter =>
+          'OAuth 1.0 access token — must say "Read and Write", not "Read"',
         _ => 'Platform username',
       };
 
@@ -397,19 +399,25 @@ class _PlatformConfigDetailScreenState
               icon: Icons.app_registration,
               title: 'Create an X developer app',
               body:
-                  'Go to developer.x.com → Projects & Apps → Create App. Set the app permissions to "Read and Write" (required to post).',
+                  'Go to developer.x.com → Apps → Create App. The dialog shown once after creation gives you the Consumer Key and Secret Key — copy them into Consumer Key / Consumer Secret above.',
             ),
             _HelpStep(
-              icon: Icons.vpn_key,
-              title: 'Copy the Consumer Key and Secret',
+              icon: Icons.lock_open,
+              title: 'Set the app to Read and Write',
               body:
-                  'On the app\'s "Keys and tokens" tab, copy the API Key into Consumer Key above and the API Key Secret into Consumer Secret above.',
+                  'Open the app → Keys & Tokens → under "OAuth 2.0 Keys", press Set up on "User authentication settings" and choose app permissions "Read and Write". This panel governs both OAuth versions. Without it every post fails with 403.',
             ),
             _HelpStep(
               icon: Icons.key,
-              title: 'Generate an Access Token and Secret',
+              title: 'Generate the Access Token and Secret',
               body:
-                  'On the same tab, generate an Access Token and Secret under "Access Token and Secret" (make sure app permissions are Read and Write first, then regenerate if needed). Paste them into Access Token / Access Token Secret above.',
+                  'On the same tab under "OAuth 1.0 Keys", press Generate on the Access Token row. Check the row then reads "Read and Write" — a token generated while the app was Read-only stays read-only, so regenerate it if it still says "Read". Paste the token and its secret into Access Token / Access Token Secret above.',
+            ),
+            _HelpStep(
+              icon: Icons.warning_amber,
+              title: 'The Bearer Token is not used here',
+              body:
+                  'The long AAAA… Bearer Token under "App-Only Authentication" authenticates your app, not your account, and X refuses to post with it. Leave it out — GrowERP needs the four values above.',
             ),
           ],
         _ => null,
