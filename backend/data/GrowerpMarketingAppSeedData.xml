@@ -28,8 +28,6 @@ limitations under the License.
         title="CRM" route="/crm" iconName="people" widgetName="ActivityList" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_MARKETING" menuConfigurationId="MARKETING_DEFAULT"
         title="Marketing" route="/marketing" iconName="campaign" widgetName="ContentPlanList" sequenceNum="30"/>
-    <growerp.menu.MenuItem menuItemId="MKTAPP_WEBSITE" menuConfigurationId="MARKETING_DEFAULT"
-        title="Website" route="/website" iconName="web" widgetName="WebsiteDialog" sequenceNum="35"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_OUTREACH" menuConfigurationId="MARKETING_DEFAULT"
         title="Outreach" route="/outreach" iconName="send" widgetName="CampaignListScreen" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_AGENT_CONTROL" menuConfigurationId="MARKETING_DEFAULT"
@@ -38,11 +36,21 @@ limitations under the License.
         title="Knowledge" route="/knowledge" iconName="menu_book" widgetName="AdkKnowledgeView" sequenceNum="55"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_ORG" menuConfigurationId="MARKETING_DEFAULT"
         title="Organization" route="/companies" iconName="business" widgetName="ShowCompanyDialog" sequenceNum="60"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_WEBSITE" menuConfigurationId="MARKETING_DEFAULT"
+        title="Website" route="/website" iconName="web" widgetName="WebsiteDialog" sequenceNum="65"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_SYSTEM_SETUP" menuConfigurationId="MARKETING_DEFAULT"
         title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
         userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="70"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_ABOUT" menuConfigurationId="MARKETING_DEFAULT"
         title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="80"/>
+
+    <!-- ====================== System Setup children (tabs) ====================== -->
+    <growerp.menu.MenuItem menuItemId="MKTAPP_SETUP_AI" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_SYSTEM_SETUP"
+        title="AI" iconName="psychology" widgetName="SystemSetupAiView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_SETUP_EMAIL" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_SYSTEM_SETUP"
+        title="Email" iconName="mail_outline" widgetName="SystemSetupEmailView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_SETUP_GUIDES" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_SYSTEM_SETUP"
+        title="Guides" iconName="checklist" widgetName="GuideList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="30"/>
 
     <!-- ====================== CRM children ====================== -->
     <growerp.menu.MenuItem menuItemId="MKTAPP_CRM_ACTIVITIES" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_CRM"
@@ -120,8 +128,12 @@ limitations under the License.
     <!-- ====================== Organization children ====================== -->
     <growerp.menu.MenuItem menuItemId="MKTAPP_ORG_COMPANY" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_ORG"
         title="Company" iconName="home" widgetName="ShowCompanyDialog" sequenceNum="10"/>
+    <!-- Switched off, not removed: a marketing user administers content and
+         campaigns, not staff. A removed seed line would leave the row behind in
+         every database that already loaded it; isActive=N also lets a user put
+         the entry back. -->
     <growerp.menu.MenuItem menuItemId="MKTAPP_ORG_USERS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_ORG"
-        title="Employees" iconName="school" widgetName="UserListEmployee" sequenceNum="20"/>
+        title="Employees" iconName="school" widgetName="UserListEmployee" isActive="N" sequenceNum="20"/>
 
     <!-- ====================== Website children ====================== -->
     <growerp.menu.MenuItem menuItemId="MKTAPP_ORG_WEBSITE" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_WEBSITE"

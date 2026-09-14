@@ -76,7 +76,9 @@ class MarketingDbForm extends StatelessWidget {
                     return const OutreachDashboardChartMini();
                   }
                   if (route == '/crm') {
-                    return const CrmDashboardChartMini();
+                    // No employee count here: this app administers content and
+                    // campaigns, not staff.
+                    return const CrmDashboardChartMini(showEmployees: false);
                   }
                   if (route == '/agent-control') {
                     return const AgentControlDashboardChartMini();

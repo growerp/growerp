@@ -23,7 +23,11 @@ import 'package:growerp_models/growerp_models.dart';
 /// counters in a row at the bottom. The tile route must be listed in
 /// DashboardGrid.compactGraphicRoutes so the icon+title render beside it.
 class CrmDashboardChartMini extends StatefulWidget {
-  const CrmDashboardChartMini({super.key});
+  const CrmDashboardChartMini({super.key, this.showEmployees = true});
+
+  /// False in apps that do not administer staff (marketing), where an employee
+  /// count on the CRM tile says nothing about the pipeline.
+  final bool showEmployees;
 
   @override
   State<CrmDashboardChartMini> createState() => _CrmDashboardChartMiniState();
@@ -154,7 +158,8 @@ class _CrmDashboardChartMiniState extends State<CrmDashboardChartMini> {
     final counters = [
       counter(l.dashContacts, dashboard!.totalContacts),
       counter(l.dashSuppliers, dashboard!.suppliers),
-      counter(l.dashEmployees, dashboard!.employees),
+      if (widget.showEmployees)
+        counter(l.dashEmployees, dashboard!.employees),
       counter(l.dashAdmins, dashboard!.admins),
     ];
     // Phones show the logo as a horizontal top-left strip, desktop as a
