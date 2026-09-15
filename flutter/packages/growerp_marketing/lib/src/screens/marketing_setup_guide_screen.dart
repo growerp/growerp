@@ -335,7 +335,9 @@ class _MarketingSetupGuideScreenState extends State<MarketingSetupGuideScreen> {
         icon: Icons.alt_route,
         title: localizations.mktGuideStep6Title,
         description: localizations.mktGuideStep6Desc,
-        targetWidgetName: 'SocialPostList',
+        // Adapting happens on the Content piece itself: SocialPosts are its
+        // platform variants and have no list screen of their own in the menu.
+        targetWidgetName: 'MasterContentList',
         checked: posts.isNotEmpty,
         status: posts.isEmpty
             ? localizations.mktGuideStatusNoVariants
@@ -346,7 +348,7 @@ class _MarketingSetupGuideScreenState extends State<MarketingSetupGuideScreen> {
         icon: Icons.send,
         title: localizations.mktGuideStep7Title,
         description: localizations.mktGuideStep7Desc,
-        targetWidgetName: 'SocialPostList',
+        targetWidgetName: 'MasterContentList',
         checked: published.isNotEmpty,
         status: published.isEmpty
             ? localizations.mktGuideStatusNotPublished
