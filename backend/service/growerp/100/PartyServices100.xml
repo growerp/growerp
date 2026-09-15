@@ -378,7 +378,8 @@ limitations under the License.
                     <econdition field-name="ownerPartyId" operator="in" from="ownerIds" />
                 </entity-find>
                 <set field="ownKeyOwners"
-                    from="llmConfigs.findAll { it.apiKey }.collect { it.ownerPartyId } as Set" />
+                    from="llmConfigs.findAll { it.apiKey as boolean }
+                            .collect { it.ownerPartyId } as Set" />
                 <!-- Guarded: a no-op when the moqui-adk component is absent. -->
                 <script><![CDATA[
                     try {
