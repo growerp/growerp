@@ -1538,6 +1538,12 @@ abstract class RestClient {
     @Query('searchString') String? searchString,
     @Query('planId') String? planId,
     @Query('masterContentId') String? masterContentId,
+
+    /// Epoch milliseconds: only posts scheduled at or after this moment.
+    @Query('fromDate') int? fromDate,
+
+    /// Epoch milliseconds, exclusive: only posts scheduled before this moment.
+    @Query('thruDate') int? thruDate,
     @Query('start') int? start,
     @Query('limit') int? limit,
   });

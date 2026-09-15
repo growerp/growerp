@@ -301,5 +301,41 @@
   "dashStageClosedLost": "Closed Lost",
   "@dashStageClosedLost": {
     "description": "Dashboard tile funnel stage label"
+  },
+  "contentCalendar": "Content Calendar",
+  "@contentCalendar": {
+    "description": "Title of the screen showing scheduled posts on a calendar"
+  },
+  "calendarToday": "Today",
+  "@calendarToday": {
+    "description": "Button returning the calendar to the current period"
+  },
+  "calendarMonth": "Month",
+  "@calendarMonth": {
+    "description": "Calendar period option: a whole month"
+  },
+  "calendarWeek": "Week",
+  "@calendarWeek": {
+    "description": "Calendar period option: a single week"
+  },
+  "calendarNoPosts": "Nothing scheduled in this period",
+  "@calendarNoPosts": {
+    "description": "Shown when no post falls inside the shown calendar period"
+  },
+  "calendarUnscheduled": "No date",
+  "@calendarUnscheduled": {
+    "description": "Label for posts that have no scheduled date"
+  },
+  "scheduledDateLabel": "Scheduled Date",
+  "@scheduledDateLabel": {
+    "description": "Field label for the date a post goes out"
+  },
+  "scheduledHour": "Hour",
+  "@scheduledHour": {
+    "description": "Field label for the hour of day a post goes out"
+  },
+  "selectDate": "Select date",
+  "@selectDate": {
+    "description": "Placeholder shown when no scheduled date is set"
   }
 }

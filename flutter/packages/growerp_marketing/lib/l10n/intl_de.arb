@@ -96,5 +96,14 @@
   "dashStageProposal": "Angebot",
   "dashStageQuote": "Kostenvoranschlag",
   "dashStageClosedWon": "Gewonnen",
-  "dashStageClosedLost": "Verloren"
+  "dashStageClosedLost": "Verloren",
+  "contentCalendar": "Content-Kalender",
+  "calendarToday": "Heute",
+  "calendarMonth": "Monat",
+  "calendarWeek": "Woche",
+  "calendarNoPosts": "In diesem Zeitraum ist nichts geplant",
+  "calendarUnscheduled": "Kein Datum",
+  "scheduledDateLabel": "Geplantes Datum",
+  "scheduledHour": "Stunde",
+  "selectDate": "Datum wählen"
 }

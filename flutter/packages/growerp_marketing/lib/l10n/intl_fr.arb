@@ -96,5 +96,14 @@
   "dashStageProposal": "Proposition",
   "dashStageQuote": "Devis",
   "dashStageClosedWon": "Gagnée",
-  "dashStageClosedLost": "Perdue"
+  "dashStageClosedLost": "Perdue",
+  "contentCalendar": "Calendrier de contenu",
+  "calendarToday": "Aujourd'hui",
+  "calendarMonth": "Mois",
+  "calendarWeek": "Semaine",
+  "calendarNoPosts": "Rien de planifié sur cette période",
+  "calendarUnscheduled": "Aucune date",
+  "scheduledDateLabel": "Date planifiée",
+  "scheduledHour": "Heure",
+  "selectDate": "Choisir une date"
 }

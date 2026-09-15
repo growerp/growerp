@@ -96,5 +96,14 @@
   "dashStageProposal": "Voorstel",
   "dashStageQuote": "Offerte",
   "dashStageClosedWon": "Gewonnen",
-  "dashStageClosedLost": "Verloren"
+  "dashStageClosedLost": "Verloren",
+  "contentCalendar": "Contentkalender",
+  "calendarToday": "Vandaag",
+  "calendarMonth": "Maand",
+  "calendarWeek": "Week",
+  "calendarNoPosts": "Niets gepland in deze periode",
+  "calendarUnscheduled": "Geen datum",
+  "scheduledDateLabel": "Geplande datum",
+  "scheduledHour": "Uur",
+  "selectDate": "Kies datum"
 }

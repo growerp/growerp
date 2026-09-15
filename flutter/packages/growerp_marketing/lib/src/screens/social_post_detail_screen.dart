@@ -59,6 +59,10 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
   late SocialPost updatedSocialPost;
   late SocialPostBloc _socialPostBloc;
 
+  /// Local hour a newly picked date defaults to, well inside working hours so a
+  /// post never silently lands at midnight.
+  static const int _defaultScheduleHour = 10;
+
   static const List<String> postTypes = ['PAIN', 'NEWS', 'PRIZE', 'OTHER'];
   static const List<String> postStatuses = ['DRAFT', 'READY', 'PUBLISHED'];
   static const List<String> platforms = [
@@ -135,15 +139,29 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
   }
 
   Future<void> _selectScheduledDate(BuildContext context) async {
+    final current = _selectedScheduledDate;
+    final now = DateTime.now();
+    // midnight, not now: with a firstDate carrying a time of day the picker
+    // rejects today itself as out of range and keeps OK disabled
+    final today = DateTime(now.year, now.month, now.day);
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _selectedScheduledDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      initialDate: current ?? today,
+      firstDate: today,
+      lastDate: today.add(const Duration(days: 365)),
     );
-    if (picked != null && picked != _selectedScheduledDate) {
+    if (picked == null) return;
+    // showDatePicker returns midnight: keep the hour already chosen, otherwise
+    // every post of a day lands in the same publish batch
+    final withHour = DateTime(
+      picked.year,
+      picked.month,
+      picked.day,
+      current?.hour ?? _defaultScheduleHour,
+    );
+    if (withHour != current) {
       setState(() {
-        _selectedScheduledDate = picked;
+        _selectedScheduledDate = withHour;
       });
     }
   }
@@ -517,20 +535,57 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
   }
 
   Widget _buildScheduledDateField() {
-    return InkWell(
-      key: const Key('scheduledDate'),
-      onTap: () => _selectScheduledDate(context),
-      child: InputDecorator(
-        decoration: const InputDecoration(
-          labelText: 'Scheduled Date',
-          suffixIcon: Icon(Icons.calendar_today),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 3,
+          child: InkWell(
+            key: const Key('scheduledDate'),
+            onTap: () => _selectScheduledDate(context),
+            child: InputDecorator(
+              decoration: InputDecoration(
+                labelText:
+                    MarketingLocalizations.of(context)!.scheduledDateLabel,
+                suffixIcon: const Icon(Icons.calendar_today),
+              ),
+              child: Text(
+                _selectedScheduledDate != null
+                    ? _selectedScheduledDate.toLocalizedDateOnly(context)
+                    : MarketingLocalizations.of(context)!.selectDate,
+              ),
+            ),
+          ),
         ),
-        child: Text(
-          _selectedScheduledDate != null
-              ? '${_selectedScheduledDate!.month}/${_selectedScheduledDate!.day}/${_selectedScheduledDate!.year}'
-              : 'Select date',
+        const SizedBox(width: 10),
+        Expanded(
+          flex: 2,
+          child: DropdownButtonFormField<int>(
+            key: const Key('scheduledHour'),
+            decoration: InputDecoration(
+              labelText: MarketingLocalizations.of(context)!.scheduledHour,
+            ),
+            initialValue: _selectedScheduledDate?.hour,
+            items: List.generate(
+              24,
+              (hour) => DropdownMenuItem<int>(
+                value: hour,
+                child: Text('${hour.toString().padLeft(2, '0')}:00'),
+              ),
+            ),
+            onChanged: _selectedScheduledDate == null
+                ? null
+                : (hour) {
+                    if (hour == null) return;
+                    final date = _selectedScheduledDate!;
+                    setState(() {
+                      _selectedScheduledDate =
+                          DateTime(date.year, date.month, date.day, hour);
+                    });
+                  },
+          ),
         ),
-      ),
+      ],
     );
   }
 

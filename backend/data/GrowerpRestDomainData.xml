@@ -103,6 +103,7 @@ when the organization's menu shows it a screen that drives that domain.
     <growerp.menu.WidgetDomain widgetName="AssessmentList" artifactGroupId="GROWERP_MARKETING"/>
     <growerp.menu.WidgetDomain widgetName="AutomationScreen" artifactGroupId="GROWERP_MARKETING"/>
     <growerp.menu.WidgetDomain widgetName="CampaignListScreen" artifactGroupId="GROWERP_MARKETING"/>
+    <growerp.menu.WidgetDomain widgetName="ContentCalendar" artifactGroupId="GROWERP_MARKETING"/>
     <growerp.menu.WidgetDomain widgetName="ContentPlanList" artifactGroupId="GROWERP_MARKETING"/>
     <growerp.menu.WidgetDomain widgetName="EmailSequenceList" artifactGroupId="GROWERP_MARKETING"/>
     <growerp.menu.WidgetDomain widgetName="LandingPageList" artifactGroupId="GROWERP_MARKETING"/>

@@ -19,6 +19,7 @@ export 'persona_dialog.dart';
 
 // Content Plan screens
 export 'content_plan_list.dart';
+export 'content_calendar.dart';
 export 'content_plan_detail_screen.dart';
 
 // Social Post screens

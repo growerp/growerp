@@ -19,6 +19,7 @@ import '../growerp_marketing.dart';
 Map<String, GrowerpWidgetBuilder> getMarketingWidgets() {
   return {
     'MarketingSetupGuideScreen': (args) => const MarketingSetupGuideScreen(),
+    'ContentCalendar': (args) => const ContentCalendar(),
     'ContentPlanList': (args) => const ContentPlanList(),
     'SocialPostList': (args) => const SocialPostList(),
     'MasterContentList': (args) => const MasterContentList(),
@@ -37,6 +38,13 @@ List<WidgetMetadata> getMarketingWidgetsWithMetadata() {
       iconName: 'checklist',
       keywords: ['guide', 'setup', 'marketing', 'content', 'steps'],
       builder: (args) => const MarketingSetupGuideScreen(),
+    ),
+    WidgetMetadata(
+      widgetName: 'ContentCalendar',
+      description: 'Scheduled social posts on a calendar',
+      iconName: 'calendar_month',
+      keywords: ['calendar', 'schedule', 'content', 'social', 'plan'],
+      builder: (args) => const ContentCalendar(),
     ),
     WidgetMetadata(
       widgetName: 'ContentPlanList',

@@ -96,5 +96,14 @@
   "dashStageProposal": "Propuesta",
   "dashStageQuote": "Cotización",
   "dashStageClosedWon": "Ganada",
-  "dashStageClosedLost": "Perdida"
+  "dashStageClosedLost": "Perdida",
+  "contentCalendar": "Calendario de contenido",
+  "calendarToday": "Hoy",
+  "calendarMonth": "Mes",
+  "calendarWeek": "Semana",
+  "calendarNoPosts": "No hay nada programado en este periodo",
+  "calendarUnscheduled": "Sin fecha",
+  "scheduledDateLabel": "Fecha programada",
+  "scheduledHour": "Hora",
+  "selectDate": "Seleccionar fecha"
 }

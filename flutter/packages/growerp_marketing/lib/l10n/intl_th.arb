@@ -96,5 +96,14 @@
   "dashStageProposal": "ข้อเสนอ",
   "dashStageQuote": "ใบเสนอราคา",
   "dashStageClosedWon": "ปิดการขายสำเร็จ",
-  "dashStageClosedLost": "ปิดการขายไม่สำเร็จ"
+  "dashStageClosedLost": "ปิดการขายไม่สำเร็จ",
+  "contentCalendar": "ปฏิทินเนื้อหา",
+  "calendarToday": "วันนี้",
+  "calendarMonth": "เดือน",
+  "calendarWeek": "สัปดาห์",
+  "calendarNoPosts": "ไม่มีกำหนดการในช่วงนี้",
+  "calendarUnscheduled": "ไม่มีวันที่",
+  "scheduledDateLabel": "วันที่กำหนด",
+  "scheduledHour": "ชั่วโมง",
+  "selectDate": "เลือกวันที่"
 }

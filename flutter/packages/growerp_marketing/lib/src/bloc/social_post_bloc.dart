@@ -17,12 +17,17 @@ EventTransformer<SocialPostSearchRequested> socialPostSearchDebounce() {
   };
 }
 
+/// Upper bound on the posts one calendar period can show; a month of content
+/// is far below it, so the calendar never needs to page.
+const _calendarPeriodLimit = 200;
+
 /// BLoC for managing Social Posts
 class SocialPostBloc extends Bloc<SocialPostEvent, SocialPostState> {
   final RestClient restClient;
 
   SocialPostBloc(this.restClient) : super(const SocialPostState()) {
     on<SocialPostFetch>(_onSocialPostFetch);
+    on<SocialPostFetchWindow>(_onSocialPostFetchWindow);
     on<SocialPostCreate>(_onSocialPostCreate);
     on<SocialPostUpdate>(_onSocialPostUpdate);
     on<SocialPostDelete>(_onSocialPostDelete);
@@ -88,6 +93,48 @@ class SocialPostBloc extends Bloc<SocialPostEvent, SocialPostState> {
     } catch (e) {
       emit(
         state.copyWith(status: SocialPostStatus.failure, message: e.toString()),
+      );
+    }
+  }
+
+  Future<void> _onSocialPostFetchWindow(
+    SocialPostFetchWindow event,
+    Emitter<SocialPostState> emit,
+  ) async {
+    emit(state.copyWith(calendarStatus: SocialPostStatus.loading));
+
+    try {
+      final result = await restClient.getSocialPosts(
+        fromDate: event.from.millisecondsSinceEpoch,
+        thruDate: event.thru.millisecondsSinceEpoch,
+        limit: _calendarPeriodLimit,
+      );
+
+      // the backend orders on lastModifiedDate for the list screen; a calendar
+      // period is small enough to order here instead of branching the query
+      final posts = List<SocialPost>.of(result.socialPosts)
+        ..sort((a, b) => (a.scheduledDate ?? DateTime(0))
+            .compareTo(b.scheduledDate ?? DateTime(0)));
+
+      emit(
+        state.copyWith(
+          calendarStatus: SocialPostStatus.success,
+          calendarPosts: posts,
+        ),
+      );
+    } on DioException catch (e) {
+      emit(
+        state.copyWith(
+          calendarStatus: SocialPostStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(
+          calendarStatus: SocialPostStatus.failure,
+          message: e.toString(),
+        ),
       );
     }
   }

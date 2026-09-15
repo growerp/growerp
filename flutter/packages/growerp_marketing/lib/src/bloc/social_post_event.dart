@@ -29,6 +29,23 @@ class SocialPostFetch extends SocialPostEvent {
   List<Object?> get props => [refresh, limit, start, searchString, planId];
 }
 
+/// Event to load every post scheduled inside one calendar period.
+///
+/// Kept apart from [SocialPostFetch]: the calendar loads a whole period at once
+/// instead of a page, and it must not overwrite the list screen's own results.
+class SocialPostFetchWindow extends SocialPostEvent {
+  /// Start of the period, inclusive.
+  final DateTime from;
+
+  /// End of the period, exclusive.
+  final DateTime thru;
+
+  const SocialPostFetchWindow({required this.from, required this.thru});
+
+  @override
+  List<Object?> get props => [from, thru];
+}
+
 /// Event to create a new social post
 class SocialPostCreate extends SocialPostEvent {
   final SocialPost socialPost;

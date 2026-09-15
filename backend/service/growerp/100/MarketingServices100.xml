@@ -409,6 +409,14 @@
             <parameter name="pseudoId" />
             <parameter name="planId" />
             <parameter name="masterContentId" />
+            <parameter name="fromDate" type="Long">
+                <description>Epoch milliseconds: only posts scheduled at or after this
+                    moment. Used by the content calendar to load one visible period.</description>
+            </parameter>
+            <parameter name="thruDate" type="Long">
+                <description>Epoch milliseconds, exclusive: only posts scheduled before this
+                    moment.</description>
+            </parameter>
             <parameter name="start" type="Integer" />
             <parameter name="limit" type="Integer" />
         </in-parameters>
@@ -423,12 +431,23 @@
                  the benign '%%' wildcard instead of the literal string '%null%' -->
             <set field="searchString" from="searchString ?: ''" />
 
+            <!-- a Long reaches the database untyped: Postgres then rejects the comparison
+                 against a timestamp column, while H2 quietly accepts it -->
+            <set field="fromDateTs"
+                from="fromDate ? new java.sql.Timestamp(fromDate) : null" />
+            <set field="thruDateTs"
+                from="thruDate ? new java.sql.Timestamp(thruDate) : null" />
+
             <entity-find entity-name="growerp.marketing.SocialPost" list="socialPosts"
                 offset="start" limit="limit">
                 <econdition field-name="ownerPartyId" />
                 <econdition field-name="planId" from="planId" ignore-if-empty="true" />
                 <econdition field-name="masterContentId" from="masterContentId"
                     ignore-if-empty="true" />
+                <econdition field-name="scheduledDate" operator="greater-equals"
+                    from="fromDateTs" ignore-if-empty="true" />
+                <econdition field-name="scheduledDate" operator="less"
+                    from="thruDateTs" ignore-if-empty="true" />
                 <econditions combine="or">
                     <econdition field-name="pseudoId" operator="like" value="%${searchString}%"
                         ignore-if-empty="true" ignore-case="true" />
