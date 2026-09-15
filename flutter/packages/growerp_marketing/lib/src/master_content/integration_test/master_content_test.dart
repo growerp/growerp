@@ -192,6 +192,13 @@ class MasterContentTest {
     );
 
     await CommonTest.tapByKey(tester, 'cancel');
+    // the approve response must carry the complete record: the list row keeps
+    // its id and title instead of falling back to the json defaults
+    expect(CommonTest.getTextField('masterContentItem'), equals(mc.pseudoId));
+    expect(
+      CommonTest.getTextField('title0').startsWith(mc.title!.substring(0, 20)),
+      true,
+    );
     await clearSearch(tester);
   }
 
