@@ -18,18 +18,11 @@ limitations under the License.
     <service verb="get" noun="ProjectTree">
         <out-parameters>
             <parameter name="workEffortList" type="List">
-                <parameter name="workEffort" type="Map">
-                    <parameter name="id" />
-                    <parameter name="activityName" />
-                    <parameter name="dependents" type="List">
-                        <parameter name="dependent" type="Map">
-                            <parameter name="workEffort" type="Map">
-                                <parameter name="id" />
-                                <parameter name="activityName" />
-                            </parameter>
-                        </parameter>
-                    </parameter>
-                </parameter>
+                <description>Task tree roots. Each node is a Map of l (depth, 1 based), id,
+                    activityName, rollUp (actualWorkTime including every descendant) and
+                    dependents — the child nodes, same shape, nested to any depth. Declared
+                    without sub-parameters on purpose: sub-parameters cannot describe a
+                    recursive structure, and undeclared ones are stripped silently.</description>
             </parameter>
         </out-parameters>
         <actions>
@@ -42,32 +35,32 @@ limitations under the License.
                 <econdition field-name="statusId" operator="in"
                     from="['WeApproved','WePlanning','WeInProgress']" />
             </entity-find>
-            <set field="activityList" from="[]" />
-            <script>
-                def getTaskTree(workEffort, dept) {
-                    def workEffort = [:];
-                    workEffort.l = dept;
-                    workEffort.id = workEffort.workEffortId;
-                    workEffort.name = workEffortId.workEffortName;
-                    workEffort.rollUp = new BigDecimal(workEffortId.actualWorkTime?:"0");
-                    def dependents = workEffortIds.findAll { 
-                        workEffort.workEffortId == it.parentworkEffortId
+            <set field="workEffortList" from="[]" />
+            <script><![CDATA[
+                // one row per time entry, so the same task repeats: collapse to one
+                // node per work effort before building the tree
+                def tasks = entries.unique(false) { it.workEffortId }
+                def byParent = tasks.groupBy { it.parentWorkEffortId }
+
+                def buildNode
+                buildNode = { task, depth ->
+                    def node = [l: depth,
+                                id: task.workEffortId,
+                                activityName: task.workEffortName,
+                                rollUp: (task.actualWorkTime ?: 0.0) as BigDecimal,
+                                dependents: []]
+                    for (child in (byParent[task.workEffortId] ?: [])) {
+                        def childNode = buildNode(child, depth + 1)
+                        node.rollUp = node.rollUp.add(childNode.rollUp)
+                        node.dependents.add(childNode)
                     }
-                    workEffort.children = [];
-                    dependents.each {
-                        def workEffortSave = getTaskTree(it, dept + 1)
-                        workEffort.rollUp = workEffort.rollUp.add(workEffortSave.rollUp); 
-                        workEffort.children.add(workEffortSave)
-                    }
-                    return workEffort;
+                    return node
                 }
 
-                def projects = workEffortIds.findAll {
-                    it.parentWorkEffortId == null }
-                projects.each {
-                    workEffortList.add(getTaskTree(it, 1));
+                for (root in (byParent[null] ?: [])) {
+                    workEffortList.add(buildNode(root, 1))
                 }
-            </script>
+            ]]></script>
         </actions>
     </service>
 
