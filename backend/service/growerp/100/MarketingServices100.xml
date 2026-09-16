@@ -438,26 +438,62 @@
             <set field="thruDateTs"
                 from="thruDate ? new java.sql.Timestamp(thruDate) : null" />
 
-            <entity-find entity-name="growerp.marketing.SocialPost" list="socialPosts"
-                offset="start" limit="limit">
-                <econdition field-name="ownerPartyId" />
-                <econdition field-name="planId" from="planId" ignore-if-empty="true" />
-                <econdition field-name="masterContentId" from="masterContentId"
-                    ignore-if-empty="true" />
-                <econdition field-name="scheduledDate" operator="greater-equals"
-                    from="fromDateTs" ignore-if-empty="true" />
-                <econdition field-name="scheduledDate" operator="less"
-                    from="thruDateTs" ignore-if-empty="true" />
-                <econditions combine="or">
-                    <econdition field-name="pseudoId" operator="like" value="%${searchString}%"
-                        ignore-if-empty="true" ignore-case="true" />
-                    <econdition field-name="headline" operator="like" value="%${searchString}%"
-                        ignore-if-empty="true" ignore-case="true" />
-                    <econdition field-name="type" operator="like" value="%${searchString}%"
-                        ignore-if-empty="true" ignore-case="true" />
-                </econditions>
-                <order-by field-name="-lastModifiedDate" />
-            </entity-find>
+            <if condition="fromDateTs">
+                <!-- Calendar period: a post belongs to the day it matters on, which is its
+                     schedule, or for one already out the day it was published. Posts with
+                     neither belong to no day at all and are returned as well, so the
+                     calendar can offer them as a backlog to drop onto a day - they are
+                     recognised by having both dates empty. -->
+                <entity-find entity-name="growerp.marketing.SocialPost" list="periodPosts"
+                    limit="limit">
+                    <econdition field-name="ownerPartyId" />
+                    <econditions combine="or">
+                        <econditions combine="and">
+                            <econdition field-name="scheduledDate" operator="greater-equals"
+                                from="fromDateTs" />
+                            <econdition field-name="scheduledDate" operator="less"
+                                from="thruDateTs" />
+                        </econditions>
+                        <econditions combine="and">
+                            <econdition field-name="scheduledDate" from="null" />
+                            <econdition field-name="publishedDate" operator="greater-equals"
+                                from="fromDateTs" />
+                            <econdition field-name="publishedDate" operator="less"
+                                from="thruDateTs" />
+                        </econditions>
+                    </econditions>
+                    <order-by field-name="scheduledDate" />
+                </entity-find>
+                <entity-find entity-name="growerp.marketing.SocialPost" list="backlogPosts"
+                    limit="limit">
+                    <econdition field-name="ownerPartyId" />
+                    <econdition field-name="scheduledDate" from="null" />
+                    <econdition field-name="publishedDate" from="null" />
+                    <order-by field-name="-lastModifiedDate" />
+                </entity-find>
+                <!-- disjoint by construction: the backlog is exactly the rows the period
+                     query cannot match, so concatenating cannot duplicate -->
+                <set field="socialPosts"
+                    from="(periodPosts as List) + (backlogPosts as List)" />
+            <else>
+                <entity-find entity-name="growerp.marketing.SocialPost" list="socialPosts"
+                    offset="start" limit="limit">
+                    <econdition field-name="ownerPartyId" />
+                    <econdition field-name="planId" from="planId" ignore-if-empty="true" />
+                    <econdition field-name="masterContentId" from="masterContentId"
+                        ignore-if-empty="true" />
+                    <econditions combine="or">
+                        <econdition field-name="pseudoId" operator="like" value="%${searchString}%"
+                            ignore-if-empty="true" ignore-case="true" />
+                        <econdition field-name="headline" operator="like" value="%${searchString}%"
+                            ignore-if-empty="true" ignore-case="true" />
+                        <econdition field-name="type" operator="like" value="%${searchString}%"
+                            ignore-if-empty="true" ignore-case="true" />
+                    </econditions>
+                    <order-by field-name="-lastModifiedDate" />
+                </entity-find>
+            </else>
+            </if>
         </actions>
     </service>
 

@@ -105,5 +105,6 @@
   "calendarUnscheduled": "无日期",
   "scheduledDateLabel": "计划日期",
   "scheduledHour": "小时",
-  "selectDate": "选择日期"
+  "selectDate": "选择日期",
+  "calendarBacklog": "{count, plural, other{{count} 篇没有日期的内容}}"
 }

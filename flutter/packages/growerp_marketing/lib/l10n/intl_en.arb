@@ -337,5 +337,14 @@
   "selectDate": "Select date",
   "@selectDate": {
     "description": "Placeholder shown when no scheduled date is set"
+  },
+  "calendarBacklog": "{count, plural, =1{1 post with no date} other{{count} posts with no date}}",
+  "@calendarBacklog": {
+    "description": "Heading of the strip holding posts that have no scheduled or published date",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

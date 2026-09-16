@@ -367,7 +367,9 @@
                 <description>For MESSAGE content: the campaign whose platformSettings to update</description>
             </parameter>
             <parameter name="scheduledDate" type="Long">
-                <description>Optional schedule for the created SocialPosts (epoch ms)</description>
+                <description>Schedule for the created SocialPosts (epoch ms). When left empty
+                    the next free day is picked, so pieces spread over the coming days instead
+                    of all publishing on the next scheduler tick.</description>
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -411,6 +413,50 @@
             <if condition="!platforms">
                 <return error="true"
                     message="No platforms given and no enabled PlatformConfiguration found for owner" />
+            </if>
+
+            <!-- No schedule given: hand this piece the next day the owner has nothing
+                 scheduled on yet, starting tomorrow. Without it every variant is created
+                 with an empty scheduledDate, which publish#ScheduledSocialPosts reads as
+                 "publish now" - so a week of content goes out on one tick and never
+                 appears on the content calendar. All platform variants of one piece share
+                 the slot: cross-posting the same piece at once is wanted, it is separate
+                 pieces landing together that is not. -->
+            <if condition="!scheduledDate">
+                <!-- 10:00 UTC: the hour the weekly content agent's prompt already uses, so
+                     hand-adapted and agent-adapted pieces land at the same time of day -->
+                <set field="slotHourUtc" value="10" type="Integer" />
+                <set field="slotDay"
+                    from="java.time.LocalDate.now(java.time.ZoneOffset.UTC).plusDays(1)" />
+                <set field="slotFound" from="false" type="Boolean" />
+                <!-- bounded walk: a full year of taken days means something is wrong and
+                     the piece is better off on a taken day than in an endless loop -->
+                <set field="daysTried" from="0" type="Integer" />
+                <while condition="!slotFound &amp;&amp; daysTried &lt; 365">
+                    <set field="dayStartTs"
+                        from="new java.sql.Timestamp(slotDay.atStartOfDay(java.time.ZoneOffset.UTC)
+                              .toInstant().toEpochMilli())" />
+                    <set field="dayEndTs"
+                        from="new java.sql.Timestamp(slotDay.plusDays(1)
+                              .atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli())" />
+                    <entity-find-count entity-name="growerp.marketing.SocialPost"
+                        count-field="takenCount">
+                        <econdition field-name="ownerPartyId" />
+                        <econdition field-name="scheduledDate" operator="greater-equals"
+                            from="dayStartTs" />
+                        <econdition field-name="scheduledDate" operator="less" from="dayEndTs" />
+                    </entity-find-count>
+                    <if condition="takenCount == 0">
+                        <set field="slotFound" from="true" type="Boolean" />
+                        <else>
+                            <set field="slotDay" from="slotDay.plusDays(1)" />
+                            <set field="daysTried" from="daysTried + 1" type="Integer" />
+                        </else>
+                    </if>
+                </while>
+                <set field="scheduledDate"
+                    from="slotDay.atTime(slotHourUtc, 0).toInstant(java.time.ZoneOffset.UTC)
+                          .toEpochMilli()" type="Long" />
             </if>
 
             <!-- Preflight: the AI key must be set (user preference, then GEMINI_API_KEY env,

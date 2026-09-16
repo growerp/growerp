@@ -105,5 +105,6 @@
   "calendarUnscheduled": "Geen datum",
   "scheduledDateLabel": "Geplande datum",
   "scheduledHour": "Uur",
-  "selectDate": "Kies datum"
+  "selectDate": "Kies datum",
+  "calendarBacklog": "{count, plural, =1{1 bericht zonder datum} other{{count} berichten zonder datum}}"
 }

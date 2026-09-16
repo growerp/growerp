@@ -108,13 +108,18 @@ class ContentCalendarState extends State<ContentCalendar> {
     _load();
   }
 
-  /// Posts of the period, grouped by the local day they are scheduled on.
+  /// The day a post belongs on: its schedule, or for one already out the day it
+  /// actually went. Null for a post that has neither - those are the backlog.
+  static DateTime? _effectiveDate(SocialPost post) =>
+      post.scheduledDate ?? post.publishedDate;
+
+  /// Posts of the period, grouped by their local effective day.
   Map<DateTime, List<SocialPost>> _byDay(List<SocialPost> posts) {
     final grouped = <DateTime, List<SocialPost>>{};
     for (final post in posts) {
-      final scheduled = post.scheduledDate;
-      if (scheduled == null) continue;
-      final local = scheduled.toLocal();
+      final effective = _effectiveDate(post);
+      if (effective == null) continue;
+      final local = effective.toLocal();
       final day = DateTime(local.year, local.month, local.day);
       grouped.putIfAbsent(day, () => []).add(post);
     }
@@ -173,10 +178,20 @@ class ContentCalendarState extends State<ContentCalendar> {
       builder: (context, state) {
         final posts = state.calendarPosts;
         final loading = state.calendarStatus == SocialPostStatus.loading;
-        // one flat index over the period, so a post keeps the same key in the
-        // grid and in the agenda
+        // a post with neither date belongs to no day: the service returns those
+        // alongside the period so they can be offered as a backlog
+        final dated = [
+          for (final p in posts)
+            if (_effectiveDate(p) != null) p,
+        ];
+        final backlog = [
+          for (final p in posts)
+            if (_effectiveDate(p) == null) p,
+        ];
+        // one flat index over the dated posts, so a post keeps the same key in
+        // the grid and in the agenda
         final indexOfPost = <String?, int>{
-          for (var i = 0; i < posts.length; i++) posts[i].postId: i,
+          for (var i = 0; i < dated.length; i++) dated[i].postId: i,
         };
 
         return Scaffold(
@@ -191,14 +206,15 @@ class ContentCalendarState extends State<ContentCalendar> {
           body: Column(
             children: [
               _header(context),
+              if (backlog.isNotEmpty) _backlog(context, backlog),
               Expanded(
                 child: loading && posts.isEmpty
                     ? const _CalendarSkeleton()
                     : LayoutBuilder(
                         builder: (context, constraints) =>
                             constraints.maxWidth < _gridMinWidth
-                                ? _agenda(context, posts, indexOfPost)
-                                : _grid(context, posts, indexOfPost),
+                                ? _agenda(context, dated, indexOfPost)
+                                : _grid(context, dated, indexOfPost),
                       ),
               ),
             ],
@@ -253,6 +269,50 @@ class ContentCalendarState extends State<ContentCalendar> {
             ],
             selected: {_period},
             onSelectionChanged: (selected) => _setPeriod(selected.first),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Posts with no date at all. They are invisible on a calendar otherwise, and
+  /// they never publish either: the scheduler only picks up posts it can place.
+  Widget _backlog(BuildContext context, List<SocialPost> backlog) {
+    final theme = Theme.of(context);
+    return Container(
+      key: const Key('calendarBacklog'),
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(8, 4, 8, 6),
+      color: theme.colorScheme.surfaceContainerHighest,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            MarketingLocalizations.of(
+              context,
+            )!.calendarBacklog(backlog.length),
+            style: theme.textTheme.labelSmall,
+          ),
+          const SizedBox(height: 4),
+          SizedBox(
+            height: 34,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: backlog.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 6),
+              itemBuilder: (context, index) {
+                final post = backlog[index];
+                return ActionChip(
+                  key: Key('calendarBacklogPost$index'),
+                  avatar: const Icon(Icons.schedule, size: 16),
+                  label: Text(
+                    post.headline ?? post.pseudoId ?? '',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  onPressed: () => _openPost(post),
+                );
+              },
+            ),
           ),
         ],
       ),

@@ -105,5 +105,6 @@
   "calendarUnscheduled": "ไม่มีวันที่",
   "scheduledDateLabel": "วันที่กำหนด",
   "scheduledHour": "ชั่วโมง",
-  "selectDate": "เลือกวันที่"
+  "selectDate": "เลือกวันที่",
+  "calendarBacklog": "{count, plural, other{{count} โพสต์ที่ยังไม่มีวันที่}}"
 }

@@ -110,11 +110,13 @@ class SocialPostBloc extends Bloc<SocialPostEvent, SocialPostState> {
         limit: _calendarPeriodLimit,
       );
 
-      // the backend orders on lastModifiedDate for the list screen; a calendar
-      // period is small enough to order here instead of branching the query
+      // order on the date each post actually sits on: its schedule, or for one
+      // already out the day it went. Posts with neither are the backlog and
+      // sort to the front, where the calendar picks them out by their nulls.
       final posts = List<SocialPost>.of(result.socialPosts)
-        ..sort((a, b) => (a.scheduledDate ?? DateTime(0))
-            .compareTo(b.scheduledDate ?? DateTime(0)));
+        ..sort((a, b) =>
+            (a.scheduledDate ?? a.publishedDate ?? DateTime(0)).compareTo(
+                b.scheduledDate ?? b.publishedDate ?? DateTime(0)));
 
       emit(
         state.copyWith(
