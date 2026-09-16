@@ -154,12 +154,15 @@
                     <script>publishedToday[limitKey] = publishedToday[limitKey] + 1</script>
                     <set field="platformConfig.lastUsedDate" from="ec.user.nowTimestamp"/>
                     <entity-update value-field="platformConfig"/>
-                <else/>
-                    <service-call name="update#growerp.marketing.SocialPost"
-                        in-map="[postId: post.postId,
-                                 publishError: publishResult.errorMessage ?: 'Unknown error',
-                                 lastModifiedDate: ec.user.nowTimestamp]"/>
-                    <set field="failedCount" from="failedCount + 1" type="Integer"/>
+                    <!-- else must WRAP its actions: after a self-closing <else/> they stay
+                         children of the <if> and run in the then-branch instead -->
+                    <else>
+                        <service-call name="update#growerp.marketing.SocialPost"
+                            in-map="[postId: post.postId,
+                                     publishError: publishResult.errorMessage ?: 'Unknown error',
+                                     lastModifiedDate: ec.user.nowTimestamp]"/>
+                        <set field="failedCount" from="failedCount + 1" type="Integer"/>
+                    </else>
                 </if>
             </iterate>
         </actions>
