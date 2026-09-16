@@ -8,6 +8,8 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_sales/src/opportunities/integration_test/opportunity_test.dart';
 import 'package:growerp_sales/src/opportunities/integration_test/data.dart';
+import 'package:growerp_sales/src/opportunities/integration_test/marketing_test_model.dart';
+import 'package:growerp_sales/src/opportunities/integration_test/persist_marketing_test.dart';
 import 'package:growerp_core/test_data.dart';
 
 void main() {
@@ -40,6 +42,9 @@ void main() {
       testData: {"users": administrators.sublist(0, 2) + leads.sublist(0, 2)},
     );
     await OpportunityTest.selectOpportunities(tester);
+    // fresh company each run: reset persisted marketing test state so
+    // opportunities get created again
+    await PersistMarketingTest.save(MarketingTest());
     await OpportunityTest.addOpportunities(tester, opportunities.sublist(0, 4));
     await OpportunityTest.updateOpportunities(
       tester,
