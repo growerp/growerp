@@ -639,6 +639,10 @@ limitations under the License.
             <parameter name="failedCount" type="Integer" />
         </out-parameters>
         <actions>
+            <!-- headless run: renew#TenantSubscription needs a user -->
+            <if condition="!ec.user.userId">
+                <script>ec.user.internalLoginUser('SystemSupport')</script>
+            </if>
             <set field="windowStart"
                 from="new java.sql.Timestamp(ec.user.nowTimestamp.time - 3L * 86400000L)" />
             <set field="windowEnd"

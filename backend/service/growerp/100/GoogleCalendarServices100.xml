@@ -32,6 +32,10 @@ limitations under the License.
             <parameter name="tenantCount" type="Integer" />
         </out-parameters>
         <actions>
+            <!-- headless run: create#User (from import#CalendarEvent) needs a user -->
+            <if condition="!ec.user.userId">
+                <script>ec.user.internalLoginUser('SystemSupport')</script>
+            </if>
             <entity-find entity-name="growerp.general.SystemSettings" list="settingsList">
                 <econdition field-name="googleRefreshToken" operator="is-not-null" />
             </entity-find>

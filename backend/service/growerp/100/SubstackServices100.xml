@@ -250,6 +250,10 @@
             <parameter name="failedCount" type="Integer"/>
         </out-parameters>
         <actions>
+            <!-- headless run: subscribe#EmailToSubstack needs a user -->
+            <if condition="!ec.user.userId">
+                <script>ec.user.internalLoginUser('SystemSupport')</script>
+            </if>
             <entity-find entity-name="mantle.product.subscription.Subscription" list="trialSubscriptions">
                 <econdition field-name="ownerPartyId" value="GROWERP"/>
                 <econdition field-name="externalSubscriptionId" operator="is-not-null"/>
@@ -384,6 +388,10 @@
             <parameter name="failedCount" type="Integer"/>
         </out-parameters>
         <actions>
+            <!-- headless run: get#SubstackPostComments needs a user -->
+            <if condition="!ec.user.userId">
+                <script>ec.user.internalLoginUser('SystemSupport')</script>
+            </if>
             <set field="cutoffDate" from="new java.sql.Timestamp(ec.user.nowTimestamp.time - 90L*24*60*60*1000)"/>
             <entity-find entity-name="growerp.marketing.SocialPost" list="publishedPosts">
                 <econdition field-name="platform" value="SUBSTACK"/>
