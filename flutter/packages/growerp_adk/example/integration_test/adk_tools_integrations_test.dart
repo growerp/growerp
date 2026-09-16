@@ -137,7 +137,6 @@ void main() {
         reason: 'the writing style should be stored on the tenant');
     expect(CommonTest.getTextFormField('smtpHost'), smtpHost,
         reason: 'saving the writing style must not clear the SMTP host');
-    await CommonTest.tapByKey(tester, 'cancelSettings');
 
     // ── The agent dialog shows the built-in Moqui server (read-only) ─────────
     await AdkTest.selectAgents(tester);
