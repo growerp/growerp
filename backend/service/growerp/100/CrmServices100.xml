@@ -203,11 +203,181 @@ limitations under the License.
         </actions>
     </service>
 
-    <service verb="get" noun="CrmDashboard">
-        <description>Aggregates for the CRM dashboard tile: customer lifecycle
-            funnel (assigned/qualified/converted) and party-role counters,
-            scoped to the owner company.</description>
+    <service verb="collect" noun="OpportunityWeekStats" authenticate="false">
+        <description>Job: store a snapshot of the open opportunity pipeline per stage
+            for every owner. A stage change overwrites the opportunity, so the pipeline
+            of a past week cannot be reconstructed afterwards. Re-running for the same
+            week overwrites that week only.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId">
+                <description>Optional, limit the run to one owner.</description>
+            </parameter>
+            <parameter name="weekStartDate" type="Date">
+                <description>Optional, defaults to the Monday of the current week.
+                    Only for tests/backfill of an explicit week.</description>
+            </parameter>
+        </in-parameters>
+        <actions>
+            <if condition="!weekStartDate">
+                <set field="weekStartDate"
+                    from="java.sql.Date.valueOf(ec.user.nowTimestamp.toLocalDateTime()
+                        .toLocalDate().with(java.time.DayOfWeek.MONDAY))" />
+            </if>
+            <entity-find entity-name="growerp.party.OwnerAndCompany" list="parties">
+                <econdition field-name="partyTypeEnumId" value="PtyOwner" />
+                <econdition field-name="companyRole" value="OrgInternal" />
+                <econdition field-name="ownerPartyId" from="ownerPartyId"
+                    ignore-if-empty="true" />
+                <econdition field-name="ownerDisabled" value="N" />
+            </entity-find>
+            <entity-find list="stages"
+                entity-name="mantle.sales.opportunity.SalesOpportunityStage">
+                <econdition field-name="opportunityStageId" operator="not-equals"
+                    value="Deleted" />
+                <order-by field-name="sequenceNum" />
+            </entity-find>
+            <iterate list="parties" entry="party">
+                <!-- opportunities carry the company party in ownerPartyId (see
+                     create#Opportunity), not the owner party of the tenant -->
+                <set field="statOwnerPartyId" from="party.companyPartyId" />
+                <!-- same accumulation as get#OpportunitySummary: one find, totalled
+                     per stage below -->
+                <entity-find list="opps"
+                    entity-name="mantle.sales.opportunity.SalesOpportunity">
+                    <econdition field-name="ownerPartyId" from="statOwnerPartyId" />
+                    <econdition field-name="opportunityStageId" operator="not-equals"
+                        value="Deleted" />
+                    <select-field field-name="opportunityStageId" />
+                    <select-field field-name="estimatedAmount" />
+                    <select-field field-name="estimatedProbability" />
+                </entity-find>
+                <set field="byStage" from="[:]" />
+                <iterate list="opps" entry="opp">
+                    <set field="acc"
+                        from="byStage[opp.opportunityStageId] ?:
+                            [count: 0, total: new BigDecimal(0),
+                                weighted: new BigDecimal(0)]" />
+                    <set field="acc.count" from="acc.count + 1" />
+                    <set field="acc.total"
+                        from="acc.total + (opp.estimatedAmount ?: 0)" />
+                    <set field="acc.weighted"
+                        from="acc.weighted + ((opp.estimatedAmount ?: 0) *
+                            (opp.estimatedProbability ?: 0) / 100)" />
+                    <script>byStage[opp.opportunityStageId] = acc</script>
+                </iterate>
+                <!-- every stage is written, also with a zero count, so the weekly
+                     series has no holes -->
+                <iterate list="stages" entry="stage">
+                    <set field="acc"
+                        from="byStage[stage.opportunityStageId] ?:
+                            [count: 0, total: new BigDecimal(0),
+                                weighted: new BigDecimal(0)]" />
+                    <service-call name="store#growerp.crm.OpportunityWeekStat"
+                        in-map="[
+                            ownerPartyId: statOwnerPartyId,
+                            weekStartDate: weekStartDate,
+                            opportunityStageId: stage.opportunityStageId,
+                            opportunityCount: acc.count,
+                            totalAmount: acc.total,
+                            weightedAmount: acc.weighted.setScale(2,
+                                java.math.RoundingMode.HALF_UP)]" />
+                </iterate>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="get" noun="OpportunityWeekStats">
+        <description>Weekly opportunity pipeline history, newest week first. Weeks the
+            job did not run for are absent.</description>
+        <in-parameters>
+            <parameter name="weeks" type="Integer" default="6" />
+        </in-parameters>
         <out-parameters>
+            <parameter name="weekSummary" type="List">
+                <parameter name="week" type="Map">
+                    <parameter name="weekStartDate" />
+                    <parameter name="opportunityCount" />
+                    <parameter name="totalAmount" />
+                    <parameter name="weightedAmount" />
+                    <parameter name="stages" type="List">
+                        <parameter name="stage" type="Map">
+                            <parameter name="stageId" />
+                            <parameter name="sequenceNum" />
+                            <parameter name="opportunityCount" />
+                            <parameter name="totalAmount" />
+                            <parameter name="weightedAmount" />
+                        </parameter>
+                    </parameter>
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="growerp.crm.OpportunityWeekStat" list="weekRows"
+                distinct="true" limit="weeks">
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+                <select-field field-name="weekStartDate" />
+                <order-by field-name="-weekStartDate" />
+            </entity-find>
+            <entity-find list="stages"
+                entity-name="mantle.sales.opportunity.SalesOpportunityStage">
+                <econdition field-name="opportunityStageId" operator="not-equals"
+                    value="Deleted" />
+                <order-by field-name="sequenceNum" />
+            </entity-find>
+            <set field="weekSummary" from="[]" />
+            <iterate list="weekRows" entry="weekRow">
+                <entity-find entity-name="growerp.crm.OpportunityWeekStat" list="statRows">
+                    <econdition field-name="ownerPartyId" from="companyPartyId" />
+                    <econdition field-name="weekStartDate" from="weekRow.weekStartDate" />
+                </entity-find>
+                <set field="byStage" from="[:]" />
+                <iterate list="statRows" entry="statRow">
+                    <script>byStage[statRow.opportunityStageId] = statRow</script>
+                </iterate>
+                <set field="stageList" from="[]" />
+                <set field="weekCount" type="Integer" value="0" />
+                <set field="weekTotal" from="new BigDecimal(0)" />
+                <set field="weekWeighted" from="new BigDecimal(0)" />
+                <iterate list="stages" entry="stage">
+                    <set field="statRow" from="byStage[stage.opportunityStageId]" />
+                    <if condition="statRow">
+                        <set field="stageOut"
+                            from="[stageId: stage.opportunityStageId,
+                                sequenceNum: stage.sequenceNum,
+                                opportunityCount: statRow.opportunityCount ?: 0,
+                                totalAmount: (statRow.totalAmount ?: 0).toString(),
+                                weightedAmount: (statRow.weightedAmount ?: 0).toString()]" />
+                        <script>stageList.add(stageOut)</script>
+                        <set field="weekCount"
+                            from="weekCount + (statRow.opportunityCount ?: 0)" />
+                        <set field="weekTotal"
+                            from="weekTotal + (statRow.totalAmount ?: 0)" />
+                        <set field="weekWeighted"
+                            from="weekWeighted + (statRow.weightedAmount ?: 0)" />
+                    </if>
+                </iterate>
+                <!-- the date is sent as a plain yyyy-MM-dd string, the flutter model
+                     parses it with the DateTimeConverter -->
+                <set field="weekOut"
+                    from="[weekStartDate: weekRow.weekStartDate.toString(),
+                        opportunityCount: weekCount,
+                        totalAmount: weekTotal.toString(),
+                        weightedAmount: weekWeighted.toString(),
+                        stages: stageList]" />
+                <script>weekSummary.add(weekOut)</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="get" noun="CrmDashboard">
+        <description>Aggregates for the CRM dashboard tile: the weekly opportunity
+            pipeline history, the customer lifecycle funnel
+            (assigned/qualified/converted) and party-role counters, scoped to the
+            owner company.</description>
+        <out-parameters>
+            <parameter name="weekSummary" type="List" />
             <parameter name="stageSummary" type="List" />
             <parameter name="suppliers" type="Integer" />
             <parameter name="employees" type="Integer" />
@@ -298,6 +468,10 @@ limitations under the License.
                 <econdition field-name="companyRole" value="OrgInternal" />
                 <econdition field-name="userGroupId" value="GROWERP_M_ADMIN" />
             </entity-find-count>
+
+            <!-- weekly pipeline history for the tile bars, in the same call -->
+            <service-call out-map="context" in-map="[weeks: 6]"
+                name="growerp.100.CrmServices100.get#OpportunityWeekStats" />
         </actions>
     </service>
 

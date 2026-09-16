@@ -59,6 +59,8 @@
   "opportunityUploadFailure": "Uploaden van kansen mislukt",
   "opportunityDownloadSuccess": "Kansendownload gepland, e-mail wordt binnenkort verzonden",
   "opportunityDownloadFailure": "Downloaden van kansen mislukt",
+  "dashWeekCurrent": "deze week",
+  "dashWeeksAgo": "{weeks}w geleden",
   "noPipelineData": "Geen pipelinegegevens",
   "convertToQuote": "Omzetten naar offerte",
   "opportunityConvertSuccess": "Offerte #{id} succesvol aangemaakt",

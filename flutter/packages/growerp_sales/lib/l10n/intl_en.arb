@@ -278,6 +278,19 @@
   "@opportunityDownloadFailure": {
     "description": "BLoC message: Failed to download opportunities"
   },
+  "dashWeekCurrent": "this week",
+  "@dashWeekCurrent": {
+    "description": "Bar label for the running week on the crm dashboard tile"
+  },
+  "dashWeeksAgo": "{weeks}w ago",
+  "@dashWeeksAgo": {
+    "description": "Bar label for a past week on the crm dashboard tile",
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
   "noPipelineData": "No pipeline data",
   "@noPipelineData": {
     "description": "No pipeline data"

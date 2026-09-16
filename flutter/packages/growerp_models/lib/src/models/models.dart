@@ -55,6 +55,7 @@ export 'profit_loss_model.dart';
 export 'opportunity_stages_model.dart';
 export 'opportunity_model.dart';
 export 'opportunity_summary_model.dart';
+export 'opportunity_week_stat_model.dart';
 export 'website_form_model.dart';
 export 'website_conversion_model.dart';
 export 'website_translation_model.dart';

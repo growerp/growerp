@@ -59,6 +59,8 @@
   "opportunityUploadFailure": "การอัปโหลดโอกาสล้มเหลว",
   "opportunityDownloadSuccess": "กำหนดเวลาดาวน์โหลดโอกาสแล้ว อีเมลจะถูกส่งในไม่ช้า",
   "opportunityDownloadFailure": "การดาวน์โหลดโอกาสล้มเหลว",
+  "dashWeekCurrent": "สัปดาห์นี้",
+  "dashWeeksAgo": "{weeks} สัปดาห์ก่อน",
   "noPipelineData": "ไม่มีข้อมูลท่อส่ง",
   "convertToQuote": "แปลงเป็นใบเสนอราคา",
   "opportunityConvertSuccess": "ใบเสนอราคา #{id} สร้างสำเร็จแล้ว",

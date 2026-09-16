@@ -237,6 +237,23 @@ limitations under the License.
         </relationship>
     </entity>
 
+    <entity entity-name="OpportunityWeekStat" package="growerp.crm">
+        <description>Weekly snapshot of the open opportunity pipeline per stage, written
+            by the collect#OpportunityWeekStats job: a stage change overwrites the
+            opportunity, so without this the pipeline of past weeks is lost.</description>
+        <field name="ownerPartyId" type="id" is-pk="true" />
+        <field name="weekStartDate" type="date" is-pk="true">
+            <description>Monday of the ISO week the snapshot belongs to.</description>
+        </field>
+        <field name="opportunityStageId" type="id" is-pk="true" />
+        <field name="opportunityCount" type="number-integer" />
+        <field name="totalAmount" type="currency-amount" />
+        <field name="weightedAmount" type="currency-amount" />
+        <relationship type="one" title="Owner" related="mantle.party.Party" short-alias="owner">
+            <key-map field-name="ownerPartyId" />
+        </relationship>
+    </entity>
+
     <entity entity-name="ChatMessage" package="growerp.general">
         <field name="chatMessageId" type="id" is-pk="true" />
         <field name="content" type="text-very-long" />

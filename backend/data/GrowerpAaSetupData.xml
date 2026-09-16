@@ -21,6 +21,12 @@ limitations under the License.
         paused="N"
         transactionTimeout="1800" />
 
+    <!-- Service Job: Snapshot the opportunity pipeline per stage - weekly, monday night -->
+    <moqui.service.job.ServiceJob jobName="collect_opportunity_week_stats"
+        description="Store the weekly opportunity pipeline statistics per stage"
+        serviceName="growerp.100.CrmServices100.collect#OpportunityWeekStats"
+        cronExpression="0 15 0 ? * MON" paused="N" transactionTimeout="1800" />
+
     <!-- Service Job: Auto-renew tenant subscriptions expiring within 3 days - daily -->
     <moqui.service.job.ServiceJob jobName="renew_due_tenant_subscriptions"
         description="Auto-renew tenant subscriptions expiring soon using their stored payment method; dunning email on failure"

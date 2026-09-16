@@ -1187,6 +1187,11 @@ abstract class RestClient {
   @GET("rest/s1/growerp/100/Opportunity/Summary")
   Future<OpportunitySummary> getOpportunitySummary();
 
+  @GET("rest/s1/growerp/100/Opportunity/WeekStats")
+  Future<OpportunityWeekStats> getOpportunityWeekStats({
+    @Query('weeks') int? weeks,
+  });
+
   // website lead-capture forms
   @GET("rest/s1/growerp/100/WebsiteForm")
   Future<WebsiteForms> getWebsiteForm({
