@@ -13,37 +13,31 @@
  */
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:growerp_models/growerp_models.dart';
 
 part 'marketing_dashboard_model.freezed.dart';
 part 'marketing_dashboard_model.g.dart';
 
 @freezed
-abstract class CampaignSummaryItem with _$CampaignSummaryItem {
-  CampaignSummaryItem._();
-  factory CampaignSummaryItem({
-    @Default("") String marketingCampaignId,
-    @Default("") String campaignName,
-    @Default("") String statusId,
-    @Default(0) int messagesSent,
-    @Default(0) int responsesReceived,
-    @Default(0) int leadsGenerated,
-  }) = _CampaignSummaryItem;
+abstract class ContentStatusSummaryItem with _$ContentStatusSummaryItem {
+  ContentStatusSummaryItem._();
+  factory ContentStatusSummaryItem({
+    @Default("") String status,
+    @Default(0) int count,
+  }) = _ContentStatusSummaryItem;
 
-  factory CampaignSummaryItem.fromJson(Map<String, dynamic> json) =>
-      _$CampaignSummaryItemFromJson(json);
+  factory ContentStatusSummaryItem.fromJson(Map<String, dynamic> json) =>
+      _$ContentStatusSummaryItemFromJson(json);
 }
 
 @freezed
 abstract class MarketingDashboard with _$MarketingDashboard {
   MarketingDashboard._();
   factory MarketingDashboard({
-    @Default([]) List<OpportunitySummaryItem> stageSummary,
-    @Default([]) List<CampaignSummaryItem> campaigns,
-    @Default(0) int totalLeads,
-    @Default(0) int assessmentCompletions,
-    @Default(0) int activeEnrollments,
-    @Default(0) int completedEnrollments,
+    @Default([]) List<ContentStatusSummaryItem> postSummary,
+    @Default(0) int totalPosts,
+    @Default(0) int contentToApprove,
+    @Default(0) int activePlans,
+    @Default(0) int newEngagements,
   }) = _MarketingDashboard;
 
   factory MarketingDashboard.fromJson(Map<String, dynamic> json) =>

@@ -59,8 +59,6 @@
   "opportunityUploadFailure": "机会上传失败",
   "opportunityDownloadSuccess": "机会下载已安排，电子邮件将很快发送",
   "opportunityDownloadFailure": "机会下载失败",
-  "dashWeekCurrent": "本周",
-  "dashWeeksAgo": "{weeks}周前",
   "noPipelineData": "无管道数据",
   "convertToQuote": "转换为报价",
   "opportunityConvertSuccess": "报价 #{id} 创建成功",
@@ -70,5 +68,12 @@
   "dashAdmins": "管理员",
   "dashStageAssigned": "已分配",
   "dashStageQualified": "已确认",
-  "dashStageConverted": "已转化"
+  "dashStageConverted": "已转化",
+  "dashStageProspecting": "潜在客户",
+  "dashStageQualification": "资格审核",
+  "dashStageDemoMeeting": "演示/会议",
+  "dashStageProposal": "提案",
+  "dashStageQuote": "报价",
+  "dashStageClosedWon": "成交",
+  "dashStageClosedLost": "流失"
 }

@@ -59,8 +59,6 @@
   "opportunityUploadFailure": "Hochladen der Opportunities fehlgeschlagen",
   "opportunityDownloadSuccess": "Opportunity-Download geplant, E-Mail wird in Kürze gesendet",
   "opportunityDownloadFailure": "Herunterladen der Opportunities fehlgeschlagen",
-  "dashWeekCurrent": "diese Woche",
-  "dashWeeksAgo": "vor {weeks}W",
   "noPipelineData": "Keine Pipeline-Daten",
   "convertToQuote": "In Angebot umwandeln",
   "opportunityConvertSuccess": "Angebot Nr. {id} erfolgreich erstellt",
@@ -70,5 +68,12 @@
   "dashAdmins": "Administratoren",
   "dashStageAssigned": "Zugewiesen",
   "dashStageQualified": "Qualifiziert",
-  "dashStageConverted": "Konvertiert"
+  "dashStageConverted": "Konvertiert",
+  "dashStageProspecting": "Akquise",
+  "dashStageQualification": "Qualifizierung",
+  "dashStageDemoMeeting": "Demo/Termin",
+  "dashStageProposal": "Angebot",
+  "dashStageQuote": "Kostenvoranschlag",
+  "dashStageClosedWon": "Gewonnen",
+  "dashStageClosedLost": "Verloren"
 }

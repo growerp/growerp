@@ -17,11 +17,9 @@ import 'package:growerp_sales/l10n/generated/sales_localizations.dart';
 import 'package:growerp_core/growerp_core.dart';
 
 /// Compact CRM dashboard for the half-height 'Crm' dashboard tile: the open
-/// opportunity pipeline of the last weeks as one bar per week, with the
-/// party-role counters in a row at the bottom. The weeks come from the weekly
-/// snapshot job, so a week only appears after that job has run for it. The tile
-/// route must be listed in DashboardGrid.compactGraphicRoutes so the icon+title
-/// render beside it.
+/// opportunity pipeline as one bar per stage, with the party-role counters in a
+/// row at the bottom. The tile route must be listed in
+/// DashboardGrid.compactGraphicRoutes so the icon+title render beside it.
 class CrmDashboardChartMini extends StatelessWidget {
   const CrmDashboardChartMini({super.key, this.showEmployees = true});
 
@@ -39,12 +37,10 @@ class CrmDashboardChartMini extends StatelessWidget {
         final dashboard = await restClient.getCrmDashboard();
         return (
           bars: <DashboardBar>[
-            for (final week in dashboard.weekSummary.asMap().entries)
+            for (final stage in dashboard.opportunitySummary)
               (
-                label: week.key == 0
-                    ? l.dashWeekCurrent
-                    : l.dashWeeksAgo(week.key),
-                count: week.value.opportunityCount,
+                label: _stageLabel(l, stage.stageId),
+                count: stage.opportunityCount,
                 color: null,
               ),
           ],
@@ -58,5 +54,28 @@ class CrmDashboardChartMini extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+/// Opportunity stage ids are the English stage names as seeded; translate the
+/// standard ones and show the raw id for stages a company added itself.
+String _stageLabel(SalesLocalizations l, String stageId) {
+  switch (stageId) {
+    case 'Prospecting':
+      return l.dashStageProspecting;
+    case 'Qualification':
+      return l.dashStageQualification;
+    case 'Demo/Meeting':
+      return l.dashStageDemoMeeting;
+    case 'Proposal':
+      return l.dashStageProposal;
+    case 'Quote':
+      return l.dashStageQuote;
+    case 'Closed Won':
+      return l.dashStageClosedWon;
+    case 'Closed Lost':
+      return l.dashStageClosedLost;
+    default:
+      return stageId;
   }
 }

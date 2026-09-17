@@ -14,7 +14,7 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'opportunity_week_stat_model.dart';
+import 'opportunity_summary_model.dart';
 
 part 'crm_dashboard_model.freezed.dart';
 part 'crm_dashboard_model.g.dart';
@@ -36,7 +36,7 @@ abstract class CrmStageSummaryItem with _$CrmStageSummaryItem {
 abstract class CrmDashboard with _$CrmDashboard {
   CrmDashboard._();
   factory CrmDashboard({
-    @Default([]) List<OpportunityWeekStatItem> weekSummary,
+    @Default([]) List<OpportunitySummaryItem> opportunitySummary,
     @Default([]) List<CrmStageSummaryItem> stageSummary,
     @Default(0) int suppliers,
     @Default(0) int employees,

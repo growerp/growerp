@@ -106,10 +106,6 @@
   "@delete": {
     "description": "Delete"
   },
-  "noPipelineData": "No pipeline data",
-  "@noPipelineData": {
-    "description": "No pipeline data"
-  },
   "save": "Save",
   "@save": {
     "description": "Save"
@@ -258,50 +254,6 @@
   "@searchHintMasterContent": {
     "description": "Search field hint"
   },
-  "dashLeads": "leads",
-  "@dashLeads": {
-    "description": "Dashboard tile counter label"
-  },
-  "dashAssessments": "assessments",
-  "@dashAssessments": {
-    "description": "Dashboard tile counter label"
-  },
-  "dashNurturing": "nurturing",
-  "@dashNurturing": {
-    "description": "Dashboard tile counter label"
-  },
-  "dashNurtured": "nurtured",
-  "@dashNurtured": {
-    "description": "Dashboard tile counter label"
-  },
-  "dashStageProspecting": "Prospecting",
-  "@dashStageProspecting": {
-    "description": "Dashboard tile funnel stage label"
-  },
-  "dashStageQualification": "Qualification",
-  "@dashStageQualification": {
-    "description": "Dashboard tile funnel stage label"
-  },
-  "dashStageDemoMeeting": "Demo/Meeting",
-  "@dashStageDemoMeeting": {
-    "description": "Dashboard tile funnel stage label"
-  },
-  "dashStageProposal": "Proposal",
-  "@dashStageProposal": {
-    "description": "Dashboard tile funnel stage label"
-  },
-  "dashStageQuote": "Quote",
-  "@dashStageQuote": {
-    "description": "Dashboard tile funnel stage label"
-  },
-  "dashStageClosedWon": "Closed Won",
-  "@dashStageClosedWon": {
-    "description": "Dashboard tile funnel stage label"
-  },
-  "dashStageClosedLost": "Closed Lost",
-  "@dashStageClosedLost": {
-    "description": "Dashboard tile funnel stage label"
-  },
   "contentPlans": "Content Plans",
   "@contentPlans": {
     "description": "Title of the content plan list, used on the toggle back from the calendar"
@@ -350,5 +302,45 @@
         "type": "int"
       }
     }
+  },
+  "noContentData": "No content data",
+  "@noContentData": {
+    "description": "Empty message on the marketing dashboard tile"
+  },
+  "dashPosts": "posts",
+  "@dashPosts": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashToApprove": "to approve",
+  "@dashToApprove": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashPlans": "plans",
+  "@dashPlans": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashEngagements": "engagements",
+  "@dashEngagements": {
+    "description": "Dashboard tile counter label"
+  },
+  "dashPostDraft": "Draft",
+  "@dashPostDraft": {
+    "description": "Dashboard tile post funnel status label"
+  },
+  "dashPostScheduled": "Scheduled",
+  "@dashPostScheduled": {
+    "description": "Dashboard tile post funnel status label"
+  },
+  "dashPostBacklog": "Backlog",
+  "@dashPostBacklog": {
+    "description": "Dashboard tile post funnel status label"
+  },
+  "dashPostPublished": "Published",
+  "@dashPostPublished": {
+    "description": "Dashboard tile post funnel status label"
+  },
+  "dashPostFailed": "Failed",
+  "@dashPostFailed": {
+    "description": "Dashboard tile post funnel status label"
   }
 }

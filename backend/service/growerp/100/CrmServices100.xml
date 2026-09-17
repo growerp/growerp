@@ -372,12 +372,11 @@ limitations under the License.
     </service>
 
     <service verb="get" noun="CrmDashboard">
-        <description>Aggregates for the CRM dashboard tile: the weekly opportunity
-            pipeline history, the customer lifecycle funnel
-            (assigned/qualified/converted) and party-role counters, scoped to the
-            owner company.</description>
+        <description>Aggregates for the CRM dashboard tile: the opportunity pipeline
+            per stage, the customer lifecycle funnel (assigned/qualified/converted)
+            and party-role counters, scoped to the owner company.</description>
         <out-parameters>
-            <parameter name="weekSummary" type="List" />
+            <parameter name="opportunitySummary" type="List" />
             <parameter name="stageSummary" type="List" />
             <parameter name="suppliers" type="Integer" />
             <parameter name="employees" type="Integer" />
@@ -469,9 +468,12 @@ limitations under the License.
                 <econdition field-name="userGroupId" value="GROWERP_M_ADMIN" />
             </entity-find-count>
 
-            <!-- weekly pipeline history for the tile bars, in the same call -->
-            <service-call out-map="context" in-map="[weeks: 6]"
-                name="growerp.100.CrmServices100.get#OpportunityWeekStats" />
+            <!-- opportunity pipeline per stage for the tile bars. get#OpportunitySummary
+                 returns its list as stageSummary, which means the customer lifecycle
+                 funnel here, so map it out separately instead of into the context -->
+            <service-call out-map="oppResult"
+                name="growerp.100.CrmServices100.get#OpportunitySummary" />
+            <set field="opportunitySummary" from="oppResult.stageSummary" />
         </actions>
     </service>
 

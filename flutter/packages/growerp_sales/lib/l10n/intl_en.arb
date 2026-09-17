@@ -278,19 +278,6 @@
   "@opportunityDownloadFailure": {
     "description": "BLoC message: Failed to download opportunities"
   },
-  "dashWeekCurrent": "this week",
-  "@dashWeekCurrent": {
-    "description": "Bar label for the running week on the crm dashboard tile"
-  },
-  "dashWeeksAgo": "{weeks}w ago",
-  "@dashWeeksAgo": {
-    "description": "Bar label for a past week on the crm dashboard tile",
-    "placeholders": {
-      "weeks": {
-        "type": "int"
-      }
-    }
-  },
   "noPipelineData": "No pipeline data",
   "@noPipelineData": {
     "description": "No pipeline data"
@@ -334,6 +321,34 @@
   },
   "dashStageConverted": "Converted",
   "@dashStageConverted": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageProspecting": "Prospecting",
+  "@dashStageProspecting": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageQualification": "Qualification",
+  "@dashStageQualification": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageDemoMeeting": "Demo/Meeting",
+  "@dashStageDemoMeeting": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageProposal": "Proposal",
+  "@dashStageProposal": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageQuote": "Quote",
+  "@dashStageQuote": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageClosedWon": "Closed Won",
+  "@dashStageClosedWon": {
+    "description": "Dashboard tile funnel stage label"
+  },
+  "dashStageClosedLost": "Closed Lost",
+  "@dashStageClosedLost": {
     "description": "Dashboard tile funnel stage label"
   }
 }

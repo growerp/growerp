@@ -59,8 +59,6 @@
   "opportunityUploadFailure": "No se pudieron cargar oportunidades",
   "opportunityDownloadSuccess": "Descarga de oportunidad programada; el correo electrónico se enviará en breve",
   "opportunityDownloadFailure": "No se pudieron descargar las oportunidades",
-  "dashWeekCurrent": "esta semana",
-  "dashWeeksAgo": "hace {weeks}sem",
   "noPipelineData": "No hay datos del embudo",
   "convertToQuote": "Convertir en cotización",
   "opportunityConvertSuccess": "Cita #{id} creada exitosamente",
@@ -70,5 +68,12 @@
   "dashAdmins": "administradores",
   "dashStageAssigned": "Asignados",
   "dashStageQualified": "Calificados",
-  "dashStageConverted": "Convertidos"
+  "dashStageConverted": "Convertidos",
+  "dashStageProspecting": "Prospección",
+  "dashStageQualification": "Calificación",
+  "dashStageDemoMeeting": "Demo/Reunión",
+  "dashStageProposal": "Propuesta",
+  "dashStageQuote": "Cotización",
+  "dashStageClosedWon": "Ganada",
+  "dashStageClosedLost": "Perdida"
 }

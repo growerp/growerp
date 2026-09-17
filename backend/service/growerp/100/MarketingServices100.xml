@@ -709,73 +709,82 @@
     </service>
 
     <service verb="get" noun="MarketingDashboard">
-        <description>Aggregates for the marketing/sales dashboard: pipeline funnel,
-            campaign metrics rollup, lead count, assessment completions and nurture
-            enrollment counts.</description>
+        <description>Aggregates for the marketing dashboard tile: the social post
+            status funnel and the content counters, scoped to the owner company.</description>
         <out-parameters>
-            <parameter name="stageSummary" type="List" />
-            <parameter name="campaigns" type="List" />
-            <parameter name="totalLeads" />
-            <parameter name="assessmentCompletions" />
-            <parameter name="activeEnrollments" />
-            <parameter name="completedEnrollments" />
+            <parameter name="postSummary" type="List" />
+            <parameter name="totalPosts" type="Integer" />
+            <parameter name="contentToApprove" type="Integer" />
+            <parameter name="activePlans" type="Integer" />
+            <parameter name="newEngagements" type="Integer" />
         </out-parameters>
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <!-- pipeline funnel -->
-            <service-call name="growerp.100.CrmServices100.get#OpportunitySummary"
-                out-map="context" />
-            <!-- campaign rollup -->
-            <entity-find entity-name="growerp.marketing.MarketingCampaignAndMetrics"
-                list="campaignList">
-                <econdition field-name="ownerPartyId" from="companyPartyId" />
-                <order-by field-name="campaignName" />
-            </entity-find>
-            <set field="campaigns" from="[]" />
-            <iterate list="campaignList" entry="campaign">
-                <script>campaigns.add([
-                    marketingCampaignId: campaign.marketingCampaignId,
-                    campaignName: campaign.campaignName,
-                    statusId: campaign.statusId,
-                    messagesSent: campaign.messagesSent ?: 0,
-                    responsesReceived: campaign.responsesReceived ?: 0,
-                    leadsGenerated: campaign.leadsGenerated ?: 0])</script>
-            </iterate>
-            <!-- leads (same filter as the dashboard statistics service) -->
-            <entity-find-count count-field="totalLeads"
-                entity-name="growerp.party.OwnerPersonDetailAndCompany">
+
+            <!-- social post funnel. A failed publish keeps status READY and only
+                 stamps publishError, so failed posts are READY posts with an error
+                 and the scheduled count has to exclude them to avoid double counting -->
+            <entity-find-count count-field="draftPosts"
+                entity-name="growerp.marketing.SocialPost">
                 <econdition field-name="ownerPartyId" />
-                <econdition field-name="userDisabled" value="N" or-null="true" />
-                <econdition field-name="ownerDisabled" value="N" or-null="true" />
-                <econditions combine="or">
-                    <econdition field-name="role" value="Customer" />
-                    <econdition field-name="companyRole" value="Customer" />
-                </econditions>
-                <!-- lead: a customer that has not been converted yet -->
-                <econdition field-name="customerStatusId" operator="not-equals"
-                    value="CUSTOMER_CONVERTED" or-null="true" />
+                <econdition field-name="status" value="DRAFT" />
             </entity-find-count>
-            <!-- assessments completed -->
-            <entity-find-count count-field="assessmentCompletions"
-                entity-name="growerp.assessment.AssessmentResult">
-                <econdition field-name="ownerPartyId" from="companyPartyId" />
+            <entity-find-count count-field="scheduledPosts"
+                entity-name="growerp.marketing.SocialPost">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="status" value="READY" />
+                <econdition field-name="scheduledDate" operator="is-not-null" />
+                <econdition field-name="publishError" operator="is-null" />
             </entity-find-count>
-            <!-- nurture enrollments -->
-            <entity-find-count count-field="activeEnrollments"
-                entity-name="growerp.marketing.EmailSequenceEnrollment">
-                <econdition field-name="ownerPartyId" from="companyPartyId" />
+            <!-- backlog: ready to go out but not scheduled on a date yet -->
+            <entity-find-count count-field="backlogPosts"
+                entity-name="growerp.marketing.SocialPost">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="status" value="READY" />
+                <econdition field-name="scheduledDate" operator="is-null" />
+            </entity-find-count>
+            <entity-find-count count-field="publishedPosts"
+                entity-name="growerp.marketing.SocialPost">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="status" value="PUBLISHED" />
+            </entity-find-count>
+            <entity-find-count count-field="failedPosts"
+                entity-name="growerp.marketing.SocialPost">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="status" value="READY" />
+                <econdition field-name="publishError" operator="is-not-null" />
+            </entity-find-count>
+            <set field="postSummary" from="[
+                [status: 'DRAFT', count: draftPosts],
+                [status: 'SCHEDULED', count: scheduledPosts],
+                [status: 'BACKLOG', count: backlogPosts],
+                [status: 'PUBLISHED', count: publishedPosts],
+                [status: 'FAILED', count: failedPosts]]" />
+
+            <!-- content counters -->
+            <entity-find-count count-field="totalPosts"
+                entity-name="growerp.marketing.SocialPost">
+                <econdition field-name="ownerPartyId" />
+            </entity-find-count>
+            <!-- content waiting for approval blocks everything downstream -->
+            <entity-find-count count-field="contentToApprove"
+                entity-name="growerp.marketing.MasterContent">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="status" value="DRAFT" />
+            </entity-find-count>
+            <entity-find-count count-field="activePlans"
+                entity-name="growerp.marketing.ContentPlan">
+                <econdition field-name="ownerPartyId" />
                 <econdition field-name="status" value="ACTIVE" />
             </entity-find-count>
-            <entity-find-count count-field="completedEnrollments"
-                entity-name="growerp.marketing.EmailSequenceEnrollment">
-                <econdition field-name="ownerPartyId" from="companyPartyId" />
-                <econdition field-name="status" value="COMPLETED" />
+            <entity-find-count count-field="newEngagements"
+                entity-name="growerp.marketing.SocialEngagement">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="status" value="NEW" />
             </entity-find-count>
         </actions>
     </service>
-
-    <!-- ============ social engagement signals ============ -->
 
     <service verb="get" noun="SocialEngagement">
         <description>Engagement signals recorded on the company's social posts</description>
