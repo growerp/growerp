@@ -65,6 +65,7 @@ export 'marketing_dashboard_model.dart';
 export 'crm_dashboard_model.dart';
 export 'rest_usage_statistics_model.dart';
 export 'infra_metrics_model.dart';
+export 'signup_statistics_model.dart';
 export 'support_dashboard_model.dart';
 export 'catalog_dashboard_model.dart';
 export 'order_dashboard_model.dart';

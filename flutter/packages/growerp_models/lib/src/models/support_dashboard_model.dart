@@ -90,6 +90,21 @@ abstract class SupportRestUsageStats with _$SupportRestUsageStats {
 }
 
 @freezed
+abstract class SupportSignupsStats with _$SupportSignupsStats {
+  SupportSignupsStats._();
+  factory SupportSignupsStats({
+    @Default([]) List<SupportBarItem> bars,
+    @Default(0) int day,
+    @Default(0) int week,
+    @Default(0) int month,
+    @Default(0) int quarter,
+  }) = _SupportSignupsStats;
+
+  factory SupportSignupsStats.fromJson(Map<String, dynamic> json) =>
+      _$SupportSignupsStatsFromJson(json);
+}
+
+@freezed
 abstract class SupportDashboard with _$SupportDashboard {
   SupportDashboard._();
   factory SupportDashboard({
@@ -97,6 +112,7 @@ abstract class SupportDashboard with _$SupportDashboard {
     SupportOwnersStats? owners,
     SupportLlmUsageStats? llmUsage,
     SupportRestUsageStats? restUsage,
+    SupportSignupsStats? signups,
   }) = _SupportDashboard;
 
   factory SupportDashboard.fromJson(Map<String, dynamic> json) =>

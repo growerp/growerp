@@ -18,7 +18,7 @@ import 'package:growerp_models/growerp_models.dart';
 import '../l10n/generated/support_localizations.dart';
 import 'support_chart_mini.dart';
 
-/// The four support dashboard tile charts. All data comes from a single
+/// The support dashboard tile charts. All data comes from a single
 /// get#SupportDashboard call made once by SupportDashboardContent.
 
 class ApplicationsDashboardChartMini extends StatelessWidget {
@@ -89,6 +89,24 @@ class RestUsageDashboardChartMini extends StatelessWidget {
       MapEntry(SupportLocalizations.of(context)!.dashCalls, stats.calls),
       MapEntry(SupportLocalizations.of(context)!.dashAvgPerDay, stats.avgPerDay),
       MapEntry(SupportLocalizations.of(context)!.dashPeakDay, stats.peakDay),
+    ],
+  );
+}
+
+class SignupsDashboardChartMini extends StatelessWidget {
+  const SignupsDashboardChartMini({super.key, required this.stats});
+  final SupportSignupsStats stats;
+
+  @override
+  Widget build(BuildContext context) => SupportChartMini(
+    name: 'signups',
+    bars: stats.bars,
+    emptyMessage: SupportLocalizations.of(context)!.dashNoSignups,
+    counters: [
+      MapEntry(SupportLocalizations.of(context)!.dashDay, stats.day),
+      MapEntry(SupportLocalizations.of(context)!.dashWeek, stats.week),
+      MapEntry(SupportLocalizations.of(context)!.dashMonth, stats.month),
+      MapEntry(SupportLocalizations.of(context)!.dashQuarter, stats.quarter),
     ],
   );
 }

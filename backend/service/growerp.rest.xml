@@ -44,6 +44,12 @@ limitations under the License.
                 <service name="growerp.100.GeneralServices100.get#RestUsageStatistics" />
             </method>
         </resource>
+        <resource name="SignupStatistics"
+            description="New tenant signups that logged in: app, login days and REST calls">
+            <method type="get">
+                <service name="growerp.100.GeneralServices100.get#SignupStatistics" />
+            </method>
+        </resource>
         <resource name="SupportDashboard"
             description="Aggregated counters for the support app dashboard tiles">
             <method type="get">

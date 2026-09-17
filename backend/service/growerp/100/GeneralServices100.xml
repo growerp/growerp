@@ -1691,10 +1691,213 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="get" noun="SignupStatistics">
+        <description>New tenant signups that also logged in successfully: one row per
+            tenant with the application it registered with, the number of days its users
+            logged in, the number of external REST calls and the login date range.
+            Signup dates come from the 'New tenant &amp; admin created' event written by
+            create#Tenant; login and REST figures come from moqui.server.ArtifactHit,
+            which clean#ArtifactData purges after 90 days.</description>
+        <in-parameters>
+            <parameter name="startDateTime" type="Timestamp"/><!-- default: endDateTime - 90 days -->
+            <parameter name="endDateTime" type="Timestamp"/><!-- default: now -->
+            <parameter name="applicationId"/><!-- optional filter on the signup application -->
+            <parameter name="search"/><!-- company name, admin name, email or application -->
+            <parameter name="start" type="Integer" default-value="0"/>
+            <parameter name="limit" type="Integer" default-value="50"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="fromDate"/><!-- yyyy-MM-dd -->
+            <parameter name="thruDate"/><!-- yyyy-MM-dd -->
+            <parameter name="signupCount" type="Integer"/><!-- matching rows before paging -->
+            <parameter name="signups" type="List">
+                <parameter name="signup" type="Map">
+                    <parameter name="ownerPartyId"/>
+                    <parameter name="companyName"/>
+                    <parameter name="adminName"/>
+                    <parameter name="adminEmail"/>
+                    <parameter name="applicationId"/>
+                    <parameter name="signupDate"/><!-- yyyy-MM-dd -->
+                    <parameter name="firstLoginDate"/><!-- yyyy-MM-dd -->
+                    <parameter name="lastLoginDate"/><!-- yyyy-MM-dd -->
+                    <parameter name="daysLoggedIn" type="Integer"/>
+                    <parameter name="loginCount" type="Integer"/>
+                    <parameter name="restCalls" type="Integer"/>
+                    <parameter name="userCount" type="Integer"/>
+                    <parameter name="appsUsed" type="List"/>
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.check#SupportUser"/>
+            <set field="thruDateTime" from="endDateTime ?: ec.user.nowTimestamp"/>
+            <set field="fromDateTime"
+                from="startDateTime ?: new java.sql.Timestamp(thruDateTime.time - 90L*24*60*60*1000)"/>
+            <set field="fromDate" from="ec.l10n.format(fromDateTime, 'yyyy-MM-dd')"/>
+            <set field="thruDate" from="ec.l10n.format(thruDateTime, 'yyyy-MM-dd')"/>
+
+            <!-- one signup event per new tenant, created by create#Tenant -->
+            <entity-find entity-name="mantle.work.effort.WorkEffort" list="signupEvents">
+                <econdition field-name="workEffortTypeEnumId" value="WetEvent"/>
+                <econdition field-name="workEffortName" value="New tenant &amp; admin created"/>
+                <econdition field-name="actualStartDate" operator="greater-equals" from="fromDateTime"/>
+                <econdition field-name="actualStartDate" operator="less-equals" from="thruDateTime"/>
+                <select-field field-name="workEffortId"/>
+                <select-field field-name="ownerPartyId"/>
+                <select-field field-name="actualStartDate"/>
+                <order-by field-name="-actualStartDate"/>
+            </entity-find>
+            <set field="ownerIds"
+                from="signupEvents.collect { it.ownerPartyId }.findAll { it }.toSet()"/>
+            <!-- no signups in the period: return the empty result, not an error -->
+            <if condition="!ownerIds">
+                <set field="signups" from="[]"/>
+                <set field="signupCount" value="0" type="Integer"/>
+                <return/>
+            </if>
+
+            <!-- the application the tenant registered with -->
+            <entity-find entity-name="growerp.general.TenantSetup" list="tenantSetups">
+                <econdition field-name="ownerPartyId" operator="in" from="ownerIds"/>
+                <select-field field-name="ownerPartyId"/>
+                <select-field field-name="applicationId"/>
+            </entity-find>
+            <!-- the admin party the signup event was created for -->
+            <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="eventParties">
+                <econdition field-name="workEffortId" operator="in"
+                    from="signupEvents.collect { it.workEffortId }"/>
+                <select-field field-name="workEffortId"/>
+                <select-field field-name="partyId"/>
+            </entity-find>
+            <entity-find entity-name="growerp.party.OwnerCompany" list="ownerCompanies">
+                <econdition field-name="ownerPartyId" operator="in" from="ownerIds"/>
+                <econdition field-name="role" value="OrgInternal"/>
+                <select-field field-name="ownerPartyId"/>
+                <select-field field-name="name"/>
+            </entity-find>
+            <!-- one row per person/role: dedupe on partyId -->
+            <entity-find entity-name="growerp.party.OwnerUser" list="ownerUsers">
+                <econdition field-name="ownerPartyId" operator="in" from="ownerIds"/>
+                <select-field field-name="ownerPartyId"/>
+                <select-field field-name="partyId"/>
+                <select-field field-name="firstName"/>
+                <select-field field-name="lastName"/>
+                <select-field field-name="email"/>
+            </entity-find>
+            <!-- applications the tenant's users actually opened -->
+            <entity-find entity-name="growerp.PartyApplication" list="partyApps">
+                <date-filter/>
+                <select-field field-name="partyId"/>
+                <select-field field-name="applicationId"/>
+            </entity-find>
+
+            <!-- Restrict to services exposed via growerp.rest.xml, excludes internal hits -->
+            <script><![CDATA[
+                def restXml = new groovy.xml.XmlSlurper().parse(
+                    ec.resource.getLocationReference('component://growerp/service/growerp.rest.xml').openStream())
+                externalServiceNames = restXml.'**'.findAll { it.name() == 'service' }
+                    .collect { it.@name.text() } as Set
+            ]]></script>
+            <entity-find entity-name="growerp.party.OwnerPersonRestRequest" list="hitData">
+                <econdition field-name="ownerPartyId" operator="in" from="ownerIds"/>
+                <econdition field-name="artifactName" operator="in" from="externalServiceNames"/>
+                <econdition field-name="startDateTime" operator="greater-equals" from="fromDateTime"/>
+                <econdition field-name="startDateTime" operator="less-equals" from="thruDateTime"/>
+                <select-field field-name="hitId"/>
+                <select-field field-name="userId"/>
+                <select-field field-name="ownerPartyId"/>
+                <select-field field-name="artifactName"/>
+                <select-field field-name="wasError"/>
+                <select-field field-name="startDateTime"/>
+            </entity-find>
+
+            <!-- Bucket hits per tenant. The PERSONTOCOMPANY join can duplicate a hit for
+                 users related to multiple companies, so dedup on hitId. A login hit only
+                 carries the real userId once the password check passed; the anonymous
+                 pre-authentication hit is recorded with _NA_. -->
+            <script><![CDATA[
+                def loginService = 'growerp.100.GeneralServices100.login#User'
+                def seenHits = new HashSet()
+                def perOwner = [:]
+                for (hit in hitData) {
+                    if (hit.hitId == null || !seenHits.add(hit.hitId)) continue
+                    def owner = perOwner[hit.ownerPartyId]
+                    if (owner == null) {
+                        owner = [restCalls: 0, loginCount: 0, loginDays: new HashSet(),
+                                 userIds: new HashSet(), firstLogin: null, lastLogin: null]
+                        perOwner[hit.ownerPartyId] = owner
+                    }
+                    owner.restCalls = owner.restCalls + 1
+                    if (hit.artifactName != loginService || hit.wasError == 'Y'
+                            || hit.userId == null || hit.userId == '_NA_') continue
+                    owner.loginCount = owner.loginCount + 1
+                    owner.loginDays.add(ec.l10n.format(hit.startDateTime, 'yyyy-MM-dd'))
+                    owner.userIds.add(hit.userId)
+                    if (owner.firstLogin == null || hit.startDateTime.time < owner.firstLogin.time)
+                        owner.firstLogin = hit.startDateTime
+                    if (owner.lastLogin == null || hit.startDateTime.time > owner.lastLogin.time)
+                        owner.lastLogin = hit.startDateTime
+                }
+
+                def appPerOwner = [:]
+                for (setup in tenantSetups) appPerOwner[setup.ownerPartyId] = setup.applicationId
+                def namePerOwner = [:]
+                for (company in ownerCompanies) namePerOwner[company.ownerPartyId] = company.name
+                def adminPerEvent = [:]
+                for (party in eventParties) adminPerEvent[party.workEffortId] = party.partyId
+                def userPerParty = [:]
+                def ownerPerParty = [:]
+                for (user in ownerUsers) {
+                    if (!userPerParty.containsKey(user.partyId)) userPerParty[user.partyId] = user
+                    ownerPerParty[user.partyId] = user.ownerPartyId
+                }
+                def appsPerOwner = [:]
+                for (partyApp in partyApps) {
+                    def owner = ownerPerParty[partyApp.partyId]
+                    if (owner == null) continue
+                    appsPerOwner.get(owner, new LinkedHashSet()).add(partyApp.applicationId)
+                }
+
+                def rows = []
+                for (event in signupEvents) {
+                    def ownerId = event.ownerPartyId
+                    if (ownerId == null || event.actualStartDate == null) continue
+                    if (applicationId && appPerOwner[ownerId] != applicationId) continue
+                    def owner = perOwner[ownerId]
+                    // only signups that logged in successfully at least once
+                    if (owner == null || owner.loginDays.isEmpty()) continue
+                    def admin = userPerParty[adminPerEvent[event.workEffortId]]
+                    rows.add([ownerPartyId: ownerId,
+                        companyName: namePerOwner[ownerId] ?: ownerId,
+                        adminName: admin ? [admin.firstName, admin.lastName].findAll { it }.join(' ') : '',
+                        adminEmail: admin?.email ?: '',
+                        applicationId: appPerOwner[ownerId] ?: '',
+                        signupDate: ec.l10n.format(event.actualStartDate, 'yyyy-MM-dd'),
+                        firstLoginDate: ec.l10n.format(owner.firstLogin, 'yyyy-MM-dd'),
+                        lastLoginDate: ec.l10n.format(owner.lastLogin, 'yyyy-MM-dd'),
+                        daysLoggedIn: owner.loginDays.size(),
+                        loginCount: owner.loginCount,
+                        restCalls: owner.restCalls,
+                        userCount: owner.userIds.size(),
+                        appsUsed: (appsPerOwner[ownerId] ?: []) as List])
+                }
+                if (search) {
+                    def term = search.toLowerCase()
+                    rows = rows.findAll {
+                        "${it.companyName} ${it.adminName} ${it.adminEmail} ${it.applicationId}"
+                            .toLowerCase().contains(term) }
+                }
+                signupCount = rows.size()
+                def fromIndex = Math.min((start ?: 0) as int, rows.size())
+                def toIndex = Math.min(fromIndex + ((limit ?: 50) as int), rows.size())
+                signups = new ArrayList(rows.subList(fromIndex, toIndex))
+            ]]></script>
+        </actions>
+    </service>
     <service verb="get" noun="SupportDashboard">
         <description>Aggregated counters for the support app dashboard tiles:
-            applications, owners, system LLM usage and REST usage. One call feeds
-            all four dashboard chart minis.</description>
+            applications, owners, system LLM usage, REST usage and signups. One call
+            feeds all five dashboard chart minis.</description>
         <in-parameters>
             <parameter name="periodDays" type="Integer" default-value="30"/>
         </in-parameters>
@@ -1727,6 +1930,13 @@ limitations under the License.
                 <parameter name="calls" type="Integer"/>
                 <parameter name="avgPerDay" type="Integer"/>
                 <parameter name="peakDay" type="Integer"/>
+            </parameter>
+            <parameter name="signups" type="Map">
+                <parameter name="bars" type="List"/>
+                <parameter name="day" type="Integer"/>
+                <parameter name="week" type="Integer"/>
+                <parameter name="month" type="Integer"/>
+                <parameter name="quarter" type="Integer"/>
             </parameter>
         </out-parameters>
         <actions>
@@ -1855,6 +2065,46 @@ limitations under the License.
                 } catch (Throwable t) {
                     ec.logger.warn("ADK usage skipped: ${t.message}")
                 }
+            ]]></script>
+
+            <!-- ===== signups: new tenants per day/week/month/quarter =====
+                 Always a fixed 90 day window, independent of periodDays, so the tile
+                 always shows the four buckets. -->
+            <set field="quarterStart"
+                from="new java.sql.Timestamp(thruDateTime.time - 90L*24*60*60*1000)"/>
+            <entity-find entity-name="mantle.work.effort.WorkEffort" list="signupEvents">
+                <econdition field-name="workEffortTypeEnumId" value="WetEvent"/>
+                <econdition field-name="workEffortName" value="New tenant &amp; admin created"/>
+                <econdition field-name="actualStartDate" operator="greater-equals" from="quarterStart"/>
+                <econdition field-name="actualStartDate" operator="less-equals" from="thruDateTime"/>
+                <select-field field-name="ownerPartyId"/>
+                <select-field field-name="actualStartDate"/>
+            </entity-find>
+            <entity-find entity-name="growerp.general.TenantSetup" list="signupApps">
+                <select-field field-name="ownerPartyId"/>
+                <select-field field-name="applicationId"/>
+            </entity-find>
+            <script><![CDATA[
+                def appPerOwner = [:]
+                for (setup in signupApps) appPerOwner[setup.ownerPartyId] = setup.applicationId
+                def signupDayMillis = 24L*60*60*1000
+                def counts = [day: 0, week: 0, month: 0, quarter: 0]
+                def perApp = [:]
+                for (event in signupEvents) {
+                    if (event.actualStartDate == null) continue
+                    def daysAgo = (thruDateTime.time - event.actualStartDate.time) / signupDayMillis
+                    if (daysAgo < 1) counts.day = counts.day + 1
+                    if (daysAgo < 7) counts.week = counts.week + 1
+                    if (daysAgo < 30) counts.month = counts.month + 1
+                    counts.quarter = counts.quarter + 1
+                    def app = appPerOwner[event.ownerPartyId] ?: 'unknown'
+                    perApp[app] = (perApp[app] ?: 0) + 1
+                }
+                signups = [
+                    bars: perApp.collect { app, count -> [label: app, count: count] }
+                        .sort { -it.count }.take(6),
+                    day: counts.day, week: counts.week,
+                    month: counts.month, quarter: counts.quarter]
             ]]></script>
         </actions>
     </service>

@@ -341,5 +341,95 @@
   "infraNoData": "No data",
   "@infraNoData": {
     "description": "Shown when a metrics section returned nothing"
+  },
+  "signupsTitle": "New signups that logged in",
+  "@signupsTitle": {
+    "description": "Header above the signup list, followed by the period"
+  },
+  "signupsSearchHint": "Search company, admin or app",
+  "@signupsSearchHint": {
+    "description": "Search field hint on the signup list"
+  },
+  "noSignupsInPeriod": "No signups with a login in period",
+  "@noSignupsInPeriod": {
+    "description": "Shown when no signup matched"
+  },
+  "signupColSignup": "Signup",
+  "@signupColSignup": {
+    "description": "Column header: date the tenant registered"
+  },
+  "signupColCompany": "Company",
+  "@signupColCompany": {
+    "description": "Column header: tenant company name"
+  },
+  "signupColApp": "App",
+  "@signupColApp": {
+    "description": "Column header: application registered with"
+  },
+  "signupColDays": "Days",
+  "@signupColDays": {
+    "description": "Column header: number of days the tenant logged in"
+  },
+  "signupColLogins": "Logins",
+  "@signupColLogins": {
+    "description": "Column header: number of successful logins"
+  },
+  "signupColCalls": "Calls",
+  "@signupColCalls": {
+    "description": "Column header: number of REST calls"
+  },
+  "signupColLastLogin": "Last login",
+  "@signupColLastLogin": {
+    "description": "Column header: date of the last login"
+  },
+  "signupAdmin": "Admin",
+  "@signupAdmin": {
+    "description": "Detail label: name of the admin user that registered"
+  },
+  "signupAdminEmail": "Email",
+  "@signupAdminEmail": {
+    "description": "Detail label: email of the admin user"
+  },
+  "signupFirstLogin": "First login",
+  "@signupFirstLogin": {
+    "description": "Detail label: date of the first login"
+  },
+  "signupUsers": "Users",
+  "@signupUsers": {
+    "description": "Detail label: number of users that logged in"
+  },
+  "signupAppsUsed": "Apps used",
+  "@signupAppsUsed": {
+    "description": "Detail label: applications the tenant's users opened"
+  },
+  "dashNoSignups": "No signups",
+  "@dashNoSignups": {
+    "description": "Shown when the signup dashboard tile has no data"
+  },
+  "dashDay": "day",
+  "@dashDay": {
+    "description": "Signup tile counter: signups in the last day"
+  },
+  "dashWeek": "week",
+  "@dashWeek": {
+    "description": "Signup tile counter: signups in the last week"
+  },
+  "dashMonth": "month",
+  "@dashMonth": {
+    "description": "Signup tile counter: signups in the last month"
+  },
+  "dashQuarter": "quarter",
+  "@dashQuarter": {
+    "description": "Signup tile counter: signups in the last quarter"
+  },
+  "signupsCount": "{count} signups",
+  "@signupsCount": {
+    "description": "Number of signups matching the filter.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of signups."
+      }
+    }
   }
 }

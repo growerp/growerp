@@ -128,6 +128,16 @@ abstract class RestClient {
     @Query('maxUsers') int? maxUsers,
   });
 
+  @GET("rest/s1/growerp/100/SignupStatistics")
+  Future<SignupStatistics> getSignupStatistics({
+    @Query('startDateTime') String? startDateTime,
+    @Query('endDateTime') String? endDateTime,
+    @Query('applicationId') String? applicationId,
+    @Query('search') String? searchString,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
   @GET("rest/s1/growerp/100/SupportDashboard")
   Future<SupportDashboard> getSupportDashboard({
     @Query('periodDays') int? periodDays,

@@ -26,7 +26,7 @@ import 'support_dashboard_minis.dart';
 /// - 'statistic' → 2×1 (shows stats text)
 /// - 'graphic' → 2×2 (shows chart widget), 2×1 when in [compactGraphicRoutes]
 ///
-/// All four chart tiles are fed by a single get#SupportDashboard call made here,
+/// All chart tiles are fed by a single get#SupportDashboard call made here,
 /// unlike the block minis in other apps which each fetch their own endpoint.
 class SupportDashboardContent extends StatefulWidget {
   const SupportDashboardContent({super.key});
@@ -73,6 +73,9 @@ class _SupportDashboardContentState extends State<SupportDashboardContent> {
       case '/restStatistics':
         final stats = dashboard!.restUsage;
         return stats == null ? null : RestUsageDashboardChartMini(stats: stats);
+      case '/signups':
+        final stats = dashboard!.signups;
+        return stats == null ? null : SignupsDashboardChartMini(stats: stats);
       default:
         return null;
     }
@@ -121,6 +124,7 @@ class _SupportDashboardContentState extends State<SupportDashboardContent> {
                   '/owners',
                   '/llm-usage',
                   '/restStatistics',
+                  '/signups',
                 },
                 chartBuilder: _chart,
               ),

@@ -553,6 +553,9 @@ limitations under the License.
         title="Applications" route="/applications" iconName="apps" widgetName="ApplicationList" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="SUPPORT_OWNERS" menuConfigurationId="SUPPORT_DEFAULT"
         title="Owners" route="/owners" iconName="business" widgetName="CompanyListMainOnly" sequenceNum="25"/>
+    <growerp.menu.MenuItem menuItemId="SUPPORT_SIGNUPS" menuConfigurationId="SUPPORT_DEFAULT"
+        title="Signups" route="/signups" iconName="person_add" widgetName="SignupStatisticsView"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="26"/>
     <!-- the support app signs in as a system support user (GROWERP_M_SYSTEM); listing only
          GROWERP_M_ADMIN here hides the item from the left menu, which filters on the user's
          group, while the dashboard tiles do not -->
