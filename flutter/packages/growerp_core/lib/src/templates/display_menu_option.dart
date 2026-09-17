@@ -124,6 +124,7 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
   String? _currentMenuConfigId;
   CoreLocalizations? _localizations;
   bool _isInitialized = false;
+  bool? _lastIsPhone;
   MenuConfiguration? _lastMenuConfig;
   MenuConfiguration? _injectSrcConfig; // rawConfig the cache was built from
   bool? _injectSrcIsAdmin; // admin flag the cache was built with
@@ -187,7 +188,7 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
 
     for (final option in menuConfiguration.menuItems) {
       // Only add if user has access AND it's active
-      if (_hasAccess(option) && option.isActive) {
+      if (_hasAccess(option) && option.isActive && _showOnThisScreen(option)) {
         menuList.add(option);
 
         // Check if this is the item we should highlight
@@ -245,7 +246,12 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
     // Get child menu items (tabs) from the option's children
     tabItems =
         (menuOption.children ?? [])
-            .where((item) => item.isActive && _hasAccessToItem(item))
+            .where(
+              (item) =>
+                  item.isActive &&
+                  _hasAccessToItem(item) &&
+                  _showOnThisScreen(item),
+            )
             .toList()
           ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
 
@@ -288,6 +294,12 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
   /// backend already filters, this is defence in depth for a stale cached config.
   bool _hasAccessToItem(MenuItem item) => _hasAccess(item);
 
+  /// Setup guides are laid out for a wide screen (a fixed 800px column with the
+  /// opened step next to the navigation), so they are left out on a phone.
+  static const String _guideSuffix = 'GuideScreen';
+  bool _showOnThisScreen(MenuItem item) =>
+      !isPhone || !(item.widgetName ?? '').endsWith(_guideSuffix);
+
   @override
   void dispose() {
     _controller?.dispose();
@@ -298,6 +310,20 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
   Widget build(BuildContext context) {
     currentRoute = GoRouterState.of(context).uri.toString();
     isPhone = isAPhone(context);
+
+    // The menu itself depends on the screen size (guides are phone-hidden), so
+    // a resize across the breakpoint has to rebuild the filtered lists.
+    if (_isInitialized && _lastIsPhone != isPhone) {
+      final capturedConfig = _lastMenuConfig ?? widget.menuConfiguration;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _initialize(context, capturedConfig);
+          });
+        }
+      });
+    }
+    _lastIsPhone = isPhone;
 
     // Check if MenuConfigBloc is available in the widget tree
     final menuConfigBloc = context.read<MenuConfigBloc?>();
