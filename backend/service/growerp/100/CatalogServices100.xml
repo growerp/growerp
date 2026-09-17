@@ -161,7 +161,10 @@ limitations under the License.
                     <set field="categories" from="[]" />
                 </if>
                 <if condition="!lastItem || lastItem.productId != product.productId">
-                    <if condition="applicationId == 'AppHotel'">
+                    <!-- hotel rooms and rental equipment: every asset is one rentable
+                         unit, so they are counted, not totalled by quantity on hand -->
+                    <if
+                        condition="applicationId == 'AppHotel' || applicationId == 'AppRental'">
                         <entity-find-count entity-name="mantle.product.asset.Asset"
                             count-field="assetCount">
                             <econdition field-name="productId" from="product.productId" />

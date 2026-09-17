@@ -45,10 +45,7 @@ Future main(List<String> args) async {
   } catch (e, s) {
     debugPrint('===freelance startup failed: $e\n$s');
     runApp(
-      StartupErrorScreen(
-        message: e.toString(),
-        onRetry: () => main(args),
-      ),
+      StartupErrorScreen(message: e.toString(), onRetry: () => main(args)),
     );
   }
 }
@@ -122,6 +119,7 @@ class _FreelanceAppState extends State<FreelanceApp> {
   final GlobalKey<NavigatorState> _rootNavigatorKey =
       GlobalKey<NavigatorState>();
   GoRouter? _router;
+  GoRouter? _splashRouter;
   MenuConfiguration? _routerMenuConfiguration;
 
   @override
@@ -181,7 +179,7 @@ class _FreelanceAppState extends State<FreelanceApp> {
             // Loading or error, show splash screen using shared component
             // The wildcard route ensures deep-link paths are accepted and
             // preserved while the menu config loads.
-            router = GoRouter(
+            router = _splashRouter ??= GoRouter(
               routes: [
                 GoRoute(
                   path: '/',

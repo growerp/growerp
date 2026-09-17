@@ -19,7 +19,6 @@ import 'package:flutter/foundation.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:go_router/go_router.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:universal_io/io.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
@@ -103,64 +102,15 @@ class LoginDialogState extends State<LoginDialog> {
               case AuthStatus.authenticated:
                 if (_postLoginHandled) return;
                 _postLoginHandled = true;
+                // The welcome/assessment sequence of a new tenant runs on the
+                // dashboard (PostLoginFlow), not here: this dialog is on the
+                // navigator of the splash router, which is replaced as soon as
+                // the menu configuration of the new user arrives.
                 final navigator = Navigator.of(context);
-                final auth = state.authenticate!;
-                final isGrowERP =
-                    auth.company?.name?.toLowerCase() == 'growerp';
-                if (context.mounted &&
-                    !isGrowERP &&
-                    (auth.user?.appsUsed.isEmpty ?? false)) {
-                  // Apple/Mac App Store reject trial messaging outside IAP;
-                  // suppress the trial welcome on those platforms in test.
-                  final skipTrialWelcome =
-                      (Platform.isIOS || Platform.isMacOS) &&
-                      GlobalConfiguration().get("test") == true;
-                  // A user who registered into an existing company does not
-                  // own the trial, only an admin starts one.
-                  if (!skipTrialWelcome &&
-                      auth.user?.userGroup == UserGroup.admin) {
-                    await showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (ctx) =>
-                          TrialWelcomeDialog(authenticate: auth),
-                    );
-                  }
-                  // Replace the old onboarding assistant with the
-                  // "Do you need an ERP system?" assessment.
-                  if (context.mounted) {
-                    await showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (ctx) =>
-                          ErpAssessmentDialog(authenticate: auth),
-                    );
-                  }
-                  // Mark this app as used so the welcome + assessment only
-                  // appear on the first login. Registering the app
-                  // classification makes user.appsUsed non-empty next time.
-                  if (context.mounted) {
-                    try {
-                      final applicationId =
-                          context.read<AuthBloc>().applicationId;
-                      await context
-                          .read<RestClient>()
-                          .registerAppUsed(applicationId: applicationId);
-                    } catch (_) {
-                      // Non-fatal: if registration fails the dialog may show
-                      // again next login, but login itself must not break.
-                    }
-                  }
-                }
-                // through the navigator captured before the awaits: resolving
-                // it now would pop whatever route ended up on top instead of
-                // this dialog
-                if (context.mounted) {
-                  if (navigator.canPop()) {
-                    navigator.pop();
-                  } else {
-                    context.go('/');
-                  }
+                if (navigator.canPop()) {
+                  navigator.pop();
+                } else {
+                  context.go('/');
                 }
               default:
                 HelperFunctions.showMessage(

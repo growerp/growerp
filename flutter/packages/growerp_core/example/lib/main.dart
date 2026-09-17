@@ -62,6 +62,12 @@ class CoreApp extends StatefulWidget {
 
 class _CoreAppState extends State<CoreApp> {
   late MenuConfigBloc _menuConfigBloc;
+  // Routers are kept per menu configuration: building a new GoRouter on every
+  // MenuConfigBloc emission hands MaterialApp.router a new delegate, which
+  // rebuilds the navigator and silently drops the dialogs open on it.
+  GoRouter? _splashRouter;
+  GoRouter? _dynamicRouter;
+  String? _dynamicRouterKey;
 
   @override
   void initState() {
@@ -119,18 +125,25 @@ class _CoreAppState extends State<CoreApp> {
         builder: (context, state) {
           GoRouter router;
 
+          final menuConfiguration = state.menuConfiguration;
           if (state.status == MenuConfigStatus.success &&
-              state.menuConfiguration != null) {
-            // Capture bloc reference here to avoid looking it up
-            // from a deactivated widget context during router rebuilds
-            final menuConfigBloc = context.read<MenuConfigBloc>();
-            router = createDynamicCoreRouter(
-              [state.menuConfiguration!],
-              menuConfigBloc: menuConfigBloc,
-            );
+              menuConfiguration != null) {
+            final routerKey =
+                '${menuConfiguration.menuConfigurationId}_'
+                '${menuConfiguration.menuItems.length}';
+            if (_dynamicRouter == null || _dynamicRouterKey != routerKey) {
+              _dynamicRouterKey = routerKey;
+              // Capture bloc reference here to avoid looking it up
+              // from a deactivated widget context during router rebuilds
+              final menuConfigBloc = context.read<MenuConfigBloc>();
+              _dynamicRouter = createDynamicCoreRouter([
+                menuConfiguration,
+              ], menuConfigBloc: menuConfigBloc);
+            }
+            router = _dynamicRouter!;
           } else {
             // Loading or error, show splash screen using shared component
-            router = GoRouter(
+            router = _splashRouter ??= GoRouter(
               routes: [
                 GoRoute(
                   path: '/',

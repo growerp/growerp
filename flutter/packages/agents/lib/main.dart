@@ -86,6 +86,12 @@ class AgentsApp extends StatefulWidget {
 
 class _AgentsAppState extends State<AgentsApp> {
   late MenuConfigBloc _menuConfigBloc;
+  // Routers are kept per menu configuration: building a new GoRouter on every
+  // MenuConfigBloc emission hands MaterialApp.router a new delegate, which
+  // rebuilds the navigator and silently drops the dialogs open on it.
+  GoRouter? _splashRouter;
+  GoRouter? _dynamicRouter;
+  String? _dynamicRouterKey;
 
   @override
   void initState() {
@@ -134,15 +140,22 @@ class _AgentsAppState extends State<AgentsApp> {
         },
         builder: (context, state) {
           GoRouter router;
+          final menuConfiguration = state.menuConfiguration;
           if (state.status == MenuConfigStatus.success &&
-              state.menuConfiguration != null) {
-            final menuConfigBloc = context.read<MenuConfigBloc>();
-            router = createDynamicAgentsRouter(
-              [state.menuConfiguration!],
-              menuConfigBloc: menuConfigBloc,
-            );
+              menuConfiguration != null) {
+            final routerKey =
+                '${menuConfiguration.menuConfigurationId}_'
+                '${menuConfiguration.menuItems.length}';
+            if (_dynamicRouter == null || _dynamicRouterKey != routerKey) {
+              _dynamicRouterKey = routerKey;
+              final menuConfigBloc = context.read<MenuConfigBloc>();
+              _dynamicRouter = createDynamicAgentsRouter([
+                menuConfiguration,
+              ], menuConfigBloc: menuConfigBloc);
+            }
+            router = _dynamicRouter!;
           } else {
-            router = GoRouter(
+            router = _splashRouter ??= GoRouter(
               routes: [
                 GoRoute(
                   path: '/',

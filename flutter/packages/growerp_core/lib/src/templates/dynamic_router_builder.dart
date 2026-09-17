@@ -173,7 +173,11 @@ GoRouter createDynamicAppRouter(
         builder: (context, state) {
           final authState = context.watch<AuthBloc>().state;
           if (authState.status == AuthStatus.authenticated) {
-            return DisplayMenuItem(
+            // PostLoginFlow, not the login dialog, owns the welcome sequence of
+            // a new tenant: it needs a navigator that outlives the switch from
+            // the splash router to this one.
+            return PostLoginFlow(
+                child: DisplayMenuItem(
               menuConfiguration: mainConfig,
               menuIndex: 0,
               actions: [
@@ -195,7 +199,7 @@ GoRouter createDynamicAppRouter(
                   ? config.dashboardFabBuilder!(mainConfig)
                   : null,
               child: getDashboard(),
-            );
+            ));
           } else {
             return HomeForm(
               menuConfiguration: mainConfig,

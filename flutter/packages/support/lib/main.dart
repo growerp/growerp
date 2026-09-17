@@ -96,6 +96,12 @@ class SupportApp extends StatefulWidget {
 
 class _SupportAppState extends State<SupportApp> {
   late MenuConfigBloc _menuConfigBloc;
+  // Routers are kept per menu configuration: building a new GoRouter on every
+  // MenuConfigBloc emission hands MaterialApp.router a new delegate, which
+  // rebuilds the navigator and silently drops the dialogs open on it.
+  GoRouter? _splashRouter;
+  GoRouter? _dynamicRouter;
+  String? _dynamicRouterKey;
   final DeepLinkService _deepLinkService = DeepLinkService();
 
   @override
@@ -122,23 +128,31 @@ class _SupportAppState extends State<SupportApp> {
         builder: (context, state) {
           GoRouter router;
 
+          final menuConfiguration = state.menuConfiguration;
           if (state.status == MenuConfigStatus.success &&
-              state.menuConfiguration != null) {
-            // Use simplified config - no accounting submenu
-            router = createDynamicAppRouter(
-              [state.menuConfiguration!],
-              config: DynamicRouterConfig(
-                dashboardBuilder: () => const SupportDashboardContent(),
-                widgetLoader: WidgetRegistry.getWidget,
-                appTitle: 'GrowERP Support',
-                deepLinkService: _deepLinkService,
-              ),
-            );
+              menuConfiguration != null) {
+            final routerKey =
+                '${menuConfiguration.menuConfigurationId}_'
+                '${menuConfiguration.menuItems.length}';
+            if (_dynamicRouter == null || _dynamicRouterKey != routerKey) {
+              _dynamicRouterKey = routerKey;
+              // Use simplified config - no accounting submenu
+              _dynamicRouter = createDynamicAppRouter(
+                [menuConfiguration],
+                config: DynamicRouterConfig(
+                  dashboardBuilder: () => const SupportDashboardContent(),
+                  widgetLoader: WidgetRegistry.getWidget,
+                  appTitle: 'GrowERP Support',
+                  deepLinkService: _deepLinkService,
+                ),
+              );
+            }
+            router = _dynamicRouter!;
           } else {
             // Loading or error, show splash screen using shared component
             // The wildcard route ensures deep-link paths are accepted and
             // preserved while the menu config loads.
-            router = GoRouter(
+            router = _splashRouter ??= GoRouter(
               routes: [
                 GoRoute(
                   path: '/',

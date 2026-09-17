@@ -546,7 +546,8 @@ limitations under the License.
                     acquireCost: asset.acquireCost ? new BigDecimal(asset.acquireCost): BigDecimal.ZERO,
                     facilityId: stores[0].inventoryFacilityId,
                     locationSeqId: asset.location?.locationId,
-                    assetTypeEnumId: applicationId == 'AppHotel' ? 'AstTpFixed' : 'AstTpInventory']"
+                    assetTypeEnumId: applicationId == 'AppHotel'
+                        || applicationId == 'AppRental' ? 'AstTpFixed' : 'AstTpInventory']"
                 out-map="context" />
             <service-call name="create#mantle.product.asset.AssetDetail"
                 in-map="[assetId: assetId, quantityOnHandDiff: asset.quantityOnHand,

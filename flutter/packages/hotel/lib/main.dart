@@ -106,6 +106,12 @@ class HotelApp extends StatefulWidget {
 
 class _HotelAppState extends State<HotelApp> {
   late MenuConfigBloc _menuConfigBloc;
+  // Routers are kept per menu configuration: building a new GoRouter on every
+  // MenuConfigBloc emission hands MaterialApp.router a new delegate, which
+  // rebuilds the navigator and silently drops the dialogs open on it.
+  GoRouter? _splashRouter;
+  GoRouter? _dynamicRouter;
+  String? _dynamicRouterKey;
   final DeepLinkService _deepLinkService = DeepLinkService();
 
   @override
@@ -133,25 +139,32 @@ class _HotelAppState extends State<HotelApp> {
         builder: (context, state) {
           GoRouter router;
 
+          final menuConfiguration = state.menuConfiguration;
           if (state.status == MenuConfigStatus.success &&
-              state.menuConfiguration != null) {
-            // Configuration loaded, build dynamic router using shared component
-            router = createDynamicAppRouter(
-              [state.menuConfiguration!],
-              config: DynamicRouterConfig(
-                mainConfigId: 'HOTEL_DEFAULT',
-                dashboardBuilder: () => const GanttForm(),
-                widgetLoader: WidgetRegistry.getWidget,
-                appTitle: 'GrowERP Hotel',
-                deepLinkService: _deepLinkService,
-              ),
-              rootNavigatorKey: GlobalKey<NavigatorState>(),
-            );
+              menuConfiguration != null) {
+            final routerKey =
+                '${menuConfiguration.menuConfigurationId}_'
+                '${menuConfiguration.menuItems.length}';
+            if (_dynamicRouter == null || _dynamicRouterKey != routerKey) {
+              _dynamicRouterKey = routerKey;
+              // Configuration loaded, build dynamic router using shared component
+              _dynamicRouter = createDynamicAppRouter(
+                [menuConfiguration],
+                config: DynamicRouterConfig(
+                  mainConfigId: 'HOTEL_DEFAULT',
+                  dashboardBuilder: () => const GanttForm(),
+                  widgetLoader: WidgetRegistry.getWidget,
+                  appTitle: 'GrowERP Hotel',
+                  deepLinkService: _deepLinkService,
+                ),
+              );
+            }
+            router = _dynamicRouter!;
           } else {
             // Loading or error, show splash screen using shared component
             // The wildcard route ensures deep-link paths are accepted and
             // preserved while the menu config loads.
-            router = GoRouter(
+            router = _splashRouter ??= GoRouter(
               routes: [
                 GoRoute(
                   path: '/',

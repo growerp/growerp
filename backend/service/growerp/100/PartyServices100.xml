@@ -1878,6 +1878,14 @@ limitations under the License.
             </parameter>
             <parameter name="password"
                 default="org.moqui.util.StringUtilities.getRandomString(6) + '9!'" />
+            <parameter name="login" type="Boolean" default-value="false">
+                <description>Log the session in as the user just created. Only the anonymous
+                    registration services need this: the rest of their work runs as that new
+                    user. Everywhere else it must stay false - mantle create#Account defaults
+                    loginAfterCreate to true, which silently replaced the logged in user with,
+                    for example, a demo user being created, and left its failed login as an
+                    error message on an otherwise successful service.</description>
+            </parameter>
             <parameter name="ownerPartyId" /><!-- only required when no user logged in after
                                                 creating owner company -->
             <parameter name="applicationId" />
@@ -1932,7 +1940,6 @@ limitations under the License.
                 <parameter name="timeZoneOffset" />
             </parameter>
             <parameter name="password" />
-            <parameter name="login" type="Boolean" default-value="false" />
         </out-parameters>
         <actions>
             <service-call
@@ -3310,6 +3317,7 @@ limitations under the License.
                             ],
                             password: newPassword,
                             trustGroup: true,
+                            login: true,
                             ownerPartyId: ownerPartyId,
                             applicationId: applicationId
                         ]"
@@ -3448,14 +3456,11 @@ limitations under the License.
                     defaultCurrencyUomId: aPref.baseCurrencyUomId,
                     wikiSpaceId: wikiSpaceId,
                     ]" />
-            <if condition="applicationId == 'AppAdmin'">
-                <set field="inMap"
-                    from="inMap + [
-                    requireInventory: 'N',
-                    reservationOrderEnumId:'AsResOrdNoRes',
-                    ]" />
-            </if>
-            <if condition="applicationId == 'AppHotel'">
+            <!-- apps that sell the use of an asset(hotel rooms, rental equipment) or
+                 do not ship stock at all: no inventory reservation on the store -->
+            <if
+                condition="applicationId == 'AppAdmin' || applicationId == 'AppHotel'
+                    || applicationId == 'AppRental'">
                 <set field="inMap"
                     from="inMap + [
                     requireInventory: 'N',
@@ -3825,6 +3830,22 @@ limitations under the License.
         </in-parameters>
         <actions>
             <script><![CDATA[
+                // The demo data is created through the normal growerp services, and most of
+                // them take ownerPartyId from the logged in user. This runs on a worker
+                // thread built while login#User was still authenticating, so it carries no
+                // user: log in as the tenant admin it is loading the data for. Until now the
+                // load leaned on mantle create#Account logging the session in as the first
+                // demo user it created, which made the rest of the data that user's and
+                // failed as soon as that login did.
+                def adminAccounts = ec.entity.find("moqui.security.UserAccount")
+                    .condition("partyId", userPartyId).disableAuthz().list()
+                if (adminAccounts) {
+                    ec.user.internalLoginUser((String) adminAccounts[0].username, false)
+                } else {
+                    ec.logger.warn("No UserAccount for partyId ${userPartyId}, loading the " +
+                        "demo data of ${ownerPartyId} without a user")
+                }
+
                 boolean loaded = true
                 try {
                     ec.service.sync().name('growerp.100.PartyServices100.load#DemoData')

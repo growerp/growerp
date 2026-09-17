@@ -94,6 +94,12 @@ class RentalApp extends StatefulWidget {
 
 class _RentalAppState extends State<RentalApp> {
   late MenuConfigBloc _menuConfigBloc;
+  // Routers are kept per menu configuration: building a new GoRouter on every
+  // MenuConfigBloc emission hands MaterialApp.router a new delegate, which
+  // rebuilds the navigator and silently drops the dialogs open on it.
+  GoRouter? _splashRouter;
+  GoRouter? _dynamicRouter;
+  String? _dynamicRouterKey;
 
   @override
   void initState() {
@@ -117,22 +123,29 @@ class _RentalAppState extends State<RentalApp> {
         builder: (context, state) {
           GoRouter router;
 
+          final menuConfiguration = state.menuConfiguration;
           if (state.status == MenuConfigStatus.success &&
-              state.menuConfiguration != null) {
-            router = createDynamicAppRouter(
-              [state.menuConfiguration!],
-              config: DynamicRouterConfig(
-                mainConfigId: 'RENTAL_DEFAULT',
-                dashboardBuilder: () => const GanttForm(),
-                widgetLoader: WidgetRegistry.getWidget,
-                appTitle: 'GrowERP Rental',
-                // no dashboardFabBuilder: GanttForm already shows its own
-                // AI-assistant FAB (same setup as the hotel app)
-              ),
-              rootNavigatorKey: GlobalKey<NavigatorState>(),
-            );
+              menuConfiguration != null) {
+            final routerKey =
+                '${menuConfiguration.menuConfigurationId}_'
+                '${menuConfiguration.menuItems.length}';
+            if (_dynamicRouter == null || _dynamicRouterKey != routerKey) {
+              _dynamicRouterKey = routerKey;
+              _dynamicRouter = createDynamicAppRouter(
+                [menuConfiguration],
+                config: DynamicRouterConfig(
+                  mainConfigId: 'RENTAL_DEFAULT',
+                  dashboardBuilder: () => const GanttForm(),
+                  widgetLoader: WidgetRegistry.getWidget,
+                  appTitle: 'GrowERP Rental',
+                  // no dashboardFabBuilder: GanttForm already shows its own
+                  // AI-assistant FAB (same setup as the hotel app)
+                ),
+              );
+            }
+            router = _dynamicRouter!;
           } else {
-            router = GoRouter(
+            router = _splashRouter ??= GoRouter(
               routes: [
                 GoRoute(
                   path: '/',
