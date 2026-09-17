@@ -18,13 +18,21 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 class ContentCalendarTest {
+  /// The calendar has no menu entry of its own: it is the calendar icon in the
+  /// content plan search bar.
   static Future<void> selectContentCalendar(WidgetTester tester) async {
     await CommonTest.selectOption(
       tester,
-      '/contentCalendar',
-      'contentCalendar',
+      '/contentPlans',
+      'ContentPlanList',
       null,
     );
+    await CommonTest.tapByKey(
+      tester,
+      'contentCalendarToggle',
+      seconds: CommonTest.waitTime,
+    );
+    expect(find.byKey(const Key('contentCalendar')), findsOneWidget);
   }
 
   /// Puts the first saved post on [date] through the social post detail

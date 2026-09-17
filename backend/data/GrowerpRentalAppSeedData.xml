@@ -94,8 +94,6 @@ limitations under the License.
         title="Guide" iconName="checklist" widgetName="MarketingSetupGuideScreen" sequenceNum="5"/>
     <growerp.menu.MenuItem menuItemId="RENTAL_MKTG_CONTENT" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_MARKETING"
         title="Content Plans" iconName="list" widgetName="ContentPlanList" sequenceNum="10"/>
-    <growerp.menu.MenuItem menuItemId="RENTAL_MKTG_CALENDAR" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_MARKETING"
-        title="Calendar" iconName="calendar_month" widgetName="ContentCalendar" sequenceNum="15"/>
     <!-- Content hub: author once, adapt per platform. Social Posts are managed
          as platform variants inside a Content piece. -->
     <growerp.menu.MenuItem menuItemId="RENTAL_MKTG_SOCIAL" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_MARKETING"

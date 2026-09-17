@@ -60,14 +60,6 @@ const marketingMenuConfig = MenuConfiguration(
       widgetName: 'ContentPlanList',
     ),
     MenuItem(
-      itemKey: 'MKT_CALENDAR',
-      title: 'Calendar',
-      route: '/contentCalendar',
-      iconName: 'calendar_month',
-      sequenceNum: 62,
-      widgetName: 'ContentCalendar',
-    ),
-    MenuItem(
       itemKey: 'MKT_CONTENT_HUB',
       title: 'Content',
       route: '/masterContent',
@@ -116,7 +108,6 @@ GoRouter createMarketingExampleRouter() {
         const MarketingSetupGuideScreen(staticMenuConfig: marketingMenuConfig),
       '/personas' => const PersonaList(),
       '/contentPlans' => const ContentPlanList(),
-      '/contentCalendar' => const ContentCalendar(),
       '/masterContent' => const MasterContentList(),
       '/socialPosts' => const SocialPostList(),
       '/engagements' => const SocialEngagementList(),

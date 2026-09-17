@@ -24,6 +24,7 @@ import '../bloc/master_content_bloc.dart';
 import '../bloc/persona_bloc.dart';
 import '../bloc/persona_event.dart';
 import '../bloc/persona_state.dart';
+import 'content_calendar.dart';
 import 'content_plan_detail_screen.dart';
 import 'content_plan_list_styled_data.dart';
 import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
@@ -48,6 +49,7 @@ class ContentPlanListState extends State<ContentPlanList> {
   double currentScroll = 0;
   String searchString = '';
   bool _isLoading = true;
+  bool _showCalendar = false;
 
   @override
   void initState() {
@@ -151,86 +153,105 @@ class ContentPlanListState extends State<ContentPlanList> {
               searchHint: localizations.searchHintContentPlans,
               searchController: _searchController,
               focusNode: _searchFocusNode,
+              // the search filters plans, it has no meaning on the calendar
+              showSearch: !_showCalendar,
               onSearchChanged: (value) {
                 searchString = value;
                 _contentPlanBloc.add(
                   ContentPlanSearchRequested(searchString: value),
                 );
               },
+              actions: [
+                IconButton(
+                  key: const Key('contentCalendarToggle'),
+                  icon: Icon(_showCalendar ? Icons.list : Icons.calendar_month),
+                  tooltip: _showCalendar
+                      ? localizations.contentPlans
+                      : localizations.contentCalendar,
+                  onPressed: () =>
+                      setState(() => _showCalendar = !_showCalendar),
+                ),
+              ],
             ),
-            // Main content area with StyledDataTable
-            Expanded(
-              child: Stack(
-                children: [
-                  tableView(),
-                  Positioned(
-                    right: right,
-                    bottom: bottom,
-                    child: GestureDetector(
-                      onPanUpdate: (details) {
-                        setState(() {
-                          right = right! - details.delta.dx;
-                          bottom -= details.delta.dy;
-                        });
-                      },
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          FloatingActionButton(
-                            key: const Key('addNewContentPlan'),
-                            heroTag: 'contentPlanBtn1',
-                            onPressed: () async {
-                              await showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return MultiBlocProvider(
-                                    providers: [
-                                      BlocProvider.value(
-                                          value: _contentPlanBloc),
-                                      BlocProvider.value(
+            // Main content area: the calendar replaces the table when asked
+            // for; it brings its own scaffold and add button.
+            if (_showCalendar)
+              const Expanded(child: ContentCalendar())
+            else
+              Expanded(
+                child: Stack(
+                  children: [
+                    tableView(),
+                    Positioned(
+                      right: right,
+                      bottom: bottom,
+                      child: GestureDetector(
+                        onPanUpdate: (details) {
+                          setState(() {
+                            right = right! - details.delta.dx;
+                            bottom -= details.delta.dy;
+                          });
+                        },
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            FloatingActionButton(
+                              key: const Key('addNewContentPlan'),
+                              heroTag: 'contentPlanBtn1',
+                              onPressed: () async {
+                                await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return MultiBlocProvider(
+                                      providers: [
+                                        BlocProvider.value(
+                                          value: _contentPlanBloc,
+                                        ),
+                                        BlocProvider.value(
                                           value: context
-                                              .read<MasterContentBloc>()),
-                                    ],
-                                    child: const ContentPlanDetailScreen(
-                                      contentPlan: null,
-                                    ),
-                                  );
-                                },
-                              );
-                              if (mounted) _searchFocusNode.requestFocus();
-                            },
-                            tooltip: 'Add new content plan',
-                            child: const Icon(Icons.add),
-                          ),
-                          const SizedBox(height: 10),
-                          FloatingActionButton(
-                            key: const Key('generateAIContentPlan'),
-                            heroTag: 'contentPlanBtn2',
-                            onPressed: () async {
-                              if (!mounted) return;
-                              await showDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext dialogContext) {
-                                  return BlocProvider.value(
-                                    value: _contentPlanBloc,
-                                    child: const GenerateContentPlanDialog(),
-                                  );
-                                },
-                              );
-                              if (mounted) _searchFocusNode.requestFocus();
-                            },
-                            tooltip: 'Generate Content Plan with AI',
-                            child: const Icon(Icons.auto_awesome),
-                          ),
-                        ],
+                                              .read<MasterContentBloc>(),
+                                        ),
+                                      ],
+                                      child: const ContentPlanDetailScreen(
+                                        contentPlan: null,
+                                      ),
+                                    );
+                                  },
+                                );
+                                if (mounted) _searchFocusNode.requestFocus();
+                              },
+                              tooltip: 'Add new content plan',
+                              child: const Icon(Icons.add),
+                            ),
+                            const SizedBox(height: 10),
+                            FloatingActionButton(
+                              key: const Key('generateAIContentPlan'),
+                              heroTag: 'contentPlanBtn2',
+                              onPressed: () async {
+                                if (!mounted) return;
+                                await showDialog(
+                                  barrierDismissible: true,
+                                  context: context,
+                                  builder: (BuildContext dialogContext) {
+                                    return BlocProvider.value(
+                                      value: _contentPlanBloc,
+                                      child: const GenerateContentPlanDialog(),
+                                    );
+                                  },
+                                );
+                                if (mounted) _searchFocusNode.requestFocus();
+                              },
+                              tooltip: 'Generate Content Plan with AI',
+                              child: const Icon(Icons.auto_awesome),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
           ],
         );
       },

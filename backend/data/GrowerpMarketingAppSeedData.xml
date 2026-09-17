@@ -69,8 +69,6 @@ limitations under the License.
         title="Guide" iconName="checklist" widgetName="MarketingSetupGuideScreen" sequenceNum="5"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_MKTG_CONTENT" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_MARKETING"
         title="Content Plans" iconName="list" widgetName="ContentPlanList" sequenceNum="10"/>
-    <growerp.menu.MenuItem menuItemId="MKTAPP_MKTG_CALENDAR" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_MARKETING"
-        title="Calendar" iconName="calendar_month" widgetName="ContentCalendar" sequenceNum="15"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_MKTG_SOCIAL" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_MARKETING"
         title="Content" iconName="auto_awesome" widgetName="MasterContentList" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_MKTG_PERSONA" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_MARKETING"

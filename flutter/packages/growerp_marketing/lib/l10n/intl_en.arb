@@ -302,6 +302,10 @@
   "@dashStageClosedLost": {
     "description": "Dashboard tile funnel stage label"
   },
+  "contentPlans": "Content Plans",
+  "@contentPlans": {
+    "description": "Title of the content plan list, used on the toggle back from the calendar"
+  },
   "contentCalendar": "Content Calendar",
   "@contentCalendar": {
     "description": "Title of the screen showing scheduled posts on a calendar"

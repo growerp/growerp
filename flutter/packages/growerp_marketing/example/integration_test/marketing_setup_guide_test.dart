@@ -46,6 +46,13 @@ void main() {
     );
     await CommonTest.createCompanyAndAdmin(tester);
 
+    // The guide is laid out for a wide screen, so its menu entry is left out
+    // on a phone: there is nothing to test in the mobile layout.
+    if (CommonTest.isPhone()) {
+      await CommonTest.logout(tester);
+      return;
+    }
+
     await CommonTest.selectOption(tester, '/guide', 'MarketingSetupGuide');
 
     // The guide opens with a summary of the whole content flow
