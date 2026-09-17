@@ -94,10 +94,11 @@ abstract class SupportSignupsStats with _$SupportSignupsStats {
   SupportSignupsStats._();
   factory SupportSignupsStats({
     @Default([]) List<SupportBarItem> bars,
-    @Default(0) int day,
-    @Default(0) int week,
-    @Default(0) int month,
-    @Default(0) int quarter,
+    // signups per day, averaged over the last day, week, month and quarter
+    @Default(0) double day,
+    @Default(0) double week,
+    @Default(0) double month,
+    @Default(0) double quarter,
   }) = _SupportSignupsStats;
 
   factory SupportSignupsStats.fromJson(Map<String, dynamic> json) =>

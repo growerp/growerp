@@ -33,8 +33,9 @@ class SupportChartMini extends StatelessWidget {
   final String name;
   final List<SupportBarItem> bars;
 
-  /// Label/value pairs, shown left to right under the bars.
-  final List<MapEntry<String, int>> counters;
+  /// Label/value pairs, shown left to right under the bars. A fractional
+  /// value, like an average, keeps one decimal; a whole one shows no decimals.
+  final List<MapEntry<String, num>> counters;
   final String emptyMessage;
 
   Widget _bars(BuildContext context) {
@@ -115,12 +116,17 @@ class SupportChartMini extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget counter(String label, int value) => Padding(
+    Widget counter(String label, num value) => Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('$value', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            value == value.roundToDouble()
+                ? '${value.round()}'
+                : value.toStringAsFixed(1),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           Text(label, style: Theme.of(context).textTheme.bodySmall),
         ],
       ),

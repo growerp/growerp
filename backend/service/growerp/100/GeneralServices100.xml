@@ -1931,12 +1931,14 @@ limitations under the License.
                 <parameter name="avgPerDay" type="Integer"/>
                 <parameter name="peakDay" type="Integer"/>
             </parameter>
+            <!-- the four counters are signups per day, averaged over the last
+                 day, week, month and quarter -->
             <parameter name="signups" type="Map">
                 <parameter name="bars" type="List"/>
-                <parameter name="day" type="Integer"/>
-                <parameter name="week" type="Integer"/>
-                <parameter name="month" type="Integer"/>
-                <parameter name="quarter" type="Integer"/>
+                <parameter name="day" type="BigDecimal"/>
+                <parameter name="week" type="BigDecimal"/>
+                <parameter name="month" type="BigDecimal"/>
+                <parameter name="quarter" type="BigDecimal"/>
             </parameter>
         </out-parameters>
         <actions>
@@ -2067,7 +2069,8 @@ limitations under the License.
                 }
             ]]></script>
 
-            <!-- ===== signups: new tenants per day/week/month/quarter =====
+            <!-- ===== signups: new tenants per day, averaged over the last day,
+                 week, month and quarter =====
                  Always a fixed 90 day window, independent of periodDays, so the tile
                  always shows the four buckets. -->
             <set field="quarterStart"
@@ -2100,11 +2103,15 @@ limitations under the License.
                     def app = appPerOwner[event.ownerPartyId] ?: 'unknown'
                     perApp[app] = (perApp[app] ?: 0) + 1
                 }
+                def perDayAverage = { int total, int days ->
+                    (total / days).setScale(1, java.math.RoundingMode.HALF_UP) }
                 signups = [
                     bars: perApp.collect { app, count -> [label: app, count: count] }
                         .sort { -it.count }.take(6),
-                    day: counts.day, week: counts.week,
-                    month: counts.month, quarter: counts.quarter]
+                    day: perDayAverage(counts.day, 1),
+                    week: perDayAverage(counts.week, 7),
+                    month: perDayAverage(counts.month, 30),
+                    quarter: perDayAverage(counts.quarter, 90)]
             ]]></script>
         </actions>
     </service>
