@@ -1277,12 +1277,37 @@ limitations under the License.
         </actions>
     </service>
 
+    <!-- anonymous-all: the callers below include the anonymous register and reset flows -->
+    <service verb="get" noun="RuntimeMode" authenticate="anonymous-all">
+        <description>Two independent switches that decide how much credential material this
+            instance is allowed to expose.
+
+            devInstance: not a production instance, so printing a password in the moqui log is
+            acceptable - reading that log already requires access to the server. Self-hosted
+            installs without a mail server depend on this to learn their initial password.
+
+            testMode: opt-in only, set by the CI compose file. Opens the anonymous
+            get#TempResetPassword endpoint and the plaintext tempResetPassword column, both of
+            which hand a working credential to anyone who can reach the port. Never enable this
+            on an instance that is reachable from outside.</description>
+        <out-parameters>
+            <parameter name="devInstance" type="Boolean"/>
+            <parameter name="testMode" type="Boolean"/>
+        </out-parameters>
+        <actions>
+            <set field="devInstance"
+                from="!'production'.equals(System.getProperty('instance_purpose'))"/>
+            <set field="testMode" from="'true'.equals(System.getenv('GROWERP_TEST_MODE'))"/>
+        </actions>
+    </service>
+
     <service verb="reset" noun="Password" authenticate="anonymous-all">
         <description>will send a new password by email and will initiate a change password at login time</description>
         <in-parameters>
             <parameter name="username"/>
         </in-parameters>
         <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RuntimeMode" out-map="context"/>
             <entity-find-one entity-name="moqui.basic.email.EmailServer"
                 value-field="emailExist">
                 <field-map field-name="emailServerId" value="SYSTEM"/>
@@ -1310,10 +1335,20 @@ limitations under the License.
                             from="ec.ecfi.getSimpleHash(resetPassword, userAccount.passwordSalt, userAccount.passwordHashType, 'Y'.equals(userAccount.passwordBase64))"/>
                         <set field="userAccount.requirePasswordChange"
                             from="(passwordNode.attribute('email-require-change') == 'true') ? 'Y' : 'N'"/>
-                        <set field="userAccount.tempResetPassword" from="resetPassword"/>
+                        <!-- the plaintext copy only exists so the integration tests can finish
+                             the forgot-password flow: keep it out of every real database -->
+                        <if condition="testMode">
+                            <set field="userAccount.tempResetPassword" from="resetPassword"/>
+                        </if>
                         <entity-update value-field="userAccount"/>
-                        <log level="warn"
-                            message="Email server not configured: reset password for user ${userAccount.username} is ${resetPassword}"/>
+                        <if condition="devInstance">
+                            <log level="warn"
+                                message="Email server not configured: reset password for user ${userAccount.username} is ${resetPassword}"/>
+                            <else>
+                                <log level="warn"
+                                    message="Email server not configured: reset password generated for user ${userAccount.username}, not shown on a production instance"/>
+                            </else>
+                        </if>
                         <else>
                             <return error="true"
                                 message="Could not find a user account for $username"/>
@@ -1442,10 +1477,41 @@ limitations under the License.
                     <return error="true"
                         message="cannot find username: ${username}" public="true"/>
                 </if>
+                <else>
+                    <!-- Anonymous callers have one legitimate reason to be here: finishing a
+                         reset, where login#User returns 'passwordChange' without creating a
+                         session. Moqui's update#Password skips its own cross-user check when
+                         there is no logged in user, so require an outstanding reset; otherwise
+                         an unauthenticated caller who learned a password elsewhere could
+                         rotate it and take the account over. -->
+                    <entity-find-one entity-name="moqui.security.UserAccount"
+                        value-field="resetAccount">
+                        <field-map field-name="username" from="username"/>
+                    </entity-find-one>
+                    <if condition="!resetAccount">
+                        <entity-find-one entity-name="moqui.security.UserAccount"
+                            value-field="resetAccount">
+                            <field-map field-name="emailAddress" from="username"/>
+                        </entity-find-one>
+                    </if>
+                    <if condition="!resetAccount?.resetPassword">
+                        <return error="true"
+                            message="Login required to change the password" public="true"/>
+                    </if>
+                </else>
             </if>
             <service-call name="org.moqui.impl.UserServices.update#Password"
                 in-map="[username: username, oldPassword: oldPassword,
-                    newPassword: newPassword, newPasswordVerify: newPassword]"/>
+                    newPassword: newPassword, newPasswordVerify: newPassword]"
+                out-map="passwordResult"/>
+            <!-- moqui reports a wrong oldPassword as a 'danger' message rather than an error, so
+                 execution continues here. Without this check the re-enable below ran on every
+                 failed attempt, clearing successiveFailedLogins and undoing the lockout, and the
+                 rejection only surfaced as a Shiro exception out of loginUser. -->
+            <if condition="!passwordResult.updateSuccessful">
+                <return error="true"
+                    message="Password could not be changed for ${username}" public="true"/>
+            </if>
             <!-- enable useraccount -->
             <service-call name="update#moqui.security.UserAccount"
                 in-map="[username:username, disabled:'N', disabledDateTime:null,
@@ -1458,9 +1524,14 @@ limitations under the License.
     </service>
 
     <service verb="get" noun="TempResetPassword" authenticate="anonymous-all">
-        <description>Returns the plaintext temp reset password for a user.
-            Only works when email server is not configured (dev/test environments).
-            Used by integration tests to complete the forgot-password flow.</description>
+        <description>Returns the plaintext temp reset password for a user, so the integration
+            tests can complete the forgot-password flow.
+
+            This hands a working credential to any anonymous caller, so it needs the explicit
+            GROWERP_TEST_MODE opt-in (see get#RuntimeMode) on top of the absence of a mail
+            server. Gating it on the missing mail server alone left it open on every fresh
+            install, which made reset -> read temp password -> change password an
+            unauthenticated takeover of any account.</description>
         <in-parameters>
             <parameter name="username" required="true"/>
         </in-parameters>
@@ -1468,6 +1539,11 @@ limitations under the License.
             <parameter name="tempPassword"/>
         </out-parameters>
         <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RuntimeMode" out-map="context"/>
+            <if condition="!testMode">
+                <return error="true"
+                    message="Not available on this instance"/>
+            </if>
             <entity-find-one entity-name="moqui.basic.email.EmailServer"
                 value-field="emailExist">
                 <field-map field-name="emailServerId" value="SYSTEM"/>

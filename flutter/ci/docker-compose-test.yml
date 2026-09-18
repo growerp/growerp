@@ -65,6 +65,9 @@ services:
       #- ../docker/runtime/csstyles:/opt/moqui/runtime/component/PopRestStore/screen/store/components/styles
     environment:
       - instance_purpose=test
+      # opens get#TempResetPassword so password_test can finish the forgot-password
+      # flow; never set this on an instance reachable from outside
+      - GROWERP_TEST_MODE=true
       - entity_ds_db_conf=postgres
       - entity_ds_host=moqui-database
       - entity_ds_port=5432

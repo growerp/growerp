@@ -2164,8 +2164,18 @@ limitations under the License.
                                 lastName: user.lastName, userLocale: user.locale]" />
                     </service-call>
                     <else>
-                        <log level="warn"
-                            message="====== Email not Send, ${user.loginName} password: $password email: ${user.email}" />
+                        <!-- a self hosted install without a mail server has no other way to
+                             learn this password, but a production log must never carry one -->
+                        <service-call name="growerp.100.GeneralServices100.get#RuntimeMode"
+                            out-map="context" />
+                        <if condition="devInstance">
+                            <log level="warn"
+                                message="====== Email not Send, ${user.loginName} password: $password email: ${user.email}" />
+                            <else>
+                                <log level="warn"
+                                    message="====== Email not Send, ${user.loginName} email: ${user.email}, password not shown on a production instance" />
+                            </else>
+                        </if>
                     </else>
                 </if>
             </if>
@@ -2275,6 +2285,13 @@ limitations under the License.
                 <parameter name="appsUsed" type="List">
                     <parameter name="partyClassificationId" />
                 </parameter>
+            </parameter>
+            <parameter name="password"
+                default="org.moqui.util.StringUtilities.getRandomString(6) + '9!'">
+                <description>Only used when this update adds a login to a person who did not
+                    have one. It was referenced further down without being declared here, so it
+                    resolved to null and the new UserAccount was created without a password at
+                    all: the person could neither log in nor reset.</description>
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -3203,8 +3220,16 @@ limitations under the License.
                                     lastName: user.lastName, userLocale: locale]" />
                     </service-call>
                     <else>
-                        <log level="warn"
-                            message="====== Email not configured, ${user.loginName} password: $newPassword" />
+                        <service-call name="growerp.100.GeneralServices100.get#RuntimeMode"
+                            out-map="context" />
+                        <if condition="devInstance">
+                            <log level="warn"
+                                message="====== Email not configured, ${user.loginName} password: $newPassword" />
+                            <else>
+                                <log level="warn"
+                                    message="====== Email not configured, ${user.loginName}, password not shown on a production instance" />
+                            </else>
+                        </if>
                     </else>
                 </if>
             </if>
