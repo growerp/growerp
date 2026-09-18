@@ -290,12 +290,22 @@ var storeInfo = ${storeInfoJson};
             // Lumina design tokens for the 'modern' template set: defaults below,
             // overridable per store via a "lumina" object of hex colors in websiteColor.json.
             // Emitted as "R G B" channel strings so Tailwind opacity modifiers work.
-            Map luminaDefaults = [
+            // The default palette follows luminaBrightness, so a store that only stores
+            // {"luminaBrightness":"light"} really renders light.
+            String luminaBrightness = (context.luminaBrightness ?: 'light').toString()
+            Map luminaDefaultsDark = [
                 surface: '#0b1326', surfaceContainerLowest: '#060e20', surfaceContainerLow: '#131b2e',
                 surfaceContainer: '#171f33', surfaceContainerHigh: '#222a3d', surfaceContainerHighest: '#2d3449',
                 onSurface: '#dae2fd', onSurfaceVariant: '#bccac0', primary: '#68dba9', onPrimary: '#003825',
                 primaryContainer: '#25a475', secondary: '#4edea3', tertiary: '#45dfa4', error: '#ffb4ab',
                 outline: '#87948b', outlineVariant: '#3d4a42']
+            Map luminaDefaultsLight = [
+                surface: '#f6fbf7', surfaceContainerLowest: '#ffffff', surfaceContainerLow: '#f0f6f1',
+                surfaceContainer: '#eaf1eb', surfaceContainerHigh: '#e4ebe5', surfaceContainerHighest: '#dee5df',
+                onSurface: '#171d1a', onSurfaceVariant: '#3f4945', primary: '#006c4c', onPrimary: '#ffffff',
+                primaryContainer: '#88f8c2', secondary: '#4c6358', tertiary: '#3d6373', error: '#ba1a1a',
+                outline: '#6f7975', outlineVariant: '#bfc9c3']
+            Map luminaDefaults = (luminaBrightness == 'light') ? luminaDefaultsLight : luminaDefaultsDark
             Map luminaOverrides = context.lumina instanceof Map ? (Map) context.lumina : [:]
             Map luminaChannels = [:]
             Closure toChannels = { String value, String fallbackHex ->
@@ -311,9 +321,8 @@ var storeInfo = ${storeInfoJson};
             luminaDefaults.each { String key, String defaultHex ->
                 luminaChannels[key] = toChannels((luminaOverrides[key] ?: defaultHex).toString().trim(), defaultHex)
             }
-            // brightness-aware chrome: contrast channel (white on dark, black on light) and
-            // the surface hex used for the theme-color meta tag / anti-FOUC style
-            String luminaBrightness = (context.luminaBrightness ?: 'dark').toString()
+            // brightness-aware chrome: contrast channel (white on dark, black on light);
+            // the surface hex for the theme-color meta tag / anti-FOUC style is derived below
             luminaChannels.contrast = (luminaBrightness == 'light') ? '0 0 0' : '255 255 255'
             // the legacy header/footer are painted with primaryContainer, so they need its
             // on-colour. Themes stored before onPrimaryContainer existed do not carry it:

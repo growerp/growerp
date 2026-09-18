@@ -225,8 +225,9 @@ class WebsiteDialogState extends State<WebsiteDialog> {
   /// scheme's Material 3 colors as the 'lumina' object in colorJson,
   /// consumed by the modern website template CSS.
   Widget _websiteThemePicker(WebsiteState state, Map websiteColor) {
+    // no stored brightness means the server defaults, which are light
     final bool dark =
-        _websiteThemeDark ?? websiteColor['luminaBrightness'] != 'light';
+        _websiteThemeDark ?? websiteColor['luminaBrightness'] == 'dark';
     final String? selectedScheme = websiteColor['luminaScheme'] as String?;
 
     void saveTheme(FlexScheme scheme, {bool? asDark}) {
@@ -361,10 +362,23 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                   for (final scheme in curatedSchemes) {
                     if (scheme.name == selectedScheme) {
                       saveTheme(scheme, asDark: newDark);
-                      break;
+                      return;
                     }
                   }
                 }
+                // no scheme picked: store the brightness and drop any stale
+                // token map so the server defaults for that brightness apply
+                final updated = Map.of(websiteColor)
+                  ..['luminaBrightness'] = newDark ? 'dark' : 'light'
+                  ..remove('lumina');
+                _websiteBloc.add(
+                  WebsiteUpdate(
+                    Website(
+                      id: state.website!.id,
+                      colorJson: jsonEncode(updated),
+                    ),
+                  ),
+                );
               },
             ),
             const Spacer(),

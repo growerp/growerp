@@ -2038,25 +2038,25 @@ body.growerp-store-100000 .customer-menu {
 /* Scoped with --l- prefix + body.lumina so legacy set is unaffected.  */
 /* ==================================================================== */
 :root {
-    --l-surface: ${(lumina.surface)!'11 19 38'};
-    --l-surface-container-lowest: ${(lumina.surfaceContainerLowest)!'6 14 32'};
-    --l-surface-container-low: ${(lumina.surfaceContainerLow)!'19 27 46'};
-    --l-surface-container: ${(lumina.surfaceContainer)!'23 31 51'};
-    --l-surface-container-high: ${(lumina.surfaceContainerHigh)!'34 42 61'};
-    --l-surface-container-highest: ${(lumina.surfaceContainerHighest)!'45 52 73'};
-    --l-on-surface: ${(lumina.onSurface)!'218 226 253'};
-    --l-on-surface-variant: ${(lumina.onSurfaceVariant)!'188 202 192'};
-    --l-primary: ${(lumina.primary)!'104 219 169'};
-    --l-on-primary: ${(lumina.onPrimary)!'0 56 37'};
-    --l-primary-container: ${(lumina.primaryContainer)!'37 164 117'};
-    --l-secondary: ${(lumina.secondary)!'78 222 163'};
-    --l-tertiary: ${(lumina.tertiary)!'69 223 164'};
-    --l-error: ${(lumina.error)!'255 180 171'};
-    --l-outline: ${(lumina.outline)!'135 148 139'};
-    --l-outline-variant: ${(lumina.outlineVariant)!'61 74 66'};
+    --l-surface: ${(lumina.surface)!'246 251 247'};
+    --l-surface-container-lowest: ${(lumina.surfaceContainerLowest)!'255 255 255'};
+    --l-surface-container-low: ${(lumina.surfaceContainerLow)!'240 246 241'};
+    --l-surface-container: ${(lumina.surfaceContainer)!'234 241 235'};
+    --l-surface-container-high: ${(lumina.surfaceContainerHigh)!'228 235 229'};
+    --l-surface-container-highest: ${(lumina.surfaceContainerHighest)!'222 229 223'};
+    --l-on-surface: ${(lumina.onSurface)!'23 29 26'};
+    --l-on-surface-variant: ${(lumina.onSurfaceVariant)!'63 73 69'};
+    --l-primary: ${(lumina.primary)!'0 108 76'};
+    --l-on-primary: ${(lumina.onPrimary)!'255 255 255'};
+    --l-primary-container: ${(lumina.primaryContainer)!'136 248 194'};
+    --l-secondary: ${(lumina.secondary)!'76 99 88'};
+    --l-tertiary: ${(lumina.tertiary)!'61 99 115'};
+    --l-error: ${(lumina.error)!'186 26 26'};
+    --l-outline: ${(lumina.outline)!'111 121 117'};
+    --l-outline-variant: ${(lumina.outlineVariant)!'191 201 195'};
     /* server-derived (from luminaBrightness), not part of the 16-token contract:
-       white on dark themes, black on light themes */
-    --l-contrast: ${(lumina.contrast)!'255 255 255'};
+       black on light themes (the default), white on dark themes */
+    --l-contrast: ${(lumina.contrast)!'0 0 0'};
     /* black or white, whichever is readable on --l-primary-container (store.xml picks it
        from that colour's luminance); the legacy header/footer are painted with it */
     --l-on-primary-container: ${(lumina.onPrimaryContainer)!'0 0 0'};

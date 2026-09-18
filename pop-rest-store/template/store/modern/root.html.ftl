@@ -14,7 +14,7 @@
     <#else>
     <meta name="description" content="Welcome to ${storeInfo.productStore.storeName} - Your trusted online store">
     </#if>
-    <meta name="theme-color" content="${luminaSurfaceHex!'#0b1326'}">
+    <meta name="theme-color" content="${luminaSurfaceHex!'#f6fbf7'}">
 
     <#if pageTitle?has_content>
     <title>${pageTitle?html} — ${storeInfo.productStore.storeName}</title>
@@ -57,12 +57,12 @@
 
     <!-- Anti-FOUC: paint the store surface before Tailwind CDN JIT runs -->
     <style>
-        html { background: rgb(var(--l-surface, ${(lumina.surface)!'11 19 38'})); color: rgb(var(--l-on-surface, ${(lumina.onSurface)!'218 226 253'})); color-scheme: ${luminaBrightness!'dark'}; }
+        html { background: rgb(var(--l-surface, ${(lumina.surface)!'246 251 247'})); color: rgb(var(--l-on-surface, ${(lumina.onSurface)!'23 29 26'})); color-scheme: ${luminaBrightness!'light'}; }
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
         .icon-fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: rgb(var(--l-surface, ${(lumina.surface)!'11 19 38'})); }
-        ::-webkit-scrollbar-thumb { background: rgb(var(--l-surface-container-highest, ${(lumina.surfaceContainerHighest)!'45 52 73'})); border-radius: 4px; }
+        ::-webkit-scrollbar-track { background: rgb(var(--l-surface, ${(lumina.surface)!'246 251 247'})); }
+        ::-webkit-scrollbar-thumb { background: rgb(var(--l-surface-container-highest, ${(lumina.surfaceContainerHighest)!'222 229 223'})); border-radius: 4px; }
     </style>
 
     <!-- Tailwind CDN with Lumina token theme; colors reference the per-store CSS variables -->

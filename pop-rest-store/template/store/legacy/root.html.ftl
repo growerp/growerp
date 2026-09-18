@@ -11,7 +11,7 @@
     <#else>
     <meta name="description" content="Welcome to ${storeInfo.productStore.storeName} - Your trusted online store">
     </#if>
-    <meta name="theme-color" content="${luminaSurfaceHex!'#0b1326'}">
+    <meta name="theme-color" content="${luminaSurfaceHex!'#f6fbf7'}">
 
     <#if pageTitle?has_content>
     <title>${pageTitle?html} — ${storeInfo.productStore.storeName}</title>
