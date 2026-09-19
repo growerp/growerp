@@ -13,6 +13,9 @@ class EmailSequenceBloc extends Bloc<EmailSequenceEvent, EmailSequenceState> {
     on<EmailSequenceFetch>(_onEmailSequenceFetch);
     on<EmailSequenceUpdate>(_onEmailSequenceUpdate);
     on<EmailSequenceDelete>(_onEmailSequenceDelete);
+    on<EmailSequenceMembersFetch>(_onEmailSequenceMembersFetch);
+    on<EmailSequenceMemberAdd>(_onEmailSequenceMemberAdd);
+    on<EmailSequenceMemberUnsubscribe>(_onEmailSequenceMemberUnsubscribe);
   }
 
   Future<void> _onEmailSequenceFetch(
@@ -111,6 +114,93 @@ class EmailSequenceBloc extends Bloc<EmailSequenceEvent, EmailSequenceState> {
         state.copyWith(
           status: EmailSequenceStatus.failure,
           message: await getDioError(e),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onEmailSequenceMembersFetch(
+    EmailSequenceMembersFetch event,
+    Emitter<EmailSequenceState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(memberStatus: EmailSequenceStatus.loading));
+      final result = await restClient.getEmailSequenceEnrollments(
+        emailSequenceId: event.emailSequenceId,
+        searchString: event.searchString,
+      );
+      emit(
+        state.copyWith(
+          memberStatus: EmailSequenceStatus.success,
+          members: result.enrollments,
+        ),
+      );
+    } on DioException catch (e) {
+      emit(
+        state.copyWith(
+          memberStatus: EmailSequenceStatus.failure,
+          memberMessage: await getDioError(e),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onEmailSequenceMemberAdd(
+    EmailSequenceMemberAdd event,
+    Emitter<EmailSequenceState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(memberStatus: EmailSequenceStatus.loading));
+      await restClient.addEmailSequenceMember(
+        emailSequenceId: event.emailSequenceId,
+        emailAddress: event.emailAddress,
+        firstName: event.firstName,
+      );
+      final result = await restClient.getEmailSequenceEnrollments(
+        emailSequenceId: event.emailSequenceId,
+      );
+      emit(
+        state.copyWith(
+          memberStatus: EmailSequenceStatus.success,
+          members: result.enrollments,
+          memberMessage: '${event.emailAddress} added',
+        ),
+      );
+    } on DioException catch (e) {
+      emit(
+        state.copyWith(
+          memberStatus: EmailSequenceStatus.failure,
+          memberMessage: await getDioError(e),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onEmailSequenceMemberUnsubscribe(
+    EmailSequenceMemberUnsubscribe event,
+    Emitter<EmailSequenceState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(memberStatus: EmailSequenceStatus.loading));
+      await restClient.unsubscribeEmailSequenceMember(
+        emailSequenceId: event.emailSequenceId,
+        enrollmentId: event.enrollmentId,
+      );
+      final result = await restClient.getEmailSequenceEnrollments(
+        emailSequenceId: event.emailSequenceId,
+      );
+      emit(
+        state.copyWith(
+          memberStatus: EmailSequenceStatus.success,
+          members: result.enrollments,
+          memberMessage: 'member unsubscribed',
+        ),
+      );
+    } on DioException catch (e) {
+      emit(
+        state.copyWith(
+          memberStatus: EmailSequenceStatus.failure,
+          memberMessage: await getDioError(e),
         ),
       );
     }

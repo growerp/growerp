@@ -1248,6 +1248,27 @@ abstract class RestClient {
     @Field() required EmailSequence emailSequence,
   });
 
+  @GET("rest/s1/growerp/100/EmailSequenceMember")
+  Future<EmailSequenceEnrollments> getEmailSequenceEnrollments({
+    @Query('emailSequenceId') required String emailSequenceId,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+    @Query('search') String? searchString,
+  });
+
+  @POST("rest/s1/growerp/100/EmailSequenceMember")
+  Future<void> addEmailSequenceMember({
+    @Field() required String emailSequenceId,
+    @Field() required String emailAddress,
+    @Field() String? firstName,
+  });
+
+  @PATCH("rest/s1/growerp/100/EmailSequenceMember")
+  Future<void> unsubscribeEmailSequenceMember({
+    @Field() required String emailSequenceId,
+    @Field() required String enrollmentId,
+  });
+
   @GET("rest/s1/growerp/100/MarketingDashboard")
   Future<MarketingDashboard> getMarketingDashboard();
 

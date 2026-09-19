@@ -78,6 +78,14 @@ const marketingMenuConfig = MenuConfiguration(
       sequenceNum: 70,
       widgetName: 'SocialPostList',
     ),
+    MenuItem(
+      itemKey: 'MKT_SEQUENCES',
+      title: 'Email Sequences',
+      route: '/emailSequences',
+      iconName: 'schedule_send',
+      sequenceNum: 75,
+      widgetName: 'EmailSequenceList',
+    ),
     // Reached from the last guide step, which turns engagements into leads.
     MenuItem(
       itemKey: 'MKT_ENGAGEMENTS',
@@ -110,6 +118,7 @@ GoRouter createMarketingExampleRouter() {
       '/contentPlans' => const ContentPlanList(),
       '/masterContent' => const MasterContentList(),
       '/socialPosts' => const SocialPostList(),
+      '/emailSequences' => const EmailSequenceList(),
       '/engagements' => const SocialEngagementList(),
       _ => const MarketingDashboard(),
     },

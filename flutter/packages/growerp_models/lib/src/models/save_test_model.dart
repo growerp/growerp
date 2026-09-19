@@ -56,6 +56,7 @@ abstract class SaveTest with _$SaveTest {
     @Default([]) List<MenuItem> menuItems,
     @Default([]) List<AdkAgentConfig> adkAgentConfigs,
     @Default([]) List<AdkKnowledgeDoc> adkKnowledgeDocs,
+    @Default([]) List<EmailSequence> emailSequences,
   }) = _SaveTest;
   SaveTest._();
 

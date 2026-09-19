@@ -13,6 +13,7 @@
  */
 
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:growerp_models/src/json_converters.dart';
 
 part 'email_sequence_model.freezed.dart';
 part 'email_sequence_model.g.dart';
@@ -58,4 +59,34 @@ abstract class EmailSequences with _$EmailSequences {
 
   factory EmailSequences.fromJson(Map<String, dynamic> json) =>
       _$EmailSequencesFromJson(json);
+}
+
+@freezed
+abstract class EmailSequenceEnrollment with _$EmailSequenceEnrollment {
+  EmailSequenceEnrollment._();
+  factory EmailSequenceEnrollment({
+    @Default("") String enrollmentId,
+    @Default("") String emailAddress,
+    @Default("") String firstName,
+    @Default(0) int currentStep,
+    @Default("") String status, // ACTIVE, COMPLETED, UNSUBSCRIBED, CONVERTED
+    @DateTimeConverter() DateTime? nextSendDate,
+    @Default(0) int opens,
+    @Default(0) int clicks,
+    @DateTimeConverter() DateTime? createdDate,
+  }) = _EmailSequenceEnrollment;
+
+  factory EmailSequenceEnrollment.fromJson(Map<String, dynamic> json) =>
+      _$EmailSequenceEnrollmentFromJson(json['enrollment'] ?? json);
+}
+
+@freezed
+abstract class EmailSequenceEnrollments with _$EmailSequenceEnrollments {
+  EmailSequenceEnrollments._();
+  factory EmailSequenceEnrollments({
+    @Default([]) List<EmailSequenceEnrollment> enrollments,
+  }) = _EmailSequenceEnrollments;
+
+  factory EmailSequenceEnrollments.fromJson(Map<String, dynamic> json) =>
+      _$EmailSequenceEnrollmentsFromJson(json);
 }

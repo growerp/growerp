@@ -21,6 +21,7 @@ import '../bloc/email_sequence_bloc.dart';
 import '../bloc/email_sequence_event.dart';
 import '../bloc/email_sequence_state.dart';
 import 'email_sequence_dialog.dart';
+import 'email_sequence_members_dialog.dart';
 import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// List of email nurture (drip) sequences.
@@ -63,6 +64,7 @@ class EmailSequenceListState extends State<EmailSequenceList> {
             StyledColumn(header: localizations.tableHdrName, flex: 3),
             StyledColumn(header: localizations.active, flex: 1),
             StyledColumn(header: '', flex: 1),
+            StyledColumn(header: '', flex: 1),
           ]
         : [
             StyledColumn(header: localizations.tableHdrId, flex: 1),
@@ -71,6 +73,7 @@ class EmailSequenceListState extends State<EmailSequenceList> {
             StyledColumn(header: localizations.tableHdrSteps, flex: 1),
             StyledColumn(header: localizations.active, flex: 1),
             StyledColumn(header: localizations.tableHdrCompleted, flex: 1),
+            StyledColumn(header: '', flex: 1),
             StyledColumn(header: '', flex: 1),
           ];
 
@@ -91,11 +94,27 @@ class EmailSequenceListState extends State<EmailSequenceList> {
         icon: const Icon(Icons.delete_forever),
         onPressed: confirmDelete,
       );
+      final members = IconButton(
+        key: Key('members$index'),
+        icon: const Icon(Icons.people),
+        tooltip: 'Members',
+        onPressed: () async {
+          await showDialog(
+            barrierDismissible: true,
+            context: context,
+            builder: (BuildContext context) => BlocProvider.value(
+              value: _emailSequenceBloc,
+              child: EmailSequenceMembersDialog(sequence),
+            ),
+          );
+        },
+      );
       if (isPhone) {
         return [
           Text(sequence.pseudoId, key: Key('id$index')),
           Text(sequence.sequenceName, key: Key('sequenceName$index')),
           Text('${sequence.activeEnrollments}'),
+          members,
           delete,
         ];
       }
@@ -106,6 +125,7 @@ class EmailSequenceListState extends State<EmailSequenceList> {
         Text('${sequence.steps.length}'),
         Text('${sequence.activeEnrollments}'),
         Text('${sequence.completedEnrollments}'),
+        members,
         delete,
       ];
     }

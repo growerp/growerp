@@ -218,3 +218,58 @@ List<MasterContent> updatedMasterContents = [
     status: 'APPROVED',
   ),
 ];
+
+/// Email nurture sequence test data
+List<EmailSequence> emailSequences = [
+  EmailSequence(
+    sequenceName: 'Welcome Series',
+    status: 'ACTIVE',
+    steps: [
+      EmailSequenceStep(
+        stepSeq: 1,
+        delayDays: 0,
+        subject: 'Welcome to GrowERP',
+        bodyHtml: 'Hi {name}, welcome aboard!',
+      ),
+    ],
+  ),
+  EmailSequence(
+    sequenceName: 'Trial Nurture',
+    status: 'ACTIVE',
+    steps: [
+      EmailSequenceStep(
+        stepSeq: 1,
+        delayDays: 1,
+        subject: 'How is your trial going?',
+        bodyHtml: 'Hi {name}, just checking in on your trial.',
+      ),
+    ],
+  ),
+];
+
+List<EmailSequence> updatedEmailSequences = [
+  EmailSequence(
+    sequenceName: 'Welcome Series Updated',
+    status: 'ACTIVE',
+    steps: [
+      EmailSequenceStep(
+        stepSeq: 1,
+        delayDays: 0,
+        subject: 'Welcome to GrowERP (updated)',
+        bodyHtml: 'Hi {name}, welcome aboard! (updated)',
+      ),
+    ],
+  ),
+  EmailSequence(
+    sequenceName: 'Trial Nurture Updated',
+    status: 'ACTIVE',
+    steps: [
+      EmailSequenceStep(
+        stepSeq: 1,
+        delayDays: 1,
+        subject: 'How is your trial going? (updated)',
+        bodyHtml: 'Hi {name}, just checking in on your trial. (updated)',
+      ),
+    ],
+  ),
+];

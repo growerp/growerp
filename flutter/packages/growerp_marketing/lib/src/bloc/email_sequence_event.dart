@@ -24,3 +24,31 @@ class EmailSequenceDelete extends EmailSequenceEvent {
   const EmailSequenceDelete(this.emailSequence);
   final EmailSequence emailSequence;
 }
+
+class EmailSequenceMembersFetch extends EmailSequenceEvent {
+  const EmailSequenceMembersFetch(this.emailSequenceId, {this.searchString = ''});
+  final String emailSequenceId;
+  final String searchString;
+  @override
+  List<Object> get props => [emailSequenceId, searchString];
+}
+
+class EmailSequenceMemberAdd extends EmailSequenceEvent {
+  const EmailSequenceMemberAdd({
+    required this.emailSequenceId,
+    required this.emailAddress,
+    this.firstName,
+  });
+  final String emailSequenceId;
+  final String emailAddress;
+  final String? firstName;
+}
+
+class EmailSequenceMemberUnsubscribe extends EmailSequenceEvent {
+  const EmailSequenceMemberUnsubscribe({
+    required this.emailSequenceId,
+    required this.enrollmentId,
+  });
+  final String emailSequenceId;
+  final String enrollmentId;
+}

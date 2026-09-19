@@ -205,7 +205,7 @@ limitations under the License.
             <set field="sequences[0].sequenceName" from="emailSequence.sequenceName" />
             <set field="sequences[0].status" from="emailSequence.status ?: 'ACTIVE'" />
             <set field="sequences[0].marketingCampaignId"
-                from="emailSequence.marketingCampaignId" />
+                from="emailSequence.marketingCampaignId ?: null" />
             <entity-update value-field="sequences[0]" />
             <entity-delete-by-condition entity-name="growerp.marketing.EmailSequenceStep">
                 <econdition field-name="emailSequenceId" from="emailSequence.emailSequenceId" />
@@ -342,6 +342,126 @@ limitations under the License.
                      recipient may have no enrollment rows at all -->
                 <set field="unsubscribed" from="true" />
             </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="EmailSequenceEnrollments">
+        <description>List the members enrolled in one sequence, company-scoped.</description>
+        <in-parameters>
+            <parameter name="emailSequenceId" required="true" />
+            <parameter name="start" type="Integer" default-value="0" />
+            <parameter name="limit" type="Integer" default-value="20" />
+            <parameter name="search" default="null" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="enrollments" type="List">
+                <parameter name="enrollment" type="Map">
+                    <parameter name="enrollmentId" />
+                    <parameter name="emailAddress" />
+                    <parameter name="firstName" />
+                    <parameter name="currentStep" />
+                    <parameter name="status" />
+                    <parameter name="nextSendDate" type="Timestamp" />
+                    <parameter name="opens" />
+                    <parameter name="clicks" />
+                    <parameter name="createdDate" type="Timestamp" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="growerp.marketing.EmailSequence" list="sequences"
+                limit="1">
+                <econdition field-name="emailSequenceId" from="emailSequenceId" />
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+            </entity-find>
+            <if condition="!sequences">
+                <return error="true" message="sequence ${emailSequenceId} not found!" />
+            </if>
+            <if condition="search != null">
+                <set field="search" value="%${search}%" />
+            </if>
+            <entity-find entity-name="growerp.marketing.EmailSequenceEnrollment"
+                list="rows" offset="start" limit="limit">
+                <econdition field-name="emailSequenceId" from="emailSequenceId" />
+                <econditions combine="or">
+                    <econdition field-name="emailAddress" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="firstName" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="-createdDate" />
+            </entity-find>
+            <set field="enrollments" from="[]" />
+            <iterate list="rows" entry="row">
+                <script>enrollments.add([enrollmentId: row.enrollmentId,
+                    emailAddress: row.emailAddress, firstName: row.firstName,
+                    currentStep: row.currentStep, status: row.status,
+                    nextSendDate: row.nextSendDate?.toInstant()?.toString(),
+                    opens: row.opens, clicks: row.clicks,
+                    createdDate: row.createdDate?.toInstant()?.toString()])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="add" noun="EmailSequenceMember">
+        <description>Manually add a member to a sequence (company-scoped); delegates
+            to enroll#EmailSequence for the actual create/dedupe logic.</description>
+        <in-parameters>
+            <parameter name="emailSequenceId" required="true" />
+            <parameter name="emailAddress" required="true" />
+            <parameter name="firstName" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="enrollmentId" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="growerp.marketing.EmailSequence" list="sequences"
+                limit="1">
+                <econdition field-name="emailSequenceId" from="emailSequenceId" />
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+            </entity-find>
+            <if condition="!sequences">
+                <return error="true" message="sequence ${emailSequenceId} not found!" />
+            </if>
+            <service-call name="growerp.100.NurtureServices100.enroll#EmailSequence"
+                out-map="context"
+                in-map="[emailSequenceId: emailSequenceId, emailAddress: emailAddress,
+                    firstName: firstName]" />
+        </actions>
+    </service>
+
+    <service verb="unsubscribe" noun="EmailSequenceMember">
+        <description>Unsubscribe one member of a sequence from the admin UI
+            (company-scoped counterpart to unsubscribe#Enrollment).</description>
+        <in-parameters>
+            <parameter name="emailSequenceId" required="true" />
+            <parameter name="enrollmentId" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="growerp.marketing.EmailSequence" list="sequences"
+                limit="1">
+                <econdition field-name="emailSequenceId" from="emailSequenceId" />
+                <econdition field-name="ownerPartyId" from="companyPartyId" />
+            </entity-find>
+            <if condition="!sequences">
+                <return error="true" message="sequence ${emailSequenceId} not found!" />
+            </if>
+            <entity-find entity-name="growerp.marketing.EmailSequenceEnrollment"
+                list="enrollments" for-update="true" limit="1">
+                <econdition field-name="enrollmentId" from="enrollmentId" />
+                <econdition field-name="emailSequenceId" from="emailSequenceId" />
+            </entity-find>
+            <if condition="!enrollments">
+                <return error="true" message="enrollment ${enrollmentId} not found!" />
+            </if>
+            <set field="enrollments[0].status" value="UNSUBSCRIBED" />
+            <entity-update value-field="enrollments[0]" />
         </actions>
     </service>
 
