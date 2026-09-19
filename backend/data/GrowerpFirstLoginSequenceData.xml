@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-facade-xml type="seed">
+
+    <!-- ════════════════════════════════════════════════════════════════════════
+         First-login welcome sequence, GROWERP owner only.
+         Enrolled from GeneralServices100.login#User on a person's first successful
+         login; sent by the existing process_due_sequence_emails cron. ════════════ -->
+
+    <growerp.marketing.EmailSequence emailSequenceId="FIRST_LOGIN_GROWERP"
+        pseudoId="WELCOME" ownerPartyId="GROWERP"
+        sequenceName="First login welcome sequence" status="ACTIVE"/>
+
+    <growerp.marketing.EmailSequenceStep emailSequenceId="FIRST_LOGIN_GROWERP"
+        stepSeq="1" delayDays="0" subject="Welcome to GrowERP, {name}!" bodyHtml="
+        &lt;p&gt;Hi {name},&lt;/p&gt;
+        &lt;p&gt;You just logged in to GrowERP for the first time &amp;#8212; welcome aboard!&lt;/p&gt;
+        &lt;p&gt;A few things to get you going:&lt;/p&gt;
+        &lt;ul&gt;
+        &lt;li&gt;Take a look at your dashboard to see what's already set up.&lt;/li&gt;
+        &lt;li&gt;Invite a teammate so you're not exploring alone.&lt;/li&gt;
+        &lt;li&gt;Check out the built-in demo data to see GrowERP in action.&lt;/li&gt;
+        &lt;/ul&gt;
+        &lt;p&gt;We'll send a couple more tips over the next week. If anything's unclear, just reply to this email.&lt;/p&gt;
+        &lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;
+        "/>
+
+    <growerp.marketing.EmailSequenceStep emailSequenceId="FIRST_LOGIN_GROWERP"
+        stepSeq="2" delayDays="3" subject="3 things to try in GrowERP" bodyHtml="
+        &lt;p&gt;Hi {name},&lt;/p&gt;
+        &lt;p&gt;A few days in &amp;#8212; here are three things worth trying if you haven't already:&lt;/p&gt;
+        &lt;ul&gt;
+        &lt;li&gt;&lt;b&gt;Invite your team&lt;/b&gt; so everyone works from the same data.&lt;/li&gt;
+        &lt;li&gt;&lt;b&gt;Explore the dashboard&lt;/b&gt; to see the reports and stats GrowERP tracks for you automatically.&lt;/li&gt;
+        &lt;li&gt;&lt;b&gt;Connect your data&lt;/b&gt; (products, customers, or accounting) to see GrowERP working with your real business.&lt;/li&gt;
+        &lt;/ul&gt;
+        &lt;p&gt;Questions? Just reply, we read every email.&lt;/p&gt;
+        &lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;
+        "/>
+
+    <growerp.marketing.EmailSequenceStep emailSequenceId="FIRST_LOGIN_GROWERP"
+        stepSeq="3" delayDays="4" subject="How's it going so far?" bodyHtml="
+        &lt;p&gt;Hi {name},&lt;/p&gt;
+        &lt;p&gt;It's been a week since you started with GrowERP &amp;#8212; how's it going?&lt;/p&gt;
+        &lt;p&gt;If you're stuck on anything, or there's a feature you expected to find and couldn't, just reply and let us know. We'd love to help.&lt;/p&gt;
+        &lt;p&gt;If things are going well, that's great to hear too &amp;#8212; thanks for giving GrowERP a try!&lt;/p&gt;
+        &lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;
+        "/>
+
+</entity-facade-xml>

@@ -77,7 +77,7 @@ limitations under the License.
             </if>
             <entity-find entity-name="growerp.marketing.EmailSequence" list="sequences"
                 offset="start" limit="limit">
-                <econdition field-name="ownerPartyId" from="companyPartyId" />
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
                 <econdition field-name="emailSequenceId" ignore-if-empty="true" />
                 <econditions combine="or">
                     <econdition field-name="pseudoId" ignore-case="true"
@@ -150,7 +150,7 @@ limitations under the License.
             </if>
             <service-call name="create#growerp.marketing.EmailSequence" out-map="context"
                 in-map="[pseudoId: emailSequence.pseudoId,
-                    ownerPartyId: companyPartyId,
+                    ownerPartyId: ownerPartyId,
                     sequenceName: emailSequence.sequenceName,
                     status: emailSequence.status ?: 'ACTIVE',
                     marketingCampaignId: emailSequence.marketingCampaignId,
@@ -196,7 +196,7 @@ limitations under the License.
             <entity-find list="sequences" for-update="true" limit="1"
                 entity-name="growerp.marketing.EmailSequence">
                 <econdition field-name="emailSequenceId" from="emailSequence.emailSequenceId" />
-                <econdition field-name="ownerPartyId" from="companyPartyId" />
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
             </entity-find>
             <if condition="!sequences">
                 <return error="true"
@@ -236,7 +236,7 @@ limitations under the License.
             <entity-find list="sequences" limit="1"
                 entity-name="growerp.marketing.EmailSequence">
                 <econdition field-name="emailSequenceId" from="emailSequence.emailSequenceId" />
-                <econdition field-name="ownerPartyId" from="companyPartyId" />
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
             </entity-find>
             <if condition="!sequences">
                 <return error="true"
@@ -374,7 +374,7 @@ limitations under the License.
             <entity-find entity-name="growerp.marketing.EmailSequence" list="sequences"
                 limit="1">
                 <econdition field-name="emailSequenceId" from="emailSequenceId" />
-                <econdition field-name="ownerPartyId" from="companyPartyId" />
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
             </entity-find>
             <if condition="!sequences">
                 <return error="true" message="sequence ${emailSequenceId} not found!" />
@@ -422,7 +422,7 @@ limitations under the License.
             <entity-find entity-name="growerp.marketing.EmailSequence" list="sequences"
                 limit="1">
                 <econdition field-name="emailSequenceId" from="emailSequenceId" />
-                <econdition field-name="ownerPartyId" from="companyPartyId" />
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
             </entity-find>
             <if condition="!sequences">
                 <return error="true" message="sequence ${emailSequenceId} not found!" />
@@ -447,7 +447,7 @@ limitations under the License.
             <entity-find entity-name="growerp.marketing.EmailSequence" list="sequences"
                 limit="1">
                 <econdition field-name="emailSequenceId" from="emailSequenceId" />
-                <econdition field-name="ownerPartyId" from="companyPartyId" />
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
             </entity-find>
             <if condition="!sequences">
                 <return error="true" message="sequence ${emailSequenceId} not found!" />
@@ -562,6 +562,16 @@ limitations under the License.
             <if condition="!steps">
                 <set field="enrollment.status" value="COMPLETED" />
                 <entity-update value-field="enrollment" />
+                <!-- First-login sequence only: subscribe to growerp.substack.com once
+                     the sequence completes. Double-gated so this never fires for any
+                     other tenant. -->
+                <if condition="enrollment.emailSequenceId == 'FIRST_LOGIN_GROWERP'
+                        &amp;&amp; enrollment.ownerPartyId == 'GROWERP'">
+                    <service-call name="growerp.100.SubstackServices100.add#SubstackSubscriber"
+                        async="true" ignore-error="true"
+                        in-map="[emailAddress: enrollment.emailAddress,
+                            ownerPartyId: enrollment.ownerPartyId]" />
+                </if>
                 <return />
             </if>
             <set field="step" from="steps[0]" />

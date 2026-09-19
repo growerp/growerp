@@ -1267,6 +1267,15 @@ limitations under the License.
                 in-map="[applicationId: applicationId]"
                 out-map="context"/>
 
+            <!-- Enroll every genuine first-time login in GrowERP's own welcome sequence
+                 (the sequence itself is GROWERP-owned, see FIRST_LOGIN_GROWERP seed data).
+                 Dedupes on sequence+email so this is a no-op after the first login. -->
+            <service-call name="growerp.100.NurtureServices100.enroll#EmailSequence"
+                async="true" ignore-error="true"
+                in-map="[emailSequenceId: 'FIRST_LOGIN_GROWERP',
+                    emailAddress: username, firstName: person.firstName,
+                    partyId: userAccount.partyId]"/>
+
             <!-- Demo data is still being loaded on a worker thread (see setup#SpecificApp).
                  Keep the real apiKey from get#Authenticate so the frontend can connect its
                  notification websocket, but flag the login so it waits on the 'setting up'

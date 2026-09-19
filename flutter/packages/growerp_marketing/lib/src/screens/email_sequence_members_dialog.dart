@@ -35,9 +35,8 @@ class EmailSequenceMembersDialog extends StatefulWidget {
 
 class EmailSequenceMembersDialogState
     extends State<EmailSequenceMembersDialog> {
-  final _addFormKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _firstNameController = TextEditingController();
+  final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   late EmailSequenceBloc _emailSequenceBloc;
 
   @override
@@ -49,8 +48,8 @@ class EmailSequenceMembersDialogState
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _firstNameController.dispose();
+    _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -61,10 +60,6 @@ class EmailSequenceMembersDialogState
       listenWhen: (previous, current) =>
           previous.memberStatus != current.memberStatus,
       listener: (context, state) {
-        if (state.memberStatus == EmailSequenceStatus.success) {
-          _emailController.clear();
-          _firstNameController.clear();
-        }
         if (state.memberStatus == EmailSequenceStatus.failure) {
           HelperFunctions.showMessage(
             context,
@@ -82,61 +77,57 @@ class EmailSequenceMembersDialogState
           title: 'Members of ${widget.emailSequence.sequenceName}',
           width: isPhone ? 400 : 800,
           height: 650,
-          child: _dialogContent(),
+          child: _dialogContent(isPhone),
         ),
       ),
     );
   }
 
-  Widget _dialogContent() {
+  Widget _dialogContent(bool isPhone) {
     return Column(
       children: [
-        Form(
-          key: _addFormKey,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        ListFilterBar(
+          searchHint: 'Search by email or name...',
+          searchController: _searchController,
+          focusNode: _searchFocusNode,
+          onSearchChanged: (value) {
+            _emailSequenceBloc.add(
+              EmailSequenceMembersFetch(
+                widget.emailSequence.emailSequenceId,
+                searchString: value,
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 10),
+        Expanded(
+          child: Stack(
             children: [
-              Expanded(
-                flex: 2,
-                child: TextFormField(
-                  key: const Key('memberEmail'),
-                  controller: _emailController,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  validator: (value) => value == null || value.isEmpty
-                      ? 'Email required'
-                      : null,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: TextFormField(
-                  key: const Key('memberFirstName'),
-                  controller: _firstNameController,
-                  decoration: const InputDecoration(labelText: 'First name'),
-                ),
-              ),
-              const SizedBox(width: 10),
-              IconButton(
-                key: const Key('addMember'),
-                icon: const Icon(Icons.add),
-                tooltip: 'Add member',
-                onPressed: () {
-                  if (_addFormKey.currentState!.validate()) {
-                    _emailSequenceBloc.add(
-                      EmailSequenceMemberAdd(
-                        emailSequenceId: widget.emailSequence.emailSequenceId,
-                        emailAddress: _emailController.text,
-                        firstName: _firstNameController.text,
+              _memberTable(),
+              Positioned(
+                right: isPhone ? 20 : 50,
+                bottom: 20,
+                child: FloatingActionButton(
+                  key: const Key('addNewMember'),
+                  onPressed: () async {
+                    await showDialog(
+                      barrierDismissible: true,
+                      context: context,
+                      builder: (BuildContext context) => BlocProvider.value(
+                        value: _emailSequenceBloc,
+                        child: _AddMemberDialog(
+                          emailSequenceId: widget.emailSequence.emailSequenceId,
+                        ),
                       ),
                     );
-                  }
-                },
+                  },
+                  tooltip: 'Add member',
+                  child: const Icon(Icons.add),
+                ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 10),
-        Expanded(child: _memberTable()),
       ],
     );
   }
@@ -192,6 +183,89 @@ class EmailSequenceMembersDialogState
               members.isEmpty,
         );
       },
+    );
+  }
+}
+
+/// Small modal form to manually add one member to a sequence, opened from
+/// the members dialog's FAB.
+class _AddMemberDialog extends StatefulWidget {
+  final String emailSequenceId;
+  const _AddMemberDialog({required this.emailSequenceId});
+
+  @override
+  State<_AddMemberDialog> createState() => _AddMemberDialogState();
+}
+
+class _AddMemberDialogState extends State<_AddMemberDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _firstNameController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _firstNameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<EmailSequenceBloc, EmailSequenceState>(
+      listenWhen: (previous, current) =>
+          previous.memberStatus != current.memberStatus,
+      listener: (context, state) {
+        if (state.memberStatus == EmailSequenceStatus.success) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Dialog(
+        key: const Key('AddEmailSequenceMemberDialog'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: popUp(
+          context: context,
+          title: 'Add member',
+          height: 280,
+          width: 400,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 10),
+                TextFormField(
+                  key: const Key('memberEmail'),
+                  controller: _emailController,
+                  decoration: const InputDecoration(labelText: 'Email'),
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Email required' : null,
+                ),
+                TextFormField(
+                  key: const Key('memberFirstName'),
+                  controller: _firstNameController,
+                  decoration: const InputDecoration(labelText: 'First name'),
+                ),
+                const SizedBox(height: 20),
+                OutlinedButton(
+                  key: const Key('addMember'),
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      context.read<EmailSequenceBloc>().add(
+                        EmailSequenceMemberAdd(
+                          emailSequenceId: widget.emailSequenceId,
+                          emailAddress: _emailController.text,
+                          firstName: _firstNameController.text,
+                        ),
+                      );
+                    }
+                  },
+                  child: const Text('Add'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

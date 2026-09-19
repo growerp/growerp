@@ -14,6 +14,7 @@
 
 import 'package:growerp_marketing_example/router_builder.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:integration_test/integration_test.dart';
@@ -65,6 +66,17 @@ void main() {
       email: 'member@example.com',
       firstName: 'Test',
     );
+    await EmailSequenceTest.searchMembers(
+      tester,
+      searchString: 'member@example.com',
+    );
+    expect(CommonTest.getTextField('email0'), equals('member@example.com'));
+    await EmailSequenceTest.searchMembers(
+      tester,
+      searchString: 'nomatch12345',
+    );
+    expect(find.byKey(const Key('email0')), findsNothing);
+    await EmailSequenceTest.clearSearch(tester);
     await EmailSequenceTest.unsubscribeMember(tester, 0);
     await EmailSequenceTest.closeMembers(tester);
 

@@ -184,6 +184,11 @@ class EmailSequenceTest {
     required String email,
     String firstName = '',
   }) async {
+    await CommonTest.tapByKey(
+      tester,
+      'addNewMember',
+      seconds: CommonTest.waitTime,
+    );
     await CommonTest.enterText(tester, 'memberEmail', email);
     await CommonTest.enterText(tester, 'memberFirstName', firstName);
     await CommonTest.tapByKey(
@@ -193,6 +198,17 @@ class EmailSequenceTest {
     );
     expect(CommonTest.getTextField('email0'), equals(email));
     expect(CommonTest.getTextField('status0'), equals('ACTIVE'));
+  }
+
+  /// Search the (already open) member list and let the debounced backend
+  /// filter apply.
+  static Future<void> searchMembers(
+    WidgetTester tester, {
+    required String searchString,
+  }) async {
+    await CommonTest.enterText(tester, 'searchField', searchString);
+    await tester.pump(const Duration(seconds: CommonTest.waitTime));
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
   }
 
   /// Unsubscribe the member at [index] and verify its status flips, while the

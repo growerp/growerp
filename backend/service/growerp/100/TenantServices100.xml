@@ -262,6 +262,9 @@ limitations under the License.
                     // spreadsheet-freedom guide download form + playbook email template
                     // for the /spreadsheetFreedom landing page
                     ec.entity.makeDataLoader().location("component://growerp/data/SpreadsheetFreedomLandingPageData.xml").load()
+                    // first-login welcome sequence (day0/3/7) + Substack subscribe on
+                    // completion, enrolled from GeneralServices100.login#User
+                    ec.entity.makeDataLoader().location("component://growerp/data/GrowerpFirstLoginSequenceData.xml").load()
                 ]]></script>
                 <service-call name="update#growerp.Application" in-map="[applicationId: 'AppAdmin', assessmentId: 'ERP_ONBOARD']"/>
 

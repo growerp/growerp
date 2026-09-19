@@ -20,7 +20,33 @@ along with this software (see the LICENSE.md file). If not, see
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
     require-authentication="anonymous-all" allow-extra-path="true" history="false">
 
+    <!-- GET only renders a confirmation form: a bot or mail-client link
+         prefetcher following the raw email link must not silently unsubscribe
+         someone. The actual unsubscribe only happens on the confirm POST. -->
     <transition name="unsubscribe" read-only="true">
+        <parameter name="id"/><parameter name="token"/>
+        <parameter name="email"/><parameter name="campaign"/>
+        <actions>
+            <script><![CDATA[
+                ec.web.sendTextResponse('<!DOCTYPE html><html><head><title>Unsubscribe</title>' +
+                    '<meta name="viewport" content="width=device-width, initial-scale=1"></head>' +
+                    '<body style="font-family:Arial,sans-serif;text-align:center;padding-top:80px;">' +
+                    '<h2>Unsubscribe from these emails?</h2>' +
+                    '<p>You will stop receiving emails from this list.</p>' +
+                    '<form method="post" action="unsubscribeConfirm">' +
+                    '<input type="hidden" name="id" value="' + (id ?: '') + '"/>' +
+                    '<input type="hidden" name="token" value="' + (token ?: '') + '"/>' +
+                    '<input type="hidden" name="email" value="' + (email ?: '') + '"/>' +
+                    '<button type="submit" style="padding:10px 24px;font-size:16px;">' +
+                    'Unsubscribe</button>' +
+                    '</form>' +
+                    '</body></html>', 'text/html', null)
+            ]]></script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+    <transition name="unsubscribeConfirm" read-only="false">
         <parameter name="id"/><parameter name="token"/>
         <parameter name="email"/><parameter name="campaign"/>
         <actions>
