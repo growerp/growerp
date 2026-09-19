@@ -40,7 +40,6 @@ dependencies:
   file_picker: ^12.2.0
   stream_transform: ^2.1.0
   decimal: ^3.2.4
-  #  html_editor_enhanced: ^2.5.1
   markdown_widget: ^2.3.1
   dio: ^5.4.3
   universal_io: ^2.2.2

@@ -36,6 +36,8 @@ class WebsiteContentState extends State<WebsiteContent> {
   final TextEditingController _seoDescriptionController =
       TextEditingController();
   bool _seoDescriptionLoaded = false;
+  final TextEditingController _htmlBodyController = TextEditingController();
+  bool _htmlBodyLoaded = false;
   static final RegExp _descriptionComment = RegExp(
     r'<!--\s*description:.*?-->\s*\n?',
     caseSensitive: false,
@@ -74,6 +76,7 @@ class WebsiteContentState extends State<WebsiteContent> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _htmlBodyController.dispose();
     super.dispose();
   }
 
@@ -124,6 +127,10 @@ class WebsiteContentState extends State<WebsiteContent> {
             if (!_seoDescriptionLoaded) {
               _seoDescriptionController.text = state.content!.description;
               _seoDescriptionLoaded = true;
+            }
+            if (!_htmlBodyLoaded && widget.content.contentType == 'ftl') {
+              _htmlBodyController.text = data;
+              _htmlBodyLoaded = true;
             }
             if (widget.content.text.isNotEmpty) {
               return Dialog(
@@ -288,7 +295,14 @@ class WebsiteContentState extends State<WebsiteContent> {
         ),
         const SizedBox(height: 10),
         isFtl
-            ? Expanded(child: input)
+            ? Expanded(
+                child: HtmlSourceEditor(
+                  controller: _htmlBodyController,
+                  isPhone: isPhone,
+                  inputKey: const Key('mdInput'),
+                  monospace: true,
+                ),
+              )
             : isPhone
             ? Expanded(
                 child: Column(
@@ -341,10 +355,11 @@ class WebsiteContentState extends State<WebsiteContent> {
                 : _localizations.update,
           ),
           onPressed: () async {
-            if (newData != '') {
+            final String bodyText = isFtl ? _htmlBodyController.text : newData;
+            if (bodyText != '') {
               // description lives in the page text as a comment so the
               // public site can render it as <meta name="description">
-              String text = newData.replaceAll(_descriptionComment, '');
+              String text = bodyText.replaceAll(_descriptionComment, '');
               final seoDescription = _seoDescriptionController.text.trim();
               if (seoDescription.isNotEmpty) {
                 text = '<!-- description: $seoDescription -->\n$text';
@@ -366,36 +381,4 @@ class WebsiteContentState extends State<WebsiteContent> {
       ],
     );
   }
-
-  /*
-  Widget _showHtmlTextForm(bool isPhone) {
-     Widget input = TextFormField(
-        key: const Key('htmlInput'),
-        autofocus: true,
-        decoration: InputDecoration(labelText: WebsiteLocalizations.of(context)!.enterTextHere),
-        expands: true,
-        maxLines: null,
-        textAlignVertical: TextAlignVertical.top,
-        textInputAction: TextInputAction.newline,
-        initialValue: data,
-        onChanged: (text) {
-          setState(() {
-            newData = text;
-          });
-        });
-
-    HtmlEditorController controller = HtmlEditorController();
-
-    return HtmlEditor(
-      controller: controller, //required
-      htmlEditorOptions: const HtmlEditorOptions(
-        hint: "Your text here...",
-        //initalText: "text content initial, if any",
-      ),
-      otherOptions: const OtherOptions(
-        height: 400,
-      ),
-    );
-  }
-*/
 }

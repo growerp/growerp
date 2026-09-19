@@ -83,13 +83,13 @@ class EmailSequenceDialogState extends State<EmailSequenceDialog> {
               : 'Email Sequence #${widget.emailSequence.pseudoId}',
           width: isPhone ? 400 : 800,
           height: 650,
-          child: _dialogContent(),
+          child: _dialogContent(isPhone),
         ),
       ),
     );
   }
 
-  Widget _dialogContent() {
+  Widget _dialogContent(bool isPhone) {
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
@@ -165,12 +165,14 @@ class EmailSequenceDialogState extends State<EmailSequenceDialog> {
                         controller: row.subject,
                         decoration: const InputDecoration(labelText: 'Subject'),
                       ),
-                      TextFormField(
-                        key: Key('stepBody$index'),
-                        controller: row.bodyHtml,
-                        maxLines: 4,
-                        decoration: const InputDecoration(
-                          labelText: 'Body (HTML allowed)',
+                      SizedBox(
+                        height: 220,
+                        child: HtmlSourceEditor(
+                          controller: row.bodyHtml,
+                          isPhone: isPhone,
+                          inputKey: Key('stepBody$index'),
+                          inputLabel: 'Body (HTML allowed)',
+                          monospace: false,
                         ),
                       ),
                     ],
