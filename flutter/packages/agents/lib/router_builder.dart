@@ -143,6 +143,15 @@ const agentsMenuConfig = MenuConfiguration(
       widgetName: 'SystemSetupDialog',
       isActive: true,
     ),
+    MenuItem(
+      menuItemId: 'AGENTS_ABOUT',
+      title: 'About',
+      route: '/about',
+      iconName: 'info',
+      sequenceNum: 90,
+      widgetName: 'AboutForm',
+      isActive: true,
+    ),
   ],
 );
 
@@ -182,7 +191,7 @@ List<Map<String, GrowerpWidgetBuilder>> agentsWidgetRegistrations = [
   getWikiWidgets(),
   {
     'AgentsDashboard': (args) => const AgentsDashboard(),
-    'AboutForm': (args) => const AboutForm(),
+    'AboutForm': (args) => const AdkAboutForm(),
     'SystemSetupDialog': (args) => const SystemSetupDialog(),
     'AdkAgentListView': (args) => const AdkAgentListView(),
     'AdkMcpServerListView': (args) => const AdkMcpServerListView(),

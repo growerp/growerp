@@ -12,6 +12,7 @@ export 'src/adk_chat_dialog.dart';
 export 'src/adk_config_service.dart';
 export 'src/adk_agent_config_dialog.dart';
 export 'src/adk_agent_list_view.dart';
+export 'src/adk_about_form.dart';
 // External MCP server registry
 export 'src/adk_mcp_server_dialog.dart';
 export 'src/adk_mcp_server_list_view.dart';

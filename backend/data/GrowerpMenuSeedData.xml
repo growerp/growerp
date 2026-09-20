@@ -733,6 +733,8 @@ limitations under the License.
         title="Organization" route="/organization" iconName="business" widgetName="ShowCompanyDialog" sequenceNum="70"/>
     <growerp.menu.MenuItem menuItemId="AGENTS_SETUP" menuConfigurationId="AGENTS_DEFAULT"
         title="System Setup" route="/setup" iconName="settings" widgetName="SystemSetupDialog" sequenceNum="80"/>
+    <growerp.menu.MenuItem menuItemId="AGENTS_ABOUT" menuConfigurationId="AGENTS_DEFAULT"
+        title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="90"/>
 
     <!-- AGENTS_SETUP children (tabs) -->
     <growerp.menu.MenuItem menuItemId="AGENTS_SETUPT_AI" menuConfigurationId="AGENTS_DEFAULT" parentMenuItemId="AGENTS_SETUP"
