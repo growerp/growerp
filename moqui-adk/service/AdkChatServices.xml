@@ -87,6 +87,31 @@
 
             <script><![CDATA[
                 import org.moqui.adk.AdkManager
+                String orgName = ''
+                String companyPseudoId = ''
+                if (ownerPartyId) {
+                    try {
+                        boolean wasDisabled = ec.artifactExecution.disableAuthz()
+                        try {
+                            def companyList = ec.entity.find('mantle.party.PartyDetailAndRole')
+                                .condition('ownerPartyId', ownerPartyId)
+                                .condition('partyTypeEnumId', 'PtyOrganization')
+                                .condition('roleTypeId', 'OrgInternal')
+                                .limit(1).list()
+                            String companyPartyId = companyList[0]?.partyId
+                            if (companyPartyId) {
+                                def org = ec.entity.find('mantle.party.Organization')
+                                    .condition('partyId', companyPartyId).one()
+                                orgName = org?.organizationName ?: ''
+
+                                def companyParty = ec.entity.find('mantle.party.Party')
+                                    .condition('partyId', companyPartyId)
+                                    .selectField('pseudoId').one()
+                                companyPseudoId = companyParty?.pseudoId ?: ''
+                            }
+                        } finally { if (!wasDisabled) ec.artifactExecution.enableAuthz() }
+                    } catch (Exception ignored) { /* best-effort */ }
+                }
                 if (!AdkManager.isInitialized()) { AdkManager.lazyInit(ec.factory) }
                 replyText = ''
                 if (AdkManager.isInitialized()) {
@@ -94,8 +119,8 @@
                         userId          : 'webchat',
                         username        : 'webchat',
                         userFullName    : (room.chatRoomName ?: 'Website visitor') as String,
-                        organizationName: '',
-                        companyPseudoId : '',
+                        organizationName: orgName,
+                        companyPseudoId : companyPseudoId,
                         tenantId        : (ownerPartyId ?: 'DEFAULT') as String,
                         timeZone        : 'UTC',
                         locale          : 'en_US',
