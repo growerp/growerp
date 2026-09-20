@@ -368,6 +368,22 @@ limitations under the License.
                             <date-filter/>
                             <order-by field-name="-fromDate"/>
                         </entity-find>
+                        <!-- A store can keep several host names side by side (GROWERP's own
+                             store has growerp.com/.org plus the local dev one); pick the same
+                             row get#Website would show for this request instead of always the
+                             newest by date, or editing silently targets the wrong host name. -->
+                        <script><![CDATA[
+                            String requestHost = ec.web?.getHostName(true)
+                            if (requestHost == '10.0.2.2') {
+                                requestHost = "${stores[0].productStoreId}.localhost:${ec.web?.request?.getServerPort() ?: 8080}"
+                            }
+                            def match = null
+                            if (requestHost) {
+                                match = prodStoreSettings.find { it.settingValue == requestHost } ?:
+                                        prodStoreSettings.find { it.settingValue?.endsWith(requestHost) }
+                            }
+                            currentSetting = match ?: prodStoreSettings[0]
+                        ]]></script>
                         <if condition="website.hostName.indexOf('.') &gt; 0">
                             <set field="newPart" from="website.hostName.split('.')[0]" />
                             <else>
@@ -375,25 +391,32 @@ limitations under the License.
                             </else>
                         </if>
                         <set field="host"
-                            from="prodStoreSettings[0]
-                        .settingValue.substring(prodStoreSettings[0].settingValue.indexOf('.'))" />
+                            from="currentSetting
+                        .settingValue.substring(currentSetting.settingValue.indexOf('.'))" />
                         <if
                             condition="
                         ['backend', 'test', 'info', 'hotel','freelance', 'ecommerce',
-                        'chat', 'nagios', 'www', 'admin', 'restaurant', 'shop', hospital,
+                        'chat', 'nagios', 'www', 'admin', 'restaurant', 'shop', 'hospital',
                         'service', 'realtor' ].contains(newPart.toLowerCase())">
                             <entity-find entity-name="mantle.product.store.ProductStoreSetting"
-                                list="checkList" limit="1">
+                                list="checkList" limit="2">
                                 <econdition field-name="settingValue"
                                     from="newPart.toLowerCase() + host" />
                                 <econdition field-name="settingTypeEnumId" value="PsstHostname" />
                             </entity-find>
-                            <if condition="checklist">
+                            <!-- exclude the row being renamed itself: the newest-by-date lookup
+                                 above may already be the row whose value equals the target -->
+                            <script>
+                                checkList = checkList.findAll {
+                                    !(it.productStoreId == currentSetting.productStoreId &amp;&amp;
+                                        it.fromDate == currentSetting.fromDate) }
+                            </script>
+                            <if condition="checkList">
                                 <return error="true" message="Name $newPart already taken!" />
                             </if>
                         </if>
                         <entity-update
-                            value-field="(prodStoreSettings[0] +
+                            value-field="(currentSetting +
                         [settingValue: newPart.toLowerCase() + host])" />
                     </if>
 
