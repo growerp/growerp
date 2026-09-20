@@ -33,6 +33,8 @@
             <parameter name="agentRole"/>
             <parameter name="orchestrationType"/>
             <parameter name="loopMaxIterations" type="Integer"/>
+            <!-- free-form grouping label; agents sharing (ownerPartyId, teamName) are one team -->
+            <parameter name="teamName"/>
         </in-parameters>
         <out-parameters>
             <parameter name="adkAgentConfigId"/>
@@ -79,6 +81,7 @@
                 <if condition="agentRole != null"><set field="existing.agentRole" from="agentRole"/></if>
                 <if condition="orchestrationType != null"><set field="existing.orchestrationType" from="orchestrationType"/></if>
                 <if condition="loopMaxIterations != null"><set field="existing.loopMaxIterations" from="loopMaxIterations"/></if>
+                <if condition="teamName != null"><set field="existing.teamName" from="teamName"/></if>
                 <entity-update value-field="existing"/>
                 <set field="adkAgentConfigId" from="existing.adkAgentConfigId"/>
                 <else>
@@ -107,6 +110,7 @@
                     <set field="newCfg.agentRole"          from="agentRole ?: 'specialist'"/>
                     <set field="newCfg.orchestrationType"  from="orchestrationType"/>
                     <set field="newCfg.loopMaxIterations"  from="loopMaxIterations"/>
+                    <set field="newCfg.teamName"           from="teamName"/>
                     <entity-sequenced-id-primary value-field="newCfg"/>
                     <entity-create value-field="newCfg"/>
                     <set field="adkAgentConfigId" from="newCfg.adkAgentConfigId"/>

@@ -41,6 +41,7 @@
                     agentRole         : cfg.agentRole ?: 'specialist',
                     orchestrationType : cfg.orchestrationType,
                     loopMaxIterations : cfg.loopMaxIterations,
+                    teamName          : cfg.teamName,
                 ]"/>
                 <script>adkAgentConfigs.add(cfgOut)</script>
             </iterate>
@@ -67,6 +68,7 @@
             <parameter name="agentRole"/>
             <parameter name="orchestrationType"/>
             <parameter name="loopMaxIterations" type="Integer"/>
+            <parameter name="teamName"/>
         </in-parameters>
         <out-parameters>
             <parameter name="adkAgentConfig" type="Map"/>
@@ -86,7 +88,7 @@
                           writePolicy: writePolicy, approvalChatRoomId: approvalChatRoomId,
                           websiteChat: websiteChat ? 'Y' : 'N',
                           agentRole: agentRole, orchestrationType: orchestrationType,
-                          loopMaxIterations: loopMaxIterations]"/>
+                          loopMaxIterations: loopMaxIterations, teamName: teamName]"/>
             <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
                 auto-field-map="[adkAgentConfigId: adkAgentConfigId]"/>
             <set field="adkAgentConfig" from="[
@@ -110,6 +112,7 @@
                 agentRole         : cfg.agentRole ?: 'specialist',
                 orchestrationType : cfg.orchestrationType,
                 loopMaxIterations : cfg.loopMaxIterations,
+                teamName          : cfg.teamName,
             ]"/>
         </actions>
     </service>
@@ -135,6 +138,7 @@
             <parameter name="agentRole"/>
             <parameter name="orchestrationType"/>
             <parameter name="loopMaxIterations" type="Integer"/>
+            <parameter name="teamName"/>
         </in-parameters>
         <out-parameters>
             <parameter name="adkAgentConfig" type="Map"/>
@@ -160,7 +164,7 @@
                           writePolicy: writePolicy, approvalChatRoomId: approvalChatRoomId,
                           websiteChat: websiteChat ? 'Y' : 'N',
                           agentRole: agentRole, orchestrationType: orchestrationType,
-                          loopMaxIterations: loopMaxIterations]"/>
+                          loopMaxIterations: loopMaxIterations, teamName: teamName]"/>
             <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
                 auto-field-map="[adkAgentConfigId: adkAgentConfigId]"/>
             <set field="adkAgentConfig" from="[
@@ -184,6 +188,7 @@
                 agentRole         : cfg.agentRole ?: 'specialist',
                 orchestrationType : cfg.orchestrationType,
                 loopMaxIterations : cfg.loopMaxIterations,
+                teamName          : cfg.teamName,
             ]"/>
         </actions>
     </service>
@@ -1076,7 +1081,8 @@
                              websiteChat: tmpl.websiteChat,
                              agentRole: tmpl.agentRole,
                              orchestrationType: tmpl.orchestrationType,
-                             loopMaxIterations: tmpl.loopMaxIterations]"/>
+                             loopMaxIterations: tmpl.loopMaxIterations,
+                             teamName: tmpl.teamName]"/>
                 <service-call name="AdkSchedulerServices.sync#AgentJob" ignore-error="true"
                     in-map="[adkAgentConfigId: cfgOut.adkAgentConfigId]"/>
                 <set field="enabledCount" from="enabledCount + 1"/>

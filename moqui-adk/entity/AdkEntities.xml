@@ -39,6 +39,11 @@
         <field name="orchestrationType"  type="text-short"/>
         <!-- loop orchestration safety cap -->
         <field name="loopMaxIterations"  type="number-integer"/>
+        <!-- Free-form label, independent of agentRole/orchestrationType: agents sharing
+             (ownerPartyId, teamName) are one team for Agent Control Center grouping and
+             team download/upload. A flat set of specialists with no coordinator (e.g. the
+             marketing agents) is still a "team" this way. -->
+        <field name="teamName"           type="text-short"/>
     </entity>
 
     <!-- Phase 4: members of a coordinator/workflow agent's team. A coordinator delegates to

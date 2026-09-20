@@ -52,6 +52,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   final _allowlistCtrl = TextEditingController();
   final _approvalRoomCtrl = TextEditingController();
   final _loopMaxCtrl = TextEditingController();
+  final _teamNameCtrl = TextEditingController();
 
   bool _scheduleEnabled = false;
   bool _saving = false;
@@ -104,6 +105,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       _agentRole = e.agentRole ?? 'specialist';
       _orchestrationType = e.orchestrationType ?? 'router';
       _loopMaxCtrl.text = e.loopMaxIterations?.toString() ?? '';
+      _teamNameCtrl.text = e.teamName ?? '';
       if (_agentRole != 'specialist' && e.adkAgentConfigId != null) _loadTeam();
       if (e.adkAgentConfigId != null) _loadMcpServers();
     } else {
@@ -280,6 +282,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     _allowlistCtrl.dispose();
     _approvalRoomCtrl.dispose();
     _loopMaxCtrl.dispose();
+    _teamNameCtrl.dispose();
     super.dispose();
   }
 
@@ -332,6 +335,9 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
             (_agentRole != 'specialist' && _orchestrationType == 'loop')
                 ? int.tryParse(_loopMaxCtrl.text.trim())
                 : null,
+        teamName: _teamNameCtrl.text.trim().isEmpty
+            ? null
+            : _teamNameCtrl.text.trim(),
       );
       final apiKey = _apiKeyCtrl.text.trim();
       final saved = await svc.save(cfg, apiKey: apiKey.isEmpty ? null : apiKey);
@@ -747,6 +753,17 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                       Divider(height: 24),
                       Text(AdkLocalizations.of(context)!.adk_teamOrchestration,
                           style: TextStyle(fontWeight: FontWeight.bold)),
+                      SizedBox(height: 8),
+                      TextFormField(
+                        key: Key('teamName'),
+                        controller: _teamNameCtrl,
+                        decoration: InputDecoration(
+                          labelText: 'Team name',
+                          helperText:
+                              'Groups this agent in the Agent Control Center list and '
+                              'lets the whole team be downloaded/uploaded together',
+                        ),
+                      ),
                       SizedBox(height: 8),
                       DropdownButtonFormField<String>(
                         key: Key('agentRole'),

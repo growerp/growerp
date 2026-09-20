@@ -55,6 +55,7 @@ class AdkConfigService {
         agentRole: cfg.agentRole,
         orchestrationType: cfg.orchestrationType,
         loopMaxIterations: cfg.loopMaxIterations,
+        teamName: cfg.teamName,
       );
     }
     return _client.updateAdkAgentConfig(
@@ -76,6 +77,7 @@ class AdkConfigService {
       agentRole: cfg.agentRole,
       orchestrationType: cfg.orchestrationType,
       loopMaxIterations: cfg.loopMaxIterations,
+      teamName: cfg.teamName,
     );
   }
 
@@ -109,6 +111,15 @@ class AdkConfigService {
 
   Future<void> removeTeamMember(String adkAgentTeamMemberId) async =>
       _client.deleteAdkAgentTeam(adkAgentTeamMemberId: adkAgentTeamMemberId);
+
+  /// Download a whole team (agents + delegation edges) as one JSON payload.
+  /// A null [teamName] downloads the untagged "Other agents" bucket.
+  Future<AdkAgentTeamExport> exportTeam(String? teamName) async =>
+      _client.getAdkAgentTeamExport(teamName: teamName);
+
+  /// Upload a team JSON payload previously produced by [exportTeam].
+  Future<AdkAgentTeamImportResult> importTeam(String jsonText) async =>
+      _client.postAdkAgentTeamImport(jsonText: jsonText);
 
   // ── System settings (read-only here; used for tool-auth status badges) ─────
   Future<SystemSettings> getSystemSettings() => _client.getSystemSettings();

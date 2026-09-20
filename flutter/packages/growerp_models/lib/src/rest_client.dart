@@ -2424,6 +2424,7 @@ abstract class RestClient {
     @Field() String? agentRole,
     @Field() String? orchestrationType,
     @Field() int? loopMaxIterations,
+    @Field() String? teamName,
   });
 
   @PATCH("rest/s1/growerp/100/AdkAgentConfig")
@@ -2446,6 +2447,7 @@ abstract class RestClient {
     @Field() String? agentRole,
     @Field() String? orchestrationType,
     @Field() int? loopMaxIterations,
+    @Field() String? teamName,
   });
 
   @DELETE("rest/s1/growerp/100/AdkAgentConfig")
@@ -2470,6 +2472,17 @@ abstract class RestClient {
   @DELETE("rest/s1/growerp/100/AdkAgentTeam")
   Future<void> deleteAdkAgentTeam({
     @Query('adkAgentTeamMemberId') required String adkAgentTeamMemberId,
+  });
+
+  // Team download / upload. teamName omitted -> the untagged "Other agents" bucket.
+  @GET("rest/s1/growerp/100/AdkAgentTeam/Export")
+  Future<AdkAgentTeamExport> getAdkAgentTeamExport({
+    @Query('teamName') String? teamName,
+  });
+
+  @POST("rest/s1/growerp/100/AdkAgentTeam/Import")
+  Future<AdkAgentTeamImportResult> postAdkAgentTeamImport({
+    @Field() required String jsonText,
   });
 
   // External MCP server registry (tenant-level)

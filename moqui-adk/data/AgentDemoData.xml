@@ -29,6 +29,7 @@
         enabled="Y"
         agentRole="coordinator"
         orchestrationType="router"
+        teamName="Operations Assistant"
         toolMode="readOnly"
         description="Front-desk operations coordinator for the company. Delegates to the right specialist."
         instruction="You are the GrowERP Operations Assistant, the coordinator for this company.
@@ -48,6 +49,7 @@ spans several areas, delegate them in turn. Never invent data."/>
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
+        teamName="Operations Assistant"
         toolMode="scoped"
         serviceAllowlist="*get#FinDoc,*create#FinDoc,*update#FinDoc,*get#Product,*get#Companies,*get#Users"
         writePolicy="approve"
@@ -66,6 +68,7 @@ prices; look them up."/>
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
+        teamName="Operations Assistant"
         toolMode="readOnly"
         description="Use for stock levels, product availability, warehouse locations and inventory questions."
         instruction="You are the Inventory specialist for this company. You answer questions about
@@ -81,6 +84,7 @@ through the Sales specialist with approval."/>
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
+        teamName="Operations Assistant"
         toolMode="readOnly"
         websiteChat="Y"
         description="Use for company policy: returns, refunds, shipping times, support hours and FAQs."

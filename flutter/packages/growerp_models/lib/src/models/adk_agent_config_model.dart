@@ -56,6 +56,10 @@ class AdkAgentConfig {
   final String? orchestrationType;
   final int? loopMaxIterations;
 
+  /// Free-form label; agents sharing (ownerPartyId, teamName) are grouped as one team in
+  /// the Agent Control Center UI and can be downloaded/uploaded together.
+  final String? teamName;
+
   /// Write-only: sent on create/update, never returned by GET.
   @JsonKey(includeFromJson: false)
   final String? apiKey;
@@ -81,6 +85,7 @@ class AdkAgentConfig {
     this.agentRole,
     this.orchestrationType,
     this.loopMaxIterations,
+    this.teamName,
     this.apiKey,
   });
 
@@ -110,6 +115,7 @@ class AdkAgentConfig {
     String? agentRole,
     String? orchestrationType,
     int? loopMaxIterations,
+    String? teamName,
     String? apiKey,
   }) =>
       AdkAgentConfig(
@@ -133,6 +139,7 @@ class AdkAgentConfig {
         agentRole: agentRole ?? this.agentRole,
         orchestrationType: orchestrationType ?? this.orchestrationType,
         loopMaxIterations: loopMaxIterations ?? this.loopMaxIterations,
+        teamName: teamName ?? this.teamName,
         apiKey: apiKey ?? this.apiKey,
       );
 
@@ -149,4 +156,30 @@ class AdkAgentConfigs {
   factory AdkAgentConfigs.fromJson(Map<String, dynamic> json) =>
       _$AdkAgentConfigsFromJson(json);
   Map<String, dynamic> toJson() => _$AdkAgentConfigsToJson(this);
+}
+
+/// A downloadable team file: `jsonText` is the exact bytes to save/read back.
+@JsonSerializable()
+class AdkAgentTeamExport {
+  final String? fileName;
+  final String? jsonText;
+
+  const AdkAgentTeamExport({this.fileName, this.jsonText});
+
+  factory AdkAgentTeamExport.fromJson(Map<String, dynamic> json) =>
+      _$AdkAgentTeamExportFromJson(json);
+  Map<String, dynamic> toJson() => _$AdkAgentTeamExportToJson(this);
+}
+
+@JsonSerializable()
+class AdkAgentTeamImportResult {
+  final String? importedTeamName;
+  final int? importedAgentCount;
+
+  const AdkAgentTeamImportResult(
+      {this.importedTeamName, this.importedAgentCount});
+
+  factory AdkAgentTeamImportResult.fromJson(Map<String, dynamic> json) =>
+      _$AdkAgentTeamImportResultFromJson(json);
+  Map<String, dynamic> toJson() => _$AdkAgentTeamImportResultToJson(this);
 }

@@ -1716,6 +1716,16 @@ limitations under the License.
         </resource>
         <!-- Phase 4: coordinator team membership -->
         <resource name="AdkAgentTeam">
+            <resource name="Export">
+                <method type="get">
+                    <service name="AdkTeamTransferServices.export#AdkAgentTeam"/>
+                </method>
+            </resource>
+            <resource name="Import">
+                <method type="post">
+                    <service name="AdkTeamTransferServices.import#AdkAgentTeam"/>
+                </method>
+            </resource>
             <method type="get">
                 <service name="AdkServices100.get#AdkAgentTeam"/>
             </method>

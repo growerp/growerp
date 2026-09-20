@@ -12,7 +12,11 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'adk_agent_config_dialog.dart';
@@ -191,6 +195,68 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
     }
   }
 
+  /// A null [teamName] downloads the untagged "Other agents" bucket.
+  Future<void> _downloadTeam(String? teamName) async {
+    try {
+      final svc = await AdkConfigService.create();
+      final export = await svc.exportTeam(teamName);
+      final bytes = Uint8List.fromList(utf8.encode(export.jsonText ?? '{}'));
+      final uri = await FilePicker.saveFile(
+        dialogTitle: 'Save the agent team',
+        fileName: export.fileName ?? 'team.json',
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+        bytes: bytes,
+      );
+      if (!mounted || uri == null) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Saved as ${uri.path}')));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Download failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _uploadTeam() async {
+    final file = await FilePicker.pickFile(
+      allowedExtensions: ['json'],
+      type: FileType.custom,
+    );
+    if (file == null) return;
+    final jsonText = utf8.decode(await file.readAsBytes());
+    try {
+      final svc = await AdkConfigService.create();
+      final result = await svc.importTeam(jsonText);
+      await _load();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Imported "${result.importedTeamName}" '
+              '(${result.importedAgentCount} agents)',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Import failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _edit(AdkAgentConfig cfg) async {
     final result = await AdkAgentConfigDialog.show(context, existing: cfg);
     if (result != null) await _load();
@@ -276,6 +342,12 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
               icon: const Icon(Icons.rocket_launch),
               tooltip: 'Enable marketing agent team',
               onPressed: _enableMarketingTeam,
+            ),
+            IconButton(
+              key: const Key('uploadAdkAgentTeam'),
+              icon: const Icon(Icons.upload),
+              tooltip: 'Upload team',
+              onPressed: _uploadTeam,
             ),
             IconButton(
               key: const Key('refreshAdkAgents'),
@@ -371,8 +443,105 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
             StyledColumn(header: '', flex: 1),
           ];
 
-    final rows = _configs.asMap().entries.map((entry) {
-      final i = entry.key;
+    // Group by teamName so orchestrated coordinator/specialist teams (e.g. the demo
+    // "Operations Assistant") and flat tagged groups (e.g. "GrowERP Marketing Team")
+    // both render as one section. Untagged agents fall into a trailing "Other agents"
+    // section, and a single running row index is kept across every section so the
+    // existing name$i/editAdkAgent$i/deleteAdkAgent$i keys stay unique.
+    final teamGroups = <String, List<AdkAgentConfig>>{};
+    final ungrouped = <AdkAgentConfig>[];
+    for (final cfg in _configs) {
+      final t = cfg.teamName?.trim();
+      if (t == null || t.isEmpty) {
+        ungrouped.add(cfg);
+      } else {
+        teamGroups.putIfAbsent(t, () => []).add(cfg);
+      }
+    }
+    final teamNames = teamGroups.keys.toList()..sort();
+
+    int runningIndex = 0;
+    final sections = <Widget>[];
+    for (final teamName in teamNames) {
+      final groupConfigs = teamGroups[teamName]!;
+      sections.add(
+        _buildTeamSection(
+          teamName,
+          groupConfigs,
+          runningIndex,
+          phone,
+          cs,
+          columns,
+        ),
+      );
+      runningIndex += groupConfigs.length;
+    }
+    if (ungrouped.isNotEmpty) {
+      sections.add(
+        _buildTeamSection(null, ungrouped, runningIndex, phone, cs, columns),
+      );
+    }
+
+    return ListView(controller: _scrollController, children: sections);
+  }
+
+  Widget _buildTeamSection(
+    String? teamName,
+    List<AdkAgentConfig> groupConfigs,
+    int startIndex,
+    bool phone,
+    ColorScheme cs,
+    List<StyledColumn> columns,
+  ) {
+    final rowHeight = phone ? 80.0 : 56.0;
+    final rows = _buildRows(groupConfigs, startIndex, phone, cs);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 8, 4),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '${teamName ?? 'Other agents'} (${groupConfigs.length})',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+              IconButton(
+                key: Key('downloadTeam_${teamName ?? 'other'}'),
+                icon: const Icon(Icons.download, size: 20),
+                tooltip: teamName != null
+                    ? 'Download team'
+                    : 'Download other agents',
+                onPressed: () => _downloadTeam(teamName),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 48 + rowHeight * groupConfigs.length,
+          child: StyledDataTable(
+            columns: columns,
+            rows: rows,
+            rowHeight: rowHeight,
+            onRowTap: (index) => _edit(groupConfigs[index]),
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<List<Widget>> _buildRows(
+    List<AdkAgentConfig> list,
+    int startIndex,
+    bool phone,
+    ColorScheme cs,
+  ) {
+    return list.asMap().entries.map((entry) {
+      final i = startIndex + entry.key;
       final cfg = entry.value;
       final hasSchedule =
           cfg.scheduleEnabled &&
@@ -471,13 +640,5 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
         actions,
       ];
     }).toList();
-
-    return StyledDataTable(
-      columns: columns,
-      rows: rows,
-      scrollController: _scrollController,
-      rowHeight: phone ? 80 : 56,
-      onRowTap: (index) => _edit(_configs[index]),
-    );
   }
 }

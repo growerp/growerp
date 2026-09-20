@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- Download / upload a whole named team (agents sharing ownerPartyId+teamName, plus any
+         AdkAgentTeamMember delegation edges among them) as a single JSON file, so a team built
+         in one tenant can be shared into another. Mirrors the xmlText+fileName pattern already
+         used by growerp.100.WebsiteGeneratorServices100.export#WebsiteOwner /
+         import#WebsiteFile, adapted to JSON since the payload is already structured. -->
+
+    <service verb="export" noun="AdkAgentTeam">
+        <in-parameters>
+            <!-- omit teamName to export the untagged "Other agents" bucket instead of a
+                 named team -->
+            <parameter name="teamName"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="fileName"/>
+            <parameter name="jsonText"/>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <if condition="!ownerPartyId">
+                <return error="true" message="Cannot determine your company, please log in again."/>
+            </if>
+            <if condition="teamName">
+                <entity-find entity-name="moqui.adk.AdkAgentConfig" list="cfgList">
+                    <econdition field-name="ownerPartyId" from="ownerPartyId"/>
+                    <econdition field-name="teamName" from="teamName"/>
+                    <order-by field-name="agentName"/>
+                </entity-find>
+                <else>
+                    <entity-find entity-name="moqui.adk.AdkAgentConfig" list="cfgList">
+                        <econdition field-name="ownerPartyId" from="ownerPartyId"/>
+                        <econdition field-name="teamName" operator="is-null"/>
+                        <order-by field-name="agentName"/>
+                    </entity-find>
+                </else>
+            </if>
+            <if condition="!cfgList">
+                <set field="notFoundMsg"
+                    from="teamName ? (&quot;No agents found for team '&quot; + teamName + &quot;'.&quot;) : 'No untagged agents found.'"/>
+                <return error="true" message="${notFoundMsg}"/>
+            </if>
+            <set field="agentIds" from="cfgList*.adkAgentConfigId"/>
+            <set field="agents" from="[]"/>
+            <!-- never export apiKey (secret), or ownerPartyId/agentPartyId/approvalChatRoomId/
+                 scheduleChatRoomId (tenant-specific ids that would dangle in another tenant) -->
+            <iterate list="cfgList" entry="cfg">
+                <script>agents.add([
+                    adkAgentConfigId  : cfg.adkAgentConfigId,
+                    agentName         : cfg.agentName,
+                    modelName         : cfg.modelName,
+                    llmProvider       : cfg.llmProvider ?: 'gemini',
+                    instruction       : cfg.instruction,
+                    description       : cfg.description,
+                    scheduleExpression: cfg.scheduleExpression,
+                    scheduleEnabled   : cfg.scheduleEnabled == 'Y',
+                    schedulePrompt    : cfg.schedulePrompt,
+                    toolMode          : cfg.toolMode ?: 'readOnly',
+                    serviceAllowlist  : cfg.serviceAllowlist,
+                    writePolicy       : cfg.writePolicy ?: 'approve',
+                    websiteChat       : cfg.websiteChat == 'Y',
+                    agentRole         : cfg.agentRole ?: 'specialist',
+                    orchestrationType : cfg.orchestrationType,
+                    loopMaxIterations : cfg.loopMaxIterations,
+                ])</script>
+            </iterate>
+            <entity-find entity-name="moqui.adk.AdkAgentTeamMember" list="tmList">
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
+                <econdition field-name="coordinatorConfigId" operator="in" from="agentIds"/>
+                <order-by field-name="sequenceNum"/>
+            </entity-find>
+            <set field="teamMembers" from="[]"/>
+            <iterate list="tmList" entry="tm">
+                <if condition="agentIds.contains(tm.memberConfigId)">
+                    <script>teamMembers.add([
+                        coordinatorConfigId: tm.coordinatorConfigId,
+                        memberConfigId     : tm.memberConfigId,
+                        sequenceNum        : tm.sequenceNum,
+                        delegationMode     : tm.delegationMode ?: 'tool',
+                    ])</script>
+                </if>
+            </iterate>
+            <script>
+                def exportMap = [teamName: teamName ?: null, agents: agents, teamMembers: teamMembers]
+                jsonText = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(exportMap))
+                fileName = teamName
+                    ? "team-" + teamName.toLowerCase().replaceAll(/[^a-z0-9]+/, '-').replaceAll(/(^-|-$)/, '') + ".json"
+                    : "other-agents.json"
+            </script>
+        </actions>
+    </service>
+
+    <service verb="import" noun="AdkAgentTeam">
+        <in-parameters>
+            <parameter name="jsonText" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="importedTeamName"/>
+            <parameter name="importedAgentCount" type="Integer"/>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <if condition="!ownerPartyId">
+                <return error="true" message="Cannot determine your company, please log in again."/>
+            </if>
+            <!-- assigned via <set>, not a <script>-local var, so it stays visible to the
+                 mini-language <if>/<iterate> elements below -->
+            <set field="data" from="new groovy.json.JsonSlurper().parseText(jsonText)"/>
+            <!-- teamName is optional: absent/null means the untagged "Other agents" bucket -->
+            <set field="importedTeamName" from="data.teamName"/>
+            <set field="importedAgentCount" from="data.agents?.size() ?: 0"/>
+            <if condition="!data.agents">
+                <return error="true" message="Team file is missing an agents list."/>
+            </if>
+            <!-- 1. Upsert each agent into this tenant (no id given -> upserts by
+                 (ownerPartyId, agentName), so re-importing the same file is safe), remapping
+                 each old (source-tenant) id to the new id created here. -->
+            <set field="idMap" from="[:]"/>
+            <iterate list="data.agents" entry="a">
+                <service-call name="AdkServices.update#AgentConfig" out-map="cfgOut"
+                    in-map="[ownerPartyId: ownerPartyId,
+                             agentName: a.agentName, modelName: a.modelName,
+                             llmProvider: a.llmProvider, instruction: a.instruction,
+                             description: a.description,
+                             scheduleExpression: a.scheduleExpression,
+                             scheduleEnabled: a.scheduleEnabled ? 'Y' : 'N',
+                             schedulePrompt: a.schedulePrompt,
+                             toolMode: a.toolMode, serviceAllowlist: a.serviceAllowlist,
+                             writePolicy: a.writePolicy, websiteChat: a.websiteChat ? 'Y' : 'N',
+                             agentRole: a.agentRole, orchestrationType: a.orchestrationType,
+                             loopMaxIterations: a.loopMaxIterations, teamName: importedTeamName]"/>
+                <script>idMap[a.adkAgentConfigId as String] = cfgOut.adkAgentConfigId</script>
+                <!-- scheduled agents need a chat room to report to; self-reference the new id
+                     the same way AdkDemoServices.load#AgentDemo does for the built-in demo -->
+                <if condition="a.scheduleEnabled">
+                    <service-call name="AdkServices.update#AgentConfig"
+                        in-map="[adkAgentConfigId: cfgOut.adkAgentConfigId, ownerPartyId: ownerPartyId,
+                                 agentName: a.agentName, modelName: a.modelName,
+                                 llmProvider: a.llmProvider, instruction: a.instruction,
+                                 description: a.description,
+                                 scheduleExpression: a.scheduleExpression,
+                                 scheduleEnabled: 'Y', schedulePrompt: a.schedulePrompt,
+                                 scheduleChatRoomId: cfgOut.adkAgentConfigId,
+                                 toolMode: a.toolMode, serviceAllowlist: a.serviceAllowlist,
+                                 writePolicy: a.writePolicy, websiteChat: a.websiteChat ? 'Y' : 'N',
+                                 agentRole: a.agentRole, orchestrationType: a.orchestrationType,
+                                 loopMaxIterations: a.loopMaxIterations, teamName: importedTeamName]"/>
+                </if>
+            </iterate>
+            <!-- 2. Recreate team membership with remapped coordinator/member ids -->
+            <iterate list="data.teamMembers ?: []" entry="tm">
+                <set field="newCoord"  from="idMap[tm.coordinatorConfigId as String]"/>
+                <set field="newMember" from="idMap[tm.memberConfigId as String]"/>
+                <if condition="newCoord &amp;&amp; newMember">
+                    <entity-find entity-name="moqui.adk.AdkAgentTeamMember" list="existingTm">
+                        <econdition field-name="ownerPartyId" from="ownerPartyId"/>
+                        <econdition field-name="coordinatorConfigId" from="newCoord"/>
+                        <econdition field-name="memberConfigId" from="newMember"/>
+                    </entity-find>
+                    <if condition="!existingTm">
+                        <service-call name="AdkServices100.create#AdkAgentTeam" ignore-error="true"
+                            in-map="[coordinatorConfigId: newCoord, memberConfigId: newMember,
+                                     sequenceNum: tm.sequenceNum, delegationMode: tm.delegationMode ?: 'tool']"/>
+                    </if>
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
+</services>

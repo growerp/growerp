@@ -37,7 +37,7 @@
                              toolMode: tmpl.toolMode, serviceAllowlist: tmpl.serviceAllowlist,
                              writePolicy: tmpl.writePolicy, websiteChat: tmpl.websiteChat,
                              agentRole: tmpl.agentRole, orchestrationType: tmpl.orchestrationType,
-                             loopMaxIterations: tmpl.loopMaxIterations]"/>
+                             loopMaxIterations: tmpl.loopMaxIterations, teamName: tmpl.teamName]"/>
                 <script>idMap[tmpl.adkAgentConfigId] = cfgOut.adkAgentConfigId</script>
                 <!-- Scheduled agents need a room to report output/errors to. ChatRoom ids are a
                      global PK, so a literal id can't be hardcoded in the _NA_ template (it would
@@ -56,7 +56,7 @@
                                  toolMode: tmpl.toolMode, serviceAllowlist: tmpl.serviceAllowlist,
                                  writePolicy: tmpl.writePolicy, websiteChat: tmpl.websiteChat,
                                  agentRole: tmpl.agentRole, orchestrationType: tmpl.orchestrationType,
-                                 loopMaxIterations: tmpl.loopMaxIterations]"/>
+                                 loopMaxIterations: tmpl.loopMaxIterations, teamName: tmpl.teamName]"/>
                 </if>
             </iterate>
 
