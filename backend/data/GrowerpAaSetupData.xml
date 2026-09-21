@@ -17,7 +17,7 @@ limitations under the License.
     <!-- Service Job: Recalculate GL Account Org Summaries - once per hour by default -->
     <moqui.service.job.ServiceJob jobName="recalculate_growerp_statistics"
         description="Recalculate the growerp dashboard statistics"
-        serviceName="growerp.100.GeneralServices100.get#Statistics" cronExpression="0 0 * * * ?"
+        serviceName="growerp.100.GeneralServices100.recalculate#StatisticsJob" cronExpression="0 0 * * * ?"
         paused="N"
         transactionTimeout="1800" />
 

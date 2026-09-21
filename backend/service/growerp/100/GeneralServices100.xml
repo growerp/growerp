@@ -422,6 +422,20 @@ limitations under the License.
     </service>
 
 
+    <service verb="recalculate" noun="StatisticsJob" authenticate="false">
+        <description>Internal-only entry point for the hourly statistics job scheduler,
+            which has no logged-in user. Not REST-mapped; rejects any web-originated call
+            so it cannot become a new anonymous trigger for get#Statistics. Do not call
+            directly except from the recalculate_growerp_statistics ServiceJob.</description>
+        <actions>
+            <if condition="ec.web != null">
+                <return error="true" message="Internal service only, not callable over the web"/>
+            </if>
+            <script><![CDATA[ec.user.internalLoginUser("SystemSupport")]]></script>
+            <service-call name="growerp.100.GeneralServices100.get#Statistics"/>
+        </actions>
+    </service>
+
     <service verb="get" noun="Statistics">
         <description>Job run by the job sheduler or at owner creation, do not make pubic.</description>
         <in-parameters>
