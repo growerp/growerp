@@ -190,8 +190,27 @@ class CommonTest {
     Map testData = const {},
   }) async {
     SaveTest test = await PersistFunctions.getTest();
-    int seq = test.sequence + 1;
     if (test.admin != null) return; // company already created
+    // check if logged in, if yes logout first
+    await logout(tester);
+    await _registerNewAdmin(tester);
+    await login(
+      tester,
+      testData: testData,
+      demoData: demoData,
+    );
+    // check for notification message
+    if (hasKey('dismiss')) {
+      await tapByKey(tester, 'dismiss');
+    }
+  }
+
+  // Registers a brand-new admin user via the newUserButton flow and persists
+  // it as the current SaveTest.admin. Assumes the caller already logged off
+  // (or was never logged in) so the unauthenticated home screen is showing.
+  static Future<void> _registerNewAdmin(WidgetTester tester) async {
+    SaveTest test = await PersistFunctions.getTest();
+    int seq = test.sequence + 1;
     // check if email address already exist
     final restClient = RestClient(await buildDioClient());
     var exist = true;
@@ -212,8 +231,6 @@ class CommonTest {
         expect(true, false, reason: "=============backend error =============");
       }
     }
-    // check if logged in, if yes logout first
-    await logout(tester);
     // Wait for unauthenticated home screen with newUserButton to appear
     for (int i = 0; i < 150; i++) {
       await tester.pump(const Duration(milliseconds: 100));
@@ -237,15 +254,6 @@ class CommonTest {
         admin: admin.copyWith(email: email, loginName: email),
       ),
     );
-    await login(
-      tester,
-      testData: testData,
-      demoData: demoData,
-    );
-    // check for notification message
-    if (hasKey('dismiss')) {
-      await tapByKey(tester, 'dismiss');
-    }
   }
 
   static Future<void> login(
@@ -321,15 +329,17 @@ class CommonTest {
         debugPrint('Login: TenantSetupDialog detected, completing...');
 
         // If the company name is already filled with 'GrowERP', this is the
-        // initial master-tenant setup. Complete it, log off to ensure the
-        // GrowERP company is created, then re-login to continue normally.
+        // initial master-tenant setup (first tenant ever, backend has no
+        // users yet). GrowERP carries its own permanent seed demo data, so
+        // don't run the actual test against it: complete the bootstrap, log
+        // off, then register a genuinely new admin/tenant for the real test.
         final existingCompanyName = getFormBuilderTextFieldByName(
           tester,
           'companyName',
         );
         if (existingCompanyName == 'GrowERP') {
           debugPrint(
-            'Login: GrowERP tenant detected - clicking Complete Setup then logging off...',
+            'Login: GrowERP tenant detected - clicking Complete Setup then creating a fresh tenant...',
           );
           await tester.tap(find.byKey(const Key('submit')));
           await tester.pump();
@@ -341,14 +351,11 @@ class CommonTest {
           // Log off so the initial GrowERP company is fully persisted
           await logout(tester);
           await tester.pumpAndSettle(const Duration(seconds: 2));
-          // Re-login with the same credentials to continue the test flow
-          await pressLoginButton(tester);
-          await enterText(tester, 'username', loginUsername);
-          await enterText(tester, 'password', password ?? 'qqqqqq9!');
-          await pressLogin(tester);
-          await waitForSnackbarToGo(tester);
-          await tester.pumpAndSettle(const Duration(seconds: 2));
-          continue;
+          // Register a brand-new admin: GrowERP now has a user, so the
+          // backend allocates a real new tenant for this registration.
+          await _registerNewAdmin(tester);
+          await login(tester, testData: testData, demoData: demoData);
+          return;
         }
 
         await enterText(tester, 'companyName', companyName);
