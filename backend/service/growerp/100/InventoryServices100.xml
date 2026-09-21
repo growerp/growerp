@@ -15,7 +15,7 @@ limitations under the License.
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
 
-    <service verb="get" noun="Location" authenticate="false">
+    <service verb="get" noun="Location">
         <description> get a single, or all warehouse locations</description>
         <in-parameters>
             <parameter name="locationId" />
@@ -122,7 +122,7 @@ limitations under the License.
         </actions>
     </service>
 
-    <service verb="create" noun="Location" authenticate="false">
+    <service verb="create" noun="Location">
         <description> get a single, or all warehouse locations</description>
         <in-parameters>
             <parameter name="location" type="Map" required="true">
@@ -164,7 +164,7 @@ limitations under the License.
         </actions>
     </service>
 
-    <service verb="update" noun="Location" authenticate="false">
+    <service verb="update" noun="Location">
         <description> get a single, or all warehouse locations</description>
         <in-parameters>
             <parameter name="location" type="Map">
@@ -227,7 +227,7 @@ limitations under the License.
         </actions>
     </service>
 
-    <service verb="delete" noun="Location" authenticate="false">
+    <service verb="delete" noun="Location">
         <description> get a single, or all warehouse locations</description>
         <in-parameters>
             <parameter name="location" type="Map" required="true">

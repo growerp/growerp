@@ -422,7 +422,7 @@ limitations under the License.
     </service>
 
 
-    <service verb="get" noun="Statistics" authenticate="false">
+    <service verb="get" noun="Statistics">
         <description>Job run by the job sheduler or at owner creation, do not make pubic.</description>
         <in-parameters>
             <parameter name="ownerPartyId"/>

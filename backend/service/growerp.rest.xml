@@ -543,7 +543,7 @@ limitations under the License.
                 <method type="delete">
                     <service name="growerp.100.AssessmentServices100.delete#Question" />
                 </method>
-                <resource name="Option" require-authentication="anonymous-all">
+                <resource name="Option">
                     <method type="get" require-authentication="anonymous-all">
                         <service name="growerp.100.AssessmentServices100.get#Option" />
                     </method>
