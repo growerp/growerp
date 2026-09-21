@@ -17,11 +17,12 @@
 /*
 app: freelance
 screens:
-  - route: /             title: "Dashboard"     wait_key: refresh
-  - route: /tasks        title: "Tasks"
-  - route: /orders       title: "Orders"
-  - route: /invoices     title: "Invoices"
-  - route: /bookkeeping  title: "Bookkeeping"
+  - route: /             title: "Dashboard"           wait_key: refresh
+  - route: /tasks        title: "To Do List"
+  - route: /crm    tab: Opportunities                 title: "CRM Opportunities"
+  - route: /crm    tab: Leads                         title: "CRM Leads"
+  - route: /website      title: "Website"
+  - route: /catalog      title: "Catalog"
 */
 
 import 'dart:io';
@@ -188,15 +189,28 @@ void main() {
     await _screenshot(binding, tester, 'dashboard');
 
     await _selectOption(tester, route: '/tasks', formKey: '/tasks');
-    await _screenshot(binding, tester, 'tasks');
+    await _screenshot(binding, tester, 'todolist');
 
-    await _selectOption(tester, route: '/orders', formKey: '/orders');
-    await _screenshot(binding, tester, 'orders');
+    await _selectOption(
+      tester,
+      route: '/crm',
+      formKey: '/crm',
+      tab: 'Opportunities',
+    );
+    await _screenshot(binding, tester, 'crm_opportunities');
 
-    await _selectOption(tester, route: '/invoices', formKey: '/invoices');
-    await _screenshot(binding, tester, 'invoices');
+    await _selectOption(
+      tester,
+      route: '/crm',
+      formKey: 'leadStatusFilter',
+      tab: 'Leads',
+    );
+    await _screenshot(binding, tester, 'crm_leads');
 
-    await _selectOption(tester, route: '/bookkeeping', formKey: '/bookkeeping');
-    await _screenshot(binding, tester, 'bookkeeping');
+    await _selectOption(tester, route: '/website', formKey: '/website');
+    await _screenshot(binding, tester, 'website');
+
+    await _selectOption(tester, route: '/catalog', formKey: '/catalog');
+    await _screenshot(binding, tester, 'catalog');
   });
 }
