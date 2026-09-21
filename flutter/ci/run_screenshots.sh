@@ -7,8 +7,9 @@
 # Environment variables (set by docker-compose-screenshot.yml):
 #   BACKEND_URL   — REST backend URL (default: http://moqui)
 #   CHAT_URL      — WebSocket URL    (default: ws://moqui)
-#   SCREEN_WIDTH  — Logical screen width  (default: 412)
-#   SCREEN_HEIGHT — Logical screen height (default: 892)
+#   SCREEN_WIDTH       — Logical screen width  (default: 412)
+#   SCREEN_HEIGHT      — Logical screen height (default: 892)
+#   SCREEN_TOP_PADDING — Simulated top safe-area inset, e.g. iPhone notch (default: 0)
 #
 set -euo pipefail
 
@@ -52,6 +53,7 @@ export BACKEND_URL="${BACKEND_URL:-http://moqui}"
 export CHAT_URL="${CHAT_URL:-ws://moqui}"
 export SCREEN_WIDTH="${SCREEN_WIDTH:-412}"
 export SCREEN_HEIGHT="${SCREEN_HEIGHT:-892}"
+export SCREEN_TOP_PADDING="${SCREEN_TOP_PADDING:-0}"
 
 echo "Verifying Moqui backend at $BACKEND_URL ..."
 TIMEOUT=120
@@ -92,6 +94,7 @@ flutter test \
   --dart-define="CHAT_URL=$CHAT_URL" \
   --dart-define="SCREEN_WIDTH=$SCREEN_WIDTH" \
   --dart-define="SCREEN_HEIGHT=$SCREEN_HEIGHT" \
+  --dart-define="SCREEN_TOP_PADDING=$SCREEN_TOP_PADDING" \
   --dart-define="SCREENSHOTS_DIR=$SCREENSHOTS_DIR"
 
 DRIVE_EXIT=$?

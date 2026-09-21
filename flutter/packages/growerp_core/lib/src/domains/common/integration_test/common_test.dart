@@ -118,6 +118,20 @@ class CommonTest {
       tester.view.devicePixelRatio = 1.0;
     }
 
+    // Simulate a real device's top safe-area inset (e.g. iPhone notch) when
+    // SCREEN_TOP_PADDING is passed via --dart-define, so AppBar's built-in
+    // SafeArea reserves the same space a real device would. Without this,
+    // headless captures have zero top padding and the header renders flush
+    // to row 0 — which store-screenshot device frames then draw a notch
+    // cutout over.
+    const int screenTopPadding = int.fromEnvironment(
+      'SCREEN_TOP_PADDING',
+      defaultValue: 0,
+    );
+    if (screenTopPadding > 0) {
+      tester.view.padding = FakeViewPadding(top: screenTopPadding.toDouble());
+    }
+
     // Disable Google Fonts runtime fetching to prevent network failures in
     // headless/offline test environments (e.g., Docker CI).
     GoogleFonts.config.allowRuntimeFetching = false;

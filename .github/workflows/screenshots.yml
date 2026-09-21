@@ -125,6 +125,9 @@ jobs:
             # Physical resolution that frameit recognises as iPhone 12 Pro Max
             phys_w: 1284
             phys_h: 2778
+            # iPhone 12 Pro Max top safe-area inset (notch), in logical points —
+            # reserves space so frameit's notch cutout doesn't sit over app content
+            top_padding: 47
           - device: ipad_pro
             # Logical landscape (2× scale) → tablet layout, horizontal
             width: 1366
@@ -220,6 +223,7 @@ jobs:
         env:
           SCREEN_WIDTH: ${{ matrix.width }}
           SCREEN_HEIGHT: ${{ matrix.height }}
+          SCREEN_TOP_PADDING: ${{ matrix.top_padding || 0 }}
           APPS_INPUT: ${{ needs.resolve-apps.outputs.apps }}
         run: |
           APPS="$APPS_INPUT"
@@ -235,7 +239,8 @@ jobs:
             docker compose -f ci/docker-compose-screenshot.yml rm -sf sut 2>/dev/null || true
             if HOST_UID=$(id -u) HOST_GID=$(id -g) \
                APP=$app \
-               SCREEN_WIDTH=$SCREEN_WIDTH SCREEN_HEIGHT=$SCREEN_HEIGHT DEVICE_PREFIX=${{ matrix.device }} \
+               SCREEN_WIDTH=$SCREEN_WIDTH SCREEN_HEIGHT=$SCREEN_HEIGHT \
+               SCREEN_TOP_PADDING=$SCREEN_TOP_PADDING DEVICE_PREFIX=${{ matrix.device }} \
                  docker compose -f ci/docker-compose-screenshot.yml up \
                    --exit-code-from sut sut; then
               echo "--- $app: OK ---"
