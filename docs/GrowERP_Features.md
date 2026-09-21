@@ -18,10 +18,12 @@
 	- **Admin Application:** A comprehensive ERP system for managing all aspects of a business.
 	- **Hotel Application:** A specialized application tailored for the hospitality industry.
 	- **Freelance Application:** A project-based work management application for freelancers and service professionals.
-
-	- **Health Application:** A healthcare management application.
+	- **Marketing Application:** Campaigns, website content, outreach and sales pipeline management.
+	- **Rental Application:** Equipment/asset rental scheduling, availability and billing.
+	- **Agents Application:** AI agent chat, governance and organization setup.
 	- **Support Application:** A support and ticketing system.
 	- **Assessment Application:** A lead-capture and AI-scored assessment platform.
+	- **Website Application:** The growerp.org marketing and documentation website.
 
 - **AI-Powered Features:** Integrated AI capabilities powered by Google Gemini, including invoice scanning, assessment scoring, landing page generation, and AI-assisted content creation.
 

@@ -17,6 +17,10 @@ GrowERP is an open-source, multi-platform ERP application built with a modular a
 - **Admin next version**: [admin.growerp.org](https://admin.growerp.org)
 - **Hotel**: [hotel.growerp.org](https://hotel.growerp.org)
 - **Freelance**: [freelance.growerp.org](https://freelance.growerp.org)
+- **Marketing**: [marketing.growerp.org](https://marketing.growerp.org)
+- **Rental**: [rental.growerp.org](https://rental.growerp.org)
+- **Agents**: [agents.growerp.org](https://agents.growerp.org)
+- **Support**: [support.growerp.org](https://support.growerp.org)
 
 *Create a new company, select demo data, and explore! Login credentials will be sent to your email.*
 
@@ -106,9 +110,8 @@ GrowERP uses a modular architecture that promotes reusability and extensibility:
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    Applications Layer                        │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────┐ │
-│  │ Admin App   │ │ Hotel App   │ │Freelance App│ │Custom...│ │
-│  └─────────────┘ └─────────────┘ └─────────────┘ └─────────┘ │
+│  Admin, Hotel, Freelance, Marketing, Rental, Agents,         │
+│  Support, Assessment, Website, Custom...                     │
 └─────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────┐
 │                  Building Blocks Layer                      │
@@ -142,6 +145,10 @@ GrowERP uses a modular architecture that promotes reusability and extensibility:
 - **growerp_courses** - eLearning course and content management
 - **growerp_sales** - Sales pipeline and opportunity management
 - **growerp_outreach** - Outreach and lead engagement
+- **growerp_hr** - Employee and human resources management
+- **growerp_rental** - Rental scheduling, availability and Gantt-style booking
+- **growerp_wiki** - Wiki pages and documentation management
+- **growerp_adk** - AI agent chat and control center UI
 
 ### ⚙️ Backend Components
 - **moqui-adk** - Agent Development Kit for multi-agent orchestration and governance
@@ -261,14 +268,26 @@ Project management focused:
 - Invoicing
 - Activity monitoring
 
+### 📣 Marketing Application
+Campaigns, content and lead engagement:
+- Marketing campaigns and content management
+- Website content management
+- Outreach and lead engagement
+- Sales pipeline and opportunities
 
-
-### 🏥 Health Application
-Healthcare management:
-- Patient management
-- Appointment scheduling
-- Health records
+### 🏗️ Rental Application
+Equipment and asset rental:
+- Rental scheduling and availability (Gantt view)
+- Rate management
 - Billing and accounting
+- Utilization statistics
+
+### 🤖 Agents Application
+AI agent governance and organization setup:
+- AI agent chat, jobs and approvals
+- Action audit trail
+- Company, employees and website setup
+- System configuration
 
 ### 🎧 Support Application
 Customer support and ticketing:

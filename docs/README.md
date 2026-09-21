@@ -287,7 +287,8 @@ BlocListener<UserBloc, UserState>(
 ```
 ┌─────────────────────────────────────────────────────────┐
 │            Application Layer (Apps)                      │
-│  Admin • Hotel • Freelance • Health • Custom Apps      │
+│  Admin • Hotel • Freelance • Marketing • Rental • Agents  │
+│  Support • Assessment • Website • Custom Apps            │
 └──────────────────┬──────────────────────────────────────┘
                    │
 ┌──────────────────▼──────────────────────────────────────┐
