@@ -19,9 +19,9 @@ app: freelance
 screens:
   - route: /             title: "Dashboard"           wait_key: refresh
   - route: /tasks        title: "To Do List"
+  - route: /website      title: "Website"
   - route: /crm    tab: Opportunities                 title: "CRM Opportunities"
   - route: /crm    tab: Leads                         title: "CRM Leads"
-  - route: /website      title: "Website"
   - route: /catalog      title: "Catalog"
 */
 
@@ -191,6 +191,9 @@ void main() {
     await _selectOption(tester, route: '/tasks', formKey: '/tasks');
     await _screenshot(binding, tester, 'todolist');
 
+    await _selectOption(tester, route: '/website', formKey: '/website');
+    await _screenshot(binding, tester, 'website');
+
     await _selectOption(
       tester,
       route: '/crm',
@@ -206,9 +209,6 @@ void main() {
       tab: 'Leads',
     );
     await _screenshot(binding, tester, 'crm_leads');
-
-    await _selectOption(tester, route: '/website', formKey: '/website');
-    await _screenshot(binding, tester, 'website');
 
     await _selectOption(tester, route: '/catalog', formKey: '/catalog');
     await _screenshot(binding, tester, 'catalog');
