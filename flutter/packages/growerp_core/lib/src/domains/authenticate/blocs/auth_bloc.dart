@@ -40,6 +40,14 @@ EventTransformer<E> authDroppable<E>(Duration duration) {
   };
 }
 
+final RegExp _reviewerTestEmailPattern = RegExp(
+  r'^test[a-z0-9]*@example\.com$',
+  caseSensitive: false,
+);
+
+bool _isReviewerTestEmail(String email) =>
+    _reviewerTestEmailPattern.hasMatch(email);
+
 /// Authbloc controls the connection to the backend
 ///
 /// It contains company and user information and signals connection errrors,
@@ -267,11 +275,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         lastName: event.user.lastName!,
         userGroup: event.user.userGroup,
         // Caller-chosen password (e.g. from the web startup page) wins;
-        // otherwise debug builds and release builds pointed at staging
-        // default to qqqqqq9!, production release emails a temp one.
+        // otherwise debug builds default to qqqqqq9!, and so do release
+        // builds registering a testN@example.com reviewer account on
+        // staging; every other release registration emails a temp one.
         newPassword:
             event.newPassword ??
-            ((kReleaseMode && !isStagingBackend()) ? null : 'qqqqqq9!'),
+            ((!kReleaseMode ||
+                    (isStagingBackend() &&
+                        _isReviewerTestEmail(event.user.email!)))
+                ? 'qqqqqq9!'
+                : null),
         timeZoneOffset: DateTime.now().timeZoneOffset.toString(),
         // language code only: the backend does new Locale(locale), which takes a
         // full tag like en-US as one language code
