@@ -119,15 +119,15 @@ jobs:
             width: 1280
             height: 800
           - device: iphone
-            # Logical size of iPhone 12 Pro Max (3× scale) → phone layout
-            width: 428
-            height: 926
-            # Physical resolution that frameit recognises as iPhone 12 Pro Max
-            phys_w: 1284
-            phys_h: 2778
-            # iPhone 12 Pro Max top safe-area inset (notch), in logical points —
+            # Logical size of iPhone 11 Pro Max / XS Max (3× scale) → phone layout
+            width: 414
+            height: 896
+            # Physical resolution that frameit recognises as iPhone 11 Pro Max / XS Max
+            phys_w: 1242
+            phys_h: 2688
+            # iPhone 11 Pro Max / XS Max top safe-area inset (notch), in logical points —
             # reserves space so frameit's notch cutout doesn't sit over app content
-            top_padding: 47
+            top_padding: 44
           - device: ipad_pro
             # Logical landscape (2× scale) → tablet layout, horizontal
             width: 1366
@@ -457,7 +457,7 @@ jobs:
           # Android screenshots (412×892, 960×600, 1280×800) are at logical
           # pixels (devicePixelRatio=1) so they don't match any frameit device —
           # they will be skipped and fall back to raw PNGs.
-          # iOS screenshots (1284×2778 and 2048×2732) ARE at physical resolution
+          # iOS screenshots (1242×2688 and 2048×2732) ARE at physical resolution
           # and will be detected and framed.
           printf '%s\n' \
             '{' \
@@ -644,8 +644,8 @@ jobs:
               -extent "${store_w}x${store_h}" -flatten -type TrueColor "$f"
           }
 
-          # iPhone 6.7" (iPhone 12/13 Pro Max): 1284x2778
-          for f in iphone-*_framed.png;   do process "$f" 1284 2778; done
+          # iPhone 6.5" (iPhone 11 Pro Max / XS Max): 1242x2688
+          for f in iphone-*_framed.png;   do process "$f" 1242 2688; done
           # iPad Pro 12.9" landscape: 2732x2048
           for f in ipad_pro-*_framed.png; do process "$f" 2732 2048; done
           # Android phone: 1080x1920

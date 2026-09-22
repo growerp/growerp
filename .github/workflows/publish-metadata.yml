@@ -221,7 +221,7 @@ jobs:
           shopt -s nullglob
           for prefix in iphone ipad_pro; do
             case "$prefix" in
-              iphone)   required="1284x2778" ;;
+              iphone)   required="1242x2688" ;;
               ipad_pro) required="2732x2048" ;;
             esac
             # dashboard (main menu) first, so it also sorts first once numbered
