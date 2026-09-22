@@ -3260,8 +3260,7 @@ limitations under the License.
             <parameter name="companyPartyId" /><!-- If provided, user joins existing company -->
             <parameter name="ownerPartyId" /><!-- If provided with companyPartyId, used for existing
             company registration -->
-            <parameter name="newPassword"
-                default="org.moqui.util.StringUtilities.getRandomString(6) + '9!'" />
+            <parameter name="newPassword" />
             <parameter name="userGroupId" /><!-- If GROWERP_M_ADMIN and no company, creates new
             tenant -->
             <parameter name="timeZoneOffset" />
@@ -3302,6 +3301,21 @@ limitations under the License.
             </entity-find-one>
             <if condition="!application">
                 <return error="true" message="Not a valid applicationId: ${applicationId}" />
+            </if>
+
+            <!-- App Store / Play Store review builds are always release-mode, so a
+                 testN@example.com reviewer account registered on the growerp.org staging
+                 backend still gets the known qqqqqq9! password reviewers log back in with;
+                 production (growerp.com) and every other email keep the random, emailed one. -->
+            <if condition="!newPassword">
+                <if condition="email ==~ /(?i)^test[a-z0-9]*@example\.com$/
+                        &amp;&amp; ec.web?.getHostName(false)?.endsWith('.org') == true">
+                    <set field="newPassword" value="qqqqqq9!" />
+                    <else>
+                        <set field="newPassword"
+                            from="org.moqui.util.StringUtilities.getRandomString(6) + '9!'" />
+                    </else>
+                </if>
             </if>
 
             <if condition="companyPartyId">
