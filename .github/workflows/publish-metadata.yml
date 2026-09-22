@@ -806,7 +806,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install craft-store
-        run: pip install craft-store pyyaml requests
+        run: pip install craft-store pyyaml requests pillow
 
       - name: Upload Snap Store metadata
         env:
@@ -816,11 +816,36 @@ jobs:
           python3 << 'PYEOF'
           import glob
           import hashlib
+          import io
           import json
           import os
           import requests
           import yaml
           from craft_store import UbuntuOneStoreClient, endpoints
+          from PIL import Image
+
+          # Snap Store rejects screenshots over 2048kB. The windows-*_framed.png
+          # files are plain ImageMagick output with no PNG compression tuning, so
+          # they can land well above that (seen: 5.75MB). Re-encode losslessly
+          # (same pixels, just better-compressed PNG) before uploading, falling
+          # back to palette quantization only if optimization alone isn't enough.
+          SNAP_SCREENSHOT_LIMIT = 2048 * 1024
+
+          def compress_for_snap(path):
+              im = Image.open(path).convert('RGB')
+
+              buf = io.BytesIO()
+              im.save(buf, format='PNG', optimize=True)
+              content = buf.getvalue()
+
+              for colors in (256, 128, 64):
+                  if len(content) <= SNAP_SCREENSHOT_LIMIT:
+                      break
+                  buf = io.BytesIO()
+                  im.quantize(colors=colors).save(buf, format='PNG', optimize=True)
+                  content = buf.getvalue()
+
+              return content
 
           app_name = os.environ['APP_NAME']
           snapcraft_yaml_path = f'flutter/packages/{app_name}/snapcraft.yaml'
@@ -884,8 +909,7 @@ jobs:
               files = {}
               for i, path in enumerate(screenshot_paths):
                   filename = os.path.basename(path)
-                  with open(path, 'rb') as f:
-                      content = f.read()
+                  content = compress_for_snap(path)
                   key = f'screenshot-{i}'
                   info.append({
                       'key': key,
