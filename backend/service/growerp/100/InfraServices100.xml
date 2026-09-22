@@ -18,22 +18,21 @@ limitations under the License.
     <!--
         Infrastructure metrics for the support app.
 
-        Everything here is read from the Prometheus that already runs in the swarm
-        stack. Moqui and Prometheus share the internal 'backend-tier' overlay
-        network, so http://prometheus:9090 is reachable without publishing anything
-        and without any docker socket access.
+        Moqui-native, no Prometheus/Grafana involved: this reads the same facilities
+        the built-in system dashboard (vapps/system/dashboardscreen,
+        base-component/tools/screen/System/dashboard.xml) uses -
+        ExecutionContextFactoryImpl.getStatusMap() (JVM/OS MXBeans, this process only)
+        for host/JVM numbers, and a direct JDBC query over the entity engine's own
+        'transactional' connection pool for Postgres numbers (the same
+        pg_stat_activity/pg_database tables postgres_exporter itself reads).
 
-        The PromQL below is lifted from the Grafana dashboards that are already
-        provisioned against this same deployment (HostDashboard.json,
-        PostgresDashboard.json, NginxDashboard.json, MoquiDashboard.json in the
-        growerp/server repo, swarm/ directory) - those expressions are known good.
-
-        There is no Prometheus in the local development compose stack, so an
-        unreachable endpoint is the normal developer case: it returns
-        available=false with a message rather than failing.
+        Because this only ever sees the JVM handling the request, 'jvms' is always a
+        single-entry list for this instance (prod or test, whichever answered) - not
+        every instance in the stack, as the old Prometheus-backed version showed.
     -->
     <service verb="get" noun="InfraMetrics">
-        <description>Host, JVM, database and ingress metrics, read from Prometheus.
+        <description>Host, JVM and database metrics for this Moqui instance, read
+            directly from the JVM and the database - no external monitoring stack.
             Restricted to GrowERP system support users.</description>
         <out-parameters>
             <parameter name="available" type="Boolean"/>
@@ -69,27 +68,6 @@ limitations under the License.
                     </parameter>
                 </parameter>
             </parameter>
-            <parameter name="nginx" type="Map">
-                <parameter name="activeConnections" type="BigDecimal"/>
-                <parameter name="requestsPerSecond" type="BigDecimal"/>
-                <parameter name="droppedConnections" type="BigDecimal"/>
-                <parameter name="vhosts" type="List">
-                    <parameter name="vhost" type="Map">
-                        <parameter name="host"/>
-                        <parameter name="requestsPerSecond" type="BigDecimal"/>
-                        <parameter name="error5xxPerSecond" type="BigDecimal"/>
-                    </parameter>
-                </parameter>
-            </parameter>
-            <parameter name="containers" type="List">
-                <parameter name="container" type="Map">
-                    <parameter name="service"/>
-                    <parameter name="taskCount" type="Integer"/>
-                    <parameter name="cpuPercent" type="BigDecimal"/>
-                    <parameter name="memUsedBytes" type="BigDecimal"/>
-                    <parameter name="memLimitBytes" type="BigDecimal"/>
-                </parameter>
-            </parameter>
         </out-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.check#SupportUser"/>
@@ -103,146 +81,91 @@ limitations under the License.
                         diskUsedBytes: 0, diskTotalBytes: 0, uptimeSeconds: 0]
                 jvms = []
                 database = [connections: 0, maxConnections: 0, databases: []]
-                nginx = [activeConnections: 0, requestsPerSecond: 0, droppedConnections: 0, vhosts: []]
-                containers = []
             </script>
 
-            <set field="prometheusUrl"
-                from="System.getProperty('growerp_prometheus_url') ?: System.getenv('growerp_prometheus_url') ?: 'http://prometheus:9090'"/>
-
             <script><![CDATA[
-                import org.moqui.util.RestClient
-
-                // ---- instant query helper -------------------------------------
-                // returns a list of [labels: Map, value: BigDecimal]; an empty list
-                // for an expression that matches nothing. A typo'd metric name is
-                // NOT an error in Prometheus - it is a 200 with an empty result -
-                // so callers must cope with empty rather than expect a throw.
-                def query = { String expr ->
-                    RestClient restClient = ec.service.rest().method(RestClient.GET)
-                            .uri("${prometheusUrl}/api/v1/query")
-                            .addBodyParameter('query', expr)
-                            .timeout(5)
-                    RestClient.RestResponse response = restClient.call()
-                    if (response.statusCode < 200 || response.statusCode >= 300) {
-                        throw new Exception("prometheus returned ${response.statusCode}")
-                    }
-                    Map body = (Map) response.jsonObject()
-                    if (body?.status != 'success') {
-                        throw new Exception("prometheus query failed: ${body?.error}")
-                    }
-                    return ((List) body.data?.result ?: []).collect { Map r ->
-                        [labels: (Map) r.metric ?: [:], value: new BigDecimal((String) r.value[1])]
-                    }
-                }
-                // single scalar, or the supplied default when nothing matched
-                def scalar = { String expr, def dflt = 0 ->
-                    List rows = query(expr)
-                    return rows ? rows[0].value : dflt
-                }
-                // label value -> metric value, for the "by (label)" queries
-                def byLabel = { String expr, String label ->
-                    Map out = [:]
-                    query(expr).each { Map r -> out[(String) r.labels[label] ?: ''] = r.value }
-                    return out
-                }
+                import java.sql.Connection
+                import java.sql.ResultSet
+                import java.sql.Statement
 
                 try {
-                    // ---- host (node-exporter) ---------------------------------
-                    host.cpuPercent = scalar('100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)')
-                    host.load1 = scalar('max(node_load1)')
-                    host.memTotalBytes = scalar('max(node_memory_MemTotal_bytes)')
-                    host.memUsedBytes = scalar('max(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes)')
-                    host.uptimeSeconds = scalar('time() - max(node_boot_time_seconds)')
+                    // ---- host / JVM, same source as the built-in system dashboard ----
+                    Map smap = ec.factory.getStatusMap(true)
+                    Map util = (Map) smap.Utilization
+                    Map heap = (Map) smap.Heap
+                    Map nonHeap = (Map) smap.NonHeap
+                    Map disk = (Map) smap.Disk
+                    Map sys = (Map) smap.System
+                    Map javaRuntime = (Map) smap.JavaRuntime
+                    Map javaStats = (Map) smap.JavaStats
 
-                    // Disk: report the root filesystem. node-exporter runs with
-                    // --path.rootfs=/rootfs but still reports the host root as '/',
-                    // so prefer that; fall back to the largest real filesystem only
-                    // when it is missing. Do not just take the largest - a box with
-                    // a big data volume mounted elsewhere would report that instead
-                    // of the disk that actually fills up.
-                    String fsFilter = '{fstype!~"tmpfs|overlay|squashfs|ramfs|fuse.*"}'
-                    Map fsSize = byLabel("node_filesystem_size_bytes${fsFilter}", 'mountpoint')
-                    Map fsAvail = byLabel("node_filesystem_avail_bytes${fsFilter}", 'mountpoint')
-                    if (fsSize) {
-                        String rootMount = fsSize.containsKey('/') ? '/' : fsSize.max { it.value }.key
-                        host.diskTotalBytes = fsSize[rootMount]
-                        host.diskUsedBytes = fsSize[rootMount] - (fsAvail[rootMount] ?: 0)
-                    }
+                    BigDecimal mb = new BigDecimal(1024 * 1024)
+                    BigDecimal heapUsedBytes = ((heap.Used ?: 0) as BigDecimal) * mb
+                    BigDecimal heapMaxBytes = ((heap.Max ?: 0) as BigDecimal) * mb
+                    BigDecimal heapCommittedBytes = ((heap.Committed ?: 0) as BigDecimal) * mb
+                    BigDecimal nonHeapUsedBytes = ((nonHeap.Used ?: 0) as BigDecimal) * mb
+                    BigDecimal diskTotalBytes = ((disk.Total ?: 0) as BigDecimal) * mb
+                    BigDecimal diskUsedBytes = diskTotalBytes - (((disk.Free ?: 0) as BigDecimal) * mb)
 
-                    // ---- moqui JVMs (moqui-metrics component) -----------------
-                    // prometheus.yml relabels each scrape job to namespace=prod|test
-                    Map heapUsed = byLabel('max by (namespace) (moqui_memory_heap_usage_bytes)', 'namespace')
-                    Map heapMax = byLabel('max by (namespace) (moqui_memory_heap_max_bytes)', 'namespace')
-                    Map heapCommitted = byLabel('max by (namespace) (moqui_memory_heap_committed_bytes)', 'namespace')
-                    Map nonHeapUsed = byLabel('max by (namespace) (moqui_memory_nonheap_usage_bytes)', 'namespace')
-                    Map threads = byLabel('max by (namespace) (moqui_jvm_thread_count)', 'namespace')
-                    Map gcTime = byLabel('sum by (namespace) (increase(moqui_memory_gc_time_seconds[5m]))', 'namespace')
-                    jvms = heapUsed.keySet().sort().collect { String ns ->
-                        [instance: ns,
-                         heapUsedBytes: heapUsed[ns] ?: 0,
-                         heapMaxBytes: heapMax[ns] ?: 0,
-                         heapCommittedBytes: heapCommitted[ns] ?: 0,
-                         nonHeapUsedBytes: nonHeapUsed[ns] ?: 0,
-                         threadCount: threads[ns] ?: 0,
-                         gcTimeSeconds: gcTime[ns] ?: 0]
-                    }
+                    // this process' JVM/disk view stands in for "host" - there is no
+                    // node-exporter to report the machine outside this container
+                    host.cpuPercent = util.LoadPercent ?: 0
+                    host.load1 = sys.Load ?: 0
+                    host.memUsedBytes = heapUsedBytes
+                    host.memTotalBytes = heapMaxBytes
+                    host.diskUsedBytes = diskUsedBytes
+                    host.diskTotalBytes = diskTotalBytes
+                    host.uptimeSeconds = ((javaRuntime.UptimeHours ?: 0) as BigDecimal) * 3600
 
-                    // ---- postgres (postgres-exporter) -------------------------
-                    database.connections = scalar('sum(pg_stat_activity_count)')
-                    database.maxConnections = scalar('max(pg_settings_max_connections)')
-                    Map dbConn = byLabel('sum by (datname) (pg_stat_activity_count)', 'datname')
-                    Map dbSize = byLabel('pg_database_size_bytes', 'datname')
-                    database.databases = (dbConn.keySet() + dbSize.keySet()).sort().findAll { it }.collect { String name ->
-                        [name: name, connections: dbConn[name] ?: 0, sizeBytes: dbSize[name] ?: 0]
-                    }
+                    String instanceName = System.getProperty('instance_purpose') ?: 'prod'
+                    jvms = [[instance: instanceName,
+                             heapUsedBytes: heapUsedBytes,
+                             heapMaxBytes: heapMaxBytes,
+                             heapCommittedBytes: heapCommittedBytes,
+                             nonHeapUsedBytes: nonHeapUsedBytes,
+                             threadCount: javaStats.ThreadCount ?: 0,
+                             gcTimeSeconds: javaStats.GcTimeSeconds ?: 0]]
 
-                    // ---- nginx ingress ----------------------------------------
-                    // connection level from stub_status via nginx-exporter
-                    nginx.activeConnections = scalar('max(nginx_connections_active)')
-                    nginx.requestsPerSecond = scalar('sum(rate(nginx_http_requests_total[5m]))')
-                    nginx.droppedConnections = scalar(
-                            'sum(rate(nginx_connections_accepted[5m]) - rate(nginx_connections_handled[5m]))')
-                    // per vhost from the access log via nginxlog-exporter
-                    Map vhostRps = byLabel('sum by (vhost) (rate(nginx_http_response_count_total[5m]))', 'vhost')
-                    Map vhost5xx = byLabel(
-                            'sum by (vhost) (rate(nginx_http_response_count_total{status=~"5.."}[5m]))', 'vhost')
-                    nginx.vhosts = vhostRps.entrySet().sort { -it.value }.collect { entry ->
-                        [host: entry.key, requestsPerSecond: entry.value,
-                         error5xxPerSecond: vhost5xx[entry.key] ?: 0]
-                    }
+                    // ---- postgres, queried directly - the same tables postgres_exporter reads ----
+                    Connection con = ec.entity.getConnection('transactional')
+                    try {
+                        Statement stmt = con.createStatement()
+                        try {
+                            ResultSet rs = stmt.executeQuery('SELECT count(*) FROM pg_stat_activity')
+                            if (rs.next()) database.connections = new BigDecimal(rs.getLong(1))
+                            rs.close()
 
-                    // ---- per service containers (cAdvisor) --------------------
-                    // cAdvisor runs with --store_container_labels=false, so the
-                    // swarm service label is not exported. The container name is,
-                    // and swarm names tasks '<stack>_<service>.<slot>.<taskid>'.
-                    Map cpuByName = byLabel(
-                            'sum by (name) (rate(container_cpu_usage_seconds_total{name!=""}[5m])) * 100', 'name')
-                    Map memByName = byLabel(
-                            'sum by (name) (container_memory_working_set_bytes{name!=""})', 'name')
-                    Map limitByName = byLabel(
-                            'sum by (name) (container_spec_memory_limit_bytes{name!=""})', 'name')
-                    Map byService = [:]
-                    cpuByName.keySet().each { String name ->
-                        String service = name.contains('.') ? name.substring(0, name.indexOf('.')) : name
-                        if (service.startsWith('growerp_')) service = service.substring('growerp_'.length())
-                        Map agg = byService.get(service)
-                        if (agg == null) {
-                            agg = [service: service, taskCount: 0, cpuPercent: 0, memUsedBytes: 0, memLimitBytes: 0]
-                            byService.put(service, agg)
+                            rs = stmt.executeQuery("SELECT setting FROM pg_settings WHERE name = 'max_connections'")
+                            if (rs.next()) database.maxConnections = new BigDecimal(rs.getString(1))
+                            rs.close()
+
+                            rs = stmt.executeQuery('''
+                                SELECT d.datname AS datname, count(a.pid) AS connections,
+                                       pg_database_size(d.datname) AS size_bytes
+                                FROM pg_database d
+                                LEFT JOIN pg_stat_activity a ON a.datname = d.datname
+                                WHERE NOT d.datistemplate
+                                GROUP BY d.datname
+                                ORDER BY d.datname
+                            ''')
+                            List dbs = []
+                            while (rs.next()) {
+                                dbs.add([name: rs.getString('datname'),
+                                         connections: new BigDecimal(rs.getLong('connections')),
+                                         sizeBytes: new BigDecimal(rs.getLong('size_bytes'))])
+                            }
+                            rs.close()
+                            database.databases = dbs
+                        } finally {
+                            stmt.close()
                         }
-                        agg.taskCount = agg.taskCount + 1
-                        agg.cpuPercent = agg.cpuPercent + (cpuByName[name] ?: 0)
-                        agg.memUsedBytes = agg.memUsedBytes + (memByName[name] ?: 0)
-                        agg.memLimitBytes = agg.memLimitBytes + (limitByName[name] ?: 0)
+                    } finally {
+                        con.close()
                     }
-                    containers = byService.values().sort { -it.memUsedBytes }
 
                     available = true
                 } catch (Throwable t) {
-                    // no prometheus locally, or the stack is partly down: report it
-                    // as a state the screen can show, never as a service failure
-                    ec.logger.warn("InfraMetrics unavailable from ${prometheusUrl}: ${t.message}")
+                    ec.logger.warn("InfraMetrics error: ${t.message}", t)
                     available = false
                     message = "Metrics unavailable: ${t.message}"
                 }

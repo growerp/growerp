@@ -78,48 +78,6 @@ abstract class InfraDatabase with _$InfraDatabase {
 }
 
 @freezed
-abstract class InfraVhost with _$InfraVhost {
-  InfraVhost._();
-  factory InfraVhost({
-    @Default("") String host,
-    @Default(0) double requestsPerSecond,
-    @Default(0) double error5xxPerSecond,
-  }) = _InfraVhost;
-
-  factory InfraVhost.fromJson(Map<String, dynamic> json) =>
-      _$InfraVhostFromJson(json);
-}
-
-@freezed
-abstract class InfraNginx with _$InfraNginx {
-  InfraNginx._();
-  factory InfraNginx({
-    @Default(0) double activeConnections,
-    @Default(0) double requestsPerSecond,
-    @Default(0) double droppedConnections,
-    @Default([]) List<InfraVhost> vhosts,
-  }) = _InfraNginx;
-
-  factory InfraNginx.fromJson(Map<String, dynamic> json) =>
-      _$InfraNginxFromJson(json);
-}
-
-@freezed
-abstract class InfraContainer with _$InfraContainer {
-  InfraContainer._();
-  factory InfraContainer({
-    @Default("") String service,
-    @Default(0) int taskCount,
-    @Default(0) double cpuPercent,
-    @Default(0) double memUsedBytes,
-    @Default(0) double memLimitBytes,
-  }) = _InfraContainer;
-
-  factory InfraContainer.fromJson(Map<String, dynamic> json) =>
-      _$InfraContainerFromJson(json);
-}
-
-@freezed
 abstract class InfraMetrics with _$InfraMetrics {
   InfraMetrics._();
   factory InfraMetrics({
@@ -128,8 +86,6 @@ abstract class InfraMetrics with _$InfraMetrics {
     InfraHost? host,
     @Default([]) List<InfraJvm> jvms,
     InfraDatabase? database,
-    InfraNginx? nginx,
-    @Default([]) List<InfraContainer> containers,
   }) = _InfraMetrics;
 
   factory InfraMetrics.fromJson(Map<String, dynamic> json) =>

@@ -20,15 +20,12 @@ import 'package:growerp_models/growerp_models.dart';
 
 import '../l10n/generated/support_localizations.dart';
 
-/// Read-only view of the metrics the swarm already exports: host load from
-/// node-exporter, Moqui JVM memory from the moqui-metrics component, Postgres
-/// connections from postgres-exporter and ingress counters from the two nginx
-/// exporters. All of it comes from the backend, which queries Prometheus over
-/// the internal overlay network.
-///
-/// There is no Prometheus in the local development stack, so the unavailable
-/// state is the normal case off-server and is rendered as a message, not an
-/// error.
+/// Read-only view of Moqui-native metrics for this backend instance: JVM
+/// heap/load/disk and Postgres connection/size numbers, read directly from
+/// the JVM and the database (the same way Moqui's own built-in system
+/// dashboard does it) - no external monitoring stack involved. Since this
+/// only ever sees the instance answering the request, the JVM section shows
+/// one entry, not every instance in the stack.
 class InfrastructureView extends StatefulWidget {
   const InfrastructureView({super.key});
 
@@ -253,63 +250,6 @@ class _InfrastructureViewState extends State<InfrastructureView> {
     ]);
   }
 
-  Widget _ingressSection(SupportLocalizations l10n, InfraNginx nginx) {
-    return _section(l10n.infraIngress, const Key('infraIngress'), [
-      _metricWrap([
-        _metric(l10n.infraActiveConnections,
-            nginx.activeConnections.toStringAsFixed(0),
-            key: const Key('nginxActive')),
-        _metric(l10n.infraRequestsPerSecond, _num(nginx.requestsPerSecond, 2),
-            key: const Key('nginxRps')),
-        _metric(l10n.infraDropped, _num(nginx.droppedConnections, 2),
-            key: const Key('nginxDropped')),
-      ]),
-      if (nginx.vhosts.isNotEmpty) ...[
-        const SizedBox(height: 8),
-        _table(
-          [l10n.infraVhost, l10n.infraRequestsPerSecond, l10n.infraErrors5xx],
-          [
-            for (var i = 0; i < nginx.vhosts.length; i++)
-              [
-                Text(nginx.vhosts[i].host, key: Key('vhostName$i')),
-                Text(_num(nginx.vhosts[i].requestsPerSecond, 2)),
-                Text(_num(nginx.vhosts[i].error5xxPerSecond, 2)),
-              ],
-          ],
-        ),
-      ],
-    ]);
-  }
-
-  Widget _servicesSection(
-      SupportLocalizations l10n, List<InfraContainer> containers) {
-    return _section(l10n.infraServices, const Key('infraServices'), [
-      if (containers.isEmpty)
-        Text(l10n.infraNoData, style: Theme.of(context).textTheme.bodySmall)
-      else
-        _table(
-          [
-            l10n.infraServices,
-            l10n.infraTasks,
-            l10n.infraCpu,
-            l10n.infraMemory,
-          ],
-          [
-            for (var i = 0; i < containers.length; i++)
-              [
-                Text(containers[i].service, key: Key('serviceName$i')),
-                Text('${containers[i].taskCount}'),
-                Text('${_num(containers[i].cpuPercent)}%'),
-                Text(containers[i].memLimitBytes > 0
-                    ? '${_bytes(containers[i].memUsedBytes)} / '
-                        '${_bytes(containers[i].memLimitBytes)}'
-                    : _bytes(containers[i].memUsedBytes)),
-              ],
-          ],
-        ),
-    ]);
-  }
-
   /// Wide tables must scroll inside themselves rather than overflow the page.
   Widget _table(List<String> headers, List<List<Widget>> rows) {
     final headerStyle = Theme.of(context)
@@ -366,8 +306,6 @@ class _InfrastructureViewState extends State<InfrastructureView> {
                         _jvmSection(l10n, metrics.jvms),
                         _databaseSection(
                             l10n, metrics.database ?? InfraDatabase()),
-                        _ingressSection(l10n, metrics.nginx ?? InfraNginx()),
-                        _servicesSection(l10n, metrics.containers),
                       ],
                     ),
     );

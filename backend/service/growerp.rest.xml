@@ -57,7 +57,7 @@ limitations under the License.
             </method>
         </resource>
         <resource name="InfraMetrics"
-            description="Host, JVM, database and ingress metrics for the support app">
+            description="Host, JVM and database metrics for the support app">
             <method type="get">
                 <service name="growerp.100.InfraServices100.get#InfraMetrics" />
             </method>

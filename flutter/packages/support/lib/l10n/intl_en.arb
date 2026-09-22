@@ -258,14 +258,6 @@
   "@infraDatabase": {
     "description": "Section title: PostgreSQL"
   },
-  "infraIngress": "Ingress",
-  "@infraIngress": {
-    "description": "Section title: nginx"
-  },
-  "infraServices": "Services",
-  "@infraServices": {
-    "description": "Section title: per container resource use"
-  },
   "infraCpu": "CPU",
   "@infraCpu": {
     "description": "Metric label: cpu usage percent"
@@ -313,30 +305,6 @@
   "infraSize": "Size",
   "@infraSize": {
     "description": "Column header: database size on disk"
-  },
-  "infraActiveConnections": "Active connections",
-  "@infraActiveConnections": {
-    "description": "Metric label: nginx active connections"
-  },
-  "infraRequestsPerSecond": "Requests/sec",
-  "@infraRequestsPerSecond": {
-    "description": "Metric label: nginx request rate"
-  },
-  "infraDropped": "Dropped/sec",
-  "@infraDropped": {
-    "description": "Metric label: nginx connections accepted but not handled"
-  },
-  "infraVhost": "Host name",
-  "@infraVhost": {
-    "description": "Column header: nginx virtual host"
-  },
-  "infraErrors5xx": "5xx/sec",
-  "@infraErrors5xx": {
-    "description": "Column header: server error rate per virtual host"
-  },
-  "infraTasks": "Tasks",
-  "@infraTasks": {
-    "description": "Column header: number of running containers for a service"
   },
   "infraNoData": "No data",
   "@infraNoData": {
