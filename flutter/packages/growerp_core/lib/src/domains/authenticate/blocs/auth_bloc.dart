@@ -267,8 +267,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         lastName: event.user.lastName!,
         userGroup: event.user.userGroup,
         // Caller-chosen password (e.g. from the web startup page) wins;
-        // otherwise debug builds default to qqqqqq9!, release emails a temp one.
-        newPassword: event.newPassword ?? (kReleaseMode ? null : 'qqqqqq9!'),
+        // otherwise debug builds and release builds pointed at staging
+        // default to qqqqqq9!, production release emails a temp one.
+        newPassword:
+            event.newPassword ??
+            ((kReleaseMode && !isStagingBackend()) ? null : 'qqqqqq9!'),
         timeZoneOffset: DateTime.now().timeZoneOffset.toString(),
         // language code only: the backend does new Locale(locale), which takes a
         // full tag like en-US as one language code
