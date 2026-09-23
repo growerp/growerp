@@ -300,26 +300,34 @@ pre-filled dialog. Order/shipment specifics still work: "enter a sales order" �
         if (apiKey && effectiveProvider == 'gemini') System.setProperty('GOOGLE_API_KEY', apiKey)
 
         try {
+            // Read this agent's scoping so the in-process FunctionTools (Email/GitHub) honour it
+            // too — a read-only agent gets no write tools.
+            String toolMode = lookupToolMode(configId)
+            boolean allowWrites = toolMode != 'readOnly'
+
             // Per-agent MCP toolset: identical to the shared one but tagged with this config's
             // id (and owner) so the MCP governance gate / searchKnowledge can resolve the
-            // calling agent and its tenant.
-            def agentMcpToolset = buildMcpToolset(configId, ownerPartyId)
+            // calling agent and its tenant. The dangerous action itself is still gated
+            // server-side by govern#AgentAction; toolMode here just keeps the write-capable
+            // moqui_execute_service tool out of a read-only agent's context.
+            def agentMcpToolset = buildMcpToolset(configId, ownerPartyId, toolMode)
 
             String modelId = modelName ?: defaultModelFor(effectiveProvider)
             def modelArg = buildModel(effectiveProvider, modelId, apiKey)
             LlmAgent agent
 
-            // Read this agent's scoping so the in-process FunctionTools (Email/GitHub) honour it
-            // too — a read-only agent gets no write tools. (The MCP toolset is gated server-side
-            // by the governance service.)
-            String toolMode = lookupToolMode(configId)
-            boolean allowWrites = toolMode != 'readOnly'
-
             // In-process FunctionTools (read-only set + writes when allowed), plus the MCP toolset.
             List allTools = assembleFunctionTools(allowWrites)
             if (agentMcpToolset) allTools.add(agentMcpToolset)
-            // External (tenant-registered) MCP servers attached to this agent.
-            loadExternalMcpToolsets(configId, ownerPartyId).each { allTools.add(it) }
+            // External (tenant-registered) MCP servers attached to this agent — wrapped so a
+            // tool name that collides with the internal server or an earlier external server
+            // gets logged instead of silently shadowing (see CollisionLoggingToolset).
+            Set<String> seenMcpToolNames = Collections.synchronizedSet(new HashSet<>(INTERNAL_MCP_TOOL_NAMES))
+            int externalServerIdx = 0
+            loadExternalMcpToolsets(configId, ownerPartyId).each { ts ->
+                externalServerIdx++
+                allTools.add(new CollisionLoggingToolset(ts, configId, "external MCP server #${externalServerIdx}", seenMcpToolNames))
+            }
 
             if (!agentName) {
                 agent = LlmAgent.builder()
@@ -1074,10 +1082,26 @@ CRITICAL tool-use rules — follow exactly:
         m
     }
 
+    // The only write-capable tool the internal MCP server exposes (runs any growerp.* service).
+    // govern#AgentAction still blocks the call server-side either way; this just keeps it out
+    // of a read-only agent's tool list so the model isn't offered a tool it can't use.
+    private static final String MCP_WRITE_TOOL_NAME = 'moqui_execute_service'
+
+    // Fixed tool names the internal moqui MCP server exposes (McpServices.xml) — used only to
+    // seed the cross-server collision log in CollisionLoggingToolset below (see loadExternalMcpToolsets
+    // callers). Not a security boundary: govern#AgentAction enforces scope server-side regardless
+    // of which client-visible tool name triggered the call.
+    private static final List<String> INTERNAL_MCP_TOOL_NAMES = [
+        'moqui_prompts_list', 'moqui_prompts_get', 'moqui_search_services',
+        'moqui_get_service_details', MCP_WRITE_TOOL_NAME, 'moqui_rest_call',
+        'searchKnowledge', 'okf_index', 'okf_load_concept', 'okf_follow', 'moqui_get_help'
+    ].asImmutable()
+
     /** Build a per-agent MCP toolset whose SSE headers carry `adk_config_id` (and the
      *  tenant `adk_owner_party_id`) so the governance gate / searchKnowledge on the MCP
-     *  server can resolve the calling agent and its tenant. */
-    private static com.google.adk.tools.mcp.McpToolset buildMcpToolset(String configId, String ownerPartyId = null) {
+     *  server can resolve the calling agent and its tenant. `toolMode` 'readOnly' drops
+     *  {@link #MCP_WRITE_TOOL_NAME} from the exposed tool list. */
+    private static com.google.adk.tools.mcp.McpToolset buildMcpToolset(String configId, String ownerPartyId = null, String toolMode = null) {
         if (shuttingDown) return null
         if (mcpApiKey == null && sharedSessionService != null) {
             mcpApiKey = generateMcpApiKey(sharedSessionService.ecf)
@@ -1143,7 +1167,15 @@ CRITICAL tool-use rules — follow exactly:
                 .build()
         def prior = configMcpToolsets[configId]
         if (prior != null) { try { prior.close() } catch (Exception ignore) {} }
-        def ts = new com.google.adk.tools.mcp.McpToolset(sseParams)
+        def ts
+        if (toolMode == 'readOnly') {
+            com.google.adk.tools.ToolPredicate filter = { com.google.adk.tools.BaseTool tool, Optional ctx ->
+                tool.name() != MCP_WRITE_TOOL_NAME
+            } as com.google.adk.tools.ToolPredicate
+            ts = new com.google.adk.tools.mcp.McpToolset(sseParams, new com.fasterxml.jackson.databind.ObjectMapper(), filter)
+        } else {
+            ts = new com.google.adk.tools.mcp.McpToolset(sseParams)
+        }
         configMcpToolsets[configId] = ts
         if (mcpToolset == null) mcpToolset = ts   // keep a default reference for legacy paths
         return ts
@@ -1501,5 +1533,42 @@ use your own Moqui tools. Keep delegation minimal: pick the best-matching specia
         providerRegistry.clear()
         sharedSessionService = null
         mcpApiKey = null
+    }
+
+    /** Wraps an external (tenant-registered) MCP toolset so its resolved tool names are checked
+     *  against every other toolset already attached to the same agent (the fixed internal names
+     *  plus earlier external servers). The Java ADK has no tool_name_prefix — BaseTool.name is
+     *  private final, so renaming isn't reachable through the public API — so a same-named tool
+     *  on two servers still silently shadows one at the SDK level. This can't prevent that, but
+     *  logs it instead of leaving it silent. Detection only, never blocks a call: govern#AgentAction
+     *  is the actual enforcement point regardless of which client-visible tool name was used. */
+    private static final class CollisionLoggingToolset implements com.google.adk.tools.BaseToolset {
+        private final com.google.adk.tools.mcp.McpToolset delegate
+        private final String configId
+        private final String serverLabel
+        private final Set<String> knownNames
+
+        CollisionLoggingToolset(com.google.adk.tools.mcp.McpToolset delegate, String configId,
+                                 String serverLabel, Set<String> knownNames) {
+            this.delegate = delegate
+            this.configId = configId
+            this.serverLabel = serverLabel
+            this.knownNames = knownNames
+        }
+
+        @Override
+        io.reactivex.rxjava3.core.Flowable<com.google.adk.tools.BaseTool> getTools(com.google.adk.agents.ReadonlyContext ctx) {
+            return delegate.getTools(ctx).doOnNext({ com.google.adk.tools.BaseTool tool ->
+                synchronized (knownNames) {
+                    if (!knownNames.add(tool.name())) {
+                        logger.warn("MCP tool name collision on agent ${configId}: '${tool.name()}' from ${serverLabel} " +
+                                "duplicates an already-attached tool of the same name; one silently shadows the other.")
+                    }
+                }
+            } as io.reactivex.rxjava3.functions.Consumer)
+        }
+
+        @Override
+        void close() throws Exception { delegate.close() }
     }
 }
