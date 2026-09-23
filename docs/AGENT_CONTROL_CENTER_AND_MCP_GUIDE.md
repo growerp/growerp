@@ -12,6 +12,7 @@ Related docs:
 - [Agent Demo Walkthrough](./Agent_Control_Center_Demo.md) — guided demo of the built-in team
 - [Moqui MCP User Guide](./Moqui_MCP_User_Guide.md) — connecting external MCP clients
 - [Marketing Agent Team User Guide](./Marketing_Agent_Team_User_Guide.md) — the marketing team preset
+- [AI Agent Teams Overview](./AI_Agent_Teams_Overview.md) — short summary of every ready-to-run team, including the GrowERP Operations Team (§16 below)
 
 ---
 
@@ -322,7 +323,12 @@ a team's work reads as a tree.
    4. **Token budget** — if the company runs on the *system* LLM key, sum this month's
       `tokensTotal`; over `SystemDefault.llmMonthlyTokenLimit` ⇒ blocked, with a "add your own API
       key" message.
-   5. **Write policy** — `block` ⇒ blocked, `approve` ⇒ `pending`.
+   5. **Write policy** — `block` ⇒ blocked, `approve` ⇒ `pending`, **except** for a fixed list of
+      direction-ambiguous services (`create#Order`/`update#Order`/`create#Invoice`/`update#Invoice`/
+      `create#Payment`/`update#Payment`/`create#Shipment`) — these are shared by sales *and* purchase,
+      discriminated only by a `sales` boolean buried in the call's own arguments, which no
+      allow-list glob can see. For these, `writePolicy=allow` is silently downgraded to `approve` so
+      a misconfigured agent can never auto-run the wrong direction.
 5. **An `AdkActionLog` row is always written**, whatever the decision. This is why blocked attempts
    are visible — the log is the evidence, not just a success trail.
 6. `pending` also creates an `AdkApproval` row and posts an approval card to the agent's approval
@@ -651,3 +657,104 @@ Common symptoms:
 | `okf_*` tools say "No OKF bundle found" | Export never run — `export#OkfBundle` (§11) |
 | OKF absent from Wiki / Knowledge screens | Export (wiki) and ingest (knowledge) are separate steps |
 | External MCP tools missing | Server disabled, or attached before the agent was saved |
+
+---
+
+## 16. GrowERP Operations Team
+
+Beyond the Marketing team and the toy demo (§13), there is a third, real preset:
+**`backend/data/GrowerpOperationsTeamData.xml`** covers the company's own core ERP domains —
+Sales, Purchasing, Inventory, Finance, HR — the way the Marketing team covers outreach/CRM.
+
+| Agent | Domain | Type | Notes |
+|---|---|---|---|
+| Operations Coordinator | — | coordinator, router, read-only | Routes by domain keyword (orders/quotes → Sales, PO/vendor → Purchasing, stock → Inventory, GL → Finance, employees → HR) |
+| Sales Digest | Sales | read-only, scheduled daily | Order stage funnel, AR funnel, oldest open orders |
+| Purchasing Digest | Purchasing | read-only, scheduled daily | PO counts, AP funnel, oldest open POs |
+| Inventory Digest | Inventory | read-only, scheduled daily | Stockouts, and below-minimum-stock when `ProductFacility.minimumStock` is configured |
+| Finance Digest | Finance | read-only, scheduled weekly | Calls `get#FinanceSubsystem` first to branch between full-GL and cash-book reporting deterministically, never guesses from an empty result |
+| HR Digest | HR | read-only, scheduled weekly | Headcount, pending leave, allowance exhaustion |
+| Inventory Replenishment Assistant | Inventory | scoped write, `writePolicy=approve`, scheduled daily | Drafts a PO per vendor for out-of-stock/below-minimum products; every draft held for approval |
+| Sales Quote and Order Assistant | Sales | scoped write, `writePolicy=approve`, chat-driven | Drafts a sales quote/order on request |
+| Purchasing Assistant | Purchasing | scoped write, `writePolicy=approve`, chat-driven | Drafts a purchase order on request, including non-catalog items (e.g. office equipment) via a description-only line item |
+
+Finance and HR stay read-only in every phase, deliberately: period-close services are
+long-running and effectively irreversible, and leave-request approval is itself admin-gated —
+neither belongs in an agent's `serviceAllowlist` without a separate compliance review.
+
+**GROWERP's own Stripe payment import** (`GrowerpStripeImportAgentData.xml`) is a related but
+separate, GROWERP-owned monitor — not part of this per-tenant team. `mantle-stripe`'s gateway
+config has no `ownerPartyId`: it is one global Stripe account used for GrowERP's own SaaS/course/
+store billing, not a "each tenant connects their own Stripe" gateway, so a copy of this agent
+would be a no-op for every other tenant. The actual charge-to-invoice matching
+(`growerp.100.AccountingServices100.import#StripePayments`) is deterministic code — exact
+customer email + exact amount against exactly one open invoice — never an LLM decision, because
+misapplying a payment is a real-money mistake; the agent only triggers the job and reports
+anything it could not confidently match.
+
+---
+
+## 17. Function catalog — pick functions individually
+
+Loading a whole team is sometimes too coarse: the admin may want only the Inventory digest, or
+only the Purchasing assistant. The **function catalog** (toolbar icon next to "Load agent demo"
+on **AI Agents**) lists every `_NA_` template agent across every real team — today the GrowERP
+Operations Team — grouped by team, each with a risk badge (read-only / approval-gated write /
+auto-write) and a checkbox. Already-enabled functions show checked and disabled. **Add selected**
+clones exactly the checked ones.
+
+The toy demo team (§13, `teamName="Operations Assistant"`) is excluded from the catalog by name —
+it is a fixed onboarding bundle behind its own "Load agent demo" button, not meant to be
+cherry-picked function-by-function.
+
+Selecting a specialist alone still works: cloning auto-includes its team's coordinator if it is
+not already present, since a specialist is unreachable without one
+(`AdkDemoServices.clone#AgentTeam`, `adkAgentConfigIds` parameter).
+
+---
+
+## 18. Suggesting a new function
+
+The catalog only covers functions someone already built. **Suggest a function** (inside the
+catalog dialog) lets an admin describe a capability in their own words — "remind customers about
+overdue invoices" — and get a feasibility check before anything is created.
+
+Under the hood this runs a hidden **Function Scout** template agent
+(`GrowerpFunctionScoutAgentData.xml`, `teamName="System Internal"` — also excluded from the
+catalog) as a one-off (`AdkManager.runOneOff`) against the tenant's own real services *and* the
+calling session's own screen catalog, and returns one of three verdicts:
+
+- **`navigation`** — the request just needs the coordinator to open/list an existing screen; no
+  new agent needed.
+- **`newFunction`** — a proposed draft (name, description, instruction, `serviceAllowlist` using
+  only service names it actually found via `moqui_search_services`, suggested `toolMode`/
+  `writePolicy`) — this pre-fills the normal `AdkAgentConfigDialog` for the admin to review and
+  save. Nothing is created without that explicit save.
+- **`notPossible`** — nothing covers it; the agent is instructed to say so rather than fabricate a
+  plausible-looking but non-functional `serviceAllowlist`.
+
+Verified live: a real request ("summarize open sales orders") correctly proposed
+`*get#FinDoc,*get#OrderDashboard` — both real, existing services — with `toolMode=readOnly`,
+`writePolicy=block`.
+
+The Function Scout is cloned into the asking tenant on first use (same catalog-clone mechanism as
+§17), so its token usage is attributed to that tenant's own quota, not shared globally.
+
+---
+
+## 19. Catalog promotion — support app
+
+A tenant-created agent (from §18, or the ordinary **+** button) stays private to that tenant. To
+make a genuinely useful one available to every tenant, the tenant first **nominates** it — a
+toggle in `AdkAgentConfigDialog` ("Suggest for shared catalog") that sets `catalogNominated=Y`.
+This is the only thing that becomes cross-tenant-visible, and only once the tenant explicitly asks
+for it.
+
+GrowERP support then reviews it in the **support app**'s Catalog Promotion screen
+(`AdkCatalogPromotionView`, menu item `SUPPORT_CATALOG_PROMOTION`) — restricted to the
+`GROWERP_M_SYSTEM` group, the same as the other cross-tenant ADK view (System Usage, §2). The
+screen lists every nominated agent across every tenant (name, owner, description, instruction,
+`serviceAllowlist`) for a human to actually read before deciding. **Promote** clones it into a new
+`_NA_` catalog template, stripping `apiKey`, `agentPartyId`, and any literal `scheduleChatRoomId`/
+`approvalChatRoomId` — a real tenant's room id must never leak into a shared template. It then
+shows up in every tenant's function catalog (§17), the same as `OPS_PURCH_DRAFT` does today.

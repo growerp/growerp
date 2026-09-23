@@ -169,10 +169,27 @@
                         }
                     }
                     if (decision == 'allowed' && verbClass == 'write') {
-                        if (writePolicy == 'block') {
+                        // Direction-ambiguous services: create#Order/Invoice/Payment/Shipment
+                        // (and their update# siblings) are shared by sales AND purchase — the
+                        // only thing that tells them apart is a 'sales' boolean buried in the
+                        // call's own parameters, which a serviceAllowlist glob can never see.
+                        // A misconfigured writePolicy=allow could otherwise let an agent meant
+                        // only for one direction quietly write the other. Force human review on
+                        // these regardless of the agent's own writePolicy.
+                        def effectiveWritePolicy = writePolicy
+                        if (writePolicy == 'allow') {
+                            def directionAmbiguous = [
+                                'create#Order', 'update#Order', 'create#Invoice', 'update#Invoice',
+                                'create#Payment', 'update#Payment', 'create#Shipment'
+                            ]
+                            if (directionAmbiguous.any { serviceName?.endsWith(".${it}") }) {
+                                effectiveWritePolicy = 'approve'
+                            }
+                        }
+                        if (effectiveWritePolicy == 'block') {
                             decision = 'blocked'
                             message  = "Write actions are disabled for this agent."
-                        } else if (writePolicy == 'approve') {
+                        } else if (effectiveWritePolicy == 'approve') {
                             decision = 'pending'
                             message  = "Action queued for human approval before it runs."
                         }

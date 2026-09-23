@@ -63,6 +63,8 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   // Multi-agent orchestration (Phase 4).
   String _agentRole = 'specialist'; // specialist | coordinator
   String _orchestrationType = 'router'; // router | sequential | parallel | loop
+  bool _nominated = false; // catalogNominated: opted into support's promotion queue
+  bool _nominating = false;
   List<AdkAgentTeamMember> _members = [];
   List<AdkAgentConfig> _allAgents = [];
   bool _teamLoading = false;
@@ -106,6 +108,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       _orchestrationType = e.orchestrationType ?? 'router';
       _loopMaxCtrl.text = e.loopMaxIterations?.toString() ?? '';
       _teamNameCtrl.text = e.teamName ?? '';
+      _nominated = e.catalogNominated;
       if (_agentRole != 'specialist' && e.adkAgentConfigId != null) _loadTeam();
       if (e.adkAgentConfigId != null) _loadMcpServers();
     } else {
@@ -284,6 +287,39 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     _loopMaxCtrl.dispose();
     _teamNameCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _toggleNominate() async {
+    final id = widget.existing?.adkAgentConfigId;
+    if (id == null) return;
+    setState(() => _nominating = true);
+    try {
+      final svc = await AdkConfigService.create();
+      await svc.nominateForCatalog(id, nominated: !_nominated);
+      if (mounted) {
+        setState(() => _nominated = !_nominated);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _nominated
+                  ? 'Suggested for the shared catalog — GrowERP support will review it'
+                  : 'Removed from the catalog review queue',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _nominating = false);
+    }
   }
 
   Future<void> _save() async {
@@ -894,8 +930,21 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
               ),
               SizedBox(height: 8),
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  if (widget.existing?.adkAgentConfigId != null)
+                    TextButton.icon(
+                      key: Key('nominateForCatalog'),
+                      onPressed: _nominating ? null : _toggleNominate,
+                      icon: Icon(
+                        _nominated ? Icons.star : Icons.star_border,
+                      ),
+                      label: Text(
+                        _nominated
+                            ? 'Suggested for catalog'
+                            : 'Suggest for shared catalog',
+                      ),
+                    ),
+                  Spacer(),
                   TextButton(
                     key: Key('AdkAgentConfigCancel'),
                     onPressed:

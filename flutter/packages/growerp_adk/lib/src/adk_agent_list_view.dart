@@ -21,6 +21,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'adk_agent_config_dialog.dart';
 import 'adk_config_service.dart';
+import 'adk_function_catalog_view.dart';
 import 'package:growerp_adk/l10n/generated/adk_localizations.dart';
 
 /// Screen that lists all ADK agent configs and lets users create / edit / delete them.
@@ -195,6 +196,11 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
     }
   }
 
+  Future<void> _openFunctionCatalog() async {
+    await AdkFunctionCatalogView.show(context);
+    await _load();
+  }
+
   /// A null [teamName] downloads the untagged "Other agents" bucket.
   Future<void> _downloadTeam(String? teamName) async {
     try {
@@ -342,6 +348,12 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
               icon: const Icon(Icons.rocket_launch),
               tooltip: 'Enable marketing agent team',
               onPressed: _enableMarketingTeam,
+            ),
+            IconButton(
+              key: const Key('openFunctionCatalog'),
+              icon: const Icon(Icons.precision_manufacturing),
+              tooltip: 'Function catalog',
+              onPressed: _openFunctionCatalog,
             ),
             IconButton(
               key: const Key('uploadAdkAgentTeam'),

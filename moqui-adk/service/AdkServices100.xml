@@ -42,6 +42,7 @@
                     orchestrationType : cfg.orchestrationType,
                     loopMaxIterations : cfg.loopMaxIterations,
                     teamName          : cfg.teamName,
+                    catalogNominated  : cfg.catalogNominated == 'Y',
                 ]"/>
                 <script>adkAgentConfigs.add(cfgOut)</script>
             </iterate>
@@ -235,6 +236,97 @@
             <if condition="stillThere">
                 <return error="true" message="Agent ${adkAgentConfigId} was not deleted, please try again."/>
             </if>
+        </actions>
+    </service>
+
+    <!-- Tenant side of catalog promotion: opt one of THIS tenant's own agents into the
+         support app's review queue (AdkCatalogPromotionView). Never makes it visible or
+         usable by another tenant on its own — only support acting on
+         AdkServices100.promote#AgentToCatalog does that, and only after a human reviews it. -->
+    <service verb="nominate" noun="AdkAgentConfig">
+        <in-parameters>
+            <parameter name="adkAgentConfigId" required="true"/>
+            <parameter name="nominated" type="Boolean" default-value="true"/>
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <if condition="!ownerPartyId">
+                <return error="true" message="Cannot determine your company, please log in again."/>
+            </if>
+            <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
+                auto-field-map="[adkAgentConfigId: adkAgentConfigId]"/>
+            <if condition="!cfg || cfg.ownerPartyId != ownerPartyId">
+                <return error="true" message="Agent ${adkAgentConfigId} not found for your company."/>
+            </if>
+            <service-call name="AdkServices.nominate#AgentForCatalog"
+                in-map="[adkAgentConfigId: adkAgentConfigId, nominated: nominated]"/>
+        </actions>
+    </service>
+
+    <!-- Support-only: clone a nominated tenant agent into a new "_NA_" catalog template,
+         stripping everything tenant-specific. Restricted to SystemSupport, same as the other
+         cross-tenant ADK views (AdkSystemUsageView / moqui_rest_call). -->
+    <service verb="promote" noun="AgentToCatalog">
+        <in-parameters>
+            <parameter name="adkAgentConfigId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="newAdkAgentConfigId"/>
+        </out-parameters>
+        <actions>
+            <if condition="!ec.user.isInGroup('GROWERP_M_SYSTEM')">
+                <return error="true" message="Only GrowERP support may promote an agent to the shared catalog."/>
+            </if>
+            <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="src">
+                <field-map field-name="adkAgentConfigId"/>
+            </entity-find-one>
+            <if condition="!src || src.catalogNominated != 'Y'">
+                <return error="true" message="Agent ${adkAgentConfigId} is not nominated for the catalog."/>
+            </if>
+            <!-- upsert by (ownerPartyId='_NA_', agentName): safe to re-promote after edits -->
+            <service-call name="AdkServices.update#AgentConfig" out-map="promoteOut"
+                in-map="[ownerPartyId: '_NA_',
+                    agentName: src.agentName, llmProvider: src.llmProvider,
+                    instruction: src.instruction, description: src.description,
+                    scheduleExpression: src.scheduleExpression, scheduleEnabled: src.scheduleEnabled,
+                    schedulePrompt: src.schedulePrompt,
+                    toolMode: src.toolMode, serviceAllowlist: src.serviceAllowlist,
+                    writePolicy: src.writePolicy, websiteChat: src.websiteChat,
+                    agentRole: src.agentRole, orchestrationType: src.orchestrationType,
+                    loopMaxIterations: src.loopMaxIterations, teamName: src.teamName]"/>
+            <!-- explicitly NOT copied: apiKey, agentPartyId, scheduleChatRoomId,
+                 approvalChatRoomId, catalogNominated — all tenant-specific or must
+                 self-reference at clone time per the existing template convention -->
+            <set field="newAdkAgentConfigId" from="promoteOut.adkAgentConfigId"/>
+        </actions>
+    </service>
+
+    <!-- Support-only: the promotion review queue. Only ever returns agents the owning
+         tenant explicitly nominated — never a blanket cross-tenant listing. -->
+    <service verb="get" noun="NominatedAgents">
+        <out-parameters>
+            <parameter name="agents" type="List">
+                <parameter name="agent" type="Map">
+                    <parameter name="adkAgentConfigId"/>
+                    <parameter name="agentName"/>
+                    <parameter name="ownerPartyId"/>
+                    <parameter name="teamName"/>
+                    <parameter name="description"/>
+                    <parameter name="instruction"/>
+                    <parameter name="serviceAllowlist"/>
+                    <parameter name="toolMode"/>
+                    <parameter name="writePolicy"/>
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <if condition="!ec.user.isInGroup('GROWERP_M_SYSTEM')">
+                <return error="true" message="Only GrowERP support may view the catalog promotion queue."/>
+            </if>
+            <entity-find entity-name="moqui.adk.AdkAgentConfig" list="agents">
+                <econdition field-name="catalogNominated" value="Y"/>
+                <order-by field-name="ownerPartyId"/>
+            </entity-find>
         </actions>
     </service>
 
@@ -1105,6 +1197,166 @@
             <service-call name="AdkDemoServices.load#AgentDemo"
                 in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId,
                          userPartyId: userPartyId]"/>
+        </actions>
+    </service>
+
+    <!-- Load a named, production-ready "_NA_" template team (as opposed to the toy Agent Demo
+         above) into the calling admin's tenant on demand. Thin REST wrapper around
+         AdkDemoServices.clone#AgentTeam, which is idempotent (upserts by (ownerPartyId,
+         agentName)) and restricted to the given teamName so it never touches the demo team's
+         rows. Defaults to "GrowERP Operations Team" (Sales/Purchasing/Inventory/Finance/HR
+         digest + scoped-write specialists) since that is the only such team shipped today. -->
+    <service verb="load" noun="AgentTeam" transaction-timeout="600">
+        <in-parameters>
+            <parameter name="teamName" default-value="GrowERP Operations Team"/>
+            <parameter name="adkAgentConfigIds" type="List">
+                <description>Clone exactly these template ids (the function-catalog picker)
+                    instead of the whole teamName.</description>
+            </parameter>
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <service-call name="AdkDemoServices.clone#AgentTeam"
+                in-map="[ownerPartyId: ownerPartyId, teamName: teamName,
+                    adkAgentConfigIds: adkAgentConfigIds]"/>
+        </actions>
+    </service>
+
+    <!-- Function catalog: every "_NA_" template function (across every real team, not just one),
+         excluding the toy Agent Demo's own team, plus whether the calling tenant already has each
+         one (matched by (teamName, agentName), the same key update#AgentConfig upserts on). Backs
+         AdkFunctionCatalogView's picker. -->
+    <service verb="get" noun="AgentCatalog">
+        <out-parameters>
+            <parameter name="functions" type="List">
+                <parameter name="function" type="Map">
+                    <parameter name="adkAgentConfigId"/>
+                    <parameter name="agentName"/>
+                    <parameter name="teamName"/>
+                    <parameter name="description"/>
+                    <parameter name="toolMode"/>
+                    <parameter name="writePolicy"/>
+                    <parameter name="scheduleEnabled" type="Boolean"/>
+                    <parameter name="agentRole"/>
+                    <parameter name="alreadyEnabled" type="Boolean"/>
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <entity-find entity-name="moqui.adk.AdkAgentConfig" list="templates">
+                <econdition field-name="ownerPartyId" value="_NA_"/>
+                <econdition field-name="teamName" operator="not-equals" value="Operations Assistant"/>
+                <econdition field-name="teamName" operator="not-equals" value="System Internal"/>
+                <order-by field-name="teamName"/>
+                <order-by field-name="adkAgentConfigId"/>
+            </entity-find>
+            <entity-find entity-name="moqui.adk.AdkAgentConfig" list="ownAgents">
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
+            </entity-find>
+            <script>
+                def ownKeys = (ownAgents ?: []).collect { "${it.teamName}::${it.agentName}".toString() } as Set
+                functions = (templates ?: []).collect { tmpl ->
+                    [adkAgentConfigId: tmpl.adkAgentConfigId, agentName: tmpl.agentName,
+                     teamName: tmpl.teamName, description: tmpl.description, toolMode: tmpl.toolMode,
+                     writePolicy: tmpl.writePolicy, scheduleEnabled: tmpl.scheduleEnabled == 'Y',
+                     agentRole: tmpl.agentRole,
+                     alreadyEnabled: ownKeys.contains("${tmpl.teamName}::${tmpl.agentName}".toString())]
+                }
+            </script>
+        </actions>
+    </service>
+
+    <!-- Feasibility-checked "suggest a new function" — runs the Function Scout template
+         agent (SYS_FUNCTION_SCOUT, GrowerpFunctionScoutAgentData.xml) as a one-off against
+         real services and this session's own screen catalog. Never creates anything: the
+         caller opens AdkAgentConfigDialog pre-filled from "draft" for the admin to review
+         and save through the normal, human-reviewed create flow. -->
+    <service verb="suggest" noun="AgentFunction" transaction-timeout="120">
+        <in-parameters>
+            <parameter name="description" required="true"/>
+            <parameter name="screenCatalogJson">
+                <description>The calling Flutter session's own screen catalog (same JSON
+                    WidgetRegistry.getWidgetCatalog() feeds to live chat), so the Scout can
+                    recognise a "navigation" outcome. Omit for a plain "[]".</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="outcome"/> <!-- navigation | newFunction | notPossible | error -->
+            <parameter name="message"/>
+            <parameter name="draft" type="Map"/>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <if condition="!ownerPartyId">
+                <return error="true" message="Not logged in"/>
+            </if>
+            <!-- ensure this tenant has its own Function Scout instance, so the run is
+                 attributed to its own token quota, not a shared/global one -->
+            <service-call name="AdkDemoServices.clone#AgentTeam"
+                in-map="[ownerPartyId: ownerPartyId, adkAgentConfigIds: ['SYS_FUNCTION_SCOUT']]"/>
+            <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="scoutCfg">
+                <field-map field-name="ownerPartyId" from="ownerPartyId"/>
+                <field-map field-name="agentName" value="Function Scout"/>
+            </entity-find-one>
+            <if condition="!scoutCfg">
+                <return error="true" message="Could not initialize the Function Scout for this company"/>
+            </if>
+            <script><![CDATA[
+                import org.moqui.adk.AdkManager
+                import groovy.json.JsonSlurper
+
+                outcome = 'error'
+                message = 'Could not check feasibility right now.'
+                draft = null
+
+                if (!AdkManager.isInitialized()) AdkManager.lazyInit(ec.factory)
+                if (!AdkManager.isInitialized()) {
+                    message = 'AI is not configured for this company yet.'
+                } else {
+                    try {
+                        Map sessionCtx = [
+                            userId          : (ec.user.userId ?: 'suggest') as String,
+                            username        : (ec.user.username ?: 'suggest') as String,
+                            userFullName    : (ec.user.username ?: 'Suggest') as String,
+                            organizationName: '',
+                            companyPseudoId : '',
+                            tenantId        : ownerPartyId as String,
+                            timeZone        : 'UTC',
+                            locale          : 'en_US',
+                            screenCatalog   : (screenCatalogJson ?: '[]') as String,
+                        ]
+                        List events = AdkManager.runOneOff(
+                            scoutCfg.adkAgentConfigId as String, sessionCtx.userId as String,
+                            description, sessionCtx)
+
+                        StringBuilder sb = new StringBuilder()
+                        events.each { e ->
+                            if (e.author != sessionCtx.userId && e.partial != true) {
+                                e.content?.parts?.each { p -> if (p.text) sb.append(p.text) }
+                            }
+                        }
+                        String resultText = sb.toString().trim()
+
+                        def m = (resultText =~ /(?s)```suggestion\s*(\{.*?\})\s*```/)
+                        if (m.find()) {
+                            def parsed = new JsonSlurper().parseText(m.group(1)) as Map
+                            outcome = (parsed.outcome ?: 'error') as String
+                            message = (parsed.message ?: '') as String
+                            draft = parsed.draft as Map
+                        } else {
+                            ec.logger.warn("suggest#AgentFunction: no JSON block in Scout reply: ${resultText}")
+                            message = 'Could not parse a feasibility check right now. Try rephrasing the request.'
+                        }
+                    } catch (Throwable t) {
+                        ec.logger.error("suggest#AgentFunction failed: ${t.message}", t)
+                        message = "Feasibility check failed: ${t.message}"
+                    }
+                }
+            ]]></script>
         </actions>
     </service>
 

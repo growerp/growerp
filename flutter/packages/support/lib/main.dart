@@ -208,6 +208,7 @@ List<Map<String, GrowerpWidgetBuilder>> supportWidgetRegistrations = [
     'AboutForm': (args) => const AboutForm(),
     'ApplicationList': (args) => const ApplicationList(),
     'AdkSystemUsageView': (args) => const AdkSystemUsageView(),
+    'AdkCatalogPromotionView': (args) => const AdkCatalogPromotionView(),
     'RestStatisticsView': (args) => const RestStatisticsView(),
     'SignupStatisticsView': (args) => const SignupStatisticsView(),
     'InfrastructureView': (args) => const InfrastructureView(),

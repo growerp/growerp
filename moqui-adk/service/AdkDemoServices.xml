@@ -2,29 +2,65 @@
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
 
-    <!-- Clone the Agent Control Center demo (the "_NA_" template rows in AgentDemoData.xml)
-         into a tenant. Called from AdkServices100.load#AgentDemo when the admin taps
-         "Load agent demo" on the Agent Control screen. Idempotent: re-running upserts agents
-         by (ownerPartyId, agentName) and skips team links / knowledge docs that already exist. -->
-    <service verb="load" noun="AgentDemo" transaction-timeout="600">
+    <!-- Clone "_NA_" template AdkAgentConfig/AdkAgentTeamMember rows into a tenant, restricted
+         either to one teamName or to an explicit list of template ids (the function-catalog
+         picker). Shared by load#AgentDemo (neither given -> clones every _NA_ template, original
+         behavior), load#AgentTeam (teamName given -> clones a whole named team, e.g. "GrowERP
+         Operations Team") and the catalog picker (adkAgentConfigIds given -> clones exactly the
+         selected functions). Idempotent: re-running upserts agents by (ownerPartyId, agentName)
+         and skips team links that already exist. No GROWERP block here: whether GROWERP itself
+         may load a given team is a per-caller decision (load#AgentDemo's own wrapper blocks it —
+         the toy demo doesn't apply to a tenant that already has a real team; load#AgentTeam does
+         not — the Operations Team is a generic team GROWERP-the-company can use for its own ERP
+         operations too). -->
+    <service verb="clone" noun="AgentTeam" transaction-timeout="600">
         <in-parameters>
             <parameter name="ownerPartyId" required="true"/>
-            <parameter name="companyPartyId"/>
-            <parameter name="userPartyId"/>
+            <parameter name="teamName"/>
+            <parameter name="adkAgentConfigIds" type="List">
+                <description>Explicit template ids to clone instead of a whole teamName (the
+                    function-catalog picker). Any selected specialist's coordinator is
+                    auto-included even if not itself selected, since a specialist is unreachable
+                    without one.</description>
+            </parameter>
         </in-parameters>
         <actions>
-            <if condition="ownerPartyId == '_NA_' || ownerPartyId == 'GROWERP'">
-                <return message="Agent demo not loaded for owner ${ownerPartyId}"/>
+            <if condition="ownerPartyId == '_NA_'">
+                <return message="Agent team not loaded for owner ${ownerPartyId}"/>
+            </if>
+
+            <!-- Auto-include the coordinator of any selected specialist, so picking a specialist
+                 alone from the catalog still leaves it reachable. -->
+            <if condition="adkAgentConfigIds">
+                <script>
+                    def selectedIds = new LinkedHashSet(adkAgentConfigIds)
+                    ec.entity.find('moqui.adk.AdkAgentTeamMember').condition('ownerPartyId', '_NA_').list().each { tm ->
+                        if (selectedIds.contains(tm.memberConfigId)) selectedIds.add(tm.coordinatorConfigId)
+                    }
+                    adkAgentConfigIds = selectedIds as List
+                </script>
             </if>
 
             <!-- 1. Clone each template agent config into the tenant. update#AgentConfig (no id)
                  upserts by (ownerPartyId, agentName), assigns agentPartyId and registers the
                  runtime. Map template id -> new tenant id for the team links below. -->
             <set field="idMap" from="[:]"/>
-            <entity-find entity-name="moqui.adk.AdkAgentConfig" list="templates">
-                <econdition field-name="ownerPartyId" value="_NA_"/>
-                <order-by field-name="adkAgentConfigId"/>
-            </entity-find>
+            <if condition="adkAgentConfigIds">
+                <then>
+                    <entity-find entity-name="moqui.adk.AdkAgentConfig" list="templates">
+                        <econdition field-name="ownerPartyId" value="_NA_"/>
+                        <econdition field-name="adkAgentConfigId" operator="in" from="adkAgentConfigIds"/>
+                        <order-by field-name="adkAgentConfigId"/>
+                    </entity-find>
+                </then>
+                <else>
+                    <entity-find entity-name="moqui.adk.AdkAgentConfig" list="templates">
+                        <econdition field-name="ownerPartyId" value="_NA_"/>
+                        <econdition field-name="teamName" from="teamName" ignore-if-empty="true"/>
+                        <order-by field-name="adkAgentConfigId"/>
+                    </entity-find>
+                </else>
+            </if>
             <iterate list="templates" entry="tmpl">
                 <service-call name="AdkServices.update#AgentConfig" out-map="cfgOut"
                     in-map="[ownerPartyId: ownerPartyId,
@@ -60,7 +96,9 @@
                 </if>
             </iterate>
 
-            <!-- 2. Clone team membership with remapped coordinator/member ids. -->
+            <!-- 2. Clone team membership with remapped coordinator/member ids. Only links whose
+                 coordinator AND member were both just cloned above are considered, so a teamName
+                 filter naturally restricts membership to that team too. -->
             <set field="coordIds" from="[] as Set"/>
             <entity-find entity-name="moqui.adk.AdkAgentTeamMember" list="teamTemplates">
                 <econdition field-name="ownerPartyId" value="_NA_"/>
@@ -88,8 +126,29 @@
             <iterate list="coordIds" entry="cid">
                 <script>org.moqui.adk.AdkManager.reloadConfig(cid as String)</script>
             </iterate>
+        </actions>
+    </service>
 
-            <!-- 3. Ingest demo policy docs for the Support specialist's RAG — only when an
+    <!-- Clone the Agent Control Center demo ("Operations Assistant", the _NA_ template rows in
+         AgentDemoData.xml) into a tenant. Called from AdkServices100.load#AgentDemo when the
+         admin taps "Load agent demo" on the Agent Control screen. Clones every _NA_ template
+         (teamName omitted), matching the original behavior before clone#AgentTeam was factored
+         out — other named teams (e.g. "GrowERP Operations Team") are loaded separately via
+         load#AgentTeam and never bundled in here. -->
+    <service verb="load" noun="AgentDemo" transaction-timeout="600">
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true"/>
+            <parameter name="companyPartyId"/>
+            <parameter name="userPartyId"/>
+        </in-parameters>
+        <actions>
+            <if condition="ownerPartyId == '_NA_' || ownerPartyId == 'GROWERP'">
+                <return message="Agent demo not loaded for owner ${ownerPartyId}"/>
+            </if>
+
+            <service-call name="AdkDemoServices.clone#AgentTeam" in-map="[ownerPartyId: ownerPartyId]"/>
+
+            <!-- Ingest demo policy docs for the Support specialist's RAG — only when an
                  embedding-capable key is available (gemini or openai; Anthropic has no
                  embeddings API). Failures here must never break tenant setup, so each ingest
                  is best-effort. -->

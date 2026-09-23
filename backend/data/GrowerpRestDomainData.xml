@@ -154,6 +154,7 @@ when the organization's menu shows it a screen that drives that domain.
     <growerp.menu.WidgetDomain widgetName="AdkKnowledgeView" artifactGroupId="GROWERP_ADK"/>
     <growerp.menu.WidgetDomain widgetName="AdkMcpServerListView" artifactGroupId="GROWERP_ADK"/>
     <growerp.menu.WidgetDomain widgetName="AdkSystemUsageView" artifactGroupId="GROWERP_ADK"/>
+    <growerp.menu.WidgetDomain widgetName="AdkCatalogPromotionView" artifactGroupId="GROWERP_ADK"/>
     <growerp.menu.WidgetDomain widgetName="AgentsDashboard" artifactGroupId="GROWERP_ADK"/>
 
     <!-- GROWERP_SETUP -->

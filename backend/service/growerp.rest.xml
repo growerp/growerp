@@ -350,6 +350,11 @@ limitations under the License.
                 <service name="growerp.100.FinDocServices100.receive#Shipment" />
             </method>
         </resource>
+        <resource name="FinDocEmail"><!-- email a rendered invoice/order PDF to its counterparty -->
+            <method type="post">
+                <service name="growerp.100.FinDocServices100.send#FinDocEmail" />
+            </method>
+        </resource>
         <!-- payment gateway actions -->
         <resource name="GatewayPayment">
             <method type="post">
@@ -700,6 +705,11 @@ limitations under the License.
             <resource name="approve">
                 <method type="post">
                     <service name="growerp.100.MasterContentServices100.approve#MasterContent" />
+                </method>
+            </resource>
+            <resource name="uploadSeries">
+                <method type="post">
+                    <service name="growerp.100.MasterContentServices100.upload#ContentSeries" />
                 </method>
             </resource>
         </resource>
@@ -1699,6 +1709,36 @@ limitations under the License.
             <resource name="LoadAgentDemo">
                 <method type="post">
                     <service name="AdkServices100.load#AgentDemo"/>
+                </method>
+            </resource>
+            <resource name="LoadAgentTeam">
+                <method type="post">
+                    <service name="AdkServices100.load#AgentTeam"/>
+                </method>
+            </resource>
+            <resource name="AgentCatalog">
+                <method type="get">
+                    <service name="AdkServices100.get#AgentCatalog"/>
+                </method>
+            </resource>
+            <resource name="SuggestFunction">
+                <method type="post">
+                    <service name="AdkServices100.suggest#AgentFunction"/>
+                </method>
+            </resource>
+            <resource name="Nominate">
+                <method type="post">
+                    <service name="AdkServices100.nominate#AdkAgentConfig"/>
+                </method>
+            </resource>
+            <resource name="NominatedAgents">
+                <method type="get">
+                    <service name="AdkServices100.get#NominatedAgents"/>
+                </method>
+            </resource>
+            <resource name="Promote">
+                <method type="post">
+                    <service name="AdkServices100.promote#AgentToCatalog"/>
                 </method>
             </resource>
             <method type="get">

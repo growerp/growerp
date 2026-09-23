@@ -573,6 +573,9 @@ limitations under the License.
         userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="SUPPORT_LLM_USAGE" menuConfigurationId="SUPPORT_DEFAULT"
         title="LLM Usage" route="/llm-usage" iconName="assessment" widgetName="AdkSystemUsageView" sequenceNum="50"/>
+    <growerp.menu.MenuItem menuItemId="SUPPORT_CATALOG_PROMOTION" menuConfigurationId="SUPPORT_DEFAULT"
+        title="Catalog Promotion" route="/catalog-promotion" iconName="star"
+        widgetName="AdkCatalogPromotionView" sequenceNum="55"/>
     <growerp.menu.MenuItem menuItemId="SUPPORT_STATISTICS" menuConfigurationId="SUPPORT_DEFAULT"
         title="Statistics" route="/restStatistics" iconName="scatter_plot" widgetName="RestStatisticsView" sequenceNum="55"/>
     <growerp.menu.MenuItem menuItemId="SUPPORT_INFRASTRUCTURE" menuConfigurationId="SUPPORT_DEFAULT"

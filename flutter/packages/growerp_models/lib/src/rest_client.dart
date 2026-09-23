@@ -613,6 +613,16 @@ abstract class RestClient {
   @PATCH("rest/s1/growerp/100/FinDocShipment")
   Future<FinDoc> receiveShipment({@Field() required FinDoc finDoc});
 
+  /// Email a client-rendered invoice/order PDF to its counterparty. [pdfBase64]
+  /// is the same bytes PdfFormats.finDocPdf already renders for the print
+  /// preview; [toEmail] overrides the document's contact email.
+  @POST("rest/s1/growerp/100/FinDocEmail")
+  Future<void> sendFinDocEmail({
+    @Field() required String finDocId,
+    @Field() required String pdfBase64,
+    @Field() String? toEmail,
+  });
+
   @GET("rest/s1/growerp/100/ItemType")
   Future<ItemTypes> getItemTypes({@Query('sales') bool? sales});
 
@@ -2404,6 +2414,46 @@ abstract class RestClient {
 
   @POST("rest/s1/growerp/100/AdkAgentConfig/LoadAgentDemo")
   Future<void> loadAgentDemo();
+
+  @POST("rest/s1/growerp/100/AdkAgentConfig/LoadAgentTeam")
+  Future<void> loadAgentTeam({
+    @Query("teamName") String? teamName,
+    @Field() List<String>? adkAgentConfigIds,
+  });
+
+  /// The function catalog: every "_NA_" template AdkAgentConfig across every real
+  /// team (excludes the toy Agent Demo's own team), plus whether this tenant
+  /// already has each one.
+  @GET("rest/s1/growerp/100/AdkAgentConfig/AgentCatalog")
+  Future<AdkAgentCatalog> getAdkAgentCatalog();
+
+  /// Feasibility-checked "suggest a new function". [screenCatalogJson] should be
+  /// the same catalog JSON the chat view already builds via
+  /// WidgetRegistry.getWidgetCatalog(), so a "just navigate there" outcome can
+  /// be recognised.
+  @POST("rest/s1/growerp/100/AdkAgentConfig/SuggestFunction")
+  Future<AdkFunctionSuggestion> suggestAgentFunction({
+    @Field() required String description,
+    @Field() String? screenCatalogJson,
+  });
+
+  /// Tenant side of catalog promotion: opt one of this tenant's own agents
+  /// in/out of the support app's review queue.
+  @POST("rest/s1/growerp/100/AdkAgentConfig/Nominate")
+  Future<void> nominateAdkAgentConfig({
+    @Field() required String adkAgentConfigId,
+    @Field() bool nominated = true,
+  });
+
+  /// Support-only: the catalog promotion review queue.
+  @GET("rest/s1/growerp/100/AdkAgentConfig/NominatedAgents")
+  Future<AdkNominatedAgents> getNominatedAgents();
+
+  /// Support-only: clone a nominated tenant agent into the shared "_NA_" catalog.
+  @POST("rest/s1/growerp/100/AdkAgentConfig/Promote")
+  Future<dynamic> promoteAgentToCatalog({
+    @Field() required String adkAgentConfigId,
+  });
 
   @POST("rest/s1/growerp/100/AdkAgentConfig")
   Future<AdkAgentConfig> createAdkAgentConfig({

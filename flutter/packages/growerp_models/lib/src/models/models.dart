@@ -126,6 +126,9 @@ export 'adk_job_model.dart';
 export 'adk_action_model.dart';
 export 'adk_approval_model.dart';
 export 'adk_knowledge_model.dart';
+export 'adk_agent_catalog_model.dart';
+export 'adk_function_suggestion_model.dart';
+export 'adk_nominated_agents_model.dart';
 // Wiki / OKF knowledge bundle models
 export 'wiki_model.dart';
 // Course models

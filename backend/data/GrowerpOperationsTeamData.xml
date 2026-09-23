@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-facade-xml type="seed">
+
+    <!-- ════════════════════════════════════════════════════════════════════════
+         GrowERP Operations Team — TEMPLATE rows (ownerPartyId="_NA_"), cloned into a
+         tenant either whole (AdkServices100.load#AgentTeam) or function-by-function via
+         the "Function catalog" picker on the Agent Control screen (AdkFunctionCatalogView),
+         NOT via the unrelated "Load agent demo" button (that only ever clones the toy
+         "Operations Assistant" demo team, see AgentDemoData.xml).
+
+         Coordinator + read-only digest specialists across every core ERP domain
+         (Sales, Purchasing, Inventory, Finance, HR), plus three scoped, approval-gated
+         write specialists (Inventory replenishment drafting, Sales quote/order
+         drafting, Purchase order drafting).
+
+         Stripe payment import (growerp.100.AccountingServices100.import#StripePayments)
+         is deliberately NOT part of this per-tenant team: today's mantle-stripe
+         integration is a single GLOBAL Stripe account used for GrowERP's own SaaS/
+         course/store billing (Stripe.PaymentGatewayStripe has no ownerPartyId), not a
+         "each tenant connects their own Stripe" gateway, so a per-tenant agent here
+         would be a no-op for every owner except GROWERP. See
+         GrowerpStripeImportAgentData.xml for the GROWERP-scoped monitor instead.
+
+         Finance and HR intentionally stay read-only in every phase: period-close
+         services are long-running, effectively irreversible operations, and leave-request
+         approval is itself admin-gated in HrServices100 — neither belongs in an agent's
+         serviceAllowlist without a separate compliance review.
+
+         Agents deliberately name no modelName: AdkManager.defaultModelFor resolves it at
+         build time (SystemDefault row -> env -> constant), so seed rows never go stale.
+         ════════════════════════════════════════════════════════════════════════ -->
+
+    <!-- ── Coordinator ─────────────────────────────────────────────────────────
+         Routes each request to the right domain specialist by matching its DESCRIPTION. -->
+    <moqui.adk.AdkAgentConfig
+        ownerPartyId="_NA_"
+        adkAgentConfigId="OPS_COORD"
+        agentName="Operations Coordinator"
+        teamName="GrowERP Operations Team"
+        llmProvider="gemini"
+        enabled="Y"
+        agentRole="coordinator"
+        orchestrationType="router"
+        toolMode="readOnly"
+        description="Front-desk coordinator for this company's core ERP operations. Delegates to the domain specialist that matches the request."
+        instruction="You are the Operations Coordinator for this company's ERP. You do not answer
+business questions yourself — you route each request to the specialist whose description best
+matches it:
+- Sales orders, quotes, customers, AR invoices → the Sales specialist.
+- Purchase orders, vendors, receiving, AP invoices → the Purchasing specialist.
+- Stock levels, warehouse locations, stockouts → the Inventory specialist.
+- GL, ledger, balance sheet, profit and loss → the Finance specialist.
+- Employees, departments, leave requests, onboarding → the HR specialist.
+Delegate to exactly one specialist, then relay their answer concisely. If a request spans
+several domains, delegate them in turn. Never invent data."/>
+
+    <!-- ── Phase 1: read-only digests, all five domains ────────────────────────── -->
+
+    <moqui.adk.AdkAgentConfig
+        ownerPartyId="_NA_"
+        adkAgentConfigId="OPS_SALES_DIGEST"
+        agentName="Sales Digest"
+        teamName="GrowERP Operations Team"
+        llmProvider="gemini"
+        enabled="Y"
+        agentRole="specialist"
+        toolMode="scoped"
+        serviceAllowlist="*get#OrderDashboard,*get#AcctSalesDashboard,*get#FinDoc"
+        writePolicy="block"
+        scheduleEnabled="Y"
+        scheduleExpression="0 0 8 * * ?"
+        schedulePrompt="Summarize sales order-to-cash health: order stage funnel and salesOrders
+count from growerp.100.FinDocServices100.get#OrderDashboard; AR invoice funnel
+(unpaidInvoices/paidInvoices/cancelledInvoices) from growerp.100.FinDocServices100.get#AcctSalesDashboard;
+list the top 5 oldest open sales orders via growerp.100.FinDocServices100.get#FinDoc(docType='order',
+sales=true, open=true). 5-7 bullets, flag anything stalled."
+        description="Use for sales order, quote, AR and customer-invoice status questions."
+        instruction="You are the read-only Sales / Order-to-Cash reporter for this company. Only
+growerp.100.FinDocServices100.get#OrderDashboard, get#AcctSalesDashboard and get#FinDoc exist for you
+— never call anything else and never change data. If unsure of an exact service name, call
+moqui_search_services with a single noun first."/>
+
+    <moqui.adk.AdkAgentConfig
+        ownerPartyId="_NA_"
+        adkAgentConfigId="OPS_PURCH_DIGEST"
+        agentName="Purchasing Digest"
+        teamName="GrowERP Operations Team"
+        llmProvider="gemini"
+        enabled="Y"
+        agentRole="specialist"
+        toolMode="scoped"
+        serviceAllowlist="*get#OrderDashboard,*get#AcctPurchaseDashboard,*get#FinDoc"
+        writePolicy="block"
+        scheduleEnabled="Y"
+        scheduleExpression="0 0 8 * * ?"
+        schedulePrompt="Summarize procure-to-pay health: purchaseOrders count from
+growerp.100.FinDocServices100.get#OrderDashboard; AP invoice funnel (received/approved/paid) and
+purchInvoicesNotPaidCount from growerp.100.FinDocServices100.get#AcctPurchaseDashboard; list the top
+5 oldest open purchase orders via growerp.100.FinDocServices100.get#FinDoc(docType='order', sales=false,
+open=true)."
+        description="Use for purchase order, vendor invoice and AP status questions."
+        instruction="You are the read-only Purchasing / Procure-to-Pay reporter for this company. Only
+growerp.100.FinDocServices100.get#OrderDashboard, get#AcctPurchaseDashboard and get#FinDoc exist for
+you — never call anything else and never change data. If unsure of an exact service name, call
+moqui_search_services with a single noun first."/>
+
+    <moqui.adk.AdkAgentConfig
+        ownerPartyId="_NA_"
+        adkAgentConfigId="OPS_INV_DIGEST"
+        agentName="Inventory Digest"
+        teamName="GrowERP Operations Team"
+        llmProvider="gemini"
+        enabled="Y"
+        agentRole="specialist"
+        toolMode="scoped"
+        serviceAllowlist="*get#InventoryDashboard,*get#Assets,*get#Location"
+        writePolicy="block"
+        scheduleEnabled="Y"
+        scheduleExpression="0 0 8 * * ?"
+        schedulePrompt="Summarize warehouse status from growerp.100.InventoryServices100.get#InventoryDashboard
+(whLocations, incoming/outgoing shipment funnel); then call growerp.100.InventoryServices100.get#Assets and,
+for each product, flag it as low stock when quantityOnHand is below its configured minimumStock (when
+minimumStock is set), or otherwise when quantityOnHand is 0 or availableToPromise is 0 or negative
+(stockout). Say which rule triggered — 'below its minimum stock of N' vs 'stockout, no minimum configured'."
+        description="Use for stock levels, warehouse locations and stockout questions."
+        instruction="You are the read-only Inventory reporter for this company. Only
+growerp.100.InventoryServices100.get#InventoryDashboard, get#Assets and get#Location exist for you — never
+call anything else and never change data. get#Assets returns minimumStock/reorderQuantity per product when
+configured for that warehouse (mantle.facility.ProductFacility) — when minimumStock is set, 'low stock' means
+quantityOnHand below it; when it is not set for a product, fall back to zero or negative availableToPromise
+and call that a stockout rather than implying a configured minimum exists. If unsure of an exact service
+name, call moqui_search_services with a single noun first."/>
+
+    <moqui.adk.AdkAgentConfig
+        ownerPartyId="_NA_"
+        adkAgentConfigId="OPS_FIN_DIGEST"
+        agentName="Finance Digest"
+        teamName="GrowERP Operations Team"
+        llmProvider="gemini"
+        enabled="Y"
+        agentRole="specialist"
+        toolMode="scoped"
+        serviceAllowlist="*get#FinanceSubsystem,*get#LedgerDashboard,*get#BalanceSheet,*get#BalanceSummary,*get#TimePeriod,*get#ProfitLoss,*get#CashBookEntry"
+        writePolicy="block"
+        scheduleEnabled="Y"
+        scheduleExpression="0 0 8 ? * MON"
+        schedulePrompt="Call growerp.100.AccountingServices100.get#FinanceSubsystem first. If hasAnyActivity is
+false, report that this company has no financial activity yet and stop. If usesCashBookCategories is true,
+prefer growerp.100.CashBookServices100.get#ProfitLoss and get#CashBookEntry for the digest since that is the
+report this tenant actually uses. Otherwise (or in addition), give a weekly finance digest: transaction mix
+and posted/unposted counts from growerp.100.AccountingServices100.get#LedgerDashboard; current balance sheet
+summary from get#BalanceSheet; open/closed time periods from get#TimePeriod. Never propose closing a period
+or posting anything — you are strictly read-only."
+        description="Use for GL, balance sheet, cash-book and ledger status questions. Never period-close or post."
+        instruction="You are the read-only Finance reporter for this company. Only
+growerp.100.AccountingServices100.get#FinanceSubsystem, get#LedgerDashboard, get#BalanceSheet,
+get#BalanceSummary, get#TimePeriod and growerp.100.CashBookServices100.get#ProfitLoss / get#CashBookEntry
+exist for you — never call anything else, and never suggest closing a time period or creating a ledger
+entry, even if asked; those are compliance-sensitive actions for a human only. Always call
+get#FinanceSubsystem first: it tells you deterministically whether this company has any activity at all,
+and whether it runs simplified cash-book categories (use the CashBookServices100 reports for those tenants
+instead of guessing from an empty-looking GL report). If unsure of an exact service name, call
+moqui_search_services with a single noun first."/>
+
+    <moqui.adk.AdkAgentConfig
+        ownerPartyId="_NA_"
+        adkAgentConfigId="OPS_HR_DIGEST"
+        agentName="HR Digest"
+        teamName="GrowERP Operations Team"
+        llmProvider="gemini"
+        enabled="Y"
+        agentRole="specialist"
+        toolMode="scoped"
+        serviceAllowlist="*get#Employees,*get#Departments,*get#LeaveRequests,*get#LeaveAllowances"
+        writePolicy="block"
+        scheduleEnabled="Y"
+        scheduleExpression="0 0 8 ? * MON"
+        schedulePrompt="Weekly HR digest: headcount by department from growerp.100.HrServices100.get#Employees
+and get#Departments; pending (not yet approved) leave requests and upcoming leave from
+growerp.100.HrServices100.get#LeaveRequests; anyone close to exhausting their leave allowance from
+growerp.100.HrServices100.get#LeaveAllowances."
+        description="Use for headcount, leave-request and leave-balance questions. Never approves leave."
+        instruction="You are the read-only HR reporter for this company. Only
+growerp.100.HrServices100.get#Employees, get#Departments, get#LeaveRequests and get#LeaveAllowances exist
+for you — never call anything else. You never approve, reject or create a leave request, an employee or
+anything else: leave approval is an admin-only action in this system and must stay with a human. If unsure
+of an exact service name, call moqui_search_services with a single noun first."/>
+
+    <!-- ── Phase 2: low-risk scoped writes, approval-gated ─────────────────────── -->
+
+    <moqui.adk.AdkAgentConfig
+        ownerPartyId="_NA_"
+        adkAgentConfigId="OPS_INV_REPLEN"
+        agentName="Inventory Replenishment Assistant"
+        teamName="GrowERP Operations Team"
+        llmProvider="gemini"
+        enabled="Y"
+        agentRole="specialist"
+        toolMode="scoped"
+        serviceAllowlist="*get#Assets,*get#InventoryDashboard,*create#Order,*get#FinDoc"
+        writePolicy="approve"
+        scheduleEnabled="Y"
+        scheduleExpression="0 0 7 * * ?"
+        schedulePrompt="Find products needing replenishment via growerp.100.InventoryServices100.get#Assets:
+below their configured minimumStock when one is set for that product/warehouse (mantle.facility.ProductFacility),
+otherwise at a stockout (quantityOnHand zero or availableToPromise zero or negative). For each, check whether an
+open purchase order already covers it via growerp.100.FinDocServices100.get#FinDoc(docType='order', sales=false,
+open=true); if not, draft one purchase order per vendor via growerp.100.FinDocServices100.create#Order with
+order.sales=false, using reorderQuantity as the order quantity when it is set, otherwise a reasonable small
+quantity. Every draft is held for human approval before it is actually created. End with a summary of what you
+drafted and why, and what you skipped because a PO already covers it."
+        description="Drafts purchase orders for out-of-stock or below-minimum-stock items. Every draft order requires human approval before it is created for real."
+        instruction="You draft replenishment purchase orders for this company when a product needs it.
+Check growerp.100.InventoryServices100.get#Assets: a product is below its configured minimumStock (when set,
+via mantle.facility.ProductFacility) or otherwise at a stockout (zero or negative availableToPromise). Use
+growerp.100.FinDocServices100.get#FinDoc to make sure no open purchase order already covers that product
+before drafting a new one with create#Order (order.sales=false) — use reorderQuantity as the quantity when
+set. Never guess a vendor or price: use what the product/vendor records already show, and skip a product if
+you cannot determine its vendor. Every draft you create is queued for a human to approve before it becomes
+real — always say so. If unsure of an exact service name, call moqui_search_services with a single noun
+first."/>
+
+    <moqui.adk.AdkAgentConfig
+        ownerPartyId="_NA_"
+        adkAgentConfigId="OPS_SALES_DRAFT"
+        agentName="Sales Quote and Order Assistant"
+        teamName="GrowERP Operations Team"
+        llmProvider="gemini"
+        enabled="Y"
+        agentRole="specialist"
+        toolMode="scoped"
+        serviceAllowlist="*get#FinDoc,*create#Order,*get#Assets"
+        writePolicy="approve"
+        description="Use for drafting a new sales quote or order on request. Always confirms customer, items and price before drafting; every draft is held for human approval."
+        instruction="You draft sales quotes and orders for this company on request. Before drafting with
+growerp.100.FinDocServices100.create#Order (order.sales=true), confirm the customer, the items and their
+availability via growerp.100.InventoryServices100.get#Assets, and never guess a price. Use
+growerp.100.FinDocServices100.get#FinDoc to check for an existing open quote/order for the same customer
+before creating a new one. Every draft you create is queued for a human to approve before it becomes real
+— always say so. If unsure of an exact service name, call moqui_search_services with a single noun first."/>
+
+    <!-- ── Purchasing draft assistant: same approval-gated design as the Sales assistant above.
+         NOTE: an "open a pre-filled creation dialog and let the human submit it" design (via the
+         chat's growerp-action mechanism) was considered instead of a direct governed write, since
+         a human is already present for a chat-driven request. It was NOT used here: the order
+         creation dialog (FinDocDialog/ShowFinDocDialog) is a multi-bloc cart flow built around an
+         existing FinDoc id (CartFetch), not a "create new, prefilled from flat fields" flow, and
+         it has no WidgetMetadata entry in getOrderAccountingWidgetsWithMetadata() at all today —
+         only list/filter screens are chat-navigable, not order creation. Wiring AI-prefilled order
+         creation into that cart flow is real, separate Flutter work, not done in this pass — use
+         the proven approval-queue path instead, as OPS_SALES_DRAFT already does. -->
+    <moqui.adk.AdkAgentConfig
+        ownerPartyId="_NA_"
+        adkAgentConfigId="OPS_PURCH_DRAFT"
+        agentName="Purchasing Assistant"
+        teamName="GrowERP Operations Team"
+        llmProvider="gemini"
+        enabled="Y"
+        agentRole="specialist"
+        toolMode="scoped"
+        serviceAllowlist="*get#FinDoc,*create#Order,*get#Companies"
+        writePolicy="approve"
+        description="Use for drafting a new purchase order on request, including office equipment or other items with no catalog product. Every draft is held for human approval."
+        instruction="You draft purchase orders for this company on request, including items that have no
+catalog product (e.g. office equipment) — growerp.100.FinDocServices100 order items support a plain
+description, quantity and price with no product required. Before drafting with
+growerp.100.FinDocServices100.create#Order (order.sales=false), confirm the vendor and the item
+description/quantity/price with the user, and never guess a price. Use
+growerp.100.FinDocServices100.get#FinDoc to check for an existing open purchase order to the same vendor
+before creating a new one. Every draft you create is queued for a human to approve before it becomes real
+— always say so. If unsure of an exact service name, call moqui_search_services with a single noun first."/>
+
+    <!-- ── Team membership: coordinator delegates to all eight specialists ──────────
+         delegationMode=tool → each specialist is exposed to the coordinator as a callable tool. -->
+    <moqui.adk.AdkAgentTeamMember
+        ownerPartyId="_NA_"
+        adkAgentTeamMemberId="OPS_TM_1"
+        coordinatorConfigId="OPS_COORD"
+        memberConfigId="OPS_SALES_DIGEST"
+        sequenceNum="1"
+        delegationMode="tool"
+        enabled="Y"/>
+    <moqui.adk.AdkAgentTeamMember
+        ownerPartyId="_NA_"
+        adkAgentTeamMemberId="OPS_TM_2"
+        coordinatorConfigId="OPS_COORD"
+        memberConfigId="OPS_PURCH_DIGEST"
+        sequenceNum="2"
+        delegationMode="tool"
+        enabled="Y"/>
+    <moqui.adk.AdkAgentTeamMember
+        ownerPartyId="_NA_"
+        adkAgentTeamMemberId="OPS_TM_3"
+        coordinatorConfigId="OPS_COORD"
+        memberConfigId="OPS_INV_DIGEST"
+        sequenceNum="3"
+        delegationMode="tool"
+        enabled="Y"/>
+    <moqui.adk.AdkAgentTeamMember
+        ownerPartyId="_NA_"
+        adkAgentTeamMemberId="OPS_TM_4"
+        coordinatorConfigId="OPS_COORD"
+        memberConfigId="OPS_FIN_DIGEST"
+        sequenceNum="4"
+        delegationMode="tool"
+        enabled="Y"/>
+    <moqui.adk.AdkAgentTeamMember
+        ownerPartyId="_NA_"
+        adkAgentTeamMemberId="OPS_TM_5"
+        coordinatorConfigId="OPS_COORD"
+        memberConfigId="OPS_HR_DIGEST"
+        sequenceNum="5"
+        delegationMode="tool"
+        enabled="Y"/>
+    <moqui.adk.AdkAgentTeamMember
+        ownerPartyId="_NA_"
+        adkAgentTeamMemberId="OPS_TM_6"
+        coordinatorConfigId="OPS_COORD"
+        memberConfigId="OPS_INV_REPLEN"
+        sequenceNum="6"
+        delegationMode="tool"
+        enabled="Y"/>
+    <moqui.adk.AdkAgentTeamMember
+        ownerPartyId="_NA_"
+        adkAgentTeamMemberId="OPS_TM_7"
+        coordinatorConfigId="OPS_COORD"
+        memberConfigId="OPS_SALES_DRAFT"
+        sequenceNum="7"
+        delegationMode="tool"
+        enabled="Y"/>
+    <moqui.adk.AdkAgentTeamMember
+        ownerPartyId="_NA_"
+        adkAgentTeamMemberId="OPS_TM_8"
+        coordinatorConfigId="OPS_COORD"
+        memberConfigId="OPS_PURCH_DRAFT"
+        sequenceNum="8"
+        delegationMode="tool"
+        enabled="Y"/>
+
+</entity-facade-xml>

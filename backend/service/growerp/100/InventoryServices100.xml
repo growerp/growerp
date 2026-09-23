@@ -299,6 +299,10 @@ limitations under the License.
                     <parameter name="quantityOnHand" />
                     <parameter name="acquireCost" />
                     <parameter name="availableToPromise" />
+                    <!-- from mantle.facility.ProductFacility(productId, this asset's facilityId),
+                         when configured for this product at this warehouse -->
+                    <parameter name="minimumStock" />
+                    <parameter name="reorderQuantity" />
                     <parameter name="receivedDate" />
                     <parameter name="expectedEndOfLifeDate" />
                     <parameter name="product" type="Map">
@@ -377,6 +381,11 @@ limitations under the License.
                     in-map="[docType: 'asset', statusId: item.statusId]" out-map="status" />
                 <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                     in-map="[docType: 'asset', statusId: item.classEnumId]" out-map="assetClass" />
+                <!-- reorder-point config, when set for this product at this asset's warehouse -->
+                <entity-find-one entity-name="mantle.facility.ProductFacility" value-field="prodFac" cache="true">
+                    <field-map field-name="productId" from="item.productId" />
+                    <field-map field-name="facilityId" from="item.facilityId" />
+                </entity-find-one>
                 <set field="assetOut"
                     from="[
                     assetId: item.assetId,
@@ -387,6 +396,8 @@ limitations under the License.
                     assetName: item.assetName,
                     quantityOnHand: item.quantityOnHandTotal ? item.quantityOnHandTotal.toString() : '0',
                     availableToPromise: item.availableToPromiseTotal ? item.availableToPromiseTotal.toString() : '0',
+                    minimumStock: prodFac?.minimumStock?.toString(),
+                    reorderQuantity: prodFac?.reorderQuantity?.toString(),
                     acquireCost: item.acquireCost?.toString(),
                     receivedDate: item.receivedDate ? ec.l10n.format(item.receivedDate,'yyyy-MM-dd')  : null,
                     expectedEndOfLifeDate: item.expectedEndOfLife ? ec.l10n.format(item.expectedEndOfLife,'yyyy-MM-dd')  : null,

@@ -153,6 +153,28 @@
         </actions>
     </service>
 
+    <service verb="nominate" noun="AgentForCatalog" authenticate="true">
+        <description>Flip an agent's catalogNominated flag. Tenant-side half of catalog
+            promotion: the owning tenant opts an agent in/out of the support app's review
+            queue (AdkCatalogPromotionView); it never becomes cross-tenant visible or usable
+            on its own. Ownership is checked by the growerp-facing wrapper
+            (AdkServices100.nominate#AgentForCatalog), not here.</description>
+        <in-parameters>
+            <parameter name="adkAgentConfigId" required="true"/>
+            <parameter name="nominated" type="Boolean" default-value="true"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg" for-update="true">
+                <field-map field-name="adkAgentConfigId"/>
+            </entity-find-one>
+            <if condition="!cfg">
+                <return error="true" message="Agent config ${adkAgentConfigId} not found."/>
+            </if>
+            <set field="cfg.catalogNominated" from="nominated ? 'Y' : 'N'"/>
+            <entity-update value-field="cfg"/>
+        </actions>
+    </service>
+
     <service verb="create" noun="Session" authenticate="true">
         <description>Create a new ADK chat session for the current user.</description>
         <out-parameters>

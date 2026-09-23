@@ -587,6 +587,7 @@ limitations under the License.
                     in-map="[secretKey: stripeGatewayConfig.secretKey,
                             startDate: startDate]"
                     out-map="context" />
+                <set field="paymentsReceived" from="responseMap?.paymentsReceived ?: []"/>
                 <else>
                     <return error="true"
                         message="Stripe Gateway Config not found for ${System.getProperty('paymentGatewayConfigId')}, please check your configuration."

@@ -162,6 +162,7 @@ class TransactionServices {
         def startTimestamp = parsedDate.atStartOfDay(ZoneOffset.UTC).toEpochSecond()
 
         def responseMap = [:]
+        def paymentsReceived = []
 
         try {
             // 3. Build the parameter map for the API call
@@ -199,14 +200,18 @@ class TransactionServices {
                         println "No line items for this charge."
                     }
 
-                    // Retrieve and print related customer information
+                    // Retrieve related customer information (best-effort, never fails the charge)
+                    def customerEmail = null
+                    def customerName = null
                     try {
                         def customerId = charge.getCustomer()
                         if (customerId) {
                             def customer = com.stripe.model.Customer.retrieve(customerId)
+                            customerEmail = customer.getEmail()
+                            customerName = customer.getName()
                             println "Customer ID:   ${customer.getId()}"
-                            println "Customer Email: ${customer.getEmail() ?: 'N/A'}"
-                            println "Customer Name:  ${customer.getName() ?: 'N/A'}"
+                            println "Customer Email: ${customerEmail ?: 'N/A'}"
+                            println "Customer Name:  ${customerName ?: 'N/A'}"
                             println "Customer Phone: ${customer.getPhone() ?: 'N/A'}"
                         } else {
                             println "No customer information for this charge."
@@ -214,6 +219,16 @@ class TransactionServices {
                     } catch (Exception e) {
                         println "Error retrieving customer info: ${e.getMessage()}"
                     }
+
+                    paymentsReceived.add([
+                        chargeId       : charge.getId(),
+                        amount         : amount,
+                        currencyUomId  : charge.getCurrency()?.toUpperCase(),
+                        createdDateMillis: charge.getCreated() * 1000L,
+                        description    : charge.getDescription(),
+                        customerEmail  : customerEmail,
+                        customerName   : customerName,
+                    ])
                 }
             }
 
@@ -231,6 +246,7 @@ class TransactionServices {
             responseMap.errorInfo = ['responseCode':'3','reasonCode':'','reasonMessage':e.getMessage(),'exception':e]
         }
 
+        responseMap.paymentsReceived = paymentsReceived
         return ['responseMap':responseMap]
     }
 

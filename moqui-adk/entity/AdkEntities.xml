@@ -44,6 +44,11 @@
              team download/upload. A flat set of specialists with no coordinator (e.g. the
              marketing agents) is still a "team" this way. -->
         <field name="teamName"           type="text-short"/>
+        <!-- catalogNominated: Y → the owning tenant asked for this agent to be considered
+             for promotion into the shared "_NA_" catalog (AdkFunctionCatalogView). Only
+             GrowERP support (AdkCatalogPromotionView, promote#AgentToCatalog) ever queries
+             across tenants by this flag; it is never visible cross-tenant otherwise. -->
+        <field name="catalogNominated"   type="text-indicator"/>
     </entity>
 
     <!-- Phase 4: members of a coordinator/workflow agent's team. A coordinator delegates to

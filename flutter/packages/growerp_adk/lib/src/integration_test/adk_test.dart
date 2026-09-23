@@ -15,6 +15,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import '../adk_config_service.dart';
 
 /// Reusable integration-test steps for the growerp_adk building block, built to
 /// the same pattern as `UserTest` (growerp_user_company): data is carried
@@ -309,6 +310,84 @@ class AdkTest {
       await CommonTest.enterText(tester, 'searchField', '');
     }
     await PersistFunctions.persistTest(test.copyWith(adkKnowledgeDocs: []));
+  }
+
+  // ── Function catalog ──────────────────────────────────────────────────────
+  /// Open the catalog picker from Agent Control, confirm it lists a real seed
+  /// function (the Operations Team coordinator, always present once
+  /// backend/data/GrowerpOperationsTeamData.xml is loaded) grouped under its
+  /// team, then close it. Read-only smoke test: the catalog itself is a plain
+  /// GET, so this is deterministic and needs no live LLM call.
+  static Future<void> openFunctionCatalog(WidgetTester tester) async {
+    await selectAgents(tester);
+    await CommonTest.tapByKey(tester, 'openFunctionCatalog',
+        seconds: CommonTest.waitTime);
+    await CommonTest.checkWidgetKey(tester, 'functionCatalogList');
+    await CommonTest.checkWidgetKey(tester, 'function_OPS_COORD');
+    await CommonTest.tapByKey(tester, 'closeFunctionCatalog');
+  }
+
+  /// Whether an agent created by this test could actually reach an LLM: either
+  /// this tenant has its own per-provider key (`llmConfigs`, checked the same
+  /// way `AdkAgentConfigDialog` does), or the system-wide free allowance
+  /// (`systemTokenLimit`/`tokensUsedThisMonth` — the GOOGLE_API_KEY / shared
+  /// key every agent can fall back to per AdkGovernanceServices) still has
+  /// room. A brand-new test company always has an empty `llmConfigs` — the
+  /// system allowance is what actually makes AI usable for it in practice, so
+  /// checking `llmConfigs` alone would make this always report "no key" even
+  /// with a real key configured system-wide (caught by running this test live
+  /// against a backend with GOOGLE_API_KEY set: llmConfigs came back empty,
+  /// systemTokenLimit did not). A test that needs a real AI response should
+  /// check this first and skip that part when false, so the suite still
+  /// passes on a backend/CI run with no key configured at all.
+  static Future<bool> hasLlmApiKey(WidgetTester tester) async {
+    final svc = await AdkConfigService.create();
+    final settings = await svc.systemSettings();
+    final ownKey = settings.llmConfigs.any((c) => (c.apiKey ?? '').isNotEmpty);
+    final systemLimit = settings.systemTokenLimit ?? 0;
+    final systemUsed = settings.tokensUsedThisMonth ?? 0;
+    final systemAllowance = systemLimit > 0 && systemUsed < systemLimit;
+    return ownKey || systemAllowance;
+  }
+
+  /// Open the catalog picker, then "Suggest a function" from inside it, assert
+  /// the description field renders. With an AI key configured on this backend,
+  /// actually runs the feasibility check and asserts only that SOME outcome
+  /// dialog appeared (never on the LLM's wording or which of the three
+  /// outcomes it picked — that would make the test flaky against model
+  /// output). With no key configured, cancels instead of calling it — same
+  /// reasoning as [openChatDialog] not sending a chat message.
+  static Future<void> openSuggestFunctionDialog(WidgetTester tester) async {
+    await selectAgents(tester);
+    await CommonTest.tapByKey(tester, 'openFunctionCatalog',
+        seconds: CommonTest.waitTime);
+    await CommonTest.tapByKey(tester, 'suggestFunction');
+    await CommonTest.checkWidgetKey(tester, 'suggestFunctionDescription');
+
+    if (await hasLlmApiKey(tester)) {
+      await CommonTest.enterText(
+          tester, 'suggestFunctionDescription', 'summarize open sales orders');
+      await CommonTest.tapByKey(tester, 'checkSuggestFunction',
+          seconds: CommonTest.waitTime * 3);
+      // Exactly one of these three outcome-dismiss keys renders, depending on
+      // the model's (non-deterministic) verdict — accept any of them.
+      if (await CommonTest.doesExistKey(tester, 'reviewSuggestFeasible')) {
+        await CommonTest.tapByKey(tester, 'dismissSuggestFeasible');
+        // A "feasible" verdict also opens AdkAgentConfigDialog pre-filled from
+        // the draft, regardless of which button dismissed the verdict dialog —
+        // close it without saving so it doesn't create a real agent.
+        if (await CommonTest.doesExistKey(tester, 'AdkAgentConfigDialog')) {
+          await CommonTest.tapByKey(tester, 'AdkAgentConfigCancel');
+        }
+      } else if (await CommonTest.doesExistKey(tester, 'dismissSuggestOutcome')) {
+        await CommonTest.tapByKey(tester, 'dismissSuggestOutcome');
+      } else {
+        await CommonTest.tapByKey(tester, 'dismissSuggestError');
+      }
+    } else {
+      await CommonTest.tapByKey(tester, 'cancelSuggestFunction');
+    }
+    await CommonTest.tapByKey(tester, 'closeFunctionCatalog');
   }
 
   // ── Approvals (governance) ────────────────────────────────────────────────

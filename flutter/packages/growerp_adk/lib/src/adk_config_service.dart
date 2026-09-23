@@ -85,6 +85,26 @@ class AdkConfigService {
     await _client.deleteAdkAgentConfig(adkAgentConfigId: configId);
   }
 
+  /// Opt one of this tenant's own agents in/out of the support app's catalog
+  /// promotion review queue. Never makes it visible or usable by another
+  /// tenant on its own.
+  Future<void> nominateForCatalog(String configId, {bool nominated = true}) =>
+      _client.nominateAdkAgentConfig(
+        adkAgentConfigId: configId,
+        nominated: nominated,
+      );
+
+  /// Support-only: the catalog promotion review queue (every tenant's
+  /// catalogNominated='Y' agents).
+  Future<List<AdkAgentConfig>> nominatedAgents() async {
+    final r = await _client.getNominatedAgents();
+    return r.agents;
+  }
+
+  /// Support-only: clone a nominated tenant agent into the shared "_NA_" catalog.
+  Future<void> promoteToCatalog(String configId) =>
+      _client.promoteAgentToCatalog(adkAgentConfigId: configId);
+
   /// Clone the GROWERP marketing agent team into this tenant (idempotent).
   Future<void> enableMarketingTeam() async {
     await _client.enableMarketingAgentTeam();
@@ -94,6 +114,40 @@ class AdkConfigService {
   Future<void> loadAgentDemo() async {
     await _client.loadAgentDemo();
   }
+
+  /// Load a named production-ready template team (e.g. "GrowERP Operations
+  /// Team") into this tenant, independently of the Agent Control demo above
+  /// (idempotent). Pass [adkAgentConfigIds] to clone exactly those catalog
+  /// functions instead of the whole team.
+  Future<void> loadAgentTeam({
+    String? teamName,
+    List<String>? adkAgentConfigIds,
+  }) async {
+    await _client.loadAgentTeam(
+      teamName: teamName,
+      adkAgentConfigIds: adkAgentConfigIds,
+    );
+  }
+
+  /// The function catalog: every "_NA_" template function across every real
+  /// team, plus whether this tenant already has each one.
+  Future<List<AdkAgentCatalogFunction>> agentCatalog() async {
+    final r = await _client.getAdkAgentCatalog();
+    return r.functions;
+  }
+
+  /// Feasibility-checked "suggest a new function": checks a free-text
+  /// description against real services and [screenCatalogJson] (the running
+  /// app's own screen catalog, so a "just navigate there" outcome can be
+  /// recognised). Never creates anything.
+  Future<AdkFunctionSuggestion> suggestFunction(
+    String description, {
+    String? screenCatalogJson,
+  }) =>
+      _client.suggestAgentFunction(
+        description: description,
+        screenCatalogJson: screenCatalogJson,
+      );
 
   // ── Phase 4: team membership ───────────────────────────────────────────────
   Future<List<AdkAgentTeamMember>> teamMembers(String coordinatorConfigId) async {

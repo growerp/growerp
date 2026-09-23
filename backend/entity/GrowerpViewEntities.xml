@@ -790,6 +790,7 @@ limitations under the License.
         <alias name="invoiceName" field="description" entity-alias="INV" />
         <alias name="statusId" entity-alias="INV" />
         <alias name="invoiceDate" entity-alias="INV" />
+        <alias name="dueDate" entity-alias="INV" />
         <alias name="invoiceTotal" entity-alias="INV" />
         <alias name="invoiceItemSeqId" entity-alias="ITEM" />
         <alias name="productId" entity-alias="ITEM" />

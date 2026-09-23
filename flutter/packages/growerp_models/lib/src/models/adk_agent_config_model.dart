@@ -19,6 +19,10 @@ part 'adk_agent_config_model.g.dart';
 @JsonSerializable(includeIfNull: false, explicitToJson: true)
 class AdkAgentConfig {
   final String? adkAgentConfigId;
+  /// Only ever populated cross-tenant, by the support app's
+  /// get#NominatedAgents (catalog promotion queue) — a tenant's own
+  /// get#AdkAgentConfig never sends its own ownerPartyId back.
+  final String? ownerPartyId;
   final String? agentName;
   final String? modelName;
   final String? llmProvider;
@@ -60,12 +64,19 @@ class AdkAgentConfig {
   /// the Agent Control Center UI and can be downloaded/uploaded together.
   final String? teamName;
 
+  /// Y → the owning tenant asked for this agent to be reviewed for the shared
+  /// catalog (support app's AdkCatalogPromotionView). Never makes it visible
+  /// or usable by another tenant on its own.
+  @JsonKey(defaultValue: false)
+  final bool catalogNominated;
+
   /// Write-only: sent on create/update, never returned by GET.
   @JsonKey(includeFromJson: false)
   final String? apiKey;
 
   const AdkAgentConfig({
     this.adkAgentConfigId,
+    this.ownerPartyId,
     this.agentName,
     this.modelName,
     this.llmProvider,
@@ -86,6 +97,7 @@ class AdkAgentConfig {
     this.orchestrationType,
     this.loopMaxIterations,
     this.teamName,
+    this.catalogNominated = false,
     this.apiKey,
   });
 
@@ -96,6 +108,7 @@ class AdkAgentConfig {
 
   AdkAgentConfig copyWith({
     String? adkAgentConfigId,
+    String? ownerPartyId,
     String? agentName,
     String? modelName,
     String? llmProvider,
@@ -116,10 +129,12 @@ class AdkAgentConfig {
     String? orchestrationType,
     int? loopMaxIterations,
     String? teamName,
+    bool? catalogNominated,
     String? apiKey,
   }) =>
       AdkAgentConfig(
         adkAgentConfigId: adkAgentConfigId ?? this.adkAgentConfigId,
+        ownerPartyId: ownerPartyId ?? this.ownerPartyId,
         agentName: agentName ?? this.agentName,
         modelName: modelName ?? this.modelName,
         llmProvider: llmProvider ?? this.llmProvider,
@@ -140,6 +155,7 @@ class AdkAgentConfig {
         orchestrationType: orchestrationType ?? this.orchestrationType,
         loopMaxIterations: loopMaxIterations ?? this.loopMaxIterations,
         teamName: teamName ?? this.teamName,
+        catalogNominated: catalogNominated ?? this.catalogNominated,
         apiKey: apiKey ?? this.apiKey,
       );
 

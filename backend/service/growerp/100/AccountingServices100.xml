@@ -2406,6 +2406,35 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="get" noun="FinanceSubsystem">
+        <description>Whether this company has any accounting activity at all, and whether it
+            has configured simplified cash-book categories — so a reporting agent can branch
+            deterministically instead of guessing from empty query results. Cash-book and full
+            GL are not separate data stores (both read mantle.ledger.transaction.AcctgTrans);
+            usesCashBookCategories just signals a freelance/small-business setup where
+            growerp.100.CashBookServices100.get#ProfitLoss / get#CashBookEntry are likely more
+            relevant to the user than raw GL reports.</description>
+        <out-parameters>
+            <parameter name="hasAnyActivity" type="Boolean"/>
+            <parameter name="usesCashBookCategories" type="Boolean"/>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <entity-find-count count-field="transCount"
+                entity-name="mantle.ledger.transaction.AcctgTrans">
+                <econdition field-name="organizationPartyId" from="companyPartyId"/>
+            </entity-find-count>
+            <entity-find-count count-field="cashBookCategoryCount"
+                entity-name="mantle.ledger.account.GlAccountOrganization">
+                <econdition field-name="organizationPartyId" from="companyPartyId"/>
+                <econdition field-name="isCashBookCategory" value="Y"/>
+            </entity-find-count>
+            <set field="hasAnyActivity" from="transCount > 0"/>
+            <set field="usesCashBookCategories" from="cashBookCategoryCount > 0"/>
+        </actions>
+    </service>
+
     <service verb="get" noun="LedgerDashboard">
         <description>Aggregates for the ledger dashboard tile: transaction
             mix by type (sales/purchase invoice, incoming/outgoing payment)
@@ -2464,6 +2493,134 @@ limitations under the License.
                 <econdition field-name="isPosted" operator="not-equals" value="Y" or-null="true" />
             </entity-find-count>
             <set field="totalTransactions" from="posted + unposted" />
+        </actions>
+    </service>
+
+    <!-- ════════════════════════════════════════════════════════════════════════
+         Stripe payment import. NOTE: today's mantle-stripe integration is a single
+         GLOBAL Stripe account (Stripe.PaymentGatewayStripe has no ownerPartyId —
+         it's resolved from a JVM System property), used for GrowERP's own SaaS
+         subscription/course/store billing — not a per-tenant "each company connects
+         their own Stripe" gateway. This service is therefore only meaningful for the
+         GROWERP owner today; calling it for another tenant will simply find no
+         invoices to match against its own Stripe charges.
+
+         Matching is deterministic, not LLM judgment: a Stripe charge has no
+         invoice/order reference in its metadata today (charge-creation only stamps
+         line-item description/amount and customer name/phone — see
+         com.stripe.TransactionServices.sendAuthorizeRequest), so a "confident" match
+         here means exact customerEmail + exact amount against exactly one open sales
+         invoice. Anything else (no match, or more than one candidate) is left for a
+         human and reported back, never guessed. -->
+    <service verb="import" noun="StripePayments" transaction-timeout="300">
+        <description>Import recent successful Stripe charges as AR Payments and apply
+            them to the matching open invoice. Confident matches (exact customer email
+            + exact amount, exactly one open invoice) are applied automatically;
+            everything else is returned in unmatchedPayments for a human to resolve.
+        </description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true"/>
+            <parameter name="startDate" type="Timestamp">
+                <description>Defaults to 24 hours ago.</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="importedCount" type="Integer"/>
+            <parameter name="unmatchedPayments" type="List"/>
+        </out-parameters>
+        <actions>
+            <!-- Headless run (scheduled job, no logged-in user): authenticate as the owner's
+                 main-company administrator, same pattern as
+                 MCPAutomationServices100.run#AllCampaignAutomation, so that the disable-authz-free
+                 get#FinDoc call below runs with real authorization. -->
+            <if condition="!ec.user.userId">
+                <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany"
+                    list="adminList" limit="1" disable-authz="true">
+                    <econdition field-name="ownerPartyId"/>
+                    <econdition field-name="companyRole" value="OrgInternal"/>
+                    <econdition field-name="userGroupId" value="GROWERP_M_ADMIN"/>
+                    <econdition field-name="userDisabled" value="N" or-null="true"/>
+                    <order-by field-name="userId"/>
+                </entity-find>
+                <if condition="!adminList">
+                    <return error="true" message="No administrator user found for owner ${ownerPartyId}"/>
+                </if>
+                <script>ec.user.internalLoginUser(adminList[0].loginName)</script>
+            </if>
+            <!-- Resolve companyPartyId directly from the caller-supplied ownerPartyId — never via
+                 get#RelatedCompanyAndOwner here, since that always derives ownerPartyId from
+                 ec.user's OWN account when no userPartyId is passed, silently clobbering the
+                 explicit ownerPartyId argument whenever this is called by an already-logged-in
+                 caller (e.g. SystemSupport testing a different owner, or in a future
+                 direct-service-call context). Found live: SystemSupport calling with
+                 ownerPartyId=GROWERP got "No internal company found for owner _NA_" — SystemSupport's
+                 own owner, not GROWERP — because the old code called get#RelatedCompanyAndOwner
+                 unconditionally. -->
+            <entity-find entity-name="mantle.party.PartyDetailAndRole" list="companyList" cache="true">
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
+                <econdition field-name="partyTypeEnumId" value="PtyOrganization"/>
+                <econdition field-name="roleTypeId" value="OrgInternal"/>
+            </entity-find>
+            <set field="companyPartyId" from="companyList[0]?.partyId"/>
+            <if condition="!companyPartyId">
+                <return error="true" message="No internal company found for owner ${ownerPartyId}"/>
+            </if>
+
+            <set field="startDate" from="startDate ?: new java.sql.Timestamp(ec.user.nowTimestamp.time - 24*60*60*1000)"/>
+            <service-call name="Stripe.StripePaymentServices.download#Payments" out-map="context"
+                in-map="[startDate: startDate]"/>
+            <set field="importedCount" value="0" type="Integer"/>
+            <set field="unmatchedPayments" from="[]"/>
+
+            <!-- open sales invoices for this owner, fetched once -->
+            <service-call name="growerp.100.FinDocServices100.get#FinDoc" out-map="invoiceSearch"
+                in-map="[docType: 'invoice', sales: true, open: true, limit: 250]"/>
+            <set field="openInvoices" from="invoiceSearch.finDocs ?: []"/>
+
+            <iterate list="paymentsReceived ?: []" entry="stripePayment">
+                <!-- idempotency: skip a charge already imported -->
+                <entity-find entity-name="mantle.account.payment.Payment" list="existingPayments">
+                    <econdition field-name="paymentRefNum" from="stripePayment.chargeId"/>
+                </entity-find>
+                <if condition="existingPayments"><continue/></if>
+
+                <if condition="!stripePayment.customerEmail">
+                    <script>unmatchedPayments.add(stripePayment + [reason: 'No customer email on the Stripe charge'])</script>
+                    <continue/>
+                </if>
+
+                <!-- candidates: open invoices whose contact email and grandTotal both match exactly -->
+                <script>
+                    def candidates = openInvoices.findAll { fd ->
+                        fd.otherUser?.email?.trim()?.equalsIgnoreCase(stripePayment.customerEmail?.trim()) &amp;&amp;
+                        fd.grandTotal != null &amp;&amp;
+                        Math.abs((fd.grandTotal as BigDecimal).subtract(stripePayment.amount as BigDecimal).doubleValue()) &lt; 0.01
+                    }
+                </script>
+                <if condition="candidates.size() == 1">
+                    <then>
+                        <set field="invoice" from="candidates[0]"/>
+                        <set field="chargeEffectiveDate"
+                            from="new java.sql.Timestamp(stripePayment.createdDateMillis as Long)"/>
+                        <service-call name="mantle.account.PaymentServices.create#Payment" out-map="context"
+                            in-map="[fromPartyId: invoice.otherUser.partyId, toPartyId: companyPartyId,
+                                amount: stripePayment.amount, paymentRefNum: stripePayment.chargeId,
+                                paymentInstrumentEnumId: 'PiCreditCard',
+                                effectiveDate: chargeEffectiveDate]"/>
+                        <service-call name="update#mantle.account.payment.Payment"
+                            in-map="[paymentId: paymentId, forInvoiceId: invoice.invoiceId, statusId: 'PmntDelivered']"/>
+                        <service-call name="mantle.account.PaymentServices.apply#PaymentForInvoice"
+                            in-map="[paymentId: paymentId]"/>
+                        <set field="importedCount" from="importedCount + 1" type="Integer"/>
+                    </then>
+                    <else>
+                        <script>
+                            unmatchedPayments.add(stripePayment + [reason: candidates.size() == 0 ?
+                                'No open invoice for this customer/amount' : 'Multiple open invoices match this customer/amount'])
+                        </script>
+                    </else>
+                </if>
+            </iterate>
         </actions>
     </service>
 </services>

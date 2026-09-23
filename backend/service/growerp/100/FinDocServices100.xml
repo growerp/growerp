@@ -260,6 +260,8 @@ limitations under the License.
                     <parameter name="statusId" />
                     <parameter name="creationDate" />
                     <parameter name="placedDate" />
+                    <!-- invoices only: mantle.account.invoice.Invoice.dueDate -->
+                    <parameter name="dueDate" />
                     <parameter name="description" />
                     <parameter name="otherUser" type="Map">
                         <parameter name="partyId" />
@@ -877,6 +879,8 @@ limitations under the License.
                             statusId: convertedStatusId,
                             creationDate: item.invoiceDate
                                 ? ec.l10n.format(item.invoiceDate,'yyyy-MM-dd HH:mm:ssZ')  : null,
+                            dueDate: item.dueDate
+                                ? ec.l10n.format(item.dueDate,'yyyy-MM-dd HH:mm:ssZ')  : null,
                             otherUser: userOut?.partyId ? userOut : null,
                             otherCompany: company?.partyId ? company : null,
                             grandTotal: item.invoiceTotal
@@ -1946,6 +1950,53 @@ limitations under the License.
                     in-map="[invoiceId: invoiceId,
                             invoiceItems: invoice.items]" />
             </if>
+        </actions>
+    </service>
+
+    <service verb="send" noun="FinDocEmail">
+        <description>Email a rendered document (invoice, order/quote, etc) to its counterparty
+            as a PDF attachment. The PDF itself is rendered client-side (Flutter's PdfFormats) and
+            handed in as base64 — this service only resolves the recipient/subject and sends it.
+        </description>
+        <in-parameters>
+            <parameter name="finDocId" required="true"/>
+            <parameter name="pdfBase64" required="true"/>
+            <parameter name="toEmail">
+                <description>Override recipient; defaults to the document's counterparty
+                    contact email (otherUser.email from get#FinDoc).</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="emailMessageId"/>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <service-call name="growerp.100.FinDocServices100.get#FinDoc" out-map="context"
+                in-map="[finDocId: finDocId, limit: 1]"/>
+            <if condition="!finDocs">
+                <return error="true" message="No document found for finDocId ${finDocId}"/>
+            </if>
+            <set field="finDoc" from="finDocs[0]"/>
+            <set field="recipient" from="toEmail ?: finDoc.otherUser?.email"/>
+            <if condition="!recipient">
+                <return error="true"
+                    message="No email address on file for this document's contact; pass toEmail explicitly."/>
+            </if>
+            <set field="docLabel" from="(finDoc.docType ?: 'document').capitalize()"/>
+            <set field="docRef" from="finDoc.pseudoId ?: finDoc.id"/>
+            <set field="fileName" from="&quot;${docLabel}-${docRef}.pdf&quot;"/>
+            <set field="emailSubject" from="&quot;${docLabel} ${docRef}&quot;"/>
+            <set field="emailBodyHtml"
+                from="&quot;&lt;p&gt;Please find attached ${docLabel.toLowerCase()} ${docRef}.&lt;/p&gt;&quot;"/>
+            <service-call name="growerp.100.GeneralServices100.send#DirectEmail"
+                in-map="[ownerPartyId: ownerPartyId,
+                    toAddresses: recipient,
+                    subject: emailSubject,
+                    bodyHtml: emailBodyHtml,
+                    attachmentBase64: pdfBase64, attachmentFileName: fileName,
+                    attachmentContentType: 'application/pdf']"
+                out-map="context"/>
         </actions>
     </service>
 

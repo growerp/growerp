@@ -12,8 +12,11 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -23,6 +26,77 @@ import '../findoc.dart';
 class PrintingForm extends StatelessWidget {
   final FinDoc finDocIn;
   const PrintingForm({super.key, required this.finDocIn});
+
+  Future<void> _emailInvoice(
+    BuildContext context,
+    Company company,
+    FinDoc finDoc,
+  ) async {
+    final emailController = TextEditingController(
+      text: finDoc.otherCompany?.email ?? finDoc.otherUser?.email ?? '',
+    );
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Email ${finDoc.docType?.name ?? 'document'}'),
+        content: TextField(
+          key: const Key('emailInvoiceTo'),
+          controller: emailController,
+          decoration: const InputDecoration(labelText: 'Send to'),
+          keyboardType: TextInputType.emailAddress,
+        ),
+        actions: [
+          TextButton(
+            key: const Key('cancelEmailInvoice'),
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            key: const Key('confirmEmailInvoice'),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Send'),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true || !context.mounted) return;
+    if (emailController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Enter a recipient email address'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    final restClient = context.read<RestClient>();
+    try {
+      final bytes = await PdfFormats.finDocPdf(
+        PdfPageFormat.a4,
+        company,
+        finDoc,
+      );
+      await restClient.sendFinDocEmail(
+        finDocId: finDoc.id()!,
+        pdfBase64: base64Encode(bytes),
+        toEmail: emailController.text.trim(),
+      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Emailed to ${emailController.text.trim()}')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Email failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,15 +130,34 @@ class PrintingForm extends StatelessWidget {
                       finDoc,
                     ),
                   ),
-                  SizedBox(
-                    height: 100,
-                    child: OutlinedButton(
-                      key: const Key('back'),
-                      child: const Icon(Icons.arrow_back),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        height: 100,
+                        child: OutlinedButton(
+                          key: const Key('back'),
+                          child: const Icon(Icons.arrow_back),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ),
+                      if (finDoc.docType == FinDocType.order ||
+                          finDoc.docType == FinDocType.invoice)
+                        SizedBox(
+                          height: 100,
+                          child: OutlinedButton(
+                            key: const Key('emailInvoice'),
+                            child: const Icon(Icons.email),
+                            onPressed: () => _emailInvoice(
+                              context,
+                              authenticate.company!,
+                              finDoc,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ],
               );
