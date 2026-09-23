@@ -39,10 +39,10 @@ dependencies {
     // google-adk is declared runtimeOnly in the Moqui framework so it ships in moqui.war.
     // Declare it compileOnly here so AdkManager and AdkDevServlet can compile against it,
     // without bundling extra JARs in the component lib/ directory.
-    compileOnly 'com.google.adk:google-adk:1.9.0'
+    compileOnly 'com.google.adk:google-adk:1.10.1'
 
     // Dev module — only used to extract the Angular DevUI browser assets at build time
-    adkDevAssets 'com.google.adk:google-adk-dev:1.9.0'
+    adkDevAssets 'com.google.adk:google-adk-dev:1.10.1'
 }
 
 check.dependsOn.clear()
