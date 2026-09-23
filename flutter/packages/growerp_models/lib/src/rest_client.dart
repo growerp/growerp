@@ -2435,6 +2435,7 @@ abstract class RestClient {
   Future<AdkFunctionSuggestion> suggestAgentFunction({
     @Field() required String description,
     @Field() String? screenCatalogJson,
+    @Field() String? ownerPartyId,
   });
 
   /// Tenant side of catalog promotion: opt one of this tenant's own agents

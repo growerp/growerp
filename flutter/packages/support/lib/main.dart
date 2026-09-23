@@ -32,6 +32,7 @@ import 'views/infrastructure_view.dart';
 import 'views/rest_statistics_view.dart';
 import 'views/signup_statistics_view.dart';
 import 'views/support_dashboard_content.dart';
+import 'views/website_tools_view.dart';
 import 'l10n/generated/support_localizations.dart';
 
 Future main(List<String> args) async {
@@ -208,10 +209,11 @@ List<Map<String, GrowerpWidgetBuilder>> supportWidgetRegistrations = [
     'AboutForm': (args) => const AboutForm(),
     'ApplicationList': (args) => const ApplicationList(),
     'AdkSystemUsageView': (args) => const AdkSystemUsageView(),
-    'AdkCatalogPromotionView': (args) => const AdkCatalogPromotionView(),
+    'AdkAgentCatalogView': (args) => const AdkAgentCatalogView(),
     'RestStatisticsView': (args) => const RestStatisticsView(),
     'SignupStatisticsView': (args) => const SignupStatisticsView(),
     'InfrastructureView': (args) => const InfrastructureView(),
+    'WebsiteToolsView': (args) => const WebsiteToolsView(),
     'WebsiteConversionList': (args) => const WebsiteConversionList(),
     'WebsiteTranslationList': (args) => const WebsiteTranslationList(),
     'GlAccountTranslationList': (args) => const GlAccountTranslationList(),

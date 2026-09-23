@@ -12,13 +12,13 @@ The Agent Development Kit (ADK) package for the GrowERP Flutter frontend. It pro
 - **Scheduled Jobs** - Setting up and managing recurring or scheduled tasks for agents
 - **Agent Chat** - Conversational interfaces for interacting with agents directly
 - **Governance & Audit** - Action auditing and write approvals to safely manage agent actions
-- **Catalog Promotion** (support app only) - Reviewing a tenant-nominated agent and promoting it into the shared catalog every tenant can pick from
+- **Agent Catalog** (support app only) - Two tabs: reviewing/promoting a tenant-nominated agent into the shared catalog, and running the same "Suggest a function" check on behalf of a named tenant (support's own session has no tenant of its own)
 - **Knowledge Base** - Services and views for managing agent knowledge
 
 ## Key Domains
 
 - **Agents** - Core views and configurations (`adk_agent_list_view`, `adk_agent_config_dialog`)
-- **Catalog** - Function picker and AI-assisted suggestions (`adk_function_catalog_view`), catalog promotion review queue for the support app (`adk_catalog_promotion_view`)
+- **Catalog** - Function picker and AI-assisted suggestions (`adk_function_catalog_view`, `adk_suggest_function_panel`); support app's tabbed "Agent Catalog" (`adk_agent_catalog_view`) combines the promotion review queue (`adk_catalog_promotion_view`) with the suggestion panel
 - **Chat** - Chat interfaces (`adk_chat_view`, `adk_chat_dialog`)
 - **Jobs** - Job scheduling and management (`adk_job_list_view`, `adk_job_service`)
 - **Governance** - Approvals and action lists (`adk_approvals_list_view`, `adk_actions_list_view`, `adk_governance_service`)
@@ -66,7 +66,9 @@ growerp_adk/
 │       ├── adk_approvals_list_view.dart   # Write approvals
 │       ├── adk_chat_view.dart             # Agent chat interface
 │       ├── adk_function_catalog_view.dart # Function picker + "Suggest a function"
-│       ├── adk_catalog_promotion_view.dart # Support app: catalog promotion review queue
+│       ├── adk_suggest_function_panel.dart # Reusable inline suggestion panel
+│       ├── adk_agent_catalog_view.dart    # Support app: "Agent Catalog" (Promotion + Suggestion tabs)
+│       ├── adk_catalog_promotion_view.dart # Promotion tab content: review/promote nominated agents
 │       ├── adk_job_list_view.dart         # Scheduled jobs list
 │       ├── adk_knowledge_view.dart        # Knowledge management
 │       └── ... (services)                 # Backend communication services

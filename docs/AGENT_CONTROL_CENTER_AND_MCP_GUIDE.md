@@ -742,19 +742,36 @@ The Function Scout is cloned into the asking tenant on first use (same catalog-c
 
 ---
 
-## 19. Catalog promotion — support app
+## 19. Agent Catalog — support app
+
+The **support app**'s "Agent Catalog" screen (`AdkAgentCatalogView`, menu item
+`SUPPORT_CATALOG_PROMOTION`, route `/agent-catalog`) is the support-side counterpart to §17-18,
+restricted to the `GROWERP_M_SYSTEM` group like the other cross-tenant ADK view (System Usage,
+§2). It has two tabs:
+
+### Promotion
 
 A tenant-created agent (from §18, or the ordinary **+** button) stays private to that tenant. To
 make a genuinely useful one available to every tenant, the tenant first **nominates** it — a
 toggle in `AdkAgentConfigDialog` ("Suggest for shared catalog") that sets `catalogNominated=Y`.
 This is the only thing that becomes cross-tenant-visible, and only once the tenant explicitly asks
-for it.
+for it. Nothing notifies support when this happens today — the Promotion tab is a pull, not a push;
+open it to see who has asked.
 
-GrowERP support then reviews it in the **support app**'s Catalog Promotion screen
-(`AdkCatalogPromotionView`, menu item `SUPPORT_CATALOG_PROMOTION`) — restricted to the
-`GROWERP_M_SYSTEM` group, the same as the other cross-tenant ADK view (System Usage, §2). The
-screen lists every nominated agent across every tenant (name, owner, description, instruction,
+The tab (`AdkCatalogPromotionView`, embedded here rather than its own top-level screen) lists
+every nominated agent across every tenant (name, owner, description, instruction,
 `serviceAllowlist`) for a human to actually read before deciding. **Promote** clones it into a new
 `_NA_` catalog template, stripping `apiKey`, `agentPartyId`, and any literal `scheduleChatRoomId`/
 `approvalChatRoomId` — a real tenant's room id must never leak into a shared template. It then
 shows up in every tenant's function catalog (§17), the same as `OPS_PURCH_DRAFT` does today.
+
+### Suggestion
+
+The same "Suggest a function" feasibility check from §18 (`AdkSuggestFunctionPanel`), but with a
+**Tenant owner party ID** field so support can run it *on behalf of* a named tenant — useful to
+preview or troubleshoot a suggestion before advising them. This exists because support's own
+session has no real tenant of its own (`ownerPartyId` resolves to `_NA_`), so the plain
+tenant-side flow would fail for them with no way to test anything. `suggest#AgentFunction`'s
+`ownerPartyId` in-parameter is honoured only for a caller in `GROWERP_M_SYSTEM` — a normal tenant
+admin cannot use it to test on another tenant's behalf, so this is support-only by construction,
+not just by convention.

@@ -139,14 +139,18 @@ class AdkConfigService {
   /// Feasibility-checked "suggest a new function": checks a free-text
   /// description against real services and [screenCatalogJson] (the running
   /// app's own screen catalog, so a "just navigate there" outcome can be
-  /// recognised). Never creates anything.
+  /// recognised). Never creates anything. [ownerPartyId] is a support-only
+  /// override to test on behalf of a specific tenant — ignored for anyone not
+  /// in GROWERP_M_SYSTEM.
   Future<AdkFunctionSuggestion> suggestFunction(
     String description, {
     String? screenCatalogJson,
+    String? ownerPartyId,
   }) =>
       _client.suggestAgentFunction(
         description: description,
         screenCatalogJson: screenCatalogJson,
+        ownerPartyId: ownerPartyId,
       );
 
   // ── Phase 4: team membership ───────────────────────────────────────────────

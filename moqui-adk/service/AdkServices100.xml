@@ -1282,6 +1282,13 @@
                     WidgetRegistry.getWidgetCatalog() feeds to live chat), so the Scout can
                     recognise a "navigation" outcome. Omit for a plain "[]".</description>
             </parameter>
+            <parameter name="ownerPartyId">
+                <description>Support-only override to run the feasibility check on behalf of a
+                    specific tenant (the support app's own session resolves to no real tenant, so
+                    it must name one to test against). Ignored — always session-derived — for
+                    anyone not in GROWERP_M_SYSTEM, so a tenant admin can never test on another
+                    tenant's behalf.</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="outcome"/> <!-- navigation | newFunction | notPossible | error -->
@@ -1289,8 +1296,10 @@
             <parameter name="draft" type="Map"/>
         </out-parameters>
         <actions>
-            <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            <if condition="!ownerPartyId || !ec.user.isInGroup('GROWERP_M_SYSTEM')">
+                <service-call out-map="context"
+                    name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
+            </if>
             <if condition="!ownerPartyId">
                 <return error="true" message="Not logged in"/>
             </if>
