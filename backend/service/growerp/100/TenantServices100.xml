@@ -262,6 +262,8 @@ limitations under the License.
                     // spreadsheet-freedom guide download form + playbook email template
                     // for the /spreadsheetFreedom landing page
                     ec.entity.makeDataLoader().location("component://growerp/data/SpreadsheetFreedomLandingPageData.xml").load()
+                    // revenue-first assessment, linked from the /content/revenue-first page
+                    ec.entity.makeDataLoader().location("component://growerp/data/RevenueFirstAssessmentData.xml").load()
                     // first-login welcome sequence (day0/3/7) + Substack subscribe on
                     // completion, enrolled from GeneralServices100.login#User
                     ec.entity.makeDataLoader().location("component://growerp/data/GrowerpFirstLoginSequenceData.xml").load()

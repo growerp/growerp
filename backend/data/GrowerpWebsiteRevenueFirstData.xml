@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-facade-xml type="seed-initial">
+
+    <!-- Parent records (also in GrowerpWebsiteSeedData.xml) so the page loads on a fresh DB -->
+    <moqui.resource.DbResource filename="GROWERP_ROOT" isFile="N" resourceId="GROWERP_ROOT" parentResourceId="" />
+    <moqui.resource.DbResource filename="content" isFile="N" resourceId="growerp_content_dir" parentResourceId="GROWERP_ROOT" />
+
+    <!-- Wiki Space -->
+    <moqui.resource.wiki.WikiSpace wikiSpaceId="GROWERP_WS" description="GrowERP Official Website Content"
+        allowAnyHtml="Y" rootPageLocation="dbresource://GROWERP_ROOT"/>
+
+    <!-- ================================================================
+         REVENUE FIRST SEQUENCE PAGE
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="growerp_revenue_first" wikiSpaceId="GROWERP_WS" pagePath="revenue-first"
+        publishedVersionName="01" sequenceNum="8">
+        <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="revenue-first.html.ftl" isFile="Y" resourceId="growerp_revenue_first"
+        parentResourceId="growerp_content_dir">
+        <file mimeType="text/html" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[<#-- title: Revenue-First ERP -->
+<#-- description: Discover the Revenue-First ERP implementation sequence. Solve marketing and sales problems for SMEs before scaling back-office operations. -->
+<!-- Background Ambient Glow -->
+<div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+    <div class="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/5 blur-[120px]"></div>
+    <div class="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] rounded-full bg-tertiary/5 blur-[100px]"></div>
+</div>
+
+<main class="pt-24 pb-16 overflow-x-hidden">
+    <!-- Hero Section -->
+    <section class="max-w-container mx-auto px-4 md:px-12 min-h-[75vh] flex flex-col justify-center py-16 relative">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] max-w-full h-[800px] bg-primary/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full">
+            <div class="lg:col-span-7 flex flex-col z-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container border border-outline-variant/50 w-fit mb-6">
+                    <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                    <span class="font-label text-xs text-on-surface-variant">For SMEs &lt; 30 Employees</span>
+                </div>
+                <h1 class="font-display text-4xl md:text-6xl font-bold tracking-tight leading-tight text-on-surface">
+                    Flip the ERP Script.<br>
+                    <span class="l-gradient-text">Solve Sales First.</span>
+                </h1>
+                <p class="text-lg text-on-surface-variant mt-6 max-w-xl leading-relaxed">
+                    Traditional ERP rollouts drain capital with back-office complexities. We build your lead-to-revenue machine first, ensuring the system pays for itself.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 mt-8">
+                    <a href="#phases" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-8 py-4 rounded-lg l-glow transition-all active:scale-95 text-center">
+                        See the Sequence
+                    </a>
+                    <a href="#problem" class="l-glass hover:bg-surface-container text-on-surface font-label text-sm font-medium px-8 py-4 rounded-lg transition-all active:scale-95 text-center flex items-center justify-center gap-2">
+                        Why It Works
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Visual -->
+            <div class="lg:col-span-5 relative z-10 hidden md:block">
+                <div class="relative group">
+                    <!-- Glowing blur behind the image -->
+                    <div class="absolute -inset-1 bg-gradient-to-r from-primary to-tertiary rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200"></div>
+                    <img src="/assets/revenue_first_hero.jpg" alt="Revenue First ERP Machine" class="relative w-full h-auto rounded-2xl border border-outline-variant/30 shadow-[0_20px_50px_rgba(0,0,0,0.5)] hover:scale-[1.02] transition-transform duration-500" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section id="problem" class="max-w-container mx-auto px-4 md:px-12 py-24 relative">
+        <div class="text-center mb-16 max-w-2xl mx-auto">
+            <h2 class="font-display text-3xl font-semibold tracking-tight text-on-surface mb-4">The Existential Threat to SMEs</h2>
+            <p class="text-on-surface-variant">Cash flow is king, yet most small companies struggle with inconsistent lead generation and disconnected sales tools.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-error/5 rounded-full blur-[40px] group-hover:bg-error/10 transition-all"></div>
+                <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-error mb-2">
+                    <span class="material-symbols-outlined icon-fill text-[24px]">cloud_off</span>
+                </div>
+                <h3 class="font-display text-xl font-semibold text-on-surface">Scattered Data</h3>
+                <p class="text-on-surface-variant leading-relaxed">Leads get lost between emails, spreadsheets, and disconnected CRM trials.</p>
+            </div>
+            <div class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-tertiary/5 rounded-full blur-[40px] group-hover:bg-tertiary/10 transition-all"></div>
+                <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-tertiary mb-2">
+                    <span class="material-symbols-outlined icon-fill text-[24px]">money_off</span>
+                </div>
+                <h3 class="font-display text-xl font-semibold text-on-surface">Capital Drain</h3>
+                <p class="text-on-surface-variant leading-relaxed">Traditional ERPs start with accounting, draining funds before a single sale is made.</p>
+            </div>
+            <div class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-full blur-[40px] group-hover:bg-secondary/10 transition-all"></div>
+                <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-secondary mb-2">
+                    <span class="material-symbols-outlined icon-fill text-[24px]">group_off</span>
+                </div>
+                <h3 class="font-display text-xl font-semibold text-on-surface">Low Adoption</h3>
+                <p class="text-on-surface-variant leading-relaxed">Teams resist complex systems that don't directly help them hit their targets.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sequence Section -->
+    <section id="phases" class="max-w-container mx-auto px-4 md:px-12 py-24 relative">
+        <div class="text-center mb-16 max-w-2xl mx-auto">
+            <span class="font-label text-xs uppercase tracking-wider text-primary">The Roadmap</span>
+            <h2 class="font-display text-3xl font-semibold tracking-tight text-on-surface mt-2 mb-4">The 5-Phase Implementation Sequence</h2>
+            <p class="text-on-surface-variant">A rollout strategy designed for immediate ROI.</p>
+        </div>
+        
+        <div class="space-y-6 max-w-4xl mx-auto">
+            <!-- Phase 1 -->
+            <div class="l-glass rounded-2xl p-8 flex flex-col md:flex-row gap-8 items-start">
+                <div class="w-16 h-16 shrink-0 rounded-full bg-primary/20 flex items-center justify-center border border-primary/50 text-primary font-display text-2xl font-bold">1</div>
+                <div>
+                    <h3 class="font-display text-2xl font-semibold text-on-surface mb-2">Digital Presence & Lead Gen</h3>
+                    <p class="text-on-surface-variant mb-4">Establish the digital storefront. Deploy e-commerce, product catalogs, and marketing tools (landing pages, forms) to capture leads.</p>
+                    <span class="inline-block px-3 py-1 bg-surface-container border border-outline-variant/50 rounded-md text-xs font-label text-primary">KPIs: Website Traffic, Conversion Rate, MQLs</span>
+                </div>
+            </div>
+            
+            <!-- Phase 2 -->
+            <div class="l-glass rounded-2xl p-8 flex flex-col md:flex-row gap-8 items-start">
+                <div class="w-16 h-16 shrink-0 rounded-full bg-tertiary/20 flex items-center justify-center border border-tertiary/50 text-tertiary font-display text-2xl font-bold">2</div>
+                <div>
+                    <h3 class="font-display text-2xl font-semibold text-on-surface mb-2">Sales Pipeline & Conversion</h3>
+                    <p class="text-on-surface-variant mb-4">Implement CRM for lead tracking and opportunity management. Transition quotes into Sales Orders with integrated payment gateways.</p>
+                    <span class="inline-block px-3 py-1 bg-surface-container border border-outline-variant/50 rounded-md text-xs font-label text-tertiary">KPIs: Sales Conversion Rate, Orders Generated, AOV</span>
+                </div>
+            </div>
+
+            <!-- Phase 3 -->
+            <div class="l-glass rounded-2xl p-8 flex flex-col md:flex-row gap-8 items-start">
+                <div class="w-16 h-16 shrink-0 rounded-full bg-secondary/20 flex items-center justify-center border border-secondary/50 text-secondary font-display text-2xl font-bold">3</div>
+                <div>
+                    <h3 class="font-display text-2xl font-semibold text-on-surface mb-2">Financial Foundation</h3>
+                    <p class="text-on-surface-variant mb-4">Set up Accounts Receivable and General Ledger to measure the financial success of Phases 1 & 2. Revenue becomes the KPI for expansion.</p>
+                    <span class="inline-block px-3 py-1 bg-surface-container border border-outline-variant/50 rounded-md text-xs font-label text-secondary">KPIs: Recognized Revenue, AR Turnover, Cash Flow</span>
+                </div>
+            </div>
+
+            <!-- Phase 4 -->
+            <div class="l-glass rounded-2xl p-8 flex flex-col md:flex-row gap-8 items-start">
+                <div class="w-16 h-16 shrink-0 rounded-full bg-surface-container flex items-center justify-center border border-outline-variant text-on-surface font-display text-2xl font-bold">4</div>
+                <div>
+                    <h3 class="font-display text-2xl font-semibold text-on-surface mb-2">Fulfillment & Supply Chain</h3>
+                    <p class="text-on-surface-variant mb-4">Ensure products can be delivered efficiently. Implement Inventory and Purchasing based on actual sales demand.</p>
+                    <span class="inline-block px-3 py-1 bg-surface-container border border-outline-variant/50 rounded-md text-xs font-label text-on-surface-variant">KPIs: Fulfillment Rate, Inventory Turnover</span>
+                </div>
+            </div>
+
+            <!-- Phase 5 -->
+            <div class="l-glass rounded-2xl p-8 flex flex-col md:flex-row gap-8 items-start">
+                <div class="w-16 h-16 shrink-0 rounded-full bg-surface-container flex items-center justify-center border border-outline-variant text-on-surface font-display text-2xl font-bold">5</div>
+                <div>
+                    <h3 class="font-display text-2xl font-semibold text-on-surface mb-2">Organizational Scaling</h3>
+                    <p class="text-on-surface-variant mb-4">Implement lightweight HR modules only when team size dictates it. Add manufacturing or project management organically.</p>
+                    <span class="inline-block px-3 py-1 bg-surface-container border border-outline-variant/50 rounded-md text-xs font-label text-on-surface-variant">KPIs: Revenue per Employee, Delivery Time</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="max-w-container mx-auto px-4 md:px-12 py-12 relative">
+        <div class="l-glass rounded-2xl p-8 md:p-12 text-center relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-tr from-primary/10 to-tertiary/10 mix-blend-overlay z-0 pointer-events-none"></div>
+            <div class="w-16 h-16 mx-auto mb-6 shrink-0 rounded-2xl bg-surface-container flex items-center justify-center border border-outline-variant/30 text-primary">
+                <span class="material-symbols-outlined icon-fill text-[32px]">fact_check</span>
+            </div>
+            <h3 class="font-display text-3xl font-semibold text-on-surface mb-4 relative z-10">Ready to flip the script?</h3>
+            <p class="text-on-surface-variant max-w-xl mx-auto mb-8 relative z-10">Take our free revenue-first assessment to find out if this sequence fits your business, and which phase to start with.</p>
+            <a href="/landing/revenue-first-assessment" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-8 py-4 rounded-lg l-glow transition-all active:scale-95 inline-block relative z-10">
+                Start the Assessment
+            </a>
+        </div>
+    </section>
+</main>
+]]></fileData>
+            <histories versionName="01" versionDate="1485028800000" isDiff="N" />
+        </file>
+    </moqui.resource.DbResource>
+
+</entity-facade-xml>

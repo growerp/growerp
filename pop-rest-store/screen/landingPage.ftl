@@ -373,7 +373,9 @@
                 <#if party??>ownerPartyId: '${party.ownerPartyId}'</#if>
             };
             window.sessionStorage.setItem('assessmentData', JSON.stringify(assessmentData));
-            return '/assessment/';
+            // the Flutter app reads the page from the url query, not from sessionStorage;
+            // without it every landing page ran the erp-landing-page default assessment
+            return '/assessment/?pseudoId=' + encodeURIComponent('${(landingPage.pseudoId!pseudoId!)?js_string}');
         }
 
         function preloadAssessment(assessmentId) {

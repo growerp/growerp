@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-facade-xml type="demo">
+  <!-- Revenue-First Implementation Assessment, GROWERP owner only.
+       Loaded in TenantServices100 when the GROWERP tenant is set up; linked from
+       the /content/revenue-first website page as /landing/revenue-first-assessment.
+       Scoring: 10 scored questions, 1-10 points each, so the raw score (10-100)
+       reads as a percentage. High score = strong fit for a revenue-first rollout. -->
+
+  <growerp.assessment.Assessment
+    assessmentId="REVENUE_FIRST_ASSESSMENT"
+    pseudoId="revenue-first-assessment"
+    ownerPartyId="GROWERP"
+    companyPartyId="100001"
+    assessmentName="Revenue-First ERP Assessment"
+    description="Scores how well a revenue-first ERP rollout (website, marketing and sales before accounting, inventory and HR) fits a small company, and which phase to start with."
+    status="Active" createdByUserLogin="admin" />
+
+  <!-- Landing Page Definition -->
+  <growerp.landing.LandingPage landingPageId="REVENUE_FIRST_LANDING_PAGE"
+    pseudoId="revenue-first-assessment"
+    ownerPartyId="GROWERP"
+    companyPartyId="100001"
+    title="Revenue-First ERP Assessment" hookType="ResultsHook"
+    headline="Should your ERP start with sales instead of the back office?"
+    subheading="Answer 12 quick questions about your leads, sales and cash flow. You get a free, personalised report on whether a revenue-first rollout fits your business, and which phase to start with."
+    ctaActionType="assessment"
+    ctaAssessmentId="REVENUE_FIRST_ASSESSMENT"
+    status="Published" privacyPolicyUrl="/privacy" createdByUserLogin="admin" />
+
+  <growerp.landing.PageSection pageSectionId="RF_PAIN_SECTION" pseudoId="rf-pain-section"
+    landingPageId="REVENUE_FIRST_LANDING_PAGE" sectionSequence="1"
+    sectionTitle="Solve the Biggest Pain Point First"
+    sectionDescription="Most companies under 30 employees share one problem: inconsistent leads, scattered customer data and disconnected sales tools. A revenue-first rollout deploys the ERP as the fix for that problem before it touches administration." />
+
+  <growerp.landing.PageSection pageSectionId="RF_PAYS_SECTION" pseudoId="rf-pays-section"
+    landingPageId="REVENUE_FIRST_LANDING_PAGE" sectionSequence="2"
+    sectionTitle="A System That Pays for Itself"
+    sectionDescription="Website, marketing and CRM come first, so the early phases generate revenue that funds the rest of the rollout. Cash flow is king, and a back-office-first project drains it without winning a single new customer." />
+
+  <growerp.landing.PageSection pageSectionId="RF_PACE_SECTION" pseudoId="rf-pace-section"
+    landingPageId="REVENUE_FIRST_LANDING_PAGE" sectionSequence="3"
+    sectionTitle="Add Complexity Only When Revenue Demands It"
+    sectionDescription="Accounting arrives to measure the ROI of your sales, inventory and purchasing when order volume needs them, and HR only when manual processes genuinely break. Five phases, each with its own KPIs." />
+
+  <!-- Credibility Section -->
+  <growerp.landing.CredibilityInfo credibilityInfoId="RF_CRED_INFO" pseudoId="rf-cred-info"
+    landingPageId="REVENUE_FIRST_LANDING_PAGE"
+    creatorBio="This assessment is built by the creators of GrowERP, a modern, open-source, multi-platform ERP built from modular building blocks."
+    backgroundText="Because GrowERP is modular, you can start with the website, marketing and CRM blocks and add accounting, inventory and HR later without a migration. This assessment uses that experience to tell you where to start." />
+
+  <growerp.landing.CredibilityStatistic
+    credibilityStatisticId="RF_STAT_1" pseudoId="rf-stat-1"
+    credibilityInfoId="RF_CRED_INFO"
+    statistic="Faster time-to-value: the business sees financial benefit from the ERP in the first phase, not after a year of back-office setup."
+    sequence="1" />
+
+  <growerp.landing.CredibilityStatistic
+    credibilityStatisticId="RF_STAT_2" pseudoId="rf-stat-2"
+    credibilityInfoId="RF_CRED_INFO"
+    statistic="Data-driven justification: the revenue KPIs captured in the early phases give hard numbers to justify every back-office module that follows."
+    sequence="2" />
+
+  <!-- Question 1: Team size -->
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="RF_Q1" pseudoId="rf-q1"
+    assessmentId="REVENUE_FIRST_ASSESSMENT" questionSequence="1"
+    questionType="MultipleChoice"
+    questionText="How many people work in your company?"
+    isRequired="Y" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q1_OA" pseudoId="rf-q1-oa"
+    assessmentQuestionId="RF_Q1" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="1" optionText="1 to 9" optionScore="10" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q1_OB" pseudoId="rf-q1-ob"
+    assessmentQuestionId="RF_Q1" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="2" optionText="10 to 30" optionScore="8" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q1_OC" pseudoId="rf-q1-oc"
+    assessmentQuestionId="RF_Q1" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="3" optionText="31 to 100" optionScore="4" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q1_OD" pseudoId="rf-q1-od"
+    assessmentQuestionId="RF_Q1" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="4" optionText="More than 100" optionScore="1" />
+
+  <!-- Question 2: Biggest problem -->
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="RF_Q2" pseudoId="rf-q2"
+    assessmentId="REVENUE_FIRST_ASSESSMENT" questionSequence="2"
+    questionType="MultipleChoice"
+    questionText="What is the biggest problem holding your business back right now?"
+    isRequired="Y" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q2_OA" pseudoId="rf-q2-oa"
+    assessmentQuestionId="RF_Q2" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="1" optionText="Not enough leads or new customers." optionScore="10" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q2_OB" pseudoId="rf-q2-ob"
+    assessmentQuestionId="RF_Q2" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="2" optionText="Leads and quotes slip through the cracks before they become orders." optionScore="8" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q2_OC" pseudoId="rf-q2-oc"
+    assessmentQuestionId="RF_Q2" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="3" optionText="Bookkeeping and invoicing take too much time." optionScore="3" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q2_OD" pseudoId="rf-q2-od"
+    assessmentQuestionId="RF_Q2" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="4" optionText="Stock, purchasing or delivery can't keep up with orders." optionScore="1" />
+
+  <!-- Question 3: Website conversion -->
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="RF_Q3" pseudoId="rf-q3"
+    assessmentId="REVENUE_FIRST_ASSESSMENT" questionSequence="3"
+    questionType="MultipleChoice"
+    questionText="What does your website do for your sales today?"
+    isRequired="Y" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q3_OA" pseudoId="rf-q3-oa"
+    assessmentQuestionId="RF_Q3" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="1" optionText="We have no website, or only a brochure page." optionScore="10" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q3_OB" pseudoId="rf-q3-ob"
+    assessmentQuestionId="RF_Q3" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="2" optionText="Visitors can contact us, but enquiries land in an email inbox." optionScore="8" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q3_OC" pseudoId="rf-q3-oc"
+    assessmentQuestionId="RF_Q3" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="3" optionText="We capture leads or sell online, but in a separate tool." optionScore="4" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q3_OD" pseudoId="rf-q3-od"
+    assessmentQuestionId="RF_Q3" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="4" optionText="Website leads and orders flow straight into our CRM and order system." optionScore="1" />
+
+  <!-- Question 4: Customer data -->
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="RF_Q4" pseudoId="rf-q4"
+    assessmentId="REVENUE_FIRST_ASSESSMENT" questionSequence="4"
+    questionType="MultipleChoice"
+    questionText="Where does your customer and prospect information live?"
+    isRequired="Y" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q4_OA" pseudoId="rf-q4-oa"
+    assessmentQuestionId="RF_Q4" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="1" optionText="In people's heads, phones and email." optionScore="10" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q4_OB" pseudoId="rf-q4-ob"
+    assessmentQuestionId="RF_Q4" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="2" optionText="In spreadsheets." optionScore="8" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q4_OC" pseudoId="rf-q4-oc"
+    assessmentQuestionId="RF_Q4" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="3" optionText="Spread over several apps that don't talk to each other." optionScore="6" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q4_OD" pseudoId="rf-q4-od"
+    assessmentQuestionId="RF_Q4" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="4" optionText="In one CRM that everybody uses." optionScore="1" />
+
+  <!-- Question 5: Quote to order -->
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="RF_Q5" pseudoId="rf-q5"
+    assessmentId="REVENUE_FIRST_ASSESSMENT" questionSequence="5"
+    questionType="MultipleChoice"
+    questionText="How does an interested customer become a paid order?"
+    isRequired="Y" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q5_OA" pseudoId="rf-q5-oa"
+    assessmentQuestionId="RF_Q5" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="1" optionText="Manual quotes in documents, then days or weeks of back and forth." optionScore="10" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q5_OB" pseudoId="rf-q5-ob"
+    assessmentQuestionId="RF_Q5" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="2" optionText="Quote templates, but orders and payments are re-typed elsewhere." optionScore="7" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q5_OC" pseudoId="rf-q5-oc"
+    assessmentQuestionId="RF_Q5" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="3" optionText="A sales tool creates quotes and orders, but payment is separate." optionScore="4" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q5_OD" pseudoId="rf-q5-od"
+    assessmentQuestionId="RF_Q5" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="4" optionText="Approved quotes turn into orders and are paid online automatically." optionScore="1" />
+
+  <!-- Question 6: Revenue attribution -->
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="RF_Q6" pseudoId="rf-q6"
+    assessmentId="REVENUE_FIRST_ASSESSMENT" questionSequence="6"
+    questionType="MultipleChoice"
+    questionText="Do you know which marketing activity brought in last month's revenue?"
+    isRequired="Y" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q6_OA" pseudoId="rf-q6-oa"
+    assessmentQuestionId="RF_Q6" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="1" optionText="No idea." optionScore="10" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q6_OB" pseudoId="rf-q6-ob"
+    assessmentQuestionId="RF_Q6" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="2" optionText="A rough guess." optionScore="7" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q6_OC" pseudoId="rf-q6-oc"
+    assessmentQuestionId="RF_Q6" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="3" optionText="For some channels." optionScore="4" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q6_OD" pseudoId="rf-q6-od"
+    assessmentQuestionId="RF_Q6" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="4" optionText="Yes, down to the campaign." optionScore="1" />
+
+  <!-- Question 7: Cash flow -->
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="RF_Q7" pseudoId="rf-q7"
+    assessmentId="REVENUE_FIRST_ASSESSMENT" questionSequence="7"
+    questionType="MultipleChoice"
+    questionText="How would you describe your cash flow?"
+    isRequired="Y" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q7_OA" pseudoId="rf-q7-oa"
+    assessmentQuestionId="RF_Q7" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="1" optionText="Tight: every new sale counts." optionScore="10" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q7_OB" pseudoId="rf-q7-ob"
+    assessmentQuestionId="RF_Q7" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="2" optionText="Stable, but we need growth to invest." optionScore="7" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q7_OC" pseudoId="rf-q7-oc"
+    assessmentQuestionId="RF_Q7" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="3" optionText="Comfortable." optionScore="3" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q7_OD" pseudoId="rf-q7-od"
+    assessmentQuestionId="RF_Q7" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="4" optionText="Well funded, with budget set aside for an ERP project." optionScore="1" />
+
+  <!-- Question 8: Back-office strain -->
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="RF_Q8" pseudoId="rf-q8"
+    assessmentId="REVENUE_FIRST_ASSESSMENT" questionSequence="8"
+    questionType="MultipleChoice"
+    questionText="How are your back-office tasks (accounting, stock, HR) coping?"
+    isRequired="Y" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q8_OA" pseudoId="rf-q8-oa"
+    assessmentQuestionId="RF_Q8" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="1" optionText="Fine by hand or with our accountant." optionScore="10" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q8_OB" pseudoId="rf-q8-ob"
+    assessmentQuestionId="RF_Q8" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="2" optionText="Starting to strain, but manageable." optionScore="7" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q8_OC" pseudoId="rf-q8-oc"
+    assessmentQuestionId="RF_Q8" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="3" optionText="Regularly breaking under the order volume." optionScore="3" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q8_OD" pseudoId="rf-q8-od"
+    assessmentQuestionId="RF_Q8" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="4" optionText="Our biggest problem: compliance, stock or payroll errors every month." optionScore="1" />
+
+  <!-- Question 9: Sales team adoption -->
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="RF_Q9" pseudoId="rf-q9"
+    assessmentId="REVENUE_FIRST_ASSESSMENT" questionSequence="9"
+    questionType="MultipleChoice"
+    questionText="How would the people who sell react to a new system?"
+    isRequired="Y" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q9_OA" pseudoId="rf-q9-oa"
+    assessmentQuestionId="RF_Q9" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="1" optionText="Eager, if it helps them close more deals." optionScore="10" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q9_OB" pseudoId="rf-q9-ob"
+    assessmentQuestionId="RF_Q9" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="2" optionText="The owner does the selling and wants less admin." optionScore="8" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q9_OC" pseudoId="rf-q9-oc"
+    assessmentQuestionId="RF_Q9" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="3" optionText="Hesitant; they are used to their own way of working." optionScore="4" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q9_OD" pseudoId="rf-q9-od"
+    assessmentQuestionId="RF_Q9" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="4" optionText="Resistant; any change is a fight." optionScore="1" />
+
+  <!-- Question 10: Measuring success -->
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="RF_Q10" pseudoId="rf-q10"
+    assessmentId="REVENUE_FIRST_ASSESSMENT" questionSequence="10"
+    questionType="MultipleChoice"
+    questionText="How would you judge whether a new ERP was worth the money?"
+    isRequired="Y" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q10_OA" pseudoId="rf-q10-oa"
+    assessmentQuestionId="RF_Q10" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="1" optionText="More leads, more orders, more revenue." optionScore="10" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q10_OB" pseudoId="rf-q10-ob"
+    assessmentQuestionId="RF_Q10" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="2" optionText="Faster quotes and fewer lost deals." optionScore="8" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q10_OC" pseudoId="rf-q10-oc"
+    assessmentQuestionId="RF_Q10" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="3" optionText="Cleaner books and faster month-end." optionScore="3" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q10_OD" pseudoId="rf-q10-od"
+    assessmentQuestionId="RF_Q10" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="4" optionText="Accurate stock and on-time deliveries." optionScore="1" />
+
+  <!-- Qualifying questions (not scored) -->
+  <!-- Question 11: Preferred starting phase -->
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="RF_Q11" pseudoId="rf-q11"
+    assessmentId="REVENUE_FIRST_ASSESSMENT" questionSequence="11"
+    questionType="MultipleChoice"
+    questionText="(Starting point) If you could fix one area in the next 90 days, which would it be?"
+    isRequired="Y" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q11_OA" pseudoId="rf-q11-oa"
+    assessmentQuestionId="RF_Q11" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="1" optionText="Website and marketing: attract visitors and capture leads." optionScore="0" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q11_OB" pseudoId="rf-q11-ob"
+    assessmentQuestionId="RF_Q11" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="2" optionText="CRM and orders: turn leads into quotes, orders and payments." optionScore="0" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q11_OC" pseudoId="rf-q11-oc"
+    assessmentQuestionId="RF_Q11" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="3" optionText="Accounting: invoice sales and see revenue per campaign." optionScore="0" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q11_OD" pseudoId="rf-q11-od"
+    assessmentQuestionId="RF_Q11" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="4" optionText="Inventory and purchasing: deliver what we sell on time." optionScore="0" />
+
+  <!-- Question 12: Preferred solution -->
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="RF_Q12" pseudoId="rf-q12"
+    assessmentId="REVENUE_FIRST_ASSESSMENT" questionSequence="12"
+    questionType="MultipleChoice"
+    questionText="(Solution) Which kind of help would suit you best?"
+    isRequired="Y" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q12_OA" pseudoId="rf-q12-oa"
+    assessmentQuestionId="RF_Q12" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="1" optionText="A free trial I can set up myself." optionScore="0" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q12_OB" pseudoId="rf-q12-ob"
+    assessmentQuestionId="RF_Q12" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="2" optionText="A guided setup of the website, marketing and CRM phases." optionScore="0" />
+  <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="RF_Q12_OC" pseudoId="rf-q12-oc"
+    assessmentQuestionId="RF_Q12" assessmentId="REVENUE_FIRST_ASSESSMENT"
+    optionSequence="3" optionText="Full implementation support across all five phases." optionScore="0" />
+
+  <!-- Question 13: Open-ended -->
+  <growerp.assessment.AssessmentQuestion assessmentQuestionId="RF_Q13" pseudoId="rf-q13"
+    assessmentId="REVENUE_FIRST_ASSESSMENT" questionSequence="13"
+    questionType="OpenText"
+    questionText="(Open-Ended) Anything else we should know about your sales or marketing challenges?"
+    isRequired="N" />
+
+  <!-- Scoring Thresholds (raw score 10-100) -->
+  <growerp.assessment.ScoringThreshold scoringThresholdId="RF_THRESHOLD_HIGH"
+    pseudoId="rf-threshold-high"
+    assessmentId="REVENUE_FIRST_ASSESSMENT"
+    minScore="70" maxScore="100"
+    leadStatus="High"
+    description="Strong revenue-first fit (70-100): your gap is turning visitors into leads and leads into paid orders. Start with Phase 1 (website, lead capture) and Phase 2 (CRM, quotes, online payment). Add the back office when revenue demands it."
+    createdByUserLogin="admin" />
+
+  <growerp.assessment.ScoringThreshold scoringThresholdId="RF_THRESHOLD_MEDIUM"
+    pseudoId="rf-threshold-medium"
+    assessmentId="REVENUE_FIRST_ASSESSMENT"
+    minScore="40" maxScore="69"
+    leadStatus="Medium"
+    description="Good revenue-first fit (40-69): some sales tools are in place but they are disconnected. Connect your website, CRM and orders first (Phases 1 and 2), then add accounting in Phase 3 to measure the revenue each campaign brings in."
+    createdByUserLogin="admin" />
+
+  <growerp.assessment.ScoringThreshold scoringThresholdId="RF_THRESHOLD_LOW"
+    pseudoId="rf-threshold-low"
+    assessmentId="REVENUE_FIRST_ASSESSMENT"
+    minScore="0" maxScore="39"
+    leadStatus="Low"
+    description="Back-office first (0-39): your sales engine is already working and the strain is in fulfilment, accounting or HR. Start with Phase 3 or 4 (accounting, inventory and purchasing) and keep your current front-office tools connected."
+    createdByUserLogin="admin" />
+</entity-facade-xml>
