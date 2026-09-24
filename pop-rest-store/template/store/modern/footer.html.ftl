@@ -59,7 +59,7 @@
                     <li><a href="https://github.com/growerp/growerp" target="_blank" rel="noopener" class="font-label text-sm text-on-primary-container/70 hover:text-on-primary-container transition-colors">GitHub</a></li>
                     </#if>
                     <#list storeInfo.menu as topItem>
-                    <#if !topItem.title?has_content || topItem.path == 'home'><#continue></#if>
+                    <#if !topItem.title?has_content><#continue></#if>
                     <#if topItem.items?has_content>
                         <#-- grouped pages: list children as individual links; a bare group path has no route -->
                         <#list topItem.items as item>

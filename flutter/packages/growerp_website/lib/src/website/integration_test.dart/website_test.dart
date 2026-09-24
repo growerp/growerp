@@ -203,6 +203,143 @@ class WebsiteTest {
     );
   }
 
+  /// Tests the menu indicator on the text content chips and the
+  /// 'Use as home page' / 'Show in menu' switches in the content dialog:
+  /// - hiding a page shows the crossed-out eye, drops it from the public
+  ///   menu and keeps its /content url working
+  /// - choosing a home page shows the home icon and serves it at '/'
+  /// - choosing another home page hides the previous one from the menu
+  /// - the home switch cannot be switched off on the current home page
+  /// Expects the 'TestingtextNew' page from [updateTextSection].
+  static Future<void> updateHomeAndMenuPages(
+    WidgetTester tester,
+    RestClient restClient,
+  ) async {
+    await CommonTest.tapByKey(tester, 'addText');
+    await CommonTest.enterText(tester, 'mdInput', '# Testinghome');
+    await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
+    expect(CommonTest.getTextField('Testinghome'), equals('Testinghome'));
+
+    Website website = await restClient.getWebsite();
+    String pathOf(String title) =>
+        website.websiteContent.firstWhere((c) => c.title == title).path;
+    final String textPath = pathOf('TestingtextNew');
+    final String homePath = pathOf('Testinghome');
+    IconData? indicator(String path) => tester
+        .widget<Icon>(find.byKey(Key('menuIndicator_$path')))
+        .icon;
+    expect(indicator(textPath), equals(Icons.visibility));
+    expect(indicator(homePath), equals(Icons.visibility));
+
+    // hide TestingtextNew from the menu
+    await CommonTest.tapByKey(
+      tester,
+      'TestingtextNew',
+      seconds: CommonTest.waitTime,
+    );
+    await CommonTest.tapByKey(tester, 'showInMenu');
+    await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
+    expect(indicator(textPath), equals(Icons.visibility_off));
+    website = await restClient.getWebsite();
+    expect(
+      (website.menuHiddenPages ?? '').split(','),
+      contains(textPath),
+      reason: 'TestingtextNew saved as hidden from the menu?',
+    );
+    String root = await _publicGet(website, '/');
+    expect(
+      root.contains('/content/$textPath"'),
+      isFalse,
+      reason: 'hidden page should not be in the public menu',
+    );
+    expect(
+      await _publicGet(website, '/content/$textPath'),
+      contains('TestingtextNew'),
+      reason: 'hidden page should still be served at its url',
+    );
+
+    // make Testinghome the home page
+    await CommonTest.tapByKey(
+      tester,
+      'Testinghome',
+      seconds: CommonTest.waitTime,
+    );
+    await CommonTest.tapByKey(tester, 'isHomePage');
+    expect(
+      tester.any(find.byKey(const Key('showInMenu'))),
+      isFalse,
+      reason: 'menu switch hidden while the page is the home page',
+    );
+    await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
+    expect(indicator(homePath), equals(Icons.home));
+    website = await restClient.getWebsite();
+    expect(website.homePageName, equals(homePath));
+    root = await _publicGet(website, '/');
+    expect(
+      root.contains('Testinghome'),
+      isTrue,
+      reason: 'home page content served at the site root',
+    );
+    expect(
+      root.contains('/content/$homePath"'),
+      isFalse,
+      reason: 'the home page is never in the public menu',
+    );
+
+    // make TestingtextNew the home page: Testinghome gets hidden
+    await CommonTest.tapByKey(
+      tester,
+      'TestingtextNew',
+      seconds: CommonTest.waitTime,
+    );
+    await CommonTest.tapByKey(tester, 'isHomePage');
+    await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
+    expect(indicator(textPath), equals(Icons.home));
+    expect(indicator(homePath), equals(Icons.visibility_off));
+    website = await restClient.getWebsite();
+    expect(website.homePageName, equals(textPath));
+    expect(
+      (website.menuHiddenPages ?? '').split(','),
+      contains(homePath),
+      reason: 'previous home page hidden from the menu?',
+    );
+
+    // the current home page cannot be switched off
+    await CommonTest.tapByKey(
+      tester,
+      'TestingtextNew',
+      seconds: CommonTest.waitTime,
+    );
+    expect(
+      tester
+          .widget<SwitchListTile>(find.byKey(const Key('isHomePage')))
+          .onChanged,
+      isNull,
+      reason: 'home switch disabled on the current home page',
+    );
+    await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
+    expect(indicator(textPath), equals(Icons.home));
+  }
+
+  /// GET a public store page as an anonymous browser for this website's host.
+  static Future<String> _publicGet(Website website, String path) async {
+    final Dio configuredDio = await buildDioClient();
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: configuredDio.options.baseUrl,
+        responseType: ResponseType.plain,
+      ),
+    );
+    final response = await dio.get(
+      path,
+      options: Options(
+        headers: {'Host': website.hostName},
+        validateStatus: (status) => status != null,
+      ),
+    );
+    return response.data as String;
+  }
+
   /// Creates a 'ftl' (FreeMarker/HTML) content page, checks the chip shows
   /// the title from the <#-- title: ... --> comment, updates it, verifies the
   /// public website renders it full-width (raw HTML marker served), then

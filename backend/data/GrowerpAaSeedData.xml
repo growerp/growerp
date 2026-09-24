@@ -516,6 +516,12 @@ limitations under the License.
     <moqui.basic.Enumeration enumCode="templateId"
         description="Website Template ID" enumId="PsstTemplateId"
         enumTypeId="ProductStoreSettingType" />
+    <moqui.basic.Enumeration enumCode="homePageName"
+        description="Home Page Name" enumId="PsstHomePageName"
+        enumTypeId="ProductStoreSettingType" />
+    <moqui.basic.Enumeration enumCode="menuHiddenPages"
+        description="Content pages hidden from the website menu" enumId="PsstMenuHiddenPages"
+        enumTypeId="ProductStoreSettingType" />
     <moqui.basic.Enumeration enumCode="template_server_content"
         description="Template Server Content" enumId="PsstContentLocation"
         enumTypeId="ProductStoreSettingType" />

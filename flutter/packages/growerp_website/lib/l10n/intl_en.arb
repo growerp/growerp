@@ -366,6 +366,14 @@
   "@websiteTemplate": {
     "description": "Website Template"
   },
+  "websiteUseAsHomePage": "Use as home page",
+  "@websiteUseAsHomePage": {
+    "description": "Website content dialog: make this page the site home page"
+  },
+  "websiteShowInMenu": "Show in menu",
+  "@websiteShowInMenu": {
+    "description": "Website content: pages listed in the website menu"
+  },
   "twitterXUrl": "Twitter / X URL",
   "@twitterXUrl": {
     "description": "Twitter / X URL"

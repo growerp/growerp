@@ -89,6 +89,8 @@
   "pleaseSelectAPageFirst": "请先选择一个页面",
   "websiteInfo": "网站信息",
   "websiteTemplate": "网站模板",
+  "websiteUseAsHomePage": "用作首页",
+  "websiteShowInMenu": "在菜单中显示",
   "twitterXUrl": "Twitter / X 网址",
   "facebookUrl": "Facebook 网址",
   "instagramUrl": "Instagram 网址",

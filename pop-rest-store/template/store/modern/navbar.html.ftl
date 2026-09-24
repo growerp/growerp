@@ -45,7 +45,7 @@
 
                 <#-- Content Menu Items (both modes); marketing Features link inserted before getting-started -->
                 <#list storeInfo.menu as topItem>
-                <#if !topItem.title?has_content || topItem.path == 'home'><#continue></#if>
+                <#if !topItem.title?has_content><#continue></#if>
                 <#if isMarketing && topItem.path == 'verticals'>
                     <a href="${up}/modules" class="font-label text-sm text-on-primary-container/70 hover:text-on-primary-container transition-colors">${l('GrowerpWebsiteFeatures')}</a>
                 </#if>
@@ -184,7 +184,7 @@
         <div id="mobileMenu" data-dropdown-panel class="hidden md:hidden border-t border-white/10 bg-surface-container-lowest/90 px-4 py-4 space-y-1">
             <#if isMarketing>
                 <#list storeInfo.menu as topItem>
-                <#if !topItem.title?has_content || topItem.path == 'home'><#continue></#if>
+                <#if !topItem.title?has_content><#continue></#if>
                 <#if topItem.path == 'verticals'>
                     <a href="${up}/modules" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">${l('GrowerpWebsiteFeatures')}</a>
                 </#if>
@@ -204,7 +204,7 @@
                     <a href="${up}/category/${storeInfo.categoryByType.PsctPromotions.productCategoryId}" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">${storeInfo.categoryByType.PsctPromotions.categoryName}</a>
                 </#if>
                 <#list storeInfo.menu as topItem>
-                <#if !topItem.title?has_content || topItem.path == 'home'><#continue></#if>
+                <#if !topItem.title?has_content><#continue></#if>
                 <#if topItem.items?has_content>
                     <span class="block px-2 pt-2 pb-1 text-xs uppercase tracking-wider text-outline">${topItem.title!topItem.path}</span>
                     <#list topItem.items as item>

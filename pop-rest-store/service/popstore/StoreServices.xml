@@ -269,6 +269,15 @@ along with this software (see the LICENSE.md file). If not, see
                 }
                 menu = grouped
             </script>
+            <!-- leave the home page and the pages hidden in the website settings out of the
+                 menu; they stay in 'pages' so they remain routable and in the sitemap -->
+            <script>
+                Set menuHidden = ((settings.PsstMenuHiddenPages ?: '') as String).split(',')
+                        .collect({ it.trim().toLowerCase() }).findAll({ it }) as Set
+                menuHidden.add(((settings.PsstHomePageName ?: 'home') as String).trim().toLowerCase())
+                menu = menu.findAll({ !menuHidden.contains(((String) it.path)?.toLowerCase()) })
+                menu.each({ mi -> if (mi.items) mi.items = mi.items.findAll({ !menuHidden.contains(((String) it.path)?.toLowerCase()) }) })
+            </script>
             <!-- check if obsidian uploaded -->
             <entity-find entity-name="moqui.resource.wiki.WikiPage" list="checkObsidian" limit="1">
                 <econdition field-name="pagePath" operator="like" value="obsidian/%"/>

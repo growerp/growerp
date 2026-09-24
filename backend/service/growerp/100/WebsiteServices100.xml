@@ -53,6 +53,8 @@ limitations under the License.
                 <parameter name="measurementId" />
                 <parameter name="stripeApiKey" />
                 <parameter name="templateId" />
+                <parameter name="homePageName" />
+                <parameter name="menuHiddenPages" />
             </parameter>
         </out-parameters>
         <actions>
@@ -259,6 +261,22 @@ limitations under the License.
                 <order-by field-name="-fromDate"/>
             </entity-find>
             <set field="website.templateId" from="templateIdList ? templateIdList[0].settingValue : 'legacy'" />
+            <!-- home page name: path of the content page served at the site root -->
+            <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="homePageNameList">
+                <econdition field-name="productStoreId" from="stores[0].productStoreId" />
+                <econdition field-name="settingTypeEnumId" value="PsstHomePageName" />
+                <date-filter/>
+                <order-by field-name="-fromDate"/>
+            </entity-find>
+            <set field="website.homePageName" from="homePageNameList ? homePageNameList[0].settingValue : 'home'" />
+            <!-- comma separated content page paths left out of the website menu -->
+            <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="menuHiddenPagesList">
+                <econdition field-name="productStoreId" from="stores[0].productStoreId" />
+                <econdition field-name="settingTypeEnumId" value="PsstMenuHiddenPages" />
+                <date-filter/>
+                <order-by field-name="-fromDate"/>
+            </entity-find>
+            <set field="website.menuHiddenPages" from="menuHiddenPagesList ? (menuHiddenPagesList[0].settingValue ?: '') : ''" />
         </actions>
     </service>
 
@@ -300,6 +318,8 @@ limitations under the License.
                 <parameter name="measurementId" />
                 <parameter name="stripeApiKey" />
                 <parameter name="templateId" />
+                <parameter name="homePageName" />
+                <parameter name="menuHiddenPages" />
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -338,6 +358,8 @@ limitations under the License.
                 <parameter name="measurementId" />
                 <parameter name="stripeApiKey" />
                 <parameter name="templateId" />
+                <parameter name="homePageName" />
+                <parameter name="menuHiddenPages" />
             </parameter>
         </out-parameters>
         <actions>
@@ -534,6 +556,42 @@ limitations under the License.
                                     in-map="[productStoreId: stores[0].productStoreId,
                                             settingTypeEnumId: 'PsstTemplateId',
                                             settingValue: website.templateId]" />
+                            </else>
+                        </if>
+                    </if>
+                    <!-- homePageName -->
+                    <if condition="website.homePageName">
+                        <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                            list="homePageNameList" for-update="true">
+                            <econdition field-name="productStoreId" from="stores[0].productStoreId" />
+                            <econdition field-name="settingTypeEnumId" value="PsstHomePageName" />
+                        </entity-find>
+                        <if condition="homePageNameList">
+                            <set field="homePageNameList[0].settingValue" from="website.homePageName" />
+                            <entity-update value-field="homePageNameList[0]" />
+                            <else>
+                                <service-call name="create#mantle.product.store.ProductStoreSetting"
+                                    in-map="[productStoreId: stores[0].productStoreId,
+                                            settingTypeEnumId: 'PsstHomePageName',
+                                            settingValue: website.homePageName]" />
+                            </else>
+                        </if>
+                    </if>
+                    <!-- menuHiddenPages: null = not sent, empty = show all pages -->
+                    <if condition="website.menuHiddenPages != null">
+                        <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                            list="menuHiddenPagesList" for-update="true">
+                            <econdition field-name="productStoreId" from="stores[0].productStoreId" />
+                            <econdition field-name="settingTypeEnumId" value="PsstMenuHiddenPages" />
+                        </entity-find>
+                        <if condition="menuHiddenPagesList">
+                            <set field="menuHiddenPagesList[0].settingValue" from="website.menuHiddenPages" />
+                            <entity-update value-field="menuHiddenPagesList[0]" />
+                            <else>
+                                <service-call name="create#mantle.product.store.ProductStoreSetting"
+                                    in-map="[productStoreId: stores[0].productStoreId,
+                                            settingTypeEnumId: 'PsstMenuHiddenPages',
+                                            settingValue: website.menuHiddenPages]" />
                             </else>
                         </if>
                     </if>

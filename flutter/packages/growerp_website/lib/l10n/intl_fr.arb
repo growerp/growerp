@@ -89,6 +89,8 @@
   "pleaseSelectAPageFirst": "Veuillez d'abord sélectionner une page",
   "websiteInfo": "Informations du site web",
   "websiteTemplate": "Modèle de site web",
+  "websiteUseAsHomePage": "Utiliser comme page d'accueil",
+  "websiteShowInMenu": "Afficher dans le menu",
   "twitterXUrl": "URL Twitter / X",
   "facebookUrl": "URL Facebook",
   "instagramUrl": "URL Instagram",

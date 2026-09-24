@@ -14,19 +14,43 @@ import '../../../growerp_website.dart';
 class WebsiteContentDialog extends StatelessWidget {
   final String websiteId;
   final Content content;
-  const WebsiteContentDialog(this.websiteId, this.content, {super.key});
+  // 'use as home page' and 'show in website menu' switches for text pages;
+  // null hides them. The caller reads the values after the dialog closed
+  // with an update.
+  final ValueNotifier<bool>? showInMenu;
+  final ValueNotifier<bool>? isHome;
+  const WebsiteContentDialog(
+    this.websiteId,
+    this.content, {
+    this.showInMenu,
+    this.isHome,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) => BlocProvider(
     create: (BuildContext context) => ContentBloc(context.read<RestClient>()),
-    child: WebsiteContent(websiteId, content),
+    child: WebsiteContent(
+      websiteId,
+      content,
+      showInMenu: showInMenu,
+      isHome: isHome,
+    ),
   );
 }
 
 class WebsiteContent extends StatefulWidget {
   final String websiteId;
   final Content content;
-  const WebsiteContent(this.websiteId, this.content, {super.key});
+  final ValueNotifier<bool>? showInMenu;
+  final ValueNotifier<bool>? isHome;
+  const WebsiteContent(
+    this.websiteId,
+    this.content, {
+    this.showInMenu,
+    this.isHome,
+    super.key,
+  });
   @override
   WebsiteContentState createState() => WebsiteContentState();
 }
@@ -52,6 +76,7 @@ class WebsiteContentState extends State<WebsiteContent> {
   late ContentBloc _contentBloc;
   late ThemeBloc _themeBloc;
   late WebsiteLocalizations _localizations;
+  late final bool _wasHome = widget.isHome?.value ?? false;
 
   MethodChannel channel = const MethodChannel(
     'plugins.flutter.io/url_launcher',
@@ -293,6 +318,45 @@ class WebsiteContentState extends State<WebsiteContent> {
             labelText: WebsiteLocalizations.of(context)!.seoDescriptionSearchEnginesLinkPreviews,
           ),
         ),
+        if (widget.isHome != null && widget.showInMenu != null)
+          ValueListenableBuilder<bool>(
+            valueListenable: widget.isHome!,
+            builder: (context, home, _) => Row(
+              children: [
+                Expanded(
+                  child: SwitchListTile(
+                    key: const Key('isHomePage'),
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(_localizations.websiteUseAsHomePage),
+                    value: home,
+                    // a site always has a home page: pick another page
+                    // to move it, it cannot be switched off here
+                    onChanged: _wasHome
+                        ? null
+                        : (value) => widget.isHome!.value = value,
+                  ),
+                ),
+                const SizedBox(width: 20),
+                // the home page is never in the menu
+                if (!home)
+                  Expanded(
+                    child: ValueListenableBuilder<bool>(
+                      valueListenable: widget.showInMenu!,
+                      builder: (context, show, _) => SwitchListTile(
+                        key: const Key('showInMenu'),
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(_localizations.websiteShowInMenu),
+                        value: show,
+                        onChanged: (value) =>
+                            widget.showInMenu!.value = value,
+                      ),
+                    ),
+                  )
+                else
+                  const Expanded(child: SizedBox()),
+              ],
+            ),
+          ),
         const SizedBox(height: 10),
         isFtl
             ? Expanded(

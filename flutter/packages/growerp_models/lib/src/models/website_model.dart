@@ -37,6 +37,9 @@ abstract class Website with _$Website {
     @Default('') String measurementId,
     @Default('') String stripeApiKey,
     @Default('') String templateId,
+    @Default('') String homePageName,
+    // comma separated page paths hidden from the website menu; null = not sent on update
+    String? menuHiddenPages,
   }) = _Website;
 
   factory Website.fromJson(Map<String, dynamic> json) =>

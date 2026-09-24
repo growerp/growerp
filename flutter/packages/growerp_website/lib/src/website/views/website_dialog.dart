@@ -416,23 +416,71 @@ class WebsiteDialogState extends State<WebsiteDialog> {
   Widget _showForm(WebsiteState state) {
     // create text content buttons
     List<Widget> textButtons = [];
+    final menuHidden = (state.website!.menuHiddenPages ?? '')
+        .split(',')
+        .where((p) => p.isNotEmpty)
+        .toSet();
 
     // create text content list
     state.website!.websiteContent.asMap().forEach((index, content) {
       if (content.text.isNotEmpty) {
         textButtons.add(
           InputChip(
+            // menu indicator: home page, shown in the website menu or hidden
+            avatar: Icon(
+              content.path == state.website!.homePageName
+                  ? Icons.home
+                  : menuHidden.contains(content.path)
+                  ? Icons.visibility_off
+                  : Icons.visibility,
+              key: Key('menuIndicator_${content.path}'),
+              size: 18,
+            ),
             label: Text(content.title, key: Key(content.title)),
             onPressed: () async {
+              final bool wasHome = content.path == state.website!.homePageName;
+              final bool wasInMenu = !menuHidden.contains(content.path);
+              final isHome = ValueNotifier(wasHome);
+              final showInMenu = ValueNotifier(wasInMenu);
               var updContent = await showDialog(
                 barrierDismissible: true,
                 context: context,
                 builder: (BuildContext context) {
-                  return WebsiteContentDialog(state.website!.id, content);
+                  return WebsiteContentDialog(
+                    state.website!.id,
+                    content,
+                    showInMenu: showInMenu,
+                    isHome: isHome,
+                  );
                 },
               );
               if (updContent != null) {
-                _websiteBloc.add(WebsiteFetch());
+                final bool newHome = !wasHome && isHome.value;
+                // the home page is never in the menu: its switch is ignored
+                final bool menuChanged =
+                    !isHome.value && showInMenu.value != wasInMenu;
+                if (newHome || menuChanged) {
+                  final hidden = Set.of(menuHidden);
+                  if (menuChanged) {
+                    showInMenu.value
+                        ? hidden.remove(content.path)
+                        : hidden.add(content.path);
+                  }
+                  // the page replaced as home stays out of the menu
+                  if (newHome) hidden.add(state.website!.homePageName);
+                  // update returns the refreshed website, no fetch needed
+                  _websiteBloc.add(
+                    WebsiteUpdate(
+                      Website(
+                        id: state.website!.id,
+                        homePageName: newHome ? content.path : '',
+                        menuHiddenPages: hidden.join(','),
+                      ),
+                    ),
+                  );
+                } else {
+                  _websiteBloc.add(WebsiteFetch());
+                }
               }
             },
             deleteIcon: const Icon(Icons.cancel, key: Key("deleteTextChip")),
