@@ -234,6 +234,11 @@ class CourseModule {
   @JsonKey(includeToJson: false)
   final List<CourseSlide>? slides;
 
+  /// Narrated video of the slides, relative to the backend url; only for
+  /// users with access to the course
+  @JsonKey(includeToJson: false)
+  final String? videoUrl;
+
   /// Number of quiz questions of this module, 0 is no quiz
   @JsonKey(includeToJson: false)
   final int? quizQuestionCount;
@@ -254,6 +259,7 @@ class CourseModule {
     this.lastModifiedDate,
     this.lessons,
     this.slides,
+    this.videoUrl,
     this.quizQuestionCount,
     this.quizQuestions,
   });
@@ -285,6 +291,7 @@ class CourseModule {
     lastModifiedDate: lastModifiedDate ?? this.lastModifiedDate,
     lessons: lessons ?? this.lessons,
     slides: slides,
+    videoUrl: videoUrl,
     quizQuestionCount: quizQuestionCount,
     quizQuestions: quizQuestions,
   );

@@ -229,6 +229,31 @@ class CourseTest {
     expect(find.textContaining(RegExp(r'Slides: [1-9]')), findsWidgets);
   }
 
+  /// Makes the videos of all modules from their slides and opens the first.
+  static Future<void> makeVideos(WidgetTester tester) async {
+    await CommonTest.dragUntil(tester, key: 'aiWriteVideos');
+    await CommonTest.tapByKey(tester, 'aiWriteVideos');
+    await CommonTest.tapByKey(tester, 'aiVideoConfirm', settle: false);
+    await _pumpUntil(
+      tester,
+      find.textContaining(RegExp(r'videos? made')),
+      seconds: 600,
+    );
+    await CommonTest.waitForSnackbarToGo(tester);
+    await CommonTest.dragUntil(tester, key: 'moduleVideo0');
+    expect(find.text('Video: ready'), findsWidgets);
+    await CommonTest.tapByKey(
+      tester,
+      'moduleVideo0',
+      seconds: CommonTest.waitTime,
+    );
+    await CommonTest.checkWidgetKey(tester, 'courseVideoDialog');
+    Navigator.of(
+      tester.element(find.byKey(const Key('courseVideoDialog'))),
+    ).pop();
+    await tester.pumpAndSettle();
+  }
+
   /// Opens a pdf preview dialog with the button [buttonKey], checks it shows
   /// and closes it.
   static Future<void> openPdf(

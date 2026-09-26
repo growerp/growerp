@@ -27,6 +27,8 @@ Job types:
              given lessonIds, from the lesson brief, the outline and the course sources
     SLIDES   write the slides of all modules, or of the given moduleIds, with speaker notes
              that later become the narration of the course video
+    VIDEO    per module a narrated video: the slides, their speaker notes spoken with
+             text-to-speech, joined by ffmpeg; needs the slides
     QUIZ     replace the quiz questions of all modules, or of the given moduleIds, with
              multiple choice questions on the lesson content
 -->
@@ -65,7 +67,7 @@ Job types:
             Uploaded files are converted to text here, so the job row never holds the
             (possibly large) file itself.</description>
         <in-parameters>
-            <parameter name="jobType" required="true" /> <!-- OUTLINE, LESSONS, QUIZ, SLIDES -->
+            <parameter name="jobType" required="true" /> <!-- OUTLINE, LESSONS, QUIZ, SLIDES, VIDEO -->
             <parameter name="courseId" />
             <!-- OUTLINE -->
             <parameter name="title" />
@@ -84,7 +86,7 @@ Job types:
             <parameter name="useKnowledgeBase" type="Boolean" default="false" />
             <!-- LESSONS: empty is all lessons of the course -->
             <parameter name="lessonIds" type="List" />
-            <!-- QUIZ, SLIDES: empty is all modules of the course -->
+            <!-- QUIZ, SLIDES, VIDEO: empty is all modules of the course -->
             <parameter name="moduleIds" type="List" />
             <parameter name="questionsPerModule" type="Integer" default="5" />
         </in-parameters>
@@ -94,7 +96,7 @@ Job types:
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <if condition="!(jobType in ['OUTLINE', 'LESSONS', 'QUIZ', 'SLIDES'])">
+            <if condition="!(jobType in ['OUTLINE', 'LESSONS', 'QUIZ', 'SLIDES', 'VIDEO'])">
                 <return error="true" message="Unknown AI job type ${jobType}" />
             </if>
             <if condition="jobType == 'OUTLINE' &amp;&amp; !title">

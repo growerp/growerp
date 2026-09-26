@@ -177,6 +177,50 @@ class GeminiAiUtil {
     }
 
     /**
+     * Speak [text] with Gemini text-to-speech, always on a Gemini key (the tenant's own, else
+     * the system key) whatever text provider the tenant uses; same allowance rules and usage
+     * logging as the text calls. Model and voice: GEMINI_TTS_MODEL / GEMINI_TTS_VOICE
+     * preference or environment variable.
+     *
+     * @return raw audio: 16 bit little endian PCM, 24000 Hz, mono
+     */
+    static byte[] callGeminiTts(def ec, String text, Map options = [:]) {
+        String ownerPartyId = options.ownerPartyId as String
+        String apiKey = resolveApiKey(ec, ownerPartyId, "gemini", options.apiKey as String)
+        if (!apiKey) {
+            throw new Exception("No API key configured for LLM provider 'gemini'. " +
+                "Add it in System Setup -> AI Settings.")
+        }
+        if (hasOwnApiKey(ec, ownerPartyId, "gemini", options.apiKey as String)) {
+            checkOwnAllowance(ec, ownerPartyId)
+        } else {
+            checkMonthlyAllowance(ec, ownerPartyId)
+        }
+        String model = ec.user.getPreference("GEMINI_TTS_MODEL") ?: System.getenv("GEMINI_TTS_MODEL") ?:
+            "gemini-2.5-flash-preview-tts"
+        String voice = options.voice ?: ec.user.getPreference("GEMINI_TTS_VOICE") ?:
+            System.getenv("GEMINI_TTS_VOICE") ?: "Kore"
+        def requestMap = [
+            contents: [[parts: [[text: text]]]],
+            generationConfig: [
+                responseModalities: ["AUDIO"],
+                speechConfig: [voiceConfig: [prebuiltVoiceConfig: [voiceName: voice]]]
+            ]
+        ]
+        def responseText = postJson(ec, "${API_BASE_URL}/${model}:generateContent?key=${apiKey}",
+            [:], JsonOutput.toJson(requestMap), "Gemini TTS")
+        def response = new JsonSlurper().parseText(responseText)
+        String audio = response.candidates?.getAt(0)?.content?.parts?.find { it.inlineData }?.inlineData?.data
+        if (!audio) throw new Exception("Gemini TTS returned no audio")
+        def usage = response.usageMetadata
+        logUsage(ec, ownerPartyId, "gemini", model,
+            [tokensIn: (usage?.promptTokenCount ?: 0) as int,
+             tokensOut: (usage?.candidatesTokenCount ?: 0) as int,
+             tokensTotal: (usage?.totalTokenCount ?: 0) as int], options)
+        return Base64.decoder.decode(audio)
+    }
+
+    /**
      * Historical entry point, kept so the existing callers keep working. Dispatches on the
      * tenant's configured provider, which is not necessarily Gemini.
      */

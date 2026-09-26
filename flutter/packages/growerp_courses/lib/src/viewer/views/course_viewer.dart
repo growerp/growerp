@@ -20,6 +20,7 @@ import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_viewer_bloc.dart';
 import '../../media/views/media_preview.dart';
 import '../../documents/course_pdfs.dart';
+import '../../documents/course_video_dialog.dart';
 import '../../quiz/views/course_certificate.dart';
 import '../../quiz/views/course_quiz_screen.dart';
 import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
@@ -497,6 +498,17 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
                         },
                       );
                     }),
+                    if (module.videoUrl != null)
+                      ListTile(
+                        key: Key('video$moduleIndex'),
+                        leading: const Icon(Icons.ondemand_video),
+                        title: const Text('Video'),
+                        onTap: () => showCourseVideo(
+                          context,
+                          title: module.title,
+                          videoUrl: module.videoUrl!,
+                        ),
+                      ),
                     if (module.slides?.isNotEmpty ?? false)
                       ListTile(
                         key: Key('slides$moduleIndex'),

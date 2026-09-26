@@ -25,6 +25,7 @@ import 'course_participants_view.dart';
 import 'quiz_editor_dialog.dart';
 import 'slides_editor_dialog.dart';
 import '../../documents/course_pdfs.dart';
+import '../../documents/course_video_dialog.dart';
 import '../../viewer/views/course_viewer.dart';
 import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
@@ -400,6 +401,13 @@ class _CourseDialogState extends State<CourseDialog> {
                   ),
                 if (modules.any((m) => m.slides?.isNotEmpty ?? false))
                   TextButton.icon(
+                    key: const Key('aiWriteVideos'),
+                    icon: const Icon(Icons.ondemand_video),
+                    label: const Text('Videos from slides'),
+                    onPressed: () => _makeVideos(null),
+                  ),
+                if (modules.any((m) => m.slides?.isNotEmpty ?? false))
+                  TextButton.icon(
                     key: const Key('courseSlidesPdf'),
                     icon: const Icon(Icons.picture_as_pdf_outlined),
                     label: const Text('Slide deck'),
@@ -528,6 +536,33 @@ class _CourseDialogState extends State<CourseDialog> {
                       onPressed: () => _writeSlidesWithAi(module),
                     ),
                   ),
+                  if (module.slides?.isNotEmpty ?? false)
+                    ListTile(
+                      key: Key('moduleVideo$index'),
+                      contentPadding: const EdgeInsets.only(
+                        left: 72,
+                        right: 16,
+                      ),
+                      leading: const Icon(Icons.ondemand_video),
+                      title: Text(
+                        module.videoUrl == null
+                            ? 'Video: none'
+                            : 'Video: ready',
+                      ),
+                      onTap: module.videoUrl == null
+                          ? null
+                          : () => showCourseVideo(
+                              context,
+                              title: module.title,
+                              videoUrl: module.videoUrl!,
+                            ),
+                      trailing: IconButton(
+                        key: Key('aiVideo$index'),
+                        icon: const Icon(Icons.auto_awesome),
+                        tooltip: 'Make this video from the slides',
+                        onPressed: () => _makeVideos(module),
+                      ),
+                    ),
                 ],
               );
             },
@@ -636,10 +671,10 @@ class _CourseDialogState extends State<CourseDialog> {
     jobType: 'QUIZ',
     module: module,
     title: 'Write quizzes with AI',
-    what: module == null
-        ? 'a quiz for every module from its lessons, replacing the '
+    message: module == null
+        ? 'The AI writes a quiz for every module from its lessons, replacing the '
               'questions there are now.'
-        : 'the quiz of "${module.title}" from its lessons, replacing the '
+        : 'The AI writes the quiz of "${module.title}" from its lessons, replacing the '
               'questions there are now.',
     confirmKey: 'aiQuizConfirm',
   );
@@ -648,12 +683,26 @@ class _CourseDialogState extends State<CourseDialog> {
     jobType: 'SLIDES',
     module: module,
     title: 'Make slides with AI',
-    what: module == null
-        ? 'the slides of every module from its lessons, with speaker notes, '
+    message: module == null
+        ? 'The AI writes the slides of every module from its lessons, with speaker notes, '
               'replacing the slides there are now.'
-        : 'the slides of "${module.title}" from its lessons, with speaker '
+        : 'The AI writes the slides of "${module.title}" from its lessons, with speaker '
               'notes, replacing the slides there are now.',
     confirmKey: 'aiSlidesConfirm',
+  );
+
+  Future<void> _makeVideos(CourseModule? module) => _runModuleAiJob(
+    jobType: 'VIDEO',
+    module: module,
+    title: 'Make videos',
+    message: module == null
+        ? 'The speaker notes of the slides of every module are spoken with '
+              'text-to-speech and made into a video per module, replacing the videos there '
+              'are now. This takes a few minutes per module.'
+        : 'The speaker notes of the slides of "${module.title}" are spoken '
+              'with text-to-speech and made into a video, replacing the '
+              'video there is now.',
+    confirmKey: 'aiVideoConfirm',
   );
 
   /// Runs an AI job on every module ([module] null) or on one module
@@ -661,7 +710,7 @@ class _CourseDialogState extends State<CourseDialog> {
     required String jobType,
     required CourseModule? module,
     required String title,
-    required String what,
+    required String message,
     required String confirmKey,
   }) async {
     if (_aiBloc.state.status == CourseAiStatus.running) return;
@@ -669,7 +718,7 @@ class _CourseDialogState extends State<CourseDialog> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(title),
-        content: Text('The AI writes $what'),
+        content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),

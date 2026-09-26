@@ -235,6 +235,9 @@ limitations under the License.
                             .findAll { k, v -> !(k in ['content', 'keyPoints', 'videoUrl']) } },
                         slides: hasAccess &amp;&amp; module.slides ?
                             new groovy.json.JsonSlurper().parseText(module.slides) : null,
+                        // relative: the app puts its backend url in front
+                        videoUrl: hasAccess &amp;&amp; module.videoToken ?
+                            "/courseVideo/stream?t=${module.videoToken}".toString() : null,
                         quizQuestionCount: questionList.size(),
                         // answers only for the authors: learners get the quiz from get#CourseQuiz
                         quizQuestions: access.isStaff ? questionList.collect { q -> [
@@ -458,7 +461,14 @@ limitations under the License.
             <entity-delete-by-condition entity-name="growerp.course.CourseLesson">
                 <econdition field-name="courseId" />
             </entity-delete-by-condition>
-            <!-- Delete modules -->
+            <!-- Delete modules, with their videos -->
+            <entity-find entity-name="growerp.course.CourseModule" list="videoModules">
+                <econdition field-name="courseId" />
+                <econdition field-name="videoLocation" operator="is-not-null" />
+            </entity-find>
+            <iterate list="videoModules" entry="videoModule">
+                <script>ec.resource.getLocationReference(videoModule.videoLocation).delete()</script>
+            </iterate>
             <entity-delete-by-condition entity-name="growerp.course.CourseModule">
                 <econdition field-name="courseId" />
             </entity-delete-by-condition>
@@ -586,6 +596,9 @@ limitations under the License.
             <entity-delete-by-condition entity-name="growerp.course.CourseQuizQuestion">
                 <econdition field-name="moduleId" />
             </entity-delete-by-condition>
+            <if condition="moduleEntity.videoLocation">
+                <script>ec.resource.getLocationReference(moduleEntity.videoLocation).delete()</script>
+            </if>
             <entity-delete value-field="moduleEntity" />
         </actions>
     </service>

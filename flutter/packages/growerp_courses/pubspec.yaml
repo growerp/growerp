@@ -30,6 +30,7 @@ dependencies:
   file_picker: ^12.2.0
   pdf: ^3.10.8
   printing: ^5.14.3
+  video_player: ^2.14.0
   flutter_test:
     sdk: flutter
   integration_test:

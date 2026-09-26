@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<!-- Streams the narrated video of a course module: /courseVideo/stream?t=videoToken.
+     The token is the access: get#Course only hands it to users with access to the course, and
+     making the video again gives a new token. Supports HTTP Range requests, which video players
+     (iOS always) use to load and seek. -->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    require-authentication="false" track-artifact-hit="false" default-menu-include="false">
+
+    <transition name="stream" read-only="true" begin-transaction="false">
+        <parameter name="t" />
+        <actions>
+            <script><![CDATA[
+                import jakarta.servlet.http.HttpServletResponse
+
+                HttpServletResponse response = ec.web.response
+                def module = t ? ec.entity.find("growerp.course.CourseModule").condition("videoToken", t)
+                    .disableAuthz().one() : null
+                def reference = module?.videoLocation ? ec.resource.getLocationReference(module.videoLocation) : null
+                byte[] data = reference?.openStream()?.withCloseable { it.readAllBytes() }
+                if (!data) {
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND)
+                    return
+                }
+                long length = data.length
+                long start = 0, end = length - 1
+                String range = ec.web.request.getHeader("Range")
+                def matcher = range =~ /^bytes=(\d*)-(\d*)$/
+                if (matcher.matches()) {
+                    if (matcher.group(1)) {
+                        start = matcher.group(1) as long
+                        if (matcher.group(2)) end = Math.min(matcher.group(2) as long, length - 1)
+                    } else if (matcher.group(2)) {
+                        // suffix range: the last n bytes
+                        start = Math.max(0L, length - (matcher.group(2) as long))
+                    }
+                    if (start > end || start >= length) {
+                        response.setHeader("Content-Range", "bytes */${length}")
+                        response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE)
+                        return
+                    }
+                    response.status = HttpServletResponse.SC_PARTIAL_CONTENT
+                    response.setHeader("Content-Range", "bytes ${start}-${end}/${length}")
+                }
+                response.contentType = "video/mp4"
+                response.setHeader("Accept-Ranges", "bytes")
+                response.setHeader("Cache-Control", "private, max-age=86400")
+                response.setContentLengthLong(end - start + 1)
+                response.outputStream.write(data, (int) start, (int) (end - start + 1))
+                response.outputStream.flush()
+            ]]></script>
+        </actions>
+        <default-response type="none" />
+    </transition>
+
+    <widgets />
+</screen>

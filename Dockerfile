@@ -159,7 +159,8 @@ RUN unzip -q /root/growerp/moqui/moqui-plus-runtime.war
 FROM eclipse-temurin:21-jdk
 ARG DOCKER_TAG=NOTSET1
 
-RUN apt-get update && apt-get install -y apt-transport-https nano curl && apt-get clean
+# ffmpeg + fonts: narrated course videos (slides drawn with Java2D, joined by ffmpeg)
+RUN apt-get update && apt-get install -y apt-transport-https nano curl ffmpeg fontconfig fonts-dejavu-core && apt-get clean
 
 COPY --from=build-env /opt/moqui /opt/moqui
 # The war already contains a partial runtime copy; remove it so the full source

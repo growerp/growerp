@@ -378,6 +378,80 @@ Answer with JSON only:
     return "${slideCount} slides made for ${modules.size()} module${modules.size() == 1 ? '' : 's'}"
 }
 
+// ---------------------------------------------------------------------------------------------
+// VIDEO: per module, the slides with their speaker notes spoken, as one mp4
+// ---------------------------------------------------------------------------------------------
+def runVideo = {
+    def CourseVideoUtil = ec.resource.script("component://growerp/service/course/CourseVideoUtil.groovy", null)
+    def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
+    CourseVideoUtil.checkFfmpeg()
+    String courseId = job.courseId
+    def course = ec.entity.find("growerp.course.Course").condition("courseId", courseId).disableAuthz().one()
+    def slurper = new JsonSlurper()
+    def modules = ec.entity.find("growerp.course.CourseModule").condition("courseId", courseId)
+        .orderBy("sequenceNum").disableAuthz().list()
+        .findAll { (!input.moduleIds || it.moduleId in input.moduleIds) && it.slides }
+        .collect { [module: it, slides: slurper.parseText(it.slides as String) as List] }
+        .findAll { it.slides }
+    if (!modules) throw new Exception('Make the slides first: the video shows the slides and speaks their notes')
+    String companyPartyId = svc('growerp.100.GeneralServices100.get#RelatedCompanyAndOwner', [:]).companyPartyId
+    int totalSlides = modules.sum { it.slides.size() + 1 } as int
+    int doneSlides = 0
+    modules.each { Map item ->
+        def module = item.module
+        File dir = java.nio.file.Files.createTempDirectory("course-video").toFile()
+        try {
+            // the title slide introduces the module, then every slide with its notes
+            List parts = [[image: { File f -> CourseVideoUtil.writeTitleSlide(f, course.title, "Module ${module.sequenceNum}: ${module.title}") },
+                           narration: "Module ${module.sequenceNum}: ${module.title}."]]
+            item.slides.eachWithIndex { Map slide, int n ->
+                List bullets = (slide.bullets ?: []).collect { it as String }
+                parts.add([image: { File f -> CourseVideoUtil.writeSlide(f, slide.title as String, bullets,
+                                        "${course.title} · ${module.title}", n + 1, item.slides.size()) },
+                           narration: slide.notes ?: ([slide.title] + bullets).join('. ')])
+            }
+            List segments = []
+            parts.eachWithIndex { Map part, int n ->
+                progress((int) (5 + 90 * doneSlides / totalSlides),
+                    "Module ${module.sequenceNum}: speaking slide ${n + 1} of ${parts.size()}")
+                File image = new File(dir, "slide${n}.png")
+                part.image.call(image)
+                byte[] pcm = CourseAiUtil.testMode() ? CourseVideoUtil.silence(part.narration as String) :
+                    GeminiAiUtil.callGeminiTts(ec, part.narration as String,
+                        [ownerPartyId: ownerPartyId, purpose: 'course video'])
+                File audio = new File(dir, "slide${n}.pcm")
+                audio.bytes = pcm
+                File segment = new File(dir, "segment${n}.mp4")
+                CourseVideoUtil.writeSegment(image, audio, segment)
+                segments.add(segment)
+                doneSlides++
+            }
+            progress((int) (5 + 90 * doneSlides / totalSlides), "Module ${module.sequenceNum}: joining the video")
+            File video = new File(dir, "module.mp4")
+            CourseVideoUtil.concat(segments, video)
+
+            // a new token per video: an old link stops working when the video is made again
+            String token = UUID.randomUUID().toString().replace('-', '')
+            String location = "dbresource://C${companyPartyId}/courses/${courseId}/video-${module.moduleId}-${token}.mp4"
+            byte[] bytes = video.bytes
+            ec.transaction.runRequireNew(600, "Could not save the video of ${module.title}", {
+                ec.resource.getLocationReference(location).putBytes(bytes)
+                def current = ec.entity.find("growerp.course.CourseModule").condition("moduleId", module.moduleId)
+                    .forUpdate(true).disableAuthz().one()
+                String old = current.videoLocation
+                current.videoLocation = location
+                current.videoToken = token
+                current.update()
+                if (old) ec.resource.getLocationReference(old).delete()
+            })
+            ec.logger.info("Course video of module ${module.moduleId}: ${bytes.length} bytes, ${parts.size()} slides")
+        } finally {
+            dir.deleteDir()
+        }
+    }
+    return "${modules.size()} video${modules.size() == 1 ? '' : 's'} made"
+}
+
 try {
     String doneMessage
     switch (job.jobType) {
@@ -385,6 +459,7 @@ try {
         case 'LESSONS': doneMessage = runLessons(); break
         case 'QUIZ': doneMessage = runQuiz(); break
         case 'SLIDES': doneMessage = runSlides(); break
+        case 'VIDEO': doneMessage = runVideo(); break
         default: throw new Exception("Unknown AI job type ${job.jobType}")
     }
     ec.service.sync().name(STATUS_SERVICE).parameters([jobId: jobId, status: 'DONE',
