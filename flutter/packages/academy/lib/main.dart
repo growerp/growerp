@@ -23,7 +23,6 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_courses/growerp_courses.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'views/academy_db_form.dart';
 
 Future main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -129,7 +128,8 @@ class _AcademyAppState extends State<AcademyApp> {
                 [menuConfiguration],
                 config: DynamicRouterConfig(
                   mainConfigId: 'ACADEMY_DEFAULT',
-                  dashboardBuilder: () => const AcademyDbForm(),
+                  // learner-only app: the home screen is the learner's courses
+                  dashboardBuilder: () => const CourseViewer(courseId: ''),
                   widgetLoader: WidgetRegistry.getWidget,
                   appTitle: 'GrowERP Academy',
 
@@ -186,9 +186,4 @@ class _AcademyAppState extends State<AcademyApp> {
 List<Map<String, GrowerpWidgetBuilder>> academyWidgetRegistrations = [
   getUserCompanyWidgets(),
   getCoursesWidgets(),
-  // App-specific widgets
-  {
-    'AcademyDbForm': (args) => const AcademyDbForm(),
-    'AboutForm': (args) => const AboutForm(),
-  },
 ];

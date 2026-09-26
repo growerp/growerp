@@ -27,7 +27,6 @@ when the organization's menu shows it a screen that drives that domain.
 
     <!-- GROWERP_BASE -->
     <growerp.menu.WidgetDomain widgetName="AboutForm" artifactGroupId="GROWERP_BASE"/>
-    <growerp.menu.WidgetDomain widgetName="AcademyDbForm" artifactGroupId="GROWERP_BASE"/>
     <growerp.menu.WidgetDomain widgetName="AdminDashboard" artifactGroupId="GROWERP_BASE"/>
     <growerp.menu.WidgetDomain widgetName="AdminDbForm" artifactGroupId="GROWERP_BASE"/>
     <growerp.menu.WidgetDomain widgetName="CoreDashboard" artifactGroupId="GROWERP_BASE"/>

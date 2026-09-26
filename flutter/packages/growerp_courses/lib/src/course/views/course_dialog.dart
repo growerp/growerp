@@ -19,6 +19,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_bloc.dart';
 import 'course_participants_view.dart';
+import '../../viewer/views/course_viewer.dart';
 import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
 class CourseDialog extends StatefulWidget {
@@ -413,8 +414,18 @@ class _CourseDialogState extends State<CourseDialog> {
               style: TextButton.styleFrom(foregroundColor: Colors.red),
               child: const Text('Delete'),
             ),
+          if (isEdit) ...[
+            const SizedBox(width: 8),
+            TextButton.icon(
+              key: const Key('previewCourse'),
+              icon: const Icon(Icons.visibility_outlined),
+              label: const Text('Preview'),
+              onPressed: _previewCourse,
+            ),
+          ],
           const Spacer(),
           TextButton(
+            key: const Key('cancelCourse'),
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
@@ -481,6 +492,16 @@ class _CourseDialogState extends State<CourseDialog> {
     }
 
     Navigator.pop(context);
+  }
+
+  /// Shows the saved course as a learner sees it; staff get full lesson
+  /// content, drafts included
+  void _previewCourse() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => CourseViewer(courseId: widget.course!.courseId!),
+      ),
+    );
   }
 
   void _deleteCourse() {

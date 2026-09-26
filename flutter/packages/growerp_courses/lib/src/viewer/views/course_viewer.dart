@@ -336,7 +336,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
       return _buildMobileViewer(context, state);
     }
 
-    return Row(
+    final viewer = Row(
       children: [
         SizedBox(width: 300, child: _buildSidebar(context, state)),
         const VerticalDivider(width: 1),
@@ -347,6 +347,15 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
         ],
       ],
     );
+    // opened as its own page (catalog, admin preview): give it a way back;
+    // as a menu page the app's own chrome is around it
+    if (ModalRoute.of(context)?.canPop ?? false) {
+      return Scaffold(
+        appBar: AppBar(title: Text(state.course!.title)),
+        body: viewer,
+      );
+    }
+    return viewer;
   }
 
   Widget _buildMobileViewer(BuildContext context, CourseViewerState state) {

@@ -24,16 +24,11 @@ limitations under the License.
     <!-- Menu items: learners are outside users (GROWERP_M_OTHER, registered as Customer of the
          company the app starts with). Outside users only see items that name them and only
          write where updateGroupsJson names them: enrolling and saving progress are writes. -->
+    <!-- learner-only app: the courses the learner subscribed to at the top, then the catalog -->
     <growerp.menu.MenuItem menuItemId="ACADEMY_MAIN" menuConfigurationId="ACADEMY_DEFAULT"
-        title="Main" route="/" iconName="dashboard" widgetName="AcademyDbForm"
-        userGroupsJson='["GROWERP_M_OTHER","GROWERP_M_EMPLOYEE","GROWERP_M_ADMIN"]' sequenceNum="10"/>
+        title="My Courses" route="/" iconName="play_circle_outline" widgetName="CourseViewer"
+        userGroupsJson='["GROWERP_M_OTHER","GROWERP_M_EMPLOYEE","GROWERP_M_ADMIN"]' updateGroupsJson='["GROWERP_M_OTHER","GROWERP_M_EMPLOYEE","GROWERP_M_ADMIN"]' sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="ACADEMY_CATALOG" menuConfigurationId="ACADEMY_DEFAULT"
         title="Courses" route="/courses" iconName="school" widgetName="CourseCatalogView"
         userGroupsJson='["GROWERP_M_OTHER","GROWERP_M_EMPLOYEE","GROWERP_M_ADMIN"]' updateGroupsJson='["GROWERP_M_OTHER","GROWERP_M_EMPLOYEE","GROWERP_M_ADMIN"]' sequenceNum="20"/>
-    <growerp.menu.MenuItem menuItemId="ACADEMY_MY_COURSES" menuConfigurationId="ACADEMY_DEFAULT"
-        title="My Courses" route="/myCourses" iconName="play_circle_outline" widgetName="CourseViewer"
-        userGroupsJson='["GROWERP_M_OTHER","GROWERP_M_EMPLOYEE","GROWERP_M_ADMIN"]' updateGroupsJson='["GROWERP_M_OTHER","GROWERP_M_EMPLOYEE","GROWERP_M_ADMIN"]' sequenceNum="30"/>
-    <growerp.menu.MenuItem menuItemId="ACADEMY_ABOUT" menuConfigurationId="ACADEMY_DEFAULT"
-        title="About" route="/about" iconName="info" widgetName="AboutForm"
-        userGroupsJson='["GROWERP_M_OTHER","GROWERP_M_EMPLOYEE","GROWERP_M_ADMIN"]' sequenceNum="40"/>
 </entity-facade-xml>

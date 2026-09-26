@@ -122,6 +122,28 @@ class CourseTest {
     await updateCourse(tester, status: 'Published');
   }
 
+  /// Opens the course from the list, previews it as a learner sees it and
+  /// checks the lesson text is shown (staff see drafts too).
+  static Future<void> previewCourse(
+    WidgetTester tester,
+    String title, {
+    required String lessonContent,
+  }) async {
+    await openCourse(tester, title);
+    await CommonTest.tapByKey(
+      tester,
+      'previewCourse',
+      seconds: CommonTest.waitTime,
+    );
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+    expect(find.textContaining(lessonContent), findsWidgets);
+    await tester.pageBack(); // back to the course dialog
+    await tester.pumpAndSettle();
+    await CommonTest.dragUntil(tester, key: 'cancelCourse');
+    await CommonTest.tapByKey(tester, 'cancelCourse'); // close the dialog
+    expect(find.byKey(const Key('courseTitle')), findsNothing);
+  }
+
   /// Creates and publishes a course with one module and lesson through the
   /// API, as the logged in admin: the setup for learner-only tests.
   static Future<String> createPublishedCourse(

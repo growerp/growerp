@@ -15,7 +15,6 @@
 // A learner registers into an organization that published a course, enrolls
 // in it from the catalog and studies the lesson. Course authoring is covered
 // by the growerp_courses package tests; here the course is set up by API.
-import 'package:academy/views/academy_db_form.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:go_router/go_router.dart';
@@ -27,17 +26,17 @@ import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// the learner screens of the ACADEMY_DEFAULT seed menu
+// the ACADEMY_DEFAULT seed menu: subscribed courses at the top, then the catalog
 const academyTestMenuConfig = MenuConfiguration(
   menuConfigurationId: 'ACADEMY_TEST',
   appId: 'academy',
   name: 'Academy Test',
   menuItems: [
     MenuItem(
-      title: 'Main',
+      title: 'My Courses',
       route: '/',
-      widgetName: 'AcademyDbForm',
-      iconName: 'dashboard',
+      widgetName: 'CourseViewer',
+      iconName: 'play_circle_outline',
       sequenceNum: 10,
     ),
     MenuItem(
@@ -47,13 +46,6 @@ const academyTestMenuConfig = MenuConfiguration(
       iconName: 'school',
       sequenceNum: 20,
     ),
-    MenuItem(
-      title: 'My Courses',
-      route: '/myCourses',
-      widgetName: 'CourseViewer',
-      iconName: 'play_circle_outline',
-      sequenceNum: 30,
-    ),
   ],
 );
 
@@ -61,11 +53,10 @@ GoRouter createAcademyTestRouter() {
   return createStaticAppRouter(
     menuConfig: academyTestMenuConfig,
     appTitle: 'GrowERP Academy',
-    dashboard: const AcademyDbForm(),
+    dashboard: const CourseViewer(courseId: ''),
     widgetBuilder: (route) => switch (route) {
       '/courses' => const CourseCatalogView(),
-      '/myCourses' => const CourseViewer(courseId: ''),
-      _ => const AcademyDbForm(),
+      _ => const CourseViewer(courseId: ''),
     },
   );
 }
@@ -126,7 +117,7 @@ void main() {
     await CourseTest.subscribeInCatalog(tester, '/courses');
     await CourseTest.studyFirstLesson(
       tester,
-      '/myCourses',
+      '/',
       lessonContent: 'Academy lesson body text',
     );
 

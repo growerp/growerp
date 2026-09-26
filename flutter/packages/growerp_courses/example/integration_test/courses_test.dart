@@ -76,6 +76,11 @@ void main() {
     );
     expect(find.text('Test Course Updated'), findsWidgets);
     expect(find.text('Published'), findsWidgets);
+    await CourseTest.previewCourse(
+      tester,
+      'Test Course Updated',
+      lessonContent: 'Lesson one body text',
+    );
 
     await CourseTest.addCourse(tester, title: 'Draft To Delete');
     await CourseTest.deleteCourse(tester, 'Draft To Delete');
