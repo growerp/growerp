@@ -19,6 +19,33 @@ limitations under the License.
     <!--  Course CRUD Services                                     -->
     <!-- ========================================================= -->
 
+    <service verb="get" noun="CourseAccess" allow-remote="false">
+        <description>Internal: whether the current user sees full lesson content. Staff of the
+            owning company always do; others only for courses without a product (free) or
+            whose product they hold an active subscription for.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="isStaff" type="Boolean" />
+            <parameter name="subscribedProductIds" type="List" />
+        </out-parameters>
+        <actions>
+            <set field="isStaff" from="ec.user.isInGroup('GROWERP_M_ADMIN')
+                || ec.user.isInGroup('GROWERP_M_EMPLOYEE') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <set field="subscribedProductIds" from="[]" />
+            <if condition="!isStaff &amp;&amp; ec.user.userAccount?.partyId">
+                <entity-find entity-name="mantle.product.subscription.Subscription" list="subscriptionList">
+                    <econdition field-name="ownerPartyId" />
+                    <econdition field-name="subscriberPartyId" from="ec.user.userAccount.partyId" />
+                    <econdition field-name="productId" operator="is-not-null" />
+                    <date-filter />
+                </entity-find>
+                <set field="subscribedProductIds" from="subscriptionList*.productId" />
+            </if>
+        </actions>
+    </service>
+
     <service verb="list" noun="Courses">
         <in-parameters>
             <parameter name="start" type="Integer" default="0" />
@@ -48,9 +75,13 @@ limitations under the License.
                 </econditions>
                 <order-by field-name="-lastModifiedDate" />
             </entity-find>
+            <service-call name="growerp.100.CourseServices100.get#CourseAccess"
+                in-map="[ownerPartyId: weightContext.ownerPartyId]" out-map="access" />
             <!-- Build courses with nested modules and lessons -->
             <set field="courses" from="[]" />
             <iterate list="courseList" entry="courseEntity">
+                <set field="hasAccess" from="access.isStaff || !courseEntity.productId
+                    || access.subscribedProductIds.contains(courseEntity.productId)" />
                 <!-- Get modules for this course -->
                 <entity-find entity-name="growerp.course.CourseModule" list="moduleList">
                     <econdition field-name="courseId" from="courseEntity.courseId" />
@@ -74,7 +105,8 @@ limitations under the License.
                             estimatedDuration: module.estimatedDuration,
                             createdDate: module.createdDate,
                             lastModifiedDate: module.lastModifiedDate,
-                            lessons: lessonList*.getMap()
+                            lessons: hasAccess ? lessonList*.getMap() : lessonList.collect { it.getMap()
+                            .findAll { k, v -> !(k in ['content', 'keyPoints', 'videoUrl']) } }
                         ])
                     </script>
                 </iterate>
@@ -137,6 +169,10 @@ limitations under the License.
                 <message error="true">Course not found or access denied</message>
                 <return />
             </if>
+            <service-call name="growerp.100.CourseServices100.get#CourseAccess"
+                in-map="[ownerPartyId: context.ownerPartyId]" out-map="access" />
+            <set field="hasAccess" from="access.isStaff || !courseEntity.productId
+                || access.subscribedProductIds.contains(courseEntity.productId)" />
             <!-- Get modules -->
             <entity-find entity-name="growerp.course.CourseModule" list="moduleList">
                 <econdition field-name="courseId" />
@@ -157,7 +193,8 @@ limitations under the License.
                         description: module.description,
                         sequenceNum: module.sequenceNum,
                         estimatedDuration: module.estimatedDuration,
-                        lessons: lessonList*.getMap()
+                        lessons: hasAccess ? lessonList*.getMap() : lessonList.collect { it.getMap()
+                            .findAll { k, v -> !(k in ['content', 'keyPoints', 'videoUrl']) } }
                     ])
                 </script>
             </iterate>
