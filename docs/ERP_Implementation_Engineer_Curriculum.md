@@ -476,7 +476,7 @@ and certificates are all missing.
 | 4 | No certificates, expiry or verification | — | Certification |
 | 5 | No learning paths, prerequisites or course bundles | — | Certificate paths (section 5) |
 | 6 | Progress is stored as a JSON list in one text field: no time spent, scores or module completion | `CourseProgress.completedLessons` | Learner reporting |
-| 7 | Courses are visible only inside the owning tenant. GrowERP-published courses (`ownerPartyId="_NA_"`) are invisible to every other tenant | `list#Courses`, `get#Course` | Selling the curriculum to partners |
+| 7 | ~~GrowERP-published courses (`ownerPartyId="_NA_"`) were invisible to every tenant.~~ **Resolved:** the seed courses are owned by `GROWERP`, so they show on the GrowERP website (`/courses`) and in the GrowERP organization's academy app. Each organization still sees only its own courses | `GrowerpCourseData.xml` | — |
 | 8 | ~~External learners cannot reach courses.~~ **Resolved:** the store website lists published courses at `/courses` (link hidden when there are none) and learners register, enroll, pay and study in the separate **academy** app. Customers get the `GROWERP_LEARNING` REST domain (catalog, subscribe, progress) but never the authoring domain; lesson content is gated by subscription | `academy` app, `GROWERP_LEARNING`, `get#CourseCatalog` | — |
 | 9 | Lessons cannot have attachments (templates, sample CSV files) | `CourseLesson` | Labs |
 

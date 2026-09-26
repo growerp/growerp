@@ -4,12 +4,12 @@
     <!-- Service products backing each course (required for subscriptions) -->
     <mantle.product.Product productId="ProductCourseGrowerp" productTypeEnumId="PtService"
         productName="How to Create a Course with GrowERP: The Curriculum"
-        ownerPartyId="_NA_" requireInventory="N" />
+        ownerPartyId="GROWERP" requireInventory="N" />
     <mantle.product.Product productId="ProductCourseMarketingSales" productTypeEnumId="PtService"
         productName="Marketing, Outreach and Sales: Your Complete GrowERP Growth Pipeline"
-        ownerPartyId="_NA_" requireInventory="N" />
+        ownerPartyId="GROWERP" requireInventory="N" />
 
-    <growerp.course.Course courseId="CourseGrowerp" ownerPartyId="_NA_"
+    <growerp.course.Course courseId="CourseGrowerp" ownerPartyId="GROWERP"
         productId="ProductCourseGrowerp"
         title="How to Create a Course with GrowERP: The Curriculum"
         description="This curriculum outlines the process of building, validating, and selling a course using the GrowERP ecosystem. It combines industry best practices with the specific tools and strategies found in the GrowERP architecture (Assessments, Landing Pages, and Outreach)."
@@ -148,7 +148,7 @@
 4.  Outline your **Course Modules**.]]></content>
     </growerp.course.CourseLesson>
 
-    <growerp.course.Course courseId="CourseMarketingSales" ownerPartyId="_NA_"
+    <growerp.course.Course courseId="CourseMarketingSales" ownerPartyId="GROWERP"
         productId="ProductCourseMarketingSales"
         title="Marketing, Outreach and Sales: Your Complete GrowERP Growth Pipeline"
         description="A comprehensive guide for marketers and sales reps covering every screen, workflow, and integration point across the growerp_marketing, growerp_outreach, and growerp_sales packages. By the end you will have a fully operational funnel: from a public landing page that captures leads, through an automated outreach sequence that warms them up, to a closed sales opportunity with a quote ready for the customer."
