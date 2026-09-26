@@ -85,6 +85,16 @@ void main() {
     await CourseTest.addCourse(tester, title: 'Draft To Delete');
     await CourseTest.deleteCourse(tester, 'Draft To Delete');
 
+    // --- admin: AI designs the outline, then writes the lessons
+    await CourseTest.createCourseWithAi(
+      tester,
+      title: 'AI Course',
+      audience: 'Freelancers',
+      curriculum: 'Basics\nNext steps',
+    );
+    await CourseTest.writeLessonsWithAi(tester);
+    await CommonTest.tapByKey(tester, 'cancelCourse');
+
     // --- learner: registers into this company, pays, studies
     final companyPartyId = CourseTest.currentCompanyPartyId(tester);
     await CommonTest.gotoMainMenu(tester);

@@ -12,12 +12,15 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../bloc/course_bloc.dart';
+import '../../course_ai/views/ai_course_wizard_dialog.dart';
 import 'course_dialog.dart';
 import 'course_list_styled_data.dart';
 import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
@@ -178,6 +181,14 @@ class _CourseListViewState extends State<CourseListView> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           FloatingActionButton(
+                            heroTag: 'courseNewAi',
+                            key: const Key('addNewAi'),
+                            onPressed: _createWithAi,
+                            tooltip: 'Create course with AI',
+                            child: const Icon(Icons.auto_awesome),
+                          ),
+                          const SizedBox(height: 10),
+                          FloatingActionButton(
                             heroTag: 'courseNew',
                             key: const Key('addNew'),
                             onPressed: () async {
@@ -207,6 +218,37 @@ class _CourseListViewState extends State<CourseListView> {
         );
       },
     );
+  }
+
+  /// AI designs the outline as a draft course, then the author reviews it
+  Future<void> _createWithAi() async {
+    final restClient = context.read<RestClient>();
+    final courseId = await showDialog<String>(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) => const AiCourseWizardDialog(),
+    );
+    if (courseId == null || !mounted) return;
+    _courseBloc.add(const CourseFetch(refresh: true));
+    try {
+      var result = await restClient.getCourse(courseId: courseId);
+      // a dynamic body can arrive as the raw JSON string
+      if (result is String) result = jsonDecode(result);
+      final course = Course.fromJson(result['course']);
+      if (!mounted) return;
+      await showDialog(
+        barrierDismissible: true,
+        context: context,
+        builder: (BuildContext context) => BlocProvider.value(
+          value: _courseBloc,
+          child: CourseDialog(course: course),
+        ),
+      );
+    } catch (e) {
+      final message = await getDioError(e);
+      if (mounted) HelperFunctions.showMessage(context, message, Colors.red);
+    }
+    _searchFocusNode.requestFocus();
   }
 
   @override

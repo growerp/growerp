@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+
+AI generation of courses. Every generation runs as a background job with a CourseAiJob row
+carrying the progress, the same way as a website conversion:
+
+    create#CourseAiJob         validate + queue, returns immediately
+    process#CourseAiJob        background worker, dispatches on jobType
+    update#CourseAiJobStatus   progress write in its own transaction
+    get#CourseAiJobs           polled by the app
+
+Job types:
+    OUTLINE  from title, audience, curriculum and source material: create a DRAFT course with
+             modules and lesson stubs (the stub content is the lesson brief)
+    LESSONS  write the markdown content and key points of all lessons of a course, or of the
+             given lessonIds, from the lesson brief, the outline and the course sources
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="get" noun="CourseAiJobs">
+        <description>AI jobs of this owner, newest first: of one course, or a single job.</description>
+        <in-parameters>
+            <parameter name="jobId" />
+            <parameter name="courseId" />
+            <parameter name="limit" type="Integer" default-value="20" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="courseAiJobs" type="List">
+                <parameter name="courseAiJob" type="Map" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="growerp.course.CourseAiJob" list="jobs" limit="limit">
+                <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                <econdition field-name="jobId" ignore-if-empty="true" />
+                <econdition field-name="courseId" ignore-if-empty="true" />
+                <select-field field-name="jobId,courseId,jobType,status,progressPercent" />
+                <select-field field-name="statusMessage,errorMessage,createdDate,completedDate" />
+                <order-by field-name="-createdDate" />
+            </entity-find>
+            <set field="courseAiJobs" from="jobs*.getMap()" />
+        </actions>
+    </service>
+
+    <service verb="create" noun="CourseAiJob">
+        <description>Queue an AI job and return at once; the app polls get#CourseAiJobs.
+            Uploaded files are converted to text here, so the job row never holds the
+            (possibly large) file itself.</description>
+        <in-parameters>
+            <parameter name="jobType" required="true" /> <!-- OUTLINE, LESSONS -->
+            <parameter name="courseId" />
+            <!-- OUTLINE -->
+            <parameter name="title" />
+            <parameter name="audience" allow-html="any" />
+            <parameter name="targetPersonaId" />
+            <parameter name="difficulty" />
+            <parameter name="curriculum" allow-html="any" />
+            <parameter name="notes" allow-html="any" />
+            <parameter name="urls" type="List" />
+            <parameter name="files" type="List">
+                <parameter name="file" type="Map">
+                    <parameter name="fileName" />
+                    <parameter name="base64" />
+                </parameter>
+            </parameter>
+            <parameter name="useKnowledgeBase" type="Boolean" default="false" />
+            <!-- LESSONS: empty is all lessons of the course -->
+            <parameter name="lessonIds" type="List" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="courseAiJob" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="!(jobType in ['OUTLINE', 'LESSONS'])">
+                <return error="true" message="Unknown AI job type ${jobType}" />
+            </if>
+            <if condition="jobType == 'OUTLINE' &amp;&amp; !title">
+                <return error="true" message="A course title is required" />
+            </if>
+            <if condition="jobType != 'OUTLINE'">
+                <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity" />
+                <if condition="courseEntity?.ownerPartyId != ownerPartyId">
+                    <return error="true" message="Course not found or access denied" />
+                </if>
+                <entity-find entity-name="growerp.course.CourseAiJob" list="runningJobs">
+                    <econdition field-name="courseId" />
+                    <econdition field-name="status" operator="in" value="QUEUED,RUNNING" />
+                </entity-find>
+                <if condition="runningJobs">
+                    <return error="true"
+                        message="An AI job is already running for this course, wait until it is finished" />
+                </if>
+            </if>
+
+            <script><![CDATA[
+                import groovy.json.JsonOutput
+                def CourseAiUtil = ec.resource.script("component://growerp/service/course/CourseAiUtil.groovy", null)
+                def fileTexts = []
+                for (Map f in (files ?: [])) {
+                    if (!f.base64) continue
+                    String text = CourseAiUtil.extractText(ec, f.fileName as String,
+                        Base64.decoder.decode(f.base64 as String))
+                    if (text?.trim()) fileTexts.add([fileName: f.fileName, text: text])
+                }
+                context.inputJson = JsonOutput.toJson([
+                    title: title, audience: audience, targetPersonaId: targetPersonaId,
+                    difficulty: difficulty, curriculum: curriculum, notes: notes,
+                    urls: (urls ?: []).findAll { it }, files: fileTexts,
+                    useKnowledgeBase: useKnowledgeBase, lessonIds: lessonIds ?: []])
+            ]]></script>
+            <check-errors />
+
+            <!-- write the row in its own transaction before firing the worker, which runs on
+                 another thread and would not see an uncommitted row -->
+            <script><![CDATA[
+                def created = ec.service.sync().name('create#growerp.course.CourseAiJob')
+                    .parameters([ownerPartyId: ownerPartyId, courseId: courseId, jobType: jobType,
+                                 status: 'QUEUED', progressPercent: 0,
+                                 statusMessage: 'Waiting to start', inputJson: inputJson,
+                                 username: ec.user.username, createdDate: ec.user.nowTimestamp])
+                    .requireNewTransaction(true).call()
+                context.jobId = created.jobId
+            ]]></script>
+            <check-errors />
+            <script>
+                ec.service.async().name('growerp.100.CourseAiServices100.process#CourseAiJob')
+                    .parameters([jobId: jobId, username: ec.user.username]).call()
+            </script>
+            <service-call name="growerp.100.CourseAiServices100.get#CourseAiJobs"
+                in-map="[jobId: jobId]" out-map="fetched" />
+            <set field="courseAiJob" from="fetched.courseAiJobs[0]" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="CourseAiJobStatus" transaction="force-new">
+        <description>Write job progress in its own transaction so the app sees it at once and a
+            later failure cannot roll it back.</description>
+        <in-parameters>
+            <parameter name="jobId" required="true" />
+            <parameter name="courseId" />
+            <parameter name="status" />
+            <parameter name="progressPercent" type="Integer" />
+            <parameter name="statusMessage" allow-html="any" />
+            <parameter name="errorMessage" allow-html="any" />
+            <parameter name="completedDate" type="Timestamp" />
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.course.CourseAiJob" value-field="job"
+                for-update="true" />
+            <if condition="!job">
+                <return error="true" message="AI job ${jobId} not found" />
+            </if>
+            <set field="job.courseId" from="courseId" set-if-empty="false" />
+            <set field="job.status" from="status" set-if-empty="false" />
+            <set field="job.progressPercent" from="progressPercent" set-if-empty="false" />
+            <set field="job.statusMessage" from="statusMessage" set-if-empty="false" />
+            <set field="job.errorMessage" from="errorMessage" set-if-empty="false" />
+            <set field="job.completedDate" from="completedDate" set-if-empty="false" />
+            <entity-update value-field="job" />
+        </actions>
+    </service>
+
+    <service verb="process" noun="CourseAiJob" authenticate="anonymous" transaction="ignore">
+        <description>Background worker of create#CourseAiJob.</description>
+        <in-parameters>
+            <parameter name="jobId" required="true" />
+            <parameter name="username" />
+        </in-parameters>
+        <actions>
+            <!-- the async worker has no web session: log in as the submitting user -->
+            <if condition="!ec.user.userId &amp;&amp; username">
+                <script>ec.user.internalLoginUser(username)</script>
+            </if>
+            <script location="component://growerp/service/course/processCourseAiJob.groovy" />
+        </actions>
+    </service>
+</services>

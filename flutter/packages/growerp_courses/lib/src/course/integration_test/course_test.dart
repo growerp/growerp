@@ -45,7 +45,11 @@ class CourseTest {
       await CommonTest.enterText(tester, 'coursePrice', price);
     }
     await CommonTest.dragUntil(tester, key: 'saveCourse');
-    await CommonTest.tapByKey(tester, 'saveCourse', seconds: CommonTest.waitTime);
+    await CommonTest.tapByKey(
+      tester,
+      'saveCourse',
+      seconds: CommonTest.waitTime,
+    );
     await CommonTest.waitForSnackbarToGo(tester);
     expect(find.text(title), findsWidgets);
   }
@@ -60,7 +64,11 @@ class CourseTest {
     await CommonTest.dragUntil(tester, key: 'addModule');
     await CommonTest.tapByKey(tester, 'addModule');
     await CommonTest.enterText(tester, 'moduleTitle', title);
-    await CommonTest.tapByKey(tester, 'saveModule', seconds: CommonTest.waitTime);
+    await CommonTest.tapByKey(
+      tester,
+      'saveModule',
+      seconds: CommonTest.waitTime,
+    );
     // the dialog shows the course reloaded by the bloc, with the new module
     await CommonTest.dragUntil(tester, key: 'module0');
     expect(find.text(title), findsOneWidget);
@@ -80,7 +88,11 @@ class CourseTest {
     await CommonTest.tapByKey(tester, 'addLesson$moduleIndex');
     await CommonTest.enterText(tester, 'lessonTitle', title);
     await CommonTest.enterText(tester, 'lessonContent', content);
-    await CommonTest.tapByKey(tester, 'saveLesson', seconds: CommonTest.waitTime);
+    await CommonTest.tapByKey(
+      tester,
+      'saveLesson',
+      seconds: CommonTest.waitTime,
+    );
     await CommonTest.dragUntil(tester, key: 'module$moduleIndex');
     if (!tester.any(find.text(title))) {
       await CommonTest.tapByKey(tester, 'module$moduleIndex'); // expand
@@ -102,7 +114,59 @@ class CourseTest {
       await CommonTest.enterDropDown(tester, 'courseStatus', status);
     }
     await CommonTest.dragUntil(tester, key: 'saveCourse');
-    await CommonTest.tapByKey(tester, 'saveCourse', seconds: CommonTest.waitTime);
+    await CommonTest.tapByKey(
+      tester,
+      'saveCourse',
+      seconds: CommonTest.waitTime,
+    );
+    await CommonTest.waitForSnackbarToGo(tester);
+  }
+
+  /// Pumps (no settle: the AI progress bar animates) until [finder] shows.
+  static Future<void> _pumpUntil(
+    WidgetTester tester,
+    Finder finder, {
+    int seconds = 90,
+  }) async {
+    for (int i = 0; i < seconds * 2 && !tester.any(finder); i++) {
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+    expect(tester.any(finder), true, reason: 'not shown after ${seconds}s');
+    await tester.pumpAndSettle();
+  }
+
+  /// Creates a course with the AI wizard. The backend runs in test mode in
+  /// CI and returns a canned outline: 2 modules, the first with 2 lessons.
+  /// Ends in the course dialog of the new draft course.
+  static Future<void> createCourseWithAi(
+    WidgetTester tester, {
+    required String title,
+    String? audience,
+    String? curriculum,
+  }) async {
+    await CommonTest.tapByKey(tester, 'addNewAi');
+    await CommonTest.enterText(tester, 'aiCourseTitle', title);
+    if (audience != null) {
+      await CommonTest.enterText(tester, 'aiCourseAudience', audience);
+    }
+    if (curriculum != null) {
+      await CommonTest.enterText(tester, 'aiCourseCurriculum', curriculum);
+    }
+    await CommonTest.dragUntil(tester, key: 'aiCourseGenerate');
+    await CommonTest.tapByKey(tester, 'aiCourseGenerate', settle: false);
+    await _pumpUntil(tester, find.byKey(const Key('courseTitle')));
+    await CommonTest.dragUntil(tester, key: 'module0');
+    expect(find.byKey(const Key('module1')), findsOneWidget);
+  }
+
+  /// Writes all lessons of the open course with AI and waits until done.
+  static Future<void> writeLessonsWithAi(WidgetTester tester) async {
+    await CommonTest.dragUntil(tester, key: 'aiWriteLessons');
+    await CommonTest.tapByKey(tester, 'aiWriteLessons');
+    await CommonTest.tapByKey(tester, 'aiWriteConfirm', settle: false);
+    // the banner shows while the job runs, the snackbar when it is done
+    // test mode answers at once; with a real AI every lesson takes seconds
+    await _pumpUntil(tester, find.textContaining('written'), seconds: 600);
     await CommonTest.waitForSnackbarToGo(tester);
   }
 
@@ -154,14 +218,18 @@ class CourseTest {
     Map<String, dynamic> decode(dynamic response) => response is String
         ? jsonDecode(response) as Map<String, dynamic>
         : response as Map<String, dynamic>;
-    final courseId = decode(
-      await restClient.createCourse(data: {'title': title}),
-    )['courseId'] as String;
-    final moduleId = decode(
-      await restClient.createCourseModule(
-        data: {'courseId': courseId, 'title': 'Module One'},
-      ),
-    )['moduleId'] as String;
+    final courseId =
+        decode(
+              await restClient.createCourse(data: {'title': title}),
+            )['courseId']
+            as String;
+    final moduleId =
+        decode(
+              await restClient.createCourseModule(
+                data: {'courseId': courseId, 'title': 'Module One'},
+              ),
+            )['moduleId']
+            as String;
     await restClient.createCourseLesson(
       data: {
         'moduleId': moduleId,
@@ -190,8 +258,7 @@ class CourseTest {
     String companyPartyId,
     String applicationId,
   ) async {
-    final email =
-        'learner${DateTime.now().millisecondsSinceEpoch}@example.com';
+    final email = 'learner${DateTime.now().millisecondsSinceEpoch}@example.com';
     await restClient.register(
       applicationId: applicationId,
       firstName: 'Lea',
@@ -213,7 +280,11 @@ class CourseTest {
     await CommonTest.selectOption(tester, route, 'catalogItem$index');
     expect(find.text('Subscribed'), findsNothing);
     await CommonTest.tapByKey(tester, 'catalogItem$index');
-    await CommonTest.tapByKey(tester, 'subscribe', seconds: CommonTest.waitTime);
+    await CommonTest.tapByKey(
+      tester,
+      'subscribe',
+      seconds: CommonTest.waitTime,
+    );
     await CommonTest.waitForSnackbarToGo(tester);
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
     expect(find.text('Subscribed'), findsOneWidget);
@@ -227,7 +298,11 @@ class CourseTest {
     required String lessonContent,
   }) async {
     await CommonTest.selectOption(tester, route, 'myCourse0');
-    await CommonTest.tapByKey(tester, 'myCourse0', seconds: CommonTest.waitTime);
+    await CommonTest.tapByKey(
+      tester,
+      'myCourse0',
+      seconds: CommonTest.waitTime,
+    );
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
     expect(find.textContaining(lessonContent), findsWidgets);
     await CommonTest.dragUntil(tester, key: 'completeLesson');

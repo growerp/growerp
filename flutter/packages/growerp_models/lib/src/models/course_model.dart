@@ -97,6 +97,9 @@ class Course {
   final String? description;
   final String? objectives;
   final String? targetPersonaId;
+
+  /// Free-text target audience, the AI writes for it
+  final String? audience;
   final CourseDifficulty? difficulty;
   final int? estimatedDuration;
   final CourseStatus? status;
@@ -130,6 +133,7 @@ class Course {
     this.description,
     this.objectives,
     this.targetPersonaId,
+    this.audience,
     this.difficulty = CourseDifficulty.beginner,
     this.estimatedDuration,
     this.status = CourseStatus.draft,
@@ -156,6 +160,7 @@ class Course {
     String? description,
     String? objectives,
     String? targetPersonaId,
+    String? audience,
     CourseDifficulty? difficulty,
     int? estimatedDuration,
     CourseStatus? status,
@@ -177,6 +182,7 @@ class Course {
     description: description ?? this.description,
     objectives: objectives ?? this.objectives,
     targetPersonaId: targetPersonaId ?? this.targetPersonaId,
+    audience: audience ?? this.audience,
     difficulty: difficulty ?? this.difficulty,
     estimatedDuration: estimatedDuration ?? this.estimatedDuration,
     status: status ?? this.status,
@@ -587,4 +593,55 @@ class CourseParticipants {
   factory CourseParticipants.fromJson(Map<String, dynamic> json) =>
       _$CourseParticipantsFromJson(json);
   Map<String, dynamic> toJson() => _$CourseParticipantsToJson(this);
+}
+
+/// One AI generation run for a course (OUTLINE, LESSONS), polled for progress
+@JsonSerializable()
+class CourseAiJob {
+  final String? jobId;
+  final String? courseId;
+  final String? jobType;
+
+  /// QUEUED, RUNNING, DONE, ERROR
+  final String? status;
+  final int? progressPercent;
+  final String? statusMessage;
+  final String? errorMessage;
+  @NullableTimestampConverter()
+  final DateTime? createdDate;
+  @NullableTimestampConverter()
+  final DateTime? completedDate;
+
+  CourseAiJob({
+    this.jobId,
+    this.courseId,
+    this.jobType,
+    this.status,
+    this.progressPercent,
+    this.statusMessage,
+    this.errorMessage,
+    this.createdDate,
+    this.completedDate,
+  });
+
+  bool get isRunning => status == 'QUEUED' || status == 'RUNNING';
+
+  factory CourseAiJob.fromJson(Map<String, dynamic> json) =>
+      _$CourseAiJobFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseAiJobToJson(this);
+
+  @override
+  String toString() => 'CourseAiJob($jobType $status $progressPercent%)';
+}
+
+/// List wrapper for course AI jobs
+@JsonSerializable()
+class CourseAiJobs {
+  final List<CourseAiJob> courseAiJobs;
+
+  CourseAiJobs({required this.courseAiJobs});
+
+  factory CourseAiJobs.fromJson(Map<String, dynamic> json) =>
+      _$CourseAiJobsFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseAiJobsToJson(this);
 }

@@ -18,6 +18,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_bloc.dart';
+import '../../course_ai/bloc/course_ai_bloc.dart';
 import 'course_participants_view.dart';
 import '../../viewer/views/course_viewer.dart';
 import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
@@ -36,6 +37,8 @@ class _CourseDialogState extends State<CourseDialog> {
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
   late TextEditingController _objectivesController;
+  late TextEditingController _audienceController;
+  late CourseAiBloc _aiBloc;
   late TextEditingController _durationController;
   late TextEditingController _priceController;
   CourseDifficulty _selectedDifficulty = CourseDifficulty.beginner;
@@ -53,6 +56,9 @@ class _CourseDialogState extends State<CourseDialog> {
     _objectivesController = TextEditingController(
       text: widget.course?.objectives ?? '',
     );
+    _audienceController = TextEditingController(
+      text: widget.course?.audience ?? '',
+    );
     _durationController = TextEditingController(
       text: widget.course?.estimatedDuration?.toString() ?? '',
     );
@@ -67,6 +73,9 @@ class _CourseDialogState extends State<CourseDialog> {
     if (isEdit) {
       context.read<CourseBloc>().add(CourseGetDetail(widget.course!.courseId!));
     }
+    // follow an AI job that is still writing this course
+    _aiBloc = CourseAiBloc(restClient: context.read<RestClient>());
+    if (isEdit) _aiBloc.add(CourseAiWatch(widget.course!.courseId!));
   }
 
   @override
@@ -74,6 +83,8 @@ class _CourseDialogState extends State<CourseDialog> {
     _titleController.dispose();
     _descriptionController.dispose();
     _objectivesController.dispose();
+    _audienceController.dispose();
+    _aiBloc.close();
     _durationController.dispose();
     _priceController.dispose();
     super.dispose();
@@ -100,7 +111,9 @@ class _CourseDialogState extends State<CourseDialog> {
                   if (isEdit)
                     TabBar(
                       labelColor: Theme.of(context).colorScheme.primary,
-                      unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                      unselectedLabelColor: Theme.of(
+                        context,
+                      ).colorScheme.onSurfaceVariant,
                       tabs: const [
                         Tab(icon: Icon(Icons.edit_note), text: 'Details'),
                         Tab(icon: Icon(Icons.group), text: 'Participants'),
@@ -141,6 +154,8 @@ class _CourseDialogState extends State<CourseDialog> {
             const SizedBox(height: 16),
             _buildObjectivesField(),
             const SizedBox(height: 16),
+            _buildAudienceField(),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(child: _buildDifficultyDropdown()),
@@ -151,15 +166,9 @@ class _CourseDialogState extends State<CourseDialog> {
             const SizedBox(height: 16),
             _buildProductPriceRow(),
             // new courses start as draft: publish once the content is there
-            if (isEdit) ...[
-              const SizedBox(height: 16),
-              _buildStatusDropdown(),
-            ],
+            if (isEdit) ...[const SizedBox(height: 16), _buildStatusDropdown()],
             const SizedBox(height: 24),
-            if (isEdit) ...[
-              _buildModulesSection(),
-              const SizedBox(height: 16),
-            ],
+            if (isEdit) ...[_buildModulesSection(), const SizedBox(height: 16)],
           ],
         ),
       ),
@@ -207,6 +216,19 @@ class _CourseDialogState extends State<CourseDialog> {
         border: OutlineInputBorder(),
       ),
       maxLines: 3,
+    );
+  }
+
+  Widget _buildAudienceField() {
+    return TextFormField(
+      key: const Key('courseAudience'),
+      controller: _audienceController,
+      decoration: const InputDecoration(
+        labelText: 'Audience',
+        hintText: 'Who is this course for? The AI writes for them.',
+        border: OutlineInputBorder(),
+      ),
+      maxLines: 2,
     );
   }
 
@@ -306,8 +328,7 @@ class _CourseDialogState extends State<CourseDialog> {
               border: OutlineInputBorder(),
               helperText: 'Leave empty for free',
             ),
-            keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             validator: (value) {
               if (value != null && value.isNotEmpty) {
                 if (Decimal.tryParse(value) == null) {
@@ -337,22 +358,42 @@ class _CourseDialogState extends State<CourseDialog> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(CoursesLocalizations.of(context)!.courses_modulesModuleslength(modules.length.toString()),
+            Text(
+              CoursesLocalizations.of(
+                context,
+              )!.courses_modulesModuleslength(modules.length.toString()),
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            TextButton.icon(
-              key: const Key('addModule'),
-              icon: const Icon(Icons.add),
-              label: Text(CoursesLocalizations.of(context)!.courses_addModule),
-              onPressed: () => _showAddModuleDialog(),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (modules.isNotEmpty)
+                  TextButton.icon(
+                    key: const Key('aiWriteLessons'),
+                    icon: const Icon(Icons.auto_awesome),
+                    label: const Text('Write lessons with AI'),
+                    onPressed: () => _writeLessonsWithAi(null),
+                  ),
+                TextButton.icon(
+                  key: const Key('addModule'),
+                  icon: const Icon(Icons.add),
+                  label: Text(
+                    CoursesLocalizations.of(context)!.courses_addModule,
+                  ),
+                  onPressed: () => _showAddModuleDialog(),
+                ),
+              ],
             ),
           ],
         ),
+        _buildAiJobBanner(),
         const Divider(),
         if (modules.isEmpty)
           Padding(
             padding: EdgeInsets.all(16.0),
-            child: Text(CoursesLocalizations.of(context)!.courses_noModulesYetAdd),
+            child: Text(
+              CoursesLocalizations.of(context)!.courses_noModulesYetAdd,
+            ),
           )
         else
           ListView.builder(
@@ -365,7 +406,13 @@ class _CourseDialogState extends State<CourseDialog> {
                 key: Key('module$index'),
                 leading: CircleAvatar(child: Text('${index + 1}')),
                 title: Text(module.title),
-                subtitle: Text(CoursesLocalizations.of(context)!.courses_modulelessonslength0Lessons((module.lessons?.length ?? 0).toString())),
+                subtitle: Text(
+                  CoursesLocalizations.of(
+                    context,
+                  )!.courses_modulelessonslength0Lessons(
+                    (module.lessons?.length ?? 0).toString(),
+                  ),
+                ),
                 children: [
                   if (module.lessons != null)
                     ...module.lessons!.map(
@@ -377,15 +424,28 @@ class _CourseDialogState extends State<CourseDialog> {
                         leading: const Icon(Icons.play_circle_outline),
                         title: Text(lesson.title),
                         subtitle: lesson.estimatedDuration != null
-                            ? Text(CoursesLocalizations.of(context)!.courses_lessonestimateddurationMin(lesson.estimatedDuration.toString()))
+                            ? Text(
+                                CoursesLocalizations.of(
+                                  context,
+                                )!.courses_lessonestimateddurationMin(
+                                  lesson.estimatedDuration.toString(),
+                                ),
+                              )
                             : null,
+                        trailing: IconButton(
+                          key: Key('aiLesson${lesson.lessonId}'),
+                          icon: const Icon(Icons.auto_awesome),
+                          tooltip: 'Write this lesson with AI',
+                          onPressed: () => _writeLessonsWithAi(lesson),
+                        ),
                       ),
                     ),
                   ListTile(
                     key: Key('addLesson$index'),
                     contentPadding: const EdgeInsets.only(left: 72, right: 16),
                     leading: const Icon(Icons.add, color: Colors.blue),
-                    title: Text(CoursesLocalizations.of(context)!.courses_addLesson,
+                    title: Text(
+                      CoursesLocalizations.of(context)!.courses_addLesson,
                       style: TextStyle(color: Colors.blue),
                     ),
                     onTap: () => _showAddLessonDialog(module),
@@ -395,6 +455,95 @@ class _CourseDialogState extends State<CourseDialog> {
             },
           ),
       ],
+    );
+  }
+
+  /// Progress of a running AI job; reloads the course when it is done
+  Widget _buildAiJobBanner() {
+    return BlocConsumer<CourseAiBloc, CourseAiState>(
+      bloc: _aiBloc,
+      listener: (context, state) {
+        if (state.status == CourseAiStatus.success) {
+          context.read<CourseBloc>().add(
+            CourseGetDetail(widget.course!.courseId!),
+          );
+          HelperFunctions.showMessage(
+            context,
+            state.message ?? 'Done',
+            Colors.green,
+          );
+        }
+        if (state.status == CourseAiStatus.failure) {
+          HelperFunctions.showMessage(
+            context,
+            state.message ?? 'The AI job failed',
+            Colors.red,
+          );
+        }
+      },
+      builder: (context, state) {
+        if (state.status != CourseAiStatus.running) {
+          return const SizedBox.shrink();
+        }
+        final percent = state.job?.progressPercent ?? 0;
+        return Padding(
+          key: const Key('aiJobBanner'),
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              LinearProgressIndicator(
+                value: percent > 0 ? percent / 100 : null,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                state.job?.statusMessage ?? 'Starting',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Writes all lessons ([lesson] null) or one lesson from its brief/text,
+  /// the outline and the course sources. Replaces the current lesson text.
+  Future<void> _writeLessonsWithAi(CourseLesson? lesson) async {
+    if (_aiBloc.state.status == CourseAiStatus.running) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          lesson == null ? 'Write all lessons with AI' : 'Write lesson with AI',
+        ),
+        content: Text(
+          lesson == null
+              ? 'The AI rewrites the text of every lesson, using the lesson '
+                    'text as the brief. This can take several minutes.'
+              : 'The AI rewrites "${lesson.title}", using its current text as '
+                    'the brief.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            key: const Key('aiWriteConfirm'),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Write'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    _aiBloc.add(
+      CourseAiStart({
+        'jobType': 'LESSONS',
+        'courseId': widget.course!.courseId,
+        if (lesson != null) 'lessonIds': [lesson.lessonId],
+      }),
     );
   }
 
@@ -477,6 +626,9 @@ class _CourseDialogState extends State<CourseDialog> {
       objectives: _objectivesController.text.isNotEmpty
           ? _objectivesController.text
           : null,
+      audience: _audienceController.text.isNotEmpty
+          ? _audienceController.text
+          : null,
       difficulty: _selectedDifficulty,
       status: _selectedStatus,
       estimatedDuration: _durationController.text.isNotEmpty
@@ -511,7 +663,10 @@ class _CourseDialogState extends State<CourseDialog> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(CoursesLocalizations.of(context)!.courses_deleteCourse),
-        content: Text(CoursesLocalizations.of(context)!.courses_areYouSureYou(widget.course!.title.toString()),
+        content: Text(
+          CoursesLocalizations.of(
+            context,
+          )!.courses_areYouSureYou(widget.course!.title.toString()),
         ),
         actions: [
           TextButton(
@@ -574,16 +729,16 @@ class _CourseDialogState extends State<CourseDialog> {
               if (titleController.text.isEmpty) return;
 
               context.read<CourseBloc>().add(
-                    CourseModuleCreate(
-                      courseId: widget.course!.courseId!,
-                      module: CourseModule(
-                        title: titleController.text,
-                        description: descController.text.isNotEmpty
-                            ? descController.text
-                            : null,
-                      ),
-                    ),
-                  );
+                CourseModuleCreate(
+                  courseId: widget.course!.courseId!,
+                  module: CourseModule(
+                    title: titleController.text,
+                    description: descController.text.isNotEmpty
+                        ? descController.text
+                        : null,
+                  ),
+                ),
+              );
               Navigator.pop(dialogContext);
             },
             child: const Text('Add'),
@@ -600,7 +755,11 @@ class _CourseDialogState extends State<CourseDialog> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(CoursesLocalizations.of(context)!.courses_addLessonToModuletitle(module.title.toString())),
+        title: Text(
+          CoursesLocalizations.of(
+            context,
+          )!.courses_addLessonToModuletitle(module.title.toString()),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -635,16 +794,16 @@ class _CourseDialogState extends State<CourseDialog> {
               if (titleController.text.isEmpty) return;
 
               context.read<CourseBloc>().add(
-                    CourseLessonCreate(
-                      moduleId: module.moduleId!,
-                      lesson: CourseLesson(
-                        title: titleController.text,
-                        content: contentController.text.isNotEmpty
-                            ? contentController.text
-                            : null,
-                      ),
-                    ),
-                  );
+                CourseLessonCreate(
+                  moduleId: module.moduleId!,
+                  lesson: CourseLesson(
+                    title: titleController.text,
+                    content: contentController.text.isNotEmpty
+                        ? contentController.text
+                        : null,
+                  ),
+                ),
+              );
               Navigator.pop(dialogContext);
             },
             child: const Text('Add'),

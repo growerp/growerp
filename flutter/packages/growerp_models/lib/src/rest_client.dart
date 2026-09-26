@@ -2372,6 +2372,18 @@ abstract class RestClient {
     @Body() required Map<String, dynamic> data,
   });
 
+  @GET("rest/s1/growerp/100/Course/AiJob")
+  Future<CourseAiJobs> getCourseAiJobs({
+    @Query('jobId') String? jobId,
+    @Query('courseId') String? courseId,
+  });
+
+  /// Queue an AI job (OUTLINE, LESSONS); poll [getCourseAiJobs] for progress
+  @POST("rest/s1/growerp/100/Course/AiJob")
+  Future<dynamic> createCourseAiJob({
+    @Body() required Map<String, dynamic> data,
+  });
+
   @GET("rest/s1/growerp/100/CourseMedia")
   Future<CourseMediaList> listCourseMedia({
     @Query('courseId') String? courseId,

@@ -261,6 +261,7 @@ limitations under the License.
                 description: courseEntity.description,
                 objectives: courseEntity.objectives,
                 targetPersonaId: courseEntity.targetPersonaId,
+                audience: courseEntity.audience,
                 difficulty: courseEntity.difficulty,
                 estimatedDuration: courseEntity.estimatedDuration,
                 status: courseEntity.status,
@@ -279,6 +280,7 @@ limitations under the License.
             <parameter name="description" />
             <parameter name="objectives" />
             <parameter name="targetPersonaId" />
+            <parameter name="audience" />
             <parameter name="difficulty" default-value="BEGINNER" />
             <parameter name="estimatedDuration" type="Integer" />
             <parameter name="coverImageUrl" />
@@ -322,6 +324,7 @@ limitations under the License.
                 description: description,
                 objectives: objectives,
                 targetPersonaId: targetPersonaId,
+                audience: audience,
                 difficulty: difficulty,
                 estimatedDuration: estimatedDuration,
                 status: 'DRAFT',
@@ -343,6 +346,7 @@ limitations under the License.
             <parameter name="description" />
             <parameter name="objectives" />
             <parameter name="targetPersonaId" />
+            <parameter name="audience" />
             <parameter name="difficulty" />
             <parameter name="estimatedDuration" type="Integer" />
             <parameter name="status" />
@@ -371,6 +375,7 @@ limitations under the License.
                 description: description ?: courseEntity.description,
                 objectives: objectives ?: courseEntity.objectives,
                 targetPersonaId: targetPersonaId ?: courseEntity.targetPersonaId,
+                audience: audience ?: courseEntity.audience,
                 difficulty: difficulty ?: courseEntity.difficulty,
                 estimatedDuration: estimatedDuration ?: courseEntity.estimatedDuration,
                 status: status ?: courseEntity.status,
@@ -425,6 +430,13 @@ limitations under the License.
             </entity-delete-by-condition>
             <!-- Delete progress -->
             <entity-delete-by-condition entity-name="growerp.course.CourseProgress">
+                <econdition field-name="courseId" />
+            </entity-delete-by-condition>
+            <!-- Delete AI source material and jobs -->
+            <entity-delete-by-condition entity-name="growerp.course.CourseSource">
+                <econdition field-name="courseId" />
+            </entity-delete-by-condition>
+            <entity-delete-by-condition entity-name="growerp.course.CourseAiJob">
                 <econdition field-name="courseId" />
             </entity-delete-by-condition>
             <!-- Delete lessons -->
@@ -565,8 +577,8 @@ limitations under the License.
         <in-parameters>
             <parameter name="moduleId" required="true" />
             <parameter name="title" required="true" />
-            <parameter name="content" />
-            <parameter name="keyPoints" /> <!-- JSON array -->
+            <parameter name="content" allow-html="any" /> <!-- markdown may show code -->
+            <parameter name="keyPoints" allow-html="any" /> <!-- JSON array -->
             <parameter name="sequenceNum" type="Integer" />
             <parameter name="estimatedDuration" type="Integer" />
             <parameter name="videoUrl" />
@@ -623,8 +635,8 @@ limitations under the License.
         <in-parameters>
             <parameter name="lessonId" required="true" />
             <parameter name="title" />
-            <parameter name="content" />
-            <parameter name="keyPoints" />
+            <parameter name="content" allow-html="any" />
+            <parameter name="keyPoints" allow-html="any" />
             <parameter name="sequenceNum" type="Integer" />
             <parameter name="estimatedDuration" type="Integer" />
             <parameter name="videoUrl" />
