@@ -166,7 +166,8 @@ class _AcademyAppState extends State<AcademyApp> {
             title: 'GrowERP Academy',
             router: router,
             extraDelegates: const [
-            UserCompanyLocalizations.delegate,
+              UserCompanyLocalizations.delegate,
+              CoursesLocalizations.delegate,
             ],
             extraBlocProviders: [
               ...getUserCompanyBlocProviders(widget.restClient, widget.applicationId),

@@ -69,7 +69,7 @@ class AppBlock {
   final bool providerTakesAppId;
 
   /// Localizations delegate expression, e.g. 'CatalogLocalizations.delegate'.
-  /// Null for blocks that ship no localizations (marketing/outreach/courses).
+  /// Null for blocks that ship no localizations.
   final String? localizationsDelegate;
 
   /// Default top-level menu item for this block. Null for blocks that add no
@@ -256,7 +256,7 @@ const Map<String, AppBlock> appBlocks = {
     widgetsFn: 'getMarketingWidgets',
     blocProvidersFn: 'getMarketingBlocProviders',
     providerTakesAppId: true,
-    localizationsDelegate: null,
+    localizationsDelegate: 'MarketingLocalizations.delegate',
     menuItem: BlockMenuItem(
       title: 'Marketing',
       route: '/marketing',
@@ -275,7 +275,7 @@ const Map<String, AppBlock> appBlocks = {
     widgetsFn: 'getOutreachWidgets',
     blocProvidersFn: 'getOutreachBlocProviders',
     providerTakesAppId: false,
-    localizationsDelegate: null,
+    localizationsDelegate: 'OutreachLocalizations.delegate',
     menuItem: BlockMenuItem(
       title: 'Outreach',
       route: '/outreach',
@@ -294,7 +294,7 @@ const Map<String, AppBlock> appBlocks = {
     widgetsFn: 'getCoursesWidgets',
     blocProvidersFn: 'getCoursesBlocProviders',
     providerTakesAppId: false,
-    localizationsDelegate: null,
+    localizationsDelegate: 'CoursesLocalizations.delegate',
     menuItem: BlockMenuItem(
       title: 'Courses',
       route: '/courses',
