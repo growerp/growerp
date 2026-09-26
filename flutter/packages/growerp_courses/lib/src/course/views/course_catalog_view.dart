@@ -55,14 +55,13 @@ class _CourseCatalogViewState extends State<CourseCatalogView> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.error_outline,
-                        color: Colors.red, size: 48),
+                    Icon(Icons.error_outline, color: Colors.red, size: 48),
                     SizedBox(height: 8),
                     Text(courseState.message ?? 'Failed to load courses'),
                     TextButton(
-                      onPressed: () => context
-                          .read<CourseBloc>()
-                          .add(CourseFetch(refresh: true, catalog: true)),
+                      onPressed: () => context.read<CourseBloc>().add(
+                        CourseFetch(refresh: true, catalog: true),
+                      ),
                       child: Text('Retry'),
                     ),
                   ],
@@ -77,7 +76,10 @@ class _CourseCatalogViewState extends State<CourseCatalogView> {
                   children: [
                     Icon(Icons.school_outlined, size: 64, color: Colors.grey),
                     SizedBox(height: 16),
-                    Text(CoursesLocalizations.of(context)!.courses_noCoursesAvailableYet,
+                    Text(
+                      CoursesLocalizations.of(
+                        context,
+                      )!.courses_noCoursesAvailableYet,
                       style: TextStyle(fontSize: 18, color: Colors.grey),
                     ),
                   ],
@@ -92,19 +94,18 @@ class _CourseCatalogViewState extends State<CourseCatalogView> {
 
             return RefreshIndicator(
               onRefresh: () async {
-                context
-                    .read<CourseBloc>()
-                    .add(CourseFetch(refresh: true, catalog: true));
-                context
-                    .read<CourseViewerBloc>()
-                    .add(FetchAvailableCourses());
+                context.read<CourseBloc>().add(
+                  CourseFetch(refresh: true, catalog: true),
+                );
+                context.read<CourseViewerBloc>().add(FetchAvailableCourses());
               },
               child: ListView.builder(
                 padding: EdgeInsets.all(8),
                 itemCount: courseState.courses.length,
                 itemBuilder: (context, index) {
                   final course = courseState.courses[index];
-                  final isSubscribed = course.courseId != null &&
+                  final isSubscribed =
+                      course.courseId != null &&
                       subscribedIds.contains(course.courseId);
                   return _CourseCatalogTile(
                     key: Key('catalogItem$index'),
@@ -179,10 +180,9 @@ class _CourseCatalogTile extends StatelessWidget {
                 width: 72,
                 height: 72,
                 decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primaryContainer
-                      .withValues(alpha: 0.4),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: course.coverImageUrl != null
@@ -213,13 +213,13 @@ class _CourseCatalogTile extends StatelessWidget {
                         if (isSubscribed)
                           Chip(
                             label: Text('Subscribed'),
-                            backgroundColor: Theme.of(context)
-                                .colorScheme
-                                .primaryContainer,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer,
                             labelStyle: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onPrimaryContainer,
                               fontSize: 12,
                             ),
                             padding: EdgeInsets.zero,
@@ -234,10 +234,9 @@ class _CourseCatalogTile extends StatelessWidget {
                         course.description!,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(color: Colors.grey),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                       ),
                     ],
                     SizedBox(height: 6),
@@ -247,35 +246,39 @@ class _CourseCatalogTile extends StatelessWidget {
                           _DifficultyBadge(difficulty: course.difficulty!),
                         if (course.estimatedDuration != null) ...[
                           SizedBox(width: 8),
-                          Icon(Icons.schedule,
-                              size: 14, color: Colors.grey[600]),
+                          Icon(
+                            Icons.schedule,
+                            size: 14,
+                            color: Colors.grey[600],
+                          ),
                           SizedBox(width: 2),
-                          Text(CoursesLocalizations.of(context)!.courses_courseestimateddurationMin(course.estimatedDuration.toString()),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(color: Colors.grey),
+                          Text(
+                            CoursesLocalizations.of(
+                              context,
+                            )!.courses_courseestimateddurationMin(
+                              course.estimatedDuration.toString(),
+                            ),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                           ),
                         ],
                         Spacer(),
                         if (isSubscribed)
                           TextButton.icon(
                             onPressed: onOpen,
-                            icon: Icon(Icons.play_circle_outline,
-                                size: 16),
+                            icon: Icon(Icons.play_circle_outline, size: 16),
                             label: Text('Open'),
                           )
                         else ...[
                           Text(
-                            course.price != null &&
-                                    course.price!.toDouble() > 0
+                            course.price != null && course.price!.toDouble() > 0
                                 ? '\$${course.price!.toStringAsFixed(2)}'
                                 : 'Free',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
+                            style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
-                                  color: course.price != null &&
+                                  color:
+                                      course.price != null &&
                                           course.price!.toDouble() > 0
                                       ? Theme.of(context).colorScheme.primary
                                       : Colors.green,
@@ -300,8 +303,6 @@ class _CourseCatalogTile extends StatelessWidget {
       ),
     );
   }
-
-
 }
 
 class _DifficultyBadge extends StatelessWidget {
@@ -333,7 +334,10 @@ class _DifficultyBadge extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-            fontSize: 11, color: color, fontWeight: FontWeight.w600),
+          fontSize: 11,
+          color: color,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

@@ -72,7 +72,10 @@ class _MediaPreviewState extends State<MediaPreview> {
             onPressed: () => setState(() => _isEditing = !_isEditing),
           ),
           IconButton(
-            icon: Icon(Icons.copy, color: Theme.of(context).colorScheme.onSurface),
+            icon: Icon(
+              Icons.copy,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
             tooltip: 'Copy to clipboard',
             onPressed: _copyToClipboard,
           ),
@@ -97,10 +100,9 @@ class _MediaPreviewState extends State<MediaPreview> {
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(16),
-      color: Theme.of(context)
-          .colorScheme
-          .surfaceContainerHighest
-          .withValues(alpha: 0.3),
+      color: Theme.of(
+        context,
+      ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
       child: Row(
         children: [
           _buildPlatformChip(),
@@ -108,7 +110,12 @@ class _MediaPreviewState extends State<MediaPreview> {
           _buildStatusChip(),
           const Spacer(),
           if (widget.media.createdDate != null)
-            Text(CoursesLocalizations.of(context)!.courses_generatedFormatdatewidgetmediacreateddate(_formatDate(widget.media.createdDate!).toString()),
+            Text(
+              CoursesLocalizations.of(
+                context,
+              )!.courses_generatedFormatdatewidgetmediacreateddate(
+                _formatDate(widget.media.createdDate!).toString(),
+              ),
               style: Theme.of(context).textTheme.bodySmall,
             ),
         ],
@@ -158,7 +165,11 @@ class _MediaPreviewState extends State<MediaPreview> {
     final content = _contentController.text;
 
     if (content.isEmpty) {
-      return Center(child: Text(CoursesLocalizations.of(context)!.courses_noContentAvailable));
+      return Center(
+        child: Text(
+          CoursesLocalizations.of(context)!.courses_noContentAvailable,
+        ),
+      );
     }
 
     return SingleChildScrollView(
@@ -185,7 +196,7 @@ class _MediaPreviewState extends State<MediaPreview> {
 
   Widget _buildActionButtons() {
     final isYouTube = widget.media.platform == MediaPlatform.youtube;
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -206,7 +217,11 @@ class _MediaPreviewState extends State<MediaPreview> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline, color: Colors.blue, size: 20),
+                    const Icon(
+                      Icons.info_outline,
+                      color: Colors.blue,
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -243,7 +258,9 @@ class _MediaPreviewState extends State<MediaPreview> {
                               ),
                             )
                           : const Icon(Icons.videocam),
-                      label: Text(_isGeneratingVideo ? 'Generating...' : 'Generate Video'),
+                      label: Text(
+                        _isGeneratingVideo ? 'Generating...' : 'Generate Video',
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         foregroundColor: Colors.white,
@@ -277,7 +294,9 @@ class _MediaPreviewState extends State<MediaPreview> {
     if (widget.media.mediaId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(CoursesLocalizations.of(context)!.courses_cannotGenerateVideoMedia),
+          content: Text(
+            CoursesLocalizations.of(context)!.courses_cannotGenerateVideoMedia,
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -317,14 +336,22 @@ class _MediaPreviewState extends State<MediaPreview> {
       if (status == 'success' && videoUrl != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(CoursesLocalizations.of(context)!.courses_videoGeneratedSuccessfully),
+            content: Text(
+              CoursesLocalizations.of(
+                context,
+              )!.courses_videoGeneratedSuccessfully,
+            ),
             backgroundColor: Colors.green,
           ),
         );
       } else if (status == 'pending') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(CoursesLocalizations.of(context)!.courses_videoGenerationStartedYou),
+            content: Text(
+              CoursesLocalizations.of(
+                context,
+              )!.courses_videoGenerationStartedYou,
+            ),
             backgroundColor: Colors.blue,
           ),
         );
@@ -339,7 +366,11 @@ class _MediaPreviewState extends State<MediaPreview> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(CoursesLocalizations.of(context)!.courses_failedToGenerateVideo(e.toString().toString())),
+          content: Text(
+            CoursesLocalizations.of(
+              context,
+            )!.courses_failedToGenerateVideo(e.toString().toString()),
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -350,7 +381,9 @@ class _MediaPreviewState extends State<MediaPreview> {
     Clipboard.setData(ClipboardData(text: _contentController.text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(CoursesLocalizations.of(context)!.courses_contentCopiedToClipboard),
+        content: Text(
+          CoursesLocalizations.of(context)!.courses_contentCopiedToClipboard,
+        ),
         duration: Duration(seconds: 2),
       ),
     );

@@ -162,6 +162,7 @@
         <field name="progressPercent" type="number-integer" />
         <field name="statusMessage" type="text-long" />
         <field name="errorMessage" type="text-very-long" />
+        <field name="errorCode" type="text-short" /> <!-- AI_ALLOWANCE: token allowance used up -->
         <field name="inputJson" type="text-very-long" />
         <field name="username" type="text-medium" />
         <field name="createdDate" type="date-time" />

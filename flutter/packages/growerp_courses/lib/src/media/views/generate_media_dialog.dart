@@ -60,7 +60,9 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
           return Dialog(
             clipBehavior: Clip.antiAlias,
             insetPadding: const EdgeInsets.all(16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
             child: popUp(
               context: context,
               title: 'Generate AI Content',
@@ -72,7 +74,8 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
                   body: state.status == MediaBlocStatus.generating
                       ? _buildGeneratingState()
                       : _buildForm(context, state),
-                  bottomNavigationBar: state.status == MediaBlocStatus.generating
+                  bottomNavigationBar:
+                      state.status == MediaBlocStatus.generating
                       ? null
                       : _buildActionButtons(context),
                 ),
@@ -91,11 +94,13 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
         children: [
           const CircularProgressIndicator(),
           const SizedBox(height: 24),
-          Text(CoursesLocalizations.of(context)!.courses_generatingContent,
+          Text(
+            CoursesLocalizations.of(context)!.courses_generatingContent,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
-          Text(CoursesLocalizations.of(context)!.courses_thisMayTakeA,
+          Text(
+            CoursesLocalizations.of(context)!.courses_thisMayTakeA,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
@@ -151,7 +156,10 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(CoursesLocalizations.of(context)!.courses_selectPlatforms, style: Theme.of(context).textTheme.titleSmall),
+        Text(
+          CoursesLocalizations.of(context)!.courses_selectPlatforms,
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -184,7 +192,8 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(CoursesLocalizations.of(context)!.courses_contentScopeOptional,
+        Text(
+          CoursesLocalizations.of(context)!.courses_contentScopeOptional,
           style: Theme.of(context).textTheme.titleSmall,
         ),
         const SizedBox(height: 8),
@@ -198,7 +207,9 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
           items: [
             DropdownMenuItem<CourseModule?>(
               value: null,
-              child: Text(CoursesLocalizations.of(context)!.courses_entireCourse),
+              child: Text(
+                CoursesLocalizations.of(context)!.courses_entireCourse,
+              ),
             ),
             ...modules.map(
               (module) =>
@@ -224,7 +235,9 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
             items: [
               DropdownMenuItem<CourseLesson?>(
                 value: null,
-                child: Text(CoursesLocalizations.of(context)!.courses_entireModule),
+                child: Text(
+                  CoursesLocalizations.of(context)!.courses_entireModule,
+                ),
               ),
               ...(_selectedModule!.lessons ?? []).map(
                 (lesson) =>
@@ -267,13 +280,13 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
   void _generate() {
     for (final platform in _selectedPlatforms) {
       context.read<CourseMediaBloc>().add(
-            MediaGenerate(
-              courseId: widget.course.courseId!,
-              platform: platform,
-              moduleId: _selectedModule?.moduleId,
-              lessonId: _selectedLesson?.lessonId,
-            ),
-          );
+        MediaGenerate(
+          courseId: widget.course.courseId!,
+          platform: platform,
+          moduleId: _selectedModule?.moduleId,
+          lessonId: _selectedLesson?.lessonId,
+        ),
+      );
     }
   }
 

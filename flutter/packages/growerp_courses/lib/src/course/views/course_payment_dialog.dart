@@ -95,17 +95,18 @@ class _CoursePaymentDialogState extends State<CoursePaymentDialog> {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Text(CoursesLocalizations.of(context)!.courses_price,
+                    Text(
+                      CoursesLocalizations.of(context)!.courses_price,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     Text(
                       priceLabel,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: _isFree
-                                ? Colors.green
-                                : Theme.of(context).colorScheme.primary,
-                          ),
+                        fontWeight: FontWeight.bold,
+                        color: _isFree
+                            ? Colors.green
+                            : Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ],
                 ),
@@ -113,7 +114,10 @@ class _CoursePaymentDialogState extends State<CoursePaymentDialog> {
 
                 // Credit card form — only for paid courses
                 if (!_isFree) ...[
-                  Text(CoursesLocalizations.of(context)!.courses_paymentInformation,
+                  Text(
+                    CoursesLocalizations.of(
+                      context,
+                    )!.courses_paymentInformation,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 16),
@@ -121,8 +125,7 @@ class _CoursePaymentDialogState extends State<CoursePaymentDialog> {
                     key: _formKey,
                     initialValue: {
                       'nameOnCard': _isTest ? 'Test Customer' : '',
-                      'cardNumber':
-                          _isTest ? '4242424242424242' : '',
+                      'cardNumber': _isTest ? '4242424242424242' : '',
                       'expireMonth': _isTest ? '11' : '',
                       'expireYear': _isTest ? '33' : '',
                       'cvc': _isTest ? '123' : '',
@@ -231,11 +234,12 @@ class _CoursePaymentDialogState extends State<CoursePaymentDialog> {
                                 width: 20,
                                 height: 20,
                                 child: CircularProgressIndicator(
-                                    strokeWidth: 2),
+                                  strokeWidth: 2,
+                                ),
                               )
-                            : Text(_isFree
-                                ? 'Subscribe for Free'
-                                : 'Subscribe'),
+                            : Text(
+                                _isFree ? 'Subscribe for Free' : 'Subscribe',
+                              ),
                       ),
                     ),
                   ],
@@ -254,18 +258,19 @@ class _CoursePaymentDialogState extends State<CoursePaymentDialog> {
     }
     setState(() => _isSubmitting = true);
 
-    final formData = _isFree ? <String, dynamic>{} : _formKey.currentState!.value;
+    final formData = _isFree
+        ? <String, dynamic>{}
+        : _formKey.currentState!.value;
 
     context.read<CourseBloc>().add(
-          CourseSubscribe(
-            courseId: widget.course.courseId!,
-            creditCardNumber:
-                _isFree ? null : formData['cardNumber'] as String?,
-            nameOnCard: _isFree ? null : formData['nameOnCard'] as String?,
-            expireMonth: _isFree ? null : formData['expireMonth'] as String?,
-            expireYear: _isFree ? null : formData['expireYear'] as String?,
-            cVC: _isFree ? null : formData['cvc'] as String?,
-          ),
-        );
+      CourseSubscribe(
+        courseId: widget.course.courseId!,
+        creditCardNumber: _isFree ? null : formData['cardNumber'] as String?,
+        nameOnCard: _isFree ? null : formData['nameOnCard'] as String?,
+        expireMonth: _isFree ? null : formData['expireMonth'] as String?,
+        expireYear: _isFree ? null : formData['expireYear'] as String?,
+        cVC: _isFree ? null : formData['cvc'] as String?,
+      ),
+    );
   }
 }

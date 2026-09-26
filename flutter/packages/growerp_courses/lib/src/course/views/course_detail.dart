@@ -24,8 +24,16 @@ class CourseDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(CoursesLocalizations.of(context)!.courses_courseDetail)),
-      body: Center(child: Text(CoursesLocalizations.of(context)!.courses_courseDetailCourseid(courseId.toString()))),
+      appBar: AppBar(
+        title: Text(CoursesLocalizations.of(context)!.courses_courseDetail),
+      ),
+      body: Center(
+        child: Text(
+          CoursesLocalizations.of(
+            context,
+          )!.courses_courseDetailCourseid(courseId.toString()),
+        ),
+      ),
     );
   }
 }

@@ -150,7 +150,11 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
         }
 
         if (state.course == null) {
-          return Center(child: Text(CoursesLocalizations.of(context)!.courses_courseNotFound));
+          return Center(
+            child: Text(
+              CoursesLocalizations.of(context)!.courses_courseNotFound,
+            ),
+          );
         }
 
         return _buildViewer(context, state);
@@ -162,7 +166,10 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
     final courses = state.availableCourses;
 
     return Scaffold(
-      appBar: AppBar(title: Text(CoursesLocalizations.of(context)!.courses_selectACourse), centerTitle: true),
+      appBar: AppBar(
+        title: Text(CoursesLocalizations.of(context)!.courses_selectACourse),
+        centerTitle: true,
+      ),
       body: courses.isEmpty
           ? Center(
               child: Column(
@@ -174,11 +181,17 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
                     color: Colors.grey[400],
                   ),
                   const SizedBox(height: 16),
-                  Text(CoursesLocalizations.of(context)!.courses_noCoursesAvailable,
+                  Text(
+                    CoursesLocalizations.of(
+                      context,
+                    )!.courses_noCoursesAvailable,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
-                  Text(CoursesLocalizations.of(context)!.courses_createACourseFirst,
+                  Text(
+                    CoursesLocalizations.of(
+                      context,
+                    )!.courses_createACourseFirst,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -189,7 +202,8 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(CoursesLocalizations.of(context)!.courses_chooseACourseTo,
+                  Text(
+                    CoursesLocalizations.of(context)!.courses_chooseACourseTo,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 16),
@@ -291,7 +305,10 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Text(CoursesLocalizations.of(context)!.courses_progress(progress.toString()),
+                  Text(
+                    CoursesLocalizations.of(
+                      context,
+                    )!.courses_progress(progress.toString()),
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -307,7 +324,10 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
                     color: Theme.of(context).colorScheme.secondary,
                   ),
                   const SizedBox(width: 4),
-                  Text(CoursesLocalizations.of(context)!.courses_modulecountModules(moduleCount.toString()),
+                  Text(
+                    CoursesLocalizations.of(
+                      context,
+                    )!.courses_modulecountModules(moduleCount.toString()),
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
                   const SizedBox(width: 12),
@@ -317,7 +337,10 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
                     color: Theme.of(context).colorScheme.secondary,
                   ),
                   const SizedBox(width: 4),
-                  Text(CoursesLocalizations.of(context)!.courses_lessoncountLessons(lessonCount.toString()),
+                  Text(
+                    CoursesLocalizations.of(
+                      context,
+                    )!.courses_lessoncountLessons(lessonCount.toString()),
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
                 ],
@@ -454,7 +477,13 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
                       ),
                       title: Text(lesson.title),
                       subtitle: lesson.estimatedDuration != null
-                          ? Text(CoursesLocalizations.of(context)!.courses_lessonestimateddurationMin(lesson.estimatedDuration.toString()))
+                          ? Text(
+                              CoursesLocalizations.of(
+                                context,
+                              )!.courses_lessonestimateddurationMin(
+                                lesson.estimatedDuration.toString(),
+                              ),
+                            )
                           : null,
                       onTap: () {
                         context.read<CourseViewerBloc>().add(
@@ -484,7 +513,10 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Progress', style: Theme.of(context).textTheme.titleSmall),
-              Text(CoursesLocalizations.of(context)!.courses_progress(progress.toString()),
+              Text(
+                CoursesLocalizations.of(
+                  context,
+                )!.courses_progress(progress.toString()),
                 style: Theme.of(
                   context,
                 ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
@@ -511,7 +543,8 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
           children: [
             Icon(Icons.play_circle_outline, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
-            Text(CoursesLocalizations.of(context)!.courses_selectALessonTo,
+            Text(
+              CoursesLocalizations.of(context)!.courses_selectALessonTo,
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ],
@@ -531,14 +564,22 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
               children: [
                 const Icon(Icons.access_time, size: 16),
                 const SizedBox(width: 4),
-                Text(CoursesLocalizations.of(context)!.courses_lessonestimateddurationMinutes(lesson.estimatedDuration.toString())),
+                Text(
+                  CoursesLocalizations.of(
+                    context,
+                  )!.courses_lessonestimateddurationMinutes(
+                    lesson.estimatedDuration.toString(),
+                  ),
+                ),
               ],
             ),
           const SizedBox(height: 24),
           if (lesson.content != null && lesson.content!.isNotEmpty)
             MarkdownBody(data: lesson.content!, selectable: true)
           else
-            Text(CoursesLocalizations.of(context)!.courses_noContentAvailableFor),
+            Text(
+              CoursesLocalizations.of(context)!.courses_noContentAvailableFor,
+            ),
           const SizedBox(height: 32),
           _buildLessonActions(context, state, lesson),
         ],
@@ -650,7 +691,8 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
               children: [
                 const Icon(Icons.video_library, size: 20),
                 const SizedBox(width: 8),
-                Text(CoursesLocalizations.of(context)!.courses_generatedMedia,
+                Text(
+                  CoursesLocalizations.of(context)!.courses_generatedMedia,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 const Spacer(),
@@ -685,7 +727,8 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
           children: [
             Icon(Icons.video_library, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
-            Text(CoursesLocalizations.of(context)!.courses_noMediaAvailable,
+            Text(
+              CoursesLocalizations.of(context)!.courses_noMediaAvailable,
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ],

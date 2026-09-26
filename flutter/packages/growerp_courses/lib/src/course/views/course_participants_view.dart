@@ -53,9 +53,9 @@ class _CourseParticipantsViewState extends State<CourseParticipantsView> {
                 const SizedBox(height: 8),
                 Text(state.message ?? 'Failed to load participants'),
                 TextButton(
-                  onPressed: () => context
-                      .read<CourseBloc>()
-                      .add(CourseParticipantsFetch(widget.courseId)),
+                  onPressed: () => context.read<CourseBloc>().add(
+                    CourseParticipantsFetch(widget.courseId),
+                  ),
                   child: const Text('Retry'),
                 ),
               ],
@@ -72,20 +72,24 @@ class _CourseParticipantsViewState extends State<CourseParticipantsView> {
               children: [
                 const Icon(Icons.group_outlined, size: 64, color: Colors.grey),
                 const SizedBox(height: 16),
-                Text(CoursesLocalizations.of(context)!.courses_noParticipantsYet,
+                Text(
+                  CoursesLocalizations.of(context)!.courses_noParticipantsYet,
                   style: TextStyle(fontSize: 18, color: Colors.grey),
                 ),
                 const SizedBox(height: 8),
-                Text(CoursesLocalizations.of(context)!.courses_assignSubscriptionsToStudents,
+                Text(
+                  CoursesLocalizations.of(
+                    context,
+                  )!.courses_assignSubscriptionsToStudents,
                   style: TextStyle(color: Colors.grey),
                 ),
                 const SizedBox(height: 16),
                 TextButton.icon(
                   icon: const Icon(Icons.refresh),
                   label: const Text('Refresh'),
-                  onPressed: () => context
-                      .read<CourseBloc>()
-                      .add(CourseParticipantsFetch(widget.courseId)),
+                  onPressed: () => context.read<CourseBloc>().add(
+                    CourseParticipantsFetch(widget.courseId),
+                  ),
                 ),
               ],
             ),
@@ -94,9 +98,9 @@ class _CourseParticipantsViewState extends State<CourseParticipantsView> {
 
         return RefreshIndicator(
           onRefresh: () async {
-            context
-                .read<CourseBloc>()
-                .add(CourseParticipantsFetch(widget.courseId));
+            context.read<CourseBloc>().add(
+              CourseParticipantsFetch(widget.courseId),
+            );
           },
           child: ListView.builder(
             padding: const EdgeInsets.all(8),
@@ -134,26 +138,20 @@ class _ParticipantTile extends StatelessWidget {
             Row(
               children: [
                 CircleAvatar(
-                  child: Text(
-                    name.isNotEmpty ? name[0].toUpperCase() : '?',
-                  ),
+                  child: Text(name.isNotEmpty ? name[0].toUpperCase() : '?'),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        name,
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
+                      Text(name, style: Theme.of(context).textTheme.titleSmall),
                       if (participant.username != null)
                         Text(
                           participant.username!,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(color: Colors.grey),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                         ),
                     ],
                   ),
@@ -171,16 +169,24 @@ class _ParticipantTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text(CoursesLocalizations.of(context)!.courses_progress(progress.toString())),
+                Text(
+                  CoursesLocalizations.of(
+                    context,
+                  )!.courses_progress(progress.toString()),
+                ),
               ],
             ),
             if (participant.lastAccessDate != null) ...[
               const SizedBox(height: 4),
-              Text(CoursesLocalizations.of(context)!.courses_lastActiveFormatdateparticipantlastaccessdate(_formatDate(participant.lastAccessDate!).toString()),
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: Colors.grey),
+              Text(
+                CoursesLocalizations.of(
+                  context,
+                )!.courses_lastActiveFormatdateparticipantlastaccessdate(
+                  _formatDate(participant.lastAccessDate!).toString(),
+                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey),
               ),
             ],
           ],

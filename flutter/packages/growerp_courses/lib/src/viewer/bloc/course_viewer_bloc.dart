@@ -24,7 +24,7 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
   final RestClient restClient;
 
   CourseViewerBloc({required this.restClient})
-      : super(const CourseViewerState()) {
+    : super(const CourseViewerState()) {
     on<LoadCourse>(_onLoadCourse);
     on<SelectLesson>(_onSelectLesson);
     on<MarkLessonComplete>(_onMarkLessonComplete);
@@ -96,7 +96,8 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
           }
         }
         // All lessons completed (or no progress yet) – open the first lesson
-        firstLesson ??= course.modules!.isNotEmpty &&
+        firstLesson ??=
+            course.modules!.isNotEmpty &&
                 (course.modules!.first.lessons?.isNotEmpty ?? false)
             ? course.modules!.first.lessons!.first
             : null;
@@ -215,15 +216,19 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
       // Fetch only courses the current user has active subscriptions for
       final response = await restClient.getMyCourseSubscriptions();
 
-      emit(state.copyWith(
-        status: ViewerStatus.selectingCourse,
-        availableCourses: response.courses,
-      ));
+      emit(
+        state.copyWith(
+          status: ViewerStatus.selectingCourse,
+          availableCourses: response.courses,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: ViewerStatus.failure,
-        message: 'Failed to load courses: ${e.toString()}',
-      ));
+      emit(
+        state.copyWith(
+          status: ViewerStatus.failure,
+          message: 'Failed to load courses: ${e.toString()}',
+        ),
+      );
     }
   }
 

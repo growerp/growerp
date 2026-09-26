@@ -235,7 +235,9 @@ If you want to learn more, check out the GrowERP training course.
     if (_helpContent == null) {
       return Padding(
         padding: EdgeInsets.all(16),
-        child: Text(CoursesLocalizations.of(context)!.courses_noHelpContentAvailable),
+        child: Text(
+          CoursesLocalizations.of(context)!.courses_noHelpContentAvailable,
+        ),
       );
     }
 
@@ -256,7 +258,9 @@ If you want to learn more, check out the GrowERP training course.
         children: [
           TextButton.icon(
             icon: const Icon(Icons.school),
-            label: Text(CoursesLocalizations.of(context)!.courses_viewFullCourse),
+            label: Text(
+              CoursesLocalizations.of(context)!.courses_viewFullCourse,
+            ),
             onPressed: () {
               Navigator.pop(context);
               // TODO: Navigate to full course viewer

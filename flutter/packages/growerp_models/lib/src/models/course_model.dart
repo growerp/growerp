@@ -607,6 +607,9 @@ class CourseAiJob {
   final int? progressPercent;
   final String? statusMessage;
   final String? errorMessage;
+
+  /// AI_ALLOWANCE: no (free) AI tokens left, the company needs its own key
+  final String? errorCode;
   @NullableTimestampConverter()
   final DateTime? createdDate;
   @NullableTimestampConverter()
@@ -620,9 +623,12 @@ class CourseAiJob {
     this.progressPercent,
     this.statusMessage,
     this.errorMessage,
+    this.errorCode,
     this.createdDate,
     this.completedDate,
   });
+
+  bool get needsAiKey => errorCode == 'AI_ALLOWANCE';
 
   bool get isRunning => status == 'QUEUED' || status == 'RUNNING';
 

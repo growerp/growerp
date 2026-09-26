@@ -63,6 +63,13 @@ class CourseAiUtil {
         return (title ? "# ${title}\n\n" : '') + doc.body()?.text()
     }
 
+    /** GeminiAiUtil errors the tenant fixes by entering (or raising the cap of) its own API key. */
+    static boolean isAllowanceError(Throwable t) {
+        String message = t?.message ?: ''
+        return message.contains('AI allowance used') || message.contains('AI token limit reached') ||
+            message.contains('No API key configured')
+    }
+
     static boolean testMode() {
         return 'true'.equals(System.getenv('GROWERP_TEST_MODE'))
     }

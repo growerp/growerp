@@ -42,7 +42,7 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
     MediaPlatform.linkedin: [
       MediaType.post,
       MediaType.article,
-      MediaType.sequence
+      MediaType.sequence,
     ],
     MediaPlatform.medium: [MediaType.article, MediaType.tutorial],
     MediaPlatform.email: [MediaType.sequence],
@@ -79,7 +79,9 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
           ),
           child: Scaffold(
             appBar: AppBar(
-              title: Text(CoursesLocalizations.of(context)!.courses_generateMediaContent),
+              title: Text(
+                CoursesLocalizations.of(context)!.courses_generateMediaContent,
+              ),
               automaticallyImplyLeading: false,
               actions: [
                 IconButton(
@@ -124,14 +126,12 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Theme.of(context)
-                .colorScheme
-                .primaryContainer
-                .withValues(alpha: 0.5),
-            Theme.of(context)
-                .colorScheme
-                .secondaryContainer
-                .withValues(alpha: 0.3),
+            Theme.of(
+              context,
+            ).colorScheme.primaryContainer.withValues(alpha: 0.5),
+            Theme.of(
+              context,
+            ).colorScheme.secondaryContainer.withValues(alpha: 0.3),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -146,8 +146,9 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color:
-                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -164,8 +165,8 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
                 Text(
                   widget.course.title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 if (widget.course.description != null) ...[
                   const SizedBox(height: 4),
@@ -204,10 +205,7 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
       children: [
         Icon(icon, size: 14, color: Theme.of(context).colorScheme.secondary),
         const SizedBox(width: 4),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.labelSmall,
-        ),
+        Text(label, style: Theme.of(context).textTheme.labelSmall),
       ],
     );
   }
@@ -218,16 +216,18 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(CoursesLocalizations.of(context)!.courses_contentScope,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+        Text(
+          CoursesLocalizations.of(context)!.courses_contentScope,
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        Text(CoursesLocalizations.of(context)!.courses_selectWhatContentTo,
+        Text(
+          CoursesLocalizations.of(context)!.courses_selectWhatContentTo,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 12),
         DropdownButtonFormField<String?>(
@@ -242,12 +242,15 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
           items: [
             DropdownMenuItem<String?>(
               value: null,
-              child: Text(CoursesLocalizations.of(context)!.courses_allModulesEntireCourse),
+              child: Text(
+                CoursesLocalizations.of(
+                  context,
+                )!.courses_allModulesEntireCourse,
+              ),
             ),
-            ...modules.map((m) => DropdownMenuItem(
-                  value: m.moduleId,
-                  child: Text(m.title),
-                )),
+            ...modules.map(
+              (m) => DropdownMenuItem(value: m.moduleId, child: Text(m.title)),
+            ),
           ],
           onChanged: (value) {
             setState(() {
@@ -283,12 +286,13 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
       items: [
         DropdownMenuItem<String?>(
           value: null,
-          child: Text(CoursesLocalizations.of(context)!.courses_allLessonsInModule),
+          child: Text(
+            CoursesLocalizations.of(context)!.courses_allLessonsInModule,
+          ),
         ),
-        ...lessons.map((l) => DropdownMenuItem(
-              value: l.lessonId,
-              child: Text(l.title),
-            )),
+        ...lessons.map(
+          (l) => DropdownMenuItem(value: l.lessonId, child: Text(l.title)),
+        ),
       ],
       onChanged: (value) => setState(() => _selectedLessonId = value),
     );
@@ -298,16 +302,18 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(CoursesLocalizations.of(context)!.courses_targetPlatform,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+        Text(
+          CoursesLocalizations.of(context)!.courses_targetPlatform,
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        Text(CoursesLocalizations.of(context)!.courses_chooseWhereYouWant,
+        Text(
+          CoursesLocalizations.of(context)!.courses_chooseWhereYouWant,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 12),
         Wrap(
@@ -334,8 +340,9 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
               ),
               selectedColor: Theme.of(context).colorScheme.primary,
               checkmarkColor: Theme.of(context).colorScheme.onPrimary,
-              backgroundColor:
-                  Theme.of(context).colorScheme.surfaceContainerHighest,
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest,
               onSelected: (selected) {
                 setState(() {
                   _selectedPlatform = selected ? platform : null;
@@ -355,16 +362,20 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(CoursesLocalizations.of(context)!.courses_contentType,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+        Text(
+          CoursesLocalizations.of(context)!.courses_contentType,
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        Text(CoursesLocalizations.of(context)!.courses_selectTheTypeOf(_getPlatformLabel(_selectedPlatform!).toString()),
+        Text(
+          CoursesLocalizations.of(context)!.courses_selectTheTypeOf(
+            _getPlatformLabel(_selectedPlatform!).toString(),
+          ),
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 12),
         Wrap(
@@ -419,10 +430,9 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context)
-            .colorScheme
-            .primaryContainer
-            .withValues(alpha: 0.3),
+        color: Theme.of(
+          context,
+        ).colorScheme.primaryContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
@@ -438,11 +448,14 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
                 color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(width: 8),
-              Text(CoursesLocalizations.of(context)!.courses_contentGeneratedSuccessfully,
+              Text(
+                CoursesLocalizations.of(
+                  context,
+                )!.courses_contentGeneratedSuccessfully,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
             ],
           ),
@@ -460,8 +473,9 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color:
-            Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3),
+        color: Theme.of(
+          context,
+        ).colorScheme.errorContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Theme.of(context).colorScheme.error.withValues(alpha: 0.3),
@@ -469,17 +483,14 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.error_outline,
-            color: Theme.of(context).colorScheme.error,
-          ),
+          Icon(Icons.error_outline, color: Theme.of(context).colorScheme.error),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               _errorMessage!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
+                color: Theme.of(context).colorScheme.error,
+              ),
             ),
           ),
           IconButton(
@@ -497,9 +508,7 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: Theme.of(context).dividerColor),
-        ),
+        border: Border(top: BorderSide(color: Theme.of(context).dividerColor)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -537,14 +546,14 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
     });
 
     context.read<CourseBloc>().add(
-          CourseMediaGenerate(
-            courseId: widget.course.courseId!,
-            platform: _selectedPlatform!,
-            mediaType: _selectedMediaType!,
-            moduleId: _selectedModuleId,
-            lessonId: _selectedLessonId,
-          ),
-        );
+      CourseMediaGenerate(
+        courseId: widget.course.courseId!,
+        platform: _selectedPlatform!,
+        mediaType: _selectedMediaType!,
+        moduleId: _selectedModuleId,
+        lessonId: _selectedLessonId,
+      ),
+    );
   }
 
   IconData _getPlatformIcon(MediaPlatform platform) {

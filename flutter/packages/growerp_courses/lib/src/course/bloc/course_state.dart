@@ -57,14 +57,14 @@ class CourseState extends Equatable {
 
   @override
   List<Object?> get props => [
-        status,
-        courses,
-        selectedCourse,
-        participants,
-        allParticipants,
-        message,
-        hasReachedMax,
-      ];
+    status,
+    courses,
+    selectedCourse,
+    participants,
+    allParticipants,
+    message,
+    hasReachedMax,
+  ];
 
   @override
   String toString() =>

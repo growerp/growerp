@@ -23,7 +23,7 @@ class CourseMediaBloc extends Bloc<CourseMediaEvent, CourseMediaState> {
   final RestClient restClient;
 
   CourseMediaBloc({required this.restClient})
-      : super(const CourseMediaState()) {
+    : super(const CourseMediaState()) {
     on<MediaFetch>(_onMediaFetch);
     on<MediaGenerate>(_onMediaGenerate);
     on<MediaUpdate>(_onMediaUpdate);

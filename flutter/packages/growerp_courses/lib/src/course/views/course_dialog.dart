@@ -19,6 +19,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_bloc.dart';
 import '../../course_ai/bloc/course_ai_bloc.dart';
+import '../../course_ai/views/ai_key_needed_dialog.dart';
 import 'course_participants_view.dart';
 import '../../viewer/views/course_viewer.dart';
 import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
@@ -473,7 +474,14 @@ class _CourseDialogState extends State<CourseDialog> {
             Colors.green,
           );
         }
-        if (state.status == CourseAiStatus.failure) {
+        // lessons written before the tokens ran out are kept: show them
+        if (state.status == CourseAiStatus.failure &&
+            (state.job?.needsAiKey ?? false)) {
+          context.read<CourseBloc>().add(
+            CourseGetDetail(widget.course!.courseId!),
+          );
+          showAiKeyNeededDialog(context, state.message);
+        } else if (state.status == CourseAiStatus.failure) {
           HelperFunctions.showMessage(
             context,
             state.message ?? 'The AI job failed',

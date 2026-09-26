@@ -28,17 +28,16 @@ class AllCourseParticipantsView extends StatefulWidget {
       _AllCourseParticipantsViewState();
 }
 
-class _AllCourseParticipantsViewState
-    extends State<AllCourseParticipantsView> {
+class _AllCourseParticipantsViewState extends State<AllCourseParticipantsView> {
   final _searchController = TextEditingController();
   String _searchString = '';
 
   @override
   void initState() {
     super.initState();
-    context
-        .read<CourseBloc>()
-        .add(const CourseAllParticipantsFetch(refresh: true));
+    context.read<CourseBloc>().add(
+      const CourseAllParticipantsFetch(refresh: true),
+    );
   }
 
   @override
@@ -50,8 +49,8 @@ class _AllCourseParticipantsViewState
   void _onSearch(String value) {
     setState(() => _searchString = value);
     context.read<CourseBloc>().add(
-          CourseAllParticipantsFetch(searchString: value, refresh: true),
-        );
+      CourseAllParticipantsFetch(searchString: value, refresh: true),
+    );
   }
 
   @override
@@ -93,15 +92,20 @@ class _AllCourseParticipantsViewState
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.error_outline,
-                          color: Colors.red, size: 48),
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 48,
+                      ),
                       const SizedBox(height: 8),
                       Text(state.message ?? 'Failed to load participants'),
                       TextButton(
                         onPressed: () => context.read<CourseBloc>().add(
-                              CourseAllParticipantsFetch(
-                                  searchString: _searchString, refresh: true),
-                            ),
+                          CourseAllParticipantsFetch(
+                            searchString: _searchString,
+                            refresh: true,
+                          ),
+                        ),
                         child: const Text('Retry'),
                       ),
                     ],
@@ -116,15 +120,20 @@ class _AllCourseParticipantsViewState
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.group_outlined,
-                          size: 64, color: Colors.grey),
+                      const Icon(
+                        Icons.group_outlined,
+                        size: 64,
+                        color: Colors.grey,
+                      ),
                       const SizedBox(height: 16),
                       Text(
                         _searchString.isEmpty
                             ? 'No participants yet'
                             : 'No results for "$_searchString"',
                         style: const TextStyle(
-                            fontSize: 18, color: Colors.grey),
+                          fontSize: 18,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),
@@ -134,16 +143,17 @@ class _AllCourseParticipantsViewState
               return RefreshIndicator(
                 onRefresh: () async {
                   context.read<CourseBloc>().add(
-                        CourseAllParticipantsFetch(
-                            searchString: _searchString, refresh: true),
-                      );
+                    CourseAllParticipantsFetch(
+                      searchString: _searchString,
+                      refresh: true,
+                    ),
+                  );
                 },
                 child: ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   itemCount: participants.length,
                   itemBuilder: (context, index) {
-                    return _ParticipantTile(
-                        participant: participants[index]);
+                    return _ParticipantTile(participant: participants[index]);
                   },
                 ),
               );
@@ -184,27 +194,23 @@ class _ParticipantTile extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(name,
-                          style: Theme.of(context).textTheme.titleSmall),
+                      Text(name, style: Theme.of(context).textTheme.titleSmall),
                       if (participant.username != null &&
                           participant.username!.isNotEmpty)
                         Text(
                           participant.username!,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(color: Colors.grey),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                         ),
                       if (participant.courseTitle != null)
                         Text(
                           participant.courseTitle!,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
+                          style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
-                                  color:
-                                      Theme.of(context).colorScheme.primary,
-                                  fontStyle: FontStyle.italic),
+                                color: Theme.of(context).colorScheme.primary,
+                                fontStyle: FontStyle.italic,
+                              ),
                         ),
                     ],
                   ),
@@ -222,16 +228,24 @@ class _ParticipantTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text(CoursesLocalizations.of(context)!.courses_progress(progress.toString())),
+                Text(
+                  CoursesLocalizations.of(
+                    context,
+                  )!.courses_progress(progress.toString()),
+                ),
               ],
             ),
             if (participant.lastAccessDate != null) ...[
               const SizedBox(height: 4),
-              Text(CoursesLocalizations.of(context)!.courses_lastActiveFmtparticipantlastaccessdate(_fmt(participant.lastAccessDate!).toString()),
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: Colors.grey),
+              Text(
+                CoursesLocalizations.of(
+                  context,
+                )!.courses_lastActiveFmtparticipantlastaccessdate(
+                  _fmt(participant.lastAccessDate!).toString(),
+                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey),
               ),
             ],
           ],

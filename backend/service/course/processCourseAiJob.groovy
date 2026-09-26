@@ -256,6 +256,8 @@ Answer with JSON only: {"content": "the markdown lesson", "keyPoints": ["3 to 5 
                 [lessonId: lesson.lessonId, content: written.content,
                  keyPoints: JsonOutput.toJson(written.keyPoints ?: [])])
         } catch (Exception e) {
+            // no tokens left: the other lessons would fail the same way
+            if (CourseAiUtil.isAllowanceError(e)) throw e
             ec.logger.warn("Course AI could not write lesson ${lesson.lessonId} ${lesson.title}: ${e.message}")
             ec.message.clearErrors()
             failed.add(lesson.title)
@@ -282,5 +284,6 @@ try {
     ec.message.clearErrors()
     ec.service.sync().name(STATUS_SERVICE).parameters([jobId: jobId, status: 'ERROR',
         statusMessage: 'Failed', errorMessage: (t.message ?: t.toString()).take(4000),
+        errorCode: CourseAiUtil.isAllowanceError(t) ? 'AI_ALLOWANCE' : null,
         completedDate: ec.user.nowTimestamp]).call()
 }

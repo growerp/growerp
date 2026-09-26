@@ -49,7 +49,7 @@ Job types:
                 <econdition field-name="jobId" ignore-if-empty="true" />
                 <econdition field-name="courseId" ignore-if-empty="true" />
                 <select-field field-name="jobId,courseId,jobType,status,progressPercent" />
-                <select-field field-name="statusMessage,errorMessage,createdDate,completedDate" />
+                <select-field field-name="statusMessage,errorMessage,errorCode,createdDate,completedDate" />
                 <order-by field-name="-createdDate" />
             </entity-find>
             <set field="courseAiJobs" from="jobs*.getMap()" />
@@ -158,6 +158,7 @@ Job types:
             <parameter name="progressPercent" type="Integer" />
             <parameter name="statusMessage" allow-html="any" />
             <parameter name="errorMessage" allow-html="any" />
+            <parameter name="errorCode" />
             <parameter name="completedDate" type="Timestamp" />
         </in-parameters>
         <actions>
@@ -171,6 +172,7 @@ Job types:
             <set field="job.progressPercent" from="progressPercent" set-if-empty="false" />
             <set field="job.statusMessage" from="statusMessage" set-if-empty="false" />
             <set field="job.errorMessage" from="errorMessage" set-if-empty="false" />
+            <set field="job.errorCode" from="errorCode" set-if-empty="false" />
             <set field="job.completedDate" from="completedDate" set-if-empty="false" />
             <entity-update value-field="job" />
         </actions>

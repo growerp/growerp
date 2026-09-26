@@ -69,7 +69,13 @@ class LessonPlayer extends StatelessWidget {
             if (lesson.estimatedDuration != null) ...[
               const Icon(Icons.access_time, size: 16),
               const SizedBox(width: 4),
-              Text(CoursesLocalizations.of(context)!.courses_lessonestimateddurationMin(lesson.estimatedDuration.toString())),
+              Text(
+                CoursesLocalizations.of(
+                  context,
+                )!.courses_lessonestimateddurationMin(
+                  lesson.estimatedDuration.toString(),
+                ),
+              ),
               const SizedBox(width: 16),
             ],
             if (isCompleted) ...[
@@ -125,7 +131,10 @@ class LessonPlayer extends StatelessWidget {
                 // TODO: Implement video player or launch URL
               },
             ),
-            Text(CoursesLocalizations.of(context)!.courses_videoContent, style: TextStyle(color: Colors.white)),
+            Text(
+              CoursesLocalizations.of(context)!.courses_videoContent,
+              style: TextStyle(color: Colors.white),
+            ),
           ],
         ),
       ),
@@ -143,7 +152,8 @@ class LessonPlayer extends StatelessWidget {
               children: [
                 const Icon(Icons.lightbulb_outline, color: Colors.amber),
                 const SizedBox(width: 8),
-                Text(CoursesLocalizations.of(context)!.courses_keyPoints,
+                Text(
+                  CoursesLocalizations.of(context)!.courses_keyPoints,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ],
@@ -183,7 +193,9 @@ class LessonPlayer extends StatelessWidget {
         if (onMarkComplete != null && !isCompleted)
           ElevatedButton.icon(
             icon: const Icon(Icons.check_circle_outline),
-            label: Text(CoursesLocalizations.of(context)!.courses_markAsComplete),
+            label: Text(
+              CoursesLocalizations.of(context)!.courses_markAsComplete,
+            ),
             onPressed: onMarkComplete,
           ),
         if (isCompleted)

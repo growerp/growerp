@@ -60,6 +60,14 @@ class CourseViewerState extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [status, course, currentLesson, progress, message, availableCourses, mediaList, selectedMedia];
+  List<Object?> get props => [
+    status,
+    course,
+    currentLesson,
+    progress,
+    message,
+    availableCourses,
+    mediaList,
+    selectedMedia,
+  ];
 }

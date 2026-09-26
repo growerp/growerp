@@ -21,6 +21,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../bloc/course_ai_bloc.dart';
+import 'ai_key_needed_dialog.dart';
 
 /// Step 1 of creating a course with AI: title, audience, curriculum and
 /// source material. The AI then designs the outline (modules with lesson
@@ -74,7 +75,11 @@ class _AiCourseWizardViewState extends State<_AiCourseWizardView> {
         if (state.status == CourseAiStatus.success) {
           Navigator.of(context).pop(state.job?.courseId);
         }
-        if (state.status == CourseAiStatus.failure) {
+        if (state.status == CourseAiStatus.failure &&
+            (state.job?.needsAiKey ?? false)) {
+          // the form is still filled in: after saving a key just press again
+          showAiKeyNeededDialog(context, state.message);
+        } else if (state.status == CourseAiStatus.failure) {
           HelperFunctions.showMessage(
             context,
             state.message ?? 'The AI could not create the course',

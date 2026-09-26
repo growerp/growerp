@@ -40,10 +40,19 @@ class CourseProgressBar extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(CoursesLocalizations.of(context)!.courses_completedlessonsOfTotallessonsLessons(completedLessons.toString(), totalLessons.toString()),
+              Text(
+                CoursesLocalizations.of(
+                  context,
+                )!.courses_completedlessonsOfTotallessonsLessons(
+                  completedLessons.toString(),
+                  totalLessons.toString(),
+                ),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-              Text(CoursesLocalizations.of(context)!.courses_progresspercent(progressPercent.toString()),
+              Text(
+                CoursesLocalizations.of(
+                  context,
+                )!.courses_progresspercent(progressPercent.toString()),
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),

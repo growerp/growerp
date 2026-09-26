@@ -64,11 +64,16 @@ class CourseMediaListView extends StatelessWidget {
               children: [
                 Icon(Icons.auto_awesome, size: 64, color: Colors.grey[400]),
                 const SizedBox(height: 16),
-                Text(CoursesLocalizations.of(context)!.courses_noGeneratedContent,
+                Text(
+                  CoursesLocalizations.of(context)!.courses_noGeneratedContent,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
-                Text(CoursesLocalizations.of(context)!.courses_generateContentFromYour),
+                Text(
+                  CoursesLocalizations.of(
+                    context,
+                  )!.courses_generateContentFromYour,
+                ),
               ],
             ),
           );
