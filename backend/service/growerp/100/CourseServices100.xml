@@ -237,7 +237,7 @@ limitations under the License.
                             new groovy.json.JsonSlurper().parseText(module.slides) : null,
                         // relative: the app puts its backend url in front
                         videoUrl: hasAccess &amp;&amp; module.videoToken ?
-                            "/courseVideo/stream?t=${module.videoToken}".toString() : null,
+                            "/courseMedia/video?t=${module.videoToken}".toString() : null,
                         quizQuestionCount: questionList.size(),
                         // answers only for the authors: learners get the quiz from get#CourseQuiz
                         quizQuestions: access.isStaff ? questionList.collect { q -> [

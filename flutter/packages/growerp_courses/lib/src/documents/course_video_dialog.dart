@@ -18,6 +18,8 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 
+import 'backend_url.dart';
+
 /// Plays the narrated video of a module. video_player has no Linux or
 /// Windows implementation: there the video opens in the browser instead.
 Future<void> showCourseVideo(
@@ -25,10 +27,7 @@ Future<void> showCourseVideo(
   required String title,
   required String videoUrl,
 }) async {
-  // the backend returns the path; the app knows where its backend is
-  final dio = await buildDioClient();
-  final base = dio.options.baseUrl.replaceAll(RegExp(r'/$'), '');
-  final url = Uri.parse('$base$videoUrl');
+  final url = await backendUri(videoUrl);
   if (!context.mounted) return;
   await showDialog(
     context: context,

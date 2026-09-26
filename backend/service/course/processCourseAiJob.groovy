@@ -452,6 +452,104 @@ def runVideo = {
     return "${modules.size()} video${modules.size() == 1 ? '' : 's'} made"
 }
 
+// ---------------------------------------------------------------------------------------------
+// PROMO: cover image, landing page, email sequence and social posts for the course
+// ---------------------------------------------------------------------------------------------
+def runPromo = {
+    String courseId = job.courseId
+    def course = ec.entity.find("growerp.course.Course").condition("courseId", courseId).disableAuthz().one()
+    def modules = ec.entity.find("growerp.course.CourseModule").condition("courseId", courseId)
+        .orderBy("sequenceNum").disableAuthz().list()
+    List parts = input.parts ?: ['COVER', 'LANDING', 'EMAIL', 'SOCIAL']
+    List made = [], failed = []
+    // one part failing does not stop the others, except when the tokens ran out
+    def attempt = { String label, Closure work ->
+        try {
+            work()
+            made.add(label)
+        } catch (Exception e) {
+            if (CourseAiUtil.isAllowanceError(e)) throw e
+            ec.logger.warn("Course promo ${label} failed: ${e.message}")
+            ec.message.clearErrors()
+            failed.add(label)
+        }
+    }
+
+    if ('COVER' in parts) {
+        progress(5, 'Making the cover image')
+        attempt('cover image') {
+            byte[] image
+            if (CourseAiUtil.testMode()) {
+                def CourseVideoUtil = ec.resource.script("component://growerp/service/course/CourseVideoUtil.groovy", null)
+                File file = File.createTempFile("cover", ".png")
+                try {
+                    CourseVideoUtil.writeTitleSlide(file, 'Online course', course.title as String)
+                    image = file.bytes
+                } finally {
+                    file.delete()
+                }
+            } else {
+                def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
+                image = GeminiAiUtil.callGeminiImage(ec, """Create a wide 16:9 cover illustration for an
+online course. Course: ${course.title}. ${course.description ?: ''}
+Audience: ${course.audience ?: 'professionals'}.
+Style: modern, clean, friendly flat illustration with a clear focal subject and calm colors.
+Do not put any text, letters or logos in the image.""", [ownerPartyId: ownerPartyId, purpose: 'course cover'])
+            }
+            // a fixed location per course; the version in the url makes browsers load a new one
+            String location = "dbresource://C${course.ownerPartyId}/courses/${courseId}/cover.png"
+            ec.transaction.runRequireNew(120, "Could not save the cover image", {
+                ec.resource.getLocationReference(location).putBytes(image)
+            })
+            svc('growerp.100.CourseServices100.update#Course', [courseId: courseId,
+                coverImageUrl: "/courseMedia/cover?c=${courseId}&v=${System.currentTimeMillis()}".toString()])
+        }
+    }
+
+    if ('LANDING' in parts) {
+        progress(25, 'Writing the landing page')
+        attempt('landing page') {
+            if (CourseAiUtil.testMode()) {
+                svc('create#growerp.landing.LandingPage', [ownerPartyId: ownerPartyId,
+                    title: "${course.title}".toString(), headline: "Test landing page of ${course.title}".toString(),
+                    status: 'DRAFT', ctaActionType: 'url', ctaButtonLink: "/courses/${courseId}".toString(),
+                    createdDate: ec.user.nowTimestamp])
+            } else {
+                String description = "${course.title}: ${course.description ?: ''}".toString()
+                if (description.length() > 500) description = description.substring(0, 500)
+                if (description.length() < 20) description = "Online course: ${description}".toString()
+                svc('growerp.100.LandingPageServices100.generate#LandingPageWithAI',
+                    [businessDescription: description, targetAudience: course.audience,
+                     courseUrl: "/courses/${courseId}".toString(),
+                     courseDescription: "${course.title}\n${course.description ?: ''}\nObjectives:\n${course.objectives ?: ''}\nModules:\n" +
+                         modules.collect { "- ${it.title}: ${it.description ?: ''}" }.join('\n')])
+            }
+        }
+    }
+
+    // the course media generator writes one platform at a time, as DRAFT course media
+    Map platforms = [:]
+    if ('EMAIL' in parts) platforms.EMAIL = 'email sequence'
+    if ('SOCIAL' in parts) { platforms.LINKEDIN = 'LinkedIn post'; platforms.TWITTER = 'X post' }
+    platforms.eachWithIndex { platform, label, int index ->
+        progress((int) (45 + 50 * index / platforms.size()), "Writing the ${label}")
+        attempt(label) {
+            if (CourseAiUtil.testMode()) {
+                svc('create#growerp.course.CourseMedia', [ownerPartyId: ownerPartyId, courseId: courseId,
+                    platform: platform, mediaType: platform == 'EMAIL' ? 'SEQUENCE' : 'POST',
+                    title: "Test ${label} of ${course.title}".toString(),
+                    generatedContent: "Test ${label}.".toString(), status: 'DRAFT',
+                    createdDate: ec.user.nowTimestamp, lastModifiedDate: ec.user.nowTimestamp])
+            } else {
+                svc('growerp.100.CourseServices100.generate#CourseMedia', [courseId: courseId, platform: platform])
+            }
+        }
+    }
+
+    if (!made) throw new Exception("Nothing could be made: ${failed.join(', ')}")
+    return "Promo ready: ${made.join(', ')}" + (failed ? "; failed (try again): ${failed.join(', ')}" : '')
+}
+
 try {
     String doneMessage
     switch (job.jobType) {
@@ -460,6 +558,7 @@ try {
         case 'QUIZ': doneMessage = runQuiz(); break
         case 'SLIDES': doneMessage = runSlides(); break
         case 'VIDEO': doneMessage = runVideo(); break
+        case 'PROMO': doneMessage = runPromo(); break
         default: throw new Exception("Unknown AI job type ${job.jobType}")
     }
     ec.service.sync().name(STATUS_SERVICE).parameters([jobId: jobId, status: 'DONE',

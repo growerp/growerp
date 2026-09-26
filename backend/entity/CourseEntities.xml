@@ -54,7 +54,7 @@
         <!-- JSON array [{title, bullets: [], notes}]; notes are the spoken narration -->
         <field name="slides" type="text-very-long" />
         <!-- narrated video of the slides (AI job VIDEO): the mp4 in DbResource, streamed by
-             /courseVideo/stream?t=videoToken; a new video gets a new token -->
+             /courseMedia/video?t=videoToken; a new video gets a new token -->
         <field name="videoLocation" type="text-long" />
         <field name="videoToken" type="id-long" />
 
@@ -188,7 +188,7 @@
         <field name="jobId" type="id" is-pk="true" />
         <field name="ownerPartyId" type="id" />
         <field name="courseId" type="id" />
-        <field name="jobType" type="text-short" /> <!-- OUTLINE, LESSONS, QUIZ, SLIDES, VIDEO -->
+        <field name="jobType" type="text-short" /> <!-- OUTLINE, LESSONS, QUIZ, SLIDES, VIDEO, PROMO -->
         <field name="status" type="text-short" /> <!-- QUEUED, RUNNING, DONE, ERROR -->
         <field name="progressPercent" type="number-integer" />
         <field name="statusMessage" type="text-long" />

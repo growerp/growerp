@@ -12,6 +12,7 @@
  * limitations under the License.
  */
 
+import '../../documents/backend_url.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -188,11 +189,10 @@ class _CourseCatalogTile extends StatelessWidget {
                 child: course.coverImageUrl != null
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          course.coverImageUrl!,
+                        child: BackendImage(
+                          url: course.coverImageUrl!,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) =>
-                              Icon(Icons.school, size: 40),
+                          fallback: Icon(Icons.school, size: 40),
                         ),
                       )
                     : Icon(Icons.school, size: 40),

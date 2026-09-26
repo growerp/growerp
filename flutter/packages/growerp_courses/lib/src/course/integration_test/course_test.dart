@@ -254,6 +254,20 @@ class CourseTest {
     await tester.pumpAndSettle();
   }
 
+  /// Lets the AI make the promo pack; checks the cover shows in the dialog.
+  static Future<void> makePromoPack(WidgetTester tester) async {
+    await CommonTest.dragUntil(tester, key: 'aiPromo');
+    await CommonTest.tapByKey(tester, 'aiPromo');
+    await CommonTest.tapByKey(tester, 'aiPromoConfirm', settle: false);
+    await _pumpUntil(tester, find.textContaining('Promo ready'), seconds: 300);
+    expect(find.textContaining('failed'), findsNothing);
+    await CommonTest.waitForSnackbarToGo(tester);
+    expect(
+      find.byKey(const Key('courseCover'), skipOffstage: false),
+      findsOneWidget,
+    );
+  }
+
   /// Opens a pdf preview dialog with the button [buttonKey], checks it shows
   /// and closes it.
   static Future<void> openPdf(

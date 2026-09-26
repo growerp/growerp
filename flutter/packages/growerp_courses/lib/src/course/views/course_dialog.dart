@@ -24,6 +24,7 @@ import '../../course_ai/views/ai_key_needed_dialog.dart';
 import 'course_participants_view.dart';
 import 'quiz_editor_dialog.dart';
 import 'slides_editor_dialog.dart';
+import '../../documents/backend_url.dart';
 import '../../documents/course_pdfs.dart';
 import '../../documents/course_video_dialog.dart';
 import '../../viewer/views/course_viewer.dart';
@@ -154,6 +155,7 @@ class _CourseDialogState extends State<CourseDialog> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (isEdit) _buildCover(),
             _buildTitleField(),
             const SizedBox(height: 16),
             _buildDescriptionField(),
@@ -176,6 +178,30 @@ class _CourseDialogState extends State<CourseDialog> {
             const SizedBox(height: 24),
             if (isEdit) ...[_buildModulesSection(), const SizedBox(height: 16)],
           ],
+        ),
+      ),
+    );
+  }
+
+  /// The cover image as shown on the website, once there is one
+  Widget _buildCover() {
+    final selected = context.watch<CourseBloc>().state.selectedCourse;
+    final url = selected?.courseId == widget.course?.courseId
+        ? selected?.coverImageUrl
+        : widget.course?.coverImageUrl;
+    if (url == null || url.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      key: const Key('courseCover'),
+      padding: const EdgeInsets.only(bottom: 16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: AspectRatio(
+          aspectRatio: 16 / 9,
+          child: BackendImage(
+            url: url,
+            fit: BoxFit.cover,
+            fallback: const Center(child: Icon(Icons.image_outlined)),
+          ),
         ),
       ),
     );
@@ -412,6 +438,24 @@ class _CourseDialogState extends State<CourseDialog> {
                     icon: const Icon(Icons.picture_as_pdf_outlined),
                     label: const Text('Slide deck'),
                     onPressed: () => _showSlidesPdf(docCourse),
+                  ),
+                if (modules.isNotEmpty)
+                  TextButton.icon(
+                    key: const Key('aiPromo'),
+                    icon: const Icon(Icons.campaign_outlined),
+                    label: const Text('Promo pack with AI'),
+                    onPressed: () => _runModuleAiJob(
+                      jobType: 'PROMO',
+                      module: null,
+                      title: 'Promo pack with AI',
+                      message:
+                          'The AI makes a cover image, a landing page that '
+                          'links to the course page, an email sequence and '
+                          'LinkedIn and X posts. The posts and emails are '
+                          'drafts in Course Media, the landing page is a '
+                          'draft in Landing Pages.',
+                      confirmKey: 'aiPromoConfirm',
+                    ),
                   ),
                 if (modules.isNotEmpty)
                   TextButton.icon(

@@ -12,7 +12,9 @@ You should have received a copy of the CC0 Public Domain Dedication
 along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
-<!-- Streams the narrated video of a course module: /courseVideo/stream?t=videoToken.
+<!-- Course media served from the database.
+
+     Streams the narrated video of a course module: /courseMedia/video?t=videoToken.
      The token is the access: get#Course only hands it to users with access to the course, and
      making the video again gives a new token. Supports HTTP Range requests, which video players
      (iOS always) use to load and seek. -->
@@ -20,7 +22,23 @@ along with this software (see the LICENSE.md file). If not, see
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
     require-authentication="false" track-artifact-hit="false" default-menu-include="false">
 
-    <transition name="stream" read-only="true" begin-transaction="false">
+    <!-- the cover image of a course: public, it is shown on the website -->
+    <transition name="cover" read-only="true" begin-transaction="false">
+        <parameter name="c" />
+        <actions>
+            <script><![CDATA[
+                def course = c ? ec.entity.find("growerp.course.Course").condition("courseId", c)
+                    .disableAuthz().one() : null
+                String location = course?.coverImageUrl?.startsWith('/courseMedia/cover') ?
+                    "dbresource://C${course.ownerPartyId}/courses/${c}/cover.png" : null
+                if (!location) { ec.web.sendError(404, null, null); return }
+                ec.web.sendResourceResponse(location, true)
+            ]]></script>
+        </actions>
+        <default-response type="none" />
+    </transition>
+
+    <transition name="video" read-only="true" begin-transaction="false">
         <parameter name="t" />
         <actions>
             <script><![CDATA[

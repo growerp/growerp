@@ -221,6 +221,43 @@ class GeminiAiUtil {
     }
 
     /**
+     * Make an image with a Gemini image model, on a Gemini key like [callGeminiTts]. Model:
+     * GEMINI_IMAGE_MODEL preference or environment variable.
+     *
+     * @return the image bytes (png or jpeg, see the model)
+     */
+    static byte[] callGeminiImage(def ec, String prompt, Map options = [:]) {
+        String ownerPartyId = options.ownerPartyId as String
+        String apiKey = resolveApiKey(ec, ownerPartyId, "gemini", options.apiKey as String)
+        if (!apiKey) {
+            throw new Exception("No API key configured for LLM provider 'gemini'. " +
+                "Add it in System Setup -> AI Settings.")
+        }
+        if (hasOwnApiKey(ec, ownerPartyId, "gemini", options.apiKey as String)) {
+            checkOwnAllowance(ec, ownerPartyId)
+        } else {
+            checkMonthlyAllowance(ec, ownerPartyId)
+        }
+        String model = ec.user.getPreference("GEMINI_IMAGE_MODEL") ?: System.getenv("GEMINI_IMAGE_MODEL") ?:
+            "gemini-2.5-flash-image"
+        def requestMap = [
+            contents: [[parts: [[text: prompt]]]],
+            generationConfig: [responseModalities: ["IMAGE"]]
+        ]
+        def responseText = postJson(ec, "${API_BASE_URL}/${model}:generateContent?key=${apiKey}",
+            [:], JsonOutput.toJson(requestMap), "Gemini image")
+        def response = new JsonSlurper().parseText(responseText)
+        String image = response.candidates?.getAt(0)?.content?.parts?.find { it.inlineData }?.inlineData?.data
+        if (!image) throw new Exception("Gemini returned no image")
+        def usage = response.usageMetadata
+        logUsage(ec, ownerPartyId, "gemini", model,
+            [tokensIn: (usage?.promptTokenCount ?: 0) as int,
+             tokensOut: (usage?.candidatesTokenCount ?: 0) as int,
+             tokensTotal: (usage?.totalTokenCount ?: 0) as int], options)
+        return Base64.decoder.decode(image)
+    }
+
+    /**
      * Historical entry point, kept so the existing callers keep working. Dispatches on the
      * tenant's configured provider, which is not necessarily Gemini.
      */

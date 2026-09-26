@@ -47,9 +47,22 @@ try {
     // email after a short form, so no assessment is generated and the copy must never
     // mention one - it summarizes what is in the download instead.
     def dlUrl = context.downloadUrl
-    def isLeadMagnet = dlUrl as boolean
+    // A course url makes it the promotion page of an online course: the call to action links
+    // to the course page, no assessment and no download form.
+    def courseUrl = context.courseUrl
+    def isCourse = courseUrl as boolean
+    def isLeadMagnet = !isCourse && dlUrl as boolean
 
-    def assessmentSpec = isLeadMagnet ? """
+    def assessmentSpec = isCourse ? """
+COURSE REQUIREMENTS (Must be included):
+The page promotes an online course; the call to action takes the visitor to the course page
+to enroll.
+${courseDescription ? "THE COURSE: ${courseDescription}" : ""}
+- Include a section on what the learner will be able to do after the course, and a section
+  with the modules of the course.
+- Do NOT mention an assessment, quiz score, readiness check or a download.
+- The call to action is about enrolling, e.g. "Enroll now".
+""" : isLeadMagnet ? """
 DOWNLOAD REQUIREMENTS (Must be included):
 The call to action is a free downloadable document the visitor receives by email.
 ${downloadDescription ? "WHAT THE DOWNLOAD CONTAINS: ${downloadDescription}" : ""}
@@ -78,7 +91,7 @@ SCORING THRESHOLDS:
 - Define 3 scoring ranges (Critical, Needs Work, Ready) based on the total possible score from Part A.
 """
 
-    def assessmentJson = isLeadMagnet ? """
+    def assessmentJson = isCourse ? "" : isLeadMagnet ? """
   "leadMagnet": {
     "title": "Form title, e.g. Download the free guide",
     "submitLabel": "Form button label",
@@ -105,13 +118,13 @@ SCORING THRESHOLDS:
     ]
   },"""
 
-    def ctaJson = isLeadMagnet
+    def ctaJson = isCourse ? '{"text": "Enroll now", "description": "Start the course"}' : isLeadMagnet
         ? '{"text": "Get the free guide", "description": "Send it to my inbox"}'
         : '{"text": "Start Assessment", "description": "Take the quiz now"}'
 
     // Step 3: Construct comprehensive prompt for ALL landing page components in single call
     def generationPrompt = """
-Generate a COMPLETE, production-ready landing page ${isLeadMagnet ? 'for a free downloadable guide' : 'AND a Business Readiness Assessment'} in a single comprehensive response.
+Generate a COMPLETE, production-ready landing page ${isCourse ? 'for an online course' : isLeadMagnet ? 'for a free downloadable guide' : 'AND a Business Readiness Assessment'} in a single comprehensive response.
 
 BUSINESS DESCRIPTION:
 ${businessDescription}
@@ -194,8 +207,8 @@ ${assessmentJson}
         companyPartyId: companyPartyId,
         pseudoId: pseudoId,
         // lowercase to match the FTL template; 'url' pages get their gate form below
-        ctaActionType: isLeadMagnet ? 'url' : 'assessment',
-        ctaButtonLink: isLeadMagnet ? dlUrl : null
+        ctaActionType: isCourse || isLeadMagnet ? 'url' : 'assessment',
+        ctaButtonLink: isCourse ? courseUrl : isLeadMagnet ? dlUrl : null
     ]
     
     def createPageResult = ec.service.sync().name("create#growerp.landing.LandingPage")
@@ -339,7 +352,7 @@ ${assessmentJson}
     }
     
     // Step 9: Create Assessment (never for a lead magnet page)
-    if (!isLeadMagnet && contentData.assessment) {
+    if (!isCourse && !isLeadMagnet && contentData.assessment) {
         def assessmentPseudoId = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
             .parameters([ownerPartyId: ownerPartyId, seqName: 'assessment'])
             .call().seqNum

@@ -1439,6 +1439,13 @@ Service definitions for landing page, sections, credibility, and CTA management
           assessment is generated: the page summarizes the download instead and gets a
           lead-capture form whose submit emails this link.</description>
       </parameter>
+      <parameter name="courseUrl">
+        <description>Optional: the page promotes the online course at this url; the call to
+          action links to it, no assessment and no download form</description>
+      </parameter>
+      <parameter name="courseDescription" allow-html="any">
+        <description>Optional: the course with its objectives and modules</description>
+      </parameter>
       <parameter name="downloadDescription">
         <description>Optional description of what the download contains, used to write
           the summary section</description>

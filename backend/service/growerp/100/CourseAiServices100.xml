@@ -29,6 +29,8 @@ Job types:
              that later become the narration of the course video
     VIDEO    per module a narrated video: the slides, their speaker notes spoken with
              text-to-speech, joined by ffmpeg; needs the slides
+    PROMO    promotion of the course: cover image, landing page (enroll links to the course
+             page), email sequence and social posts (course media); parts selects some
     QUIZ     replace the quiz questions of all modules, or of the given moduleIds, with
              multiple choice questions on the lesson content
 -->
@@ -67,7 +69,7 @@ Job types:
             Uploaded files are converted to text here, so the job row never holds the
             (possibly large) file itself.</description>
         <in-parameters>
-            <parameter name="jobType" required="true" /> <!-- OUTLINE, LESSONS, QUIZ, SLIDES, VIDEO -->
+            <parameter name="jobType" required="true" /> <!-- OUTLINE, LESSONS, QUIZ, SLIDES, VIDEO, PROMO -->
             <parameter name="courseId" />
             <!-- OUTLINE -->
             <parameter name="title" />
@@ -89,6 +91,8 @@ Job types:
             <!-- QUIZ, SLIDES, VIDEO: empty is all modules of the course -->
             <parameter name="moduleIds" type="List" />
             <parameter name="questionsPerModule" type="Integer" default="5" />
+            <!-- PROMO: COVER, LANDING, EMAIL, SOCIAL; empty is all -->
+            <parameter name="parts" type="List" />
         </in-parameters>
         <out-parameters>
             <parameter name="courseAiJob" type="Map" />
@@ -96,7 +100,7 @@ Job types:
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <if condition="!(jobType in ['OUTLINE', 'LESSONS', 'QUIZ', 'SLIDES', 'VIDEO'])">
+            <if condition="!(jobType in ['OUTLINE', 'LESSONS', 'QUIZ', 'SLIDES', 'VIDEO', 'PROMO'])">
                 <return error="true" message="Unknown AI job type ${jobType}" />
             </if>
             <if condition="jobType == 'OUTLINE' &amp;&amp; !title">
@@ -132,7 +136,8 @@ Job types:
                     difficulty: difficulty, curriculum: curriculum, notes: notes,
                     urls: (urls ?: []).findAll { it }, files: fileTexts,
                     useKnowledgeBase: useKnowledgeBase, lessonIds: lessonIds ?: [],
-                    moduleIds: moduleIds ?: [], questionsPerModule: questionsPerModule])
+                    moduleIds: moduleIds ?: [], questionsPerModule: questionsPerModule,
+                    parts: parts ?: []])
             ]]></script>
             <check-errors />
 

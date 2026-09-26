@@ -101,6 +101,7 @@ void main() {
     await CourseTest.writeQuizzesWithAi(tester);
     await CourseTest.writeSlidesWithAi(tester);
     await CourseTest.makeVideos(tester);
+    await CourseTest.makePromoPack(tester);
     await CourseTest.openPdf(tester, 'courseSlidesPdf', 'slidesPdfDialog');
     await CourseTest.openPdf(tester, 'courseWorkbookPdf', 'workbookPdfDialog');
     await CommonTest.tapByKey(tester, 'cancelCourse');

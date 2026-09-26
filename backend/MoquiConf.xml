@@ -65,9 +65,9 @@
         <screen location="component://webroot/screen/webroot.xml">
             <subscreens-item name="growerp" menu-include="false" no-sub-path="true"
                 location="component://growerp/screen/rest.xml"/>
-            <!-- narrated course videos, streamed with Range support -->
-            <subscreens-item name="courseVideo" menu-include="false"
-                location="component://growerp/screen/courseVideo.xml"/>
+            <!-- course videos (streamed with Range support) and cover images -->
+            <subscreens-item name="courseMedia" menu-include="false"
+                location="component://growerp/screen/courseMedia.xml"/>
         </screen>
     </screen-facade>
 
