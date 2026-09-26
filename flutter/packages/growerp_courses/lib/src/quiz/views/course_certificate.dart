@@ -22,7 +22,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
+import '../../documents/course_pdfs.dart';
 
 /// Asks the backend whether the learner earned the certificate of a course
 /// (all lessons done, every quiz passed) and shows it as a printable pdf.
@@ -53,27 +53,13 @@ Future<void> showCourseCertificate(
     );
     return;
   }
-  await showDialog(
-    context: context,
-    builder: (dialogContext) => Dialog(
-      key: const Key('courseCertificateDialog'),
-      clipBehavior: Clip.antiAlias,
-      insetPadding: const EdgeInsets.all(16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: popUp(
-        context: dialogContext,
-        title: 'Certificate',
-        width: 900,
-        height: MediaQuery.of(dialogContext).size.height * 0.9,
-        child: PdfPreview(
-          pdfFileName: 'certificate-${certificate.certificateNo}.pdf',
-          canChangeOrientation: false,
-          canChangePageFormat: false,
-          initialPageFormat: PdfPageFormat.a4.landscape,
-          build: (format) => certificatePdf(certificate, format),
-        ),
-      ),
-    ),
+  await showPdfDialog(
+    context,
+    key: const Key('courseCertificateDialog'),
+    title: 'Certificate',
+    fileName: 'certificate-${certificate.certificateNo}.pdf',
+    pageFormat: PdfPageFormat.a4.landscape,
+    build: (format) => certificatePdf(certificate, format),
   );
 }
 

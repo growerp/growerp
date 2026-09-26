@@ -218,6 +218,43 @@ class CourseTest {
     expect(find.textContaining('Quiz: 5 questions'), findsWidgets);
   }
 
+  /// Lets the AI make the slides of every module of the open course dialog.
+  static Future<void> writeSlidesWithAi(WidgetTester tester) async {
+    await CommonTest.dragUntil(tester, key: 'aiWriteSlides');
+    await CommonTest.tapByKey(tester, 'aiWriteSlides');
+    await CommonTest.tapByKey(tester, 'aiSlidesConfirm', settle: false);
+    await _pumpUntil(tester, find.textContaining('slides made'), seconds: 300);
+    await CommonTest.waitForSnackbarToGo(tester);
+    await CommonTest.dragUntil(tester, key: 'moduleSlides0');
+    expect(find.textContaining(RegExp(r'Slides: [1-9]')), findsWidgets);
+  }
+
+  /// Opens a pdf preview dialog with the button [buttonKey], checks it shows
+  /// and closes it.
+  static Future<void> openPdf(
+    WidgetTester tester,
+    String buttonKey,
+    String dialogKey,
+  ) async {
+    await CommonTest.dragUntil(tester, key: buttonKey);
+    await CommonTest.tapByKey(tester, buttonKey, seconds: CommonTest.waitTime);
+    await CommonTest.checkWidgetKey(tester, dialogKey);
+    Navigator.of(tester.element(find.byKey(Key(dialogKey)))).pop();
+    await tester.pumpAndSettle();
+  }
+
+  /// Learner in the course viewer: the workbook is in the outline, which is
+  /// its own tab on a phone.
+  static Future<void> openWorkbook(WidgetTester tester) async {
+    if (!tester.any(find.byKey(const Key('courseWorkbook')))) {
+      await CommonTest.tapByText(tester, 'Outline');
+    }
+    await openPdf(tester, 'courseWorkbook', 'workbookPdfDialog');
+    if (tester.any(find.text('Content'))) {
+      await CommonTest.tapByText(tester, 'Content');
+    }
+  }
+
   /// Learner, after the last lesson of the first module: takes its quiz
   /// answering [answers] (option index per question) and closes it.
   static Future<void> takeQuiz(

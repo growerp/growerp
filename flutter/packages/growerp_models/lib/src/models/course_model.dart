@@ -230,6 +230,10 @@ class CourseModule {
   final DateTime? lastModifiedDate;
   final List<CourseLesson>? lessons;
 
+  /// Presentation of the module, saved with its own update call
+  @JsonKey(includeToJson: false)
+  final List<CourseSlide>? slides;
+
   /// Number of quiz questions of this module, 0 is no quiz
   @JsonKey(includeToJson: false)
   final int? quizQuestionCount;
@@ -249,6 +253,7 @@ class CourseModule {
     this.createdDate,
     this.lastModifiedDate,
     this.lessons,
+    this.slides,
     this.quizQuestionCount,
     this.quizQuestions,
   });
@@ -279,6 +284,7 @@ class CourseModule {
     createdDate: createdDate ?? this.createdDate,
     lastModifiedDate: lastModifiedDate ?? this.lastModifiedDate,
     lessons: lessons ?? this.lessons,
+    slides: slides,
     quizQuestionCount: quizQuestionCount,
     quizQuestions: quizQuestions,
   );
@@ -685,6 +691,20 @@ Map<String, int>? _quizScoresFromJson(dynamic json) {
   final map = json is String ? jsonDecode(json) : json;
   if (map is! Map) return null;
   return map.map((k, v) => MapEntry(k.toString(), (v as num).toInt()));
+}
+
+/// One slide of a module presentation; [notes] is the spoken narration
+@JsonSerializable()
+class CourseSlide {
+  final String title;
+  final List<String> bullets;
+  final String? notes;
+
+  CourseSlide({required this.title, this.bullets = const [], this.notes});
+
+  factory CourseSlide.fromJson(Map<String, dynamic> json) =>
+      _$CourseSlideFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseSlideToJson(this);
 }
 
 /// Multiple choice question of a module quiz. [correctIndex] and

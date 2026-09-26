@@ -13,11 +13,13 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_viewer_bloc.dart';
 import '../../media/views/media_preview.dart';
+import '../../documents/course_pdfs.dart';
 import '../../quiz/views/course_certificate.dart';
 import '../../quiz/views/course_quiz_screen.dart';
 import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
@@ -495,6 +497,21 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
                         },
                       );
                     }),
+                    if (module.slides?.isNotEmpty ?? false)
+                      ListTile(
+                        key: Key('slides$moduleIndex'),
+                        leading: const Icon(Icons.slideshow),
+                        title: const Text('Slides'),
+                        onTap: () => showPdfDialog(
+                          context,
+                          key: const Key('slidesPdfDialog'),
+                          title: module.title,
+                          fileName: 'slides-${module.title}.pdf',
+                          pageFormat: slidePageFormat,
+                          build: (format) =>
+                              slidesPdf(state.course!, [module], format),
+                        ),
+                      ),
                     if ((module.quizQuestionCount ?? 0) > 0)
                       _buildQuizTile(context, state, module, moduleIndex),
                   ],
@@ -581,6 +598,20 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
           LinearProgressIndicator(
             value: progress / 100,
             backgroundColor: Colors.grey[300],
+          ),
+          const SizedBox(height: 8),
+          TextButton.icon(
+            key: const Key('courseWorkbook'),
+            icon: const Icon(Icons.menu_book_outlined),
+            label: const Text('Workbook (pdf)'),
+            onPressed: () => showPdfDialog(
+              context,
+              key: const Key('workbookPdfDialog'),
+              title: 'Workbook',
+              fileName: 'workbook-${state.course!.title}.pdf',
+              pageFormat: PdfPageFormat.a4,
+              build: (format) => workbookPdf(state.course!, format),
+            ),
           ),
         ],
       ),

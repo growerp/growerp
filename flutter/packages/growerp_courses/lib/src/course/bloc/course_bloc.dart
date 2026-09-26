@@ -49,6 +49,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     on<CourseLessonUpdate>(_onLessonUpdate);
     on<CourseLessonDelete>(_onLessonDelete);
     on<CourseQuizQuestionSave>(_onQuizQuestionSave);
+    on<CourseModuleSlidesSave>(_onModuleSlidesSave);
     on<CourseQuizQuestionDelete>(_onQuizQuestionDelete);
     on<CourseSubscribe>(_onCourseSubscribe);
     on<CourseMediaGenerate>(_onMediaGenerate);
@@ -310,6 +311,28 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         data: {...event.lesson.toJson(), 'moduleId': event.moduleId},
       );
 
+      if (_hasValidSelectedCourseId) {
+        add(CourseGetDetail(state.selectedCourse!.courseId!));
+      }
+    } catch (e) {
+      emit(
+        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+      );
+    }
+  }
+
+  Future<void> _onModuleSlidesSave(
+    CourseModuleSlidesSave event,
+    Emitter<CourseState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: CourseBlocStatus.loading));
+      await restClient.updateCourseModule(
+        data: {
+          'moduleId': event.moduleId,
+          'slides': jsonEncode(event.slides.map((s) => s.toJson()).toList()),
+        },
+      );
       if (_hasValidSelectedCourseId) {
         add(CourseGetDetail(state.selectedCourse!.courseId!));
       }

@@ -326,12 +326,65 @@ Answer with JSON only:
     return "${written} quiz questions written for ${modules.size()} module${modules.size() == 1 ? '' : 's'}"
 }
 
+// ---------------------------------------------------------------------------------------------
+// SLIDES: a slide deck per module; the speaker notes are the narration of the course video
+// ---------------------------------------------------------------------------------------------
+def runSlides = {
+    String courseId = job.courseId
+    def course = ec.entity.find("growerp.course.Course").condition("courseId", courseId).disableAuthz().one()
+    def modules = ec.entity.find("growerp.course.CourseModule").condition("courseId", courseId)
+        .orderBy("sequenceNum").disableAuthz().list()
+        .findAll { !input.moduleIds || it.moduleId in input.moduleIds }
+    if (!modules) throw new Exception('No modules to make slides for')
+    int slideCount = 0
+    modules.eachWithIndex { module, int index ->
+        progress((int) (5 + 90 * index / modules.size()), "Making the slides of module ${index + 1} of ${modules.size()}: ${module.title}")
+        def lessons = ec.entity.find("growerp.course.CourseLesson").condition("moduleId", module.moduleId)
+            .orderBy("sequenceNum").disableAuthz().list()
+        String lessonText = lessons.collect { "## ${it.title}\n${it.content ?: ''}" }.join('\n\n')
+        if (lessonText.length() > 30000) lessonText = lessonText.substring(0, 30000)
+        String prompt = """You are an experienced trainer turning a course module into a presentation.
+
+COURSE: ${course.title}
+TARGET AUDIENCE: ${course.audience ?: 'not specified'}
+MODULE ${module.sequenceNum}: ${module.title}
+LESSONS OF THE MODULE:
+${lessonText}
+
+RULES:
+- 1 or 2 slides per lesson plus a closing summary slide; no title slide (it is added).
+- A slide has a short title (max 8 words) and 2 to 5 bullets of max 12 words each.
+- "notes" is what the presenter says with the slide: 60 to 120 words of natural spoken
+  explanation that adds to the bullets instead of reading them out. It becomes the voice-over
+  of the course video, so no stage directions, no markdown.
+- Follow the order of the lessons; only use facts from the lessons.
+- Write in the language of the lessons.
+
+Answer with JSON only:
+{"slides": [{"title": "", "bullets": ["", ""], "notes": ""}]}"""
+        def deck = CourseAiUtil.askJson(ec, ownerPartyId, prompt,
+            [slides: lessons.collect { l ->
+                [title: l.title as String, bullets: ['Test bullet one', 'Test bullet two'],
+                 notes: "Test narration of ${l.title}."] } +
+                [[title: 'Summary', bullets: ['Test summary'], notes: 'Test closing narration.']]])
+        def slides = (deck instanceof Map ? deck.slides : null)?.findAll { it instanceof Map && it.title }
+            ?.collect { Map sl -> [title: sl.title, bullets: (sl.bullets ?: []).collect { it as String },
+                                   notes: sl.notes ?: ''] }
+        if (!slides) throw new Exception("The AI returned no slides for ${module.title}")
+        svc('growerp.100.CourseServices100.update#CourseModule',
+            [moduleId: module.moduleId, slides: JsonOutput.toJson(slides)])
+        slideCount += slides.size()
+    }
+    return "${slideCount} slides made for ${modules.size()} module${modules.size() == 1 ? '' : 's'}"
+}
+
 try {
     String doneMessage
     switch (job.jobType) {
         case 'OUTLINE': doneMessage = runOutline(); break
         case 'LESSONS': doneMessage = runLessons(); break
         case 'QUIZ': doneMessage = runQuiz(); break
+        case 'SLIDES': doneMessage = runSlides(); break
         default: throw new Exception("Unknown AI job type ${job.jobType}")
     }
     ec.service.sync().name(STATUS_SERVICE).parameters([jobId: jobId, status: 'DONE',

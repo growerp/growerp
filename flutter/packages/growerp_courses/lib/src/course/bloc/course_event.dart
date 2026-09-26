@@ -136,6 +136,17 @@ class CourseLessonCreate extends CourseEvent {
   List<Object?> get props => [moduleId, lesson];
 }
 
+/// Replace the slides of a module (empty list removes them)
+class CourseModuleSlidesSave extends CourseEvent {
+  final String moduleId;
+  final List<CourseSlide> slides;
+
+  const CourseModuleSlidesSave(this.moduleId, this.slides);
+
+  @override
+  List<Object?> get props => [moduleId, slides];
+}
+
 /// Create (no questionId) or update a module quiz question
 class CourseQuizQuestionSave extends CourseEvent {
   final CourseQuizQuestion question;

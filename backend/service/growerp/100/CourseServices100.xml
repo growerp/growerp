@@ -233,6 +233,8 @@ limitations under the License.
                         estimatedDuration: module.estimatedDuration,
                         lessons: hasAccess ? lessonList*.getMap() : lessonList.collect { it.getMap()
                             .findAll { k, v -> !(k in ['content', 'keyPoints', 'videoUrl']) } },
+                        slides: hasAccess &amp;&amp; module.slides ?
+                            new groovy.json.JsonSlurper().parseText(module.slides) : null,
                         quizQuestionCount: questionList.size(),
                         // answers only for the authors: learners get the quiz from get#CourseQuiz
                         quizQuestions: access.isStaff ? questionList.collect { q -> [
@@ -524,6 +526,8 @@ limitations under the License.
             <parameter name="description" />
             <parameter name="sequenceNum" type="Integer" />
             <parameter name="estimatedDuration" type="Integer" />
+            <!-- JSON text [{title, bullets, notes}], '[]' removes the slides -->
+            <parameter name="slides" allow-html="any" />
         </in-parameters>
         <out-parameters>
             <parameter name="moduleId" />
@@ -548,6 +552,7 @@ limitations under the License.
                 description: description ?: moduleEntity.description,
                 sequenceNum: sequenceNum ?: moduleEntity.sequenceNum,
                 estimatedDuration: estimatedDuration ?: moduleEntity.estimatedDuration,
+                slides: slides ?: moduleEntity.slides,
                 lastModifiedDate: ec.user.nowTimestamp
             ]" />
         </actions>

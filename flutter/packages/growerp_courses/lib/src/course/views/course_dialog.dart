@@ -14,6 +14,7 @@
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -22,6 +23,8 @@ import '../../course_ai/bloc/course_ai_bloc.dart';
 import '../../course_ai/views/ai_key_needed_dialog.dart';
 import 'course_participants_view.dart';
 import 'quiz_editor_dialog.dart';
+import 'slides_editor_dialog.dart';
+import '../../documents/course_pdfs.dart';
 import '../../viewer/views/course_viewer.dart';
 import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
@@ -353,6 +356,10 @@ class _CourseDialogState extends State<CourseDialog> {
             : null) ??
         widget.course?.modules ??
         [];
+    // the course the documents are made of: as reloaded when it is this one
+    final docCourse = selected?.courseId == widget.course?.courseId
+        ? selected!
+        : widget.course!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -383,6 +390,27 @@ class _CourseDialogState extends State<CourseDialog> {
                     icon: const Icon(Icons.quiz_outlined),
                     label: const Text('Quizzes with AI'),
                     onPressed: () => _writeQuizzesWithAi(null),
+                  ),
+                if (modules.isNotEmpty)
+                  TextButton.icon(
+                    key: const Key('aiWriteSlides'),
+                    icon: const Icon(Icons.slideshow),
+                    label: const Text('Slides with AI'),
+                    onPressed: () => _writeSlidesWithAi(null),
+                  ),
+                if (modules.any((m) => m.slides?.isNotEmpty ?? false))
+                  TextButton.icon(
+                    key: const Key('courseSlidesPdf'),
+                    icon: const Icon(Icons.picture_as_pdf_outlined),
+                    label: const Text('Slide deck'),
+                    onPressed: () => _showSlidesPdf(docCourse),
+                  ),
+                if (modules.isNotEmpty)
+                  TextButton.icon(
+                    key: const Key('courseWorkbookPdf'),
+                    icon: const Icon(Icons.menu_book_outlined),
+                    label: const Text('Workbook'),
+                    onPressed: () => _showWorkbookPdf(docCourse),
                   ),
                 TextButton.icon(
                   key: const Key('addModule'),
@@ -479,6 +507,25 @@ class _CourseDialogState extends State<CourseDialog> {
                       icon: const Icon(Icons.auto_awesome),
                       tooltip: 'Write this quiz with AI',
                       onPressed: () => _writeQuizzesWithAi(module),
+                    ),
+                  ),
+                  ListTile(
+                    key: Key('moduleSlides$index'),
+                    contentPadding: const EdgeInsets.only(left: 72, right: 16),
+                    leading: const Icon(Icons.slideshow),
+                    title: Text('Slides: ${module.slides?.length ?? 0}'),
+                    onTap: () => showDialog(
+                      context: context,
+                      builder: (_) => BlocProvider.value(
+                        value: context.read<CourseBloc>(),
+                        child: SlidesEditorDialog(moduleId: module.moduleId!),
+                      ),
+                    ),
+                    trailing: IconButton(
+                      key: Key('aiSlides$index'),
+                      icon: const Icon(Icons.auto_awesome),
+                      tooltip: 'Make these slides with AI',
+                      onPressed: () => _writeSlidesWithAi(module),
                     ),
                   ),
                 ],
@@ -585,28 +632,51 @@ class _CourseDialogState extends State<CourseDialog> {
     );
   }
 
-  /// Replaces the quiz of every module ([module] null) or of one module with
-  /// AI written multiple choice questions on the lesson content.
-  Future<void> _writeQuizzesWithAi(CourseModule? module) async {
+  Future<void> _writeQuizzesWithAi(CourseModule? module) => _runModuleAiJob(
+    jobType: 'QUIZ',
+    module: module,
+    title: 'Write quizzes with AI',
+    what: module == null
+        ? 'a quiz for every module from its lessons, replacing the '
+              'questions there are now.'
+        : 'the quiz of "${module.title}" from its lessons, replacing the '
+              'questions there are now.',
+    confirmKey: 'aiQuizConfirm',
+  );
+
+  Future<void> _writeSlidesWithAi(CourseModule? module) => _runModuleAiJob(
+    jobType: 'SLIDES',
+    module: module,
+    title: 'Make slides with AI',
+    what: module == null
+        ? 'the slides of every module from its lessons, with speaker notes, '
+              'replacing the slides there are now.'
+        : 'the slides of "${module.title}" from its lessons, with speaker '
+              'notes, replacing the slides there are now.',
+    confirmKey: 'aiSlidesConfirm',
+  );
+
+  /// Runs an AI job on every module ([module] null) or on one module
+  Future<void> _runModuleAiJob({
+    required String jobType,
+    required CourseModule? module,
+    required String title,
+    required String what,
+    required String confirmKey,
+  }) async {
     if (_aiBloc.state.status == CourseAiStatus.running) return;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Write quizzes with AI'),
-        content: Text(
-          module == null
-              ? 'The AI writes a quiz for every module from its lessons, '
-                    'replacing the questions there are now.'
-              : 'The AI writes the quiz of "${module.title}" from its '
-                    'lessons, replacing the questions there are now.',
-        ),
+        title: Text(title),
+        content: Text('The AI writes $what'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            key: const Key('aiQuizConfirm'),
+            key: Key(confirmKey),
             onPressed: () => Navigator.pop(dialogContext, true),
             child: const Text('Write'),
           ),
@@ -616,12 +686,31 @@ class _CourseDialogState extends State<CourseDialog> {
     if (confirmed != true) return;
     _aiBloc.add(
       CourseAiStart({
-        'jobType': 'QUIZ',
+        'jobType': jobType,
         'courseId': widget.course!.courseId,
         if (module != null) 'moduleIds': [module.moduleId],
       }),
     );
   }
+
+  /// Course documents from the course as loaded in this dialog
+  void _showSlidesPdf(Course course) => showPdfDialog(
+    context,
+    key: const Key('slidesPdfDialog'),
+    title: 'Slides',
+    fileName: 'slides-${course.title}.pdf',
+    pageFormat: slidePageFormat,
+    build: (format) => slidesPdf(course, course.modules ?? [], format),
+  );
+
+  void _showWorkbookPdf(Course course) => showPdfDialog(
+    context,
+    key: const Key('workbookPdfDialog'),
+    title: 'Workbook',
+    fileName: 'workbook-${course.title}.pdf',
+    pageFormat: PdfPageFormat.a4,
+    build: (format) => workbookPdf(course, format),
+  );
 
   Widget _buildActionButtons() {
     return Container(

@@ -51,6 +51,8 @@
         <field name="description" type="text-long" />
         <field name="sequenceNum" type="number-integer" />
         <field name="estimatedDuration" type="number-integer" /> <!-- in minutes -->
+        <!-- JSON array [{title, bullets: [], notes}]; notes are the spoken narration -->
+        <field name="slides" type="text-very-long" />
 
         <field name="createdDate" type="date-time" />
         <field name="lastModifiedDate" type="date-time" />
@@ -182,7 +184,7 @@
         <field name="jobId" type="id" is-pk="true" />
         <field name="ownerPartyId" type="id" />
         <field name="courseId" type="id" />
-        <field name="jobType" type="text-short" /> <!-- OUTLINE, LESSONS, QUIZ -->
+        <field name="jobType" type="text-short" /> <!-- OUTLINE, LESSONS, QUIZ, SLIDES -->
         <field name="status" type="text-short" /> <!-- QUEUED, RUNNING, DONE, ERROR -->
         <field name="progressPercent" type="number-integer" />
         <field name="statusMessage" type="text-long" />
