@@ -3,6 +3,17 @@
     // Example: "--dart-define=BACKEND_PORT=9090" in the toolArgs array
     "configurations": [
         {
+            "name": "Academy linux (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/academy",
+            "program": "lib/main.dart",
+            "deviceId": "linux",
+            "toolArgs": [
+                "--dart-define=BACKEND_PORT=8080"
+            ]
+        },
+        {
             "name": "Agents Web (lib/main.dart)",
             "type": "dart",
             "request": "launch",
