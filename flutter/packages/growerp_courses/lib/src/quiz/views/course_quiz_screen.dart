@@ -12,6 +12,7 @@
  * limitations under the License.
  */
 
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -65,13 +66,24 @@ class _CourseQuizView extends StatelessWidget {
           },
           child: Scaffold(
             key: const Key('CourseQuizScreen'),
-            appBar: AppBar(title: Text('Quiz: ${module.title}')),
+            appBar: AppBar(
+              title: Text(
+                CoursesLocalizations.of(
+                  context,
+                )!.courses_quizTitle(module.title),
+              ),
+            ),
             body: switch (state.status) {
               CourseQuizStatus.loading => const Center(
                 child: CircularProgressIndicator(),
               ),
               CourseQuizStatus.failure => Center(
-                child: Text(state.message ?? 'Could not load the quiz'),
+                child: Text(
+                  state.message ??
+                      CoursesLocalizations.of(
+                        context,
+                      )!.courses_couldNotLoadQuiz,
+                ),
               ),
               _ => _questions(context, state),
             },
@@ -102,13 +114,17 @@ class _CourseQuizView extends StatelessWidget {
                       onPressed: () => context.read<CourseQuizBloc>().add(
                         const CourseQuizRetry(),
                       ),
-                      child: const Text('Try again'),
+                      child: Text(
+                        CoursesLocalizations.of(context)!.courses_tryAgain,
+                      ),
                     ),
                     ElevatedButton(
                       key: const Key('quizClose'),
                       onPressed: () =>
                           Navigator.of(context).pop(result!.scorePercent),
-                      child: const Text('Close'),
+                      child: Text(
+                        CoursesLocalizations.of(context)!.courses_close,
+                      ),
                     ),
                   ],
                 )
@@ -121,7 +137,9 @@ class _CourseQuizView extends StatelessWidget {
                           const CourseQuizSubmit(),
                         )
                       : null,
-                  child: const Text('Submit answers'),
+                  child: Text(
+                    CoursesLocalizations.of(context)!.courses_submitAnswers,
+                  ),
                 ),
         ),
       ],
@@ -145,9 +163,10 @@ class _CourseQuizView extends StatelessWidget {
         ),
         subtitle: Text(
           result.passed
-              ? 'Passed!'
-              : 'You need ${CourseProgress.quizPassPercent}% to pass. '
-                    'Read the explanations and try again.',
+              ? CoursesLocalizations.of(context)!.courses_passed
+              : CoursesLocalizations.of(context)!.courses_needToPass(
+                  CourseProgress.quizPassPercent.toString(),
+                ),
         ),
       ),
     );

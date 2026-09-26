@@ -59,7 +59,9 @@ class _MediaPreviewState extends State<MediaPreview> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: popUp(
         context: context,
-        title: widget.media.title ?? 'Media Preview',
+        title:
+            widget.media.title ??
+            CoursesLocalizations.of(context)!.courses_mediaPreview,
         width: 700,
         height: MediaQuery.of(context).size.height * 0.85,
         actions: [
@@ -68,7 +70,9 @@ class _MediaPreviewState extends State<MediaPreview> {
               _isEditing ? Icons.visibility : Icons.edit,
               color: Theme.of(context).colorScheme.onSurface,
             ),
-            tooltip: _isEditing ? 'Preview' : 'Edit',
+            tooltip: _isEditing
+                ? CoursesLocalizations.of(context)!.courses_preview
+                : CoursesLocalizations.of(context)!.courses_edit,
             onPressed: () => setState(() => _isEditing = !_isEditing),
           ),
           IconButton(
@@ -76,7 +80,7 @@ class _MediaPreviewState extends State<MediaPreview> {
               Icons.copy,
               color: Theme.of(context).colorScheme.onSurface,
             ),
-            tooltip: 'Copy to clipboard',
+            tooltip: CoursesLocalizations.of(context)!.courses_copyToClipboard,
             onPressed: _copyToClipboard,
           ),
         ],
@@ -136,23 +140,23 @@ class _MediaPreviewState extends State<MediaPreview> {
     switch (widget.media.status) {
       case MediaStatus.draft:
         color = Colors.grey;
-        label = 'Draft';
+        label = CoursesLocalizations.of(context)!.courses_draft;
         break;
       case MediaStatus.reviewed:
         color = Colors.blue;
-        label = 'Reviewed';
+        label = CoursesLocalizations.of(context)!.courses_reviewed;
         break;
       case MediaStatus.scheduled:
         color = Colors.orange;
-        label = 'Scheduled';
+        label = CoursesLocalizations.of(context)!.courses_scheduled;
         break;
       case MediaStatus.published:
         color = Colors.green;
-        label = 'Published';
+        label = CoursesLocalizations.of(context)!.courses_published;
         break;
       default:
         color = Colors.grey;
-        label = 'Draft';
+        label = CoursesLocalizations.of(context)!.courses_draft;
     }
     return Chip(
       backgroundColor: color.withValues(alpha: 0.1),
@@ -185,9 +189,9 @@ class _MediaPreviewState extends State<MediaPreview> {
         controller: _contentController,
         maxLines: null,
         expands: true,
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           border: OutlineInputBorder(),
-          hintText: 'Edit content here...',
+          hintText: CoursesLocalizations.of(context)!.courses_editContentHint,
           alignLabelWithHint: true,
         ),
       ),
@@ -240,7 +244,9 @@ class _MediaPreviewState extends State<MediaPreview> {
                 children: [
                   OutlinedButton.icon(
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Regenerate'),
+                    label: Text(
+                      CoursesLocalizations.of(context)!.courses_regenerate,
+                    ),
                     onPressed: () {
                       Navigator.pop(context, 'regenerate');
                     },
@@ -259,7 +265,13 @@ class _MediaPreviewState extends State<MediaPreview> {
                             )
                           : const Icon(Icons.videocam),
                       label: Text(
-                        _isGeneratingVideo ? 'Generating...' : 'Generate Video',
+                        _isGeneratingVideo
+                            ? CoursesLocalizations.of(
+                                context,
+                              )!.courses_generating
+                            : CoursesLocalizations.of(
+                                context,
+                              )!.courses_generateVideo,
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
@@ -274,12 +286,14 @@ class _MediaPreviewState extends State<MediaPreview> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
+                    child: Text(
+                      CoursesLocalizations.of(context)!.courses_cancel,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: _saveChanges,
-                    child: const Text('Save'),
+                    child: Text(CoursesLocalizations.of(context)!.courses_save),
                   ),
                 ],
               ),
@@ -328,7 +342,9 @@ class _MediaPreviewState extends State<MediaPreview> {
 
       setState(() {
         _isGeneratingVideo = false;
-        _videoGenerationMessage = message ?? 'Video generation completed';
+        _videoGenerationMessage =
+            message ??
+            CoursesLocalizations.of(context)!.courses_videoGenerationCompleted;
       });
 
       if (!mounted) return;
@@ -359,7 +375,9 @@ class _MediaPreviewState extends State<MediaPreview> {
     } catch (e) {
       setState(() {
         _isGeneratingVideo = false;
-        _videoGenerationMessage = 'Error: ${e.toString()}';
+        _videoGenerationMessage = CoursesLocalizations.of(
+          context,
+        )!.courses_errorPrefix(e.toString());
       });
 
       if (!mounted) return;
@@ -424,7 +442,7 @@ class _MediaPreviewState extends State<MediaPreview> {
       case MediaPlatform.medium:
         return 'Medium';
       case MediaPlatform.email:
-        return 'Email';
+        return CoursesLocalizations.of(context)!.courses_platformEmail;
       case MediaPlatform.youtube:
         return 'YouTube';
       case MediaPlatform.twitter:
@@ -432,9 +450,9 @@ class _MediaPreviewState extends State<MediaPreview> {
       case MediaPlatform.substack:
         return 'Substack';
       case MediaPlatform.inapp:
-        return 'In-App';
+        return CoursesLocalizations.of(context)!.courses_platformInApp;
       default:
-        return 'Unknown';
+        return CoursesLocalizations.of(context)!.courses_unknown;
     }
   }
 

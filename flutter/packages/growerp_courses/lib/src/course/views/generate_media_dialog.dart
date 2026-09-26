@@ -67,7 +67,11 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
         } else if (state.status == CourseBlocStatus.failure && _isGenerating) {
           setState(() {
             _isGenerating = false;
-            _errorMessage = state.message ?? 'Failed to generate content';
+            _errorMessage =
+                state.message ??
+                CoursesLocalizations.of(
+                  context,
+                )!.courses_failedToGenerateContent;
           });
         }
       },
@@ -182,7 +186,11 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
                   children: [
                     _buildInfoChip(
                       Icons.view_module,
-                      '${widget.course.modules?.length ?? 0} modules',
+                      CoursesLocalizations.of(
+                        context,
+                      )!.courses_modulecountModules(
+                        (widget.course.modules?.length ?? 0).toString(),
+                      ),
                     ),
                     const SizedBox(width: 12),
                     _buildInfoChip(
@@ -233,8 +241,8 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
         DropdownButtonFormField<String?>(
           key: const Key('scopeModule'),
           decoration: InputDecoration(
-            labelText: 'Module (optional)',
-            hintText: 'All modules',
+            labelText: CoursesLocalizations.of(context)!.courses_moduleOptional,
+            hintText: CoursesLocalizations.of(context)!.courses_allModules,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             prefixIcon: const Icon(Icons.view_module),
           ),
@@ -277,8 +285,8 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
     return DropdownButtonFormField<String?>(
       key: const Key('scopeLesson'),
       decoration: InputDecoration(
-        labelText: 'Lesson (optional)',
-        hintText: 'All lessons in module',
+        labelText: CoursesLocalizations.of(context)!.courses_lessonOptional,
+        hintText: CoursesLocalizations.of(context)!.courses_allLessonsInModule,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         prefixIcon: const Icon(Icons.play_lesson),
       ),
@@ -515,7 +523,7 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
         children: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(CoursesLocalizations.of(context)!.courses_cancel),
           ),
           const SizedBox(width: 12),
           ElevatedButton.icon(
@@ -528,7 +536,11 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.auto_awesome),
-            label: Text(_isGenerating ? 'Generating...' : 'Generate Content'),
+            label: Text(
+              _isGenerating
+                  ? CoursesLocalizations.of(context)!.courses_generating
+                  : CoursesLocalizations.of(context)!.courses_generateContent,
+            ),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
@@ -582,7 +594,7 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
       case MediaPlatform.medium:
         return 'Medium';
       case MediaPlatform.email:
-        return 'Email';
+        return CoursesLocalizations.of(context)!.courses_platformEmail;
       case MediaPlatform.youtube:
         return 'YouTube';
       case MediaPlatform.twitter:
@@ -590,41 +602,41 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
       case MediaPlatform.substack:
         return 'Substack';
       case MediaPlatform.inapp:
-        return 'In-App';
+        return CoursesLocalizations.of(context)!.courses_platformInApp;
     }
   }
 
   String _getMediaTypeLabel(MediaType mediaType) {
     switch (mediaType) {
       case MediaType.post:
-        return 'Post';
+        return CoursesLocalizations.of(context)!.courses_typePost;
       case MediaType.article:
-        return 'Article';
+        return CoursesLocalizations.of(context)!.courses_typeArticle;
       case MediaType.sequence:
-        return 'Email Sequence';
+        return CoursesLocalizations.of(context)!.courses_emailSequence;
       case MediaType.script:
-        return 'Video Script';
+        return CoursesLocalizations.of(context)!.courses_videoScript;
       case MediaType.thread:
-        return 'Thread';
+        return CoursesLocalizations.of(context)!.courses_typeThread;
       case MediaType.tutorial:
-        return 'Tutorial';
+        return CoursesLocalizations.of(context)!.courses_typeTutorial;
     }
   }
 
   String _getMediaTypeDescription(MediaType mediaType) {
     switch (mediaType) {
       case MediaType.post:
-        return 'A short-form social media post optimized for engagement.';
+        return CoursesLocalizations.of(context)!.courses_descPost;
       case MediaType.article:
-        return 'A long-form article with in-depth content suitable for blogging platforms.';
+        return CoursesLocalizations.of(context)!.courses_descArticle;
       case MediaType.sequence:
-        return 'A series of emails designed to educate and engage over time.';
+        return CoursesLocalizations.of(context)!.courses_descSequence;
       case MediaType.script:
-        return 'A video script with intro, main content, and call-to-action.';
+        return CoursesLocalizations.of(context)!.courses_descScript;
       case MediaType.thread:
-        return 'A series of connected posts for storytelling or explanations.';
+        return CoursesLocalizations.of(context)!.courses_descThread;
       case MediaType.tutorial:
-        return 'Step-by-step instructional content with clear guidance.';
+        return CoursesLocalizations.of(context)!.courses_descTutorial;
     }
   }
 }

@@ -65,7 +65,9 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
             ),
             child: popUp(
               context: context,
-              title: 'Generate AI Content',
+              title: CoursesLocalizations.of(
+                context,
+              )!.courses_generateAiContent,
               width: 500,
               height: MediaQuery.of(context).size.height * 0.8,
               child: ScaffoldMessenger(
@@ -131,7 +133,10 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Course', style: Theme.of(context).textTheme.labelMedium),
+            Text(
+              CoursesLocalizations.of(context)!.courses_courseLabel,
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
             const SizedBox(height: 8),
             Text(
               widget.course.title,
@@ -199,10 +204,10 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
         const SizedBox(height: 8),
         DropdownButtonFormField<CourseModule?>(
           initialValue: _selectedModule,
-          decoration: const InputDecoration(
-            labelText: 'Module',
+          decoration: InputDecoration(
+            labelText: CoursesLocalizations.of(context)!.courses_moduleLabel,
             border: OutlineInputBorder(),
-            hintText: 'Entire course',
+            hintText: CoursesLocalizations.of(context)!.courses_entireCourse,
           ),
           items: [
             DropdownMenuItem<CourseModule?>(
@@ -227,10 +232,10 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
           const SizedBox(height: 16),
           DropdownButtonFormField<CourseLesson?>(
             initialValue: _selectedLesson,
-            decoration: const InputDecoration(
-              labelText: 'Lesson',
+            decoration: InputDecoration(
+              labelText: CoursesLocalizations.of(context)!.courses_lessonLabel,
               border: OutlineInputBorder(),
-              hintText: 'Entire module',
+              hintText: CoursesLocalizations.of(context)!.courses_entireModule,
             ),
             items: [
               DropdownMenuItem<CourseLesson?>(
@@ -264,12 +269,12 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
         children: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(CoursesLocalizations.of(context)!.courses_cancel),
           ),
           const SizedBox(width: 8),
           ElevatedButton.icon(
             icon: const Icon(Icons.auto_awesome),
-            label: const Text('Generate'),
+            label: Text(CoursesLocalizations.of(context)!.courses_generate),
             onPressed: _selectedPlatforms.isEmpty ? null : _generate,
           ),
         ],
@@ -297,7 +302,7 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
       case MediaPlatform.medium:
         return 'Medium';
       case MediaPlatform.email:
-        return 'Email';
+        return CoursesLocalizations.of(context)!.courses_platformEmail;
       case MediaPlatform.youtube:
         return 'YouTube';
       case MediaPlatform.twitter:
@@ -305,7 +310,7 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
       case MediaPlatform.substack:
         return 'Substack';
       case MediaPlatform.inapp:
-        return 'In-App Tutorial';
+        return CoursesLocalizations.of(context)!.courses_inAppTutorial;
     }
   }
 

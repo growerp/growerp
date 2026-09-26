@@ -62,7 +62,9 @@ class _AllCourseParticipantsViewState extends State<AllCourseParticipantsView> {
           child: TextField(
             controller: _searchController,
             decoration: InputDecoration(
-              hintText: 'Search by name, email or course...',
+              hintText: CoursesLocalizations.of(
+                context,
+              )!.courses_searchParticipantsHint,
               prefixIcon: const Icon(Icons.search),
               suffixIcon: _searchString.isNotEmpty
                   ? IconButton(
@@ -98,7 +100,12 @@ class _AllCourseParticipantsViewState extends State<AllCourseParticipantsView> {
                         size: 48,
                       ),
                       const SizedBox(height: 8),
-                      Text(state.message ?? 'Failed to load participants'),
+                      Text(
+                        state.message ??
+                            CoursesLocalizations.of(
+                              context,
+                            )!.courses_failedToLoadParticipants,
+                      ),
                       TextButton(
                         onPressed: () => context.read<CourseBloc>().add(
                           CourseAllParticipantsFetch(
@@ -106,7 +113,9 @@ class _AllCourseParticipantsViewState extends State<AllCourseParticipantsView> {
                             refresh: true,
                           ),
                         ),
-                        child: const Text('Retry'),
+                        child: Text(
+                          CoursesLocalizations.of(context)!.courses_retry,
+                        ),
                       ),
                     ],
                   ),
@@ -128,8 +137,12 @@ class _AllCourseParticipantsViewState extends State<AllCourseParticipantsView> {
                       const SizedBox(height: 16),
                       Text(
                         _searchString.isEmpty
-                            ? 'No participants yet'
-                            : 'No results for "$_searchString"',
+                            ? CoursesLocalizations.of(
+                                context,
+                              )!.courses_noParticipantsYet
+                            : CoursesLocalizations.of(
+                                context,
+                              )!.courses_noResultsFor(_searchString),
                         style: const TextStyle(
                           fontSize: 18,
                           color: Colors.grey,
@@ -175,7 +188,8 @@ class _ParticipantTile extends StatelessWidget {
     final progress = participant.progressPercent ?? 0;
     final name = participant.fullName.isNotEmpty
         ? participant.fullName
-        : participant.username ?? 'Unknown';
+        : participant.username ??
+              CoursesLocalizations.of(context)!.courses_unknown;
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -265,8 +279,8 @@ class _ProgressChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (progressPercent >= 100) {
-      return const Chip(
-        label: Text('Completed'),
+      return Chip(
+        label: Text(CoursesLocalizations.of(context)!.courses_completed),
         backgroundColor: Color(0xFFE8F5E9),
         labelStyle: TextStyle(color: Colors.green),
       );

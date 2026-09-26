@@ -133,7 +133,12 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
               children: [
                 const Icon(Icons.error_outline, size: 48, color: Colors.red),
                 const SizedBox(height: 16),
-                Text(state.message ?? 'Failed to load course'),
+                Text(
+                  state.message ??
+                      CoursesLocalizations.of(
+                        context,
+                      )!.courses_failedToLoadCourse,
+                ),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
@@ -147,7 +152,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
                       );
                     }
                   },
-                  child: const Text('Retry'),
+                  child: Text(CoursesLocalizations.of(context)!.courses_retry),
                 ),
               ],
             ),
@@ -395,15 +400,21 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
           title: Text(state.course!.title),
           bottom: TabBar(
             tabs: [
-              const Tab(icon: Icon(Icons.menu_book), text: 'Content'),
-              const Tab(icon: Icon(Icons.list), text: 'Outline'),
+              Tab(
+                icon: Icon(Icons.menu_book),
+                text: CoursesLocalizations.of(context)!.courses_contentTab,
+              ),
+              Tab(
+                icon: Icon(Icons.list),
+                text: CoursesLocalizations.of(context)!.courses_outline,
+              ),
               if (hasMedia)
                 Tab(
                   icon: Badge(
                     label: Text('${state.mediaList.length}'),
                     child: const Icon(Icons.video_library),
                   ),
-                  text: 'Media',
+                  text: CoursesLocalizations.of(context)!.courses_media,
                 ),
             ],
           ),
@@ -502,7 +513,9 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
                       ListTile(
                         key: Key('video$moduleIndex'),
                         leading: const Icon(Icons.ondemand_video),
-                        title: const Text('Video'),
+                        title: Text(
+                          CoursesLocalizations.of(context)!.courses_video,
+                        ),
                         onTap: () => showCourseVideo(
                           context,
                           title: module.title,
@@ -513,15 +526,21 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
                       ListTile(
                         key: Key('slides$moduleIndex'),
                         leading: const Icon(Icons.slideshow),
-                        title: const Text('Slides'),
+                        title: Text(
+                          CoursesLocalizations.of(context)!.courses_slides,
+                        ),
                         onTap: () => showPdfDialog(
                           context,
                           key: const Key('slidesPdfDialog'),
                           title: module.title,
                           fileName: 'slides-${module.title}.pdf',
                           pageFormat: slidePageFormat,
-                          build: (format) =>
-                              slidesPdf(state.course!, [module], format),
+                          build: (format) => slidesPdf(
+                            CoursesLocalizations.of(context)!,
+                            state.course!,
+                            [module],
+                            format,
+                          ),
                         ),
                       ),
                     if ((module.quizQuestionCount ?? 0) > 0)
@@ -550,11 +569,20 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
         passed ? Icons.emoji_events : Icons.quiz_outlined,
         color: passed ? Colors.green : null,
       ),
-      title: const Text('Module quiz'),
+      title: Text(CoursesLocalizations.of(context)!.courses_moduleQuiz),
       subtitle: Text(
         score == null
-            ? '${module.quizQuestionCount} questions'
-            : 'Best score $score%${passed ? '' : ', ${CourseProgress.quizPassPercent}% to pass'}',
+            ? CoursesLocalizations.of(
+                context,
+              )!.courses_questionsCount(module.quizQuestionCount.toString())
+            : passed
+            ? CoursesLocalizations.of(
+                context,
+              )!.courses_bestScore(score.toString())
+            : CoursesLocalizations.of(context)!.courses_bestScoreToPass(
+                score.toString(),
+                CourseProgress.quizPassPercent.toString(),
+              ),
       ),
       onTap: () => _openQuiz(context, state, module),
     );
@@ -595,7 +623,10 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Progress', style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                CoursesLocalizations.of(context)!.courses_progressLabel,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               Text(
                 CoursesLocalizations.of(
                   context,
@@ -615,14 +646,18 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
           TextButton.icon(
             key: const Key('courseWorkbook'),
             icon: const Icon(Icons.menu_book_outlined),
-            label: const Text('Workbook (pdf)'),
+            label: Text(CoursesLocalizations.of(context)!.courses_workbookPdf),
             onPressed: () => showPdfDialog(
               context,
               key: const Key('workbookPdfDialog'),
-              title: 'Workbook',
+              title: CoursesLocalizations.of(context)!.courses_workbook,
               fileName: 'workbook-${state.course!.title}.pdf',
               pageFormat: PdfPageFormat.a4,
-              build: (format) => workbookPdf(state.course!, format),
+              build: (format) => workbookPdf(
+                CoursesLocalizations.of(context)!,
+                state.course!,
+                format,
+              ),
             ),
           ),
         ],
@@ -700,7 +735,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
           OutlinedButton.icon(
             key: const Key('previousLesson'),
             icon: const Icon(Icons.arrow_back),
-            label: const Text('Previous'),
+            label: Text(CoursesLocalizations.of(context)!.courses_previous),
             onPressed: () {
               final prev = _getPreviousLesson(state);
               if (prev != null) {
@@ -713,7 +748,11 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
         ElevatedButton.icon(
           key: const Key('completeLesson'),
           icon: Icon(isCompleted ? Icons.check : Icons.check_circle_outline),
-          label: Text(isCompleted ? 'Completed' : 'Mark as Complete'),
+          label: Text(
+            isCompleted
+                ? CoursesLocalizations.of(context)!.courses_completed
+                : CoursesLocalizations.of(context)!.courses_markAsComplete,
+          ),
           style: ElevatedButton.styleFrom(
             backgroundColor: isCompleted ? Colors.green : null,
           ),
@@ -729,7 +768,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
           OutlinedButton.icon(
             key: const Key('nextLesson'),
             icon: const Icon(Icons.arrow_forward),
-            label: const Text('Next'),
+            label: Text(CoursesLocalizations.of(context)!.courses_next),
             onPressed: () {
               final next = _getNextLesson(state);
               if (next != null) {
@@ -767,7 +806,9 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
           child: OutlinedButton.icon(
             key: const Key('takeQuiz'),
             icon: const Icon(Icons.quiz_outlined),
-            label: const Text('Take the module quiz'),
+            label: Text(
+              CoursesLocalizations.of(context)!.courses_takeModuleQuiz,
+            ),
             onPressed: () => _openQuiz(context, state, module),
           ),
         ),
@@ -778,12 +819,16 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
           color: Colors.green.withValues(alpha: 0.12),
           child: ListTile(
             leading: const Icon(Icons.workspace_premium, color: Colors.green),
-            title: const Text('Course completed!'),
+            title: Text(
+              CoursesLocalizations.of(context)!.courses_courseCompleted,
+            ),
             trailing: ElevatedButton(
               key: const Key('courseCertificate'),
               onPressed: () =>
                   showCourseCertificate(context, state.course!.courseId!),
-              child: const Text('Certificate'),
+              child: Text(
+                CoursesLocalizations.of(context)!.courses_certificate,
+              ),
             ),
           ),
         ),
@@ -1001,21 +1046,21 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
   String _getPlatformLabel(MediaPlatform? platform) {
     switch (platform) {
       case MediaPlatform.youtube:
-        return 'YouTube Script';
+        return CoursesLocalizations.of(context)!.courses_youtubeScript;
       case MediaPlatform.linkedin:
-        return 'LinkedIn Post';
+        return CoursesLocalizations.of(context)!.courses_linkedinPost;
       case MediaPlatform.twitter:
-        return 'Twitter Thread';
+        return CoursesLocalizations.of(context)!.courses_twitterThread;
       case MediaPlatform.medium:
-        return 'Medium Article';
+        return CoursesLocalizations.of(context)!.courses_mediumArticle;
       case MediaPlatform.email:
-        return 'Email Sequence';
+        return CoursesLocalizations.of(context)!.courses_emailSequence;
       case MediaPlatform.substack:
-        return 'Substack Post';
+        return CoursesLocalizations.of(context)!.courses_substackPost;
       case MediaPlatform.inapp:
-        return 'In-App Tutorial';
+        return CoursesLocalizations.of(context)!.courses_inAppTutorial;
       default:
-        return 'Content';
+        return CoursesLocalizations.of(context)!.courses_contentTab;
     }
   }
 
@@ -1043,17 +1088,17 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
   String _getMediaTypeLabel(MediaType mediaType) {
     switch (mediaType) {
       case MediaType.post:
-        return 'Post';
+        return CoursesLocalizations.of(context)!.courses_typePost;
       case MediaType.article:
-        return 'Article';
+        return CoursesLocalizations.of(context)!.courses_typeArticle;
       case MediaType.sequence:
-        return 'Sequence';
+        return CoursesLocalizations.of(context)!.courses_typeSequence;
       case MediaType.script:
-        return 'Script';
+        return CoursesLocalizations.of(context)!.courses_typeScript;
       case MediaType.thread:
-        return 'Thread';
+        return CoursesLocalizations.of(context)!.courses_typeThread;
       case MediaType.tutorial:
-        return 'Tutorial';
+        return CoursesLocalizations.of(context)!.courses_typeTutorial;
     }
   }
 
@@ -1063,19 +1108,25 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
     switch (status) {
       case MediaStatus.published:
         color = Colors.green;
-        label = 'PUBLISHED';
+        label = CoursesLocalizations.of(
+          context,
+        )!.courses_published.toUpperCase();
         break;
       case MediaStatus.scheduled:
         color = Colors.blue;
-        label = 'SCHEDULED';
+        label = CoursesLocalizations.of(
+          context,
+        )!.courses_scheduled.toUpperCase();
         break;
       case MediaStatus.reviewed:
         color = Colors.orange;
-        label = 'REVIEWED';
+        label = CoursesLocalizations.of(
+          context,
+        )!.courses_reviewed.toUpperCase();
         break;
       default:
         color = Colors.grey;
-        label = 'DRAFT';
+        label = CoursesLocalizations.of(context)!.courses_draft.toUpperCase();
     }
 
     return Container(

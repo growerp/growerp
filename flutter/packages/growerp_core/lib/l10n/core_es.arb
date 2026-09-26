@@ -444,5 +444,6 @@
     "description": "System setup: help text for the outreach setup guide switch"
   },
   "onboarding": "Incorporación",
-  "leaveRequests": "Solicitudes de permiso"
+  "leaveRequests": "Solicitudes de permiso",
+  "myCourses": "Mis cursos"
 }

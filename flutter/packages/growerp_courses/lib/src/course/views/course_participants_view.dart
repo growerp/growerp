@@ -51,12 +51,17 @@ class _CourseParticipantsViewState extends State<CourseParticipantsView> {
               children: [
                 const Icon(Icons.error_outline, color: Colors.red, size: 48),
                 const SizedBox(height: 8),
-                Text(state.message ?? 'Failed to load participants'),
+                Text(
+                  state.message ??
+                      CoursesLocalizations.of(
+                        context,
+                      )!.courses_failedToLoadParticipants,
+                ),
                 TextButton(
                   onPressed: () => context.read<CourseBloc>().add(
                     CourseParticipantsFetch(widget.courseId),
                   ),
-                  child: const Text('Retry'),
+                  child: Text(CoursesLocalizations.of(context)!.courses_retry),
                 ),
               ],
             ),
@@ -86,7 +91,9 @@ class _CourseParticipantsViewState extends State<CourseParticipantsView> {
                 const SizedBox(height: 16),
                 TextButton.icon(
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Refresh'),
+                  label: Text(
+                    CoursesLocalizations.of(context)!.courses_refresh,
+                  ),
                   onPressed: () => context.read<CourseBloc>().add(
                     CourseParticipantsFetch(widget.courseId),
                   ),
@@ -126,7 +133,8 @@ class _ParticipantTile extends StatelessWidget {
     final progress = participant.progressPercent ?? 0;
     final name = participant.fullName.isNotEmpty
         ? participant.fullName
-        : participant.username ?? 'Unknown';
+        : participant.username ??
+              CoursesLocalizations.of(context)!.courses_unknown;
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
@@ -208,8 +216,8 @@ class _StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (progressPercent >= 100) {
-      return const Chip(
-        label: Text('Completed'),
+      return Chip(
+        label: Text(CoursesLocalizations.of(context)!.courses_completed),
         backgroundColor: Color(0xFFE8F5E9),
         labelStyle: TextStyle(color: Colors.green),
       );

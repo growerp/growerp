@@ -245,6 +245,8 @@ class HelperFunctions {
         return localizations.courseMedia;
       case 'courses':
         return localizations.courses;
+      case 'mycourses':
+        return localizations.myCourses;
       case 'courseviewer':
         return localizations.courseViewer;
       case 'crm':

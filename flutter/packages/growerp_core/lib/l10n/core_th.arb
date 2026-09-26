@@ -1355,5 +1355,6 @@
     "description": "System setup: help text for the outreach setup guide switch"
   },
   "onboarding": "การปฐมนิเทศ",
-  "leaveRequests": "คำขอลา"
+  "leaveRequests": "คำขอลา",
+  "myCourses": "คอร์สเรียนของฉัน"
 }

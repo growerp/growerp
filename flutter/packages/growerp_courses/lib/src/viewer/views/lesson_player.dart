@@ -81,7 +81,10 @@ class LessonPlayer extends StatelessWidget {
             if (isCompleted) ...[
               const Icon(Icons.check_circle, size: 16, color: Colors.green),
               const SizedBox(width: 4),
-              const Text('Completed', style: TextStyle(color: Colors.green)),
+              Text(
+                CoursesLocalizations.of(context)!.courses_completed,
+                style: const TextStyle(color: Colors.green),
+              ),
             ],
           ],
         ),
@@ -185,7 +188,7 @@ class LessonPlayer extends StatelessWidget {
         if (onPrevious != null)
           OutlinedButton.icon(
             icon: const Icon(Icons.arrow_back),
-            label: const Text('Previous'),
+            label: Text(CoursesLocalizations.of(context)!.courses_previous),
             onPressed: onPrevious,
           )
         else
@@ -199,16 +202,16 @@ class LessonPlayer extends StatelessWidget {
             onPressed: onMarkComplete,
           ),
         if (isCompleted)
-          const Chip(
+          Chip(
             avatar: Icon(Icons.check, color: Colors.white),
-            label: Text('Completed'),
+            label: Text(CoursesLocalizations.of(context)!.courses_completed),
             backgroundColor: Colors.green,
             labelStyle: TextStyle(color: Colors.white),
           ),
         if (onNext != null)
           OutlinedButton.icon(
             icon: const Icon(Icons.arrow_forward),
-            label: const Text('Next'),
+            label: Text(CoursesLocalizations.of(context)!.courses_next),
             onPressed: onNext,
           )
         else

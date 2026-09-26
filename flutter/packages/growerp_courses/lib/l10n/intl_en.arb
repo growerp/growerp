@@ -406,5 +406,995 @@
   "courses_searchHintCourses": "Search courses...",
   "@courses_searchHintCourses": {
     "description": "Search field hint"
+  },
+  "courses_cancel": "Cancel",
+  "@courses_cancel": {
+    "description": "Cancel"
+  },
+  "courses_delete": "Delete",
+  "@courses_delete": {
+    "description": "Delete"
+  },
+  "courses_add": "Add",
+  "@courses_add": {
+    "description": "Add"
+  },
+  "courses_write": "Write",
+  "@courses_write": {
+    "description": "Write"
+  },
+  "courses_save": "Save",
+  "@courses_save": {
+    "description": "Save"
+  },
+  "courses_close": "Close",
+  "@courses_close": {
+    "description": "Close"
+  },
+  "courses_preview": "Preview",
+  "@courses_preview": {
+    "description": "Preview"
+  },
+  "courses_create": "Create",
+  "@courses_create": {
+    "description": "Create"
+  },
+  "courses_update": "Update",
+  "@courses_update": {
+    "description": "Update"
+  },
+  "courses_done": "Done",
+  "@courses_done": {
+    "description": "Done"
+  },
+  "courses_starting": "Starting",
+  "@courses_starting": {
+    "description": "Starting"
+  },
+  "courses_description": "Description",
+  "@courses_description": {
+    "description": "Description"
+  },
+  "courses_audience": "Audience",
+  "@courses_audience": {
+    "description": "Audience"
+  },
+  "courses_difficulty": "Difficulty",
+  "@courses_difficulty": {
+    "description": "Difficulty"
+  },
+  "courses_beginner": "Beginner",
+  "@courses_beginner": {
+    "description": "Beginner"
+  },
+  "courses_intermediate": "Intermediate",
+  "@courses_intermediate": {
+    "description": "Intermediate"
+  },
+  "courses_advanced": "Advanced",
+  "@courses_advanced": {
+    "description": "Advanced"
+  },
+  "courses_slides": "Slides",
+  "@courses_slides": {
+    "description": "Slides"
+  },
+  "courses_workbook": "Workbook",
+  "@courses_workbook": {
+    "description": "Workbook"
+  },
+  "courses_editCourse": "Edit Course",
+  "@courses_editCourse": {
+    "description": "Edit Course"
+  },
+  "courses_newCourse": "New Course",
+  "@courses_newCourse": {
+    "description": "New Course"
+  },
+  "courses_details": "Details",
+  "@courses_details": {
+    "description": "Details"
+  },
+  "courses_participants": "Participants",
+  "@courses_participants": {
+    "description": "Participants"
+  },
+  "courses_courseTitleRequired": "Course Title *",
+  "@courses_courseTitleRequired": {
+    "description": "Course Title *"
+  },
+  "courses_courseTitleHint": "e.g., GrowERP Field Service Masterclass",
+  "@courses_courseTitleHint": {
+    "description": "e.g., GrowERP Field Service Masterclass"
+  },
+  "courses_enterCourseTitle": "Please enter a course title",
+  "@courses_enterCourseTitle": {
+    "description": "Please enter a course title"
+  },
+  "courses_descriptionHint": "Brief overview of what this course covers",
+  "@courses_descriptionHint": {
+    "description": "Brief overview of what this course covers"
+  },
+  "courses_learningObjectives": "Learning Objectives",
+  "@courses_learningObjectives": {
+    "description": "Learning Objectives"
+  },
+  "courses_objectivesHint": "What will learners be able to do after this course?",
+  "@courses_objectivesHint": {
+    "description": "What will learners be able to do after this course?"
+  },
+  "courses_audienceHint": "Who is this course for? The AI writes for them.",
+  "@courses_audienceHint": {
+    "description": "Who is this course for? The AI writes for them."
+  },
+  "courses_status": "Status",
+  "@courses_status": {
+    "description": "Status"
+  },
+  "courses_draft": "Draft",
+  "@courses_draft": {
+    "description": "Draft"
+  },
+  "courses_published": "Published",
+  "@courses_published": {
+    "description": "Published"
+  },
+  "courses_archived": "Archived",
+  "@courses_archived": {
+    "description": "Archived"
+  },
+  "courses_durationMinutes": "Duration (minutes)",
+  "@courses_durationMinutes": {
+    "description": "Duration (minutes)"
+  },
+  "courses_productId": "Product ID",
+  "@courses_productId": {
+    "description": "Product ID"
+  },
+  "courses_priceLabel": "Price",
+  "@courses_priceLabel": {
+    "description": "Price"
+  },
+  "courses_leaveEmptyForFree": "Leave empty for free",
+  "@courses_leaveEmptyForFree": {
+    "description": "Leave empty for free"
+  },
+  "courses_enterValidPrice": "Enter a valid price",
+  "@courses_enterValidPrice": {
+    "description": "Enter a valid price"
+  },
+  "courses_writeLessonsWithAi": "Write lessons with AI",
+  "@courses_writeLessonsWithAi": {
+    "description": "Write lessons with AI"
+  },
+  "courses_quizzesWithAi": "Quizzes with AI",
+  "@courses_quizzesWithAi": {
+    "description": "Quizzes with AI"
+  },
+  "courses_slidesWithAi": "Slides with AI",
+  "@courses_slidesWithAi": {
+    "description": "Slides with AI"
+  },
+  "courses_videosFromSlides": "Videos from slides",
+  "@courses_videosFromSlides": {
+    "description": "Videos from slides"
+  },
+  "courses_slideDeck": "Slide deck",
+  "@courses_slideDeck": {
+    "description": "Slide deck"
+  },
+  "courses_promoPackWithAi": "Promo pack with AI",
+  "@courses_promoPackWithAi": {
+    "description": "Promo pack with AI"
+  },
+  "courses_promoPackMessage": "The AI makes a cover image, a landing page that links to the course page, an email sequence and LinkedIn and X posts. The posts and emails are drafts in Course Media, the landing page is a draft in Landing Pages.",
+  "@courses_promoPackMessage": {
+    "description": "The AI makes a cover image, a landing page that links to the course page, an email sequence and LinkedIn and X posts. The posts and emails are drafts in Course Media, the landing page is a draft in Landing Pages."
+  },
+  "courses_writeThisLessonWithAi": "Write this lesson with AI",
+  "@courses_writeThisLessonWithAi": {
+    "description": "Write this lesson with AI"
+  },
+  "courses_quizQuestions": "Quiz: {count} questions",
+  "@courses_quizQuestions": {
+    "description": "Quiz: {count} questions",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_writeThisQuizWithAi": "Write this quiz with AI",
+  "@courses_writeThisQuizWithAi": {
+    "description": "Write this quiz with AI"
+  },
+  "courses_slidesCount": "Slides: {count}",
+  "@courses_slidesCount": {
+    "description": "Slides: {count}",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_makeTheseSlidesWithAi": "Make these slides with AI",
+  "@courses_makeTheseSlidesWithAi": {
+    "description": "Make these slides with AI"
+  },
+  "courses_videoNone": "Video: none",
+  "@courses_videoNone": {
+    "description": "Video: none"
+  },
+  "courses_videoReady": "Video: ready",
+  "@courses_videoReady": {
+    "description": "Video: ready"
+  },
+  "courses_makeThisVideo": "Make this video from the slides",
+  "@courses_makeThisVideo": {
+    "description": "Make this video from the slides"
+  },
+  "courses_aiJobFailed": "The AI job failed",
+  "@courses_aiJobFailed": {
+    "description": "The AI job failed"
+  },
+  "courses_writeAllLessonsWithAi": "Write all lessons with AI",
+  "@courses_writeAllLessonsWithAi": {
+    "description": "Write all lessons with AI"
+  },
+  "courses_writeLessonWithAi": "Write lesson with AI",
+  "@courses_writeLessonWithAi": {
+    "description": "Write lesson with AI"
+  },
+  "courses_rewriteAllLessonsMessage": "The AI rewrites the text of every lesson, using the lesson text as the brief. This can take several minutes.",
+  "@courses_rewriteAllLessonsMessage": {
+    "description": "The AI rewrites the text of every lesson, using the lesson text as the brief. This can take several minutes."
+  },
+  "courses_rewriteLessonMessage": "The AI rewrites \"{title}\", using its current text as the brief.",
+  "@courses_rewriteLessonMessage": {
+    "description": "The AI rewrites \"{title}\", using its current text as the brief.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_writeQuizzesWithAi": "Write quizzes with AI",
+  "@courses_writeQuizzesWithAi": {
+    "description": "Write quizzes with AI"
+  },
+  "courses_quizzesAllMessage": "The AI writes a quiz for every module from its lessons, replacing the questions there are now.",
+  "@courses_quizzesAllMessage": {
+    "description": "The AI writes a quiz for every module from its lessons, replacing the questions there are now."
+  },
+  "courses_quizModuleMessage": "The AI writes the quiz of \"{title}\" from its lessons, replacing the questions there are now.",
+  "@courses_quizModuleMessage": {
+    "description": "The AI writes the quiz of \"{title}\" from its lessons, replacing the questions there are now.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_makeSlidesWithAi": "Make slides with AI",
+  "@courses_makeSlidesWithAi": {
+    "description": "Make slides with AI"
+  },
+  "courses_slidesAllMessage": "The AI writes the slides of every module from its lessons, with speaker notes, replacing the slides there are now.",
+  "@courses_slidesAllMessage": {
+    "description": "The AI writes the slides of every module from its lessons, with speaker notes, replacing the slides there are now."
+  },
+  "courses_slidesModuleMessage": "The AI writes the slides of \"{title}\" from its lessons, with speaker notes, replacing the slides there are now.",
+  "@courses_slidesModuleMessage": {
+    "description": "The AI writes the slides of \"{title}\" from its lessons, with speaker notes, replacing the slides there are now.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_makeVideos": "Make videos",
+  "@courses_makeVideos": {
+    "description": "Make videos"
+  },
+  "courses_videosAllMessage": "The speaker notes of the slides of every module are spoken with text-to-speech and made into a video per module, replacing the videos there are now. This takes a few minutes per module.",
+  "@courses_videosAllMessage": {
+    "description": "The speaker notes of the slides of every module are spoken with text-to-speech and made into a video per module, replacing the videos there are now. This takes a few minutes per module."
+  },
+  "courses_videoModuleMessage": "The speaker notes of the slides of \"{title}\" are spoken with text-to-speech and made into a video, replacing the video there is now.",
+  "@courses_videoModuleMessage": {
+    "description": "The speaker notes of the slides of \"{title}\" are spoken with text-to-speech and made into a video, replacing the video there is now.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_moduleTitle": "Module Title",
+  "@courses_moduleTitle": {
+    "description": "Module Title"
+  },
+  "courses_lessonTitle": "Lesson Title",
+  "@courses_lessonTitle": {
+    "description": "Lesson Title"
+  },
+  "courses_contentMarkdown": "Content (Markdown)",
+  "@courses_contentMarkdown": {
+    "description": "Content (Markdown)"
+  },
+  "courses_aiCouldNotCreateCourse": "The AI could not create the course",
+  "@courses_aiCouldNotCreateCourse": {
+    "description": "The AI could not create the course"
+  },
+  "courses_createCourseWithAi": "Create course with AI",
+  "@courses_createCourseWithAi": {
+    "description": "Create course with AI"
+  },
+  "courses_takesAMinute": "This takes a minute or two. The course is created as a draft.",
+  "@courses_takesAMinute": {
+    "description": "This takes a minute or two. The course is created as a draft."
+  },
+  "courses_wizardTitleHint": "e.g., Bookkeeping basics for freelancers",
+  "@courses_wizardTitleHint": {
+    "description": "e.g., Bookkeeping basics for freelancers"
+  },
+  "courses_wizardAudienceHint": "Who is this course for, what do they know?",
+  "@courses_wizardAudienceHint": {
+    "description": "Who is this course for, what do they know?"
+  },
+  "courses_curriculum": "Curriculum",
+  "@courses_curriculum": {
+    "description": "Curriculum"
+  },
+  "courses_curriculumHint": "Topics in order, one per line. Leave empty to let the AI propose them.",
+  "@courses_curriculumHint": {
+    "description": "Topics in order, one per line. Leave empty to let the AI propose them."
+  },
+  "courses_additionalResources": "Additional resources",
+  "@courses_additionalResources": {
+    "description": "Additional resources"
+  },
+  "courses_notes": "Notes",
+  "@courses_notes": {
+    "description": "Notes"
+  },
+  "courses_notesHint": "Anything the AI should know or use",
+  "@courses_notesHint": {
+    "description": "Anything the AI should know or use"
+  },
+  "courses_webPages": "Web pages",
+  "@courses_webPages": {
+    "description": "Web pages"
+  },
+  "courses_oneUrlPerLine": "One URL per line",
+  "@courses_oneUrlPerLine": {
+    "description": "One URL per line"
+  },
+  "courses_notAValidUrl": "Not a valid URL: {url}",
+  "@courses_notAValidUrl": {
+    "description": "Not a valid URL: {url}",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_addDocuments": "Add documents",
+  "@courses_addDocuments": {
+    "description": "Add documents"
+  },
+  "courses_documentsHint": "pdf, docx, md or txt; documents are also added to the company knowledge base",
+  "@courses_documentsHint": {
+    "description": "pdf, docx, md or txt; documents are also added to the company knowledge base"
+  },
+  "courses_useKnowledgeBase": "Use the company knowledge base",
+  "@courses_useKnowledgeBase": {
+    "description": "Use the company knowledge base"
+  },
+  "courses_createOutline": "Create outline",
+  "@courses_createOutline": {
+    "description": "Create outline"
+  },
+  "courses_skippedTooLarge": "Skipped, larger than 10MB: {files}",
+  "@courses_skippedTooLarge": {
+    "description": "Skipped, larger than 10MB: {files}",
+    "placeholders": {
+      "files": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_couldNotOpenFile": "Could not open file: {error}",
+  "@courses_couldNotOpenFile": {
+    "description": "Could not open file: {error}",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_aiKeyNeeded": "AI key needed",
+  "@courses_aiKeyNeeded": {
+    "description": "AI key needed"
+  },
+  "courses_allowanceUsedUp": "The free monthly AI allowance is used up.",
+  "@courses_allowanceUsedUp": {
+    "description": "The free monthly AI allowance is used up."
+  },
+  "courses_addKeyToContinue": "Add your own API key to continue; what was generated so far is kept.",
+  "@courses_addKeyToContinue": {
+    "description": "Add your own API key to continue; what was generated so far is kept."
+  },
+  "courses_later": "Later",
+  "@courses_later": {
+    "description": "Later"
+  },
+  "courses_addApiKey": "Add API key",
+  "@courses_addApiKey": {
+    "description": "Add API key"
+  },
+  "courses_aiSettings": "AI Settings",
+  "@courses_aiSettings": {
+    "description": "AI Settings"
+  },
+  "courses_quizTitle": "Quiz: {title}",
+  "@courses_quizTitle": {
+    "description": "Quiz: {title}",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_noQuestionsYet": "No questions yet: add them, or let the AI write them",
+  "@courses_noQuestionsYet": {
+    "description": "No questions yet: add them, or let the AI write them"
+  },
+  "courses_answerIs": "Answer: {answer}",
+  "@courses_answerIs": {
+    "description": "Answer: {answer}",
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_addQuestion": "Add question",
+  "@courses_addQuestion": {
+    "description": "Add question"
+  },
+  "courses_editQuestion": "Edit question",
+  "@courses_editQuestion": {
+    "description": "Edit question"
+  },
+  "courses_question": "Question",
+  "@courses_question": {
+    "description": "Question"
+  },
+  "courses_enterQuestion": "Enter a question",
+  "@courses_enterQuestion": {
+    "description": "Enter a question"
+  },
+  "courses_optionN": "Option {number}",
+  "@courses_optionN": {
+    "description": "Option {number}",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_enterThisOption": "Enter this option",
+  "@courses_enterThisOption": {
+    "description": "Enter this option"
+  },
+  "courses_selectCorrectAnswer": "Select the correct answer with the radio button",
+  "@courses_selectCorrectAnswer": {
+    "description": "Select the correct answer with the radio button"
+  },
+  "courses_explanationShown": "Explanation (shown after answering)",
+  "@courses_explanationShown": {
+    "description": "Explanation (shown after answering)"
+  },
+  "courses_slidesOf": "Slides: {title}",
+  "@courses_slidesOf": {
+    "description": "Slides: {title}",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_noSlidesYet": "No slides yet: add them, or let the AI make them",
+  "@courses_noSlidesYet": {
+    "description": "No slides yet: add them, or let the AI make them"
+  },
+  "courses_addSlide": "Add slide",
+  "@courses_addSlide": {
+    "description": "Add slide"
+  },
+  "courses_editSlide": "Edit slide",
+  "@courses_editSlide": {
+    "description": "Edit slide"
+  },
+  "courses_titleLabel": "Title",
+  "@courses_titleLabel": {
+    "description": "Title"
+  },
+  "courses_enterTitle": "Enter a title",
+  "@courses_enterTitle": {
+    "description": "Enter a title"
+  },
+  "courses_bulletsOnePerLine": "Bullets, one per line",
+  "@courses_bulletsOnePerLine": {
+    "description": "Bullets, one per line"
+  },
+  "courses_speakerNotes": "Speaker notes (the video narration)",
+  "@courses_speakerNotes": {
+    "description": "Speaker notes (the video narration)"
+  },
+  "courses_couldNotLoadQuiz": "Could not load the quiz",
+  "@courses_couldNotLoadQuiz": {
+    "description": "Could not load the quiz"
+  },
+  "courses_tryAgain": "Try again",
+  "@courses_tryAgain": {
+    "description": "Try again"
+  },
+  "courses_submitAnswers": "Submit answers",
+  "@courses_submitAnswers": {
+    "description": "Submit answers"
+  },
+  "courses_passed": "Passed!",
+  "@courses_passed": {
+    "description": "Passed!"
+  },
+  "courses_needToPass": "You need {percent}% to pass. Read the explanations and try again.",
+  "@courses_needToPass": {
+    "description": "You need {percent}% to pass. Read the explanations and try again.",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_playInBrowser": "Play the video in the browser",
+  "@courses_playInBrowser": {
+    "description": "Play the video in the browser"
+  },
+  "courses_couldNotPlayVideo": "Could not play the video: {error}",
+  "@courses_couldNotPlayVideo": {
+    "description": "Could not play the video: {error}",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_moduleHeading": "Module {number}: {title}",
+  "@courses_moduleHeading": {
+    "description": "Module {number}: {title}",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_whatYouWillLearn": "What you will learn",
+  "@courses_whatYouWillLearn": {
+    "description": "What you will learn"
+  },
+  "courses_certificate": "Certificate",
+  "@courses_certificate": {
+    "description": "Certificate"
+  },
+  "courses_notCompletedYet": "Not completed yet",
+  "@courses_notCompletedYet": {
+    "description": "Not completed yet"
+  },
+  "courses_certificateOfCompletion": "CERTIFICATE OF COMPLETION",
+  "@courses_certificateOfCompletion": {
+    "description": "CERTIFICATE OF COMPLETION"
+  },
+  "courses_thisCertifiesThat": "This certifies that",
+  "@courses_thisCertifiesThat": {
+    "description": "This certifies that"
+  },
+  "courses_hasCompletedCourse": "has successfully completed the course",
+  "@courses_hasCompletedCourse": {
+    "description": "has successfully completed the course"
+  },
+  "courses_hoursOfStudy": "{hours} hours of study",
+  "@courses_hoursOfStudy": {
+    "description": "{hours} hours of study",
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_dateLabel": "Date",
+  "@courses_dateLabel": {
+    "description": "Date"
+  },
+  "courses_certificateNo": "Certificate {number}",
+  "@courses_certificateNo": {
+    "description": "Certificate {number}",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_failedToLoadCourse": "Failed to load course",
+  "@courses_failedToLoadCourse": {
+    "description": "Failed to load course"
+  },
+  "courses_retry": "Retry",
+  "@courses_retry": {
+    "description": "Retry"
+  },
+  "courses_contentTab": "Content",
+  "@courses_contentTab": {
+    "description": "Content"
+  },
+  "courses_outline": "Outline",
+  "@courses_outline": {
+    "description": "Outline"
+  },
+  "courses_media": "Media",
+  "@courses_media": {
+    "description": "Media"
+  },
+  "courses_video": "Video",
+  "@courses_video": {
+    "description": "Video"
+  },
+  "courses_moduleQuiz": "Module quiz",
+  "@courses_moduleQuiz": {
+    "description": "Module quiz"
+  },
+  "courses_questionsCount": "{count} questions",
+  "@courses_questionsCount": {
+    "description": "{count} questions",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_bestScore": "Best score {score}%",
+  "@courses_bestScore": {
+    "description": "Best score {score}%",
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_bestScoreToPass": "Best score {score}%, {percent}% to pass",
+  "@courses_bestScoreToPass": {
+    "description": "Best score {score}%, {percent}% to pass",
+    "placeholders": {
+      "score": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_progressLabel": "Progress",
+  "@courses_progressLabel": {
+    "description": "Progress"
+  },
+  "courses_workbookPdf": "Workbook (pdf)",
+  "@courses_workbookPdf": {
+    "description": "Workbook (pdf)"
+  },
+  "courses_previous": "Previous",
+  "@courses_previous": {
+    "description": "Previous"
+  },
+  "courses_next": "Next",
+  "@courses_next": {
+    "description": "Next"
+  },
+  "courses_completed": "Completed",
+  "@courses_completed": {
+    "description": "Completed"
+  },
+  "courses_takeModuleQuiz": "Take the module quiz",
+  "@courses_takeModuleQuiz": {
+    "description": "Take the module quiz"
+  },
+  "courses_courseCompleted": "Course completed!",
+  "@courses_courseCompleted": {
+    "description": "Course completed!"
+  },
+  "courses_youtubeScript": "YouTube Script",
+  "@courses_youtubeScript": {
+    "description": "YouTube Script"
+  },
+  "courses_linkedinPost": "LinkedIn Post",
+  "@courses_linkedinPost": {
+    "description": "LinkedIn Post"
+  },
+  "courses_twitterThread": "Twitter Thread",
+  "@courses_twitterThread": {
+    "description": "Twitter Thread"
+  },
+  "courses_mediumArticle": "Medium Article",
+  "@courses_mediumArticle": {
+    "description": "Medium Article"
+  },
+  "courses_emailSequence": "Email Sequence",
+  "@courses_emailSequence": {
+    "description": "Email Sequence"
+  },
+  "courses_substackPost": "Substack Post",
+  "@courses_substackPost": {
+    "description": "Substack Post"
+  },
+  "courses_inAppTutorial": "In-App Tutorial",
+  "@courses_inAppTutorial": {
+    "description": "In-App Tutorial"
+  },
+  "courses_typePost": "Post",
+  "@courses_typePost": {
+    "description": "Post"
+  },
+  "courses_typeArticle": "Article",
+  "@courses_typeArticle": {
+    "description": "Article"
+  },
+  "courses_typeSequence": "Sequence",
+  "@courses_typeSequence": {
+    "description": "Sequence"
+  },
+  "courses_typeScript": "Script",
+  "@courses_typeScript": {
+    "description": "Script"
+  },
+  "courses_typeThread": "Thread",
+  "@courses_typeThread": {
+    "description": "Thread"
+  },
+  "courses_typeTutorial": "Tutorial",
+  "@courses_typeTutorial": {
+    "description": "Tutorial"
+  },
+  "courses_reviewed": "Reviewed",
+  "@courses_reviewed": {
+    "description": "Reviewed"
+  },
+  "courses_scheduled": "Scheduled",
+  "@courses_scheduled": {
+    "description": "Scheduled"
+  },
+  "courses_failedToLoadCourses": "Failed to load courses",
+  "@courses_failedToLoadCourses": {
+    "description": "Failed to load courses"
+  },
+  "courses_subscribed": "Subscribed",
+  "@courses_subscribed": {
+    "description": "Subscribed"
+  },
+  "courses_open": "Open",
+  "@courses_open": {
+    "description": "Open"
+  },
+  "courses_free": "Free",
+  "@courses_free": {
+    "description": "Free"
+  },
+  "courses_subscribe": "Subscribe",
+  "@courses_subscribe": {
+    "description": "Subscribe"
+  },
+  "courses_anErrorOccurred": "An error occurred",
+  "@courses_anErrorOccurred": {
+    "description": "An error occurred"
+  },
+  "courses_couldNotLoadCourses": "Could not load courses!",
+  "@courses_couldNotLoadCourses": {
+    "description": "Could not load courses!"
+  },
+  "courses_addNewCourse": "Add new course",
+  "@courses_addNewCourse": {
+    "description": "Add new course"
+  },
+  "courses_failedToLoadParticipants": "Failed to load participants",
+  "@courses_failedToLoadParticipants": {
+    "description": "Failed to load participants"
+  },
+  "courses_refresh": "Refresh",
+  "@courses_refresh": {
+    "description": "Refresh"
+  },
+  "courses_unknown": "Unknown",
+  "@courses_unknown": {
+    "description": "Unknown"
+  },
+  "courses_searchParticipantsHint": "Search by name, email or course...",
+  "@courses_searchParticipantsHint": {
+    "description": "Search by name, email or course..."
+  },
+  "courses_noResultsFor": "No results for \"{search}\"",
+  "@courses_noResultsFor": {
+    "description": "No results for \"{search}\"",
+    "placeholders": {
+      "search": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_subscriptionFailed": "Subscription failed",
+  "@courses_subscriptionFailed": {
+    "description": "Subscription failed"
+  },
+  "courses_subscribeToCourse": "Subscribe to Course",
+  "@courses_subscribeToCourse": {
+    "description": "Subscribe to Course"
+  },
+  "courses_nameOnCard": "Name on Card",
+  "@courses_nameOnCard": {
+    "description": "Name on Card"
+  },
+  "courses_cardNumber": "Card Number",
+  "@courses_cardNumber": {
+    "description": "Card Number"
+  },
+  "courses_subscribeForFree": "Subscribe for Free",
+  "@courses_subscribeForFree": {
+    "description": "Subscribe for Free"
+  },
+  "courses_platformContent": "{platform} Content",
+  "@courses_platformContent": {
+    "description": "{platform} Content",
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_platformEmail": "Email",
+  "@courses_platformEmail": {
+    "description": "Email"
+  },
+  "courses_platformInApp": "In-App",
+  "@courses_platformInApp": {
+    "description": "In-App"
+  },
+  "courses_mediaPreview": "Media Preview",
+  "@courses_mediaPreview": {
+    "description": "Media Preview"
+  },
+  "courses_edit": "Edit",
+  "@courses_edit": {
+    "description": "Edit"
+  },
+  "courses_copyToClipboard": "Copy to clipboard",
+  "@courses_copyToClipboard": {
+    "description": "Copy to clipboard"
+  },
+  "courses_editContentHint": "Edit content here...",
+  "@courses_editContentHint": {
+    "description": "Edit content here..."
+  },
+  "courses_regenerate": "Regenerate",
+  "@courses_regenerate": {
+    "description": "Regenerate"
+  },
+  "courses_generating": "Generating...",
+  "@courses_generating": {
+    "description": "Generating..."
+  },
+  "courses_generateVideo": "Generate Video",
+  "@courses_generateVideo": {
+    "description": "Generate Video"
+  },
+  "courses_videoGenerationCompleted": "Video generation completed",
+  "@courses_videoGenerationCompleted": {
+    "description": "Video generation completed"
+  },
+  "courses_errorPrefix": "Error: {error}",
+  "@courses_errorPrefix": {
+    "description": "Error: {error}",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_generateAiContent": "Generate AI Content",
+  "@courses_generateAiContent": {
+    "description": "Generate AI Content"
+  },
+  "courses_courseLabel": "Course",
+  "@courses_courseLabel": {
+    "description": "Course"
+  },
+  "courses_moduleLabel": "Module",
+  "@courses_moduleLabel": {
+    "description": "Module"
+  },
+  "courses_lessonLabel": "Lesson",
+  "@courses_lessonLabel": {
+    "description": "Lesson"
+  },
+  "courses_generate": "Generate",
+  "@courses_generate": {
+    "description": "Generate"
+  },
+  "courses_failedToGenerateContent": "Failed to generate content",
+  "@courses_failedToGenerateContent": {
+    "description": "Failed to generate content"
+  },
+  "courses_moduleOptional": "Module (optional)",
+  "@courses_moduleOptional": {
+    "description": "Module (optional)"
+  },
+  "courses_allModules": "All modules",
+  "@courses_allModules": {
+    "description": "All modules"
+  },
+  "courses_lessonOptional": "Lesson (optional)",
+  "@courses_lessonOptional": {
+    "description": "Lesson (optional)"
+  },
+  "courses_generateContent": "Generate Content",
+  "@courses_generateContent": {
+    "description": "Generate Content"
+  },
+  "courses_videoScript": "Video Script",
+  "@courses_videoScript": {
+    "description": "Video Script"
+  },
+  "courses_descPost": "A short-form social media post optimized for engagement.",
+  "@courses_descPost": {
+    "description": "A short-form social media post optimized for engagement."
+  },
+  "courses_descArticle": "A long-form article with in-depth content suitable for blogging platforms.",
+  "@courses_descArticle": {
+    "description": "A long-form article with in-depth content suitable for blogging platforms."
+  },
+  "courses_descSequence": "A series of emails designed to educate and engage over time.",
+  "@courses_descSequence": {
+    "description": "A series of emails designed to educate and engage over time."
+  },
+  "courses_descScript": "A video script with intro, main content, and call-to-action.",
+  "@courses_descScript": {
+    "description": "A video script with intro, main content, and call-to-action."
+  },
+  "courses_descThread": "A series of connected posts for storytelling or explanations.",
+  "@courses_descThread": {
+    "description": "A series of connected posts for storytelling or explanations."
+  },
+  "courses_descTutorial": "Step-by-step instructional content with clear guidance.",
+  "@courses_descTutorial": {
+    "description": "Step-by-step instructional content with clear guidance."
+  },
+  "courses_courseCreated": "Course created successfully",
+  "@courses_courseCreated": {
+    "description": "Course created successfully"
+  },
+  "courses_courseUpdated": "Course updated successfully",
+  "@courses_courseUpdated": {
+    "description": "Course updated successfully"
+  },
+  "courses_courseDeleted": "Course deleted successfully",
+  "@courses_courseDeleted": {
+    "description": "Course deleted successfully"
+  },
+  "courses_courseSubscribed": "Successfully subscribed to course",
+  "@courses_courseSubscribed": {
+    "description": "Successfully subscribed to course"
+  },
+  "courses_courseIdRequired": "Course ID is required",
+  "@courses_courseIdRequired": {
+    "description": "Course ID is required"
   }
 }

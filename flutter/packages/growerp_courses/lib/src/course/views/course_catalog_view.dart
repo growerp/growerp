@@ -58,12 +58,19 @@ class _CourseCatalogViewState extends State<CourseCatalogView> {
                   children: [
                     Icon(Icons.error_outline, color: Colors.red, size: 48),
                     SizedBox(height: 8),
-                    Text(courseState.message ?? 'Failed to load courses'),
+                    Text(
+                      courseState.message ??
+                          CoursesLocalizations.of(
+                            context,
+                          )!.courses_failedToLoadCourses,
+                    ),
                     TextButton(
                       onPressed: () => context.read<CourseBloc>().add(
                         CourseFetch(refresh: true, catalog: true),
                       ),
-                      child: Text('Retry'),
+                      child: Text(
+                        CoursesLocalizations.of(context)!.courses_retry,
+                      ),
                     ),
                   ],
                 ),
@@ -212,7 +219,11 @@ class _CourseCatalogTile extends StatelessWidget {
                         ),
                         if (isSubscribed)
                           Chip(
-                            label: Text('Subscribed'),
+                            label: Text(
+                              CoursesLocalizations.of(
+                                context,
+                              )!.courses_subscribed,
+                            ),
                             backgroundColor: Theme.of(
                               context,
                             ).colorScheme.primaryContainer,
@@ -268,13 +279,17 @@ class _CourseCatalogTile extends StatelessWidget {
                           TextButton.icon(
                             onPressed: onOpen,
                             icon: Icon(Icons.play_circle_outline, size: 16),
-                            label: Text('Open'),
+                            label: Text(
+                              CoursesLocalizations.of(context)!.courses_open,
+                            ),
                           )
                         else ...[
                           Text(
                             course.price != null && course.price!.toDouble() > 0
                                 ? '\$${course.price!.toStringAsFixed(2)}'
-                                : 'Free',
+                                : CoursesLocalizations.of(
+                                    context,
+                                  )!.courses_free,
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
                                   color:
@@ -289,7 +304,11 @@ class _CourseCatalogTile extends StatelessWidget {
                           TextButton.icon(
                             onPressed: onSubscribe,
                             icon: Icon(Icons.lock_outline, size: 16),
-                            label: Text('Subscribe'),
+                            label: Text(
+                              CoursesLocalizations.of(
+                                context,
+                              )!.courses_subscribe,
+                            ),
                           ),
                         ],
                       ],
@@ -309,10 +328,14 @@ class _DifficultyBadge extends StatelessWidget {
   final CourseDifficulty difficulty;
   const _DifficultyBadge({required this.difficulty});
 
-  String get _label {
-    if (difficulty == CourseDifficulty.beginner) return 'Beginner';
-    if (difficulty == CourseDifficulty.intermediate) return 'Intermediate';
-    return 'Advanced';
+  String _label(BuildContext context) {
+    if (difficulty == CourseDifficulty.beginner) {
+      return CoursesLocalizations.of(context)!.courses_beginner;
+    }
+    if (difficulty == CourseDifficulty.intermediate) {
+      return CoursesLocalizations.of(context)!.courses_intermediate;
+    }
+    return CoursesLocalizations.of(context)!.courses_advanced;
   }
 
   Color get _color {
@@ -323,7 +346,7 @@ class _DifficultyBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = _label;
+    final label = _label(context);
     final color = _color;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),

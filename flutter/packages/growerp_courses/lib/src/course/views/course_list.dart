@@ -20,6 +20,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../bloc/course_bloc.dart';
+import '../course_bloc_messages.dart';
 import '../../course_ai/views/ai_course_wizard_dialog.dart';
 import 'course_dialog.dart';
 import 'course_list_styled_data.dart';
@@ -117,14 +118,22 @@ class _CourseListViewState extends State<CourseListView> {
         if (state.status == CourseBlocStatus.failure) {
           HelperFunctions.showMessage(
             context,
-            state.message ?? 'An error occurred',
+            translateCourseBlocMessage(
+              context,
+              state.message ??
+                  CoursesLocalizations.of(context)!.courses_anErrorOccurred,
+            ),
             Colors.red,
           );
           _searchFocusNode.requestFocus();
         }
         if (state.status == CourseBlocStatus.success) {
           if ((state.message ?? '').isNotEmpty) {
-            HelperFunctions.showMessage(context, state.message!, Colors.green);
+            HelperFunctions.showMessage(
+              context,
+              translateCourseBlocMessage(context, state.message!),
+              Colors.green,
+            );
           }
           _searchFocusNode.requestFocus();
         }
@@ -134,7 +143,11 @@ class _CourseListViewState extends State<CourseListView> {
         _isLoading = state.status == CourseBlocStatus.loading;
 
         if (state.status == CourseBlocStatus.failure && courses.isEmpty) {
-          return const FatalErrorForm(message: 'Could not load courses!');
+          return FatalErrorForm(
+            message: CoursesLocalizations.of(
+              context,
+            )!.courses_couldNotLoadCourses,
+          );
         }
 
         courses = state.courses;
@@ -184,7 +197,9 @@ class _CourseListViewState extends State<CourseListView> {
                             heroTag: 'courseNewAi',
                             key: const Key('addNewAi'),
                             onPressed: _createWithAi,
-                            tooltip: 'Create course with AI',
+                            tooltip: CoursesLocalizations.of(
+                              context,
+                            )!.courses_createCourseWithAi,
                             child: const Icon(Icons.auto_awesome),
                           ),
                           const SizedBox(height: 10),
@@ -204,7 +219,9 @@ class _CourseListViewState extends State<CourseListView> {
                               );
                               _searchFocusNode.requestFocus();
                             },
-                            tooltip: 'Add new course',
+                            tooltip: CoursesLocalizations.of(
+                              context,
+                            )!.courses_addNewCourse,
                             child: const Icon(Icons.add),
                           ),
                         ],

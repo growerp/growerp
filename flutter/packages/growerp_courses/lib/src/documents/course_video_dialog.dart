@@ -12,6 +12,7 @@
  * limitations under the License.
  */
 
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -47,7 +48,9 @@ Future<void> showCourseVideo(
                 child: ElevatedButton.icon(
                   key: const Key('openVideoExternal'),
                   icon: const Icon(Icons.open_in_new),
-                  label: const Text('Play the video in the browser'),
+                  label: Text(
+                    CoursesLocalizations.of(context)!.courses_playInBrowser,
+                  ),
                   onPressed: () => launchUrl(url),
                 ),
               ),
@@ -100,7 +103,11 @@ class _VideoPlayerViewState extends State<_VideoPlayerView> {
   @override
   Widget build(BuildContext context) {
     if (_error != null) {
-      return Center(child: Text('Could not play the video: $_error'));
+      return Center(
+        child: Text(
+          CoursesLocalizations.of(context)!.courses_couldNotPlayVideo(_error!),
+        ),
+      );
     }
     if (!_controller.value.isInitialized) {
       return const Center(child: CircularProgressIndicator());

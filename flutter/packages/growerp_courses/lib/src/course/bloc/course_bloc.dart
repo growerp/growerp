@@ -128,7 +128,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       emit(
         state.copyWith(
           status: CourseBlocStatus.failure,
-          message: 'Course ID is required',
+          message: 'courseIdRequired',
         ),
       );
       return;
@@ -177,7 +177,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         state.copyWith(
           status: CourseBlocStatus.success,
           courses: [newCourse, ...state.courses],
-          message: 'Course created successfully',
+          message: 'courseCreated',
         ),
       );
     } catch (e) {
@@ -205,7 +205,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
           status: CourseBlocStatus.success,
           courses: updatedCourses,
           selectedCourse: event.course,
-          message: 'Course updated successfully',
+          message: 'courseUpdated',
         ),
       );
     } catch (e) {
@@ -232,7 +232,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         state.copyWith(
           status: CourseBlocStatus.success,
           courses: updatedCourses,
-          message: 'Course deleted successfully',
+          message: 'courseDeleted',
         ),
       );
     } catch (e) {
@@ -494,7 +494,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       emit(
         state.copyWith(
           status: CourseBlocStatus.success,
-          message: 'Successfully subscribed to course',
+          message: 'courseSubscribed',
         ),
       );
     } catch (e) {

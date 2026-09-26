@@ -105,7 +105,9 @@ class _CourseDialogState extends State<CourseDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: popUp(
         context: context,
-        title: isEdit ? 'Edit Course' : 'New Course',
+        title: isEdit
+            ? CoursesLocalizations.of(context)!.courses_editCourse
+            : CoursesLocalizations.of(context)!.courses_newCourse,
         width: 600,
         height: MediaQuery.of(context).size.height * 0.85,
         child: ScaffoldMessenger(
@@ -121,9 +123,19 @@ class _CourseDialogState extends State<CourseDialog> {
                       unselectedLabelColor: Theme.of(
                         context,
                       ).colorScheme.onSurfaceVariant,
-                      tabs: const [
-                        Tab(icon: Icon(Icons.edit_note), text: 'Details'),
-                        Tab(icon: Icon(Icons.group), text: 'Participants'),
+                      tabs: [
+                        Tab(
+                          icon: Icon(Icons.edit_note),
+                          text: CoursesLocalizations.of(
+                            context,
+                          )!.courses_details,
+                        ),
+                        Tab(
+                          icon: Icon(Icons.group),
+                          text: CoursesLocalizations.of(
+                            context,
+                          )!.courses_participants,
+                        ),
                       ],
                     ),
                   Expanded(
@@ -211,14 +223,16 @@ class _CourseDialogState extends State<CourseDialog> {
     return TextFormField(
       key: const Key('courseTitle'),
       controller: _titleController,
-      decoration: const InputDecoration(
-        labelText: 'Course Title *',
-        hintText: 'e.g., GrowERP Field Service Masterclass',
+      decoration: InputDecoration(
+        labelText: CoursesLocalizations.of(
+          context,
+        )!.courses_courseTitleRequired,
+        hintText: CoursesLocalizations.of(context)!.courses_courseTitleHint,
         border: OutlineInputBorder(),
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return 'Please enter a course title';
+          return CoursesLocalizations.of(context)!.courses_enterCourseTitle;
         }
         return null;
       },
@@ -229,9 +243,9 @@ class _CourseDialogState extends State<CourseDialog> {
     return TextFormField(
       key: const Key('courseDescription'),
       controller: _descriptionController,
-      decoration: const InputDecoration(
-        labelText: 'Description',
-        hintText: 'Brief overview of what this course covers',
+      decoration: InputDecoration(
+        labelText: CoursesLocalizations.of(context)!.courses_description,
+        hintText: CoursesLocalizations.of(context)!.courses_descriptionHint,
         border: OutlineInputBorder(),
       ),
       maxLines: 3,
@@ -242,9 +256,9 @@ class _CourseDialogState extends State<CourseDialog> {
     return TextFormField(
       key: const Key('courseObjectives'),
       controller: _objectivesController,
-      decoration: const InputDecoration(
-        labelText: 'Learning Objectives',
-        hintText: 'What will learners be able to do after this course?',
+      decoration: InputDecoration(
+        labelText: CoursesLocalizations.of(context)!.courses_learningObjectives,
+        hintText: CoursesLocalizations.of(context)!.courses_objectivesHint,
         border: OutlineInputBorder(),
       ),
       maxLines: 3,
@@ -255,9 +269,9 @@ class _CourseDialogState extends State<CourseDialog> {
     return TextFormField(
       key: const Key('courseAudience'),
       controller: _audienceController,
-      decoration: const InputDecoration(
-        labelText: 'Audience',
-        hintText: 'Who is this course for? The AI writes for them.',
+      decoration: InputDecoration(
+        labelText: CoursesLocalizations.of(context)!.courses_audience,
+        hintText: CoursesLocalizations.of(context)!.courses_audienceHint,
         border: OutlineInputBorder(),
       ),
       maxLines: 2,
@@ -268,8 +282,8 @@ class _CourseDialogState extends State<CourseDialog> {
     return DropdownButtonFormField<CourseDifficulty>(
       key: const Key('courseDifficulty'),
       initialValue: _selectedDifficulty,
-      decoration: const InputDecoration(
-        labelText: 'Difficulty',
+      decoration: InputDecoration(
+        labelText: CoursesLocalizations.of(context)!.courses_difficulty,
         border: OutlineInputBorder(),
       ),
       items: CourseDifficulty.values.map((difficulty) {
@@ -301,17 +315,23 @@ class _CourseDialogState extends State<CourseDialog> {
     return DropdownButtonFormField<CourseStatus>(
       key: const Key('courseStatus'),
       initialValue: _selectedStatus,
-      decoration: const InputDecoration(
-        labelText: 'Status',
+      decoration: InputDecoration(
+        labelText: CoursesLocalizations.of(context)!.courses_status,
         border: OutlineInputBorder(),
       ),
-      items: const [
-        DropdownMenuItem(value: CourseStatus.draft, child: Text('Draft')),
+      items: [
+        DropdownMenuItem(
+          value: CourseStatus.draft,
+          child: Text(CoursesLocalizations.of(context)!.courses_draft),
+        ),
         DropdownMenuItem(
           value: CourseStatus.published,
-          child: Text('Published'),
+          child: Text(CoursesLocalizations.of(context)!.courses_published),
         ),
-        DropdownMenuItem(value: CourseStatus.archived, child: Text('Archived')),
+        DropdownMenuItem(
+          value: CourseStatus.archived,
+          child: Text(CoursesLocalizations.of(context)!.courses_archived),
+        ),
       ],
       onChanged: (value) {
         if (value != null) setState(() => _selectedStatus = value);
@@ -323,8 +343,8 @@ class _CourseDialogState extends State<CourseDialog> {
     return TextFormField(
       key: const Key('courseDuration'),
       controller: _durationController,
-      decoration: const InputDecoration(
-        labelText: 'Duration (minutes)',
+      decoration: InputDecoration(
+        labelText: CoursesLocalizations.of(context)!.courses_durationMinutes,
         hintText: 'e.g., 60',
         border: OutlineInputBorder(),
       ),
@@ -342,8 +362,8 @@ class _CourseDialogState extends State<CourseDialog> {
             key: const Key('courseProductPseudoId'),
             readOnly: true,
             initialValue: productPseudoId ?? '',
-            decoration: const InputDecoration(
-              labelText: 'Product ID',
+            decoration: InputDecoration(
+              labelText: CoursesLocalizations.of(context)!.courses_productId,
               border: OutlineInputBorder(),
             ),
           ),
@@ -353,18 +373,22 @@ class _CourseDialogState extends State<CourseDialog> {
           child: TextFormField(
             key: const Key('coursePrice'),
             controller: _priceController,
-            decoration: const InputDecoration(
-              labelText: 'Price',
+            decoration: InputDecoration(
+              labelText: CoursesLocalizations.of(context)!.courses_priceLabel,
               hintText: '0.00',
               prefixText: '\$',
               border: OutlineInputBorder(),
-              helperText: 'Leave empty for free',
+              helperText: CoursesLocalizations.of(
+                context,
+              )!.courses_leaveEmptyForFree,
             ),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             validator: (value) {
               if (value != null && value.isNotEmpty) {
                 if (Decimal.tryParse(value) == null) {
-                  return 'Enter a valid price';
+                  return CoursesLocalizations.of(
+                    context,
+                  )!.courses_enterValidPrice;
                 }
               }
               return null;
@@ -408,52 +432,67 @@ class _CourseDialogState extends State<CourseDialog> {
                   TextButton.icon(
                     key: const Key('aiWriteLessons'),
                     icon: const Icon(Icons.auto_awesome),
-                    label: const Text('Write lessons with AI'),
+                    label: Text(
+                      CoursesLocalizations.of(
+                        context,
+                      )!.courses_writeLessonsWithAi,
+                    ),
                     onPressed: () => _writeLessonsWithAi(null),
                   ),
                 if (modules.isNotEmpty)
                   TextButton.icon(
                     key: const Key('aiWriteQuizzes'),
                     icon: const Icon(Icons.quiz_outlined),
-                    label: const Text('Quizzes with AI'),
+                    label: Text(
+                      CoursesLocalizations.of(context)!.courses_quizzesWithAi,
+                    ),
                     onPressed: () => _writeQuizzesWithAi(null),
                   ),
                 if (modules.isNotEmpty)
                   TextButton.icon(
                     key: const Key('aiWriteSlides'),
                     icon: const Icon(Icons.slideshow),
-                    label: const Text('Slides with AI'),
+                    label: Text(
+                      CoursesLocalizations.of(context)!.courses_slidesWithAi,
+                    ),
                     onPressed: () => _writeSlidesWithAi(null),
                   ),
                 if (modules.any((m) => m.slides?.isNotEmpty ?? false))
                   TextButton.icon(
                     key: const Key('aiWriteVideos'),
                     icon: const Icon(Icons.ondemand_video),
-                    label: const Text('Videos from slides'),
+                    label: Text(
+                      CoursesLocalizations.of(
+                        context,
+                      )!.courses_videosFromSlides,
+                    ),
                     onPressed: () => _makeVideos(null),
                   ),
                 if (modules.any((m) => m.slides?.isNotEmpty ?? false))
                   TextButton.icon(
                     key: const Key('courseSlidesPdf'),
                     icon: const Icon(Icons.picture_as_pdf_outlined),
-                    label: const Text('Slide deck'),
+                    label: Text(
+                      CoursesLocalizations.of(context)!.courses_slideDeck,
+                    ),
                     onPressed: () => _showSlidesPdf(docCourse),
                   ),
                 if (modules.isNotEmpty)
                   TextButton.icon(
                     key: const Key('aiPromo'),
                     icon: const Icon(Icons.campaign_outlined),
-                    label: const Text('Promo pack with AI'),
+                    label: Text(
+                      CoursesLocalizations.of(context)!.courses_promoPackWithAi,
+                    ),
                     onPressed: () => _runModuleAiJob(
                       jobType: 'PROMO',
                       module: null,
-                      title: 'Promo pack with AI',
-                      message:
-                          'The AI makes a cover image, a landing page that '
-                          'links to the course page, an email sequence and '
-                          'LinkedIn and X posts. The posts and emails are '
-                          'drafts in Course Media, the landing page is a '
-                          'draft in Landing Pages.',
+                      title: CoursesLocalizations.of(
+                        context,
+                      )!.courses_promoPackWithAi,
+                      message: CoursesLocalizations.of(
+                        context,
+                      )!.courses_promoPackMessage,
                       confirmKey: 'aiPromoConfirm',
                     ),
                   ),
@@ -461,7 +500,9 @@ class _CourseDialogState extends State<CourseDialog> {
                   TextButton.icon(
                     key: const Key('courseWorkbookPdf'),
                     icon: const Icon(Icons.menu_book_outlined),
-                    label: const Text('Workbook'),
+                    label: Text(
+                      CoursesLocalizations.of(context)!.courses_workbook,
+                    ),
                     onPressed: () => _showWorkbookPdf(docCourse),
                   ),
                 TextButton.icon(
@@ -525,7 +566,9 @@ class _CourseDialogState extends State<CourseDialog> {
                         trailing: IconButton(
                           key: Key('aiLesson${lesson.lessonId}'),
                           icon: const Icon(Icons.auto_awesome),
-                          tooltip: 'Write this lesson with AI',
+                          tooltip: CoursesLocalizations.of(
+                            context,
+                          )!.courses_writeThisLessonWithAi,
                           onPressed: () => _writeLessonsWithAi(lesson),
                         ),
                       ),
@@ -545,7 +588,9 @@ class _CourseDialogState extends State<CourseDialog> {
                     contentPadding: const EdgeInsets.only(left: 72, right: 16),
                     leading: const Icon(Icons.quiz_outlined),
                     title: Text(
-                      'Quiz: ${module.quizQuestionCount ?? 0} questions',
+                      CoursesLocalizations.of(context)!.courses_quizQuestions(
+                        (module.quizQuestionCount ?? 0).toString(),
+                      ),
                     ),
                     onTap: () => showDialog(
                       context: context,
@@ -557,7 +602,9 @@ class _CourseDialogState extends State<CourseDialog> {
                     trailing: IconButton(
                       key: Key('aiQuiz$index'),
                       icon: const Icon(Icons.auto_awesome),
-                      tooltip: 'Write this quiz with AI',
+                      tooltip: CoursesLocalizations.of(
+                        context,
+                      )!.courses_writeThisQuizWithAi,
                       onPressed: () => _writeQuizzesWithAi(module),
                     ),
                   ),
@@ -565,7 +612,11 @@ class _CourseDialogState extends State<CourseDialog> {
                     key: Key('moduleSlides$index'),
                     contentPadding: const EdgeInsets.only(left: 72, right: 16),
                     leading: const Icon(Icons.slideshow),
-                    title: Text('Slides: ${module.slides?.length ?? 0}'),
+                    title: Text(
+                      CoursesLocalizations.of(context)!.courses_slidesCount(
+                        (module.slides?.length ?? 0).toString(),
+                      ),
+                    ),
                     onTap: () => showDialog(
                       context: context,
                       builder: (_) => BlocProvider.value(
@@ -576,7 +627,9 @@ class _CourseDialogState extends State<CourseDialog> {
                     trailing: IconButton(
                       key: Key('aiSlides$index'),
                       icon: const Icon(Icons.auto_awesome),
-                      tooltip: 'Make these slides with AI',
+                      tooltip: CoursesLocalizations.of(
+                        context,
+                      )!.courses_makeTheseSlidesWithAi,
                       onPressed: () => _writeSlidesWithAi(module),
                     ),
                   ),
@@ -590,8 +643,12 @@ class _CourseDialogState extends State<CourseDialog> {
                       leading: const Icon(Icons.ondemand_video),
                       title: Text(
                         module.videoUrl == null
-                            ? 'Video: none'
-                            : 'Video: ready',
+                            ? CoursesLocalizations.of(
+                                context,
+                              )!.courses_videoNone
+                            : CoursesLocalizations.of(
+                                context,
+                              )!.courses_videoReady,
                       ),
                       onTap: module.videoUrl == null
                           ? null
@@ -603,7 +660,9 @@ class _CourseDialogState extends State<CourseDialog> {
                       trailing: IconButton(
                         key: Key('aiVideo$index'),
                         icon: const Icon(Icons.auto_awesome),
-                        tooltip: 'Make this video from the slides',
+                        tooltip: CoursesLocalizations.of(
+                          context,
+                        )!.courses_makeThisVideo,
                         onPressed: () => _makeVideos(module),
                       ),
                     ),
@@ -626,7 +685,7 @@ class _CourseDialogState extends State<CourseDialog> {
           );
           HelperFunctions.showMessage(
             context,
-            state.message ?? 'Done',
+            state.message ?? CoursesLocalizations.of(context)!.courses_done,
             Colors.green,
           );
         }
@@ -640,7 +699,8 @@ class _CourseDialogState extends State<CourseDialog> {
         } else if (state.status == CourseAiStatus.failure) {
           HelperFunctions.showMessage(
             context,
-            state.message ?? 'The AI job failed',
+            state.message ??
+                CoursesLocalizations.of(context)!.courses_aiJobFailed,
             Colors.red,
           );
         }
@@ -661,7 +721,8 @@ class _CourseDialogState extends State<CourseDialog> {
               ),
               const SizedBox(height: 4),
               Text(
-                state.job?.statusMessage ?? 'Starting',
+                state.job?.statusMessage ??
+                    CoursesLocalizations.of(context)!.courses_starting,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -679,24 +740,28 @@ class _CourseDialogState extends State<CourseDialog> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(
-          lesson == null ? 'Write all lessons with AI' : 'Write lesson with AI',
+          lesson == null
+              ? CoursesLocalizations.of(context)!.courses_writeAllLessonsWithAi
+              : CoursesLocalizations.of(context)!.courses_writeLessonWithAi,
         ),
         content: Text(
           lesson == null
-              ? 'The AI rewrites the text of every lesson, using the lesson '
-                    'text as the brief. This can take several minutes.'
-              : 'The AI rewrites "${lesson.title}", using its current text as '
-                    'the brief.',
+              ? CoursesLocalizations.of(
+                  context,
+                )!.courses_rewriteAllLessonsMessage
+              : CoursesLocalizations.of(
+                  context,
+                )!.courses_rewriteLessonMessage(lesson.title),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
+            child: Text(CoursesLocalizations.of(context)!.courses_cancel),
           ),
           ElevatedButton(
             key: const Key('aiWriteConfirm'),
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Write'),
+            child: Text(CoursesLocalizations.of(context)!.courses_write),
           ),
         ],
       ),
@@ -714,38 +779,36 @@ class _CourseDialogState extends State<CourseDialog> {
   Future<void> _writeQuizzesWithAi(CourseModule? module) => _runModuleAiJob(
     jobType: 'QUIZ',
     module: module,
-    title: 'Write quizzes with AI',
+    title: CoursesLocalizations.of(context)!.courses_writeQuizzesWithAi,
     message: module == null
-        ? 'The AI writes a quiz for every module from its lessons, replacing the '
-              'questions there are now.'
-        : 'The AI writes the quiz of "${module.title}" from its lessons, replacing the '
-              'questions there are now.',
+        ? CoursesLocalizations.of(context)!.courses_quizzesAllMessage
+        : CoursesLocalizations.of(
+            context,
+          )!.courses_quizModuleMessage(module.title),
     confirmKey: 'aiQuizConfirm',
   );
 
   Future<void> _writeSlidesWithAi(CourseModule? module) => _runModuleAiJob(
     jobType: 'SLIDES',
     module: module,
-    title: 'Make slides with AI',
+    title: CoursesLocalizations.of(context)!.courses_makeSlidesWithAi,
     message: module == null
-        ? 'The AI writes the slides of every module from its lessons, with speaker notes, '
-              'replacing the slides there are now.'
-        : 'The AI writes the slides of "${module.title}" from its lessons, with speaker '
-              'notes, replacing the slides there are now.',
+        ? CoursesLocalizations.of(context)!.courses_slidesAllMessage
+        : CoursesLocalizations.of(
+            context,
+          )!.courses_slidesModuleMessage(module.title),
     confirmKey: 'aiSlidesConfirm',
   );
 
   Future<void> _makeVideos(CourseModule? module) => _runModuleAiJob(
     jobType: 'VIDEO',
     module: module,
-    title: 'Make videos',
+    title: CoursesLocalizations.of(context)!.courses_makeVideos,
     message: module == null
-        ? 'The speaker notes of the slides of every module are spoken with '
-              'text-to-speech and made into a video per module, replacing the videos there '
-              'are now. This takes a few minutes per module.'
-        : 'The speaker notes of the slides of "${module.title}" are spoken '
-              'with text-to-speech and made into a video, replacing the '
-              'video there is now.',
+        ? CoursesLocalizations.of(context)!.courses_videosAllMessage
+        : CoursesLocalizations.of(
+            context,
+          )!.courses_videoModuleMessage(module.title),
     confirmKey: 'aiVideoConfirm',
   );
 
@@ -766,12 +829,12 @@ class _CourseDialogState extends State<CourseDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
+            child: Text(CoursesLocalizations.of(context)!.courses_cancel),
           ),
           ElevatedButton(
             key: Key(confirmKey),
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Write'),
+            child: Text(CoursesLocalizations.of(context)!.courses_write),
           ),
         ],
       ),
@@ -790,19 +853,25 @@ class _CourseDialogState extends State<CourseDialog> {
   void _showSlidesPdf(Course course) => showPdfDialog(
     context,
     key: const Key('slidesPdfDialog'),
-    title: 'Slides',
+    title: CoursesLocalizations.of(context)!.courses_slides,
     fileName: 'slides-${course.title}.pdf',
     pageFormat: slidePageFormat,
-    build: (format) => slidesPdf(course, course.modules ?? [], format),
+    build: (format) => slidesPdf(
+      CoursesLocalizations.of(context)!,
+      course,
+      course.modules ?? [],
+      format,
+    ),
   );
 
   void _showWorkbookPdf(Course course) => showPdfDialog(
     context,
     key: const Key('workbookPdfDialog'),
-    title: 'Workbook',
+    title: CoursesLocalizations.of(context)!.courses_workbook,
     fileName: 'workbook-${course.title}.pdf',
     pageFormat: PdfPageFormat.a4,
-    build: (format) => workbookPdf(course, format),
+    build: (format) =>
+        workbookPdf(CoursesLocalizations.of(context)!, course, format),
   );
 
   Widget _buildActionButtons() {
@@ -819,14 +888,14 @@ class _CourseDialogState extends State<CourseDialog> {
               key: const Key('deleteCourse'),
               onPressed: _deleteCourse,
               style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Delete'),
+              child: Text(CoursesLocalizations.of(context)!.courses_delete),
             ),
           if (isEdit) ...[
             const SizedBox(width: 8),
             TextButton.icon(
               key: const Key('previewCourse'),
               icon: const Icon(Icons.visibility_outlined),
-              label: const Text('Preview'),
+              label: Text(CoursesLocalizations.of(context)!.courses_preview),
               onPressed: _previewCourse,
             ),
           ],
@@ -834,13 +903,17 @@ class _CourseDialogState extends State<CourseDialog> {
           TextButton(
             key: const Key('cancelCourse'),
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(CoursesLocalizations.of(context)!.courses_cancel),
           ),
           const SizedBox(width: 8),
           ElevatedButton(
             key: const Key('saveCourse'),
             onPressed: _saveCourse,
-            child: Text(isEdit ? 'Update' : 'Create'),
+            child: Text(
+              isEdit
+                  ? CoursesLocalizations.of(context)!.courses_update
+                  : CoursesLocalizations.of(context)!.courses_create,
+            ),
           ),
         ],
       ),
@@ -861,11 +934,11 @@ class _CourseDialogState extends State<CourseDialog> {
   String _getDifficultyLabel(CourseDifficulty difficulty) {
     switch (difficulty) {
       case CourseDifficulty.beginner:
-        return 'Beginner';
+        return CoursesLocalizations.of(context)!.courses_beginner;
       case CourseDifficulty.intermediate:
-        return 'Intermediate';
+        return CoursesLocalizations.of(context)!.courses_intermediate;
       case CourseDifficulty.advanced:
-        return 'Advanced';
+        return CoursesLocalizations.of(context)!.courses_advanced;
     }
   }
 
@@ -929,7 +1002,7 @@ class _CourseDialogState extends State<CourseDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text(CoursesLocalizations.of(context)!.courses_cancel),
           ),
           TextButton(
             onPressed: () {
@@ -938,7 +1011,7 @@ class _CourseDialogState extends State<CourseDialog> {
               Navigator.pop(context);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(CoursesLocalizations.of(context)!.courses_delete),
           ),
         ],
       ),
@@ -959,8 +1032,10 @@ class _CourseDialogState extends State<CourseDialog> {
             TextField(
               key: const Key('moduleTitle'),
               controller: titleController,
-              decoration: const InputDecoration(
-                labelText: 'Module Title',
+              decoration: InputDecoration(
+                labelText: CoursesLocalizations.of(
+                  context,
+                )!.courses_moduleTitle,
                 border: OutlineInputBorder(),
               ),
             ),
@@ -968,8 +1043,10 @@ class _CourseDialogState extends State<CourseDialog> {
             TextField(
               key: const Key('moduleDescription'),
               controller: descController,
-              decoration: const InputDecoration(
-                labelText: 'Description',
+              decoration: InputDecoration(
+                labelText: CoursesLocalizations.of(
+                  context,
+                )!.courses_description,
                 border: OutlineInputBorder(),
               ),
               maxLines: 2,
@@ -979,7 +1056,7 @@ class _CourseDialogState extends State<CourseDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text(CoursesLocalizations.of(context)!.courses_cancel),
           ),
           ElevatedButton(
             key: const Key('saveModule'),
@@ -999,7 +1076,7 @@ class _CourseDialogState extends State<CourseDialog> {
               );
               Navigator.pop(dialogContext);
             },
-            child: const Text('Add'),
+            child: Text(CoursesLocalizations.of(context)!.courses_add),
           ),
         ],
       ),
@@ -1024,8 +1101,10 @@ class _CourseDialogState extends State<CourseDialog> {
             TextField(
               key: const Key('lessonTitle'),
               controller: titleController,
-              decoration: const InputDecoration(
-                labelText: 'Lesson Title',
+              decoration: InputDecoration(
+                labelText: CoursesLocalizations.of(
+                  context,
+                )!.courses_lessonTitle,
                 border: OutlineInputBorder(),
               ),
             ),
@@ -1033,8 +1112,10 @@ class _CourseDialogState extends State<CourseDialog> {
             TextField(
               key: const Key('lessonContent'),
               controller: contentController,
-              decoration: const InputDecoration(
-                labelText: 'Content (Markdown)',
+              decoration: InputDecoration(
+                labelText: CoursesLocalizations.of(
+                  context,
+                )!.courses_contentMarkdown,
                 border: OutlineInputBorder(),
               ),
               maxLines: 4,
@@ -1044,7 +1125,7 @@ class _CourseDialogState extends State<CourseDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text(CoursesLocalizations.of(context)!.courses_cancel),
           ),
           ElevatedButton(
             key: const Key('saveLesson'),
@@ -1064,7 +1145,7 @@ class _CourseDialogState extends State<CourseDialog> {
               );
               Navigator.pop(dialogContext);
             },
-            child: const Text('Add'),
+            child: Text(CoursesLocalizations.of(context)!.courses_add),
           ),
         ],
       ),

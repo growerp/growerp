@@ -12,6 +12,7 @@
  * limitations under the License.
  */
 
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 
@@ -25,20 +26,20 @@ Future<void> showAiKeyNeededDialog(
     context: context,
     builder: (dialogContext) => AlertDialog(
       key: const Key('aiKeyNeededDialog'),
-      title: const Text('AI key needed'),
+      title: Text(CoursesLocalizations.of(context)!.courses_aiKeyNeeded),
       content: Text(
-        '${message ?? 'The free monthly AI allowance is used up.'}\n\n'
-        'Add your own API key to continue; what was generated so far is kept.',
+        '${message ?? CoursesLocalizations.of(context)!.courses_allowanceUsedUp}\n\n'
+        '${CoursesLocalizations.of(context)!.courses_addKeyToContinue}',
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(dialogContext, false),
-          child: const Text('Later'),
+          child: Text(CoursesLocalizations.of(context)!.courses_later),
         ),
         ElevatedButton(
           key: const Key('aiKeyOpenSettings'),
           onPressed: () => Navigator.pop(dialogContext, true),
-          child: const Text('Add API key'),
+          child: Text(CoursesLocalizations.of(context)!.courses_addApiKey),
         ),
       ],
     ),
@@ -52,7 +53,7 @@ Future<void> showAiKeyNeededDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: popUp(
         context: dialogContext,
-        title: 'AI Settings',
+        title: CoursesLocalizations.of(context)!.courses_aiSettings,
         width: 700,
         height: MediaQuery.of(dialogContext).size.height * 0.85,
         child: SystemSetupAiView(onSaved: () => Navigator.pop(dialogContext)),

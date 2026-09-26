@@ -12,6 +12,7 @@
  * limitations under the License.
  */
 
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -48,7 +49,8 @@ Future<void> showCourseCertificate(
   if (!certificate.eligible) {
     HelperFunctions.showMessage(
       context,
-      certificate.reason ?? 'Not completed yet',
+      certificate.reason ??
+          CoursesLocalizations.of(context)!.courses_notCompletedYet,
       Colors.orange,
     );
     return;
@@ -56,14 +58,16 @@ Future<void> showCourseCertificate(
   await showPdfDialog(
     context,
     key: const Key('courseCertificateDialog'),
-    title: 'Certificate',
+    title: CoursesLocalizations.of(context)!.courses_certificate,
     fileName: 'certificate-${certificate.certificateNo}.pdf',
     pageFormat: PdfPageFormat.a4.landscape,
-    build: (format) => certificatePdf(certificate, format),
+    build: (format) =>
+        certificatePdf(CoursesLocalizations.of(context)!, certificate, format),
   );
 }
 
 Future<Uint8List> certificatePdf(
+  CoursesLocalizations l,
   CourseCertificate certificate,
   PdfPageFormat format,
 ) async {
@@ -85,7 +89,7 @@ Future<Uint8List> certificatePdf(
           mainAxisAlignment: pw.MainAxisAlignment.center,
           children: [
             pw.Text(
-              'CERTIFICATE OF COMPLETION',
+              l.courses_certificateOfCompletion,
               style: pw.TextStyle(
                 fontSize: 30,
                 fontWeight: pw.FontWeight.bold,
@@ -95,7 +99,7 @@ Future<Uint8List> certificatePdf(
             ),
             pw.SizedBox(height: 32),
             pw.Text(
-              'This certifies that',
+              l.courses_thisCertifiesThat,
               style: const pw.TextStyle(fontSize: 16),
             ),
             pw.SizedBox(height: 12),
@@ -105,7 +109,7 @@ Future<Uint8List> certificatePdf(
             ),
             pw.SizedBox(height: 12),
             pw.Text(
-              'has successfully completed the course',
+              l.courses_hasCompletedCourse,
               style: const pw.TextStyle(fontSize: 16),
             ),
             pw.SizedBox(height: 12),
@@ -121,7 +125,9 @@ Future<Uint8List> certificatePdf(
             if (certificate.estimatedDuration != null) ...[
               pw.SizedBox(height: 8),
               pw.Text(
-                '${(certificate.estimatedDuration! / 60).toStringAsFixed(1)} hours of study',
+                l.courses_hoursOfStudy(
+                  (certificate.estimatedDuration! / 60).toStringAsFixed(1),
+                ),
                 style: const pw.TextStyle(fontSize: 12),
               ),
             ],
@@ -135,7 +141,7 @@ Future<Uint8List> certificatePdf(
                   children: [
                     pw.Text(date, style: const pw.TextStyle(fontSize: 14)),
                     pw.Text(
-                      'Date',
+                      l.courses_dateLabel,
                       style: const pw.TextStyle(
                         fontSize: 10,
                         color: PdfColors.grey700,
@@ -154,7 +160,7 @@ Future<Uint8List> certificatePdf(
                       ),
                     ),
                     pw.Text(
-                      'Certificate ${certificate.certificateNo ?? ''}',
+                      l.courses_certificateNo(certificate.certificateNo ?? ''),
                       style: const pw.TextStyle(
                         fontSize: 10,
                         color: PdfColors.grey700,

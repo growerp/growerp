@@ -156,7 +156,7 @@ List<Widget> getCourseListRow({
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
-          _getDifficultyLabel(course.difficulty),
+          _getDifficultyLabel(context, course.difficulty),
           key: Key('difficulty$index'),
           style: TextStyle(
             fontSize: 11,
@@ -192,13 +192,16 @@ List<Widget> getCourseListRow({
         }
       },
       itemBuilder: (context) => [
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'delete',
           child: Row(
             children: [
               Icon(Icons.delete, color: Colors.red, size: 20),
               SizedBox(width: 8),
-              Text('Delete', style: TextStyle(color: Colors.red)),
+              Text(
+                CoursesLocalizations.of(context)!.courses_delete,
+                style: const TextStyle(color: Colors.red),
+              ),
             ],
           ),
         ),
@@ -222,14 +225,14 @@ Color _getDifficultyColor(CourseDifficulty? difficulty) {
   }
 }
 
-String _getDifficultyLabel(CourseDifficulty? difficulty) {
+String _getDifficultyLabel(BuildContext context, CourseDifficulty? difficulty) {
   switch (difficulty) {
     case CourseDifficulty.beginner:
-      return 'Beginner';
+      return CoursesLocalizations.of(context)!.courses_beginner;
     case CourseDifficulty.intermediate:
-      return 'Intermediate';
+      return CoursesLocalizations.of(context)!.courses_intermediate;
     case CourseDifficulty.advanced:
-      return 'Advanced';
+      return CoursesLocalizations.of(context)!.courses_advanced;
     default:
       return '-';
   }
@@ -241,15 +244,15 @@ Widget _buildStatusChip(BuildContext context, CourseStatus? status) {
   switch (status) {
     case CourseStatus.published:
       color = Colors.green;
-      label = 'Published';
+      label = CoursesLocalizations.of(context)!.courses_published;
       break;
     case CourseStatus.draft:
       color = Colors.orange;
-      label = 'Draft';
+      label = CoursesLocalizations.of(context)!.courses_draft;
       break;
     default:
       color = Colors.grey;
-      label = 'Draft';
+      label = CoursesLocalizations.of(context)!.courses_draft;
   }
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

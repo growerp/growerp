@@ -1355,5 +1355,6 @@
     "description": "System setup: help text for the outreach setup guide switch"
   },
   "onboarding": "Einarbeitung",
-  "leaveRequests": "Urlaubsanträge"
+  "leaveRequests": "Urlaubsanträge",
+  "myCourses": "Meine Kurse"
 }

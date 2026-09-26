@@ -16,6 +16,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -63,6 +64,7 @@ Future<void> showPdfDialog(
 
 /// The slides of [modules]: a title slide per module, then its slides.
 Future<Uint8List> slidesPdf(
+  CoursesLocalizations l,
   Course course,
   List<CourseModule> modules,
   PdfPageFormat format,
@@ -90,7 +92,10 @@ Future<Uint8List> slidesPdf(
               ),
               pw.SizedBox(height: 16),
               pw.Text(
-                'Module ${module.sequenceNum ?? ''}: ${module.title}',
+                l.courses_moduleHeading(
+                  '${module.sequenceNum ?? ''}',
+                  module.title,
+                ),
                 style: pw.TextStyle(
                   color: PdfColors.white,
                   fontSize: 40,
@@ -167,7 +172,11 @@ Future<Uint8List> slidesPdf(
 }
 
 /// All lessons of the course as one printable document.
-Future<Uint8List> workbookPdf(Course course, PdfPageFormat format) async {
+Future<Uint8List> workbookPdf(
+  CoursesLocalizations l,
+  Course course,
+  PdfPageFormat format,
+) async {
   final pdf = pw.Document(title: course.title);
   pdf.addPage(
     pw.MultiPage(
@@ -193,14 +202,17 @@ Future<Uint8List> workbookPdf(Course course, PdfPageFormat format) async {
         if (course.description?.isNotEmpty ?? false)
           pw.Paragraph(text: course.description!),
         if (course.objectives?.isNotEmpty ?? false) ...[
-          pw.Header(level: 2, text: 'What you will learn'),
+          pw.Header(level: 2, text: l.courses_whatYouWillLearn),
           ...markdownToPdf(course.objectives!),
         ],
         for (final module in course.modules ?? <CourseModule>[]) ...[
           pw.NewPage(),
           pw.Header(
             level: 0,
-            text: 'Module ${module.sequenceNum ?? ''}: ${module.title}',
+            text: l.courses_moduleHeading(
+              '${module.sequenceNum ?? ''}',
+              module.title,
+            ),
           ),
           if (module.description?.isNotEmpty ?? false)
             pw.Paragraph(text: module.description!),
@@ -221,7 +233,7 @@ Future<Uint8List> workbookPdf(Course course, PdfPageFormat format) async {
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text(
-                      'Key points',
+                      l.courses_keyPoints,
                       style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                     ),
                     pw.SizedBox(height: 6),

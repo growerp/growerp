@@ -12,6 +12,7 @@
  * limitations under the License.
  */
 
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -41,16 +42,20 @@ class QuizEditorDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: popUp(
         context: context,
-        title: 'Quiz: ${module?.title ?? ''}',
+        title: CoursesLocalizations.of(
+          context,
+        )!.courses_quizTitle(module?.title ?? ''),
         width: 600,
         height: MediaQuery.of(context).size.height * 0.8,
         child: Column(
           children: [
             Expanded(
               child: questions.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
-                        'No questions yet: add them, or let the AI write them',
+                        CoursesLocalizations.of(
+                          context,
+                        )!.courses_noQuestionsYet,
                       ),
                     )
                   : ListView.builder(
@@ -66,7 +71,11 @@ class QuizEditorDialog extends StatelessWidget {
                           key: Key('quizQuestion$index'),
                           leading: CircleAvatar(child: Text('${index + 1}')),
                           title: Text(q.question),
-                          subtitle: Text('Answer: $correct'),
+                          subtitle: Text(
+                            CoursesLocalizations.of(
+                              context,
+                            )!.courses_answerIs(correct),
+                          ),
                           onTap: () => _edit(context, q),
                           trailing: IconButton(
                             key: Key('deleteQuestion$index'),
@@ -87,14 +96,18 @@ class QuizEditorDialog extends StatelessWidget {
                   TextButton.icon(
                     key: const Key('addQuestion'),
                     icon: const Icon(Icons.add),
-                    label: const Text('Add question'),
+                    label: Text(
+                      CoursesLocalizations.of(context)!.courses_addQuestion,
+                    ),
                     onPressed: () => _edit(context, null),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
                     key: const Key('closeQuiz'),
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Close'),
+                    child: Text(
+                      CoursesLocalizations.of(context)!.courses_close,
+                    ),
                   ),
                 ],
               ),
@@ -162,7 +175,11 @@ class _QuestionDialogState extends State<_QuestionDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.question == null ? 'Add question' : 'Edit question'),
+      title: Text(
+        widget.question == null
+            ? CoursesLocalizations.of(context)!.courses_addQuestion
+            : CoursesLocalizations.of(context)!.courses_editQuestion,
+      ),
       content: SizedBox(
         width: 500,
         child: Form(
@@ -174,13 +191,15 @@ class _QuestionDialogState extends State<_QuestionDialog> {
                 TextFormField(
                   key: const Key('questionText'),
                   controller: _question,
-                  decoration: const InputDecoration(
-                    labelText: 'Question',
+                  decoration: InputDecoration(
+                    labelText: CoursesLocalizations.of(
+                      context,
+                    )!.courses_question,
                     border: OutlineInputBorder(),
                   ),
                   maxLines: 2,
                   validator: (v) => (v == null || v.trim().isEmpty)
-                      ? 'Enter a question'
+                      ? CoursesLocalizations.of(context)!.courses_enterQuestion
                       : null,
                 ),
                 const SizedBox(height: 12),
@@ -203,14 +222,18 @@ class _QuestionDialogState extends State<_QuestionDialog> {
                                   key: Key('questionOption$i'),
                                   controller: _options[i],
                                   decoration: InputDecoration(
-                                    labelText: 'Option ${i + 1}',
+                                    labelText: CoursesLocalizations.of(
+                                      context,
+                                    )!.courses_optionN((i + 1).toString()),
                                     border: const OutlineInputBorder(),
                                   ),
                                   // two options at least; the correct one filled
                                   validator: (v) =>
                                       (i < 2 || i == _correct) &&
                                           (v == null || v.trim().isEmpty)
-                                      ? 'Enter this option'
+                                      ? CoursesLocalizations.of(
+                                          context,
+                                        )!.courses_enterThisOption
                                       : null,
                                 ),
                               ),
@@ -221,15 +244,17 @@ class _QuestionDialogState extends State<_QuestionDialog> {
                   ),
                 ),
                 Text(
-                  'Select the correct answer with the radio button',
+                  CoursesLocalizations.of(context)!.courses_selectCorrectAnswer,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   key: const Key('questionExplanation'),
                   controller: _explanation,
-                  decoration: const InputDecoration(
-                    labelText: 'Explanation (shown after answering)',
+                  decoration: InputDecoration(
+                    labelText: CoursesLocalizations.of(
+                      context,
+                    )!.courses_explanationShown,
                     border: OutlineInputBorder(),
                   ),
                   maxLines: 2,
@@ -242,12 +267,12 @@ class _QuestionDialogState extends State<_QuestionDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(CoursesLocalizations.of(context)!.courses_cancel),
         ),
         ElevatedButton(
           key: const Key('saveQuestion'),
           onPressed: _save,
-          child: const Text('Save'),
+          child: Text(CoursesLocalizations.of(context)!.courses_save),
         ),
       ],
     );

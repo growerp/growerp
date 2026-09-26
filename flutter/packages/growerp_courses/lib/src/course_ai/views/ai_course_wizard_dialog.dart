@@ -12,6 +12,7 @@
  * limitations under the License.
  */
 
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
@@ -82,7 +83,10 @@ class _AiCourseWizardViewState extends State<_AiCourseWizardView> {
         } else if (state.status == CourseAiStatus.failure) {
           HelperFunctions.showMessage(
             context,
-            state.message ?? 'The AI could not create the course',
+            state.message ??
+                CoursesLocalizations.of(
+                  context,
+                )!.courses_aiCouldNotCreateCourse,
             Colors.red,
           );
         }
@@ -98,7 +102,7 @@ class _AiCourseWizardViewState extends State<_AiCourseWizardView> {
           ),
           child: popUp(
             context: context,
-            title: 'Create course with AI',
+            title: CoursesLocalizations.of(context)!.courses_createCourseWithAi,
             width: 600,
             height: MediaQuery.of(context).size.height * 0.85,
             child: running ? _progress(state.job) : _form(),
@@ -124,13 +128,14 @@ class _AiCourseWizardViewState extends State<_AiCourseWizardView> {
             ),
             const SizedBox(height: 16),
             Text(
-              job?.statusMessage ?? 'Starting',
+              job?.statusMessage ??
+                  CoursesLocalizations.of(context)!.courses_starting,
               key: const Key('aiCourseStatus'),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              'This takes a minute or two. The course is created as a draft.',
+              CoursesLocalizations.of(context)!.courses_takesAMinute,
               style: Theme.of(context).textTheme.bodySmall,
               textAlign: TextAlign.center,
             ),
@@ -154,22 +159,32 @@ class _AiCourseWizardViewState extends State<_AiCourseWizardView> {
                   TextFormField(
                     key: const Key('aiCourseTitle'),
                     controller: _titleController,
-                    decoration: const InputDecoration(
-                      labelText: 'Course Title *',
-                      hintText: 'e.g., Bookkeeping basics for freelancers',
+                    decoration: InputDecoration(
+                      labelText: CoursesLocalizations.of(
+                        context,
+                      )!.courses_courseTitleRequired,
+                      hintText: CoursesLocalizations.of(
+                        context,
+                      )!.courses_wizardTitleHint,
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) => (value == null || value.isEmpty)
-                        ? 'Please enter a course title'
+                        ? CoursesLocalizations.of(
+                            context,
+                          )!.courses_enterCourseTitle
                         : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     key: const Key('aiCourseAudience'),
                     controller: _audienceController,
-                    decoration: const InputDecoration(
-                      labelText: 'Audience',
-                      hintText: 'Who is this course for, what do they know?',
+                    decoration: InputDecoration(
+                      labelText: CoursesLocalizations.of(
+                        context,
+                      )!.courses_audience,
+                      hintText: CoursesLocalizations.of(
+                        context,
+                      )!.courses_wizardAudienceHint,
                       border: OutlineInputBorder(),
                     ),
                     maxLines: 2,
@@ -178,22 +193,32 @@ class _AiCourseWizardViewState extends State<_AiCourseWizardView> {
                   DropdownButtonFormField<CourseDifficulty>(
                     key: const Key('aiCourseDifficulty'),
                     initialValue: _difficulty,
-                    decoration: const InputDecoration(
-                      labelText: 'Difficulty',
+                    decoration: InputDecoration(
+                      labelText: CoursesLocalizations.of(
+                        context,
+                      )!.courses_difficulty,
                       border: OutlineInputBorder(),
                     ),
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         value: CourseDifficulty.beginner,
-                        child: Text('Beginner'),
+                        child: Text(
+                          CoursesLocalizations.of(context)!.courses_beginner,
+                        ),
                       ),
                       DropdownMenuItem(
                         value: CourseDifficulty.intermediate,
-                        child: Text('Intermediate'),
+                        child: Text(
+                          CoursesLocalizations.of(
+                            context,
+                          )!.courses_intermediate,
+                        ),
                       ),
                       DropdownMenuItem(
                         value: CourseDifficulty.advanced,
-                        child: Text('Advanced'),
+                        child: Text(
+                          CoursesLocalizations.of(context)!.courses_advanced,
+                        ),
                       ),
                     ],
                     onChanged: (value) {
@@ -204,10 +229,13 @@ class _AiCourseWizardViewState extends State<_AiCourseWizardView> {
                   TextFormField(
                     key: const Key('aiCourseCurriculum'),
                     controller: _curriculumController,
-                    decoration: const InputDecoration(
-                      labelText: 'Curriculum',
-                      hintText:
-                          'Topics in order, one per line. Leave empty to let the AI propose them.',
+                    decoration: InputDecoration(
+                      labelText: CoursesLocalizations.of(
+                        context,
+                      )!.courses_curriculum,
+                      hintText: CoursesLocalizations.of(
+                        context,
+                      )!.courses_curriculumHint,
                       border: OutlineInputBorder(),
                       alignLabelWithHint: true,
                     ),
@@ -215,16 +243,22 @@ class _AiCourseWizardViewState extends State<_AiCourseWizardView> {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Additional resources',
+                    CoursesLocalizations.of(
+                      context,
+                    )!.courses_additionalResources,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
                     key: const Key('aiCourseNotes'),
                     controller: _notesController,
-                    decoration: const InputDecoration(
-                      labelText: 'Notes',
-                      hintText: 'Anything the AI should know or use',
+                    decoration: InputDecoration(
+                      labelText: CoursesLocalizations.of(
+                        context,
+                      )!.courses_notes,
+                      hintText: CoursesLocalizations.of(
+                        context,
+                      )!.courses_notesHint,
                       border: OutlineInputBorder(),
                       alignLabelWithHint: true,
                     ),
@@ -234,9 +268,13 @@ class _AiCourseWizardViewState extends State<_AiCourseWizardView> {
                   TextFormField(
                     key: const Key('aiCourseUrls'),
                     controller: _urlsController,
-                    decoration: const InputDecoration(
-                      labelText: 'Web pages',
-                      hintText: 'One URL per line',
+                    decoration: InputDecoration(
+                      labelText: CoursesLocalizations.of(
+                        context,
+                      )!.courses_webPages,
+                      hintText: CoursesLocalizations.of(
+                        context,
+                      )!.courses_oneUrlPerLine,
                       border: OutlineInputBorder(),
                       alignLabelWithHint: true,
                     ),
@@ -245,7 +283,9 @@ class _AiCourseWizardViewState extends State<_AiCourseWizardView> {
                       for (final url in _urls(value ?? '')) {
                         final uri = Uri.tryParse(url);
                         if (uri == null || !uri.hasScheme || uri.host.isEmpty) {
-                          return 'Not a valid URL: $url';
+                          return CoursesLocalizations.of(
+                            context,
+                          )!.courses_notAValidUrl(url);
                         }
                       }
                       return null;
@@ -260,7 +300,11 @@ class _AiCourseWizardViewState extends State<_AiCourseWizardView> {
                       OutlinedButton.icon(
                         key: const Key('aiCourseAddFile'),
                         icon: const Icon(Icons.attach_file),
-                        label: const Text('Add documents'),
+                        label: Text(
+                          CoursesLocalizations.of(
+                            context,
+                          )!.courses_addDocuments,
+                        ),
                         onPressed: _pickFiles,
                       ),
                       for (final file in _files)
@@ -272,14 +316,18 @@ class _AiCourseWizardViewState extends State<_AiCourseWizardView> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'pdf, docx, md or txt; documents are also added to the company knowledge base',
+                    CoursesLocalizations.of(context)!.courses_documentsHint,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(height: 8),
                   SwitchListTile(
                     key: const Key('aiCourseUseKb'),
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Use the company knowledge base'),
+                    title: Text(
+                      CoursesLocalizations.of(
+                        context,
+                      )!.courses_useKnowledgeBase,
+                    ),
                     value: _useKnowledgeBase,
                     onChanged: (value) =>
                         setState(() => _useKnowledgeBase = value),
@@ -296,13 +344,15 @@ class _AiCourseWizardViewState extends State<_AiCourseWizardView> {
                 TextButton(
                   key: const Key('aiCourseCancel'),
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(CoursesLocalizations.of(context)!.courses_cancel),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
                   key: const Key('aiCourseGenerate'),
                   icon: const Icon(Icons.auto_awesome),
-                  label: const Text('Create outline'),
+                  label: Text(
+                    CoursesLocalizations.of(context)!.courses_createOutline,
+                  ),
                   onPressed: _generate,
                 ),
               ],
@@ -338,7 +388,9 @@ class _AiCourseWizardViewState extends State<_AiCourseWizardView> {
       if (tooBig.isNotEmpty) {
         HelperFunctions.showMessage(
           context,
-          'Skipped, larger than 10MB: ${tooBig.join(', ')}',
+          CoursesLocalizations.of(
+            context,
+          )!.courses_skippedTooLarge(tooBig.join(', ')),
           Colors.orange,
         );
       }
@@ -347,7 +399,9 @@ class _AiCourseWizardViewState extends State<_AiCourseWizardView> {
       if (mounted) {
         HelperFunctions.showMessage(
           context,
-          'Could not open file: $e',
+          CoursesLocalizations.of(
+            context,
+          )!.courses_couldNotOpenFile(e.toString()),
           Colors.red,
         );
       }

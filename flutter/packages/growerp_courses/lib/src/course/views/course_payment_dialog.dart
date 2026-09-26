@@ -58,27 +58,28 @@ class _CoursePaymentDialogState extends State<CoursePaymentDialog> {
   Widget build(BuildContext context) {
     final course = widget.course;
     final priceLabel = _isFree
-        ? 'Free'
+        ? CoursesLocalizations.of(context)!.courses_free
         : '\$${course.price!.toStringAsFixed(2)}';
 
     return BlocListener<CourseBloc, CourseState>(
       listener: (context, state) {
         if (state.status == CourseBlocStatus.success &&
             state.message != null &&
-            state.message!.contains('subscribed')) {
+            state.message == 'courseSubscribed') {
           Navigator.of(context).pop(true);
         } else if (state.status == CourseBlocStatus.failure) {
           setState(() => _isSubmitting = false);
           HelperFunctions.showMessage(
             context,
-            state.message ?? 'Subscription failed',
+            state.message ??
+                CoursesLocalizations.of(context)!.courses_subscriptionFailed,
             Theme.of(context).colorScheme.error,
           );
         }
       },
       child: popUp(
         context: context,
-        title: 'Subscribe to Course',
+        title: CoursesLocalizations.of(context)!.courses_subscribeToCourse,
         height: _isFree ? 280 : 560,
         width: 500,
         child: SingleChildScrollView(
@@ -135,8 +136,10 @@ class _CoursePaymentDialogState extends State<CoursePaymentDialog> {
                         FormBuilderTextField(
                           key: const Key('nameOnCard'),
                           name: 'nameOnCard',
-                          decoration: const InputDecoration(
-                            labelText: 'Name on Card',
+                          decoration: InputDecoration(
+                            labelText: CoursesLocalizations.of(
+                              context,
+                            )!.courses_nameOnCard,
                           ),
                           validator: FormBuilderValidators.required(),
                         ),
@@ -144,8 +147,10 @@ class _CoursePaymentDialogState extends State<CoursePaymentDialog> {
                         FormBuilderTextField(
                           key: const Key('cardNumber'),
                           name: 'cardNumber',
-                          decoration: const InputDecoration(
-                            labelText: 'Card Number',
+                          decoration: InputDecoration(
+                            labelText: CoursesLocalizations.of(
+                              context,
+                            )!.courses_cardNumber,
                           ),
                           keyboardType: TextInputType.number,
                           validator: FormBuilderValidators.compose([
@@ -221,7 +226,9 @@ class _CoursePaymentDialogState extends State<CoursePaymentDialog> {
                         onPressed: _isSubmitting
                             ? null
                             : () => Navigator.of(context).pop(false),
-                        child: const Text('Cancel'),
+                        child: Text(
+                          CoursesLocalizations.of(context)!.courses_cancel,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -238,7 +245,13 @@ class _CoursePaymentDialogState extends State<CoursePaymentDialog> {
                                 ),
                               )
                             : Text(
-                                _isFree ? 'Subscribe for Free' : 'Subscribe',
+                                _isFree
+                                    ? CoursesLocalizations.of(
+                                        context,
+                                      )!.courses_subscribeForFree
+                                    : CoursesLocalizations.of(
+                                        context,
+                                      )!.courses_subscribe,
                               ),
                       ),
                     ),

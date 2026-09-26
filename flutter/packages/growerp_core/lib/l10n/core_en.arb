@@ -1774,5 +1774,9 @@
   },
   "@leaveRequests": {
     "description": "Number of leave requests waiting for approval"
+  },
+  "myCourses": "My Courses",
+  "@myCourses": {
+    "description": "Menu item title: My Courses"
   }
 }

@@ -12,6 +12,7 @@
  * limitations under the License.
  */
 
+import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -43,16 +44,18 @@ class SlidesEditorDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: popUp(
         context: context,
-        title: 'Slides: ${module?.title ?? ''}',
+        title: CoursesLocalizations.of(
+          context,
+        )!.courses_slidesOf(module?.title ?? ''),
         width: 600,
         height: MediaQuery.of(context).size.height * 0.8,
         child: Column(
           children: [
             Expanded(
               child: slides.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
-                        'No slides yet: add them, or let the AI make them',
+                        CoursesLocalizations.of(context)!.courses_noSlidesYet,
                       ),
                     )
                   : ListView.builder(
@@ -88,27 +91,38 @@ class SlidesEditorDialog extends StatelessWidget {
                   TextButton.icon(
                     key: const Key('addSlide'),
                     icon: const Icon(Icons.add),
-                    label: const Text('Add slide'),
+                    label: Text(
+                      CoursesLocalizations.of(context)!.courses_addSlide,
+                    ),
                     onPressed: () => _edit(context, slides, null),
                   ),
                   if (slides.isNotEmpty && course != null)
                     TextButton.icon(
                       key: const Key('previewSlides'),
                       icon: const Icon(Icons.slideshow),
-                      label: const Text('Preview'),
+                      label: Text(
+                        CoursesLocalizations.of(context)!.courses_preview,
+                      ),
                       onPressed: () => showPdfDialog(
                         context,
                         key: const Key('slidesPdfDialog'),
-                        title: 'Slides',
+                        title: CoursesLocalizations.of(context)!.courses_slides,
                         fileName: 'slides-${module!.title}.pdf',
                         pageFormat: slidePageFormat,
-                        build: (format) => slidesPdf(course, [module], format),
+                        build: (format) => slidesPdf(
+                          CoursesLocalizations.of(context)!,
+                          course,
+                          [module],
+                          format,
+                        ),
                       ),
                     ),
                   ElevatedButton(
                     key: const Key('closeSlides'),
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Close'),
+                    child: Text(
+                      CoursesLocalizations.of(context)!.courses_close,
+                    ),
                   ),
                 ],
               ),
@@ -174,7 +188,11 @@ class _SlideDialogState extends State<_SlideDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.slide == null ? 'Add slide' : 'Edit slide'),
+      title: Text(
+        widget.slide == null
+            ? CoursesLocalizations.of(context)!.courses_addSlide
+            : CoursesLocalizations.of(context)!.courses_editSlide,
+      ),
       content: SizedBox(
         width: 500,
         child: Form(
@@ -186,19 +204,24 @@ class _SlideDialogState extends State<_SlideDialog> {
                 TextFormField(
                   key: const Key('slideTitle'),
                   controller: _title,
-                  decoration: const InputDecoration(
-                    labelText: 'Title',
+                  decoration: InputDecoration(
+                    labelText: CoursesLocalizations.of(
+                      context,
+                    )!.courses_titleLabel,
                     border: OutlineInputBorder(),
                   ),
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Enter a title' : null,
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? CoursesLocalizations.of(context)!.courses_enterTitle
+                      : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   key: const Key('slideBullets'),
                   controller: _bullets,
-                  decoration: const InputDecoration(
-                    labelText: 'Bullets, one per line',
+                  decoration: InputDecoration(
+                    labelText: CoursesLocalizations.of(
+                      context,
+                    )!.courses_bulletsOnePerLine,
                     border: OutlineInputBorder(),
                     alignLabelWithHint: true,
                   ),
@@ -208,8 +231,10 @@ class _SlideDialogState extends State<_SlideDialog> {
                 TextFormField(
                   key: const Key('slideNotes'),
                   controller: _notes,
-                  decoration: const InputDecoration(
-                    labelText: 'Speaker notes (the video narration)',
+                  decoration: InputDecoration(
+                    labelText: CoursesLocalizations.of(
+                      context,
+                    )!.courses_speakerNotes,
                     border: OutlineInputBorder(),
                     alignLabelWithHint: true,
                   ),
@@ -223,7 +248,7 @@ class _SlideDialogState extends State<_SlideDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(CoursesLocalizations.of(context)!.courses_cancel),
         ),
         ElevatedButton(
           key: const Key('saveSlide'),
@@ -242,7 +267,7 @@ class _SlideDialogState extends State<_SlideDialog> {
               ),
             );
           },
-          child: const Text('Save'),
+          child: Text(CoursesLocalizations.of(context)!.courses_save),
         ),
       ],
     );

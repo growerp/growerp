@@ -1355,5 +1355,6 @@
     "description": "System setup: help text for the outreach setup guide switch"
   },
   "onboarding": "入职",
-  "leaveRequests": "请假申请"
+  "leaveRequests": "请假申请",
+  "myCourses": "我的课程"
 }

@@ -103,7 +103,10 @@ class CourseMediaListView extends StatelessWidget {
           child: Icon(_getPlatformIcon(media.platform), color: Colors.white),
         ),
         title: Text(
-          media.title ?? '${_getPlatformLabel(media.platform)} Content',
+          media.title ??
+              CoursesLocalizations.of(context)!.courses_platformContent(
+                _getPlatformLabel(context, media.platform),
+              ),
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Column(
@@ -119,7 +122,7 @@ class CourseMediaListView extends StatelessWidget {
             const SizedBox(height: 4),
             Row(
               children: [
-                _buildStatusChip(media.status),
+                _buildStatusChip(context, media.status),
                 const SizedBox(width: 8),
                 if (media.createdDate != null)
                   Text(
@@ -140,29 +143,29 @@ class CourseMediaListView extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusChip(MediaStatus? status) {
+  Widget _buildStatusChip(BuildContext context, MediaStatus? status) {
     Color color;
     String label;
     switch (status) {
       case MediaStatus.draft:
         color = Colors.grey;
-        label = 'Draft';
+        label = CoursesLocalizations.of(context)!.courses_draft;
         break;
       case MediaStatus.reviewed:
         color = Colors.blue;
-        label = 'Reviewed';
+        label = CoursesLocalizations.of(context)!.courses_reviewed;
         break;
       case MediaStatus.scheduled:
         color = Colors.orange;
-        label = 'Scheduled';
+        label = CoursesLocalizations.of(context)!.courses_scheduled;
         break;
       case MediaStatus.published:
         color = Colors.green;
-        label = 'Published';
+        label = CoursesLocalizations.of(context)!.courses_published;
         break;
       default:
         color = Colors.grey;
-        label = 'Draft';
+        label = CoursesLocalizations.of(context)!.courses_draft;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -217,14 +220,14 @@ class CourseMediaListView extends StatelessWidget {
     }
   }
 
-  String _getPlatformLabel(MediaPlatform? platform) {
+  String _getPlatformLabel(BuildContext context, MediaPlatform? platform) {
     switch (platform) {
       case MediaPlatform.linkedin:
         return 'LinkedIn';
       case MediaPlatform.medium:
         return 'Medium';
       case MediaPlatform.email:
-        return 'Email';
+        return CoursesLocalizations.of(context)!.courses_platformEmail;
       case MediaPlatform.youtube:
         return 'YouTube';
       case MediaPlatform.twitter:
@@ -232,9 +235,9 @@ class CourseMediaListView extends StatelessWidget {
       case MediaPlatform.substack:
         return 'Substack';
       case MediaPlatform.inapp:
-        return 'In-App';
+        return CoursesLocalizations.of(context)!.courses_platformInApp;
       default:
-        return 'Unknown';
+        return CoursesLocalizations.of(context)!.courses_unknown;
     }
   }
 
