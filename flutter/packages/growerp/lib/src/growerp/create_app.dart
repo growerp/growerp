@@ -40,6 +40,8 @@ bool _skipDonorPath(String rel) {
     'build/',
     '.dart_tool/',
     'lib/',
+    // donor-specific tests: they reference the donor's blocks and fail analysis
+    'integration_test/',
     'android/.gradle/',
     'ios/Pods/',
     'ios/.symlinks/',
@@ -55,6 +57,8 @@ bool _skipDonorPath(String rel) {
     'pubspec.yaml',
     'pubspec.lock',
     'README.md',
+    // points at lib/l10n, which is not copied: gen_localizations fails the build
+    'l10n.yaml',
     'assets/cfg/app_settings.json',
     '.flutter-plugins',
     '.flutter-plugins-dependencies',
