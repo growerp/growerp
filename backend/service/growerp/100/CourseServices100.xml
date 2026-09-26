@@ -149,6 +149,7 @@ limitations under the License.
                 <if condition="courseEntity.productId">
                     <entity-find entity-name="mantle.product.ProductPrice" list="priceList">
                         <econdition field-name="productId" from="courseEntity.productId" />
+                        <econdition field-name="priceTypeEnumId" value="PptCurrent" />
                         <date-filter />
                         <order-by field-name="-fromDate" />
                     </entity-find>
@@ -237,6 +238,7 @@ limitations under the License.
             <if condition="courseEntity.productId">
                 <entity-find entity-name="mantle.product.ProductPrice" list="priceList">
                     <econdition field-name="productId" from="courseEntity.productId" />
+                    <econdition field-name="priceTypeEnumId" value="PptCurrent" />
                     <date-filter />
                     <order-by field-name="-fromDate" />
                 </entity-find>
@@ -1156,6 +1158,7 @@ limitations under the License.
             <if condition="productId">
                 <entity-find entity-name="mantle.product.ProductPrice" list="priceList">
                     <econdition field-name="productId" />
+                    <econdition field-name="priceTypeEnumId" value="PptCurrent" />
                     <date-filter />
                     <order-by field-name="-fromDate" />
                 </entity-find>
