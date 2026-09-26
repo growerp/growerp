@@ -287,6 +287,10 @@ axis; the business relationship lives on the party Role and never grants access.
             if (appId.startsWith('App')) appId = appId.substring(3)
             appIds.add(appId.toLowerCase())
         }
+        // Learners take an organization's courses in the academy app: it has that app
+        // while it has a published course (cache cleared by the Course EECA)
+        if (ec.entity.find('growerp.course.Course').condition('ownerPartyId', ownerPartyId)
+                .condition('status', 'PUBLISHED').count() > 0) appIds.add('academy')
         appIds.remove(null)
 
         Map widgetDomains = [:]
@@ -377,6 +381,17 @@ axis; the business relationship lives on the party Role and never grants access.
                 'GROWERPAPI_AUTHZ_EMPL', 'GROWERPAPI_AUTHZ_OTHER']" />
       </entity-find>
       <iterate list="obsolete" entry="row">
+        <entity-delete value-field="row" />
+        <set field="removedCount" from="removedCount + 1" />
+      </iterate>
+      <!-- domain patterns narrowed since: the old row would still match, putting a path in
+           two domains (learner paths moved from GROWERP_TRAINING to GROWERP_LEARNING) -->
+      <entity-find entity-name="moqui.security.ArtifactGroupMember" list="obsoleteMembers">
+        <econdition field-name="artifactGroupId" value="GROWERP_TRAINING" />
+        <econdition field-name="artifactName"
+          value="/growerp/100/(AllCourseParticipants|MyCourseSubscriptions|CourseParticipants|CourseSubscription|CourseProgress|GenerateVideo|CourseMedia|Courses|Course)(/.*)?" />
+      </entity-find>
+      <iterate list="obsoleteMembers" entry="row">
         <entity-delete value-field="row" />
         <set field="removedCount" from="removedCount + 1" />
       </iterate>

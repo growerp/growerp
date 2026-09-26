@@ -35,7 +35,7 @@ class _CourseCatalogViewState extends State<CourseCatalogView> {
   @override
   void initState() {
     super.initState();
-    context.read<CourseBloc>().add(CourseFetch(refresh: true));
+    context.read<CourseBloc>().add(CourseFetch(refresh: true, catalog: true));
     context.read<CourseViewerBloc>().add(FetchAvailableCourses());
   }
 
@@ -62,7 +62,7 @@ class _CourseCatalogViewState extends State<CourseCatalogView> {
                     TextButton(
                       onPressed: () => context
                           .read<CourseBloc>()
-                          .add(CourseFetch(refresh: true)),
+                          .add(CourseFetch(refresh: true, catalog: true)),
                       child: Text('Retry'),
                     ),
                   ],
@@ -94,7 +94,7 @@ class _CourseCatalogViewState extends State<CourseCatalogView> {
               onRefresh: () async {
                 context
                     .read<CourseBloc>()
-                    .add(CourseFetch(refresh: true));
+                    .add(CourseFetch(refresh: true, catalog: true));
                 context
                     .read<CourseViewerBloc>()
                     .add(FetchAvailableCourses());

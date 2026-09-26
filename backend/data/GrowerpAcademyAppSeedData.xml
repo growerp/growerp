@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<entity-facade-xml type="seed">
+    <!-- Application record -->
+    <growerp.Application applicationId="AppAcademy"
+        description="GrowERP Academy: learners enroll in and take courses" />
+
+    <!-- Menu configuration -->
+    <growerp.menu.MenuConfiguration menuConfigurationId="ACADEMY_DEFAULT" appId="academy"
+        name="Academy Menu" description="Default academy application menu structure"/>
+
+    <!-- Menu items: learners are outside users (GROWERP_M_OTHER, registered as Customer of the
+         company the app starts with). Outside users only see items that name them and only
+         write where updateGroupsJson names them: enrolling and saving progress are writes. -->
+    <growerp.menu.MenuItem menuItemId="ACADEMY_MAIN" menuConfigurationId="ACADEMY_DEFAULT"
+        title="Main" route="/" iconName="dashboard" widgetName="AcademyDbForm"
+        userGroupsJson='["GROWERP_M_OTHER","GROWERP_M_EMPLOYEE","GROWERP_M_ADMIN"]' sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="ACADEMY_CATALOG" menuConfigurationId="ACADEMY_DEFAULT"
+        title="Courses" route="/courses" iconName="school" widgetName="CourseCatalogView"
+        userGroupsJson='["GROWERP_M_OTHER","GROWERP_M_EMPLOYEE","GROWERP_M_ADMIN"]' updateGroupsJson='["GROWERP_M_OTHER","GROWERP_M_EMPLOYEE","GROWERP_M_ADMIN"]' sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="ACADEMY_MY_COURSES" menuConfigurationId="ACADEMY_DEFAULT"
+        title="My Courses" route="/myCourses" iconName="play_circle_outline" widgetName="CourseViewer"
+        userGroupsJson='["GROWERP_M_OTHER","GROWERP_M_EMPLOYEE","GROWERP_M_ADMIN"]' updateGroupsJson='["GROWERP_M_OTHER","GROWERP_M_EMPLOYEE","GROWERP_M_ADMIN"]' sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="ACADEMY_ABOUT" menuConfigurationId="ACADEMY_DEFAULT"
+        title="About" route="/about" iconName="info" widgetName="AboutForm"
+        userGroupsJson='["GROWERP_M_OTHER","GROWERP_M_EMPLOYEE","GROWERP_M_ADMIN"]' sequenceNum="40"/>
+</entity-facade-xml>

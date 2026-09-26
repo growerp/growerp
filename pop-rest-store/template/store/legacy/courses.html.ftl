@@ -1,5 +1,5 @@
 <#-- Public course catalog (courseList) and course outline (course), see screen/store/courses.xml.
-     Lesson content is not shown here: learners enroll and study in the app at /admin/. -->
+     Lesson content is not shown here: learners enroll and study in the academy app at /academy/. -->
 <#assign up = urlPrefix!''>
 <#function duration minutes><#if !(minutes??) || minutes == 0><#return ''></#if>
     <#if minutes lt 60><#return minutes + ' min'></#if>
@@ -63,7 +63,7 @@
                     <li>${course.moduleCount} modules, ${course.lessonCount} lessons</li>
                     <#if duration(course.estimatedDuration!0)?has_content><li>Duration: ${duration(course.estimatedDuration)}</li></#if>
                 </ul>
-                <a href="${up}/admin/" class="btn btn-primary btn-block"><i class="fas fa-graduation-cap mr-1"></i>Enroll</a>
+                <a href="/academy/?companyPartyId=${storeInfo.productStore.organizationPartyId}" class="btn btn-primary btn-block"><i class="fas fa-graduation-cap mr-1"></i>Enroll</a>
                 <small class="d-block mt-2" style="color: var(--neutral-500);">Log in or register in the app to enroll and start learning.</small>
             </div></div>
         </div>

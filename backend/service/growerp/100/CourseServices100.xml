@@ -46,6 +46,39 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="get" noun="CourseCatalog">
+        <description>Learner view of the courses: published ones only (staff also see drafts),
+            lesson content gated by get#CourseAccess. With courseId returns that course.</description>
+        <in-parameters>
+            <parameter name="courseId" />
+            <parameter name="filter" type="String" />
+            <parameter name="start" type="Integer" default="0" />
+            <parameter name="limit" type="Integer" default="20" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="course" type="Map" />
+            <parameter name="courses" type="List" />
+        </out-parameters>
+        <actions>
+            <set field="isStaff" from="ec.user.isInGroup('GROWERP_M_ADMIN')
+                || ec.user.isInGroup('GROWERP_M_EMPLOYEE') || ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <if condition="courseId">
+                <service-call name="growerp.100.CourseServices100.get#Course"
+                    in-map="[courseId: courseId]" out-map="courseOut" />
+                <if condition="!isStaff &amp;&amp; courseOut.course?.status != 'PUBLISHED'">
+                    <return error="true" message="Course not found or access denied" />
+                </if>
+                <set field="course" from="courseOut.course" />
+                <else>
+                    <service-call name="growerp.100.CourseServices100.list#Courses"
+                        in-map="[filter: filter, start: start, limit: limit,
+                            status: isStaff ? null : 'PUBLISHED']" out-map="listOut" />
+                    <set field="courses" from="listOut.courses" />
+                </else>
+            </if>
+        </actions>
+    </service>
+
     <service verb="list" noun="Courses">
         <in-parameters>
             <parameter name="start" type="Integer" default="0" />

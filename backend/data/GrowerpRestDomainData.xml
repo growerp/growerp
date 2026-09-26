@@ -27,6 +27,7 @@ when the organization's menu shows it a screen that drives that domain.
 
     <!-- GROWERP_BASE -->
     <growerp.menu.WidgetDomain widgetName="AboutForm" artifactGroupId="GROWERP_BASE"/>
+    <growerp.menu.WidgetDomain widgetName="AcademyDbForm" artifactGroupId="GROWERP_BASE"/>
     <growerp.menu.WidgetDomain widgetName="AdminDashboard" artifactGroupId="GROWERP_BASE"/>
     <growerp.menu.WidgetDomain widgetName="AdminDbForm" artifactGroupId="GROWERP_BASE"/>
     <growerp.menu.WidgetDomain widgetName="CoreDashboard" artifactGroupId="GROWERP_BASE"/>
@@ -139,7 +140,8 @@ when the organization's menu shows it a screen that drives that domain.
     <!-- GROWERP_TRAINING -->
     <growerp.menu.WidgetDomain widgetName="CourseList" artifactGroupId="GROWERP_TRAINING"/>
     <growerp.menu.WidgetDomain widgetName="CourseMediaList" artifactGroupId="GROWERP_TRAINING"/>
-    <growerp.menu.WidgetDomain widgetName="CourseViewer" artifactGroupId="GROWERP_TRAINING"/>
+    <growerp.menu.WidgetDomain widgetName="CourseViewer" artifactGroupId="GROWERP_LEARNING"/>
+    <growerp.menu.WidgetDomain widgetName="CourseCatalogView" artifactGroupId="GROWERP_LEARNING"/>
     <growerp.menu.WidgetDomain widgetName="CoursesDashboard" artifactGroupId="GROWERP_TRAINING"/>
     <growerp.menu.WidgetDomain widgetName="GuideList" artifactGroupId="GROWERP_TRAINING"/>
 

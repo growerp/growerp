@@ -3,6 +3,7 @@ publish_to: none
 environment:
   sdk: ^3.10.0
 workspace:
+  - packages/academy
   - packages/admin
   - packages/agents
   - packages/assessment
@@ -104,6 +105,7 @@ melos:
     - packages/support
     - packages/rental
     - packages/marketing
+    - packages/academy
 
   command:
     bootstrap:

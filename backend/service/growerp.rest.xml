@@ -1411,6 +1411,12 @@ limitations under the License.
         </resource>
 
         <!-- Course Management -->
+        <!-- learner read access (GROWERP_LEARNING): published courses, one with courseId -->
+        <resource name="CourseCatalog">
+            <method type="get">
+                <service name="growerp.100.CourseServices100.get#CourseCatalog" />
+            </method>
+        </resource>
         <resource name="Courses">
             <method type="get">
                 <service name="growerp.100.CourseServices100.list#Courses" />

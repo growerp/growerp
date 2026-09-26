@@ -477,7 +477,7 @@ and certificates are all missing.
 | 5 | No learning paths, prerequisites or course bundles | — | Certificate paths (section 5) |
 | 6 | Progress is stored as a JSON list in one text field: no time spent, scores or module completion | `CourseProgress.completedLessons` | Learner reporting |
 | 7 | Courses are visible only inside the owning tenant. GrowERP-published courses (`ownerPartyId="_NA_"`) are invisible to every other tenant | `list#Courses`, `get#Course` | Selling the curriculum to partners |
-| 8 | External learners cannot reach courses at all. Course screens exist only in the admin app, so only staff with the Courses menu can call the course REST API; customers get 403. The customer catalog view (`CourseCatalogView`) is on no menu. Server-side subscription gating is now in place in `get#Course` / `list#Courses` (staff and free courses: full content; others: outline only unless subscribed) and applies once customers get a catalog | menus, `GROWERP_TRAINING` REST domain | Selling courses to external learners |
+| 8 | ~~External learners cannot reach courses.~~ **Resolved:** the store website lists published courses at `/courses` (link hidden when there are none) and learners register, enroll, pay and study in the separate **academy** app. Customers get the `GROWERP_LEARNING` REST domain (catalog, subscribe, progress) but never the authoring domain; lesson content is gated by subscription | `academy` app, `GROWERP_LEARNING`, `get#CourseCatalog` | — |
 | 9 | Lessons cannot have attachments (templates, sample CSV files) | `CourseLesson` | Labs |
 
 ### Improvements to existing features
@@ -485,7 +485,6 @@ and certificates are all missing.
 - Add a real video player (embedded YouTube/video on web, open the URL on mobile as a fallback).
 - Replace the JSON progress field with a per-lesson progress entity (user, lesson, completed date, time spent).
 - Add a public catalog: platform-owned courses visible to all tenants, with access granted by subscription.
-- Give external learners (customers) a course catalog menu and access to the course REST domain, so subscription gating takes effect.
 - Let authors reorder modules and lessons by drag and drop, and edit lessons full screen with a markdown preview.
 - Import and export a whole course as one file, so authors can work outside the app.
 - Store course content per language.

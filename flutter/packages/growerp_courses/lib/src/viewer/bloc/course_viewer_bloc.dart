@@ -49,7 +49,7 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
       emit(state.copyWith(status: ViewerStatus.loading));
 
       // Get course details
-      dynamic courseResponse = await restClient.getCourse(
+      dynamic courseResponse = await restClient.getCourseCatalog(
         courseId: event.courseId,
       );
       if (courseResponse is String) {

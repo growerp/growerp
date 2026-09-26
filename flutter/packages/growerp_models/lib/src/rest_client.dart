@@ -2317,6 +2317,17 @@ abstract class RestClient {
   @GET("rest/s1/growerp/100/Course")
   Future<dynamic> getCourse({@Query('courseId') required String courseId});
 
+  // Learner access: published courses only, lesson content gated by subscription
+  @GET("rest/s1/growerp/100/CourseCatalog")
+  Future<Courses> listCourseCatalog({
+    @Query('filter') String? filter,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @GET("rest/s1/growerp/100/CourseCatalog")
+  Future<dynamic> getCourseCatalog({@Query('courseId') required String courseId});
+
   @POST("rest/s1/growerp/100/Course")
   Future<dynamic> createCourse({@Body() required Map<String, dynamic> data});
 

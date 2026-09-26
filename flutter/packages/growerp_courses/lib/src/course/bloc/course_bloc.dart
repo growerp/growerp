@@ -87,11 +87,18 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     try {
       emit(state.copyWith(status: CourseBlocStatus.loading));
 
-      final response = await restClient.listCourses(
-        filter: event.searchString,
-        limit: event.limit,
-        start: event.refresh ? 0 : state.courses.length,
-      );
+      final start = event.refresh ? 0 : state.courses.length;
+      final response = event.catalog
+          ? await restClient.listCourseCatalog(
+              filter: event.searchString,
+              limit: event.limit,
+              start: start,
+            )
+          : await restClient.listCourses(
+              filter: event.searchString,
+              limit: event.limit,
+              start: start,
+            );
 
       final courses = response.courses;
 

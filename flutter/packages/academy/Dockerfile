@@ -1,0 +1,66 @@
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+# to be build from the flutter directory
+# with: docker build --build-arg DOCKER_TAG=1.3.0 -f packages/academy/Dockerfile -t growerp/academy . --progress=plain
+#
+#Stage 1 - Install dependencies and build the app
+FROM ghcr.io/cirruslabs/flutter:stable AS build-env
+
+ARG BRANCH=development # currently either master or development we need to add existing
+ARG DOCKER_TAG=1.0.0+1
+USER root
+# Install linux dependencies
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository universe && \
+    apt-get update && \
+    apt-get install -y git zip gdb libstdc++6 \
+    fonts-noto nano sed && \
+    apt-get clean
+
+# git security
+RUN git config --system --add safe.directory '*'
+
+# activate melos
+RUN dart pub global activate melos
+ENV PATH="$PATH:/root/.pub-cache/bin"
+
+# get growerp repos
+# RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
+COPY . /root/flutter
+WORKDIR /root/flutter
+RUN echo "pwd: $PWD"
+RUN sed -i 's\//webactivate \\' packages/academy/lib/main.dart
+RUN flutter --version
+# Clean any existing dart tool caches
+RUN find . -name ".dart_tool" -type d -exec rm -rf {} + 2>/dev/null || true
+RUN melos clean
+RUN melos bootstrap
+# localization
+RUN melos l10n --no-select
+# build
+RUN melos build --no-select
+# build flutter app
+WORKDIR /root/flutter/packages/academy
+RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
+RUN flutter build web --release
+# Drop the engine .symbols maps: offline symboliser input only, never fetched
+# by the browser, ~7MB per image.
+RUN find build/web -name '*.symbols' -delete
+
+# Stage 2 - Create the run-time image
+FROM nginx
+COPY --from=build-env /root/flutter/packages/academy/build/web /usr/share/nginx/html
+EXPOSE 80

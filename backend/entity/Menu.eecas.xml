@@ -35,4 +35,14 @@ limitations under the License.
         </actions>
     </eeca>
 
+    <!-- An organization has the academy app while it has a published course
+         (get#OwnerDomainAccess), so publishing or withdrawing a course changes access.
+         Course writes are rare; lesson edits live on CourseLesson and do not fire this. -->
+    <eeca id="CourseClearAccessCache" entity="growerp.course.Course"
+        on-create="true" on-update="true" on-delete="true">
+        <actions>
+            <service-call name="growerp.100.SecurityServices100.clear#OwnerDomainAccessCache" />
+        </actions>
+    </eeca>
+
 </eecas>

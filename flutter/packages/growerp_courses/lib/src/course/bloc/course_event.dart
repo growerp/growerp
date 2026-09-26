@@ -27,10 +27,18 @@ class CourseFetch extends CourseEvent {
   final bool refresh;
   final int limit;
 
-  const CourseFetch({this.searchString, this.refresh = false, this.limit = 20});
+  /// Learner view: published courses via the CourseCatalog endpoint
+  final bool catalog;
+
+  const CourseFetch({
+    this.searchString,
+    this.refresh = false,
+    this.limit = 20,
+    this.catalog = false,
+  });
 
   @override
-  List<Object?> get props => [searchString, refresh, limit];
+  List<Object?> get props => [searchString, refresh, limit, catalog];
 }
 
 /// Get single course with details
