@@ -24,6 +24,7 @@ This directory contains comprehensive documentation for extending and developing
 ### 🚀 Getting Started with GrowERP
 
 - **[GrowERP Features](./GrowERP_Features.md)** - Complete overview of all applications, modules, and platform features
+- **[ERP Implementation Engineer Curriculum](./ERP_Implementation_Engineer_Curriculum.md)** - Proposed course package and certification path for GrowERP implementation engineers
 - **[GrowERP Extensibility Guide](./GrowERP_Extensibility_Guide.md)** - Start here for complete overview
 - **[GrowERP Security Model](./GrowERP_Security_Model.md)** - Who may see a screen and call the API behind it: user groups, the Organization → Security grid, menu-driven REST authorization, and how to debug a 403
 - **[Building Blocks Development Guide](./Building_Blocks_Development_Guide.md)** - Create Flutter packages
