@@ -179,8 +179,8 @@ class GeminiAiUtil {
     /**
      * Speak [text] with Gemini text-to-speech, always on a Gemini key (the tenant's own, else
      * the system key) whatever text provider the tenant uses; same allowance rules and usage
-     * logging as the text calls. Model and voice: GEMINI_TTS_MODEL / GEMINI_TTS_VOICE
-     * preference or environment variable.
+     * logging as the text calls. Model: GEMINI_TTS_MODEL, else DEFAULT_MODEL; voice:
+     * GEMINI_TTS_VOICE (preference or environment variable).
      *
      * @return raw audio: 16 bit little endian PCM, 24000 Hz, mono
      */
@@ -197,7 +197,7 @@ class GeminiAiUtil {
             checkMonthlyAllowance(ec, ownerPartyId)
         }
         String model = ec.user.getPreference("GEMINI_TTS_MODEL") ?: System.getenv("GEMINI_TTS_MODEL") ?:
-            "gemini-2.5-flash-preview-tts"
+            DEFAULT_MODEL
         String voice = options.voice ?: ec.user.getPreference("GEMINI_TTS_VOICE") ?:
             System.getenv("GEMINI_TTS_VOICE") ?: "Kore"
         def requestMap = [
@@ -221,8 +221,8 @@ class GeminiAiUtil {
     }
 
     /**
-     * Make an image with a Gemini image model, on a Gemini key like [callGeminiTts]. Model:
-     * GEMINI_IMAGE_MODEL preference or environment variable.
+     * Make an image with Gemini, on a Gemini key like [callGeminiTts]. Model: GEMINI_IMAGE_MODEL
+     * (preference or environment variable), else DEFAULT_MODEL.
      *
      * @return the image bytes (png or jpeg, see the model)
      */
@@ -239,7 +239,7 @@ class GeminiAiUtil {
             checkMonthlyAllowance(ec, ownerPartyId)
         }
         String model = ec.user.getPreference("GEMINI_IMAGE_MODEL") ?: System.getenv("GEMINI_IMAGE_MODEL") ?:
-            "gemini-2.5-flash-image"
+            DEFAULT_MODEL
         def requestMap = [
             contents: [[parts: [[text: prompt]]]],
             generationConfig: [responseModalities: ["IMAGE"]]
