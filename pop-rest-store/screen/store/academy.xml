@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+GrowERP Academy Flutter App Screen (learners take courses)
+Serves the Flutter academy app and assets; the website Enroll button links here
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    standalone="true" require-authentication="anonymous-view">
+
+    <widgets>
+        <render-mode>
+            <text type="html" location="component://PopRestStore/screen/store/academy/index.html"/>
+        </render-mode>
+    </widgets>
+</screen>

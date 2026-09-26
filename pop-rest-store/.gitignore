@@ -8,6 +8,7 @@ screen/store/admin/
 screen/store/landingpage/
 screen/store/assessment/
 screen/store/freelance/
+screen/store/academy/
 
 
 # gradle/build files

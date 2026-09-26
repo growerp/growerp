@@ -56,6 +56,15 @@ deploy_app() {
             SCREEN_AUTH="anonymous-view"
             BASE_PATH="/freelance/"
             ;;
+        academy)
+            PACKAGE_DIR="$PROJECT_ROOT/flutter/packages/academy"
+            APP_DIR_NAME="academy"
+            SCREEN_FILE_NAME="academy.xml"
+            SCREEN_COMMENT="GrowERP Academy Flutter App Screen"
+            SCREEN_DESCRIPTION="Serves the Flutter academy app and assets"
+            SCREEN_AUTH="anonymous-view"
+            BASE_PATH="/academy/"
+            ;;
         *)
             echo -e "${RED}Unknown app: $APP${NC}"
             return 1
@@ -354,7 +363,7 @@ case "$APP_NAME" in
             exit 1
         fi
         ;;
-    admin|assessment|freelance)
+    admin|assessment|freelance|academy)
         deploy_app "$APP_NAME"
         if [ $? -ne 0 ]; then
             exit 1
@@ -362,7 +371,7 @@ case "$APP_NAME" in
         ;;
     *)
         echo -e "${RED}Unknown app: $APP_NAME${NC}"
-        echo -e "${YELLOW}Usage: $0 [admin|assessment|freelance|both|all]${NC}"
+        echo -e "${YELLOW}Usage: $0 [admin|assessment|freelance|academy|both|all]${NC}"
         echo -e "${YELLOW}Default (no args): deploys all apps${NC}"
         exit 1
         ;;
