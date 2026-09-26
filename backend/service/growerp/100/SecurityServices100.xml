@@ -337,6 +337,12 @@ axis; the business relationship lives on the party Role and never grants access.
             }
         }
 
+        // Course authors preview their courses in the learner viewer, drafts too:
+        // who may author (TRAINING) may use the learner endpoints at the same level
+        if (access['GROWERP_TRAINING'] == 'WRITE') access['GROWERP_LEARNING'] = 'WRITE'
+        else if (access['GROWERP_TRAINING'] && !access['GROWERP_LEARNING'])
+            access['GROWERP_LEARNING'] = access['GROWERP_TRAINING']
+
         cache.put(key, access)
         domainAccess = access
       ]]></script>
@@ -395,6 +401,22 @@ axis; the business relationship lives on the party Role and never grants access.
         <entity-delete value-field="row" />
         <set field="removedCount" from="removedCount + 1" />
       </iterate>
+      <!-- the admin 'Course Viewer' item (replaced by Preview in the course dialog),
+           also in the organization and user copies of the admin menu -->
+      <entity-find entity-name="growerp.menu.MenuConfiguration" list="adminConfigs">
+        <econdition field-name="appId" value="admin" />
+      </entity-find>
+      <if condition="adminConfigs">
+        <entity-find entity-name="growerp.menu.MenuItem" list="obsoleteItems">
+          <econdition field-name="menuConfigurationId" operator="in"
+            from="adminConfigs*.menuConfigurationId" />
+          <econdition field-name="widgetName" value="CourseViewer" />
+        </entity-find>
+        <iterate list="obsoleteItems" entry="row">
+          <entity-delete value-field="row" />
+          <set field="removedCount" from="removedCount + 1" />
+        </iterate>
+      </if>
       <service-call name="growerp.100.SecurityServices100.clear#OwnerDomainAccessCache" />
       <log message="migrate#RestAuthz removed ${removedCount} blanket API grant(s)" />
     </actions>
