@@ -179,7 +179,7 @@ limitations under the License.
                         createdDate: courseEntity.createdDate,
                         lastModifiedDate: courseEntity.lastModifiedDate,
                         modules: modulesWithLessons,
-                        price: coursePrice
+                        price: coursePrice?.toString()
                     ])
                 </script>
             </iterate>
@@ -268,7 +268,7 @@ limitations under the License.
                 createdDate: courseEntity.createdDate,
                 lastModifiedDate: courseEntity.lastModifiedDate,
                 modules: modulesWithLessons,
-                price: coursePrice
+                price: coursePrice?.toString()
             ]" />
         </actions>
     </service>

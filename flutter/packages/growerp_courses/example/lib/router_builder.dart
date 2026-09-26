@@ -58,6 +58,25 @@ const coursesMenuConfig = MenuConfiguration(
       widgetName: 'CourseMediaList',
       isActive: true,
     ),
+    // learner screens, as in the academy app
+    MenuItem(
+      menuItemId: 'COURSES_CATALOG',
+      title: 'Catalog',
+      route: '/catalog',
+      iconName: 'storefront',
+      sequenceNum: 40,
+      widgetName: 'CourseCatalogView',
+      isActive: true,
+    ),
+    MenuItem(
+      menuItemId: 'COURSES_MY_COURSES',
+      title: 'My Courses',
+      route: '/myCourses',
+      iconName: 'play_circle_outline',
+      sequenceNum: 50,
+      widgetName: 'CourseViewer',
+      isActive: true,
+    ),
   ],
 );
 
@@ -72,6 +91,8 @@ GoRouter createCoursesExampleRouter() {
     widgetBuilder: (route) => switch (route) {
       '/courses' => const CourseList(),
       '/media' => const CourseMediaList(courseId: null),
+      '/catalog' => const CourseCatalogView(),
+      '/myCourses' => const CourseViewer(courseId: ''),
       _ => const CoursesDashboard(menuConfiguration: coursesMenuConfig),
     },
   );

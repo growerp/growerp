@@ -247,7 +247,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       emit(state.copyWith(status: CourseBlocStatus.loading));
 
       await restClient.createCourseModule(
-        data: {'courseId': event.courseId, ...event.module.toJson()},
+        data: {...event.module.toJson(), 'courseId': event.courseId},
       );
 
       // Refresh the course detail
@@ -305,7 +305,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       emit(state.copyWith(status: CourseBlocStatus.loading));
 
       await restClient.createCourseLesson(
-        data: {'moduleId': event.moduleId, ...event.lesson.toJson()},
+        data: {...event.lesson.toJson(), 'moduleId': event.moduleId},
       );
 
       if (_hasValidSelectedCourseId) {

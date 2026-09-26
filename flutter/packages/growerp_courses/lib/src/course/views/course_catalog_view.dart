@@ -107,6 +107,7 @@ class _CourseCatalogViewState extends State<CourseCatalogView> {
                   final isSubscribed = course.courseId != null &&
                       subscribedIds.contains(course.courseId);
                   return _CourseCatalogTile(
+                    key: Key('catalogItem$index'),
                     course: course,
                     isSubscribed: isSubscribed,
                     onOpen: () => _openCourse(context, course.courseId!),
@@ -156,6 +157,7 @@ class _CourseCatalogTile extends StatelessWidget {
   final VoidCallback onSubscribe;
 
   const _CourseCatalogTile({
+    super.key,
     required this.course,
     required this.isSubscribed,
     required this.onOpen,

@@ -1,0 +1,219 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:growerp_core/growerp_core.dart';
+import 'package:growerp_models/growerp_models.dart';
+
+/// Course authoring (admin) and learning (customer) steps for integration tests.
+class CourseTest {
+  // ---------------------------------------------------------------- authoring
+
+  static Future<void> selectCourses(WidgetTester tester) async {
+    await CommonTest.selectOption(tester, '/courses', 'addNew');
+  }
+
+  /// Adds a course from the list; new courses start as draft.
+  static Future<void> addCourse(
+    WidgetTester tester, {
+    required String title,
+    String? description,
+    String? price,
+  }) async {
+    await CommonTest.tapByKey(tester, 'addNew');
+    await CommonTest.enterText(tester, 'courseTitle', title);
+    if (description != null) {
+      await CommonTest.enterText(tester, 'courseDescription', description);
+    }
+    if (price != null) {
+      await CommonTest.dragUntil(tester, key: 'coursePrice');
+      await CommonTest.enterText(tester, 'coursePrice', price);
+    }
+    await CommonTest.dragUntil(tester, key: 'saveCourse');
+    await CommonTest.tapByKey(tester, 'saveCourse', seconds: CommonTest.waitTime);
+    await CommonTest.waitForSnackbarToGo(tester);
+    expect(find.text(title), findsWidgets);
+  }
+
+  /// Opens the edit dialog of a course by tapping its row.
+  static Future<void> openCourse(WidgetTester tester, String title) async {
+    await CommonTest.tapByText(tester, title);
+    await CommonTest.checkWidgetKey(tester, 'courseTitle');
+  }
+
+  static Future<void> addModule(WidgetTester tester, String title) async {
+    await CommonTest.dragUntil(tester, key: 'addModule');
+    await CommonTest.tapByKey(tester, 'addModule');
+    await CommonTest.enterText(tester, 'moduleTitle', title);
+    await CommonTest.tapByKey(tester, 'saveModule', seconds: CommonTest.waitTime);
+    // the dialog shows the course reloaded by the bloc, with the new module
+    await CommonTest.dragUntil(tester, key: 'module0');
+    expect(find.text(title), findsOneWidget);
+  }
+
+  static Future<void> addLesson(
+    WidgetTester tester, {
+    int moduleIndex = 0,
+    required String title,
+    required String content,
+  }) async {
+    await CommonTest.dragUntil(tester, key: 'module$moduleIndex');
+    if (!CommonTest.hasKey('addLesson$moduleIndex')) {
+      await CommonTest.tapByKey(tester, 'module$moduleIndex'); // expand
+    }
+    await CommonTest.dragUntil(tester, key: 'addLesson$moduleIndex');
+    await CommonTest.tapByKey(tester, 'addLesson$moduleIndex');
+    await CommonTest.enterText(tester, 'lessonTitle', title);
+    await CommonTest.enterText(tester, 'lessonContent', content);
+    await CommonTest.tapByKey(tester, 'saveLesson', seconds: CommonTest.waitTime);
+    await CommonTest.dragUntil(tester, key: 'module$moduleIndex');
+    if (!tester.any(find.text(title))) {
+      await CommonTest.tapByKey(tester, 'module$moduleIndex'); // expand
+    }
+    expect(find.text(title), findsOneWidget);
+  }
+
+  /// Saves the open course dialog, optionally with a new title and status.
+  static Future<void> updateCourse(
+    WidgetTester tester, {
+    String? title,
+    String? status, // 'Draft', 'Published' or 'Archived'
+  }) async {
+    if (title != null) {
+      await CommonTest.enterText(tester, 'courseTitle', title);
+    }
+    if (status != null) {
+      await CommonTest.dragUntil(tester, key: 'courseStatus');
+      await CommonTest.enterDropDown(tester, 'courseStatus', status);
+    }
+    await CommonTest.dragUntil(tester, key: 'saveCourse');
+    await CommonTest.tapByKey(tester, 'saveCourse', seconds: CommonTest.waitTime);
+    await CommonTest.waitForSnackbarToGo(tester);
+  }
+
+  /// Deletes the course with this title after confirming.
+  static Future<void> deleteCourse(WidgetTester tester, String title) async {
+    await openCourse(tester, title);
+    await CommonTest.dragUntil(tester, key: 'deleteCourse');
+    await CommonTest.tapByKey(tester, 'deleteCourse');
+    await CommonTest.tapByText(tester, 'Delete');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+    expect(find.text(title), findsNothing);
+  }
+
+  /// Publishes a course through the edit dialog.
+  static Future<void> publishCourse(WidgetTester tester, String title) async {
+    await openCourse(tester, title);
+    await updateCourse(tester, status: 'Published');
+  }
+
+  /// Creates and publishes a course with one module and lesson through the
+  /// API, as the logged in admin: the setup for learner-only tests.
+  static Future<String> createPublishedCourse(
+    RestClient restClient, {
+    required String title,
+    required String lessonContent,
+  }) async {
+    Map<String, dynamic> decode(dynamic response) => response is String
+        ? jsonDecode(response) as Map<String, dynamic>
+        : response as Map<String, dynamic>;
+    final courseId = decode(
+      await restClient.createCourse(data: {'title': title}),
+    )['courseId'] as String;
+    final moduleId = decode(
+      await restClient.createCourseModule(
+        data: {'courseId': courseId, 'title': 'Module One'},
+      ),
+    )['moduleId'] as String;
+    await restClient.createCourseLesson(
+      data: {
+        'moduleId': moduleId,
+        'title': 'Lesson One',
+        'content': lessonContent,
+      },
+    );
+    await restClient.updateCourse(
+      data: {'courseId': courseId, 'status': 'PUBLISHED'},
+    );
+    return courseId;
+  }
+
+  // ----------------------------------------------------------------- learning
+
+  /// The company of the logged in admin: learners register into it.
+  static String currentCompanyPartyId(WidgetTester tester) {
+    final context = tester.element(find.byType(Scaffold).first);
+    return context.read<AuthBloc>().state.authenticate!.company!.partyId!;
+  }
+
+  /// Registers a learner (Customer, outside user) of an existing company, as
+  /// the academy app does when started with ?companyPartyId=. Returns the email.
+  static Future<String> registerLearner(
+    RestClient restClient,
+    String companyPartyId,
+    String applicationId,
+  ) async {
+    final email =
+        'learner${DateTime.now().millisecondsSinceEpoch}@example.com';
+    await restClient.register(
+      applicationId: applicationId,
+      firstName: 'Lea',
+      lastName: 'Rner',
+      email: email,
+      companyPartyId: companyPartyId,
+      newPassword: 'qqqqqq9!',
+    );
+    return email;
+  }
+
+  /// Subscribes from the catalog; paid courses use the test card the payment
+  /// dialog pre-fills in debug builds.
+  static Future<void> subscribeInCatalog(
+    WidgetTester tester,
+    String route, {
+    int index = 0,
+  }) async {
+    await CommonTest.selectOption(tester, route, 'catalogItem$index');
+    expect(find.text('Subscribed'), findsNothing);
+    await CommonTest.tapByKey(tester, 'catalogItem$index');
+    await CommonTest.tapByKey(tester, 'subscribe', seconds: CommonTest.waitTime);
+    await CommonTest.waitForSnackbarToGo(tester);
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+    expect(find.text('Subscribed'), findsOneWidget);
+  }
+
+  /// Opens the first subscribed course, checks the lesson text is there and
+  /// marks the lesson complete.
+  static Future<void> studyFirstLesson(
+    WidgetTester tester,
+    String route, {
+    required String lessonContent,
+  }) async {
+    await CommonTest.selectOption(tester, route, 'myCourse0');
+    await CommonTest.tapByKey(tester, 'myCourse0', seconds: CommonTest.waitTime);
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+    expect(find.textContaining(lessonContent), findsWidgets);
+    await CommonTest.dragUntil(tester, key: 'completeLesson');
+    await CommonTest.tapByKey(
+      tester,
+      'completeLesson',
+      seconds: CommonTest.waitTime,
+    );
+    expect(find.text('Completed'), findsOneWidget);
+  }
+}

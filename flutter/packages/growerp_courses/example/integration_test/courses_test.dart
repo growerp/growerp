@@ -21,7 +21,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_courses/growerp_courses.dart' hide CourseMediaList;
 import 'package:growerp_models/growerp_models.dart' hide CourseMediaList;
 import 'package:growerp_user_company/growerp_user_company.dart';
-import 'package:flutter/material.dart';
+import 'package:growerp_courses/src/course/integration_test/course_test.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +30,9 @@ void main() {
     await GlobalConfiguration().loadFromAsset('app_settings');
   });
 
-  testWidgets('GrowERP Courses integration test', (WidgetTester tester) async {
+  testWidgets('GrowERP Courses: author a course, learner takes it', (
+    WidgetTester tester,
+  ) async {
     final restClient = RestClient(await buildDioClient());
 
     await CommonTest.startTestApp(
@@ -52,35 +54,51 @@ void main() {
 
     await CommonTest.createCompanyAndAdmin(tester);
 
-    // Create a test course, module, and lesson
-    await restClient.createCourse(
-      data: {
-        'title': 'Integration Test Course',
-        'description': 'A course for testing',
-      },
+    // --- admin: author a paid course, publish it, delete a draft
+    await CourseTest.selectCourses(tester);
+    await CourseTest.addCourse(
+      tester,
+      title: 'Test Course',
+      description: 'A course for testing',
+      price: '49.00',
+    );
+    await CourseTest.openCourse(tester, 'Test Course');
+    await CourseTest.addModule(tester, 'Module One');
+    await CourseTest.addLesson(
+      tester,
+      title: 'Lesson One',
+      content: 'Lesson one body text',
+    );
+    await CourseTest.updateCourse(
+      tester,
+      title: 'Test Course Updated',
+      status: 'Published',
+    );
+    expect(find.text('Test Course Updated'), findsWidgets);
+    expect(find.text('Published'), findsWidgets);
+
+    await CourseTest.addCourse(tester, title: 'Draft To Delete');
+    await CourseTest.deleteCourse(tester, 'Draft To Delete');
+
+    // --- learner: registers into this company, pays, studies
+    final companyPartyId = CourseTest.currentCompanyPartyId(tester);
+    await CommonTest.gotoMainMenu(tester);
+    await CommonTest.logout(tester);
+    final learner = await CourseTest.registerLearner(
+      restClient,
+      companyPartyId,
+      'AppAcademy',
+    );
+    await CommonTest.login(tester, username: learner);
+
+    await CourseTest.subscribeInCatalog(tester, '/catalog');
+    await CourseTest.studyFirstLesson(
+      tester,
+      '/myCourses',
+      lessonContent: 'Lesson one body text',
     );
 
-    // Verify we're authenticated (logoutButton is present in static router after auth)
-    expect(find.byKey(const Key('logoutButton')), findsOneWidget);
-
-    // Navigate to Course List
-    await tester.tap(find.text('Courses').last);
-    await tester.pumpAndSettle();
-
-    // Verify Course List shows the created course
-    expect(find.text('Integration Test Course'), findsOneWidget);
-
-    // Open the course dialog (admin edit view)
-    await tester.tap(find.text('Integration Test Course'));
-    await tester.pumpAndSettle();
-
-    // Verify the course dialog opened with the correct title
-    expect(find.byKey(const Key('courseTitle')), findsOneWidget);
-
-    // Dismiss the dialog
-    await tester.tapAt(const Offset(10, 10)); // tap outside to dismiss
-    await tester.pumpAndSettle();
-
+    await CommonTest.gotoMainMenu(tester);
     await CommonTest.logout(tester);
   });
 }

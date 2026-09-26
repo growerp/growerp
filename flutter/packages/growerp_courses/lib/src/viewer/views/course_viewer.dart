@@ -205,7 +205,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
                       itemCount: courses.length,
                       itemBuilder: (context, index) {
                         final course = courses[index];
-                        return _buildCourseCard(context, course);
+                        return _buildCourseCard(context, course, index);
                       },
                     ),
                   ),
@@ -215,7 +215,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
     );
   }
 
-  Widget _buildCourseCard(BuildContext context, Course course) {
+  Widget _buildCourseCard(BuildContext context, Course course, int index) {
     final moduleCount = course.moduleCount ?? course.modules?.length ?? 0;
     final lessonCount =
         course.lessonCount ??
@@ -227,6 +227,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
     final progress = course.progressPercent ?? 0;
 
     return Card(
+      key: Key('myCourse$index'),
       clipBehavior: Clip.antiAlias,
       elevation: 2,
       child: InkWell(
@@ -386,7 +387,9 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
     final modules = course.modules ?? [];
     final currentLessonId = state.currentLesson?.lessonId;
 
-    return Container(
+    // Material, not a coloured Container: the module/lesson ListTiles paint
+    // their ink on the nearest Material, which a ColoredBox would hide
+    return Material(
       color: Theme.of(
         context,
       ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
@@ -547,6 +550,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
       children: [
         if (_getPreviousLesson(state) != null)
           OutlinedButton.icon(
+            key: const Key('previousLesson'),
             icon: const Icon(Icons.arrow_back),
             label: const Text('Previous'),
             onPressed: () {
@@ -559,6 +563,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
         else
           const SizedBox(),
         ElevatedButton.icon(
+          key: const Key('completeLesson'),
           icon: Icon(isCompleted ? Icons.check : Icons.check_circle_outline),
           label: Text(isCompleted ? 'Completed' : 'Mark as Complete'),
           style: ElevatedButton.styleFrom(
@@ -574,6 +579,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
         ),
         if (_getNextLesson(state) != null)
           OutlinedButton.icon(
+            key: const Key('nextLesson'),
             icon: const Icon(Icons.arrow_forward),
             label: const Text('Next'),
             onPressed: () {

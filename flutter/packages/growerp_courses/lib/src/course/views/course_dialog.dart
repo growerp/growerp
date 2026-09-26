@@ -38,6 +38,7 @@ class _CourseDialogState extends State<CourseDialog> {
   late TextEditingController _durationController;
   late TextEditingController _priceController;
   CourseDifficulty _selectedDifficulty = CourseDifficulty.beginner;
+  CourseStatus _selectedStatus = CourseStatus.draft;
 
   bool get isEdit => widget.course?.courseId != null;
 
@@ -59,6 +60,12 @@ class _CourseDialogState extends State<CourseDialog> {
     );
     _selectedDifficulty =
         widget.course?.difficulty ?? CourseDifficulty.beginner;
+    _selectedStatus = widget.course?.status ?? CourseStatus.draft;
+    // load the course as selectedCourse: module/lesson creates refresh it, so
+    // new modules and lessons show up in this dialog right away
+    if (isEdit) {
+      context.read<CourseBloc>().add(CourseGetDetail(widget.course!.courseId!));
+    }
   }
 
   @override
@@ -142,6 +149,11 @@ class _CourseDialogState extends State<CourseDialog> {
             ),
             const SizedBox(height: 16),
             _buildProductPriceRow(),
+            // new courses start as draft: publish once the content is there
+            if (isEdit) ...[
+              const SizedBox(height: 16),
+              _buildStatusDropdown(),
+            ],
             const SizedBox(height: 24),
             if (isEdit) ...[
               _buildModulesSection(),
@@ -229,6 +241,29 @@ class _CourseDialogState extends State<CourseDialog> {
     );
   }
 
+  /// Only published courses are offered to learners (website and academy app)
+  Widget _buildStatusDropdown() {
+    return DropdownButtonFormField<CourseStatus>(
+      key: const Key('courseStatus'),
+      initialValue: _selectedStatus,
+      decoration: const InputDecoration(
+        labelText: 'Status',
+        border: OutlineInputBorder(),
+      ),
+      items: const [
+        DropdownMenuItem(value: CourseStatus.draft, child: Text('Draft')),
+        DropdownMenuItem(
+          value: CourseStatus.published,
+          child: Text('Published'),
+        ),
+        DropdownMenuItem(value: CourseStatus.archived, child: Text('Archived')),
+      ],
+      onChanged: (value) {
+        if (value != null) setState(() => _selectedStatus = value);
+      },
+    );
+  }
+
   Widget _buildDurationField() {
     return TextFormField(
       key: const Key('courseDuration'),
@@ -287,7 +322,13 @@ class _CourseDialogState extends State<CourseDialog> {
   }
 
   Widget _buildModulesSection() {
-    final modules = widget.course?.modules ?? [];
+    final selected = context.watch<CourseBloc>().state.selectedCourse;
+    final modules =
+        (selected?.courseId == widget.course?.courseId
+            ? selected?.modules
+            : null) ??
+        widget.course?.modules ??
+        [];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -299,6 +340,7 @@ class _CourseDialogState extends State<CourseDialog> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             TextButton.icon(
+              key: const Key('addModule'),
               icon: const Icon(Icons.add),
               label: Text(CoursesLocalizations.of(context)!.courses_addModule),
               onPressed: () => _showAddModuleDialog(),
@@ -319,6 +361,7 @@ class _CourseDialogState extends State<CourseDialog> {
             itemBuilder: (context, index) {
               final module = modules[index];
               return ExpansionTile(
+                key: Key('module$index'),
                 leading: CircleAvatar(child: Text('${index + 1}')),
                 title: Text(module.title),
                 subtitle: Text(CoursesLocalizations.of(context)!.courses_modulelessonslength0Lessons((module.lessons?.length ?? 0).toString())),
@@ -338,6 +381,7 @@ class _CourseDialogState extends State<CourseDialog> {
                       ),
                     ),
                   ListTile(
+                    key: Key('addLesson$index'),
                     contentPadding: const EdgeInsets.only(left: 72, right: 16),
                     leading: const Icon(Icons.add, color: Colors.blue),
                     title: Text(CoursesLocalizations.of(context)!.courses_addLesson,
@@ -423,6 +467,7 @@ class _CourseDialogState extends State<CourseDialog> {
           ? _objectivesController.text
           : null,
       difficulty: _selectedDifficulty,
+      status: _selectedStatus,
       estimatedDuration: _durationController.text.isNotEmpty
           ? int.tryParse(_durationController.text)
           : null,
@@ -478,6 +523,7 @@ class _CourseDialogState extends State<CourseDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
+              key: const Key('moduleTitle'),
               controller: titleController,
               decoration: const InputDecoration(
                 labelText: 'Module Title',
@@ -486,6 +532,7 @@ class _CourseDialogState extends State<CourseDialog> {
             ),
             const SizedBox(height: 16),
             TextField(
+              key: const Key('moduleDescription'),
               controller: descController,
               decoration: const InputDecoration(
                 labelText: 'Description',
@@ -501,6 +548,7 @@ class _CourseDialogState extends State<CourseDialog> {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
+            key: const Key('saveModule'),
             onPressed: () {
               if (titleController.text.isEmpty) return;
 
@@ -536,6 +584,7 @@ class _CourseDialogState extends State<CourseDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
+              key: const Key('lessonTitle'),
               controller: titleController,
               decoration: const InputDecoration(
                 labelText: 'Lesson Title',
@@ -544,6 +593,7 @@ class _CourseDialogState extends State<CourseDialog> {
             ),
             const SizedBox(height: 16),
             TextField(
+              key: const Key('lessonContent'),
               controller: contentController,
               decoration: const InputDecoration(
                 labelText: 'Content (Markdown)',
@@ -559,6 +609,7 @@ class _CourseDialogState extends State<CourseDialog> {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
+            key: const Key('saveLesson'),
             onPressed: () {
               if (titleController.text.isEmpty) return;
 
