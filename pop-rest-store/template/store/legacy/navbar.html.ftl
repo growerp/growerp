@@ -48,6 +48,12 @@
                     </a>
                 </#if>
 
+                <#if storeInfo.hasCourses!false>
+                    <a class="nav-link" href="${up}/courses">
+                        <i class="fas fa-graduation-cap mr-1"></i>${ec.l10n.localize('GrowerpWebsiteCourses')}
+                    </a>
+                </#if>
+
                 <#-- Content Menu Items -->
                 <#list storeInfo.menu as topItem>
                 <#if !topItem.title?has_content><#continue></#if>

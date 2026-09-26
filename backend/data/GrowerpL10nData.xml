@@ -1020,6 +1020,21 @@ limitations under the License.
   <moqui.basic.LocalizedMessage locale="es" original="GrowerpWebsiteLogIn"
     localized="Iniciar sesión" />
 
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteCourses"
+    localized="Courses" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteCourses"
+    localized="หลักสูตร" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteCourses"
+    localized="课程" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteCourses"
+    localized="Kurse" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteCourses"
+    localized="Cours" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteCourses"
+    localized="Cursussen" />
+  <moqui.basic.LocalizedMessage locale="es" original="GrowerpWebsiteCourses"
+    localized="Cursos" />
+
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteLogout"
     localized="Logout" />
   <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteLogout"

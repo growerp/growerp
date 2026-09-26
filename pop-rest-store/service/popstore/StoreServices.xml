@@ -71,6 +71,7 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="pages" type="List"/>
             <!-- the languages this site has translated pages for, for the switcher and hreflang -->
             <parameter name="availableLocales" type="List"/>
+            <parameter name="hasCourses" type="Boolean"/>
         </out-parameters>
         <actions>
             <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore" cache="true"/>
@@ -295,6 +296,18 @@ along with this software (see the LICENSE.md file). If not, see
                 <econdition field-name="settingTypeEnumId" value="PsstMeasurementId"/>
             </entity-find>
                 <set field="settings.measurementId" from="measurementIds[0]?.settingValue"/>
+            <!-- courses are owned by the tenant owner, the store by its company: the navbar
+                 only offers a Courses link when that owner has a published course -->
+            <entity-find-one entity-name="mantle.party.Party" value-field="storeCompany" cache="true">
+                <field-map field-name="partyId" from="productStore.organizationPartyId"/></entity-find-one>
+            <set field="hasCourses" from="false" type="Boolean"/>
+            <if condition="storeCompany?.ownerPartyId">
+                <entity-find-count entity-name="growerp.course.Course" count-field="courseCount">
+                    <econdition field-name="ownerPartyId" from="storeCompany.ownerPartyId"/>
+                    <econdition field-name="status" value="PUBLISHED"/>
+                </entity-find-count>
+                <set field="hasCourses" from="courseCount > 0" type="Boolean"/>
+            </if>
         </actions>
     </service>
 

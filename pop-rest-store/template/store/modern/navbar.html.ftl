@@ -43,6 +43,9 @@
                     </#if>
                 </#if>
 
+                <#if storeInfo.hasCourses!false>
+                    <a href="${up}/courses" class="font-label text-sm text-on-primary-container/70 hover:text-on-primary-container transition-colors">${l('GrowerpWebsiteCourses')}</a>
+                </#if>
                 <#-- Content Menu Items (both modes); marketing Features link inserted before getting-started -->
                 <#list storeInfo.menu as topItem>
                 <#if !topItem.title?has_content><#continue></#if>
@@ -182,6 +185,9 @@
 
         <!-- Mobile menu panel -->
         <div id="mobileMenu" data-dropdown-panel class="hidden md:hidden border-t border-white/10 bg-surface-container-lowest/90 px-4 py-4 space-y-1">
+            <#if storeInfo.hasCourses!false>
+                <a href="${up}/courses" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">${l('GrowerpWebsiteCourses')}</a>
+            </#if>
             <#if isMarketing>
                 <#list storeInfo.menu as topItem>
                 <#if !topItem.title?has_content><#continue></#if>
