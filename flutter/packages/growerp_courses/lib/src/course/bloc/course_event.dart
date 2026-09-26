@@ -136,6 +136,25 @@ class CourseLessonCreate extends CourseEvent {
   List<Object?> get props => [moduleId, lesson];
 }
 
+/// Create (no questionId) or update a module quiz question
+class CourseQuizQuestionSave extends CourseEvent {
+  final CourseQuizQuestion question;
+
+  const CourseQuizQuestionSave(this.question);
+
+  @override
+  List<Object?> get props => [question];
+}
+
+class CourseQuizQuestionDelete extends CourseEvent {
+  final String questionId;
+
+  const CourseQuizQuestionDelete(this.questionId);
+
+  @override
+  List<Object?> get props => [questionId];
+}
+
 /// Update lesson
 class CourseLessonUpdate extends CourseEvent {
   final CourseLesson lesson;

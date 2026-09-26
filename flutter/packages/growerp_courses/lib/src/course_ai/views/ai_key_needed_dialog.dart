@@ -55,9 +55,7 @@ Future<void> showAiKeyNeededDialog(
         title: 'AI Settings',
         width: 700,
         height: MediaQuery.of(dialogContext).size.height * 0.85,
-        child: SystemSetupAiView(
-          onSaved: () => Navigator.pop(dialogContext),
-        ),
+        child: SystemSetupAiView(onSaved: () => Navigator.pop(dialogContext)),
       ),
     ),
   );

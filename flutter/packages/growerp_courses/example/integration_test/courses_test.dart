@@ -69,6 +69,11 @@ void main() {
       title: 'Lesson One',
       content: 'Lesson one body text',
     );
+    await CourseTest.addQuizQuestion(
+      tester,
+      question: 'What does this course test?',
+      options: ['The courses', 'Nothing'],
+    );
     await CourseTest.updateCourse(
       tester,
       title: 'Test Course Updated',
@@ -93,6 +98,7 @@ void main() {
       curriculum: 'Basics\nNext steps',
     );
     await CourseTest.writeLessonsWithAi(tester);
+    await CourseTest.writeQuizzesWithAi(tester);
     await CommonTest.tapByKey(tester, 'cancelCourse');
 
     // --- learner: registers into this company, pays, studies
@@ -112,6 +118,10 @@ void main() {
       '/myCourses',
       lessonContent: 'Lesson one body text',
     );
+    // the only lesson is done: the module quiz, then the certificate
+    await CourseTest.takeQuiz(tester, answers: [1], expectPassed: false);
+    await CourseTest.takeQuiz(tester, answers: [0], expectPassed: true);
+    await CourseTest.openCertificate(tester);
 
     await CommonTest.gotoMainMenu(tester);
     await CommonTest.logout(tester);

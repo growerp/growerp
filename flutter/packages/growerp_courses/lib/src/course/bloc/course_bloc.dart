@@ -48,6 +48,8 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     on<CourseLessonCreate>(_onLessonCreate);
     on<CourseLessonUpdate>(_onLessonUpdate);
     on<CourseLessonDelete>(_onLessonDelete);
+    on<CourseQuizQuestionSave>(_onQuizQuestionSave);
+    on<CourseQuizQuestionDelete>(_onQuizQuestionDelete);
     on<CourseSubscribe>(_onCourseSubscribe);
     on<CourseMediaGenerate>(_onMediaGenerate);
     on<CourseParticipantsFetch>(_onParticipantsFetch);
@@ -308,6 +310,45 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         data: {...event.lesson.toJson(), 'moduleId': event.moduleId},
       );
 
+      if (_hasValidSelectedCourseId) {
+        add(CourseGetDetail(state.selectedCourse!.courseId!));
+      }
+    } catch (e) {
+      emit(
+        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+      );
+    }
+  }
+
+  Future<void> _onQuizQuestionSave(
+    CourseQuizQuestionSave event,
+    Emitter<CourseState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: CourseBlocStatus.loading));
+      final data = event.question.toJson();
+      if (event.question.questionId == null) {
+        await restClient.createCourseQuizQuestion(data: data);
+      } else {
+        await restClient.updateCourseQuizQuestion(data: data);
+      }
+      if (_hasValidSelectedCourseId) {
+        add(CourseGetDetail(state.selectedCourse!.courseId!));
+      }
+    } catch (e) {
+      emit(
+        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+      );
+    }
+  }
+
+  Future<void> _onQuizQuestionDelete(
+    CourseQuizQuestionDelete event,
+    Emitter<CourseState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: CourseBlocStatus.loading));
+      await restClient.deleteCourseQuizQuestion(questionId: event.questionId);
       if (_hasValidSelectedCourseId) {
         add(CourseGetDetail(state.selectedCourse!.courseId!));
       }

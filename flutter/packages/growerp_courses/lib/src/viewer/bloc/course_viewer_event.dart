@@ -61,6 +61,17 @@ class PreviousLesson extends CourseViewerEvent {
   const PreviousLesson();
 }
 
+/// A module quiz was submitted with this score percent
+class QuizScored extends CourseViewerEvent {
+  final String moduleId;
+  final int scorePercent;
+
+  const QuizScored(this.moduleId, this.scorePercent);
+
+  @override
+  List<Object?> get props => [moduleId, scorePercent];
+}
+
 /// Fetch available courses for selection
 class FetchAvailableCourses extends CourseViewerEvent {
   const FetchAvailableCourses();

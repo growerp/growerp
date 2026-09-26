@@ -2328,6 +2328,25 @@ abstract class RestClient {
   @GET("rest/s1/growerp/100/CourseCatalog")
   Future<dynamic> getCourseCatalog({@Query('courseId') required String courseId});
 
+  // Learner: module quiz (no answers), scoring, completion certificate
+  @GET("rest/s1/growerp/100/CourseCatalog/Quiz")
+  Future<CourseQuiz> getCourseQuiz({
+    @Query('courseId') required String courseId,
+    @Query('moduleId') required String moduleId,
+  });
+
+  @POST("rest/s1/growerp/100/CourseCatalog/Quiz")
+  Future<CourseQuizResult> submitCourseQuiz({
+    @Field() required String courseId,
+    @Field() required String moduleId,
+    @Field() required List<int?> answers,
+  });
+
+  @GET("rest/s1/growerp/100/CourseCatalog/Certificate")
+  Future<dynamic> getCourseCertificate({
+    @Query('courseId') required String courseId,
+  });
+
   @POST("rest/s1/growerp/100/Course")
   Future<dynamic> createCourse({@Body() required Map<String, dynamic> data});
 
@@ -2370,6 +2389,22 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/Course/generateMediaWithAI")
   Future<dynamic> generateCourseMedia({
     @Body() required Map<String, dynamic> data,
+  });
+
+  // Authoring of module quiz questions
+  @POST("rest/s1/growerp/100/Course/QuizQuestion")
+  Future<dynamic> createCourseQuizQuestion({
+    @Body() required Map<String, dynamic> data,
+  });
+
+  @PATCH("rest/s1/growerp/100/Course/QuizQuestion")
+  Future<dynamic> updateCourseQuizQuestion({
+    @Body() required Map<String, dynamic> data,
+  });
+
+  @DELETE("rest/s1/growerp/100/Course/QuizQuestion")
+  Future<dynamic> deleteCourseQuizQuestion({
+    @Query('questionId') required String questionId,
   });
 
   @GET("rest/s1/growerp/100/Course/AiJob")

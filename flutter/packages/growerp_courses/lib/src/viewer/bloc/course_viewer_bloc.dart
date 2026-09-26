@@ -28,6 +28,7 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
     on<LoadCourse>(_onLoadCourse);
     on<SelectLesson>(_onSelectLesson);
     on<MarkLessonComplete>(_onMarkLessonComplete);
+    on<QuizScored>(_onQuizScored);
     on<NextLesson>(_onNextLesson);
     on<PreviousLesson>(_onPreviousLesson);
     on<FetchAvailableCourses>(_onFetchAvailableCourses);
@@ -167,6 +168,22 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
         ),
       );
     }
+  }
+
+  /// The backend keeps the best score: do the same locally
+  void _onQuizScored(QuizScored event, Emitter<CourseViewerState> emit) {
+    final scores = {...?state.progress?.quizScores};
+    final best = scores[event.moduleId] ?? 0;
+    scores[event.moduleId] = event.scorePercent > best
+        ? event.scorePercent
+        : best;
+    emit(
+      state.copyWith(
+        progress: (state.progress ?? CourseProgress()).copyWith(
+          quizScores: scores,
+        ),
+      ),
+    );
   }
 
   Future<void> _onNextLesson(

@@ -18,6 +18,8 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_viewer_bloc.dart';
 import '../../media/views/media_preview.dart';
+import '../../quiz/views/course_certificate.dart';
+import '../../quiz/views/course_quiz_screen.dart';
 import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
 /// In-app course viewer widget for presenting courses
@@ -457,41 +459,45 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
                     module.title,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  children: (module.lessons ?? []).map((lesson) {
-                    final isSelected =
-                        state.currentLesson?.lessonId == lesson.lessonId;
-                    final isCompleted =
-                        state.progress?.isLessonCompleted(lesson.lessonId!) ??
-                        false;
+                  children: [
+                    ...(module.lessons ?? []).map((lesson) {
+                      final isSelected =
+                          state.currentLesson?.lessonId == lesson.lessonId;
+                      final isCompleted =
+                          state.progress?.isLessonCompleted(lesson.lessonId!) ??
+                          false;
 
-                    return ListTile(
-                      key: lesson.lessonId != null
-                          ? _getLessonKey(lesson.lessonId!)
-                          : null,
-                      selected: isSelected,
-                      leading: Icon(
-                        isCompleted
-                            ? Icons.check_circle
-                            : Icons.play_circle_outline,
-                        color: isCompleted ? Colors.green : null,
-                      ),
-                      title: Text(lesson.title),
-                      subtitle: lesson.estimatedDuration != null
-                          ? Text(
-                              CoursesLocalizations.of(
-                                context,
-                              )!.courses_lessonestimateddurationMin(
-                                lesson.estimatedDuration.toString(),
-                              ),
-                            )
-                          : null,
-                      onTap: () {
-                        context.read<CourseViewerBloc>().add(
-                          SelectLesson(lesson),
-                        );
-                      },
-                    );
-                  }).toList(),
+                      return ListTile(
+                        key: lesson.lessonId != null
+                            ? _getLessonKey(lesson.lessonId!)
+                            : null,
+                        selected: isSelected,
+                        leading: Icon(
+                          isCompleted
+                              ? Icons.check_circle
+                              : Icons.play_circle_outline,
+                          color: isCompleted ? Colors.green : null,
+                        ),
+                        title: Text(lesson.title),
+                        subtitle: lesson.estimatedDuration != null
+                            ? Text(
+                                CoursesLocalizations.of(
+                                  context,
+                                )!.courses_lessonestimateddurationMin(
+                                  lesson.estimatedDuration.toString(),
+                                ),
+                              )
+                            : null,
+                        onTap: () {
+                          context.read<CourseViewerBloc>().add(
+                            SelectLesson(lesson),
+                          );
+                        },
+                      );
+                    }),
+                    if ((module.quizQuestionCount ?? 0) > 0)
+                      _buildQuizTile(context, state, module, moduleIndex),
+                  ],
                 );
               },
             ),
@@ -499,6 +505,54 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
         ],
       ),
     );
+  }
+
+  Widget _buildQuizTile(
+    BuildContext context,
+    CourseViewerState state,
+    CourseModule module,
+    int moduleIndex,
+  ) {
+    final score = state.progress?.quizScores?[module.moduleId];
+    final passed = state.progress?.isQuizPassed(module.moduleId!) ?? false;
+    return ListTile(
+      key: Key('quiz$moduleIndex'),
+      leading: Icon(
+        passed ? Icons.emoji_events : Icons.quiz_outlined,
+        color: passed ? Colors.green : null,
+      ),
+      title: const Text('Module quiz'),
+      subtitle: Text(
+        score == null
+            ? '${module.quizQuestionCount} questions'
+            : 'Best score $score%${passed ? '' : ', ${CourseProgress.quizPassPercent}% to pass'}',
+      ),
+      onTap: () => _openQuiz(context, state, module),
+    );
+  }
+
+  Future<void> _openQuiz(
+    BuildContext context,
+    CourseViewerState state,
+    CourseModule module,
+  ) async {
+    final bloc = context.read<CourseViewerBloc>();
+    final score = await Navigator.of(context).push<int>(
+      MaterialPageRoute(
+        builder: (_) =>
+            CourseQuizScreen(courseId: state.course!.courseId!, module: module),
+      ),
+    );
+    if (score != null) bloc.add(QuizScored(module.moduleId!, score));
+  }
+
+  /// All lessons done and every module quiz passed
+  bool _courseCompleted(CourseViewerState state) {
+    final progress = state.progress;
+    if (progress == null || !progress.isCompleted) return false;
+    return (state.course?.modules ?? [])
+        .where((m) => (m.quizQuestionCount ?? 0) > 0)
+        .every((m) => progress.isQuizPassed(m.moduleId!));
   }
 
   Widget _buildProgressHeader(BuildContext context, CourseViewerState state) {
@@ -582,6 +636,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
             ),
           const SizedBox(height: 32),
           _buildLessonActions(context, state, lesson),
+          ..._buildModuleEnd(context, state, lesson),
         ],
       ),
     );
@@ -643,6 +698,54 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
           const SizedBox(),
       ],
     );
+  }
+
+  /// After the last lesson of a module: its quiz; once all is done: the
+  /// certificate
+  List<Widget> _buildModuleEnd(
+    BuildContext context,
+    CourseViewerState state,
+    CourseLesson lesson,
+  ) {
+    final modules = state.course?.modules ?? [];
+    final module = modules
+        .where(
+          (m) => m.lessons?.any((l) => l.lessonId == lesson.lessonId) ?? false,
+        )
+        .firstOrNull;
+    final isLastOfModule = module?.lessons?.last.lessonId == lesson.lessonId;
+    return [
+      if (module != null &&
+          isLastOfModule &&
+          (module.quizQuestionCount ?? 0) > 0 &&
+          !(state.progress?.isQuizPassed(module.moduleId!) ?? false)) ...[
+        const SizedBox(height: 24),
+        Center(
+          child: OutlinedButton.icon(
+            key: const Key('takeQuiz'),
+            icon: const Icon(Icons.quiz_outlined),
+            label: const Text('Take the module quiz'),
+            onPressed: () => _openQuiz(context, state, module),
+          ),
+        ),
+      ],
+      if (_courseCompleted(state)) ...[
+        const SizedBox(height: 24),
+        Card(
+          color: Colors.green.withValues(alpha: 0.12),
+          child: ListTile(
+            leading: const Icon(Icons.workspace_premium, color: Colors.green),
+            title: const Text('Course completed!'),
+            trailing: ElevatedButton(
+              key: const Key('courseCertificate'),
+              onPressed: () =>
+                  showCourseCertificate(context, state.course!.courseId!),
+              child: const Text('Certificate'),
+            ),
+          ),
+        ),
+      ],
+    ];
   }
 
   CourseLesson? _getPreviousLesson(CourseViewerState state) {

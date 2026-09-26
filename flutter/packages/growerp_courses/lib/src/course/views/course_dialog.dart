@@ -21,6 +21,7 @@ import '../bloc/course_bloc.dart';
 import '../../course_ai/bloc/course_ai_bloc.dart';
 import '../../course_ai/views/ai_key_needed_dialog.dart';
 import 'course_participants_view.dart';
+import 'quiz_editor_dialog.dart';
 import '../../viewer/views/course_viewer.dart';
 import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
@@ -356,8 +357,10 @@ class _CourseDialogState extends State<CourseDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        // wraps: on a phone the buttons do not fit next to the title
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text(
               CoursesLocalizations.of(
@@ -365,8 +368,7 @@ class _CourseDialogState extends State<CourseDialog> {
               )!.courses_modulesModuleslength(modules.length.toString()),
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
+            Wrap(
               children: [
                 if (modules.isNotEmpty)
                   TextButton.icon(
@@ -374,6 +376,13 @@ class _CourseDialogState extends State<CourseDialog> {
                     icon: const Icon(Icons.auto_awesome),
                     label: const Text('Write lessons with AI'),
                     onPressed: () => _writeLessonsWithAi(null),
+                  ),
+                if (modules.isNotEmpty)
+                  TextButton.icon(
+                    key: const Key('aiWriteQuizzes'),
+                    icon: const Icon(Icons.quiz_outlined),
+                    label: const Text('Quizzes with AI'),
+                    onPressed: () => _writeQuizzesWithAi(null),
                   ),
                 TextButton.icon(
                   key: const Key('addModule'),
@@ -450,6 +459,27 @@ class _CourseDialogState extends State<CourseDialog> {
                       style: TextStyle(color: Colors.blue),
                     ),
                     onTap: () => _showAddLessonDialog(module),
+                  ),
+                  ListTile(
+                    key: Key('moduleQuiz$index'),
+                    contentPadding: const EdgeInsets.only(left: 72, right: 16),
+                    leading: const Icon(Icons.quiz_outlined),
+                    title: Text(
+                      'Quiz: ${module.quizQuestionCount ?? 0} questions',
+                    ),
+                    onTap: () => showDialog(
+                      context: context,
+                      builder: (_) => BlocProvider.value(
+                        value: context.read<CourseBloc>(),
+                        child: QuizEditorDialog(moduleId: module.moduleId!),
+                      ),
+                    ),
+                    trailing: IconButton(
+                      key: Key('aiQuiz$index'),
+                      icon: const Icon(Icons.auto_awesome),
+                      tooltip: 'Write this quiz with AI',
+                      onPressed: () => _writeQuizzesWithAi(module),
+                    ),
                   ),
                 ],
               );
@@ -551,6 +581,44 @@ class _CourseDialogState extends State<CourseDialog> {
         'jobType': 'LESSONS',
         'courseId': widget.course!.courseId,
         if (lesson != null) 'lessonIds': [lesson.lessonId],
+      }),
+    );
+  }
+
+  /// Replaces the quiz of every module ([module] null) or of one module with
+  /// AI written multiple choice questions on the lesson content.
+  Future<void> _writeQuizzesWithAi(CourseModule? module) async {
+    if (_aiBloc.state.status == CourseAiStatus.running) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Write quizzes with AI'),
+        content: Text(
+          module == null
+              ? 'The AI writes a quiz for every module from its lessons, '
+                    'replacing the questions there are now.'
+              : 'The AI writes the quiz of "${module.title}" from its '
+                    'lessons, replacing the questions there are now.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            key: const Key('aiQuizConfirm'),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Write'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    _aiBloc.add(
+      CourseAiStart({
+        'jobType': 'QUIZ',
+        'courseId': widget.course!.courseId,
+        if (module != null) 'moduleIds': [module.moduleId],
       }),
     );
   }

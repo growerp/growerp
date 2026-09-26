@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+
+Module quizzes and the course completion certificate.
+
+    get#CourseQuiz              learner: the questions of a module, without the answers
+    submit#CourseQuiz           learner: score the answers, keep the best score
+    get#CourseCertificate       learner: certificate data once the course is completed
+                                and every quiz passed; the app renders the pdf
+    create/update/delete#CourseQuizQuestion   authoring
+
+A quiz is passed with QUIZ_PASS_PERCENT (70) or more.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="check" noun="CourseLearnerAccess" allow-remote="false">
+        <description>Internal: the course is of this company, published (or the user is staff)
+            and its content open to the user (free, subscribed, or staff).</description>
+        <in-parameters>
+            <parameter name="courseId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="courseEntity" type="org.moqui.entity.EntityValue" />
+            <parameter name="ownerPartyId" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="owner" />
+            <set field="ownerPartyId" from="owner.ownerPartyId" />
+            <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity" />
+            <service-call name="growerp.100.CourseServices100.get#CourseAccess"
+                in-map="[ownerPartyId: ownerPartyId]" out-map="access" />
+            <if condition="courseEntity?.ownerPartyId != ownerPartyId
+                    || (!access.isStaff &amp;&amp; courseEntity.status != 'PUBLISHED')
+                    || !(access.isStaff || !courseEntity.productId
+                         || access.subscribedProductIds.contains(courseEntity.productId))">
+                <return error="true" message="Course not found or access denied" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="CourseQuiz">
+        <description>The questions of the quiz of a module, without correct answers.</description>
+        <in-parameters>
+            <parameter name="courseId" required="true" />
+            <parameter name="moduleId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="questions" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.CourseQuizServices100.check#CourseLearnerAccess"
+                in-map="[courseId: courseId]" />
+            <entity-find entity-name="growerp.course.CourseQuizQuestion" list="questionList">
+                <econdition field-name="courseId" />
+                <econdition field-name="moduleId" />
+                <order-by field-name="sequenceNum" />
+            </entity-find>
+            <script>
+                def slurper = new groovy.json.JsonSlurper()
+                questions = questionList.collect { q -> [questionId: q.questionId,
+                    moduleId: q.moduleId, sequenceNum: q.sequenceNum, question: q.question,
+                    options: slurper.parseText(q.optionsJson ?: '[]')] }
+            </script>
+        </actions>
+    </service>
+
+    <service verb="submit" noun="CourseQuiz">
+        <description>Score the answers of a module quiz and keep the best score in the progress
+            of the user. Returns per question whether it was right, the right answer and the
+            explanation.</description>
+        <in-parameters>
+            <parameter name="courseId" required="true" />
+            <parameter name="moduleId" required="true" />
+            <parameter name="answers" type="List" required="true" /> <!-- chosen index per question, in order -->
+        </in-parameters>
+        <out-parameters>
+            <parameter name="scorePercent" type="Integer" />
+            <parameter name="passed" type="Boolean" />
+            <parameter name="results" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.CourseQuizServices100.check#CourseLearnerAccess"
+                in-map="[courseId: courseId]" />
+            <entity-find entity-name="growerp.course.CourseQuizQuestion" list="questionList">
+                <econdition field-name="courseId" />
+                <econdition field-name="moduleId" />
+                <order-by field-name="sequenceNum" />
+            </entity-find>
+            <if condition="!questionList">
+                <return error="true" message="This module has no quiz" />
+            </if>
+            <script><![CDATA[
+                int correctCount = 0
+                results = []
+                questionList.eachWithIndex { q, int i ->
+                    def answer = i < answers.size() ? answers[i] : null
+                    boolean correct = answer != null && (answer as Integer) == (q.correctIndex as Integer)
+                    if (correct) correctCount++
+                    results.add([questionId: q.questionId, correct: correct,
+                                 correctIndex: q.correctIndex, explanation: q.explanation])
+                }
+                scorePercent = (int) Math.round(correctCount * 100.0 / questionList.size())
+                passed = scorePercent >= 70
+            ]]></script>
+
+            <entity-find-one entity-name="growerp.course.CourseProgress" value-field="progressEntity">
+                <field-map field-name="userId" from="ec.user.userId" />
+                <field-map field-name="courseId" />
+            </entity-find-one>
+            <script><![CDATA[
+                def scores = progressEntity?.quizScores ?
+                    new groovy.json.JsonSlurper().parseText(progressEntity.quizScores as String) as Map : [:]
+                scores[moduleId] = Math.max((scores[moduleId] ?: 0) as int, scorePercent)
+                context.quizScoresJson = groovy.json.JsonOutput.toJson(scores)
+            ]]></script>
+            <if condition="progressEntity">
+                <service-call name="update#growerp.course.CourseProgress"
+                    in-map="[progressId: progressEntity.progressId, quizScores: quizScoresJson,
+                             lastAccessDate: ec.user.nowTimestamp]" />
+                <else>
+                    <service-call name="create#growerp.course.CourseProgress"
+                        in-map="[userId: ec.user.userId, courseId: courseId, completedLessons: '[]',
+                                 progressPercent: 0, quizScores: quizScoresJson,
+                                 startedDate: ec.user.nowTimestamp, lastAccessDate: ec.user.nowTimestamp]" />
+                </else>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="CourseCertificate">
+        <description>Certificate data for the current user: eligible once all lessons are
+            completed and every module quiz is passed. The app renders the pdf.</description>
+        <in-parameters>
+            <parameter name="courseId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="certificate" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.CourseQuizServices100.check#CourseLearnerAccess"
+                in-map="[courseId: courseId]" out-map="checked" />
+            <entity-find-one entity-name="growerp.course.CourseProgress" value-field="progressEntity">
+                <field-map field-name="userId" from="ec.user.userId" />
+                <field-map field-name="courseId" />
+            </entity-find-one>
+            <entity-find entity-name="growerp.course.CourseQuizQuestion" list="questionList">
+                <econdition field-name="courseId" />
+            </entity-find>
+            <script><![CDATA[
+                def scores = progressEntity?.quizScores ?
+                    new groovy.json.JsonSlurper().parseText(progressEntity.quizScores as String) as Map : [:]
+                def quizModuleIds = questionList*.moduleId.unique()
+                def notPassed = quizModuleIds.findAll { ((scores[it] ?: 0) as int) < 70 }
+                String reason = null
+                if ((progressEntity?.progressPercent ?: 0) < 100) reason = 'Complete all lessons first'
+                else if (notPassed) reason = "Pass the quiz of ${notPassed.size()} more module${notPassed.size() == 1 ? '' : 's'} first"
+
+                def party = ec.user.userAccount?.partyId ? ec.entity.find("mantle.party.Person")
+                    .condition("partyId", ec.user.userAccount.partyId).one() : null
+                def company = ec.entity.find("mantle.party.Organization")
+                    .condition("partyId", checked.courseEntity.ownerPartyId).one()
+                // the owner is not always the organization itself: take the company of the owner
+                if (!company) {
+                    def related = ec.service.sync().name("growerp.100.GeneralServices100.get#RelatedCompanyAndOwner").call()
+                    company = ec.entity.find("mantle.party.Organization")
+                        .condition("partyId", related.companyPartyId).one()
+                }
+                certificate = [eligible: reason == null, reason: reason,
+                    courseId: courseId, courseTitle: checked.courseEntity.title,
+                    estimatedDuration: checked.courseEntity.estimatedDuration,
+                    learnerName: [party?.firstName, party?.lastName].findAll { it }.join(' ') ?: ec.user.username,
+                    companyName: company?.organizationName,
+                    completedDate: progressEntity?.completedDate,
+                    certificateNo: reason == null ? "${courseId}-${progressEntity.progressId}" : null]
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!--  Authoring                                                -->
+    <!-- ========================================================= -->
+
+    <service verb="check" noun="CourseModuleOwner" allow-remote="false">
+        <in-parameters>
+            <parameter name="moduleId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="courseId" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="owner" />
+            <entity-find-one entity-name="growerp.course.CourseModule" value-field="moduleEntity" />
+            <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity">
+                <field-map field-name="courseId" from="moduleEntity?.courseId" />
+            </entity-find-one>
+            <if condition="!courseEntity || courseEntity.ownerPartyId != owner.ownerPartyId">
+                <return error="true" message="Module not found or access denied" />
+            </if>
+            <set field="courseId" from="courseEntity.courseId" />
+        </actions>
+    </service>
+
+    <service verb="create" noun="CourseQuizQuestion">
+        <in-parameters>
+            <parameter name="moduleId" required="true" />
+            <parameter name="question" required="true" allow-html="any" />
+            <parameter name="options" type="List" required="true" />
+            <parameter name="correctIndex" type="Integer" required="true" />
+            <parameter name="explanation" allow-html="any" />
+            <parameter name="sequenceNum" type="Integer" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="questionId" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.CourseQuizServices100.check#CourseModuleOwner"
+                in-map="[moduleId: moduleId]" out-map="owned" />
+            <if condition="correctIndex &lt; 0 || correctIndex &gt;= options.size()">
+                <return error="true" message="The correct answer must be one of the options" />
+            </if>
+            <if condition="sequenceNum == null">
+                <entity-find-count entity-name="growerp.course.CourseQuizQuestion" count-field="existing">
+                    <econdition field-name="moduleId" />
+                </entity-find-count>
+                <set field="sequenceNum" from="existing + 1" />
+            </if>
+            <service-call name="create#growerp.course.CourseQuizQuestion" out-map="context"
+                in-map="[courseId: owned.courseId, moduleId: moduleId, sequenceNum: sequenceNum,
+                         question: question, optionsJson: groovy.json.JsonOutput.toJson(options),
+                         correctIndex: correctIndex, explanation: explanation,
+                         createdDate: ec.user.nowTimestamp]" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="CourseQuizQuestion">
+        <in-parameters>
+            <parameter name="questionId" required="true" />
+            <parameter name="question" allow-html="any" />
+            <parameter name="options" type="List" />
+            <parameter name="correctIndex" type="Integer" />
+            <parameter name="explanation" allow-html="any" />
+            <parameter name="sequenceNum" type="Integer" />
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.course.CourseQuizQuestion" value-field="questionEntity"
+                for-update="true" />
+            <if condition="!questionEntity">
+                <return error="true" message="Question not found" />
+            </if>
+            <service-call name="growerp.100.CourseQuizServices100.check#CourseModuleOwner"
+                in-map="[moduleId: questionEntity.moduleId]" />
+            <set field="questionEntity.question" from="question" set-if-empty="false" />
+            <if condition="options">
+                <set field="questionEntity.optionsJson" from="groovy.json.JsonOutput.toJson(options)" />
+            </if>
+            <set field="questionEntity.correctIndex" from="correctIndex" set-if-empty="false" />
+            <set field="questionEntity.explanation" from="explanation" set-if-empty="false" />
+            <set field="questionEntity.sequenceNum" from="sequenceNum" set-if-empty="false" />
+            <script>
+                int optionCount = new groovy.json.JsonSlurper().parseText(questionEntity.optionsJson ?: '[]').size()
+                if (questionEntity.correctIndex == null || questionEntity.correctIndex &lt; 0
+                        || questionEntity.correctIndex &gt;= optionCount)
+                    ec.message.addError("The correct answer must be one of the options")
+            </script>
+            <check-errors />
+            <entity-update value-field="questionEntity" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="CourseQuizQuestion">
+        <in-parameters>
+            <parameter name="questionId" required="true" />
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.course.CourseQuizQuestion" value-field="questionEntity" />
+            <if condition="!questionEntity">
+                <return error="true" message="Question not found" />
+            </if>
+            <service-call name="growerp.100.CourseQuizServices100.check#CourseModuleOwner"
+                in-map="[moduleId: questionEntity.moduleId]" />
+            <entity-delete value-field="questionEntity" />
+        </actions>
+    </service>
+</services>

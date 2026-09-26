@@ -25,6 +25,8 @@ Job types:
              modules and lesson stubs (the stub content is the lesson brief)
     LESSONS  write the markdown content and key points of all lessons of a course, or of the
              given lessonIds, from the lesson brief, the outline and the course sources
+    QUIZ     replace the quiz questions of all modules, or of the given moduleIds, with
+             multiple choice questions on the lesson content
 -->
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
@@ -61,7 +63,7 @@ Job types:
             Uploaded files are converted to text here, so the job row never holds the
             (possibly large) file itself.</description>
         <in-parameters>
-            <parameter name="jobType" required="true" /> <!-- OUTLINE, LESSONS -->
+            <parameter name="jobType" required="true" /> <!-- OUTLINE, LESSONS, QUIZ -->
             <parameter name="courseId" />
             <!-- OUTLINE -->
             <parameter name="title" />
@@ -80,6 +82,9 @@ Job types:
             <parameter name="useKnowledgeBase" type="Boolean" default="false" />
             <!-- LESSONS: empty is all lessons of the course -->
             <parameter name="lessonIds" type="List" />
+            <!-- QUIZ: empty is all modules of the course -->
+            <parameter name="moduleIds" type="List" />
+            <parameter name="questionsPerModule" type="Integer" default="5" />
         </in-parameters>
         <out-parameters>
             <parameter name="courseAiJob" type="Map" />
@@ -87,7 +92,7 @@ Job types:
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <if condition="!(jobType in ['OUTLINE', 'LESSONS'])">
+            <if condition="!(jobType in ['OUTLINE', 'LESSONS', 'QUIZ'])">
                 <return error="true" message="Unknown AI job type ${jobType}" />
             </if>
             <if condition="jobType == 'OUTLINE' &amp;&amp; !title">
@@ -122,7 +127,8 @@ Job types:
                     title: title, audience: audience, targetPersonaId: targetPersonaId,
                     difficulty: difficulty, curriculum: curriculum, notes: notes,
                     urls: (urls ?: []).findAll { it }, files: fileTexts,
-                    useKnowledgeBase: useKnowledgeBase, lessonIds: lessonIds ?: []])
+                    useKnowledgeBase: useKnowledgeBase, lessonIds: lessonIds ?: [],
+                    moduleIds: moduleIds ?: [], questionsPerModule: questionsPerModule])
             ]]></script>
             <check-errors />
 

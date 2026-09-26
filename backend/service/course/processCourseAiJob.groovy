@@ -269,11 +269,69 @@ Answer with JSON only: {"content": "the markdown lesson", "keyPoints": ["3 to 5 
         (failed ? ", not written (try again): ${failed.join(', ')}" : '')
 }
 
+// ---------------------------------------------------------------------------------------------
+// QUIZ: multiple choice questions per module, from the lesson content
+// ---------------------------------------------------------------------------------------------
+def runQuiz = {
+    String courseId = job.courseId
+    def course = ec.entity.find("growerp.course.Course").condition("courseId", courseId).disableAuthz().one()
+    def modules = ec.entity.find("growerp.course.CourseModule").condition("courseId", courseId)
+        .orderBy("sequenceNum").disableAuthz().list()
+        .findAll { !input.moduleIds || it.moduleId in input.moduleIds }
+    if (!modules) throw new Exception('No modules to write a quiz for')
+    int count = (input.questionsPerModule ?: 5) as int
+    int written = 0
+    modules.eachWithIndex { module, int index ->
+        progress((int) (5 + 90 * index / modules.size()), "Writing the quiz of module ${index + 1} of ${modules.size()}: ${module.title}")
+        def lessons = ec.entity.find("growerp.course.CourseLesson").condition("moduleId", module.moduleId)
+            .orderBy("sequenceNum").disableAuthz().list()
+        String lessonText = lessons.collect { "## ${it.title}\n${it.content ?: ''}" }.join('\n\n')
+        if (lessonText.length() > 30000) lessonText = lessonText.substring(0, 30000)
+        String prompt = """You are an experienced teacher writing the quiz at the end of a course module.
+
+COURSE: ${course.title}
+DIFFICULTY: ${course.difficulty ?: 'BEGINNER'}
+MODULE: ${module.title}
+LESSONS OF THE MODULE:
+${lessonText}
+
+RULES:
+- Write exactly ${count} multiple choice questions that test understanding of the lessons
+  above, not trivia; each question is answered by the lesson text.
+- 4 options per question, exactly one correct; wrong options must be plausible.
+- Vary the position of the correct option.
+- A one or two sentence explanation of why the correct option is right.
+- Write in the language of the lessons.
+
+Answer with JSON only:
+{"questions": [{"question": "", "options": ["", "", "", ""], "correctIndex": 0, "explanation": ""}]}"""
+        def quiz = CourseAiUtil.askJson(ec, ownerPartyId, prompt,
+            [questions: (1..count).collect { n ->
+                [question: "Test question ${n} of ${module.title}?", options: ['Right', 'Wrong 1', 'Wrong 2', 'Wrong 3'],
+                 correctIndex: 0, explanation: 'Test explanation.'] }])
+        def questions = (quiz instanceof Map ? quiz.questions : null)?.findAll { Map q ->
+            q.question && q.options instanceof List && q.options.size() >= 2 &&
+                q.correctIndex instanceof Number && q.correctIndex >= 0 && q.correctIndex < q.options.size() }
+        if (!questions) throw new Exception("The AI returned no usable questions for ${module.title}")
+        // replace the quiz of the module
+        ec.entity.find("growerp.course.CourseQuizQuestion").condition("moduleId", module.moduleId)
+            .disableAuthz().deleteAll()
+        questions.eachWithIndex { Map q, int n ->
+            svc('growerp.100.CourseQuizServices100.create#CourseQuizQuestion',
+                [moduleId: module.moduleId, question: q.question, options: q.options,
+                 correctIndex: q.correctIndex, explanation: q.explanation, sequenceNum: n + 1])
+        }
+        written += questions.size()
+    }
+    return "${written} quiz questions written for ${modules.size()} module${modules.size() == 1 ? '' : 's'}"
+}
+
 try {
     String doneMessage
     switch (job.jobType) {
         case 'OUTLINE': doneMessage = runOutline(); break
         case 'LESSONS': doneMessage = runLessons(); break
+        case 'QUIZ': doneMessage = runQuiz(); break
         default: throw new Exception("Unknown AI job type ${job.jobType}")
     }
     ec.service.sync().name(STATUS_SERVICE).parameters([jobId: jobId, status: 'DONE',

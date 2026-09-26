@@ -12,6 +12,8 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
+
 import 'package:decimal/decimal.dart';
 import 'package:json_annotation/json_annotation.dart';
 import '../json_converters.dart';
@@ -228,6 +230,14 @@ class CourseModule {
   final DateTime? lastModifiedDate;
   final List<CourseLesson>? lessons;
 
+  /// Number of quiz questions of this module, 0 is no quiz
+  @JsonKey(includeToJson: false)
+  final int? quizQuestionCount;
+
+  /// The quiz with answers: only returned to the authors
+  @JsonKey(includeToJson: false)
+  final List<CourseQuizQuestion>? quizQuestions;
+
   CourseModule({
     this.moduleId,
     this.pseudoId,
@@ -239,6 +249,8 @@ class CourseModule {
     this.createdDate,
     this.lastModifiedDate,
     this.lessons,
+    this.quizQuestionCount,
+    this.quizQuestions,
   });
 
   factory CourseModule.fromJson(Map<String, dynamic> json) =>
@@ -267,6 +279,8 @@ class CourseModule {
     createdDate: createdDate ?? this.createdDate,
     lastModifiedDate: lastModifiedDate ?? this.lastModifiedDate,
     lessons: lessons ?? this.lessons,
+    quizQuestionCount: quizQuestionCount,
+    quizQuestions: quizQuestions,
   );
 
   @override
@@ -483,6 +497,10 @@ class CourseProgress {
   @StringListConverter()
   final List<String>? completedLessons;
   final int? progressPercent;
+
+  /// Best quiz score percent per moduleId
+  @JsonKey(fromJson: _quizScoresFromJson, includeToJson: false)
+  final Map<String, int>? quizScores;
   @NullableTimestampConverter()
   final DateTime? startedDate;
   @NullableTimestampConverter()
@@ -497,6 +515,7 @@ class CourseProgress {
     this.currentLessonId,
     this.completedLessons,
     this.progressPercent = 0,
+    this.quizScores,
     this.startedDate,
     this.lastAccessDate,
     this.completedDate,
@@ -511,6 +530,12 @@ class CourseProgress {
 
   bool get isCompleted => progressPercent == 100;
 
+  /// A module quiz counts as passed with this score or more
+  static const quizPassPercent = 70;
+
+  bool isQuizPassed(String moduleId) =>
+      (quizScores?[moduleId] ?? 0) >= quizPassPercent;
+
   CourseProgress copyWith({
     String? progressId,
     String? userId,
@@ -518,6 +543,7 @@ class CourseProgress {
     String? currentLessonId,
     List<String>? completedLessons,
     int? progressPercent,
+    Map<String, int>? quizScores,
     DateTime? startedDate,
     DateTime? lastAccessDate,
     DateTime? completedDate,
@@ -528,6 +554,7 @@ class CourseProgress {
     currentLessonId: currentLessonId ?? this.currentLessonId,
     completedLessons: completedLessons ?? this.completedLessons,
     progressPercent: progressPercent ?? this.progressPercent,
+    quizScores: quizScores ?? this.quizScores,
     startedDate: startedDate ?? this.startedDate,
     lastAccessDate: lastAccessDate ?? this.lastAccessDate,
     completedDate: completedDate ?? this.completedDate,
@@ -650,4 +677,122 @@ class CourseAiJobs {
   factory CourseAiJobs.fromJson(Map<String, dynamic> json) =>
       _$CourseAiJobsFromJson(json);
   Map<String, dynamic> toJson() => _$CourseAiJobsToJson(this);
+}
+
+/// quizScores arrives as the JSON text stored in the progress row
+Map<String, int>? _quizScoresFromJson(dynamic json) {
+  if (json == null) return null;
+  final map = json is String ? jsonDecode(json) : json;
+  if (map is! Map) return null;
+  return map.map((k, v) => MapEntry(k.toString(), (v as num).toInt()));
+}
+
+/// Multiple choice question of a module quiz. [correctIndex] and
+/// [explanation] are only filled for authors.
+@JsonSerializable()
+class CourseQuizQuestion {
+  final String? questionId;
+  final String? moduleId;
+  final int? sequenceNum;
+  final String question;
+  final List<String> options;
+  final int? correctIndex;
+  final String? explanation;
+
+  CourseQuizQuestion({
+    this.questionId,
+    this.moduleId,
+    this.sequenceNum,
+    required this.question,
+    this.options = const [],
+    this.correctIndex,
+    this.explanation,
+  });
+
+  factory CourseQuizQuestion.fromJson(Map<String, dynamic> json) =>
+      _$CourseQuizQuestionFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseQuizQuestionToJson(this);
+}
+
+/// Questions of one module quiz, as a learner receives them
+@JsonSerializable()
+class CourseQuiz {
+  final List<CourseQuizQuestion> questions;
+
+  CourseQuiz({required this.questions});
+
+  factory CourseQuiz.fromJson(Map<String, dynamic> json) =>
+      _$CourseQuizFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseQuizToJson(this);
+}
+
+/// Outcome of one answered question
+@JsonSerializable()
+class CourseQuizAnswerResult {
+  final String? questionId;
+  final bool correct;
+  final int? correctIndex;
+  final String? explanation;
+
+  CourseQuizAnswerResult({
+    this.questionId,
+    this.correct = false,
+    this.correctIndex,
+    this.explanation,
+  });
+
+  factory CourseQuizAnswerResult.fromJson(Map<String, dynamic> json) =>
+      _$CourseQuizAnswerResultFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseQuizAnswerResultToJson(this);
+}
+
+/// Score of a submitted module quiz
+@JsonSerializable()
+class CourseQuizResult {
+  final int scorePercent;
+  final bool passed;
+  final List<CourseQuizAnswerResult> results;
+
+  CourseQuizResult({
+    this.scorePercent = 0,
+    this.passed = false,
+    this.results = const [],
+  });
+
+  factory CourseQuizResult.fromJson(Map<String, dynamic> json) =>
+      _$CourseQuizResultFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseQuizResultToJson(this);
+}
+
+/// Completion certificate data; the app renders the pdf.
+@JsonSerializable()
+class CourseCertificate {
+  final bool eligible;
+
+  /// Why not eligible yet
+  final String? reason;
+  final String? courseId;
+  final String? courseTitle;
+  final int? estimatedDuration;
+  final String? learnerName;
+  final String? companyName;
+  @NullableTimestampConverter()
+  final DateTime? completedDate;
+  final String? certificateNo;
+
+  CourseCertificate({
+    this.eligible = false,
+    this.reason,
+    this.courseId,
+    this.courseTitle,
+    this.estimatedDuration,
+    this.learnerName,
+    this.companyName,
+    this.completedDate,
+    this.certificateNo,
+  });
+
+  factory CourseCertificate.fromJson(Map<String, dynamic> json) =>
+      _$CourseCertificateFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseCertificateToJson(this);
 }

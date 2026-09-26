@@ -219,6 +219,10 @@ limitations under the License.
                     <econdition field-name="moduleId" from="module.moduleId" />
                     <order-by field-name="sequenceNum" />
                 </entity-find>
+                <entity-find entity-name="growerp.course.CourseQuizQuestion" list="questionList">
+                    <econdition field-name="moduleId" from="module.moduleId" />
+                    <order-by field-name="sequenceNum" />
+                </entity-find>
                 <script>
                     modulesWithLessons.add([
                         moduleId: module.moduleId,
@@ -228,7 +232,13 @@ limitations under the License.
                         sequenceNum: module.sequenceNum,
                         estimatedDuration: module.estimatedDuration,
                         lessons: hasAccess ? lessonList*.getMap() : lessonList.collect { it.getMap()
-                            .findAll { k, v -> !(k in ['content', 'keyPoints', 'videoUrl']) } }
+                            .findAll { k, v -> !(k in ['content', 'keyPoints', 'videoUrl']) } },
+                        quizQuestionCount: questionList.size(),
+                        // answers only for the authors: learners get the quiz from get#CourseQuiz
+                        quizQuestions: access.isStaff ? questionList.collect { q -> [
+                            questionId: q.questionId, moduleId: q.moduleId, sequenceNum: q.sequenceNum,
+                            question: q.question, options: new groovy.json.JsonSlurper().parseText(q.optionsJson ?: '[]'),
+                            correctIndex: q.correctIndex, explanation: q.explanation] } : null
                     ])
                 </script>
             </iterate>
@@ -432,6 +442,9 @@ limitations under the License.
             <entity-delete-by-condition entity-name="growerp.course.CourseProgress">
                 <econdition field-name="courseId" />
             </entity-delete-by-condition>
+            <entity-delete-by-condition entity-name="growerp.course.CourseQuizQuestion">
+                <econdition field-name="courseId" />
+            </entity-delete-by-condition>
             <!-- Delete AI source material and jobs -->
             <entity-delete-by-condition entity-name="growerp.course.CourseSource">
                 <econdition field-name="courseId" />
@@ -563,6 +576,9 @@ limitations under the License.
             </entity-delete-by-condition>
             <!-- Delete related media -->
             <entity-delete-by-condition entity-name="growerp.course.CourseMedia">
+                <econdition field-name="moduleId" />
+            </entity-delete-by-condition>
+            <entity-delete-by-condition entity-name="growerp.course.CourseQuizQuestion">
                 <econdition field-name="moduleId" />
             </entity-delete-by-condition>
             <entity-delete value-field="moduleEntity" />

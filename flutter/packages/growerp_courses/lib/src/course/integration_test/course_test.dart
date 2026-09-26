@@ -170,6 +170,98 @@ class CourseTest {
     await CommonTest.waitForSnackbarToGo(tester);
   }
 
+  /// Adds a quiz question to a module of the open course dialog; the first
+  /// option is the correct one.
+  static Future<void> addQuizQuestion(
+    WidgetTester tester, {
+    int moduleIndex = 0,
+    required String question,
+    required List<String> options,
+  }) async {
+    await CommonTest.dragUntil(tester, key: 'module$moduleIndex');
+    if (!CommonTest.hasKey('moduleQuiz$moduleIndex')) {
+      await CommonTest.tapByKey(tester, 'module$moduleIndex'); // expand
+    }
+    await CommonTest.dragUntil(tester, key: 'moduleQuiz$moduleIndex');
+    await CommonTest.tapByKey(tester, 'moduleQuiz$moduleIndex');
+    await CommonTest.tapByKey(tester, 'addQuestion');
+    await CommonTest.enterText(tester, 'questionText', question);
+    for (var i = 0; i < options.length; i++) {
+      await CommonTest.enterText(tester, 'questionOption$i', options[i]);
+    }
+    await CommonTest.tapByKey(
+      tester,
+      'saveQuestion',
+      seconds: CommonTest.waitTime,
+    );
+    expect(find.text(question), findsOneWidget);
+    await CommonTest.tapByKey(tester, 'closeQuiz');
+    expect(find.textContaining('Quiz: 1 questions'), findsOneWidget);
+  }
+
+  /// Lets the AI write the quiz of every module of the open course dialog.
+  static Future<void> writeQuizzesWithAi(WidgetTester tester) async {
+    await CommonTest.dragUntil(tester, key: 'aiWriteQuizzes');
+    await CommonTest.tapByKey(tester, 'aiWriteQuizzes');
+    await CommonTest.tapByKey(tester, 'aiQuizConfirm', settle: false);
+    await _pumpUntil(
+      tester,
+      find.textContaining('quiz questions written'),
+      seconds: 300,
+    );
+    await CommonTest.waitForSnackbarToGo(tester);
+    await CommonTest.dragUntil(tester, key: 'module0');
+    if (!CommonTest.hasKey('moduleQuiz0')) {
+      await CommonTest.tapByKey(tester, 'module0'); // expand
+    }
+    await CommonTest.dragUntil(tester, key: 'moduleQuiz0');
+    expect(find.textContaining('Quiz: 5 questions'), findsWidgets);
+  }
+
+  /// Learner, after the last lesson of the first module: takes its quiz
+  /// answering [answers] (option index per question) and closes it.
+  static Future<void> takeQuiz(
+    WidgetTester tester, {
+    required List<int> answers,
+    required bool expectPassed,
+  }) async {
+    await CommonTest.dragUntil(tester, key: 'takeQuiz');
+    await CommonTest.tapByKey(tester, 'takeQuiz', seconds: CommonTest.waitTime);
+    await CommonTest.checkWidgetKey(tester, 'CourseQuizScreen');
+    for (var q = 0; q < answers.length; q++) {
+      await CommonTest.dragUntil(tester, key: 'quizOption${q}_${answers[q]}');
+      await CommonTest.tapByKey(tester, 'quizOption${q}_${answers[q]}');
+    }
+    await CommonTest.dragUntil(tester, key: 'quizSubmit');
+    await CommonTest.tapByKey(
+      tester,
+      'quizSubmit',
+      seconds: CommonTest.waitTime,
+    );
+    expect(find.text(expectPassed ? 'Passed!' : '0%'), findsOneWidget);
+    await CommonTest.dragUntil(tester, key: 'quizClose');
+    await CommonTest.tapByKey(
+      tester,
+      'quizClose',
+      seconds: CommonTest.waitTime,
+    );
+  }
+
+  /// Learner with the course completed: opens the certificate and closes it.
+  static Future<void> openCertificate(WidgetTester tester) async {
+    await CommonTest.dragUntil(tester, key: 'courseCertificate');
+    await CommonTest.tapByKey(
+      tester,
+      'courseCertificate',
+      seconds: CommonTest.waitTime,
+    );
+    await CommonTest.checkWidgetKey(tester, 'courseCertificateDialog');
+    Navigator.of(
+      tester.element(find.byKey(const Key('courseCertificateDialog'))),
+    ).pop();
+    await tester.pumpAndSettle();
+  }
+
   /// Deletes the course with this title after confirming.
   static Future<void> deleteCourse(WidgetTester tester, String title) async {
     await openCourse(tester, title);
