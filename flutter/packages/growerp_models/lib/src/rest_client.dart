@@ -486,6 +486,11 @@ abstract class RestClient {
     @Query('applicationId') String? applicationId,
   });
 
+  /// The GROWERP subscription plans with their current price:
+  /// {plans: [{productId, productName, description, price, currencyUomId}]}
+  @GET("rest/s1/growerp/100/SubscriptionPlans")
+  Future<dynamic> getSubscriptionPlans();
+
   // products
   @GET("rest/s1/growerp/100/Products")
   Future<Products> getProduct({

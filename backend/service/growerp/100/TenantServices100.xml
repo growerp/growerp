@@ -485,11 +485,12 @@ limitations under the License.
             <parameter name="paymentId" />
         </out-parameters>
         <actions>
-            <!-- validate the plan is a GROWERP-owned plan product and get its current price -->
+            <!-- validate the plan is a GROWERP plan product (GROWERP_*, as get#SubscriptionPlans
+                 lists them: GROWERP also sells courses) and get its current price -->
             <entity-find-one entity-name="mantle.product.Product" value-field="planProduct">
                 <field-map field-name="productId" from="plan" />
             </entity-find-one>
-            <if condition="!planProduct || planProduct.ownerPartyId != 'GROWERP'">
+            <if condition="!planProduct || planProduct.ownerPartyId != 'GROWERP' || !plan.startsWith('GROWERP_')">
                 <return error="true" message="Invalid subscription plan ${plan}" />
             </if>
             <entity-find entity-name="mantle.product.ProductPrice" list="planPrices">

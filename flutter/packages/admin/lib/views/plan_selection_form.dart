@@ -41,9 +41,7 @@ class _PlanSelectionFormState extends State<PlanSelectionForm> {
     super.initState();
     productBloc = context.read<DataFetchBloc<Products>>()
       ..add(
-        GetDataEvent(
-          () => context.read<RestClient>().getProduct(ownerPartyId: 'GROWERP'),
-        ),
+        GetDataEvent(() => getSubscriptionPlans(context.read<RestClient>())),
       );
     subscriptionBloc = context.read<SubscriptionBloc>()
       ..add(const SubscriptionFetch(growerp: true));
@@ -64,7 +62,9 @@ class _PlanSelectionFormState extends State<PlanSelectionForm> {
         if (state.status == DataFetchStatus.loading) {
           return const Center(child: CircularProgressIndicator());
         } else if ((state.data as Products).products.isEmpty) {
-          return Center(child: Text(AdminLocalizations.of(context)!.noPlansAvailable));
+          return Center(
+            child: Text(AdminLocalizations.of(context)!.noPlansAvailable),
+          );
         }
         // get products and sort by price
         Products productsList = state.data as Products;
@@ -76,7 +76,9 @@ class _PlanSelectionFormState extends State<PlanSelectionForm> {
           );
         // get current subscription
         if (subscriptionBloc.state.subscriptions.isEmpty) {
-          return Center(child: Text(AdminLocalizations.of(context)!.noSubscriptionFound));
+          return Center(
+            child: Text(AdminLocalizations.of(context)!.noSubscriptionFound),
+          );
         }
         subscription = (subscriptionBloc.state.subscriptions).first;
         selectedPlan = subscription.product!.productId;

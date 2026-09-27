@@ -889,12 +889,13 @@ void main() {
       // returns empty until this has happened, so fetch the plans afterwards.
       await CommonTest.createCompanyAndAdmin(tester);
 
-      // Fetch the authoritative plan list from the public GROWERP owner Products
-      // endpoint (require-authentication="anonymous-all").
+      // Fetch the authoritative plan list from the public SubscriptionPlans
+      // endpoint (require-authentication="anonymous-all"); not all GROWERP
+      // products are plans, GROWERP also sells courses.
       final apiClient = RestClient(await buildDioClient());
       late Products backendPlans;
       try {
-        backendPlans = await apiClient.getProduct(ownerPartyId: 'GROWERP');
+        backendPlans = await getSubscriptionPlans(apiClient);
       } catch (e) {
         debugPrint('Skipping TC-TRIAL-004: could not fetch plans – $e');
         return;

@@ -72,9 +72,7 @@ class LoginDialogState extends State<LoginDialog> {
     _obscureText4 = true;
     productBloc = context.read<DataFetchBloc<Products>>()
       ..add(
-        GetDataEvent(
-          () => context.read<RestClient>().getProduct(ownerPartyId: 'GROWERP'),
-        ),
+        GetDataEvent(() => getSubscriptionPlans(context.read<RestClient>())),
       );
   }
 
