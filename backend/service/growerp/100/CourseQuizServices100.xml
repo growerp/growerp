@@ -30,10 +30,12 @@ A quiz is passed with QUIZ_PASS_PERCENT (70) or more.
             and its content open to the user (free, subscribed, or staff).</description>
         <in-parameters>
             <parameter name="courseId" required="true" />
+            <parameter name="moduleId" /> <!-- refused while the module is locked -->
         </in-parameters>
         <out-parameters>
             <parameter name="courseEntity" type="org.moqui.entity.EntityValue" />
             <parameter name="ownerPartyId" />
+            <parameter name="isStaff" type="Boolean" />
         </out-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
@@ -47,6 +49,14 @@ A quiz is passed with QUIZ_PASS_PERCENT (70) or more.
                     || !(access.isStaff || !courseEntity.productId
                          || access.subscribedProductIds.contains(courseEntity.productId))">
                 <return error="true" message="Course not found or access denied" />
+            </if>
+            <set field="isStaff" from="access.isStaff" />
+            <if condition="moduleId &amp;&amp; !isStaff &amp;&amp; courseEntity.sequentialUnlock == 'Y'">
+                <service-call name="growerp.100.CourseServices100.get#CourseModuleStates"
+                    in-map="[courseEntity: courseEntity, userId: ec.user.userId]" out-map="states" />
+                <if condition="states.moduleStates[moduleId]?.locked">
+                    <return error="true" message="Finish the previous module first" />
+                </if>
             </if>
         </actions>
     </service>
@@ -62,7 +72,7 @@ A quiz is passed with QUIZ_PASS_PERCENT (70) or more.
         </out-parameters>
         <actions>
             <service-call name="growerp.100.CourseQuizServices100.check#CourseLearnerAccess"
-                in-map="[courseId: courseId]" />
+                in-map="[courseId: courseId, moduleId: moduleId]" />
             <entity-find entity-name="growerp.course.CourseQuizQuestion" list="questionList">
                 <econdition field-name="courseId" />
                 <econdition field-name="moduleId" />
@@ -85,15 +95,18 @@ A quiz is passed with QUIZ_PASS_PERCENT (70) or more.
             <parameter name="courseId" required="true" />
             <parameter name="moduleId" required="true" />
             <parameter name="answers" type="List" required="true" /> <!-- chosen index per question, in order -->
+            <!-- test out: passed, the lessons of the module count as done (not for beginner courses) -->
+            <parameter name="placement" type="Boolean" default="false" />
         </in-parameters>
         <out-parameters>
             <parameter name="scorePercent" type="Integer" />
             <parameter name="passed" type="Boolean" />
             <parameter name="results" type="List" />
+            <parameter name="weakLessonIds" type="List" /> <!-- lessons of the questions answered wrong -->
         </out-parameters>
         <actions>
             <service-call name="growerp.100.CourseQuizServices100.check#CourseLearnerAccess"
-                in-map="[courseId: courseId]" />
+                in-map="[courseId: courseId, moduleId: moduleId]" out-map="access" />
             <entity-find entity-name="growerp.course.CourseQuizQuestion" list="questionList">
                 <econdition field-name="courseId" />
                 <econdition field-name="moduleId" />
@@ -114,6 +127,10 @@ A quiz is passed with QUIZ_PASS_PERCENT (70) or more.
                 }
                 scorePercent = (int) Math.round(correctCount * 100.0 / questionList.size())
                 passed = scorePercent >= 70
+                weakLessonIds = []
+                questionList.eachWithIndex { q, int i ->
+                    if (!results[i].correct && q.lessonId && !(q.lessonId in weakLessonIds)) weakLessonIds.add(q.lessonId)
+                }
             ]]></script>
 
             <entity-find-one entity-name="growerp.course.CourseProgress" value-field="progressEntity">
@@ -137,6 +154,103 @@ A quiz is passed with QUIZ_PASS_PERCENT (70) or more.
                                  startedDate: ec.user.nowTimestamp, lastAccessDate: ec.user.nowTimestamp]" />
                 </else>
             </if>
+            <if condition="placement &amp;&amp; passed &amp;&amp; access.courseEntity.difficulty != 'BEGINNER'">
+                <entity-find entity-name="growerp.course.CourseLesson" list="moduleLessons">
+                    <econdition field-name="moduleId" />
+                </entity-find>
+                <iterate list="moduleLessons" entry="moduleLesson">
+                    <service-call name="growerp.100.CourseServices100.update#CourseProgress"
+                        in-map="[courseId: courseId, lessonId: moduleLesson.lessonId]" />
+                </iterate>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="CourseRecommendation">
+        <description>What the learner best does next, from the progress, the quiz scores and the
+            weak spots; the AI explains why. Without AI: the next lesson not done yet.</description>
+        <in-parameters>
+            <parameter name="courseId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="recommendation" type="Map" /> <!-- nextLessonId, reason, reviewLessonIds -->
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.CourseQuizServices100.check#CourseLearnerAccess"
+                in-map="[courseId: courseId]" out-map="access" />
+            <entity-find-one entity-name="growerp.course.CourseProgress" value-field="progressEntity">
+                <field-map field-name="userId" from="ec.user.userId" />
+                <field-map field-name="courseId" />
+            </entity-find-one>
+            <service-call name="growerp.100.CourseServices100.get#CourseModuleStates"
+                in-map="[courseEntity: access.courseEntity, userId: ec.user.userId,
+                         progressEntity: progressEntity]" out-map="states" />
+            <entity-find entity-name="growerp.course.CourseModule" list="moduleList">
+                <econdition field-name="courseId" />
+                <order-by field-name="sequenceNum" />
+            </entity-find>
+            <entity-find entity-name="growerp.course.CourseLesson" list="lessonList">
+                <econdition field-name="courseId" />
+                <order-by field-name="sequenceNum" />
+            </entity-find>
+            <entity-find entity-name="growerp.course.CourseSubmission" list="submissionList">
+                <econdition field-name="courseId" />
+                <econdition field-name="userId" from="ec.user.userId" />
+                <order-by field-name="-submittedDate" />
+            </entity-find>
+            <script><![CDATA[
+                def slurper = new groovy.json.JsonSlurper()
+                List completed = progressEntity?.completedLessons ?
+                    slurper.parseText(progressEntity.completedLessons as String) as List : []
+                Map scores = progressEntity?.quizScores ?
+                    slurper.parseText(progressEntity.quizScores as String) as Map : [:]
+                // the plain rule: first lesson not done in a module that is open
+                def ordered = moduleList.collectMany { m -> lessonList.findAll { it.moduleId == m.moduleId } }
+                def nextLesson = ordered.find { !(it.lessonId in completed) &&
+                    !(states.moduleStates[it.moduleId]?.locked) }
+                recommendation = [nextLessonId: nextLesson?.lessonId,
+                    reason: nextLesson ? "Next: ${nextLesson.title}".toString() : 'All lessons are done.',
+                    reviewLessonIds: []]
+                def CourseAiUtil = ec.resource.script("component://growerp/service/course/CourseAiUtil.groovy", null)
+                if (!CourseAiUtil.testMode() && completed) {
+                    StringBuilder outline = new StringBuilder()
+                    for (m in moduleList) {
+                        Map st = states.moduleStates[m.moduleId] ?: [:]
+                        outline << "Module \"${m.title}\"${st.locked ? ' (locked)' : ''}${st.overdue ? ' (overdue)' : ''}" +
+                            "${scores[m.moduleId] != null ? ", quiz score ${scores[m.moduleId]}%" : ''}\n"
+                        lessonList.findAll { it.moduleId == m.moduleId }.each { l ->
+                            outline << "  [${l.lessonId}] ${l.title}${l.lessonId in completed ? ' - done' : ''}\n" }
+                    }
+                    String work = submissionList.unique(false) { it.exerciseId }.collect {
+                        "exercise ${it.exerciseId}: ${(it.instructorScore ?: it.aiScore) ?: '-'}%" }.join(', ')
+                    String prompt = """You are a learning coach. From the progress of a learner in an online course, recommend
+the single best next step and the lessons worth reviewing.
+
+COURSE: ${access.courseEntity.title}
+OUTLINE (lesson ids in brackets):
+${outline}
+EXERCISE SCORES: ${work ?: 'none yet'}
+
+RULES:
+- nextLessonId: a lesson id from the outline that is not locked; usually the first one not done,
+  but a lesson to redo when a quiz score is below 70%.
+- reviewLessonIds: at most 3 done lessons of modules with a low quiz or exercise score.
+- reason: one or two encouraging sentences to the learner, in the language of the course.
+
+Answer with JSON only: {"nextLessonId": "", "reason": "", "reviewLessonIds": []}"""
+                    try {
+                        def advice = CourseAiUtil.askJson(ec, access.ownerPartyId, prompt, null)
+                        def validIds = ordered.findAll { !(states.moduleStates[it.moduleId]?.locked) }*.lessonId
+                        if (advice instanceof Map && advice.nextLessonId in validIds) {
+                            recommendation = [nextLessonId: advice.nextLessonId, reason: advice.reason ?: recommendation.reason,
+                                reviewLessonIds: (advice.reviewLessonIds ?: []).findAll { it in validIds }.take(3)]
+                        }
+                    } catch (Exception e) {
+                        ec.logger.warn("Course recommendation without AI: ${e.message}")
+                        ec.message.clearErrors()
+                    }
+                }
+            ]]></script>
         </actions>
     </service>
 
@@ -222,6 +336,7 @@ A quiz is passed with QUIZ_PASS_PERCENT (70) or more.
             <parameter name="correctIndex" type="Integer" required="true" />
             <parameter name="explanation" allow-html="any" />
             <parameter name="sequenceNum" type="Integer" />
+            <parameter name="lessonId" /> <!-- the lesson it tests -->
         </in-parameters>
         <out-parameters>
             <parameter name="questionId" />
@@ -242,7 +357,7 @@ A quiz is passed with QUIZ_PASS_PERCENT (70) or more.
                 in-map="[courseId: owned.courseId, moduleId: moduleId, sequenceNum: sequenceNum,
                          question: question, optionsJson: groovy.json.JsonOutput.toJson(options),
                          correctIndex: correctIndex, explanation: explanation,
-                         createdDate: ec.user.nowTimestamp]" />
+                         lessonId: lessonId ?: null, createdDate: ec.user.nowTimestamp]" />
         </actions>
     </service>
 
@@ -254,6 +369,7 @@ A quiz is passed with QUIZ_PASS_PERCENT (70) or more.
             <parameter name="correctIndex" type="Integer" />
             <parameter name="explanation" allow-html="any" />
             <parameter name="sequenceNum" type="Integer" />
+            <parameter name="lessonId" />
         </in-parameters>
         <actions>
             <entity-find-one entity-name="growerp.course.CourseQuizQuestion" value-field="questionEntity"
@@ -270,6 +386,7 @@ A quiz is passed with QUIZ_PASS_PERCENT (70) or more.
             <set field="questionEntity.correctIndex" from="correctIndex" set-if-empty="false" />
             <set field="questionEntity.explanation" from="explanation" set-if-empty="false" />
             <set field="questionEntity.sequenceNum" from="sequenceNum" set-if-empty="false" />
+            <set field="questionEntity.lessonId" from="lessonId" set-if-empty="false" />
             <script>
                 int optionCount = new groovy.json.JsonSlurper().parseText(questionEntity.optionsJson ?: '[]').size()
                 if (questionEntity.correctIndex == null || questionEntity.correctIndex &lt; 0

@@ -260,6 +260,79 @@ class CourseTest {
     expect(find.textContaining('Exercises: 1'), findsWidgets);
   }
 
+  /// Lets the AI translate the open course into Dutch: a new course.
+  static Future<void> translateCourse(WidgetTester tester) async {
+    await CommonTest.dragUntil(tester, key: 'aiTranslate');
+    await CommonTest.tapByKey(tester, 'aiTranslate');
+    await CommonTest.enterDropDown(tester, 'translateLanguage', 'Nederlands');
+    await CommonTest.tapByKey(tester, 'aiTranslateConfirm', settle: false);
+    await _pumpUntil(
+      tester,
+      find.textContaining('Translated into Dutch'),
+      seconds: 300,
+    );
+    await CommonTest.waitForSnackbarToGo(tester);
+  }
+
+  /// Lets the AI check the open course for outdated content: in test mode the
+  /// first lesson gets a finding, which is dismissed.
+  static Future<void> checkOutdatedContent(WidgetTester tester) async {
+    await CommonTest.dragUntil(tester, key: 'aiReview');
+    await CommonTest.tapByKey(tester, 'aiReview');
+    await CommonTest.tapByKey(tester, 'aiReviewConfirm', settle: false);
+    await _pumpUntil(
+      tester,
+      find.textContaining('may need an update'),
+      seconds: 300,
+    );
+    await CommonTest.waitForSnackbarToGo(tester);
+    await CommonTest.dragUntil(tester, key: 'module0');
+    if (!tester.any(find.byIcon(Icons.warning_amber))) {
+      await CommonTest.tapByKey(tester, 'module0'); // expand
+    }
+    final warning = find.byIcon(Icons.warning_amber).first;
+    await tester.ensureVisible(warning);
+    await tester.tap(warning);
+    await tester.pumpAndSettle();
+    await CommonTest.checkWidgetKey(tester, 'lessonReviewNotes');
+    await CommonTest.tapByKey(
+      tester,
+      'dismissReview',
+      seconds: CommonTest.waitTime,
+    );
+    expect(find.byIcon(Icons.warning_amber), findsNothing);
+  }
+
+  /// Admin: reviews the first submission waiting for review of the course
+  /// with this title, which then leaves the "needs review" list.
+  static Future<void> reviewSubmission(
+    WidgetTester tester,
+    String title, {
+    required int score,
+  }) async {
+    await openCourse(tester, title);
+    await CommonTest.tapByKey(
+      tester,
+      'submissionsTab',
+      seconds: CommonTest.waitTime,
+    );
+    await CommonTest.tapByKey(tester, 'submission0');
+    await CommonTest.checkWidgetKey(tester, 'SubmissionReviewDialog');
+    await CommonTest.enterText(tester, 'instructorScore', '$score');
+    await CommonTest.enterText(
+      tester,
+      'instructorFeedbackField',
+      'Good start',
+    );
+    await CommonTest.tapByKey(
+      tester,
+      'saveReview',
+      seconds: CommonTest.waitTime,
+    );
+    expect(find.text('No submissions'), findsOneWidget);
+    await CommonTest.tapByKey(tester, 'cancelCourse');
+  }
+
   /// Lets the AI make the slides of every module of the open course dialog.
   static Future<void> writeSlidesWithAi(WidgetTester tester) async {
     await CommonTest.dragUntil(tester, key: 'aiWriteSlides');
@@ -357,6 +430,10 @@ class CourseTest {
       seconds: CommonTest.waitTime,
     );
     expect(find.text(expectPassed ? 'Passed!' : '0%'), findsOneWidget);
+    // answered wrong: the tutor can explain the mistakes
+    if (!expectPassed) {
+      expect(find.byKey(const Key('quizExplain')), findsOneWidget);
+    }
     await CommonTest.dragUntil(tester, key: 'quizClose');
     await CommonTest.tapByKey(
       tester,

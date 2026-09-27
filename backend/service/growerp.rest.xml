@@ -1434,6 +1434,16 @@ limitations under the License.
                     <service name="growerp.100.CourseTutorServices100.chat#CourseTutor" />
                 </method>
             </resource>
+            <resource name="Discussion">
+                <method type="post">
+                    <service name="growerp.100.CourseServices100.join#CourseDiscussion" />
+                </method>
+            </resource>
+            <resource name="Recommendation">
+                <method type="get">
+                    <service name="growerp.100.CourseQuizServices100.get#CourseRecommendation" />
+                </method>
+            </resource>
             <resource name="Exercise">
                 <method type="get">
                     <service name="growerp.100.CourseExerciseServices100.get#CourseExercise" />
@@ -1482,6 +1492,14 @@ limitations under the License.
                 <method type="delete">
                     <service name="growerp.100.CourseServices100.delete#CourseLesson" />
                 </method>
+                <resource name="History">
+                    <method type="get">
+                        <service name="growerp.100.CourseServices100.get#CourseLessonHistory" />
+                    </method>
+                    <method type="post">
+                        <service name="growerp.100.CourseServices100.restore#CourseLessonHistory" />
+                    </method>
+                </resource>
             </resource>
             <resource name="generateMediaWithAI">
                 <method type="post">
@@ -1513,6 +1531,9 @@ limitations under the License.
             <resource name="Submission">
                 <method type="get">
                     <service name="growerp.100.CourseExerciseServices100.get#CourseSubmissions" />
+                </method>
+                <method type="patch">
+                    <service name="growerp.100.CourseExerciseServices100.review#CourseSubmission" />
                 </method>
             </resource>
             <resource name="AiJob">

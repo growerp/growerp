@@ -2345,6 +2345,7 @@ abstract class RestClient {
     @Field() required String courseId,
     @Field() required String moduleId,
     @Field() required List<int?> answers,
+    @Field() bool? placement,
   });
 
   /// Learner: AI tutor answer on the current lesson; returns {answer}

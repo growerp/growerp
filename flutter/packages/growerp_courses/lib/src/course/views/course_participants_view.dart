@@ -184,6 +184,17 @@ class _ParticipantTile extends StatelessWidget {
                 ),
               ],
             ),
+            if ((participant.overdueModules ?? 0) > 0) ...[
+              const SizedBox(height: 4),
+              Text(
+                CoursesLocalizations.of(
+                  context,
+                )!.courses_overdueModules(participant.overdueModules.toString()),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.red),
+              ),
+            ],
             if (participant.lastAccessDate != null) ...[
               const SizedBox(height: 4),
               Text(

@@ -46,6 +46,178 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="get" noun="CourseModuleStates" allow-remote="false">
+        <description>Internal: per module of a course, for one learner: done (all lessons
+            completed and the quiz, if any, passed), locked (sequential unlock and an earlier
+            module not done), dueDate and overdue (dueDays after the cohort start, or after the
+            learner started).</description>
+        <in-parameters>
+            <parameter name="courseEntity" type="org.moqui.entity.EntityValue" required="true" />
+            <parameter name="userId" required="true" />
+            <parameter name="progressEntity" type="org.moqui.entity.EntityValue" /> <!-- when already found -->
+        </in-parameters>
+        <out-parameters>
+            <parameter name="moduleStates" type="Map" /> <!-- moduleId: [done, locked, dueDate, overdue] -->
+            <parameter name="overdueCount" type="Integer" />
+            <parameter name="dueSoonCount" type="Integer" /> <!-- due within 2 days, not done -->
+        </out-parameters>
+        <actions>
+            <if condition="!progressEntity">
+                <entity-find-one entity-name="growerp.course.CourseProgress" value-field="progressEntity">
+                    <field-map field-name="userId" />
+                    <field-map field-name="courseId" from="courseEntity.courseId" />
+                </entity-find-one>
+            </if>
+            <entity-find entity-name="growerp.course.CourseModule" list="moduleList">
+                <econdition field-name="courseId" from="courseEntity.courseId" />
+                <order-by field-name="sequenceNum" />
+            </entity-find>
+            <entity-find entity-name="growerp.course.CourseLesson" list="lessonList">
+                <econdition field-name="courseId" from="courseEntity.courseId" />
+            </entity-find>
+            <entity-find entity-name="growerp.course.CourseQuizQuestion" list="questionList">
+                <econdition field-name="courseId" from="courseEntity.courseId" />
+            </entity-find>
+            <script><![CDATA[
+                def slurper = new groovy.json.JsonSlurper()
+                List completed = progressEntity?.completedLessons ?
+                    slurper.parseText(progressEntity.completedLessons as String) as List : []
+                Map scores = progressEntity?.quizScores ?
+                    slurper.parseText(progressEntity.quizScores as String) as Map : [:]
+                def quizModules = questionList*.moduleId.unique()
+                java.sql.Timestamp now = ec.user.nowTimestamp
+                java.sql.Timestamp start = courseEntity.pacing == 'COHORT' && courseEntity.cohortStartDate ?
+                    courseEntity.cohortStartDate : (progressEntity?.startedDate ?: now)
+                boolean sequential = courseEntity.sequentialUnlock == 'Y'
+                moduleStates = [:]
+                overdueCount = 0
+                dueSoonCount = 0
+                boolean earlierOpen = false
+                for (module in moduleList) {
+                    def lessonIds = lessonList.findAll { it.moduleId == module.moduleId }*.lessonId
+                    boolean done = lessonIds.every { it in completed } &&
+                        (!(module.moduleId in quizModules) || ((scores[module.moduleId] ?: 0) as int) >= 70)
+                    java.sql.Timestamp dueDate = module.dueDays ?
+                        new java.sql.Timestamp(start.time + (module.dueDays as long) * 24L * 3600L * 1000L) : null
+                    boolean overdue = dueDate != null && !done && now.after(dueDate)
+                    if (overdue) overdueCount++
+                    else if (dueDate != null && !done && dueDate.time - now.time < 2L * 24L * 3600L * 1000L) dueSoonCount++
+                    moduleStates[module.moduleId] = [done: done, locked: sequential && earlierOpen,
+                        dueDate: dueDate, overdue: overdue]
+                    if (!done) earlierOpen = true
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="send" noun="CourseReminders" authenticate="false" allow-remote="false"
+        transaction-timeout="600">
+        <description>Daily batch (cron): remind learners of an unfinished course when a module is
+            due within 2 days or overdue, or they have not been in the course for 7 days. At
+            most one reminder per learner and course every 3 days; sent through the company's own
+            SMTP settings only. With dryRun nothing is sent: the reminders are returned.</description>
+        <in-parameters>
+            <parameter name="dryRun" type="Boolean" default="false" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="sentCount" type="Integer" />
+            <parameter name="reminders" type="List" />
+        </out-parameters>
+        <actions>
+            <!-- headless run: send#DirectEmail needs a user -->
+            <if condition="!ec.user.userId">
+                <script>ec.user.internalLoginUser('SystemSupport')</script>
+            </if>
+            <set field="now" from="ec.user.nowTimestamp" />
+            <set field="dayMillis" from="24L * 3600L * 1000L" />
+            <entity-find entity-name="growerp.course.CourseProgress" list="progressList">
+                <econdition field-name="completedDate" operator="is-null" />
+                <econdition field-name="lastReminderDate" operator="less"
+                    from="new java.sql.Timestamp(now.time - 3 * dayMillis)" or-null="true" />
+            </entity-find>
+            <set field="sentCount" from="0" />
+            <set field="reminders" from="[]" />
+            <iterate list="progressList" entry="progressEntity">
+                <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity" cache="true">
+                    <field-map field-name="courseId" from="progressEntity.courseId" />
+                </entity-find-one>
+                <if condition="courseEntity?.status != 'PUBLISHED'"><continue /></if>
+                <service-call name="growerp.100.CourseServices100.get#CourseModuleStates"
+                    in-map="[courseEntity: courseEntity, userId: progressEntity.userId,
+                             progressEntity: progressEntity]" out-map="states" />
+                <set field="inactive" from="progressEntity.lastAccessDate == null
+                    || progressEntity.lastAccessDate.time &lt; now.time - 7 * dayMillis" />
+                <if condition="!(states.overdueCount || states.dueSoonCount || inactive)"><continue /></if>
+                <entity-find-one entity-name="moqui.security.UserAccount" value-field="learnerAccount">
+                    <field-map field-name="userId" from="progressEntity.userId" />
+                </entity-find-one>
+                <if condition="!learnerAccount?.emailAddress
+                        || learnerAccount.emailAddress.contains('example.com')"><continue /></if>
+                <set field="reason" from="states.overdueCount ? 'OVERDUE' : (states.dueSoonCount ? 'DUE_SOON' : 'INACTIVE')" />
+                <script>reminders.add([courseId: courseEntity.courseId, userId: progressEntity.userId,
+                    email: learnerAccount.emailAddress, reason: reason])</script>
+                <if condition="dryRun"><continue /></if>
+                <set field="reminderLine" from="reason == 'OVERDUE' ?
+                    'Some modules are past their due date. It is not too late: pick up where you left off.' :
+                    (reason == 'DUE_SOON' ? 'A module is due within two days.' :
+                    'You have not been in the course for a while. A few minutes today keeps you going.')" />
+                <set field="reminderBody" value="&lt;p&gt;${reminderLine}&lt;/p&gt;&lt;p&gt;Course: &lt;b&gt;${courseEntity.title}&lt;/b&gt;, ${progressEntity.progressPercent ?: 0}% done.&lt;/p&gt;" />
+                <service-call name="growerp.100.GeneralServices100.get#ActiveEmailServer"
+                    in-map="[ownerPartyId: courseEntity.ownerPartyId]" out-map="emailServer" />
+                <if condition="emailServer.emailConfigured">
+                    <service-call name="growerp.100.GeneralServices100.send#DirectEmail"
+                        ignore-error="true"
+                        in-map="[ownerPartyId: courseEntity.ownerPartyId,
+                            toAddresses: learnerAccount.emailAddress,
+                            subject: 'Keep going: ' + courseEntity.title, bodyHtml: reminderBody]" />
+                    <service-call name="update#growerp.course.CourseProgress"
+                        in-map="[progressId: progressEntity.progressId, lastReminderDate: now]" />
+                    <set field="sentCount" from="sentCount + 1" />
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="join" noun="CourseDiscussion">
+        <description>The discussion room of a course: made on first use, the current user (learner
+            or staff) joins it. Returns the room to open in the chat.</description>
+        <in-parameters>
+            <parameter name="courseId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="chatRoomId" />
+            <parameter name="chatRoomName" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.CourseQuizServices100.check#CourseLearnerAccess"
+                in-map="[courseId: courseId]" out-map="access" />
+            <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity"
+                for-update="true" />
+            <set field="chatRoomId" from="courseEntity.chatRoomId" />
+            <if condition="!chatRoomId">
+                <service-call name="create#growerp.general.ChatRoom" out-map="created"
+                    in-map="[chatRoomName: courseEntity.title, ownerPartyId: courseEntity.ownerPartyId,
+                             isPrivate: 'N', isActive: 'Y']" />
+                <set field="chatRoomId" from="created.chatRoomId" />
+                <set field="courseEntity.chatRoomId" from="chatRoomId" />
+                <entity-update value-field="courseEntity" />
+            </if>
+            <entity-find-one entity-name="growerp.general.ChatRoomMember" value-field="member">
+                <field-map field-name="chatRoomId" />
+                <field-map field-name="userId" from="ec.user.userId" />
+            </entity-find-one>
+            <if condition="!member">
+                <service-call name="create#growerp.general.ChatRoomMember"
+                    in-map="[chatRoomId: chatRoomId, userId: ec.user.userId, isActive: 'Y', hasRead: 'Y']" />
+                <else-if condition="member.isActive != 'Y'">
+                    <set field="member.isActive" value="Y" />
+                    <entity-update value-field="member" />
+                </else-if>
+            </if>
+            <set field="chatRoomName" from="courseEntity.title" />
+        </actions>
+    </service>
+
     <service verb="get" noun="CourseCatalog">
         <description>Learner view of the courses: published ones only (staff also see drafts),
             lesson content gated by get#CourseAccess. With courseId returns that course.</description>
@@ -69,6 +241,27 @@ limitations under the License.
                     <return error="true" message="Course not found or access denied" />
                 </if>
                 <set field="course" from="courseOut.course" />
+                <!-- learners: due dates, and locked modules without their content -->
+                <if condition="!isStaff">
+                    <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity" />
+                    <service-call name="growerp.100.CourseServices100.get#CourseModuleStates"
+                        in-map="[courseEntity: courseEntity, userId: ec.user.userId]" out-map="states" />
+                    <script><![CDATA[
+                        for (Map module in (course.modules ?: [])) {
+                            Map state = states.moduleStates[module.moduleId] ?: [:]
+                            module.dueDate = state.dueDate
+                            module.overdue = state.overdue
+                            module.locked = state.locked
+                            if (state.locked) {
+                                module.slides = null
+                                module.videoUrl = null
+                                module.exercises = (module.exercises ?: []).collect { it + [prompt: null] }
+                                module.lessons = (module.lessons ?: []).collect { Map l ->
+                                    l.findAll { k, v -> !(k in ['content', 'keyPoints', 'videoUrl']) } }
+                            }
+                        }
+                    ]]></script>
+                </if>
                 <else>
                     <service-call name="growerp.100.CourseServices100.list#Courses"
                         in-map="[filter: filter, start: start, limit: limit,
@@ -252,8 +445,11 @@ limitations under the License.
                         description: module.description,
                         sequenceNum: module.sequenceNum,
                         estimatedDuration: module.estimatedDuration,
-                        lessons: hasAccess ? lessonList*.getMap() : lessonList.collect { it.getMap()
-                            .findAll { k, v -> !(k in ['content', 'keyPoints', 'videoUrl']) } },
+                        dueDays: module.dueDays,
+                        // content only with access, the outdated-content notes only for the authors
+                        lessons: lessonList.collect { it.getMap().findAll { k, v ->
+                            (hasAccess || !(k in ['content', 'keyPoints', 'videoUrl']))
+                            &amp;&amp; (access.isStaff || !(k in ['reviewNotes', 'reviewDate'])) } },
                         slides: hasAccess &amp;&amp; module.slides ?
                             new groovy.json.JsonSlurper().parseText(module.slides) : null,
                         // relative: the app puts its backend url in front
@@ -264,7 +460,8 @@ limitations under the License.
                         quizQuestions: access.isStaff ? questionList.collect { q -> [
                             questionId: q.questionId, moduleId: q.moduleId, sequenceNum: q.sequenceNum,
                             question: q.question, options: new groovy.json.JsonSlurper().parseText(q.optionsJson ?: '[]'),
-                            correctIndex: q.correctIndex, explanation: q.explanation] } : null,
+                            correctIndex: q.correctIndex, explanation: q.explanation,
+                            lessonId: q.lessonId] } : null,
                         exercises: exerciseList.collect { exerciseMap(it) }
                     ])
                 </script>
@@ -313,6 +510,14 @@ limitations under the License.
                 lastModifiedDate: courseEntity.lastModifiedDate,
                 modules: modulesWithLessons,
                 exercises: courseExerciseList.collect { exerciseMap(it) },
+                languageId: courseEntity.languageId,
+                sourceCourseId: courseEntity.sourceCourseId,
+                requireInstructorReview: courseEntity.requireInstructorReview,
+                sequentialUnlock: courseEntity.sequentialUnlock,
+                pacing: courseEntity.pacing,
+                cohortStartDate: courseEntity.cohortStartDate,
+                chatRoomId: courseEntity.chatRoomId,
+                lastReviewedDate: courseEntity.lastReviewedDate,
                 price: coursePrice?.toString()
             ]" />
         </actions>
@@ -329,6 +534,12 @@ limitations under the License.
             <parameter name="estimatedDuration" type="Integer" />
             <parameter name="coverImageUrl" />
             <parameter name="productId" />
+            <parameter name="languageId" />
+            <parameter name="sourceCourseId" />
+            <parameter name="requireInstructorReview" />
+            <parameter name="sequentialUnlock" />
+            <parameter name="pacing" />
+            <parameter name="cohortStartDate" type="Timestamp" />
         </in-parameters>
         <out-parameters>
             <parameter name="courseId" />
@@ -373,6 +584,12 @@ limitations under the License.
                 estimatedDuration: estimatedDuration,
                 status: 'DRAFT',
                 coverImageUrl: coverImageUrl,
+                languageId: languageId,
+                sourceCourseId: sourceCourseId,
+                requireInstructorReview: requireInstructorReview,
+                sequentialUnlock: sequentialUnlock,
+                pacing: pacing,
+                cohortStartDate: cohortStartDate,
                 createdDate: ec.user.nowTimestamp,
                 lastModifiedDate: ec.user.nowTimestamp,
                 createdByUserLogin: ec.user.username
@@ -397,6 +614,11 @@ limitations under the License.
             <parameter name="coverImageUrl" />
             <parameter name="productId" />
             <parameter name="price" type="BigDecimal" />
+            <parameter name="languageId" />
+            <parameter name="requireInstructorReview" />
+            <parameter name="sequentialUnlock" />
+            <parameter name="pacing" />
+            <parameter name="cohortStartDate" type="Timestamp" />
         </in-parameters>
         <out-parameters>
             <parameter name="courseId" />
@@ -424,6 +646,11 @@ limitations under the License.
                 estimatedDuration: estimatedDuration ?: courseEntity.estimatedDuration,
                 status: status ?: courseEntity.status,
                 coverImageUrl: coverImageUrl ?: courseEntity.coverImageUrl,
+                languageId: languageId ?: courseEntity.languageId,
+                requireInstructorReview: requireInstructorReview ?: courseEntity.requireInstructorReview,
+                sequentialUnlock: sequentialUnlock ?: courseEntity.sequentialUnlock,
+                pacing: pacing ?: courseEntity.pacing,
+                cohortStartDate: cohortStartDate ?: courseEntity.cohortStartDate,
                 lastModifiedDate: ec.user.nowTimestamp
             ]" />
             <!-- Update product price when price is provided -->
@@ -523,6 +750,8 @@ limitations under the License.
             <parameter name="description" />
             <parameter name="sequenceNum" type="Integer" />
             <parameter name="estimatedDuration" type="Integer" />
+            <parameter name="dueDays" type="Integer" />
+            <parameter name="slides" allow-html="any" /> <!-- JSON text, as update -->
         </in-parameters>
         <out-parameters>
             <parameter name="moduleId" />
@@ -555,6 +784,8 @@ limitations under the License.
                 description: description,
                 sequenceNum: sequenceNum,
                 estimatedDuration: estimatedDuration,
+                dueDays: dueDays,
+                slides: slides,
                 createdDate: ec.user.nowTimestamp,
                 lastModifiedDate: ec.user.nowTimestamp
             ]"
@@ -573,6 +804,7 @@ limitations under the License.
             <parameter name="estimatedDuration" type="Integer" />
             <!-- JSON text [{title, bullets, notes}], '[]' removes the slides -->
             <parameter name="slides" allow-html="any" />
+            <parameter name="dueDays" type="Integer" /> <!-- 0 removes the due date -->
         </in-parameters>
         <out-parameters>
             <parameter name="moduleId" />
@@ -598,6 +830,7 @@ limitations under the License.
                 sequenceNum: sequenceNum ?: moduleEntity.sequenceNum,
                 estimatedDuration: estimatedDuration ?: moduleEntity.estimatedDuration,
                 slides: slides ?: moduleEntity.slides,
+                dueDays: dueDays == null ? moduleEntity.dueDays : (dueDays > 0 ? dueDays : null),
                 lastModifiedDate: ec.user.nowTimestamp
             ]" />
         </actions>
@@ -721,6 +954,10 @@ limitations under the License.
             <parameter name="estimatedDuration" type="Integer" />
             <parameter name="videoUrl" />
             <parameter name="imageUrl" />
+            <!-- why the text changes, kept with the earlier version: EDIT, AI_LESSONS, AI_REVIEW, RESTORE -->
+            <parameter name="changeReason" default-value="EDIT" />
+            <parameter name="reviewNotes" allow-html="any" /> <!-- JSON {summary, issues} -->
+            <parameter name="clearReviewNotes" type="Boolean" default="false" />
         </in-parameters>
         <out-parameters>
             <parameter name="lessonId" />
@@ -737,6 +974,18 @@ limitations under the License.
             <if condition="courseEntity?.ownerPartyId != context.ownerPartyId">
                 <message error="true">Lesson not found or access denied</message>
                 <return />
+            </if>
+            <!-- keep the text as it was before it changes -->
+            <if condition="(title &amp;&amp; title != lessonEntity.title)
+                    || (content &amp;&amp; content != lessonEntity.content)
+                    || (keyPoints &amp;&amp; keyPoints != lessonEntity.keyPoints)">
+                <service-call name="growerp.100.CourseServices100.add#CourseLessonHistory"
+                    in-map="[lessonEntity: lessonEntity, changeReason: changeReason]" />
+            </if>
+            <if condition="reviewNotes || clearReviewNotes">
+                <set field="lessonEntity.reviewNotes" from="clearReviewNotes ? null : reviewNotes" />
+                <set field="lessonEntity.reviewDate" from="clearReviewNotes ? null : ec.user.nowTimestamp" />
+                <entity-update value-field="lessonEntity" />
             </if>
             <service-call name="update#growerp.course.CourseLesson"
                 in-map="[
@@ -778,6 +1027,66 @@ limitations under the License.
             <script>ec.entity.find("growerp.course.CourseExercise").condition("lessonId", lessonId)
                 .updateAll([lessonId: null])</script>
             <entity-delete value-field="lessonEntity" />
+        </actions>
+    </service>
+
+    <service verb="add" noun="CourseLessonHistory" allow-remote="false">
+        <description>Internal: keep the current text of a lesson as an earlier version.</description>
+        <in-parameters>
+            <parameter name="lessonEntity" type="org.moqui.entity.EntityValue" required="true" />
+            <parameter name="changeReason" default-value="EDIT" />
+        </in-parameters>
+        <actions>
+            <if condition="!lessonEntity.content &amp;&amp; !lessonEntity.keyPoints">
+                <return /><!-- nothing written yet: nothing to keep -->
+            </if>
+            <entity-find-count entity-name="growerp.course.CourseLessonHistory" count-field="versions">
+                <econdition field-name="lessonId" from="lessonEntity.lessonId" />
+            </entity-find-count>
+            <service-call name="create#growerp.course.CourseLessonHistory"
+                in-map="[lessonId: lessonEntity.lessonId, courseId: lessonEntity.courseId,
+                         versionNum: versions + 1, title: lessonEntity.title,
+                         content: lessonEntity.content, keyPoints: lessonEntity.keyPoints,
+                         changedByUsername: ec.user.username, changeReason: changeReason,
+                         changedDate: ec.user.nowTimestamp]" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="CourseLessonHistory">
+        <description>Earlier versions of a lesson, newest first.</description>
+        <in-parameters>
+            <parameter name="lessonId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="versions" type="List" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.course.CourseLesson" value-field="lessonEntity" />
+            <service-call name="growerp.100.CourseExerciseServices100.check#CourseOwner"
+                in-map="[courseId: lessonEntity?.courseId ?: '-']" />
+            <entity-find entity-name="growerp.course.CourseLessonHistory" list="historyList">
+                <econdition field-name="lessonId" />
+                <order-by field-name="-versionNum" />
+            </entity-find>
+            <set field="versions" from="historyList*.getMap()" />
+        </actions>
+    </service>
+
+    <service verb="restore" noun="CourseLessonHistory">
+        <description>Put an earlier version of a lesson back; the text it replaces is kept as a
+            version too.</description>
+        <in-parameters>
+            <parameter name="historyId" required="true" />
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.course.CourseLessonHistory" value-field="historyEntity" />
+            <if condition="!historyEntity">
+                <return error="true" message="Version not found" />
+            </if>
+            <service-call name="growerp.100.CourseServices100.update#CourseLesson"
+                in-map="[lessonId: historyEntity.lessonId, title: historyEntity.title,
+                         content: historyEntity.content, keyPoints: historyEntity.keyPoints,
+                         changeReason: 'RESTORE']" />
         </actions>
     </service>
 
@@ -1033,8 +1342,12 @@ limitations under the License.
                     cache="true">
                     <field-map field-name="partyId" from="userAccount?.partyId" />
                 </entity-find-one>
+                <service-call name="growerp.100.CourseServices100.get#CourseModuleStates"
+                    in-map="[courseEntity: courseEntity, userId: prog.userId, progressEntity: prog]"
+                    out-map="states" />
                 <script>
                     participants.add([
+                        overdueModules: states.overdueCount,
                         userId: prog.userId,
                         partyId: userAccount?.partyId,
                         firstName: person?.firstName,

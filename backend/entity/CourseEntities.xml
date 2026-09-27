@@ -300,7 +300,6 @@
         <field name="lastAccessDate" type="date-time" />
         <field name="completedDate" type="date-time" />
         <field name="lastReminderDate" type="date-time" />
-        <field name="chatRoomId" type="id" /> <!-- COHORT pacing: the discussion of this cohort -->
 
         <relationship type="one" related="moqui.security.UserAccount">
             <key-map field-name="userId" />

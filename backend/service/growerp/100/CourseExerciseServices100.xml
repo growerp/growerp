@@ -73,9 +73,9 @@ EXERCISE_PASS_PERCENT (70) or more, the instructor score counting over the AI sc
             <parameter name="submissions" type="List" />
         </out-parameters>
         <actions>
-            <service-call name="growerp.100.CourseQuizServices100.check#CourseLearnerAccess"
-                in-map="[courseId: courseId]" />
             <entity-find-one entity-name="growerp.course.CourseExercise" value-field="exerciseEntity" />
+            <service-call name="growerp.100.CourseQuizServices100.check#CourseLearnerAccess"
+                in-map="[courseId: courseId, moduleId: exerciseEntity?.moduleId]" />
             <if condition="exerciseEntity?.courseId != courseId">
                 <return error="true" message="Exercise not found" />
             </if>
@@ -111,9 +111,9 @@ EXERCISE_PASS_PERCENT (70) or more, the instructor score counting over the AI sc
             <parameter name="aiError" /> <!-- why the AI did not grade it -->
         </out-parameters>
         <actions>
-            <service-call name="growerp.100.CourseQuizServices100.check#CourseLearnerAccess"
-                in-map="[courseId: courseId]" out-map="access" />
             <entity-find-one entity-name="growerp.course.CourseExercise" value-field="exerciseEntity" />
+            <service-call name="growerp.100.CourseQuizServices100.check#CourseLearnerAccess"
+                in-map="[courseId: courseId, moduleId: exerciseEntity?.moduleId]" out-map="access" />
             <if condition="exerciseEntity?.courseId != courseId">
                 <return error="true" message="Exercise not found" />
             </if>
@@ -359,6 +359,55 @@ Answer with JSON only: {"score": 0, "feedback": "", "strengths": [""], "improvem
                     </if>
                 </if>
             </iterate>
+        </actions>
+    </service>
+
+    <service verb="review" noun="CourseSubmission">
+        <description>Instructor feedback and score on a submission; the score then counts over
+            the AI score. The learner gets an email (company SMTP only, skipped without).</description>
+        <in-parameters>
+            <parameter name="submissionId" required="true" />
+            <parameter name="instructorScore" type="Integer" required="true" />
+            <parameter name="instructorFeedback" allow-html="any" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="submission" type="Map" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.course.CourseSubmission" value-field="submissionEntity"
+                for-update="true" />
+            <if condition="!submissionEntity">
+                <return error="true" message="Submission not found" />
+            </if>
+            <service-call name="growerp.100.CourseExerciseServices100.check#CourseOwner"
+                in-map="[courseId: submissionEntity.courseId]" out-map="owned" />
+            <if condition="instructorScore &lt; 0 || instructorScore &gt; 100">
+                <return error="true" message="The score is 0 to 100" />
+            </if>
+            <set field="submissionEntity.instructorScore" from="instructorScore" />
+            <set field="submissionEntity.instructorFeedback" from="instructorFeedback" />
+            <set field="submissionEntity.status" value="REVIEWED" />
+            <set field="submissionEntity.reviewedByUserId" from="ec.user.userId" />
+            <set field="submissionEntity.reviewedDate" from="ec.user.nowTimestamp" />
+            <entity-update value-field="submissionEntity" />
+            <service-call name="growerp.100.CourseExerciseServices100.get#SubmissionMap"
+                in-map="[submission: submissionEntity]" out-map="mapped" />
+            <set field="submission" from="mapped.submissionMap" />
+
+            <entity-find-one entity-name="moqui.security.UserAccount" value-field="learnerAccount">
+                <field-map field-name="userId" from="submissionEntity.userId" />
+            </entity-find-one>
+            <entity-find-one entity-name="growerp.course.CourseExercise" value-field="exerciseEntity">
+                <field-map field-name="exerciseId" from="submissionEntity.exerciseId" />
+            </entity-find-one>
+            <if condition="learnerAccount?.emailAddress &amp;&amp; !learnerAccount.emailAddress.contains('example.com')">
+                <set field="reviewBody" value="&lt;p&gt;Your work on &lt;b&gt;${exerciseEntity?.title}&lt;/b&gt; in the course &lt;b&gt;${owned.courseEntity.title}&lt;/b&gt; was reviewed: ${instructorScore}%.&lt;/p&gt;&lt;p&gt;${instructorFeedback ?: ''}&lt;/p&gt;&lt;p&gt;Open the course to see all feedback.&lt;/p&gt;" />
+                <service-call name="growerp.100.GeneralServices100.send#DirectEmail"
+                    async="true" ignore-error="true"
+                    in-map="[ownerPartyId: owned.ownerPartyId, toAddresses: learnerAccount.emailAddress,
+                        subject: 'Feedback on your work: ' + (exerciseEntity?.title ?: owned.courseEntity.title),
+                        bodyHtml: reviewBody]" />
+            </if>
         </actions>
     </service>
 </services>

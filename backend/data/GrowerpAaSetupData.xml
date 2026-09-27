@@ -33,6 +33,12 @@ limitations under the License.
         serviceName="growerp.100.TenantServices100.renew#DueTenantSubscriptions"
         cronExpression="0 30 4 * * ?" paused="N" transactionTimeout="600" />
 
+    <!-- Service Job: Remind learners of due, overdue or neglected courses - daily -->
+    <moqui.service.job.ServiceJob jobName="send_course_reminders"
+        description="Email learners whose course modules are due or overdue, or who have not been in the course for a week"
+        serviceName="growerp.100.CourseServices100.send#CourseReminders"
+        cronExpression="0 0 8 * * ?" paused="N" transactionTimeout="600" />
+
     <!-- Service Job: Send due nurture-sequence emails - every 15 minutes -->
     <moqui.service.job.ServiceJob jobName="process_due_sequence_emails"
         description="Send the next nurture-sequence step to enrollments whose nextSendDate has passed"

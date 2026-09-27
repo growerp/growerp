@@ -89,10 +89,14 @@ class CourseQuizBloc extends Bloc<CourseQuizEvent, CourseQuizState> {
   final String courseId;
   final String moduleId;
 
+  /// Testing out: passed, the lessons of the module count as done
+  final bool placement;
+
   CourseQuizBloc({
     required this.restClient,
     required this.courseId,
     required this.moduleId,
+    this.placement = false,
   }) : super(const CourseQuizState()) {
     on<CourseQuizLoad>(_onLoad);
     on<CourseQuizAnswer>(_onAnswer);
@@ -144,6 +148,7 @@ class CourseQuizBloc extends Bloc<CourseQuizEvent, CourseQuizState> {
         courseId: courseId,
         moduleId: moduleId,
         answers: state.answers,
+        placement: placement,
       );
       emit(state.copyWith(status: CourseQuizStatus.submitted, result: result));
     } catch (e) {

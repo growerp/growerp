@@ -43,14 +43,17 @@ learner with questions and one hint at a time.
             <parameter name="answer" />
         </out-parameters>
         <actions>
-            <service-call name="growerp.100.CourseQuizServices100.check#CourseLearnerAccess"
-                in-map="[courseId: courseId]" out-map="access" />
-            <set field="course" from="access.courseEntity" />
+            <set field="lesson" from="null" />
             <if condition="lessonId">
                 <entity-find-one entity-name="growerp.course.CourseLesson" value-field="lesson" />
                 <if condition="lesson?.courseId != courseId">
                     <return error="true" message="Lesson not found" />
                 </if>
+            </if>
+            <service-call name="growerp.100.CourseQuizServices100.check#CourseLearnerAccess"
+                in-map="[courseId: courseId, moduleId: lesson?.moduleId]" out-map="access" />
+            <set field="course" from="access.courseEntity" />
+            <if condition="lesson">
                 <entity-find-one entity-name="growerp.course.CourseModule" value-field="module">
                     <field-map field-name="moduleId" from="lesson.moduleId" />
                 </entity-find-one>

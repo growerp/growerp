@@ -19,6 +19,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../bloc/course_quiz_bloc.dart';
+import '../../tutor/course_tutor_panel.dart';
 
 /// The quiz of one module as its own page. Pops with the score percent of the
 /// last submitted attempt, or null when nothing was submitted.
@@ -26,10 +27,18 @@ class CourseQuizScreen extends StatelessWidget {
   final String courseId;
   final CourseModule module;
 
+  /// Testing out of the module before studying it
+  final bool placement;
+
+  /// Open a lesson to review, after the quiz is closed
+  final void Function(CourseLesson lesson)? onReviewLesson;
+
   const CourseQuizScreen({
     super.key,
     required this.courseId,
     required this.module,
+    this.placement = false,
+    this.onReviewLesson,
   });
 
   @override
@@ -39,15 +48,29 @@ class CourseQuizScreen extends StatelessWidget {
         restClient: context.read<RestClient>(),
         courseId: courseId,
         moduleId: module.moduleId!,
+        placement: placement,
       )..add(const CourseQuizLoad()),
-      child: _CourseQuizView(module: module),
+      child: _CourseQuizView(
+        courseId: courseId,
+        module: module,
+        placement: placement,
+        onReviewLesson: onReviewLesson,
+      ),
     );
   }
 }
 
 class _CourseQuizView extends StatelessWidget {
+  final String courseId;
   final CourseModule module;
-  const _CourseQuizView({required this.module});
+  final bool placement;
+  final void Function(CourseLesson lesson)? onReviewLesson;
+  const _CourseQuizView({
+    required this.courseId,
+    required this.module,
+    this.placement = false,
+    this.onReviewLesson,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +123,19 @@ class _CourseQuizView extends StatelessWidget {
       key: const Key('quizQuestions'),
       padding: const EdgeInsets.all(16),
       children: [
+        if (placement && result == null)
+          Card(
+            key: const Key('placementInfo'),
+            child: ListTile(
+              leading: const Icon(Icons.fast_forward),
+              title: Text(
+                CoursesLocalizations.of(context)!.courses_testOutInfo,
+              ),
+            ),
+          ),
         if (result != null) _scoreCard(context, result),
+        if (result != null && !result.passed)
+          _reviewCard(context, state, result),
         for (var i = 0; i < state.questions.length; i++)
           _question(context, state, i, submitted ? result!.results[i] : null),
         const SizedBox(height: 16),
@@ -143,6 +178,81 @@ class _CourseQuizView extends StatelessWidget {
                 ),
         ),
       ],
+    );
+  }
+
+  /// Answered wrong: the lessons to look at again, and the tutor explaining
+  Widget _reviewCard(
+    BuildContext context,
+    CourseQuizState state,
+    CourseQuizResult result,
+  ) {
+    final l10n = CoursesLocalizations.of(context)!;
+    final lessons = (module.lessons ?? [])
+        .where((l) => result.weakLessonIds.contains(l.lessonId))
+        .toList();
+    final missed = StringBuffer();
+    for (var i = 0; i < state.questions.length && i < result.results.length; i++) {
+      final outcome = result.results[i];
+      if (outcome.correct) continue;
+      final q = state.questions[i];
+      final chosen = state.answers[i];
+      missed.writeln('QUESTION: ${q.question}');
+      if (chosen != null && chosen < q.options.length) {
+        missed.writeln('LEARNER ANSWERED: ${q.options[chosen]}');
+      }
+      final correct = outcome.correctIndex;
+      if (correct != null && correct < q.options.length) {
+        missed.writeln('CORRECT ANSWER: ${q.options[correct]}');
+      }
+      missed.writeln();
+    }
+    return Card(
+      key: const Key('quizReview'),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (lessons.isNotEmpty) ...[
+              Text(
+                l10n.courses_reviewTheseLessons,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              for (final (i, lesson) in lessons.indexed)
+                ListTile(
+                  key: Key('reviewLesson$i'),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.menu_book_outlined),
+                  title: Text(lesson.title),
+                  onTap: onReviewLesson == null
+                      ? null
+                      : () {
+                          Navigator.of(context).pop(result.scorePercent);
+                          onReviewLesson!(lesson);
+                        },
+                ),
+            ],
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                key: const Key('quizExplain'),
+                icon: const Icon(Icons.psychology_outlined),
+                label: Text(l10n.courses_explainMyMistakes),
+                onPressed: () => showCourseTutor(
+                  context,
+                  courseId: courseId,
+                  lessonId: lessons.firstOrNull?.lessonId,
+                  title: l10n.courses_explainMyMistakes,
+                  extraContext: 'QUIZ OF MODULE ${module.title}, ANSWERED WRONG:\n$missed',
+                  firstMessage: l10n.courses_explainMyMistakesPrompt,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

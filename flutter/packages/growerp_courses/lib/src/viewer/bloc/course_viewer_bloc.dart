@@ -114,8 +114,27 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
           mediaList: mediaList,
         ),
       );
+      final recommendation = await _fetchRecommendation(event.courseId);
+      if (recommendation != null) {
+        emit(state.copyWith(recommendation: recommendation));
+      }
     } catch (e) {
       emit(state.copyWith(status: ViewerStatus.failure, message: e.toString()));
+    }
+  }
+
+  /// Optional: the course works without it
+  Future<CourseRecommendation?> _fetchRecommendation(String courseId) async {
+    try {
+      dynamic response = await restClient.getCourseRecommendation(
+        courseId: courseId,
+      );
+      if (response is String) response = jsonDecode(response);
+      return CourseRecommendation.fromJson(
+        response['recommendation'] as Map<String, dynamic>,
+      );
+    } catch (_) {
+      return null;
     }
   }
 
@@ -144,6 +163,7 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
         state.copyWith(
           course: course,
           currentLesson: current ?? state.currentLesson,
+          recommendation: await _fetchRecommendation(courseId),
         ),
       );
     } catch (_) {
@@ -193,6 +213,8 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
       );
 
       emit(state.copyWith(progress: newProgress));
+      // the next module may open, the advice changes
+      add(const RefreshCourse());
     } catch (e) {
       emit(
         state.copyWith(
@@ -217,6 +239,7 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
         ),
       ),
     );
+    add(const RefreshCourse());
   }
 
   Future<void> _onNextLesson(

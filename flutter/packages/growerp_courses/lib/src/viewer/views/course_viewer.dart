@@ -12,10 +12,13 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_viewer_bloc.dart';
 import '../../media/views/media_preview.dart';
@@ -464,22 +467,36 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
                           (l) => l.lessonId == currentLessonId,
                         ) ??
                         false);
+                final locked = module.locked ?? false;
                 return ExpansionTile(
+                  key: Key('viewerModule$moduleIndex'),
                   controller: _getModuleController(moduleIndex),
+                  enabled: !locked,
                   initiallyExpanded:
-                      isCurrentModule ||
-                      (currentLessonId == null && moduleIndex == 0),
+                      !locked &&
+                      (isCurrentModule ||
+                          (currentLessonId == null && moduleIndex == 0)),
                   leading: CircleAvatar(
                     radius: 14,
-                    child: Text(
-                      '${moduleIndex + 1}',
-                      style: const TextStyle(fontSize: 12),
-                    ),
+                    child: locked
+                        ? Icon(
+                            Icons.lock,
+                            size: 14,
+                            key: Key('moduleLocked$moduleIndex'),
+                          )
+                        : Text(
+                            '${moduleIndex + 1}',
+                            style: const TextStyle(fontSize: 12),
+                          ),
                   ),
                   title: Text(
                     module.title,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: locked ? Theme.of(context).disabledColor : null,
+                    ),
                   ),
+                  subtitle: _moduleSubtitle(context, module, moduleIndex),
                   children: [
                     ...(module.lessons ?? []).map((lesson) {
                       final isSelected =
@@ -570,6 +587,31 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
     );
   }
 
+  /// Locked, or its due date (red once overdue)
+  Widget? _moduleSubtitle(
+    BuildContext context,
+    CourseModule module,
+    int moduleIndex,
+  ) {
+    final l10n = CoursesLocalizations.of(context)!;
+    if (module.locked ?? false) {
+      return Text(
+        l10n.courses_finishPreviousModule,
+        style: Theme.of(context).textTheme.bodySmall,
+      );
+    }
+    if (module.dueDate == null) return null;
+    final date = module.dueDate!.toLocalizedDateOnly(context);
+    final overdue = module.overdue ?? false;
+    return Text(
+      overdue ? l10n.courses_overdueSince(date) : l10n.courses_dueOn(date),
+      key: Key('moduleDue$moduleIndex'),
+      style: Theme.of(
+        context,
+      ).textTheme.bodySmall?.copyWith(color: overdue ? Colors.red : null),
+    );
+  }
+
   Widget _buildQuizTile(
     BuildContext context,
     CourseViewerState state,
@@ -609,13 +651,31 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
     CourseModule module,
   ) async {
     final bloc = context.read<CourseViewerBloc>();
+    // not a beginner course and nothing of the module done yet: the quiz can
+    // test the learner out of it
+    final placement =
+        state.course?.difficulty != CourseDifficulty.beginner &&
+        !(state.progress?.isQuizPassed(module.moduleId!) ?? false) &&
+        !(module.lessons ?? []).any(
+          (l) => state.progress?.isLessonCompleted(l.lessonId!) ?? false,
+        );
     final score = await Navigator.of(context).push<int>(
       MaterialPageRoute(
-        builder: (_) =>
-            CourseQuizScreen(courseId: state.course!.courseId!, module: module),
+        builder: (_) => CourseQuizScreen(
+          courseId: state.course!.courseId!,
+          module: module,
+          placement: placement,
+          onReviewLesson: (lesson) => bloc.add(SelectLesson(lesson)),
+        ),
       ),
     );
-    if (score != null) bloc.add(QuizScored(module.moduleId!, score));
+    if (score == null) return;
+    // tested out: the lessons of the module are done now
+    if (placement && score >= CourseProgress.quizPassPercent) {
+      bloc.add(LoadCourse(state.course!.courseId!));
+    } else {
+      bloc.add(QuizScored(module.moduleId!, score));
+    }
   }
 
   /// Passed; a project of a course that requires instructor review only
@@ -734,6 +794,12 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
           ),
           const SizedBox(height: 8),
           TextButton.icon(
+            key: const Key('courseDiscussion'),
+            icon: const Icon(Icons.forum_outlined),
+            label: Text(CoursesLocalizations.of(context)!.courses_discussion),
+            onPressed: () => _openDiscussion(context, state),
+          ),
+          TextButton.icon(
             key: const Key('courseWorkbook'),
             icon: const Icon(Icons.menu_book_outlined),
             label: Text(CoursesLocalizations.of(context)!.courses_workbookPdf),
@@ -751,6 +817,97 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// The course discussion room, joined on first use
+  Future<void> _openDiscussion(
+    BuildContext context,
+    CourseViewerState state,
+  ) async {
+    try {
+      var result = await context.read<RestClient>().joinCourseDiscussion(
+        courseId: state.course!.courseId!,
+      );
+      if (result is String) result = jsonDecode(result);
+      if (!context.mounted) return;
+      await showDialog(
+        context: context,
+        builder: (_) => ChatDialog(
+          ChatRoom(
+            chatRoomId: result['chatRoomId'],
+            chatRoomName: result['chatRoomName'] ?? state.course!.title,
+            isPrivate: false,
+          ),
+        ),
+      );
+    } catch (e) {
+      final message = await getDioError(e);
+      if (context.mounted) {
+        HelperFunctions.showMessage(context, message, Colors.red);
+      }
+    }
+  }
+
+  /// The advice what to do next, when it is not the lesson on screen
+  Widget _buildSuggestion(BuildContext context, CourseViewerState state) {
+    final recommendation = state.recommendation;
+    final lessons = _getAllLessons(state.course);
+    final next = lessons
+        .where((l) => l.lessonId == recommendation?.nextLessonId)
+        .firstOrNull;
+    final review = lessons
+        .where((l) => recommendation?.reviewLessonIds.contains(l.lessonId) ?? false)
+        .toList();
+    if (next == null || next.lessonId == state.currentLesson?.lessonId) {
+      return const SizedBox.shrink();
+    }
+    return Card(
+      key: const Key('suggestedNext'),
+      margin: const EdgeInsets.only(bottom: 24),
+      color: Theme.of(context).colorScheme.secondaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.assistant_navigation),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    CoursesLocalizations.of(context)!.courses_suggestedNext,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
+                TextButton(
+                  key: const Key('goSuggested'),
+                  onPressed: () =>
+                      context.read<CourseViewerBloc>().add(SelectLesson(next)),
+                  child: Text(next.title),
+                ),
+              ],
+            ),
+            if (recommendation?.reason?.isNotEmpty ?? false)
+              Text(recommendation!.reason!),
+            if (review.isNotEmpty)
+              Wrap(
+                spacing: 8,
+                children: [
+                  for (final lesson in review)
+                    ActionChip(
+                      avatar: const Icon(Icons.replay, size: 16),
+                      label: Text(lesson.title),
+                      onPressed: () => context.read<CourseViewerBloc>().add(
+                        SelectLesson(lesson),
+                      ),
+                    ),
+                ],
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -779,6 +936,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildSuggestion(context, state),
           Text(lesson.title, style: Theme.of(context).textTheme.headlineMedium),
           const SizedBox(height: 8),
           if (lesson.estimatedDuration != null)

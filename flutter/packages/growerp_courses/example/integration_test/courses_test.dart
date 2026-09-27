@@ -105,11 +105,13 @@ void main() {
     await CourseTest.writeLessonsWithAi(tester);
     await CourseTest.writeQuizzesWithAi(tester);
     await CourseTest.writeExercisesWithAi(tester);
+    await CourseTest.checkOutdatedContent(tester);
     await CourseTest.writeSlidesWithAi(tester);
     await CourseTest.makeVideos(tester);
     await CourseTest.makePromoPack(tester);
     await CourseTest.openPdf(tester, 'courseSlidesPdf', 'slidesPdfDialog');
     await CourseTest.openPdf(tester, 'courseWorkbookPdf', 'workbookPdfDialog');
+    await CourseTest.translateCourse(tester);
     await CommonTest.tapByKey(tester, 'cancelCourse');
 
     // --- learner: registers into this company, pays, studies
@@ -137,6 +139,13 @@ void main() {
     await CourseTest.takeQuiz(tester, answers: [0], expectPassed: true);
     await CourseTest.openCertificate(tester);
 
+    await CommonTest.gotoMainMenu(tester);
+    await CommonTest.logout(tester);
+
+    // --- admin: reviews the learner's exercise
+    await CommonTest.login(tester);
+    await CourseTest.selectCourses(tester);
+    await CourseTest.reviewSubmission(tester, 'Test Course Updated', score: 90);
     await CommonTest.gotoMainMenu(tester);
     await CommonTest.logout(tester);
   });

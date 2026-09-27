@@ -69,7 +69,7 @@ Job types:
             Uploaded files are converted to text here, so the job row never holds the
             (possibly large) file itself.</description>
         <in-parameters>
-            <parameter name="jobType" required="true" /> <!-- OUTLINE, LESSONS, QUIZ, SLIDES, VIDEO, PROMO, EXERCISE -->
+            <parameter name="jobType" required="true" /> <!-- OUTLINE, LESSONS, QUIZ, SLIDES, VIDEO, PROMO, EXERCISE, TRANSLATE, REVIEW -->
             <parameter name="courseId" />
             <!-- OUTLINE -->
             <parameter name="title" />
@@ -93,6 +93,8 @@ Job types:
             <parameter name="questionsPerModule" type="Integer" default="5" />
             <!-- PROMO: COVER, LANDING, EMAIL, SOCIAL; empty is all -->
             <parameter name="parts" type="List" />
+            <!-- TRANSLATE: the language to translate into, as en, nl, th, ... -->
+            <parameter name="targetLanguage" />
         </in-parameters>
         <out-parameters>
             <parameter name="courseAiJob" type="Map" />
@@ -100,11 +102,14 @@ Job types:
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <if condition="!(jobType in ['OUTLINE', 'LESSONS', 'QUIZ', 'SLIDES', 'VIDEO', 'PROMO', 'EXERCISE'])">
+            <if condition="!(jobType in ['OUTLINE', 'LESSONS', 'QUIZ', 'SLIDES', 'VIDEO', 'PROMO', 'EXERCISE', 'TRANSLATE', 'REVIEW'])">
                 <return error="true" message="Unknown AI job type ${jobType}" />
             </if>
             <if condition="jobType == 'OUTLINE' &amp;&amp; !title">
                 <return error="true" message="A course title is required" />
+            </if>
+            <if condition="jobType == 'TRANSLATE' &amp;&amp; !targetLanguage">
+                <return error="true" message="The language to translate into is required" />
             </if>
             <if condition="jobType != 'OUTLINE'">
                 <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity" />
@@ -137,7 +142,7 @@ Job types:
                     urls: (urls ?: []).findAll { it }, files: fileTexts,
                     useKnowledgeBase: useKnowledgeBase, lessonIds: lessonIds ?: [],
                     moduleIds: moduleIds ?: [], questionsPerModule: questionsPerModule,
-                    parts: parts ?: []])
+                    parts: parts ?: [], targetLanguage: targetLanguage])
             ]]></script>
             <check-errors />
 

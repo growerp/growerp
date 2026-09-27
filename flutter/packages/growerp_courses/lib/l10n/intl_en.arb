@@ -1600,5 +1600,268 @@
         "type": "String"
       }
     }
+  },
+  "courses_courseLanguage": "Course language",
+  "@courses_courseLanguage": {
+    "description": "Course language"
+  },
+  "courses_languageOfTitle": "Same as the title",
+  "@courses_languageOfTitle": {
+    "description": "Same as the title"
+  },
+  "courses_translateCourse": "Translate course",
+  "@courses_translateCourse": {
+    "description": "Translate course"
+  },
+  "courses_translateMessage": "The AI makes a copy of this course in the chosen language: modules, slides, lessons, quizzes and exercises. Videos, cover and price you make again for the copy.",
+  "@courses_translateMessage": {
+    "description": "The AI makes a copy of this course in the chosen language: modules, slides, lessons, quizzes and exercises. Videos, cover and price you make again for the copy."
+  },
+  "courses_translateInto": "Translate into",
+  "@courses_translateInto": {
+    "description": "Translate into"
+  },
+  "courses_translate": "Translate",
+  "@courses_translate": {
+    "description": "Translate"
+  },
+  "courses_learning": "Learning",
+  "@courses_learning": {
+    "description": "Learning"
+  },
+  "courses_sequentialUnlock": "Open modules one by one",
+  "@courses_sequentialUnlock": {
+    "description": "Open modules one by one"
+  },
+  "courses_sequentialUnlockHelp": "A module opens once the previous one is done: all lessons and the quiz passed",
+  "@courses_sequentialUnlockHelp": {
+    "description": "A module opens once the previous one is done: all lessons and the quiz passed"
+  },
+  "courses_requireInstructorReview": "Instructor reviews projects",
+  "@courses_requireInstructorReview": {
+    "description": "Instructor reviews projects"
+  },
+  "courses_requireInstructorReviewHelp": "Projects count as done only after you reviewed them",
+  "@courses_requireInstructorReviewHelp": {
+    "description": "Projects count as done only after you reviewed them"
+  },
+  "courses_pacing": "Pacing",
+  "@courses_pacing": {
+    "description": "Pacing"
+  },
+  "courses_pacingSelf": "Self-paced",
+  "@courses_pacingSelf": {
+    "description": "Self-paced"
+  },
+  "courses_pacingCohort": "Group with start date",
+  "@courses_pacingCohort": {
+    "description": "Group with start date"
+  },
+  "courses_cohortStart": "Start date",
+  "@courses_cohortStart": {
+    "description": "Start date"
+  },
+  "courses_pacingHelp": "Module due dates count from the group start date, or from the day each learner started",
+  "@courses_pacingHelp": {
+    "description": "Module due dates count from the group start date, or from the day each learner started"
+  },
+  "courses_noDueDate": "No due date",
+  "@courses_noDueDate": {
+    "description": "No due date"
+  },
+  "courses_dueDaysAfterStart": "Due {days} days after the start",
+  "@courses_dueDaysAfterStart": {
+    "description": "Due {days} days after the start",
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_dueDate": "Due date",
+  "@courses_dueDate": {
+    "description": "Due date"
+  },
+  "courses_dueDaysLabel": "Days after the start (0: none)",
+  "@courses_dueDaysLabel": {
+    "description": "Days after the start (0: none)"
+  },
+  "courses_submissions": "Submissions",
+  "@courses_submissions": {
+    "description": "Submissions"
+  },
+  "courses_learner": "Learner",
+  "@courses_learner": {
+    "description": "Learner"
+  },
+  "courses_score": "Score",
+  "@courses_score": {
+    "description": "Score"
+  },
+  "courses_submitted": "Submitted",
+  "@courses_submitted": {
+    "description": "Submitted"
+  },
+  "courses_searchSubmissions": "Search learner or exercise",
+  "@courses_searchSubmissions": {
+    "description": "Search learner or exercise"
+  },
+  "courses_needsReview": "Needs review",
+  "@courses_needsReview": {
+    "description": "Needs review"
+  },
+  "courses_noSubmissions": "No submissions",
+  "@courses_noSubmissions": {
+    "description": "No submissions"
+  },
+  "courses_statusReviewed": "Reviewed",
+  "@courses_statusReviewed": {
+    "description": "Reviewed"
+  },
+  "courses_statusAiGraded": "AI graded",
+  "@courses_statusAiGraded": {
+    "description": "AI graded"
+  },
+  "courses_statusSubmitted": "Not graded",
+  "@courses_statusSubmitted": {
+    "description": "Not graded"
+  },
+  "courses_reviewSubmission": "Review submission",
+  "@courses_reviewSubmission": {
+    "description": "Review submission"
+  },
+  "courses_answer": "Answer",
+  "@courses_answer": {
+    "description": "Answer"
+  },
+  "courses_scoreLabel": "Score (0-100)",
+  "@courses_scoreLabel": {
+    "description": "Score (0-100)"
+  },
+  "courses_scoreRange": "Enter a score from 0 to 100",
+  "@courses_scoreRange": {
+    "description": "Enter a score from 0 to 100"
+  },
+  "courses_finishPreviousModule": "Opens once the previous module is done",
+  "@courses_finishPreviousModule": {
+    "description": "Opens once the previous module is done"
+  },
+  "courses_overdueSince": "Overdue since {date}",
+  "@courses_overdueSince": {
+    "description": "Overdue since {date}",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_dueOn": "Due {date}",
+  "@courses_dueOn": {
+    "description": "Due {date}",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_overdueModules": "{count} module(s) overdue",
+  "@courses_overdueModules": {
+    "description": "{count} module(s) overdue",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_discussion": "Discussion",
+  "@courses_discussion": {
+    "description": "Discussion"
+  },
+  "courses_testOutInfo": "Already know this? Pass this quiz and the lessons of the module count as done.",
+  "@courses_testOutInfo": {
+    "description": "Already know this? Pass this quiz and the lessons of the module count as done."
+  },
+  "courses_reviewTheseLessons": "Review these lessons",
+  "@courses_reviewTheseLessons": {
+    "description": "Review these lessons"
+  },
+  "courses_explainMyMistakes": "Explain what I got wrong",
+  "@courses_explainMyMistakes": {
+    "description": "Explain what I got wrong"
+  },
+  "courses_explainMyMistakesPrompt": "Please explain the questions I answered wrong.",
+  "@courses_explainMyMistakesPrompt": {
+    "description": "Please explain the questions I answered wrong."
+  },
+  "courses_suggestedNext": "Suggested next",
+  "@courses_suggestedNext": {
+    "description": "Suggested next"
+  },
+  "courses_checkOutdated": "Check for outdated content",
+  "@courses_checkOutdated": {
+    "description": "Check for outdated content"
+  },
+  "courses_checkOutdatedMessage": "The AI checks every lesson for facts, tools or practices that changed, against the course sources read again. Lessons with findings get a warning sign; nothing is changed yet.",
+  "@courses_checkOutdatedMessage": {
+    "description": "The AI checks every lesson for facts, tools or practices that changed, against the course sources read again. Lessons with findings get a warning sign; nothing is changed yet."
+  },
+  "courses_earlierVersions": "Earlier versions",
+  "@courses_earlierVersions": {
+    "description": "Earlier versions"
+  },
+  "courses_versionByAi": "Before an AI rewrite",
+  "@courses_versionByAi": {
+    "description": "Before an AI rewrite"
+  },
+  "courses_versionRestored": "Before a restore",
+  "@courses_versionRestored": {
+    "description": "Before a restore"
+  },
+  "courses_versionEdited": "Before an edit",
+  "@courses_versionEdited": {
+    "description": "Before an edit"
+  },
+  "courses_lessonHistory": "Versions: {title}",
+  "@courses_lessonHistory": {
+    "description": "Versions: {title}",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_noEarlierVersions": "No earlier versions yet",
+  "@courses_noEarlierVersions": {
+    "description": "No earlier versions yet"
+  },
+  "courses_versionN": "Version {number}",
+  "@courses_versionN": {
+    "description": "Version {number}",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_restore": "Restore",
+  "@courses_restore": {
+    "description": "Restore"
+  },
+  "courses_mayBeOutdated": "May be outdated: {title}",
+  "@courses_mayBeOutdated": {
+    "description": "May be outdated: {title}",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_dismiss": "Dismiss",
+  "@courses_dismiss": {
+    "description": "Dismiss"
+  },
+  "courses_updateWithAi": "Update with AI",
+  "@courses_updateWithAi": {
+    "description": "Update with AI"
   }
 }

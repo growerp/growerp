@@ -22,8 +22,10 @@ import '../bloc/course_bloc.dart';
 import '../../course_ai/bloc/course_ai_bloc.dart';
 import '../../course_ai/views/ai_key_needed_dialog.dart';
 import 'course_participants_view.dart';
+import 'course_submissions_view.dart';
 import 'quiz_editor_dialog.dart';
 import 'exercise_editor_dialog.dart';
+import 'lesson_history_dialog.dart';
 import 'slides_editor_dialog.dart';
 import '../../documents/backend_url.dart';
 import '../../documents/course_pdfs.dart';
@@ -51,6 +53,27 @@ class _CourseDialogState extends State<CourseDialog> {
   late TextEditingController _priceController;
   CourseDifficulty _selectedDifficulty = CourseDifficulty.beginner;
   CourseStatus _selectedStatus = CourseStatus.draft;
+  String? _languageId;
+  bool _sequentialUnlock = false;
+  bool _requireInstructorReview = false;
+  String _pacing = 'SELF';
+  DateTime? _cohortStartDate;
+
+  /// Languages a course can be written in or translated into, by their own
+  /// name so they need no translation
+  static const courseLanguages = {
+    'en': 'English',
+    'de': 'Deutsch',
+    'es': 'Español',
+    'fr': 'Français',
+    'it': 'Italiano',
+    'nl': 'Nederlands',
+    'pt': 'Português',
+    'id': 'Bahasa Indonesia',
+    'th': 'ไทย',
+    'zh': '中文',
+    'ja': '日本語',
+  };
 
   bool get isEdit => widget.course?.courseId != null;
 
@@ -76,6 +99,13 @@ class _CourseDialogState extends State<CourseDialog> {
     _selectedDifficulty =
         widget.course?.difficulty ?? CourseDifficulty.beginner;
     _selectedStatus = widget.course?.status ?? CourseStatus.draft;
+    _languageId = courseLanguages.containsKey(widget.course?.languageId)
+        ? widget.course?.languageId
+        : null;
+    _sequentialUnlock = widget.course?.sequentialUnlock ?? false;
+    _requireInstructorReview = widget.course?.requireInstructorReview ?? false;
+    _pacing = widget.course?.pacing ?? 'SELF';
+    _cohortStartDate = widget.course?.cohortStartDate;
     // load the course as selectedCourse: module/lesson creates refresh it, so
     // new modules and lessons show up in this dialog right away
     if (isEdit) {
@@ -113,7 +143,7 @@ class _CourseDialogState extends State<CourseDialog> {
         height: MediaQuery.of(context).size.height * 0.85,
         child: ScaffoldMessenger(
           child: DefaultTabController(
-            length: isEdit ? 2 : 1,
+            length: isEdit ? 3 : 1,
             child: Scaffold(
               backgroundColor: Colors.transparent,
               body: Column(
@@ -137,6 +167,13 @@ class _CourseDialogState extends State<CourseDialog> {
                             context,
                           )!.courses_participants,
                         ),
+                        Tab(
+                          key: const Key('submissionsTab'),
+                          icon: const Icon(Icons.rate_review_outlined),
+                          text: CoursesLocalizations.of(
+                            context,
+                          )!.courses_submissions,
+                        ),
                       ],
                     ),
                   Expanded(
@@ -145,6 +182,10 @@ class _CourseDialogState extends State<CourseDialog> {
                         _buildDetailsTab(),
                         if (isEdit)
                           CourseParticipantsView(
+                            courseId: widget.course!.courseId!,
+                          ),
+                        if (isEdit)
+                          CourseSubmissionsView(
                             courseId: widget.course!.courseId!,
                           ),
                       ],
@@ -186,8 +227,11 @@ class _CourseDialogState extends State<CourseDialog> {
             ),
             const SizedBox(height: 16),
             _buildProductPriceRow(),
+            const SizedBox(height: 16),
+            _buildLanguageDropdown(),
             // new courses start as draft: publish once the content is there
             if (isEdit) ...[const SizedBox(height: 16), _buildStatusDropdown()],
+            if (isEdit) ...[const SizedBox(height: 16), _buildLearningSettings()],
             const SizedBox(height: 24),
             if (isEdit) ...[_buildModulesSection(), const SizedBox(height: 16)],
           ],
@@ -308,6 +352,118 @@ class _CourseDialogState extends State<CourseDialog> {
           setState(() => _selectedDifficulty = value);
         }
       },
+    );
+  }
+
+  /// The language of the content; the AI writes in it
+  Widget _buildLanguageDropdown() {
+    return DropdownButtonFormField<String?>(
+      key: const Key('courseLanguage'),
+      initialValue: _languageId,
+      decoration: InputDecoration(
+        labelText: CoursesLocalizations.of(context)!.courses_courseLanguage,
+        border: const OutlineInputBorder(),
+      ),
+      items: [
+        DropdownMenuItem<String?>(
+          value: null,
+          child: Text(CoursesLocalizations.of(context)!.courses_languageOfTitle),
+        ),
+        for (final entry in courseLanguages.entries)
+          DropdownMenuItem<String?>(value: entry.key, child: Text(entry.value)),
+      ],
+      onChanged: (value) => setState(() => _languageId = value),
+    );
+  }
+
+  /// How learners go through the course
+  Widget _buildLearningSettings() {
+    final l10n = CoursesLocalizations.of(context)!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(l10n.courses_learning, style: Theme.of(context).textTheme.titleSmall),
+        SwitchListTile(
+          key: const Key('sequentialUnlock'),
+          contentPadding: EdgeInsets.zero,
+          title: Text(l10n.courses_sequentialUnlock),
+          subtitle: Text(l10n.courses_sequentialUnlockHelp),
+          value: _sequentialUnlock,
+          onChanged: (value) => setState(() => _sequentialUnlock = value),
+        ),
+        SwitchListTile(
+          key: const Key('requireInstructorReview'),
+          contentPadding: EdgeInsets.zero,
+          title: Text(l10n.courses_requireInstructorReview),
+          subtitle: Text(l10n.courses_requireInstructorReviewHelp),
+          value: _requireInstructorReview,
+          onChanged: (value) =>
+              setState(() => _requireInstructorReview = value),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                key: const Key('coursePacing'),
+                initialValue: _pacing,
+                decoration: InputDecoration(
+                  labelText: l10n.courses_pacing,
+                  border: const OutlineInputBorder(),
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: 'SELF',
+                    child: Text(l10n.courses_pacingSelf),
+                  ),
+                  DropdownMenuItem(
+                    value: 'COHORT',
+                    child: Text(l10n.courses_pacingCohort),
+                  ),
+                ],
+                onChanged: (value) =>
+                    setState(() => _pacing = value ?? _pacing),
+              ),
+            ),
+            if (_pacing == 'COHORT') ...[
+              const SizedBox(width: 16),
+              Expanded(
+                child: OutlinedButton.icon(
+                  key: const Key('cohortStartDate'),
+                  icon: const Icon(Icons.event),
+                  label: Text(
+                    _cohortStartDate == null
+                        ? l10n.courses_cohortStart
+                        : _cohortStartDate!.toLocalizedDateOnly(context),
+                  ),
+                  onPressed: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _cohortStartDate ?? DateTime.now(),
+                      firstDate: DateTime.now().subtract(
+                        const Duration(days: 365),
+                      ),
+                      lastDate: DateTime.now().add(
+                        const Duration(days: 3 * 365),
+                      ),
+                    );
+                    if (picked != null) {
+                      setState(() => _cohortStartDate = picked);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(
+            l10n.courses_pacingHelp,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ),
+      ],
     );
   }
 
@@ -510,6 +666,34 @@ class _CourseDialogState extends State<CourseDialog> {
                   ),
                 if (modules.isNotEmpty)
                   TextButton.icon(
+                    key: const Key('aiReview'),
+                    icon: const Icon(Icons.update),
+                    label: Text(
+                      CoursesLocalizations.of(context)!.courses_checkOutdated,
+                    ),
+                    onPressed: () => _runModuleAiJob(
+                      jobType: 'REVIEW',
+                      module: null,
+                      title: CoursesLocalizations.of(
+                        context,
+                      )!.courses_checkOutdated,
+                      message: CoursesLocalizations.of(
+                        context,
+                      )!.courses_checkOutdatedMessage,
+                      confirmKey: 'aiReviewConfirm',
+                    ),
+                  ),
+                if (modules.isNotEmpty)
+                  TextButton.icon(
+                    key: const Key('aiTranslate'),
+                    icon: const Icon(Icons.translate),
+                    label: Text(
+                      CoursesLocalizations.of(context)!.courses_translateCourse,
+                    ),
+                    onPressed: _translateCourse,
+                  ),
+                if (modules.isNotEmpty)
+                  TextButton.icon(
                     key: const Key('courseWorkbookPdf'),
                     icon: const Icon(Icons.menu_book_outlined),
                     label: Text(
@@ -575,13 +759,38 @@ class _CourseDialogState extends State<CourseDialog> {
                                 ),
                               )
                             : null,
-                        trailing: IconButton(
-                          key: Key('aiLesson${lesson.lessonId}'),
-                          icon: const Icon(Icons.auto_awesome),
-                          tooltip: CoursesLocalizations.of(
-                            context,
-                          )!.courses_writeThisLessonWithAi,
-                          onPressed: () => _writeLessonsWithAi(lesson),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (lesson.reviewNotes != null)
+                              IconButton(
+                                key: Key('reviewNotes${lesson.lessonId}'),
+                                icon: const Icon(
+                                  Icons.warning_amber,
+                                  color: Colors.orange,
+                                ),
+                                tooltip: CoursesLocalizations.of(
+                                  context,
+                                )!.courses_mayBeOutdated(lesson.title),
+                                onPressed: () => _showReviewNotes(lesson),
+                              ),
+                            IconButton(
+                              key: Key('lessonHistory${lesson.lessonId}'),
+                              icon: const Icon(Icons.history),
+                              tooltip: CoursesLocalizations.of(
+                                context,
+                              )!.courses_earlierVersions,
+                              onPressed: () => _showLessonHistory(lesson),
+                            ),
+                            IconButton(
+                              key: Key('aiLesson${lesson.lessonId}'),
+                              icon: const Icon(Icons.auto_awesome),
+                              tooltip: CoursesLocalizations.of(
+                                context,
+                              )!.courses_writeThisLessonWithAi,
+                              onPressed: () => _writeLessonsWithAi(lesson),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -619,6 +828,21 @@ class _CourseDialogState extends State<CourseDialog> {
                       )!.courses_writeThisQuizWithAi,
                       onPressed: () => _writeQuizzesWithAi(module),
                     ),
+                  ),
+                  ListTile(
+                    key: Key('moduleDue$index'),
+                    contentPadding: const EdgeInsets.only(left: 72, right: 16),
+                    leading: const Icon(Icons.event_available),
+                    title: Text(
+                      module.dueDays == null
+                          ? CoursesLocalizations.of(context)!.courses_noDueDate
+                          : CoursesLocalizations.of(
+                              context,
+                            )!.courses_dueDaysAfterStart(
+                              module.dueDays.toString(),
+                            ),
+                    ),
+                    onTap: () => _editDueDays(module),
                   ),
                   ListTile(
                     key: Key('moduleExercises$index'),
@@ -719,6 +943,145 @@ class _CourseDialogState extends State<CourseDialog> {
     );
   }
 
+  /// The outdated-content findings of a lesson: rewrite it with them or drop
+  Future<void> _showReviewNotes(CourseLesson lesson) async {
+    final action = await showLessonReviewNotes(context, lesson);
+    if (!mounted || action == null) return;
+    if (action == 'apply') {
+      if (_aiBloc.state.status == CourseAiStatus.running) return;
+      _aiBloc.add(
+        CourseAiStart({
+          'jobType': 'LESSONS',
+          'courseId': widget.course!.courseId,
+          'lessonIds': [lesson.lessonId],
+          'notes': reviewNotesAsInstructions(lesson),
+        }),
+      );
+    } else {
+      try {
+        await context.read<RestClient>().updateCourseLesson(
+          data: {'lessonId': lesson.lessonId, 'clearReviewNotes': true},
+        );
+      } catch (_) {}
+      if (mounted) {
+        context.read<CourseBloc>().add(
+          CourseGetDetail(widget.course!.courseId!),
+        );
+      }
+    }
+  }
+
+  Future<void> _showLessonHistory(CourseLesson lesson) async {
+    final restored = await showDialog<bool>(
+      context: context,
+      builder: (_) => LessonHistoryDialog(lesson: lesson),
+    );
+    if (restored == true && mounted) {
+      context.read<CourseBloc>().add(CourseGetDetail(widget.course!.courseId!));
+    }
+  }
+
+  /// Days after the (cohort) start the module is due; empty or 0 is none
+  Future<void> _editDueDays(CourseModule module) async {
+    final controller = TextEditingController(
+      text: module.dueDays?.toString() ?? '',
+    );
+    final days = await showDialog<int>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(CoursesLocalizations.of(context)!.courses_dueDate),
+        content: TextField(
+          key: const Key('dueDaysField'),
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            labelText: CoursesLocalizations.of(context)!.courses_dueDaysLabel,
+            border: const OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(CoursesLocalizations.of(context)!.courses_cancel),
+          ),
+          ElevatedButton(
+            key: const Key('saveDueDays'),
+            onPressed: () => Navigator.pop(
+              dialogContext,
+              int.tryParse(controller.text.trim()) ?? 0,
+            ),
+            child: Text(CoursesLocalizations.of(context)!.courses_save),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (days == null || !mounted) return;
+    context.read<CourseBloc>().add(
+      CourseModuleUpdate(module.copyWith(dueDays: days)),
+    );
+  }
+
+  /// A copy of the course in another language, written by the AI
+  Future<void> _translateCourse() async {
+    if (_aiBloc.state.status == CourseAiStatus.running) return;
+    final l10n = CoursesLocalizations.of(context)!;
+    String? language;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          title: Text(l10n.courses_translateCourse),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.courses_translateMessage),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                key: const Key('translateLanguage'),
+                decoration: InputDecoration(
+                  labelText: l10n.courses_translateInto,
+                  border: const OutlineInputBorder(),
+                ),
+                items: [
+                  for (final entry in courseLanguages.entries)
+                    if (entry.key != _languageId)
+                      DropdownMenuItem(
+                        value: entry.key,
+                        child: Text(entry.value),
+                      ),
+                ],
+                onChanged: (value) => setDialogState(() => language = value),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(l10n.courses_cancel),
+            ),
+            ElevatedButton(
+              key: const Key('aiTranslateConfirm'),
+              onPressed: language == null
+                  ? null
+                  : () => Navigator.pop(dialogContext, true),
+              child: Text(l10n.courses_translate),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (confirmed != true || language == null) return;
+    _aiBloc.add(
+      CourseAiStart({
+        'jobType': 'TRANSLATE',
+        'courseId': widget.course!.courseId,
+        'targetLanguage': language,
+      }),
+    );
+  }
+
   /// Exercises of a module, or of the course ([moduleId] null): the capstone
   void _showExerciseEditor(String? moduleId) => showDialog(
     context: context,
@@ -740,6 +1103,10 @@ class _CourseDialogState extends State<CourseDialog> {
           context.read<CourseBloc>().add(
             CourseGetDetail(widget.course!.courseId!),
           );
+          // the translation is a new course: show it in the list
+          if (state.job?.jobType == 'TRANSLATE') {
+            context.read<CourseBloc>().add(const CourseFetch(refresh: true));
+          }
           HelperFunctions.showMessage(
             context,
             state.message ?? CoursesLocalizations.of(context)!.courses_done,
@@ -1035,6 +1402,11 @@ class _CourseDialogState extends State<CourseDialog> {
           ? int.tryParse(_durationController.text)
           : null,
       price: priceText.isNotEmpty ? Decimal.parse(priceText) : null,
+      languageId: _languageId,
+      sequentialUnlock: isEdit ? _sequentialUnlock : null,
+      requireInstructorReview: isEdit ? _requireInstructorReview : null,
+      pacing: isEdit ? _pacing : null,
+      cohortStartDate: isEdit && _pacing == 'COHORT' ? _cohortStartDate : null,
     );
 
     if (isEdit) {

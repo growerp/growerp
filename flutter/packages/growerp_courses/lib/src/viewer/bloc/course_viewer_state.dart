@@ -26,6 +26,9 @@ class CourseViewerState extends Equatable {
   final List<CourseMedia> mediaList;
   final CourseMedia? selectedMedia;
 
+  /// What the learner best does next
+  final CourseRecommendation? recommendation;
+
   const CourseViewerState({
     this.status = ViewerStatus.initial,
     this.course,
@@ -35,6 +38,7 @@ class CourseViewerState extends Equatable {
     this.availableCourses = const [],
     this.mediaList = const [],
     this.selectedMedia,
+    this.recommendation,
   });
 
   CourseViewerState copyWith({
@@ -46,6 +50,7 @@ class CourseViewerState extends Equatable {
     List<Course>? availableCourses,
     List<CourseMedia>? mediaList,
     CourseMedia? selectedMedia,
+    CourseRecommendation? recommendation,
   }) {
     return CourseViewerState(
       status: status ?? this.status,
@@ -56,6 +61,7 @@ class CourseViewerState extends Equatable {
       availableCourses: availableCourses ?? this.availableCourses,
       mediaList: mediaList ?? this.mediaList,
       selectedMedia: selectedMedia,
+      recommendation: recommendation ?? this.recommendation,
     );
   }
 
@@ -69,5 +75,6 @@ class CourseViewerState extends Equatable {
     availableCourses,
     mediaList,
     selectedMedia,
+    recommendation,
   ];
 }

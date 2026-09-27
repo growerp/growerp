@@ -81,6 +81,13 @@ def sourceText = { List sources, String query, int maxChars = CourseAiUtil.MAX_S
     return text.length() > maxChars ? text.substring(0, maxChars) + '\n[...source material cut...]' : text
 }
 
+/** The language rule of a prompt: the course language when set, else [fallback]. */
+def languageLine = { def course, String fallback ->
+    if (!course?.languageId) return "- Write in the language of ${fallback}."
+    String name = Locale.forLanguageTag(course.languageId as String).getDisplayLanguage(Locale.ENGLISH)
+    return "- Write in ${name ?: course.languageId}."
+}
+
 def personaText = { String personaId ->
     if (!personaId) return ''
     def persona = ec.entity.find("growerp.marketing.MarketingPersona").condition("personaId", personaId)
@@ -233,7 +240,7 @@ ${outlineText}
 THIS LESSON: ${lesson.title} (module "${item.module.title}", about ${lesson.estimatedDuration ?: 10} minutes reading)
 LESSON BRIEF / CURRENT TEXT:
 ${lesson.content ?: '(none)'}
-
+${input.notes ? "\nCHANGES THE AUTHOR ASKS FOR:\n${input.notes}\n" : ''}
 SOURCE MATERIAL:
 ${sourceText(sources, "${course.title} ${lesson.title}", CourseAiUtil.MAX_LESSON_SOURCE_CHARS) ?: '(none)'}
 
@@ -244,7 +251,7 @@ RULES:
 - Base facts on the source material when it covers the topic; never invent facts about the
   author's company or products.
 - Do not repeat what other lessons in the outline cover.
-- Write in the language of the course title.
+${languageLine(course, 'the course title')}
 
 Answer with JSON only: {"content": "the markdown lesson", "keyPoints": ["3 to 5 short takeaways"]}"""
         // one lesson failing should not lose the others: skip it and report it
@@ -254,7 +261,8 @@ Answer with JSON only: {"content": "the markdown lesson", "keyPoints": ["3 to 5 
             if (!(written instanceof Map) || !written.content) throw new Exception("The AI returned no content")
             svc('growerp.100.CourseServices100.update#CourseLesson',
                 [lessonId: lesson.lessonId, content: written.content,
-                 keyPoints: JsonOutput.toJson(written.keyPoints ?: [])])
+                 keyPoints: JsonOutput.toJson(written.keyPoints ?: []), changeReason: 'AI_LESSONS',
+                 clearReviewNotes: true])
         } catch (Exception e) {
             // no tokens left: the other lessons would fail the same way
             if (CourseAiUtil.isAllowanceError(e)) throw e
@@ -285,14 +293,14 @@ def runQuiz = {
         progress((int) (5 + 90 * index / modules.size()), "Writing the quiz of module ${index + 1} of ${modules.size()}: ${module.title}")
         def lessons = ec.entity.find("growerp.course.CourseLesson").condition("moduleId", module.moduleId)
             .orderBy("sequenceNum").disableAuthz().list()
-        String lessonText = lessons.collect { "## ${it.title}\n${it.content ?: ''}" }.join('\n\n')
+        String lessonText = lessons.collect { "## [${it.lessonId}] ${it.title}\n${it.content ?: ''}" }.join('\n\n')
         if (lessonText.length() > 30000) lessonText = lessonText.substring(0, 30000)
         String prompt = """You are an experienced teacher writing the quiz at the end of a course module.
 
 COURSE: ${course.title}
 DIFFICULTY: ${course.difficulty ?: 'BEGINNER'}
 MODULE: ${module.title}
-LESSONS OF THE MODULE:
+LESSONS OF THE MODULE (lesson id in brackets):
 ${lessonText}
 
 RULES:
@@ -301,14 +309,15 @@ RULES:
 - 4 options per question, exactly one correct; wrong options must be plausible.
 - Vary the position of the correct option.
 - A one or two sentence explanation of why the correct option is right.
-- Write in the language of the lessons.
+- lessonId: the id of the lesson that answers the question.
+${languageLine(course, 'the lessons')}
 
 Answer with JSON only:
-{"questions": [{"question": "", "options": ["", "", "", ""], "correctIndex": 0, "explanation": ""}]}"""
+{"questions": [{"question": "", "options": ["", "", "", ""], "correctIndex": 0, "explanation": "", "lessonId": ""}]}"""
         def quiz = CourseAiUtil.askJson(ec, ownerPartyId, prompt,
             [questions: (1..count).collect { n ->
                 [question: "Test question ${n} of ${module.title}?", options: ['Right', 'Wrong 1', 'Wrong 2', 'Wrong 3'],
-                 correctIndex: 0, explanation: 'Test explanation.'] }])
+                 correctIndex: 0, explanation: 'Test explanation.', lessonId: lessons ? lessons[0].lessonId : null] }])
         def questions = (quiz instanceof Map ? quiz.questions : null)?.findAll { Map q ->
             q.question && q.options instanceof List && q.options.size() >= 2 &&
                 q.correctIndex instanceof Number && q.correctIndex >= 0 && q.correctIndex < q.options.size() }
@@ -319,7 +328,8 @@ Answer with JSON only:
         questions.eachWithIndex { Map q, int n ->
             svc('growerp.100.CourseQuizServices100.create#CourseQuizQuestion',
                 [moduleId: module.moduleId, question: q.question, options: q.options,
-                 correctIndex: q.correctIndex, explanation: q.explanation, sequenceNum: n + 1])
+                 correctIndex: q.correctIndex, explanation: q.explanation, sequenceNum: n + 1,
+                 lessonId: lessons.find { it.lessonId == q.lessonId }?.lessonId])
         }
         written += questions.size()
     }
@@ -355,7 +365,7 @@ def runExercise = {
 - prompt: the task in Markdown, with the situation, what to hand in and roughly how long it takes.
 - rubric: 3 to 5 grading criteria for the grader (the learner does not see them), with what a
   good answer contains.
-- Write in the language of the lessons."""
+${languageLine(course, 'the lessons')}"""
     int written = 0
     int steps = modules.size() + (input.moduleIds ? 0 : 1)
     modules.eachWithIndex { module, int index ->
@@ -421,6 +431,180 @@ Answer with JSON only: {"title": "", "prompt": "", "rubric": ""}"""
 }
 
 // ---------------------------------------------------------------------------------------------
+// TRANSLATE: a copy of the course in another language (modules, slides, lessons, quizzes,
+// exercises); videos, cover and price are made again for the copy by the author
+// ---------------------------------------------------------------------------------------------
+def runTranslate = {
+    String target = input.targetLanguage as String
+    if (!target) throw new Exception('No language to translate into')
+    String targetName = Locale.forLanguageTag(target).getDisplayLanguage(Locale.ENGLISH) ?: target
+    def source = ec.entity.find("growerp.course.Course").condition("courseId", job.courseId).disableAuthz().one()
+    def modules = ec.entity.find("growerp.course.CourseModule").condition("courseId", source.courseId)
+        .orderBy("sequenceNum").disableAuthz().list()
+    def lessons = ec.entity.find("growerp.course.CourseLesson").condition("courseId", source.courseId)
+        .orderBy("sequenceNum").disableAuthz().list()
+    def questions = ec.entity.find("growerp.course.CourseQuizQuestion").condition("courseId", source.courseId)
+        .orderBy("sequenceNum").disableAuthz().list()
+    def exercises = ec.entity.find("growerp.course.CourseExercise").condition("courseId", source.courseId)
+        .orderBy("sequenceNum").disableAuthz().list()
+    def slurper = new JsonSlurper()
+
+    /** the same JSON with its text values translated; test mode returns it as it is */
+    def translate = { Map data ->
+        String prompt = """Translate the text values of the JSON below into ${targetName}.
+
+RULES:
+- Keep the JSON structure and all keys exactly as they are; translate only the text values.
+- Keep Markdown formatting, code, URLs, numbers, product and company names unchanged.
+- Translate naturally for the course audience, not word for word.
+
+JSON:
+${JsonOutput.toJson(data)}
+
+Answer with the translated JSON only."""
+        def translated = CourseAiUtil.askJson(ec, ownerPartyId, prompt, data)
+        if (!(translated instanceof Map)) throw new Exception('The AI returned no translation')
+        return translated as Map
+    }
+
+    int steps = 1 + modules.size() + lessons.size()
+    int step = 0
+    progress(2, "Translating the course into ${targetName}")
+    Map meta = translate([title: source.title, description: source.description ?: '',
+        objectives: source.objectives ?: '', audience: source.audience ?: ''])
+    if (CourseAiUtil.testMode()) meta.title = "[${target}] ${meta.title}".toString()
+    def created = svc('growerp.100.CourseServices100.create#Course',
+        [title: meta.title ?: source.title, description: meta.description ?: null,
+         objectives: meta.objectives ?: null, audience: meta.audience ?: null,
+         targetPersonaId: source.targetPersonaId, difficulty: source.difficulty,
+         estimatedDuration: source.estimatedDuration, languageId: target,
+         sourceCourseId: source.courseId, requireInstructorReview: source.requireInstructorReview,
+         sequentialUnlock: source.sequentialUnlock, pacing: source.pacing])
+    String newCourseId = created.courseId
+    step++
+
+    Map moduleIds = [:]   // source moduleId: new moduleId
+    Map lessonIds = [:]
+    for (module in modules) {
+        progress((int) (5 + 90 * step / steps), "Translating module ${module.sequenceNum}: ${module.title}")
+        List slides = module.slides ? slurper.parseText(module.slides as String) as List : []
+        Map moduleT = translate([title: module.title, description: module.description ?: '', slides: slides])
+        def newModule = svc('growerp.100.CourseServices100.create#CourseModule',
+            [courseId: newCourseId, title: moduleT.title ?: module.title,
+             description: moduleT.description ?: null, sequenceNum: module.sequenceNum,
+             estimatedDuration: module.estimatedDuration, dueDays: module.dueDays,
+             slides: slides ? JsonOutput.toJson(moduleT.slides ?: slides) : null])
+        moduleIds[module.moduleId] = newModule.moduleId
+        step++
+        for (lesson in lessons.findAll { it.moduleId == module.moduleId }) {
+            progress((int) (5 + 90 * step / steps), "Translating lesson: ${lesson.title}")
+            List keyPoints = lesson.keyPoints ? slurper.parseText(lesson.keyPoints as String) as List : []
+            Map lessonT = translate([title: lesson.title, content: lesson.content ?: '', keyPoints: keyPoints])
+            def newLesson = svc('growerp.100.CourseServices100.create#CourseLesson',
+                [moduleId: newModule.moduleId, title: lessonT.title ?: lesson.title,
+                 content: lessonT.content ?: null, keyPoints: JsonOutput.toJson(lessonT.keyPoints ?: keyPoints),
+                 sequenceNum: lesson.sequenceNum, estimatedDuration: lesson.estimatedDuration,
+                 imageUrl: lesson.imageUrl])
+            lessonIds[lesson.lessonId] = newLesson.lessonId
+            step++
+        }
+        // the quiz of the module, same correct answers
+        def moduleQuestions = questions.findAll { it.moduleId == module.moduleId }
+        if (moduleQuestions) {
+            Map quizT = translate([questions: moduleQuestions.collect { q ->
+                [question: q.question, options: slurper.parseText(q.optionsJson ?: '[]'),
+                 explanation: q.explanation ?: ''] }])
+            moduleQuestions.eachWithIndex { q, int n ->
+                Map t = (quizT.questions instanceof List && n < quizT.questions.size()) ? quizT.questions[n] as Map : [:]
+                List options = t.options instanceof List && t.options.size() == slurper.parseText(q.optionsJson ?: '[]').size() ?
+                    t.options : slurper.parseText(q.optionsJson ?: '[]')
+                svc('growerp.100.CourseQuizServices100.create#CourseQuizQuestion',
+                    [moduleId: newModule.moduleId, question: t.question ?: q.question, options: options,
+                     correctIndex: q.correctIndex, explanation: t.explanation ?: q.explanation,
+                     sequenceNum: q.sequenceNum, lessonId: lessonIds[q.lessonId]])
+            }
+        }
+    }
+    // exercises of the modules and the capstone
+    if (exercises) {
+        progress(95, "Translating the exercises")
+        Map exT = translate([exercises: exercises.collect { e ->
+            [title: e.title, prompt: e.prompt ?: '', rubric: e.rubric ?: ''] }])
+        exercises.eachWithIndex { e, int n ->
+            Map t = (exT.exercises instanceof List && n < exT.exercises.size()) ? exT.exercises[n] as Map : [:]
+            svc('growerp.100.CourseExerciseServices100.create#CourseExercise',
+                [courseId: newCourseId, moduleId: moduleIds[e.moduleId], lessonId: lessonIds[e.lessonId],
+                 exerciseType: e.exerciseType ?: 'TEXT', title: t.title ?: e.title,
+                 prompt: t.prompt ?: e.prompt, rubric: t.rubric ?: e.rubric, sequenceNum: e.sequenceNum])
+        }
+    }
+    return "Translated into ${targetName}: ${meta.title ?: source.title}"
+}
+
+// ---------------------------------------------------------------------------------------------
+// REVIEW: check the lessons for outdated or wrong statements against the (refreshed) sources;
+// the findings go on the lesson as review notes for the author
+// ---------------------------------------------------------------------------------------------
+def runReview = {
+    String courseId = job.courseId
+    def course = ec.entity.find("growerp.course.Course").condition("courseId", courseId).disableAuthz().one()
+    def lessons = ec.entity.find("growerp.course.CourseLesson").condition("courseId", courseId)
+        .orderBy("sequenceNum").disableAuthz().list()
+        .findAll { it.content && (!input.lessonIds || it.lessonId in input.lessonIds) }
+    if (!lessons) throw new Exception('No written lessons to check')
+    // web pages the course was made from may have changed: read them again
+    def sources = ec.entity.find("growerp.course.CourseSource").condition("courseId", courseId)
+        .orderBy("createdDate").disableAuthz().list()
+    if (!CourseAiUtil.testMode()) {
+        for (source in sources.findAll { it.sourceType == 'URL' && it.location }) {
+            try {
+                String text = CourseAiUtil.fetchUrlText(source.location as String)
+                if (text?.trim()) { source.content = text.take(CourseAiUtil.MAX_SOURCE_CHARS); source.update() }
+            } catch (Exception e) {
+                ec.logger.warn("Course review could not read ${source.location}: ${e.message}")
+            }
+        }
+    }
+    int flagged = 0
+    lessons.eachWithIndex { lesson, int index ->
+        progress((int) (5 + 90 * index / lessons.size()), "Checking lesson ${index + 1} of ${lessons.size()}: ${lesson.title}")
+        String prompt = """You are a subject expert reviewing one lesson of an online course for content that is
+outdated, no longer correct, or missing an important recent development. Today is ${ec.user.nowTimestamp.toString().take(10)}.
+
+COURSE: ${course.title}
+LESSON: ${lesson.title}
+LESSON TEXT:
+${lesson.content}
+
+SOURCE MATERIAL (may be more recent):
+${sourceText(sources, "${course.title} ${lesson.title}", CourseAiUtil.MAX_LESSON_SOURCE_CHARS) ?: '(none)'}
+
+RULES:
+- Only report real problems: facts, prices, versions, laws, tools or practices that changed or
+  are wrong. Style and wording are not problems.
+- text: the statement of the lesson, quoted briefly; suggestion: what it should say now.
+- No problems: an empty issues list.
+- summary: one sentence; write it and the suggestions in the language of the lesson.
+
+Answer with JSON only: {"summary": "", "issues": [{"text": "", "suggestion": ""}]}"""
+        def review = CourseAiUtil.askJson(ec, ownerPartyId, prompt,
+            [summary: 'Test review.', issues: index == 0 ? [[text: 'Test statement', suggestion: 'Test update']] : []])
+        def issues = (review instanceof Map ? review.issues : null)?.findAll { it instanceof Map && it.text }
+        if (issues) {
+            svc('growerp.100.CourseServices100.update#CourseLesson', [lessonId: lesson.lessonId,
+                reviewNotes: JsonOutput.toJson([summary: review.summary, issues: issues])])
+            flagged++
+        } else {
+            svc('growerp.100.CourseServices100.update#CourseLesson', [lessonId: lesson.lessonId, clearReviewNotes: true])
+        }
+    }
+    course.lastReviewedDate = ec.user.nowTimestamp
+    course.update()
+    return flagged ? "${flagged} of ${lessons.size()} lessons may need an update" :
+        "${lessons.size()} lessons checked, nothing outdated found"
+}
+
+// ---------------------------------------------------------------------------------------------
 // SLIDES: a slide deck per module; the speaker notes are the narration of the course video
 // ---------------------------------------------------------------------------------------------
 def runSlides = {
@@ -452,7 +636,7 @@ RULES:
   explanation that adds to the bullets instead of reading them out. It becomes the voice-over
   of the course video, so no stage directions, no markdown.
 - Follow the order of the lessons; only use facts from the lessons.
-- Write in the language of the lessons.
+${languageLine(course, 'the lessons')}
 
 Answer with JSON only:
 {"slides": [{"title": "", "bullets": ["", ""], "notes": ""}]}"""
@@ -654,6 +838,8 @@ try {
         case 'VIDEO': doneMessage = runVideo(); break
         case 'PROMO': doneMessage = runPromo(); break
         case 'EXERCISE': doneMessage = runExercise(); break
+        case 'TRANSLATE': doneMessage = runTranslate(); break
+        case 'REVIEW': doneMessage = runReview(); break
         default: throw new Exception("Unknown AI job type ${job.jobType}")
     }
     ec.service.sync().name(STATUS_SERVICE).parameters([jobId: jobId, status: 'DONE',
