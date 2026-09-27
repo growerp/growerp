@@ -1413,7 +1413,8 @@ jobs:
           # The new submission clones the last published one, including its
           # publish mode. "Immediate" would push the app live the moment
           # certification passes, bypassing the release gate — force "Manual" so
-          # it parks at ReadyToPublish until release-approved.yml publishes it.
+          # it parks in Release after certification until "Publish now" is clicked
+          # in Partner Center (no API; release-approved.yml flags it).
           $publishMode = [string]$sub.targetPublishMode
           if ($publishMode -eq "Manual") {
             Write-Host "Target publish mode is already Manual."

@@ -9,10 +9,15 @@ name: Release Approved Store Submissions
 # iOS             | App Store → PENDING_DEVELOPER_RELEASE
 # macOS           | App Store → PENDING_DEVELOPER_RELEASE
 # Android         | Google Play → managed publishing "Ready to publish"
-#                 | (Console-only) or a production track release with
-#                 | status=draft on apps without managed publishing
-# Windows         | Partner Center → ReadyToPublish certification status
+#                 | (lifecycle APPROVED_NOT_PUBLISHED) or a production track
+#                 | release with status=draft on apps without managed publishing
+# Windows         | Partner Center → submission in Release/PendingPublication
+#                 | with publish mode Manual
 # Snap            | Snap Store → revision in latest/candidate → promote to stable
+#
+# Play's managed publishing and Partner Center's manual release have no publish
+# API: for those the jobs only report the held version with a ::warning:: and
+# a console link — the release click stays manual.
 #
 # Nothing held for an app/store is a normal outcome, not a failure: those jobs
 # report and finish green so a full sweep over every app stays readable.
@@ -274,10 +279,11 @@ jobs:
   # On apps with managed publishing on, publish-binary already uploaded a
   # completed release that was reviewed and is parked in "Ready to publish";
   # Play has no API to publish it, so that last click stays in the Console and
-  # this job reports it as such. Apps without managed publishing still get a
-  # draft release, which is promoted here: commit sends it for review, and if
-  # Play refuses, fall back to staging the completed status and tell the user
-  # to click "Send changes for review".
+  # this job warns about it (release summaries: APPROVED_NOT_PUBLISHED). Apps
+  # without managed publishing still get a draft release, which is promoted
+  # here: commit sends it for review, and if Play refuses, fall back to
+  # staging the completed status and tell the user to click "Send changes for
+  # review".
   # Secrets: GOOGLE_PLAY_SERVICE_ACCOUNT_JSON
   # ───────────────────────────────────────────────────────────────────────────
   release-android:
@@ -354,13 +360,47 @@ jobs:
                       pass
                   raise
 
+          def lifecycle_states():
+              """(releaseName, releaseLifecycleState) on production, or None if unavailable."""
+              try:
+                  resp = service.applications().tracks().releases().list(
+                      parent=f"applications/{package_name}/tracks/production"
+                  ).execute()
+              except Exception as exc:
+                  print(f"Release summaries unavailable: {exc}")
+                  return None
+              return [(r.get("releaseName", "?"), r.get("releaseLifecycleState", ""))
+                      for r in resp.get("releases", [])]
+
           edit_id = stage_completed()
           if edit_id is None:
               print(f"No draft releases on production track for {package_name}.")
-              print(f"::notice::{package_name}: nothing to promote via the API. With managed "
-                    "publishing on, a reviewed release waits in Play Console → Publishing "
-                    "overview → Publish.")
-              report("nothing pending (publish in Play Console if managed publishing is on)")
+              # With managed publishing a reviewed release is completed, not a
+              # draft, and Play has no API to publish it — flag it for the
+              # Console click instead of reporting "nothing pending".
+              states = lifecycle_states()
+              if states is None:
+                  print(f"::notice::{package_name}: nothing to promote via the API. With managed "
+                        "publishing on, a reviewed release waits in Play Console → Publishing "
+                        "overview → Publish.")
+                  report("nothing pending (publish in Play Console if managed publishing is on)")
+                  sys.exit(0)
+              for name, state in states:
+                  print(f"production {name}: {state}")
+              # Play Console deep links need opaque numeric IDs not in the repo.
+              console = "https://play.google.com/console"
+              approved = [n for n, s in states if s == "RELEASE_LIFECYCLE_STATE_APPROVED_NOT_PUBLISHED"]
+              in_review = [n for n, s in states if s == "RELEASE_LIFECYCLE_STATE_IN_REVIEW"]
+              if approved:
+                  print(f"::warning::{package_name} v{', '.join(approved)} is approved and waits "
+                        "for release. Play has no API to publish it — Play Console → "
+                        "Publishing overview → Publish changes.")
+                  report(f"v{', '.join(approved)} approved — publish manually in "
+                         f"[Play Console]({console})")
+              elif in_review:
+                  report(f"v{', '.join(in_review)} in review")
+              else:
+                  report("nothing pending")
               sys.exit(0)
 
           try:
@@ -464,38 +504,30 @@ jobs:
           $subStatus = Invoke-RestMethod -Uri "$baseUri/submissions/$pendingId/status" -Headers $headers
           Write-Host "Pending submission $pendingId state: $($subStatus.status)"
 
-          if ($subStatus.status -ne "ReadyToPublish") {
-            Write-Host "::notice::$app submission $pendingId is '$($subStatus.status)', not ReadyToPublish — nothing to release yet."
+          # A certified submission with publish mode Manual waits in Release /
+          # PendingPublication. The submission API has no "Publish now" call
+          # (commit only accepts PendingCommit), so flag it for the manual click.
+          if ($subStatus.status -notin @("Release", "PendingPublication")) {
+            Write-Host "::notice::$app submission $pendingId is '$($subStatus.status)' — nothing to release yet."
             Report "not ready ($($subStatus.status))"
             exit 0
           }
 
-          Write-Host "Publishing submission $pendingId for $app..."
-          Invoke-RestMethod -Uri "$baseUri/submissions/$pendingId/commit" `
-            -Method POST -Headers $headers -ContentType "application/json" | Out-Null
-
-          for ($i = 0; $i -lt 20; $i++) {
-            Start-Sleep -Seconds 30
-            $status = Invoke-RestMethod -Uri "$baseUri/submissions/$pendingId/status" -Headers $headers
-            Write-Host "[$i] Status: $($status.status)"
-            if ($status.status -eq "Published") {
-              Write-Host "Released $app to the Microsoft Store!"
-              Report "released"
-              exit 0
-            }
-            if ($status.status -match "Failed|Canceled") {
-              Write-Host ($status.statusDetails | ConvertTo-Json -Depth 5)
-              Report "FAILED ($($status.status))"
-              exit 1
-            }
+          $sub = Invoke-RestMethod -Uri "$baseUri/submissions/$pendingId" -Headers $headers
+          if ($sub.targetPublishMode -ne "Manual") {
+            Write-Host "$app submission $pendingId is '$($subStatus.status)' with publish mode '$($sub.targetPublishMode)' — the store publishes it."
+            Report "publishing ($($sub.targetPublishMode))"
+            exit 0
           }
-          Write-Host "Publish initiated — processing continues in Partner Center."
-          Report "publishing"
+
+          $consoleUrl = "https://partner.microsoft.com/en-us/dashboard/products/$appId/overview"
+          Write-Host "::warning::$app submission $pendingId passed certification and waits for release. The Store API cannot publish it — click 'Publish now' in Partner Center: $consoleUrl"
+          Report "approved — publish manually in [Partner Center]($consoleUrl)"
 
   # ───────────────────────────────────────────────────────────────────────────
-  # Snap — promote the current latest/beta revision to stable.
-  # Off by default: the Snap Store has no review gate, so every run here would
-  # otherwise push whatever sits in beta straight to all stable users.
+  # Snap — promote the current latest/candidate revision to stable.
+  # The Snap Store has no review gate, so publish-binary parks a stable release
+  # in candidate and this job is the release click.
   # Snap names: growerp-<app>, plus the bare 'growerp' snap for admin.
   # Secrets: SNAPCRAFT_STORE_CREDENTIALS
   # ───────────────────────────────────────────────────────────────────────────
@@ -532,22 +564,25 @@ jobs:
           SNAP_NAMES="growerp-${APP_NAME}"
           if [[ "$APP_NAME" == "admin" ]]; then SNAP_NAMES="$SNAP_NAMES growerp"; fi
 
-          for SNAP_NAME in $SNAP_NAMES; do
-            REVISION=$(curl -s \
-              "https://api.snapcraft.io/v2/snaps/info/${SNAP_NAME}?fields=channel-map" \
-              -H "Snap-Device-Series: 16" | \
-              python3 -c "
-          import json, sys
-          data = json.load(sys.stdin)
-          for entry in data.get('channel-map', []):
-              ch = entry.get('channel', {})
-              if ch.get('name') == 'candidate' and ch.get('track') == 'latest':
-                  print(entry.get('revision', ''))
-                  break
-          ")
+          # Read the channel map with the authenticated CLI (as status.yml does):
+          # the public api.snapcraft.io info endpoint returned no candidate on the
+          # runner, which silently read as "nothing pending" for every snap.
+          # snapcraft marks the revision currently released to a channel with
+          # '*'; superseded revisions keep the bare channel name.
+          current_rev() {
+            awk -v ch="latest/$1*" 'NR > 1 { for (i = 2; i <= NF; i++) {
+              c = $i; sub(/,$/, "", c); if (c == ch) { print $1; exit } } }' \
+              /tmp/snap-revisions.txt
+          }
 
-            if [ -z "$REVISION" ]; then
-              echo "No revision in latest/candidate for ${SNAP_NAME}."
+          for SNAP_NAME in $SNAP_NAMES; do
+            snapcraft revisions "$SNAP_NAME" > /tmp/snap-revisions.txt
+            cat /tmp/snap-revisions.txt
+            REVISION=$(current_rev candidate)
+            STABLE=$(current_rev stable)
+
+            if [ -z "$REVISION" ] || [ "$REVISION" == "$STABLE" ]; then
+              echo "No revision in latest/candidate ahead of stable for ${SNAP_NAME}."
               echo "- **snap / ${SNAP_NAME}**: nothing pending" >> "$GITHUB_STEP_SUMMARY"
               continue
             fi
