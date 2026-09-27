@@ -1420,5 +1420,185 @@
   "courses_tutorAskHint": "Type your question",
   "@courses_tutorAskHint": {
     "description": "Type your question"
+  },
+  "courses_exercise": "Exercise",
+  "@courses_exercise": {
+    "description": "Exercise"
+  },
+  "courses_capstoneProject": "Capstone project",
+  "@courses_capstoneProject": {
+    "description": "Capstone project"
+  },
+  "courses_exerciseNotGraded": "Your answer is saved; the AI could not grade it now, the instructor will review it",
+  "@courses_exerciseNotGraded": {
+    "description": "Your answer is saved; the AI could not grade it now, the instructor will review it"
+  },
+  "courses_yourAnswer": "Your answer",
+  "@courses_yourAnswer": {
+    "description": "Your answer"
+  },
+  "courses_getAHint": "Get a hint",
+  "@courses_getAHint": {
+    "description": "Get a hint"
+  },
+  "courses_submitForFeedback": "Submit for feedback",
+  "@courses_submitForFeedback": {
+    "description": "Submit for feedback"
+  },
+  "courses_earlierAttempts": "Earlier attempts ({count})",
+  "@courses_earlierAttempts": {
+    "description": "Earlier attempts ({count})",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_waitingForReview": "Handed in, waiting for review",
+  "@courses_waitingForReview": {
+    "description": "Handed in, waiting for review"
+  },
+  "courses_exercisePassed": "Passed with {score}%",
+  "@courses_exercisePassed": {
+    "description": "Passed with {score}%",
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_exerciseScore": "Score {score}%",
+  "@courses_exerciseScore": {
+    "description": "Score {score}%",
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_instructorFeedback": "Instructor feedback",
+  "@courses_instructorFeedback": {
+    "description": "Instructor feedback"
+  },
+  "courses_aiFeedback": "AI feedback",
+  "@courses_aiFeedback": {
+    "description": "AI feedback"
+  },
+  "courses_strengths": "Strengths",
+  "@courses_strengths": {
+    "description": "Strengths"
+  },
+  "courses_toImprove": "To improve",
+  "@courses_toImprove": {
+    "description": "To improve"
+  },
+  "courses_practiceExercise": "Practice: {title}",
+  "@courses_practiceExercise": {
+    "description": "Practice: {title}",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_buildCapstone": "Capstone: {title}",
+  "@courses_buildCapstone": {
+    "description": "Capstone: {title}",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_exercisesOf": "Exercises: {title}",
+  "@courses_exercisesOf": {
+    "description": "Exercises: {title}",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_noExercisesYet": "No exercises yet",
+  "@courses_noExercisesYet": {
+    "description": "No exercises yet"
+  },
+  "courses_addExercise": "Add exercise",
+  "@courses_addExercise": {
+    "description": "Add exercise"
+  },
+  "courses_editExercise": "Edit exercise",
+  "@courses_editExercise": {
+    "description": "Edit exercise"
+  },
+  "courses_exerciseTypeText": "Written answer",
+  "@courses_exerciseTypeText": {
+    "description": "Written answer"
+  },
+  "courses_exerciseTypeCode": "Code",
+  "@courses_exerciseTypeCode": {
+    "description": "Code"
+  },
+  "courses_exerciseTypeProject": "Project",
+  "@courses_exerciseTypeProject": {
+    "description": "Project"
+  },
+  "courses_exerciseType": "Type",
+  "@courses_exerciseType": {
+    "description": "Type"
+  },
+  "courses_practicesLesson": "Practices lesson",
+  "@courses_practicesLesson": {
+    "description": "Practices lesson"
+  },
+  "courses_exerciseTask": "Task (Markdown)",
+  "@courses_exerciseTask": {
+    "description": "Task (Markdown)"
+  },
+  "courses_enterTheTask": "Enter the task",
+  "@courses_enterTheTask": {
+    "description": "Enter the task"
+  },
+  "courses_exerciseRubric": "Grading rubric",
+  "@courses_exerciseRubric": {
+    "description": "Grading rubric"
+  },
+  "courses_exerciseRubricHelp": "What a good answer contains; the AI grades with it, learners do not see it",
+  "@courses_exerciseRubricHelp": {
+    "description": "What a good answer contains; the AI grades with it, learners do not see it"
+  },
+  "courses_exercisesWithAi": "Exercises with AI",
+  "@courses_exercisesWithAi": {
+    "description": "Exercises with AI"
+  },
+  "courses_exercisesCount": "Exercises: {count}",
+  "@courses_exercisesCount": {
+    "description": "Exercises: {count}",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "courses_writeTheseExercisesWithAi": "Write these exercises with AI",
+  "@courses_writeTheseExercisesWithAi": {
+    "description": "Write these exercises with AI"
+  },
+  "courses_writeExercisesWithAi": "Write exercises with AI",
+  "@courses_writeExercisesWithAi": {
+    "description": "Write exercises with AI"
+  },
+  "courses_exercisesAllMessage": "The AI writes practice exercises for every module and a capstone project for the course. Exercises learners already worked on are kept.",
+  "@courses_exercisesAllMessage": {
+    "description": "The AI writes practice exercises for every module and a capstone project for the course. Exercises learners already worked on are kept."
+  },
+  "courses_exercisesModuleMessage": "The AI writes new practice exercises for \"{title}\". Exercises learners already worked on are kept.",
+  "@courses_exercisesModuleMessage": {
+    "description": "The AI writes new practice exercises for \"{title}\". Exercises learners already worked on are kept.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
   }
 }

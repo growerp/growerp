@@ -212,6 +212,23 @@ limitations under the License.
                 <econdition field-name="courseId" />
                 <order-by field-name="sequenceNum" />
             </entity-find>
+            <!-- the task only with access, the grading rubric only for the authors; with the
+                 latest score of the current user -->
+            <entity-find entity-name="growerp.course.CourseSubmission" list="mySubmissions">
+                <econdition field-name="courseId" />
+                <econdition field-name="userId" from="ec.user.userId" />
+                <order-by field-name="-submittedDate" />
+            </entity-find>
+            <script>
+                exerciseMap = { e ->
+                    def mine = mySubmissions.find { it.exerciseId == e.exerciseId }
+                    [exerciseId: e.exerciseId, courseId: e.courseId,
+                    moduleId: e.moduleId, lessonId: e.lessonId, sequenceNum: e.sequenceNum,
+                    exerciseType: e.exerciseType, title: e.title,
+                    prompt: hasAccess ? e.prompt : null, rubric: access.isStaff ? e.rubric : null,
+                    myScore: mine ? (mine.instructorScore ?: mine.aiScore) : null,
+                    myStatus: mine?.status] }
+            </script>
             <!-- Get lessons for each module -->
             <set field="modulesWithLessons" from="[]" />
             <iterate list="moduleList" entry="module">
@@ -220,6 +237,10 @@ limitations under the License.
                     <order-by field-name="sequenceNum" />
                 </entity-find>
                 <entity-find entity-name="growerp.course.CourseQuizQuestion" list="questionList">
+                    <econdition field-name="moduleId" from="module.moduleId" />
+                    <order-by field-name="sequenceNum" />
+                </entity-find>
+                <entity-find entity-name="growerp.course.CourseExercise" list="exerciseList">
                     <econdition field-name="moduleId" from="module.moduleId" />
                     <order-by field-name="sequenceNum" />
                 </entity-find>
@@ -243,10 +264,17 @@ limitations under the License.
                         quizQuestions: access.isStaff ? questionList.collect { q -> [
                             questionId: q.questionId, moduleId: q.moduleId, sequenceNum: q.sequenceNum,
                             question: q.question, options: new groovy.json.JsonSlurper().parseText(q.optionsJson ?: '[]'),
-                            correctIndex: q.correctIndex, explanation: q.explanation] } : null
+                            correctIndex: q.correctIndex, explanation: q.explanation] } : null,
+                        exercises: exerciseList.collect { exerciseMap(it) }
                     ])
                 </script>
             </iterate>
+            <!-- course level exercises: the capstone project -->
+            <entity-find entity-name="growerp.course.CourseExercise" list="courseExerciseList">
+                <econdition field-name="courseId" />
+                <econdition field-name="moduleId" operator="is-null" />
+                <order-by field-name="sequenceNum" />
+            </entity-find>
             <!-- Look up product price and pseudoId -->
             <set field="coursePrice" from="null" />
             <set field="productPseudoId" from="null" />
@@ -284,6 +312,7 @@ limitations under the License.
                 createdDate: courseEntity.createdDate,
                 lastModifiedDate: courseEntity.lastModifiedDate,
                 modules: modulesWithLessons,
+                exercises: courseExerciseList.collect { exerciseMap(it) },
                 price: coursePrice?.toString()
             ]" />
         </actions>
@@ -450,6 +479,12 @@ limitations under the License.
             <entity-delete-by-condition entity-name="growerp.course.CourseQuizQuestion">
                 <econdition field-name="courseId" />
             </entity-delete-by-condition>
+            <entity-delete-by-condition entity-name="growerp.course.CourseSubmission">
+                <econdition field-name="courseId" />
+            </entity-delete-by-condition>
+            <entity-delete-by-condition entity-name="growerp.course.CourseExercise">
+                <econdition field-name="courseId" />
+            </entity-delete-by-condition>
             <!-- Delete AI source material and jobs -->
             <entity-delete-by-condition entity-name="growerp.course.CourseSource">
                 <econdition field-name="courseId" />
@@ -596,6 +631,17 @@ limitations under the License.
             <entity-delete-by-condition entity-name="growerp.course.CourseQuizQuestion">
                 <econdition field-name="moduleId" />
             </entity-delete-by-condition>
+            <entity-find entity-name="growerp.course.CourseExercise" list="moduleExercises">
+                <econdition field-name="moduleId" />
+            </entity-find>
+            <if condition="moduleExercises">
+                <entity-delete-by-condition entity-name="growerp.course.CourseSubmission">
+                    <econdition field-name="exerciseId" operator="in" from="moduleExercises*.exerciseId" />
+                </entity-delete-by-condition>
+                <entity-delete-by-condition entity-name="growerp.course.CourseExercise">
+                    <econdition field-name="moduleId" />
+                </entity-delete-by-condition>
+            </if>
             <if condition="moduleEntity.videoLocation">
                 <script>ec.resource.getLocationReference(moduleEntity.videoLocation).delete()</script>
             </if>
@@ -728,6 +774,9 @@ limitations under the License.
             <entity-delete-by-condition entity-name="growerp.course.CourseMedia">
                 <econdition field-name="lessonId" />
             </entity-delete-by-condition>
+            <!-- exercises practising the lesson stay, now for the module -->
+            <script>ec.entity.find("growerp.course.CourseExercise").condition("lessonId", lessonId)
+                .updateAll([lessonId: null])</script>
             <entity-delete value-field="lessonEntity" />
         </actions>
     </service>

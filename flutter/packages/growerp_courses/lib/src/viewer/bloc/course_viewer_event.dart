@@ -72,6 +72,12 @@ class QuizScored extends CourseViewerEvent {
   List<Object?> get props => [moduleId, scorePercent];
 }
 
+/// Reload the course in the background (exercise scores, locks, due
+/// dates), staying on the current lesson
+class RefreshCourse extends CourseViewerEvent {
+  const RefreshCourse();
+}
+
 /// Fetch available courses for selection
 class FetchAvailableCourses extends CourseViewerEvent {
   const FetchAvailableCourses();

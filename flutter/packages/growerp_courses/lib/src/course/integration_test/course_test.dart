@@ -218,6 +218,48 @@ class CourseTest {
     expect(find.textContaining('Quiz: 5 questions'), findsWidgets);
   }
 
+  /// Adds an exercise to a module of the open course dialog.
+  static Future<void> addExercise(
+    WidgetTester tester, {
+    int moduleIndex = 0,
+    required String title,
+    required String task,
+  }) async {
+    await CommonTest.dragUntil(tester, key: 'module$moduleIndex');
+    if (!CommonTest.hasKey('moduleExercises$moduleIndex')) {
+      await CommonTest.tapByKey(tester, 'module$moduleIndex'); // expand
+    }
+    await CommonTest.dragUntil(tester, key: 'moduleExercises$moduleIndex');
+    await CommonTest.tapByKey(tester, 'moduleExercises$moduleIndex');
+    await CommonTest.tapByKey(tester, 'addExercise');
+    await CommonTest.enterText(tester, 'exerciseTitle', title);
+    await CommonTest.enterText(tester, 'exercisePrompt', task);
+    await CommonTest.enterText(tester, 'exerciseRubric', 'Mentions a use');
+    await CommonTest.tapByKey(
+      tester,
+      'saveExercise',
+      seconds: CommonTest.waitTime,
+    );
+    expect(find.text(title), findsOneWidget);
+    await CommonTest.tapByKey(tester, 'closeExercises');
+    expect(find.textContaining('Exercises: 1'), findsWidgets);
+  }
+
+  /// Lets the AI write exercises for every module and the capstone project.
+  static Future<void> writeExercisesWithAi(WidgetTester tester) async {
+    await CommonTest.dragUntil(tester, key: 'aiWriteExercises');
+    await CommonTest.tapByKey(tester, 'aiWriteExercises');
+    await CommonTest.tapByKey(tester, 'aiExerciseConfirm', settle: false);
+    await _pumpUntil(
+      tester,
+      find.textContaining('exercises written'),
+      seconds: 300,
+    );
+    await CommonTest.waitForSnackbarToGo(tester);
+    await CommonTest.dragUntil(tester, key: 'courseCapstone');
+    expect(find.textContaining('Exercises: 1'), findsWidgets);
+  }
+
   /// Lets the AI make the slides of every module of the open course dialog.
   static Future<void> writeSlidesWithAi(WidgetTester tester) async {
     await CommonTest.dragUntil(tester, key: 'aiWriteSlides');
@@ -340,6 +382,31 @@ class CourseTest {
       tester.element(find.byKey(const Key('courseTutorDialog'))),
     ).pop();
     await tester.pumpAndSettle();
+  }
+
+  /// Learner after the last lesson of a module: does its exercise; the AI
+  /// (canned in test mode) grades it 80%.
+  static Future<void> doExercise(
+    WidgetTester tester, {
+    required String answer,
+  }) async {
+    await CommonTest.dragUntil(tester, key: 'doExercise');
+    await CommonTest.tapByKey(
+      tester,
+      'doExercise',
+      seconds: CommonTest.waitTime,
+    );
+    await CommonTest.checkWidgetKey(tester, 'CourseExerciseScreen');
+    await CommonTest.enterText(tester, 'exerciseAnswer', answer);
+    await CommonTest.tapByKey(
+      tester,
+      'exerciseSubmit',
+      seconds: CommonTest.waitTime,
+    );
+    expect(find.text('Passed with 80%'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+    expect(find.byKey(const Key('doExercise')), findsNothing);
   }
 
   /// Learner with the course completed: opens the certificate and closes it.

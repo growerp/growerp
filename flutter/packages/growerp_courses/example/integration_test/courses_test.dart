@@ -74,6 +74,11 @@ void main() {
       question: 'What does this course test?',
       options: ['The courses', 'Nothing'],
     );
+    await CourseTest.addExercise(
+      tester,
+      title: 'Use it',
+      task: 'Describe where you would use this course.',
+    );
     await CourseTest.updateCourse(
       tester,
       title: 'Test Course Updated',
@@ -99,6 +104,7 @@ void main() {
     );
     await CourseTest.writeLessonsWithAi(tester);
     await CourseTest.writeQuizzesWithAi(tester);
+    await CourseTest.writeExercisesWithAi(tester);
     await CourseTest.writeSlidesWithAi(tester);
     await CourseTest.makeVideos(tester);
     await CourseTest.makePromoPack(tester);
@@ -124,6 +130,7 @@ void main() {
       lessonContent: 'Lesson one body text',
     );
     await CourseTest.askTutor(tester);
+    await CourseTest.doExercise(tester, answer: 'In my own freelance work.');
     await CourseTest.openWorkbook(tester);
     // the only lesson is done: the module quiz, then the certificate
     await CourseTest.takeQuiz(tester, answers: [1], expectPassed: false);

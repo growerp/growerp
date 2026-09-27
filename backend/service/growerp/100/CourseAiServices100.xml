@@ -69,7 +69,7 @@ Job types:
             Uploaded files are converted to text here, so the job row never holds the
             (possibly large) file itself.</description>
         <in-parameters>
-            <parameter name="jobType" required="true" /> <!-- OUTLINE, LESSONS, QUIZ, SLIDES, VIDEO, PROMO -->
+            <parameter name="jobType" required="true" /> <!-- OUTLINE, LESSONS, QUIZ, SLIDES, VIDEO, PROMO, EXERCISE -->
             <parameter name="courseId" />
             <!-- OUTLINE -->
             <parameter name="title" />
@@ -100,7 +100,7 @@ Job types:
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <if condition="!(jobType in ['OUTLINE', 'LESSONS', 'QUIZ', 'SLIDES', 'VIDEO', 'PROMO'])">
+            <if condition="!(jobType in ['OUTLINE', 'LESSONS', 'QUIZ', 'SLIDES', 'VIDEO', 'PROMO', 'EXERCISE'])">
                 <return error="true" message="Unknown AI job type ${jobType}" />
             </if>
             <if condition="jobType == 'OUTLINE' &amp;&amp; !title">

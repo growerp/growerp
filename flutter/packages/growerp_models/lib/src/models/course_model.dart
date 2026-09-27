@@ -125,6 +125,35 @@ class Course {
   /// Price of the course (from associated product). Null means free.
   final Decimal? price;
 
+  /// Course level exercises: the capstone project
+  @JsonKey(includeToJson: false)
+  final List<CourseExercise>? exercises;
+
+  /// Language of the content (en, nl, ...); a translated course is a copy
+  /// of [sourceCourseId]
+  final String? languageId;
+  final String? sourceCourseId;
+
+  /// Projects count as done only after an instructor reviewed them
+  @JsonKey(fromJson: _flagFromJson, toJson: _flagToJson)
+  final bool? requireInstructorReview;
+
+  /// A module opens once the previous one is done
+  @JsonKey(fromJson: _flagFromJson, toJson: _flagToJson)
+  final bool? sequentialUnlock;
+
+  /// SELF (default) or COHORT: a group starting on [cohortStartDate]
+  final String? pacing;
+  @NullableTimestampConverter()
+  final DateTime? cohortStartDate;
+
+  /// The course discussion
+  @JsonKey(includeToJson: false)
+  final String? chatRoomId;
+  @JsonKey(includeToJson: false)
+  @NullableTimestampConverter()
+  final DateTime? lastReviewedDate;
+
   Course({
     this.courseId,
     this.pseudoId,
@@ -147,6 +176,15 @@ class Course {
     this.lessonCount,
     this.progressPercent,
     this.price,
+    this.exercises,
+    this.languageId,
+    this.sourceCourseId,
+    this.requireInstructorReview,
+    this.sequentialUnlock,
+    this.pacing,
+    this.cohortStartDate,
+    this.chatRoomId,
+    this.lastReviewedDate,
   });
 
   factory Course.fromJson(Map<String, dynamic> json) => _$CourseFromJson(json);
@@ -174,6 +212,15 @@ class Course {
     int? lessonCount,
     int? progressPercent,
     Decimal? price,
+    List<CourseExercise>? exercises,
+    String? languageId,
+    String? sourceCourseId,
+    bool? requireInstructorReview,
+    bool? sequentialUnlock,
+    String? pacing,
+    DateTime? cohortStartDate,
+    String? chatRoomId,
+    DateTime? lastReviewedDate,
   }) => Course(
     courseId: courseId ?? this.courseId,
     pseudoId: pseudoId ?? this.pseudoId,
@@ -196,6 +243,16 @@ class Course {
     lessonCount: lessonCount ?? this.lessonCount,
     progressPercent: progressPercent ?? this.progressPercent,
     price: price ?? this.price,
+    exercises: exercises ?? this.exercises,
+    languageId: languageId ?? this.languageId,
+    sourceCourseId: sourceCourseId ?? this.sourceCourseId,
+    requireInstructorReview:
+        requireInstructorReview ?? this.requireInstructorReview,
+    sequentialUnlock: sequentialUnlock ?? this.sequentialUnlock,
+    pacing: pacing ?? this.pacing,
+    cohortStartDate: cohortStartDate ?? this.cohortStartDate,
+    chatRoomId: chatRoomId ?? this.chatRoomId,
+    lastReviewedDate: lastReviewedDate ?? this.lastReviewedDate,
   );
 
   @override
@@ -247,6 +304,24 @@ class CourseModule {
   @JsonKey(includeToJson: false)
   final List<CourseQuizQuestion>? quizQuestions;
 
+  /// Practice exercises of this module
+  @JsonKey(includeToJson: false)
+  final List<CourseExercise>? exercises;
+
+  /// Due this many days after the (cohort) start
+  final int? dueDays;
+
+  /// Learner: the date this module is due, and whether that has passed
+  @JsonKey(includeToJson: false)
+  @NullableTimestampConverter()
+  final DateTime? dueDate;
+  @JsonKey(includeToJson: false)
+  final bool? overdue;
+
+  /// Learner: closed until the previous module is done (sequential unlock)
+  @JsonKey(includeToJson: false)
+  final bool? locked;
+
   CourseModule({
     this.moduleId,
     this.pseudoId,
@@ -262,6 +337,11 @@ class CourseModule {
     this.videoUrl,
     this.quizQuestionCount,
     this.quizQuestions,
+    this.exercises,
+    this.dueDays,
+    this.dueDate,
+    this.overdue,
+    this.locked,
   });
 
   factory CourseModule.fromJson(Map<String, dynamic> json) =>
@@ -279,6 +359,7 @@ class CourseModule {
     DateTime? createdDate,
     DateTime? lastModifiedDate,
     List<CourseLesson>? lessons,
+    int? dueDays,
   }) => CourseModule(
     moduleId: moduleId ?? this.moduleId,
     pseudoId: pseudoId ?? this.pseudoId,
@@ -294,6 +375,11 @@ class CourseModule {
     videoUrl: videoUrl,
     quizQuestionCount: quizQuestionCount,
     quizQuestions: quizQuestions,
+    exercises: exercises,
+    dueDays: dueDays ?? this.dueDays,
+    dueDate: dueDate,
+    overdue: overdue,
+    locked: locked,
   );
 
   @override
@@ -332,6 +418,14 @@ class CourseLesson {
   @NullableTimestampConverter()
   final DateTime? lastModifiedDate;
 
+  /// Authors: outdated-content check of the REVIEW AI job, JSON
+  /// {summary, issues: [{text, suggestion}]}
+  @JsonKey(includeToJson: false)
+  final String? reviewNotes;
+  @JsonKey(includeToJson: false)
+  @NullableTimestampConverter()
+  final DateTime? reviewDate;
+
   CourseLesson({
     this.lessonId,
     this.pseudoId,
@@ -346,6 +440,8 @@ class CourseLesson {
     this.imageUrl,
     this.createdDate,
     this.lastModifiedDate,
+    this.reviewNotes,
+    this.reviewDate,
   });
 
   factory CourseLesson.fromJson(Map<String, dynamic> json) =>
@@ -380,6 +476,8 @@ class CourseLesson {
     imageUrl: imageUrl ?? this.imageUrl,
     createdDate: createdDate ?? this.createdDate,
     lastModifiedDate: lastModifiedDate ?? this.lastModifiedDate,
+    reviewNotes: reviewNotes,
+    reviewDate: reviewDate,
   );
 
   @override
@@ -597,6 +695,9 @@ class CourseParticipant {
   @NullableTimestampConverter()
   final DateTime? completedDate;
 
+  /// Modules past their due date that are not done yet
+  final int? overdueModules;
+
   CourseParticipant({
     this.courseId,
     this.courseTitle,
@@ -610,6 +711,7 @@ class CourseParticipant {
     this.startedDate,
     this.lastAccessDate,
     this.completedDate,
+    this.overdueModules,
   });
 
   String get fullName =>
@@ -726,6 +828,9 @@ class CourseQuizQuestion {
   final int? correctIndex;
   final String? explanation;
 
+  /// The lesson this question tests
+  final String? lessonId;
+
   CourseQuizQuestion({
     this.questionId,
     this.moduleId,
@@ -734,6 +839,7 @@ class CourseQuizQuestion {
     this.options = const [],
     this.correctIndex,
     this.explanation,
+    this.lessonId,
   });
 
   factory CourseQuizQuestion.fromJson(Map<String, dynamic> json) =>
@@ -780,10 +886,14 @@ class CourseQuizResult {
   final bool passed;
   final List<CourseQuizAnswerResult> results;
 
+  /// Lessons tested by the questions answered wrong: review these
+  final List<String> weakLessonIds;
+
   CourseQuizResult({
     this.scorePercent = 0,
     this.passed = false,
     this.results = const [],
+    this.weakLessonIds = const [],
   });
 
   factory CourseQuizResult.fromJson(Map<String, dynamic> json) =>
@@ -822,4 +932,223 @@ class CourseCertificate {
   factory CourseCertificate.fromJson(Map<String, dynamic> json) =>
       _$CourseCertificateFromJson(json);
   Map<String, dynamic> toJson() => _$CourseCertificateToJson(this);
+}
+
+/// Y/N indicator fields of the backend as bool
+bool? _flagFromJson(dynamic json) =>
+    json == null ? null : json == true || json == 'Y' || json == 'true';
+String? _flagToJson(bool? flag) => flag == null ? null : (flag ? 'Y' : 'N');
+
+/// Exercise type: TEXT (written answer), CODE, PROJECT (capstone)
+abstract class CourseExerciseType {
+  static const text = 'TEXT';
+  static const code = 'CODE';
+  static const project = 'PROJECT';
+}
+
+/// A hands-on exercise; without [moduleId] it is the course capstone
+/// project. [rubric] is only filled for authors.
+@JsonSerializable()
+class CourseExercise {
+  final String? exerciseId;
+  final String? courseId;
+  final String? moduleId;
+  final String? lessonId;
+  final int? sequenceNum;
+  final String? exerciseType;
+  final String title;
+  final String? prompt;
+  final String? rubric;
+
+  /// Learner: score and status of the own latest submission
+  @JsonKey(includeToJson: false)
+  final int? myScore;
+  @JsonKey(includeToJson: false)
+  final String? myStatus;
+
+  CourseExercise({
+    this.exerciseId,
+    this.courseId,
+    this.moduleId,
+    this.lessonId,
+    this.sequenceNum,
+    this.exerciseType = CourseExerciseType.text,
+    required this.title,
+    this.prompt,
+    this.rubric,
+    this.myScore,
+    this.myStatus,
+  });
+
+  /// A submission of the learner scored 70 or more
+  bool get isPassed => (myScore ?? 0) >= 70;
+
+  bool get isProject => exerciseType == CourseExerciseType.project;
+
+  factory CourseExercise.fromJson(Map<String, dynamic> json) =>
+      _$CourseExerciseFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseExerciseToJson(this);
+
+  @override
+  String toString() => 'CourseExercise($title)';
+}
+
+/// One attempt of a learner at an exercise, graded by the AI and optionally
+/// reviewed by an instructor; [score] is the instructor score if there is
+/// one, else the AI score.
+@JsonSerializable()
+class CourseSubmission {
+  final String? submissionId;
+  final String? exerciseId;
+  final String? courseId;
+  final String? userId;
+  final String? answer;
+
+  /// SUBMITTED (not graded yet), AI_GRADED, REVIEWED
+  final String? status;
+  final int? aiScore;
+  final String? aiFeedback;
+  final List<String> strengths;
+  final List<String> improvements;
+  final int? instructorScore;
+  final String? instructorFeedback;
+  @NullableTimestampConverter()
+  final DateTime? reviewedDate;
+  @NullableTimestampConverter()
+  final DateTime? submittedDate;
+  final int? score;
+  final bool passed;
+
+  /// For the authors' list
+  final String? learnerName;
+  final String? username;
+  final String? exerciseTitle;
+
+  CourseSubmission({
+    this.submissionId,
+    this.exerciseId,
+    this.courseId,
+    this.userId,
+    this.answer,
+    this.status,
+    this.aiScore,
+    this.aiFeedback,
+    this.strengths = const [],
+    this.improvements = const [],
+    this.instructorScore,
+    this.instructorFeedback,
+    this.reviewedDate,
+    this.submittedDate,
+    this.score,
+    this.passed = false,
+    this.learnerName,
+    this.username,
+    this.exerciseTitle,
+  });
+
+  bool get isReviewed => status == 'REVIEWED';
+
+  factory CourseSubmission.fromJson(Map<String, dynamic> json) =>
+      _$CourseSubmissionFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseSubmissionToJson(this);
+}
+
+/// List wrapper for submissions
+@JsonSerializable()
+class CourseSubmissions {
+  final List<CourseSubmission> submissions;
+
+  CourseSubmissions({this.submissions = const []});
+
+  factory CourseSubmissions.fromJson(Map<String, dynamic> json) =>
+      _$CourseSubmissionsFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseSubmissionsToJson(this);
+}
+
+/// An exercise as a learner opens it, with the own submissions, latest first
+@JsonSerializable()
+class CourseExerciseDetail {
+  final CourseExercise exercise;
+  final List<CourseSubmission> submissions;
+
+  CourseExerciseDetail({required this.exercise, this.submissions = const []});
+
+  factory CourseExerciseDetail.fromJson(Map<String, dynamic> json) =>
+      _$CourseExerciseDetailFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseExerciseDetailToJson(this);
+}
+
+/// Answer of submit: the graded submission; [aiError] when the AI could not
+/// grade it (it waits for the instructor then)
+@JsonSerializable()
+class CourseExerciseSubmitResult {
+  final CourseSubmission submission;
+  final String? aiError;
+
+  CourseExerciseSubmitResult({required this.submission, this.aiError});
+
+  factory CourseExerciseSubmitResult.fromJson(Map<String, dynamic> json) =>
+      _$CourseExerciseSubmitResultFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseExerciseSubmitResultToJson(this);
+}
+
+/// What the learner best does next, from the progress and quiz scores
+@JsonSerializable()
+class CourseRecommendation {
+  final String? nextLessonId;
+  final String? reason;
+  final List<String> reviewLessonIds;
+
+  CourseRecommendation({
+    this.nextLessonId,
+    this.reason,
+    this.reviewLessonIds = const [],
+  });
+
+  factory CourseRecommendation.fromJson(Map<String, dynamic> json) =>
+      _$CourseRecommendationFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseRecommendationToJson(this);
+}
+
+/// An earlier version of a lesson
+@JsonSerializable()
+class CourseLessonVersion {
+  final String? historyId;
+  final String? lessonId;
+  final int? versionNum;
+  final String? title;
+  final String? content;
+  final String? changedByUsername;
+
+  /// EDIT, AI_LESSONS, AI_REVIEW, RESTORE, TRANSLATE
+  final String? changeReason;
+  @NullableTimestampConverter()
+  final DateTime? changedDate;
+
+  CourseLessonVersion({
+    this.historyId,
+    this.lessonId,
+    this.versionNum,
+    this.title,
+    this.content,
+    this.changedByUsername,
+    this.changeReason,
+    this.changedDate,
+  });
+
+  factory CourseLessonVersion.fromJson(Map<String, dynamic> json) =>
+      _$CourseLessonVersionFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseLessonVersionToJson(this);
+}
+
+/// List wrapper for lesson versions
+@JsonSerializable()
+class CourseLessonVersions {
+  final List<CourseLessonVersion> versions;
+
+  CourseLessonVersions({this.versions = const []});
+
+  factory CourseLessonVersions.fromJson(Map<String, dynamic> json) =>
+      _$CourseLessonVersionsFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseLessonVersionsToJson(this);
 }

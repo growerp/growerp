@@ -23,6 +23,7 @@ import '../../course_ai/bloc/course_ai_bloc.dart';
 import '../../course_ai/views/ai_key_needed_dialog.dart';
 import 'course_participants_view.dart';
 import 'quiz_editor_dialog.dart';
+import 'exercise_editor_dialog.dart';
 import 'slides_editor_dialog.dart';
 import '../../documents/backend_url.dart';
 import '../../documents/course_pdfs.dart';
@@ -450,6 +451,17 @@ class _CourseDialogState extends State<CourseDialog> {
                   ),
                 if (modules.isNotEmpty)
                   TextButton.icon(
+                    key: const Key('aiWriteExercises'),
+                    icon: const Icon(Icons.edit_note),
+                    label: Text(
+                      CoursesLocalizations.of(
+                        context,
+                      )!.courses_exercisesWithAi,
+                    ),
+                    onPressed: () => _writeExercisesWithAi(null),
+                  ),
+                if (modules.isNotEmpty)
+                  TextButton.icon(
                     key: const Key('aiWriteSlides'),
                     icon: const Icon(Icons.slideshow),
                     label: Text(
@@ -609,6 +621,25 @@ class _CourseDialogState extends State<CourseDialog> {
                     ),
                   ),
                   ListTile(
+                    key: Key('moduleExercises$index'),
+                    contentPadding: const EdgeInsets.only(left: 72, right: 16),
+                    leading: const Icon(Icons.edit_note),
+                    title: Text(
+                      CoursesLocalizations.of(context)!.courses_exercisesCount(
+                        (module.exercises?.length ?? 0).toString(),
+                      ),
+                    ),
+                    onTap: () => _showExerciseEditor(module.moduleId),
+                    trailing: IconButton(
+                      key: Key('aiExercise$index'),
+                      icon: const Icon(Icons.auto_awesome),
+                      tooltip: CoursesLocalizations.of(
+                        context,
+                      )!.courses_writeTheseExercisesWithAi,
+                      onPressed: () => _writeExercisesWithAi(module),
+                    ),
+                  ),
+                  ListTile(
                     key: Key('moduleSlides$index'),
                     contentPadding: const EdgeInsets.only(left: 72, right: 16),
                     leading: const Icon(Icons.slideshow),
@@ -670,9 +701,35 @@ class _CourseDialogState extends State<CourseDialog> {
               );
             },
           ),
+        if (modules.isNotEmpty)
+          ListTile(
+            key: const Key('courseCapstone'),
+            leading: const CircleAvatar(child: Icon(Icons.flag)),
+            title: Text(
+              CoursesLocalizations.of(context)!.courses_capstoneProject,
+            ),
+            subtitle: Text(
+              CoursesLocalizations.of(context)!.courses_exercisesCount(
+                (docCourse.exercises?.length ?? 0).toString(),
+              ),
+            ),
+            onTap: () => _showExerciseEditor(null),
+          ),
       ],
     );
   }
+
+  /// Exercises of a module, or of the course ([moduleId] null): the capstone
+  void _showExerciseEditor(String? moduleId) => showDialog(
+    context: context,
+    builder: (_) => BlocProvider.value(
+      value: context.read<CourseBloc>(),
+      child: ExerciseEditorDialog(
+        courseId: widget.course!.courseId!,
+        moduleId: moduleId,
+      ),
+    ),
+  );
 
   /// Progress of a running AI job; reloads the course when it is done
   Widget _buildAiJobBanner() {
@@ -786,6 +843,18 @@ class _CourseDialogState extends State<CourseDialog> {
             context,
           )!.courses_quizModuleMessage(module.title),
     confirmKey: 'aiQuizConfirm',
+  );
+
+  Future<void> _writeExercisesWithAi(CourseModule? module) => _runModuleAiJob(
+    jobType: 'EXERCISE',
+    module: module,
+    title: CoursesLocalizations.of(context)!.courses_writeExercisesWithAi,
+    message: module == null
+        ? CoursesLocalizations.of(context)!.courses_exercisesAllMessage
+        : CoursesLocalizations.of(
+            context,
+          )!.courses_exercisesModuleMessage(module.title),
+    confirmKey: 'aiExerciseConfirm',
   );
 
   Future<void> _writeSlidesWithAi(CourseModule? module) => _runModuleAiJob(

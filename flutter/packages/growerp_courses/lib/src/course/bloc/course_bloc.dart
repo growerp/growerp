@@ -51,6 +51,8 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     on<CourseQuizQuestionSave>(_onQuizQuestionSave);
     on<CourseModuleSlidesSave>(_onModuleSlidesSave);
     on<CourseQuizQuestionDelete>(_onQuizQuestionDelete);
+    on<CourseExerciseSave>(_onExerciseSave);
+    on<CourseExerciseDelete>(_onExerciseDelete);
     on<CourseSubscribe>(_onCourseSubscribe);
     on<CourseMediaGenerate>(_onMediaGenerate);
     on<CourseParticipantsFetch>(_onParticipantsFetch);
@@ -372,6 +374,46 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     try {
       emit(state.copyWith(status: CourseBlocStatus.loading));
       await restClient.deleteCourseQuizQuestion(questionId: event.questionId);
+      if (_hasValidSelectedCourseId) {
+        add(CourseGetDetail(state.selectedCourse!.courseId!));
+      }
+    } catch (e) {
+      emit(
+        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+      );
+    }
+  }
+
+  Future<void> _onExerciseSave(
+    CourseExerciseSave event,
+    Emitter<CourseState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: CourseBlocStatus.loading));
+      final data = event.exercise.toJson()
+        ..removeWhere((key, value) => value == null);
+      if (event.exercise.exerciseId == null) {
+        await restClient.createCourseExercise(data: data);
+      } else {
+        await restClient.updateCourseExercise(data: data);
+      }
+      if (_hasValidSelectedCourseId) {
+        add(CourseGetDetail(state.selectedCourse!.courseId!));
+      }
+    } catch (e) {
+      emit(
+        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+      );
+    }
+  }
+
+  Future<void> _onExerciseDelete(
+    CourseExerciseDelete event,
+    Emitter<CourseState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: CourseBlocStatus.loading));
+      await restClient.deleteCourseExercise(exerciseId: event.exerciseId);
       if (_hasValidSelectedCourseId) {
         add(CourseGetDetail(state.selectedCourse!.courseId!));
       }

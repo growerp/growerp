@@ -29,6 +29,7 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
     on<SelectLesson>(_onSelectLesson);
     on<MarkLessonComplete>(_onMarkLessonComplete);
     on<QuizScored>(_onQuizScored);
+    on<RefreshCourse>(_onRefreshCourse);
     on<NextLesson>(_onNextLesson);
     on<PreviousLesson>(_onPreviousLesson);
     on<FetchAvailableCourses>(_onFetchAvailableCourses);
@@ -115,6 +116,38 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
       );
     } catch (e) {
       emit(state.copyWith(status: ViewerStatus.failure, message: e.toString()));
+    }
+  }
+
+  Future<void> _onRefreshCourse(
+    RefreshCourse event,
+    Emitter<CourseViewerState> emit,
+  ) async {
+    final courseId = state.course?.courseId;
+    if (courseId == null) return;
+    try {
+      dynamic courseResponse = await restClient.getCourseCatalog(
+        courseId: courseId,
+      );
+      if (courseResponse is String) {
+        courseResponse = jsonDecode(courseResponse);
+      }
+      final course = Course.fromJson(
+        courseResponse['course'] as Map<String, dynamic>,
+      );
+      final currentId = state.currentLesson?.lessonId;
+      final current = (course.modules ?? [])
+          .expand((m) => m.lessons ?? <CourseLesson>[])
+          .where((l) => l.lessonId == currentId)
+          .firstOrNull;
+      emit(
+        state.copyWith(
+          course: course,
+          currentLesson: current ?? state.currentLesson,
+        ),
+      );
+    } catch (_) {
+      // keep showing what is there
     }
   }
 

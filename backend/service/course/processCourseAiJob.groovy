@@ -327,6 +327,100 @@ Answer with JSON only:
 }
 
 // ---------------------------------------------------------------------------------------------
+// EXERCISE: hands-on exercises per module and a capstone project for the whole course
+// ---------------------------------------------------------------------------------------------
+def runExercise = {
+    String courseId = job.courseId
+    def course = ec.entity.find("growerp.course.Course").condition("courseId", courseId).disableAuthz().one()
+    def modules = ec.entity.find("growerp.course.CourseModule").condition("courseId", courseId)
+        .orderBy("sequenceNum").disableAuthz().list()
+        .findAll { !input.moduleIds || it.moduleId in input.moduleIds }
+    if (!modules) throw new Exception('No modules to write exercises for')
+    // exercises learners already handed work in for are kept, the others are replaced
+    def submitted = ec.entity.find("growerp.course.CourseSubmission").condition("courseId", courseId)
+        .disableAuthz().list()*.exerciseId.unique()
+    def replace = { Closure filter ->
+        ec.entity.find("growerp.course.CourseExercise").condition("courseId", courseId).disableAuthz().list()
+            .findAll { filter(it) && !(it.exerciseId in submitted) }.each { it.delete() }
+    }
+    def create = { Map ex, String moduleId, String lessonId, String defaultType ->
+        String type = ex.exerciseType in ['TEXT', 'CODE', 'PROJECT'] ? ex.exerciseType : defaultType
+        svc('growerp.100.CourseExerciseServices100.create#CourseExercise',
+            [courseId: courseId, moduleId: moduleId, lessonId: lessonId, exerciseType: type,
+             title: ex.title, prompt: ex.prompt, rubric: ex.rubric])
+    }
+    String common = """RULES:
+- Exercises make the learner APPLY what was taught to a realistic situation, not repeat facts.
+- exerciseType CODE when the learner has to write code, otherwise TEXT.
+- prompt: the task in Markdown, with the situation, what to hand in and roughly how long it takes.
+- rubric: 3 to 5 grading criteria for the grader (the learner does not see them), with what a
+  good answer contains.
+- Write in the language of the lessons."""
+    int written = 0
+    int steps = modules.size() + (input.moduleIds ? 0 : 1)
+    modules.eachWithIndex { module, int index ->
+        progress((int) (5 + 90 * index / steps), "Writing the exercises of module ${index + 1} of ${modules.size()}: ${module.title}")
+        def lessons = ec.entity.find("growerp.course.CourseLesson").condition("moduleId", module.moduleId)
+            .orderBy("sequenceNum").disableAuthz().list()
+        String lessonText = lessons.collect { "## [${it.lessonId}] ${it.title}\n${it.content ?: ''}" }.join('\n\n')
+        if (lessonText.length() > 30000) lessonText = lessonText.substring(0, 30000)
+        String prompt = """You are an experienced teacher writing practice exercises for a course module.
+
+COURSE: ${course.title}
+AUDIENCE: ${course.audience ?: 'not specified'}
+DIFFICULTY: ${course.difficulty ?: 'BEGINNER'}
+MODULE: ${module.title}
+LESSONS OF THE MODULE (lesson id in brackets):
+${lessonText}
+
+Write 1 or 2 exercises for this module; lessonId is the id of the lesson it practices most.
+${common}
+
+Answer with JSON only:
+{"exercises": [{"lessonId": "", "exerciseType": "TEXT", "title": "", "prompt": "", "rubric": ""}]}"""
+        def answer = CourseAiUtil.askJson(ec, ownerPartyId, prompt,
+            [exercises: [[lessonId: lessons ? lessons[0].lessonId : null, exerciseType: 'TEXT',
+                title: "Test exercise of ${module.title}".toString(),
+                prompt: 'Apply the lesson to your own situation.', rubric: 'Uses the lesson.']]])
+        def exercises = (answer instanceof Map ? answer.exercises : null)?.findAll { it instanceof Map && it.title && it.prompt }
+        if (!exercises) throw new Exception("The AI returned no usable exercises for ${module.title}")
+        replace { it.moduleId == module.moduleId }
+        exercises.each { Map ex ->
+            create(ex, module.moduleId, lessons.find { it.lessonId == ex.lessonId }?.lessonId, 'TEXT')
+            written++
+        }
+    }
+    if (!input.moduleIds) {
+        progress(90, "Writing the capstone project")
+        def allModules = ec.entity.find("growerp.course.CourseModule").condition("courseId", courseId)
+            .orderBy("sequenceNum").disableAuthz().list()
+        String prompt = """You are an experienced teacher writing the capstone project of an online course: the
+learner builds something real that combines what the whole course teaches.
+
+COURSE: ${course.title}
+OBJECTIVES: ${course.objectives ?: 'not specified'}
+AUDIENCE: ${course.audience ?: 'not specified'}
+DIFFICULTY: ${course.difficulty ?: 'BEGINNER'}
+MODULES: ${allModules*.title.join('; ')}
+
+Write one capstone project, exerciseType PROJECT, with the deliverable the learner hands in as
+text (a plan, document, code or a description with links).
+${common}
+
+Answer with JSON only: {"title": "", "prompt": "", "rubric": ""}"""
+        def project = CourseAiUtil.askJson(ec, ownerPartyId, prompt,
+            [title: "Capstone of ${course.title}".toString(), prompt: 'Build something with what you learned.',
+             rubric: 'Applies the whole course.'])
+        if (project instanceof Map && project.title && project.prompt) {
+            replace { !it.moduleId }
+            create(project + [exerciseType: 'PROJECT'], null, null, 'PROJECT')
+            written++
+        }
+    }
+    return "${written} exercise${written == 1 ? '' : 's'} written"
+}
+
+// ---------------------------------------------------------------------------------------------
 // SLIDES: a slide deck per module; the speaker notes are the narration of the course video
 // ---------------------------------------------------------------------------------------------
 def runSlides = {
@@ -559,6 +653,7 @@ try {
         case 'SLIDES': doneMessage = runSlides(); break
         case 'VIDEO': doneMessage = runVideo(); break
         case 'PROMO': doneMessage = runPromo(); break
+        case 'EXERCISE': doneMessage = runExercise(); break
         default: throw new Exception("Unknown AI job type ${job.jobType}")
     }
     ec.service.sync().name(STATUS_SERVICE).parameters([jobId: jobId, status: 'DONE',

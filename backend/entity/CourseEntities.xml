@@ -24,6 +24,16 @@
         <field name="createdDate" type="date-time" />
         <field name="lastModifiedDate" type="date-time" />
         <field name="createdByUserLogin" type="text-short" />
+        <!-- translations: a translated course is a copy, in languageId, of sourceCourseId -->
+        <field name="languageId" type="text-short" /> <!-- e.g. en, nl, th; empty: the language of the title -->
+        <field name="sourceCourseId" type="id" />
+        <!-- learning experience -->
+        <field name="requireInstructorReview" type="text-indicator" /> <!-- Y: projects count as done once reviewed -->
+        <field name="sequentialUnlock" type="text-indicator" /> <!-- Y: a module opens once the previous is done -->
+        <field name="pacing" type="text-short" /> <!-- SELF (default), COHORT -->
+        <field name="cohortStartDate" type="date-time" /> <!-- COHORT: the day the group starts -->
+        <field name="chatRoomId" type="id" /> <!-- course discussion -->
+        <field name="lastReviewedDate" type="date-time" /> <!-- last check for outdated content -->
 
         <relationship type="one" related="mantle.party.Party">
             <key-map field-name="ownerPartyId" related="partyId" />
@@ -57,6 +67,7 @@
              /courseMedia/video?t=videoToken; a new video gets a new token -->
         <field name="videoLocation" type="text-long" />
         <field name="videoToken" type="id-long" />
+        <field name="dueDays" type="number-integer" /> <!-- due this many days after the start -->
 
         <field name="createdDate" type="date-time" />
         <field name="lastModifiedDate" type="date-time" />
@@ -85,6 +96,9 @@
         <field name="estimatedDuration" type="number-integer" /> <!-- in minutes -->
         <field name="videoUrl" type="text-long" />
         <field name="imageUrl" type="text-long" />
+        <!-- REVIEW AI job: statements that may be outdated and what to change, for the author -->
+        <field name="reviewNotes" type="text-very-long" /> <!-- JSON {summary, issues: [{text, suggestion}]} -->
+        <field name="reviewDate" type="date-time" />
 
         <field name="createdDate" type="date-time" />
         <field name="lastModifiedDate" type="date-time" />
@@ -149,6 +163,7 @@
         <field name="optionsJson" type="text-very-long" /> <!-- JSON array of answer texts -->
         <field name="correctIndex" type="number-integer" /> <!-- 0-based into optionsJson -->
         <field name="explanation" type="text-long" />
+        <field name="lessonId" type="id" /> <!-- the lesson it tests: review it when answered wrong -->
         <field name="createdDate" type="date-time" />
 
         <relationship type="one" related="growerp.course.CourseModule">
@@ -156,6 +171,71 @@
         </relationship>
         <relationship type="one" related="growerp.course.Course">
             <key-map field-name="courseId" />
+        </relationship>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!--  Course Exercise (hands-on practice, AI graded)           -->
+    <!-- ========================================================= -->
+    <entity entity-name="CourseExercise" package="growerp.course">
+        <description>A practice task for the learner: a written answer, code, or (course level,
+            no moduleId) the capstone project. The AI grades submissions against the rubric,
+            which learners never see.</description>
+        <field name="exerciseId" type="id" is-pk="true" />
+        <field name="courseId" type="id" />
+        <field name="moduleId" type="id" /> <!-- empty: course level, the capstone project -->
+        <field name="lessonId" type="id" /> <!-- optional: the lesson it practices -->
+        <field name="sequenceNum" type="number-integer" />
+        <field name="exerciseType" type="text-short" /> <!-- TEXT, CODE, PROJECT -->
+        <field name="title" type="text-medium" />
+        <field name="prompt" type="text-very-long" /> <!-- Markdown task description -->
+        <field name="rubric" type="text-very-long" /> <!-- grading criteria, for the AI -->
+        <field name="createdDate" type="date-time" />
+        <field name="lastModifiedDate" type="date-time" />
+
+        <relationship type="one" related="growerp.course.Course">
+            <key-map field-name="courseId" />
+        </relationship>
+        <relationship type="one" related="growerp.course.CourseModule">
+            <key-map field-name="moduleId" />
+        </relationship>
+        <relationship type="one" related="growerp.course.CourseLesson">
+            <key-map field-name="lessonId" />
+        </relationship>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!--  Course Submission (a learner answer to an exercise)      -->
+    <!-- ========================================================= -->
+    <entity entity-name="CourseSubmission" package="growerp.course">
+        <description>One attempt of a learner at an exercise; every attempt is kept, the latest
+            counts. The AI grades it right away; an instructor can review it afterwards and
+            the instructor score then overrides the AI score.</description>
+        <field name="submissionId" type="id" is-pk="true" />
+        <field name="exerciseId" type="id" />
+        <field name="courseId" type="id" />
+        <field name="userId" type="id" />
+        <field name="answer" type="text-very-long" />
+        <field name="status" type="text-short" /> <!-- SUBMITTED, AI_GRADED, REVIEWED -->
+        <field name="aiScore" type="number-integer" /> <!-- 0-100 -->
+        <field name="aiFeedback" type="text-very-long" /> <!-- JSON {feedback, strengths[], improvements[]} -->
+        <field name="instructorScore" type="number-integer" />
+        <field name="instructorFeedback" type="text-very-long" />
+        <field name="reviewedByUserId" type="id" />
+        <field name="reviewedDate" type="date-time" />
+        <field name="submittedDate" type="date-time" />
+
+        <relationship type="one" related="growerp.course.CourseExercise">
+            <key-map field-name="exerciseId" />
+        </relationship>
+        <relationship type="one" related="growerp.course.Course">
+            <key-map field-name="courseId" />
+        </relationship>
+        <relationship type="one" related="moqui.security.UserAccount">
+            <key-map field-name="userId" />
+        </relationship>
+        <relationship type="one" related="moqui.security.UserAccount" title="ReviewedBy">
+            <key-map field-name="reviewedByUserId" related="userId" />
         </relationship>
     </entity>
 
@@ -188,7 +268,7 @@
         <field name="jobId" type="id" is-pk="true" />
         <field name="ownerPartyId" type="id" />
         <field name="courseId" type="id" />
-        <field name="jobType" type="text-short" /> <!-- OUTLINE, LESSONS, QUIZ, SLIDES, VIDEO, PROMO -->
+        <field name="jobType" type="text-short" /> <!-- OUTLINE, LESSONS, QUIZ, SLIDES, VIDEO, PROMO, EXERCISE, TRANSLATE, REVIEW -->
         <field name="status" type="text-short" /> <!-- QUEUED, RUNNING, DONE, ERROR -->
         <field name="progressPercent" type="number-integer" />
         <field name="statusMessage" type="text-long" />
@@ -219,6 +299,8 @@
         <field name="startedDate" type="date-time" />
         <field name="lastAccessDate" type="date-time" />
         <field name="completedDate" type="date-time" />
+        <field name="lastReminderDate" type="date-time" />
+        <field name="chatRoomId" type="id" /> <!-- COHORT pacing: the discussion of this cohort -->
 
         <relationship type="one" related="moqui.security.UserAccount">
             <key-map field-name="userId" />
@@ -228,6 +310,31 @@
         </relationship>
         <relationship type="one" related="growerp.course.CourseLesson">
             <key-map field-name="currentLessonId" related="lessonId" />
+        </relationship>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!--  Course Lesson History (earlier versions of a lesson)     -->
+    <!-- ========================================================= -->
+    <entity entity-name="CourseLessonHistory" package="growerp.course">
+        <description>The text of a lesson before it was changed, by hand or by an AI job, so an
+            author can see and restore earlier versions.</description>
+        <field name="historyId" type="id" is-pk="true" />
+        <field name="lessonId" type="id" />
+        <field name="courseId" type="id" />
+        <field name="versionNum" type="number-integer" />
+        <field name="title" type="text-medium" />
+        <field name="content" type="text-very-long" />
+        <field name="keyPoints" type="text-very-long" />
+        <field name="changedByUsername" type="text-medium" />
+        <field name="changeReason" type="text-medium" /> <!-- EDIT, AI_LESSONS, AI_REVIEW, RESTORE -->
+        <field name="changedDate" type="date-time" />
+
+        <relationship type="one" related="growerp.course.CourseLesson">
+            <key-map field-name="lessonId" />
+        </relationship>
+        <relationship type="one" related="growerp.course.Course">
+            <key-map field-name="courseId" />
         </relationship>
     </entity>
 

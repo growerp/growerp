@@ -166,6 +166,25 @@ class CourseQuizQuestionDelete extends CourseEvent {
   List<Object?> get props => [questionId];
 }
 
+/// Create (no exerciseId) or update an exercise
+class CourseExerciseSave extends CourseEvent {
+  final CourseExercise exercise;
+
+  const CourseExerciseSave(this.exercise);
+
+  @override
+  List<Object?> get props => [exercise];
+}
+
+class CourseExerciseDelete extends CourseEvent {
+  final String exerciseId;
+
+  const CourseExerciseDelete(this.exerciseId);
+
+  @override
+  List<Object?> get props => [exerciseId];
+}
+
 /// Update lesson
 class CourseLessonUpdate extends CourseEvent {
   final CourseLesson lesson;

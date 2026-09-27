@@ -24,6 +24,7 @@ import '../../documents/course_video_dialog.dart';
 import '../../quiz/views/course_certificate.dart';
 import '../../quiz/views/course_quiz_screen.dart';
 import '../../tutor/course_tutor_panel.dart';
+import '../../exercise/views/course_exercise_screen.dart';
 import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
 /// In-app course viewer widget for presenting courses
@@ -449,8 +450,13 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
           Expanded(
             child: ListView.builder(
               controller: _sidebarScrollController,
-              itemCount: modules.length,
+              itemCount:
+                  modules.length +
+                  ((course.exercises?.isNotEmpty ?? false) ? 1 : 0),
               itemBuilder: (context, moduleIndex) {
+                if (moduleIndex == modules.length) {
+                  return _buildCapstoneSection(context, state);
+                }
                 final module = modules[moduleIndex];
                 final isCurrentModule =
                     currentLessonId != null &&
@@ -546,6 +552,14 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
                       ),
                     if ((module.quizQuestionCount ?? 0) > 0)
                       _buildQuizTile(context, state, module, moduleIndex),
+                    for (final (i, exercise)
+                        in (module.exercises ?? []).indexed)
+                      _buildExerciseTile(
+                        context,
+                        state,
+                        exercise,
+                        'exercise${moduleIndex}_$i',
+                      ),
                   ],
                 );
               },
@@ -602,6 +616,81 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
       ),
     );
     if (score != null) bloc.add(QuizScored(module.moduleId!, score));
+  }
+
+  /// Passed; a project of a course that requires instructor review only
+  /// once reviewed
+  bool _exercisePassed(CourseViewerState state, CourseExercise exercise) =>
+      exercise.isPassed &&
+      (!(state.course?.requireInstructorReview ?? false) ||
+          !exercise.isProject ||
+          exercise.myStatus == 'REVIEWED');
+
+  Widget _buildExerciseTile(
+    BuildContext context,
+    CourseViewerState state,
+    CourseExercise exercise,
+    String key,
+  ) {
+    final passed = _exercisePassed(state, exercise);
+    return ListTile(
+      key: Key(key),
+      leading: Icon(
+        passed
+            ? Icons.emoji_events
+            : exercise.isProject
+            ? Icons.construction
+            : Icons.edit_note,
+        color: passed ? Colors.green : null,
+      ),
+      title: Text(exercise.title),
+      subtitle: Text(
+        exercise.myScore != null
+            ? CoursesLocalizations.of(
+                context,
+              )!.courses_exerciseScore(exercise.myScore.toString())
+            : exercise.isProject
+            ? CoursesLocalizations.of(context)!.courses_capstoneProject
+            : CoursesLocalizations.of(context)!.courses_exercise,
+      ),
+      onTap: () => _openExercise(context, exercise),
+    );
+  }
+
+  Widget _buildCapstoneSection(BuildContext context, CourseViewerState state) {
+    final exercises = state.course?.exercises ?? [];
+    return ExpansionTile(
+      key: const Key('capstoneSection'),
+      initiallyExpanded: true,
+      leading: const CircleAvatar(
+        radius: 14,
+        child: Icon(Icons.flag, size: 16),
+      ),
+      title: Text(
+        CoursesLocalizations.of(context)!.courses_capstoneProject,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      children: [
+        for (final (i, exercise) in exercises.indexed)
+          _buildExerciseTile(context, state, exercise, 'capstone$i'),
+      ],
+    );
+  }
+
+  Future<void> _openExercise(
+    BuildContext context,
+    CourseExercise exercise,
+  ) async {
+    final bloc = context.read<CourseViewerBloc>();
+    final submitted = await Navigator.of(context).push<CourseSubmission>(
+      MaterialPageRoute(
+        builder: (_) => CourseExerciseScreen(
+          courseId: bloc.state.course!.courseId!,
+          exerciseId: exercise.exerciseId!,
+        ),
+      ),
+    );
+    if (submitted != null) bloc.add(const RefreshCourse());
   }
 
   /// All lessons done and every module quiz passed
@@ -811,7 +900,50 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
         )
         .firstOrNull;
     final isLastOfModule = module?.lessons?.last.lessonId == lesson.lessonId;
+    final openExercise = isLastOfModule
+        ? (module?.exercises ?? [])
+              .where((e) => !_exercisePassed(state, e))
+              .firstOrNull
+        : null;
+    final allLessons = _getAllLessons(state.course);
+    final isLastOfCourse =
+        allLessons.isNotEmpty && allLessons.last.lessonId == lesson.lessonId;
+    final openCapstone = isLastOfCourse
+        ? (state.course?.exercises ?? [])
+              .where((e) => !_exercisePassed(state, e))
+              .firstOrNull
+        : null;
     return [
+      if (openExercise != null) ...[
+        const SizedBox(height: 24),
+        Center(
+          child: OutlinedButton.icon(
+            key: const Key('doExercise'),
+            icon: const Icon(Icons.edit_note),
+            label: Text(
+              CoursesLocalizations.of(
+                context,
+              )!.courses_practiceExercise(openExercise.title),
+            ),
+            onPressed: () => _openExercise(context, openExercise),
+          ),
+        ),
+      ],
+      if (openCapstone != null) ...[
+        const SizedBox(height: 24),
+        Center(
+          child: OutlinedButton.icon(
+            key: const Key('doCapstone'),
+            icon: const Icon(Icons.construction),
+            label: Text(
+              CoursesLocalizations.of(
+                context,
+              )!.courses_buildCapstone(openCapstone.title),
+            ),
+            onPressed: () => _openExercise(context, openCapstone),
+          ),
+        ),
+      ],
       if (module != null &&
           isLastOfModule &&
           (module.quizQuestionCount ?? 0) > 0 &&

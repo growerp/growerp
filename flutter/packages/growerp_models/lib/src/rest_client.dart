@@ -2351,6 +2351,31 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/CourseCatalog/Tutor")
   Future<dynamic> courseTutor({@Body() required Map<String, dynamic> data});
 
+  /// Learner: an exercise with the own submissions
+  @GET("rest/s1/growerp/100/CourseCatalog/Exercise")
+  Future<CourseExerciseDetail> getCourseExercise({
+    @Query('courseId') required String courseId,
+    @Query('exerciseId') required String exerciseId,
+  });
+
+  /// Learner: hand in an answer, graded by the AI
+  @POST("rest/s1/growerp/100/CourseCatalog/Exercise")
+  Future<CourseExerciseSubmitResult> submitCourseExercise({
+    @Field() required String courseId,
+    @Field() required String exerciseId,
+    @Field() required String answer,
+  });
+
+  /// Learner: what to do next; {recommendation}
+  @GET("rest/s1/growerp/100/CourseCatalog/Recommendation")
+  Future<dynamic> getCourseRecommendation({
+    @Query('courseId') required String courseId,
+  });
+
+  /// Learner: join the course discussion; returns {chatRoomId}
+  @POST("rest/s1/growerp/100/CourseCatalog/Discussion")
+  Future<dynamic> joinCourseDiscussion({@Field() required String courseId});
+
   @GET("rest/s1/growerp/100/CourseCatalog/Certificate")
   Future<dynamic> getCourseCertificate({
     @Query('courseId') required String courseId,
@@ -2415,6 +2440,51 @@ abstract class RestClient {
   Future<dynamic> deleteCourseQuizQuestion({
     @Query('questionId') required String questionId,
   });
+
+  @POST("rest/s1/growerp/100/Course/Exercise")
+  Future<dynamic> createCourseExercise({
+    @Body() required Map<String, dynamic> data,
+  });
+
+  @PATCH("rest/s1/growerp/100/Course/Exercise")
+  Future<dynamic> updateCourseExercise({
+    @Body() required Map<String, dynamic> data,
+  });
+
+  @DELETE("rest/s1/growerp/100/Course/Exercise")
+  Future<dynamic> deleteCourseExercise({
+    @Query('exerciseId') required String exerciseId,
+  });
+
+  /// Authors: learner work of a course, latest first
+  @GET("rest/s1/growerp/100/Course/Submission")
+  Future<CourseSubmissions> getCourseSubmissions({
+    @Query('courseId') required String courseId,
+    @Query('exerciseId') String? exerciseId,
+    @Query('userId') String? userId,
+    @Query('needsReview') bool? needsReview,
+    @Query('searchString') String? searchString,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  /// Authors: instructor feedback and score on a submission
+  @PATCH("rest/s1/growerp/100/Course/Submission")
+  Future<dynamic> reviewCourseSubmission({
+    @Field() required String submissionId,
+    @Field() required int instructorScore,
+    @Field() String? instructorFeedback,
+  });
+
+  /// Authors: earlier versions of a lesson
+  @GET("rest/s1/growerp/100/Course/Lesson/History")
+  Future<CourseLessonVersions> getCourseLessonHistory({
+    @Query('lessonId') required String lessonId,
+  });
+
+  /// Authors: put an earlier version of a lesson back
+  @POST("rest/s1/growerp/100/Course/Lesson/History")
+  Future<dynamic> restoreCourseLesson({@Field() required String historyId});
 
   @GET("rest/s1/growerp/100/Course/AiJob")
   Future<CourseAiJobs> getCourseAiJobs({
