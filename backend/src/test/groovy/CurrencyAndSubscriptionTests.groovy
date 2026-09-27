@@ -45,7 +45,7 @@ class CurrencyAndSubscriptionTests extends Specification {
     @Shared String companyPartyId = 'CURTEST_COMP'
     @Shared String productStoreId = 'CURTEST_STORE'
     @Shared String tenantId = 'CURTEST_TENANT'
-    @Shared String planProductId = 'CURTEST_PLAN'
+    @Shared String planProductId = 'GROWERP_CURTEST_PLAN'
     @Shared String subscriberPartyId = 'CURTEST_SUBS'
     @Shared String growerpCompanyId, growerpBaseCurrency
     @Shared String subscriptionId, renewPaymentId
