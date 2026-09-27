@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+
+The AI tutor of a course: a learner asks questions about the lesson at hand.
+
+    chat#CourseTutor    learner: answer one question, grounded on the lesson (or the
+                        exercise/quiz passed in extraContext). Stateless: the app sends
+                        the conversation so far in history.
+
+mode EXPLAIN answers the question; mode HINTS never gives the solution but guides the
+learner with questions and one hint at a time.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="chat" noun="CourseTutor">
+        <description>Answer a learner question about a course lesson.</description>
+        <in-parameters>
+            <parameter name="courseId" required="true" />
+            <parameter name="lessonId" />
+            <parameter name="message" required="true" allow-html="any" />
+            <parameter name="mode" default-value="EXPLAIN" /> <!-- EXPLAIN, HINTS -->
+            <parameter name="extraContext" allow-html="any" /> <!-- exercise or missed quiz questions -->
+            <parameter name="history" type="List"> <!-- earlier turns, oldest first -->
+                <parameter name="turn" type="Map">
+                    <parameter name="role" /> <!-- learner, tutor -->
+                    <parameter name="text" allow-html="any" />
+                </parameter>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="answer" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.CourseQuizServices100.check#CourseLearnerAccess"
+                in-map="[courseId: courseId]" out-map="access" />
+            <set field="course" from="access.courseEntity" />
+            <if condition="lessonId">
+                <entity-find-one entity-name="growerp.course.CourseLesson" value-field="lesson" />
+                <if condition="lesson?.courseId != courseId">
+                    <return error="true" message="Lesson not found" />
+                </if>
+                <entity-find-one entity-name="growerp.course.CourseModule" value-field="module">
+                    <field-map field-name="moduleId" from="lesson.moduleId" />
+                </entity-find-one>
+            </if>
+            <script><![CDATA[
+                def CourseAiUtil = ec.resource.script("component://growerp/service/course/CourseAiUtil.groovy", null)
+                if (CourseAiUtil.testMode()) {
+                    answer = mode == 'HINTS' ? "Hint: look again at the key points of this lesson." :
+                        "Test tutor answer to: ${message}"
+                } else {
+                    def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
+                    StringBuilder prompt = new StringBuilder()
+                    prompt << "You are a patient, encouraging tutor for the online course \"${course.title}\".\n"
+                    if (course.objectives) prompt << "Course objectives: ${course.objectives}\n"
+                    if (course.audience) prompt << "Audience: ${course.audience}\n"
+                    if (course.difficulty) prompt << "Level: ${course.difficulty}\n"
+                    if (lesson) {
+                        prompt << "\nThe learner is studying module \"${module?.title ?: ''}\", lesson \"${lesson.title}\".\n"
+                        prompt << "LESSON CONTENT:\n${(lesson.content ?: '').take(12000)}\n"
+                        if (lesson.keyPoints) prompt << "KEY POINTS: ${lesson.keyPoints}\n"
+                    }
+                    if (extraContext) prompt << "\nCONTEXT:\n${extraContext.take(6000)}\n"
+                    prompt << "\nRULES:\n"
+                    prompt << "- Base your answer on the lesson content; use general knowledge only to clarify it.\n"
+                    prompt << "- If the question is not about the course topic, say so briefly and steer back to the course.\n"
+                    prompt << "- Answer in the language of the learner's last message. Be concise: at most about 200 words. Use Markdown.\n"
+                    if (mode == 'HINTS') {
+                        prompt << "- HINTS MODE: never give the full answer or solution, even if asked. " +
+                            "Ask one guiding question or give one small hint at a time, " +
+                            "and tell the learner whether they are on the right track.\n"
+                    } else {
+                        prompt << "- Explain clearly, with a short example where it helps.\n"
+                    }
+                    def turns = (history ?: []).takeRight(10)
+                    if (turns) {
+                        prompt << "\nCONVERSATION SO FAR:\n"
+                        turns.each { Map t -> prompt << "${t.role == 'tutor' ? 'Tutor' : 'Learner'}: ${t.text}\n" }
+                    }
+                    prompt << "\nLearner: ${message}\nTutor:"
+                    answer = GeminiAiUtil.callLlmApi(ec, prompt.toString(),
+                        [ownerPartyId: access.ownerPartyId, maxOutputTokens: 2048])?.trim()
+                }
+            ]]></script>
+        </actions>
+    </service>
+</services>

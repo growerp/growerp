@@ -23,6 +23,7 @@ import '../../documents/course_pdfs.dart';
 import '../../documents/course_video_dialog.dart';
 import '../../quiz/views/course_certificate.dart';
 import '../../quiz/views/course_quiz_screen.dart';
+import '../../tutor/course_tutor_panel.dart';
 import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
 /// In-app course viewer widget for presenting courses
@@ -712,7 +713,21 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
             Text(
               CoursesLocalizations.of(context)!.courses_noContentAvailableFor,
             ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
+          Center(
+            child: TextButton.icon(
+              key: const Key('askTutor'),
+              icon: const Icon(Icons.psychology_outlined),
+              label: Text(CoursesLocalizations.of(context)!.courses_askTutor),
+              onPressed: () => showCourseTutor(
+                context,
+                courseId: state.course!.courseId!,
+                lessonId: lesson.lessonId,
+                title: lesson.title,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
           _buildLessonActions(context, state, lesson),
           ..._buildModuleEnd(context, state, lesson),
         ],

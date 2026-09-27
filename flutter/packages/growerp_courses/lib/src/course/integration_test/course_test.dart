@@ -323,6 +323,25 @@ class CourseTest {
     );
   }
 
+  /// Learner on a lesson: asks the AI tutor a question (test mode answers
+  /// with a canned reply) and closes the tutor.
+  static Future<void> askTutor(WidgetTester tester) async {
+    await CommonTest.dragUntil(tester, key: 'askTutor');
+    await CommonTest.tapByKey(tester, 'askTutor');
+    await CommonTest.checkWidgetKey(tester, 'courseTutorDialog');
+    await CommonTest.enterText(tester, 'tutorInput', 'What is this about?');
+    await CommonTest.tapByKey(
+      tester,
+      'tutorSend',
+      seconds: CommonTest.waitTime,
+    );
+    expect(find.textContaining('Test tutor answer to:'), findsOneWidget);
+    Navigator.of(
+      tester.element(find.byKey(const Key('courseTutorDialog'))),
+    ).pop();
+    await tester.pumpAndSettle();
+  }
+
   /// Learner with the course completed: opens the certificate and closes it.
   static Future<void> openCertificate(WidgetTester tester) async {
     await CommonTest.dragUntil(tester, key: 'courseCertificate');

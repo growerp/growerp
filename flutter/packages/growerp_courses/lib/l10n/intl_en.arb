@@ -1396,5 +1396,29 @@
   "courses_courseIdRequired": "Course ID is required",
   "@courses_courseIdRequired": {
     "description": "Course ID is required"
+  },
+  "courses_aiTutor": "AI tutor",
+  "@courses_aiTutor": {
+    "description": "AI tutor"
+  },
+  "courses_askTutor": "Ask the tutor",
+  "@courses_askTutor": {
+    "description": "Ask the tutor"
+  },
+  "courses_tutorHintsOnly": "Hints only",
+  "@courses_tutorHintsOnly": {
+    "description": "Hints only"
+  },
+  "courses_tutorHintsOnlyHelp": "The tutor guides you with questions and hints instead of giving the answer",
+  "@courses_tutorHintsOnlyHelp": {
+    "description": "The tutor guides you with questions and hints instead of giving the answer"
+  },
+  "courses_tutorWelcome": "Ask anything about this lesson. Switch on 'Hints only' when you want to work it out yourself.",
+  "@courses_tutorWelcome": {
+    "description": "Ask anything about this lesson. Switch on 'Hints only' when you want to work it out yourself."
+  },
+  "courses_tutorAskHint": "Type your question",
+  "@courses_tutorAskHint": {
+    "description": "Type your question"
   }
 }

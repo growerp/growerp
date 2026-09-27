@@ -123,6 +123,7 @@ void main() {
       '/myCourses',
       lessonContent: 'Lesson one body text',
     );
+    await CourseTest.askTutor(tester);
     await CourseTest.openWorkbook(tester);
     // the only lesson is done: the module quiz, then the certificate
     await CourseTest.takeQuiz(tester, answers: [1], expectPassed: false);

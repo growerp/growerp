@@ -2347,6 +2347,10 @@ abstract class RestClient {
     @Field() required List<int?> answers,
   });
 
+  /// Learner: AI tutor answer on the current lesson; returns {answer}
+  @POST("rest/s1/growerp/100/CourseCatalog/Tutor")
+  Future<dynamic> courseTutor({@Body() required Map<String, dynamic> data});
+
   @GET("rest/s1/growerp/100/CourseCatalog/Certificate")
   Future<dynamic> getCourseCertificate({
     @Query('courseId') required String courseId,

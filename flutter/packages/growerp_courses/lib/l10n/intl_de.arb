@@ -291,5 +291,11 @@
   "courses_courseUpdated": "Kurs erfolgreich aktualisiert",
   "courses_courseDeleted": "Kurs erfolgreich gelöscht",
   "courses_courseSubscribed": "Kurs erfolgreich abonniert",
-  "courses_courseIdRequired": "Kurs-ID ist erforderlich"
+  "courses_courseIdRequired": "Kurs-ID ist erforderlich",
+  "courses_aiTutor": "KI-Tutor",
+  "courses_askTutor": "Tutor fragen",
+  "courses_tutorHintsOnly": "Nur Hinweise",
+  "courses_tutorHintsOnlyHelp": "Der Tutor führt Sie mit Fragen und Hinweisen, statt die Antwort zu geben",
+  "courses_tutorWelcome": "Fragen Sie alles zu dieser Lektion. Schalten Sie 'Nur Hinweise' ein, wenn Sie es selbst herausfinden möchten.",
+  "courses_tutorAskHint": "Ihre Frage eingeben"
 }

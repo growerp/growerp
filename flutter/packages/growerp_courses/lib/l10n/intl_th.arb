@@ -291,5 +291,11 @@
   "courses_courseUpdated": "อัปเดตหลักสูตรสำเร็จ",
   "courses_courseDeleted": "ลบหลักสูตรสำเร็จ",
   "courses_courseSubscribed": "สมัครหลักสูตรสำเร็จ",
-  "courses_courseIdRequired": "ต้องระบุรหัสหลักสูตร"
+  "courses_courseIdRequired": "ต้องระบุรหัสหลักสูตร",
+  "courses_aiTutor": "ติวเตอร์ AI",
+  "courses_askTutor": "ถามติวเตอร์",
+  "courses_tutorHintsOnly": "คำใบ้เท่านั้น",
+  "courses_tutorHintsOnlyHelp": "ติวเตอร์จะแนะนำด้วยคำถามและคำใบ้แทนการให้คำตอบ",
+  "courses_tutorWelcome": "ถามอะไรก็ได้เกี่ยวกับบทเรียนนี้ เปิด 'คำใบ้เท่านั้น' หากต้องการคิดเอง",
+  "courses_tutorAskHint": "พิมพ์คำถามของคุณ"
 }

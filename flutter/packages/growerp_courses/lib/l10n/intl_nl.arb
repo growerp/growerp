@@ -291,5 +291,11 @@
   "courses_courseUpdated": "Cursus bijgewerkt",
   "courses_courseDeleted": "Cursus verwijderd",
   "courses_courseSubscribed": "Ingeschreven voor de cursus",
-  "courses_courseIdRequired": "Cursus-ID is verplicht"
+  "courses_courseIdRequired": "Cursus-ID is verplicht",
+  "courses_aiTutor": "AI-tutor",
+  "courses_askTutor": "Vraag de tutor",
+  "courses_tutorHintsOnly": "Alleen hints",
+  "courses_tutorHintsOnlyHelp": "De tutor helpt je met vragen en hints in plaats van het antwoord te geven",
+  "courses_tutorWelcome": "Vraag alles over deze les. Zet 'Alleen hints' aan als je het zelf wilt uitzoeken.",
+  "courses_tutorAskHint": "Typ je vraag"
 }

@@ -291,5 +291,11 @@
   "courses_courseUpdated": "Cours mis à jour avec succès",
   "courses_courseDeleted": "Cours supprimé avec succès",
   "courses_courseSubscribed": "Inscription au cours réussie",
-  "courses_courseIdRequired": "L'ID du cours est requis"
+  "courses_courseIdRequired": "L'ID du cours est requis",
+  "courses_aiTutor": "Tuteur IA",
+  "courses_askTutor": "Demander au tuteur",
+  "courses_tutorHintsOnly": "Indices seulement",
+  "courses_tutorHintsOnlyHelp": "Le tuteur vous guide par des questions et des indices au lieu de donner la réponse",
+  "courses_tutorWelcome": "Posez n'importe quelle question sur cette leçon. Activez 'Indices seulement' pour trouver par vous-même.",
+  "courses_tutorAskHint": "Tapez votre question"
 }

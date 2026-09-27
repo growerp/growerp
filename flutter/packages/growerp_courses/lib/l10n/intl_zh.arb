@@ -291,5 +291,11 @@
   "courses_courseUpdated": "课程更新成功",
   "courses_courseDeleted": "课程删除成功",
   "courses_courseSubscribed": "课程订阅成功",
-  "courses_courseIdRequired": "需要课程 ID"
+  "courses_courseIdRequired": "需要课程 ID",
+  "courses_aiTutor": "AI 导师",
+  "courses_askTutor": "询问导师",
+  "courses_tutorHintsOnly": "仅提示",
+  "courses_tutorHintsOnlyHelp": "导师用问题和提示引导你，而不是直接给出答案",
+  "courses_tutorWelcome": "关于本课的任何问题都可以问。想自己解决时，请打开“仅提示”。",
+  "courses_tutorAskHint": "输入你的问题"
 }
