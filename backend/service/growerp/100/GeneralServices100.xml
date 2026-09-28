@@ -2233,8 +2233,12 @@ limitations under the License.
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="relInfo"/>
             <script>
                 def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
-                def opts = options ?: [:]
-                if (!opts.ownerPartyId) opts.ownerPartyId = relInfo.ownerPartyId
+                // tenant, key and model are decided server side, never by the client: a client
+                // ownerPartyId '_NA_' skipped the allowance, a client model could be the priciest
+                def opts = (options ?: [:]).findAll { k, v ->
+                    k in ['temperature', 'topK', 'topP', 'maxOutputTokens', 'jsonMode'] }
+                opts.ownerPartyId = relInfo.ownerPartyId
+                opts.maxOutputTokens = Math.min((opts.maxOutputTokens ?: 4096) as int, 8192)
                 generatedText = GeminiAiUtil.callGeminiApi(ec, prompt, opts)
             </script>
         </actions>

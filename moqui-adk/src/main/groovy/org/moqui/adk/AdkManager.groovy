@@ -758,7 +758,55 @@ CRITICAL tool-use rules — follow exactly:
 
     // ── Agent execution ───────────────────────────────────────────────────────
 
-    static RunConfig defaultRunConfig() { RunConfig.builder().setMaxLlmCalls(30).build() }
+    static RunConfig defaultRunConfig() { RunConfig.builder().setMaxLlmCalls(10).build() }
+
+    /**
+     * Token allowance gate before an agent run: the reason the run is refused, or null to go
+     * ahead. Owner comes from the agent config, else [ownerPartyId] (one-off runs pass their
+     * tenantId), else the session user's company. Uses the caller's thread EC, never destroyed
+     * here. Fails open on lookup errors so a metering hiccup never takes chat down.
+     */
+    static String allowanceBlock(String configId, String sessionId, String ownerPartyId = null) {
+        if (sharedSessionService == null) return null
+        try {
+            def ec = sharedSessionService.ecf.getExecutionContext()
+            boolean wasDisabled = ec.artifactExecution.disableAuthz()
+            try {
+                String apiKey = null, provider = 'gemini'
+                if (configId && configId != DEFAULT_CONFIG) {
+                    def cfg = ec.entity.find('moqui.adk.AdkAgentConfig')
+                            .condition('adkAgentConfigId', configId).one()
+                    if (cfg?.ownerPartyId) ownerPartyId = cfg.ownerPartyId as String
+                    apiKey = cfg?.apiKey as String
+                    provider = (cfg?.llmProvider ?: 'gemini') as String
+                }
+                if (!ownerPartyId || ownerPartyId == 'DEFAULT') ownerPartyId = ownerForSession(ec, sessionId)
+                if (!ownerPartyId) return null
+                def out = ec.service.sync().name('AdkGovernanceServices.check#TokenAllowance')
+                        .parameters([ownerPartyId: ownerPartyId, apiKey: apiKey, llmProvider: provider]).call()
+                return out?.allowed == false ? (out.message as String) : null
+            } finally { if (!wasDisabled) ec.artifactExecution.enableAuthz() }
+        } catch (Exception e) {
+            logger.warn("allowanceBlock(${configId}/${sessionId}) failed: ${e.message}")
+            return null
+        }
+    }
+
+    /** Company of the user who owns a persisted session; null for in-memory/unknown sessions. */
+    private static String ownerForSession(def ec, String sessionId) {
+        if (!sessionId) return null
+        def sess = ec.entity.find('moqui.adk.AdkSession').condition('adkSessionId', sessionId).one()
+        if (!sess?.userId) return null
+        def ua = ec.entity.find('moqui.security.UserAccount').condition('userId', sess.userId).one()
+        if (!ua?.partyId) return null
+        return ec.entity.find('mantle.party.Party').condition('partyId', ua.partyId).one()?.ownerPartyId as String
+    }
+
+    /** The single agent reply event returned instead of running when the allowance is used up. */
+    private static Map blockedEvent(String message) {
+        [id: 'allowance-' + System.currentTimeMillis(), author: 'growerp-agent', partial: false,
+         content: [role: 'model', parts: [[text: message]]]]
+    }
 
     /**
      * After a completed interactive turn, fold the session into the rolling per-(owner,user)
@@ -853,8 +901,7 @@ CRITICAL tool-use rules — follow exactly:
      */
     static void logChatTurn(String sessionId, String text, List<Map> events) {
         if (!sessionId || sharedSessionService == null) return
-        String coordId = sessionOwn[sessionId] ?: lookupConfigIdFromDb(sessionId)
-        if (!coordId) return
+        String coordId = sessionOwn[sessionId] ?: lookupConfigIdFromDb(sessionId) ?: DEFAULT_CONFIG
         logAgentRun(coordId, sessionId, 'chat', 'chat', 'User Chat Interaction', text, events)
     }
 
@@ -864,7 +911,8 @@ CRITICAL tool-use rules — follow exactly:
      * persisted session to look a config id up from.
      */
     static void logAgentRun(String configId, String sessionId, String serviceName,
-                            String verbClass, String reason, String text, List<Map> events) {
+                            String verbClass, String reason, String text, List<Map> events,
+                            String ownerPartyId = null) {
         if (!configId || sharedSessionService == null) return
         long[] tokens = extractTokensFromEvents(events)
         def ecf = sharedSessionService.ecf
@@ -875,10 +923,16 @@ CRITICAL tool-use rules — follow exactly:
                 try {
                     def coord = ec.entity.find('moqui.adk.AdkAgentConfig')
                             .condition('adkAgentConfigId', configId).one()
-                    if (!coord) return
-                    String owner = coord.ownerPartyId as String
+                    // the default config has no row: bill the given tenant or the session user's
+                    String owner = (coord?.ownerPartyId ?:
+                            (ownerPartyId && ownerPartyId != 'DEFAULT' ? ownerPartyId : null) ?:
+                            ownerForSession(ec, sessionId)) as String
+                    if (!owner) {
+                        logger.warn("logAgentRun(${configId}/${sessionId}): no owner, ${tokens[2]} tokens unmetered")
+                        return
+                    }
                     ec.service.sync().name('create#moqui.adk.AdkActionLog').parameters([
-                            ownerPartyId: owner, configId: configId,
+                            ownerPartyId: owner, configId: coord ? configId : null,
                             adkSessionId: sessionId,
                             serviceName: serviceName, verbClass: verbClass,
                             decision: 'allowed', reason: reason,
@@ -896,6 +950,8 @@ CRITICAL tool-use rules — follow exactly:
 
     static List<Map> runAgent(String userId, String sessionId, String text) {
         if (shuttingDown) return []
+        String blocked = allowanceBlock(sessionOwn[sessionId] ?: lookupConfigIdFromDb(sessionId), sessionId)
+        if (blocked) return [blockedEvent(blocked)]
         Content userContent = buildUserContent(text)
         List<Map> events = []
         Set<String> delegateNames = new HashSet<>()
@@ -905,7 +961,11 @@ CRITICAL tool-use rules — follow exactly:
                 { Event e -> collectDelegateNames(e, delegateNames); events << eventToMap(e) },
                 { Throwable t -> err[0] = t; logger.error("ADK runAgent error (session={}): {}", sessionId, t.message, t) }
             )
-        if (err[0]) throw err[0]
+        if (err[0]) {
+            // tokens of the LLM calls before the failure were still spent
+            logChatTurn(sessionId, text, events)
+            throw err[0]
+        }
         logChatTurn(sessionId, text, events)
         logDelegations(sessionId, delegateNames)
         maybeSummarize(sessionId)
@@ -941,6 +1001,9 @@ CRITICAL tool-use rules — follow exactly:
         String cid = configId ?: DEFAULT_CONFIG
         LlmAgent agent = agentRegistry[cid] ?: agentRegistry.values().find()
         if (!agent) throw new IllegalStateException('ADK not initialized — add API key in ADK → Configuration')
+        String tenantId = initialState?.tenantId as String
+        String blocked = allowanceBlock(cid, null, tenantId)
+        if (blocked) return [blockedEvent(blocked)]
 
         // The agent instruction embeds CONTEXT_PREAMBLE with {userId}/{username}/... placeholders
         // that ADK resolves from session state. Seed state with these keys so injectSessionState
@@ -972,16 +1035,19 @@ CRITICAL tool-use rules — follow exactly:
                   { Throwable t -> err[0] = t; logger.error("ADK runOneOff error (config={}): {}", cid, t.message, t) }
               )
 
-        if (err[0]) throw err[0]
-        // scheduled and one-off runs have their own in-memory session: log against the config
+        // scheduled and one-off runs have their own in-memory session: log against the config,
+        // also when the run failed part way (earlier LLM calls were still spent)
         logAgentRun(cid, session.id() as String, 'agentRun', 'ai',
-                'Scheduled or one-off agent run', text, events)
+                'Scheduled or one-off agent run', text, events, tenantId)
+        if (err[0]) throw err[0]
         events
     }
 
     static void runAgentSse(String userId, String sessionId, String text,
                             Closure eventCallback, Closure doneCallback) {
         if (shuttingDown) { doneCallback(null); return }
+        String blocked = allowanceBlock(sessionOwn[sessionId] ?: lookupConfigIdFromDb(sessionId), sessionId)
+        if (blocked) { eventCallback(blockedEvent(blocked)); doneCallback(null); return }
         Content userContent = buildUserContent(text)
         Set<String> delegateNames = java.util.concurrent.ConcurrentHashMap.newKeySet()
         List<Map> collectedEvents = Collections.synchronizedList(new ArrayList<>())
@@ -993,7 +1059,7 @@ CRITICAL tool-use rules — follow exactly:
                     collectedEvents.add(em)
                     eventCallback(em)
                 },
-                { Throwable t -> doneCallback(t) },
+                { Throwable t -> logChatTurn(sessionId, text, collectedEvents); doneCallback(t) },
                 {
                     logChatTurn(sessionId, text, collectedEvents)
                     logDelegations(sessionId, delegateNames)

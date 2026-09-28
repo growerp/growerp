@@ -1506,6 +1506,10 @@ limitations under the License.
                 <return error="true" message="No script content available"/>
             </if>
 
+            <!-- the tenant the AI spend is metered on -->
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="relInfo"/>
+            <set field="ownerPartyId" from="relInfo.ownerPartyId"/>
+
             <!-- Call the Groovy script for video generation -->
             <script location="component://growerp/service/generateVideoFromScript.groovy"/>
         </actions>

@@ -8,6 +8,69 @@
         xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
 
     <!-- ─────────────────────────────────────────────────────────────────────────
+         check#TokenAllowance — may this tenant spend more LLM tokens this month?
+         Own key (explicit apiKey or an LlmConfig row for the provider): only the cap the
+         tenant set on itself (SystemSettings.ownTokenLimit). System key: the per tenant
+         override (SystemSettings.llmMonthlyTokenLimit) else the GrowERP wide free allowance
+         (SystemDefault.llmMonthlyTokenLimit); 0/empty = unlimited. Used before every agent
+         run (AdkManager) and every governed tool call.
+         ───────────────────────────────────────────────────────────────────────── -->
+    <service verb="check" noun="TokenAllowance" authenticate="false">
+        <in-parameters>
+            <parameter name="ownerPartyId"/>
+            <parameter name="llmProvider" default-value="gemini"/>
+            <parameter name="apiKey"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="allowed" type="Boolean"/>
+            <parameter name="message"/>
+            <parameter name="tokensUsed" type="Long"/>
+            <parameter name="tokenLimit" type="Long"/>
+        </out-parameters>
+        <actions>
+            <set field="allowed" from="true"/>
+            <if condition="!ownerPartyId || ownerPartyId == '_NA_'"><return/></if>
+
+            <set field="hasOwnKey" from="apiKey ? true : false"/>
+            <if condition="!hasOwnKey">
+                <entity-find-one entity-name="growerp.general.LlmConfig" value-field="llmConfig"/>
+                <set field="hasOwnKey" from="llmConfig?.apiKey ? true : false"/>
+            </if>
+            <entity-find-one entity-name="growerp.general.SystemSettings" value-field="ownerSettings"/>
+            <if condition="hasOwnKey">
+                <set field="tokenLimit" from="ownerSettings?.ownTokenLimit ?: 0" type="Long"/>
+                <else-if condition="ownerSettings?.llmMonthlyTokenLimit != null">
+                    <set field="tokenLimit" from="ownerSettings.llmMonthlyTokenLimit" type="Long"/>
+                </else-if>
+                <else>
+                    <entity-find-one entity-name="growerp.general.SystemDefault" value-field="sysDefault"
+                        auto-field-map="[defaultId: 'SYSTEM']"/>
+                    <!-- no row at all (upgraded install, seed not loaded) → seed value -->
+                    <set field="tokenLimit" type="Long"
+                        from="sysDefault == null ? 100000 : (sysDefault.llmMonthlyTokenLimit ?: 0)"/>
+                </else>
+            </if>
+            <if condition="tokenLimit &lt;= 0"><return/></if>
+
+            <set field="startOfMonth" from="new java.sql.Timestamp(java.time.LocalDate.now().withDayOfMonth(1)
+                .atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli())"/>
+            <!-- grouped view: one row per owner, summed in SQL -->
+            <entity-find entity-name="moqui.adk.AdkOwnerTokenSummary" list="usageList">
+                <econdition field-name="ownerPartyId"/>
+                <econdition field-name="actionTime" operator="greater-equals" from="startOfMonth"/>
+                <select-field field-name="ownerPartyId,tokensTotal"/>
+            </entity-find>
+            <set field="tokensUsed" from="usageList.sum { (it.tokensTotal ?: 0) as long } ?: 0" type="Long"/>
+            <if condition="tokensUsed &gt;= tokenLimit">
+                <set field="allowed" from="false"/>
+                <set field="message" from="hasOwnKey
+                    ? &quot;Own monthly LLM token limit reached (${tokensUsed} of ${tokenLimit} tokens). Raise or clear it in System Setup -> AI Settings.&quot;
+                    : &quot;Free monthly LLM allowance used (${tokensUsed} of ${tokenLimit} tokens). Please add your own API Key in System Setup -> AI Settings.&quot;"/>
+            </if>
+        </actions>
+    </service>
+
+    <!-- ─────────────────────────────────────────────────────────────────────────
          govern#AgentAction — pre-execution decision for one agent service call.
          Returns decision = allowed | blocked | pending, plus owner-pinned parameters.
          Always writes an AdkActionLog row; for pending it also creates an AdkApproval
@@ -115,57 +178,12 @@
                         }
                     }
                     if (decision == 'allowed') {
-                        def hasCustomLlm = false
-                        if (cfg?.apiKey) hasCustomLlm = true
-                        if (!hasCustomLlm && ownerPartyId) {
-                            // a key for the provider this agent actually runs on: a tenant
-                            // paying its own Anthropic bill is exempt just like a Gemini one
-                            def lc = ec.entity.find('growerp.general.LlmConfig')
-                                .condition('ownerPartyId', ownerPartyId)
-                                .condition('llmProvider', cfg?.llmProvider ?: 'gemini').one()
-                            if (lc?.apiKey) hasCustomLlm = true
-                        }
-                        if (ownerPartyId) {
-                            def ownerSettings = ec.entity.find('growerp.general.SystemSettings').condition('ownerPartyId', ownerPartyId).one()
-                            def tokenLimit
-                            if (hasCustomLlm) {
-                                // own key: the only cap is the one the tenant set on itself in
-                                // System Settings; empty/0 = no cap
-                                tokenLimit = ownerSettings?.ownTokenLimit ?: 0
-                            } else if (ownerSettings?.llmMonthlyTokenLimit != null) {
-                                // GrowERP wide free allowance, maintained by system support in the
-                                // support app (System Defaults); 0/empty = unlimited
-                                // a per tenant override (support app owner list) wins over it
-                                tokenLimit = ownerSettings.llmMonthlyTokenLimit
-                            } else {
-                                def sysDefault = ec.entity.find('growerp.general.SystemDefault').condition('defaultId', 'SYSTEM').one()
-                                // no row at all (upgraded install, seed not loaded) → seed value;
-                                // a row with an empty/0 limit means unlimited
-                                tokenLimit = sysDefault == null ? 100000 : (sysDefault.llmMonthlyTokenLimit ?: 0)
-                            }
-                            if (tokenLimit > 0) {
-                                def cal = Calendar.getInstance()
-                                cal.set(Calendar.DAY_OF_MONTH, 1)
-                                cal.set(Calendar.HOUR_OF_DAY, 0)
-                                cal.set(Calendar.MINUTE, 0)
-                                cal.set(Calendar.SECOND, 0)
-                                def startOfMonth = new java.sql.Timestamp(cal.getTimeInMillis())
-                                
-                                // grouped view: one row per owner, summed in SQL
-                                long totalUsed = 0
-                                ec.entity.find('moqui.adk.AdkOwnerTokenSummary')
-                                    .selectField('ownerPartyId').selectField('tokensTotal')
-                                    .condition('ownerPartyId', ownerPartyId)
-                                    .condition('actionTime', org.moqui.entity.EntityCondition.GREATER_THAN_EQUAL_TO, startOfMonth)
-                                    .list().each { totalUsed += (it.tokensTotal ?: 0) as long }
-                                
-                                if (totalUsed >= tokenLimit) {
-                                    decision = 'blocked'
-                                    message = hasCustomLlm
-                                        ? "Own monthly LLM token limit reached (${totalUsed} of ${tokenLimit} tokens). Raise or clear it in System Setup -> AI Settings."
-                                        : "Free monthly LLM allowance used (${totalUsed} of ${tokenLimit} tokens). Please add your own API Key."
-                                }
-                            }
+                        def allowance = ec.service.sync().name('AdkGovernanceServices.check#TokenAllowance')
+                            .parameters([ownerPartyId: ownerPartyId, apiKey: cfg?.apiKey,
+                                         llmProvider: cfg?.llmProvider ?: 'gemini']).call()
+                        if (allowance?.allowed == false) {
+                            decision = 'blocked'
+                            message = allowance.message
                         }
                     }
                     if (decision == 'allowed' && verbClass == 'write') {

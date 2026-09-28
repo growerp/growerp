@@ -14,8 +14,11 @@
         <out-parameters>
             <parameter name="apiKey"/>
             <parameter name="embedProvider"/>
+            <!-- true: the GrowERP environment key, metered against the tenant's free allowance -->
+            <parameter name="systemKey" type="Boolean"/>
         </out-parameters>
         <actions>
+            <set field="systemKey" from="false"/>
             <entity-find-one entity-name="growerp.general.LlmConfig" value-field="llm">
                 <field-map field-name="ownerPartyId"/>
                 <field-map field-name="llmProvider" value="gemini"/>
@@ -34,6 +37,7 @@
                 <set field="embedProvider" value="openai"/>
                 <return/>
             </if>
+            <set field="systemKey" from="true"/>
             <set field="apiKey" from="System.getenv('GOOGLE_API_KEY') ?: System.getProperty('GOOGLE_API_KEY')"/>
             <if condition="apiKey">
                 <set field="embedProvider" value="gemini"/>
@@ -65,6 +69,13 @@
             </if>
             <if condition="!apiKey">
                 <return error="true" message="No embedding-capable API key configured for this company. Add a gemini or openai key in System Setup (Anthropic has no embeddings API)."/>
+            </if>
+            <if condition="systemKey">
+                <service-call name="AdkGovernanceServices.check#TokenAllowance" out-map="allowance"
+                    in-map="[ownerPartyId: ownerPartyId, llmProvider: embedProvider ?: 'gemini']"/>
+                <if condition="allowance.allowed == false">
+                    <return error="true" message="${allowance.message}"/>
+                </if>
             </if>
             <set field="embedProvider" from="embedProvider ?: 'gemini'"/>
             <script><![CDATA[
@@ -101,6 +112,14 @@
                 embedding = (embedProvider == 'openai') ? parsed?.data?.getAt(0)?.embedding : parsed?.embedding?.values
                 if (embedding == null) ec.message.addError("No embedding in response: ${resp?.take(200)}")
             ]]></script>
+            <!-- system key spend counts toward the tenant's allowance (~4 characters a token) -->
+            <if condition="systemKey &amp;&amp; embedding != null &amp;&amp; ownerPartyId">
+                <service-call name="create#moqui.adk.AdkActionLog" transaction="force-new"
+                    in-map="[ownerPartyId: ownerPartyId, serviceName: 'embed', toolName: embedProvider + ':' + model,
+                             verbClass: 'ai', decision: 'allowed', tokensIn: (text.length() / 4) as int,
+                             tokensOut: 0, tokensTotal: (text.length() / 4) as int,
+                             actionTime: ec.user.nowTimestamp]"/>
+            </if>
         </actions>
     </service>
 

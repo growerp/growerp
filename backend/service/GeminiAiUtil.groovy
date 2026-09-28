@@ -38,6 +38,9 @@ class GeminiAiUtil {
     static final String ANTHROPIC_VERSION = "2023-06-01"
     static final String OPENAI_URL = "https://api.openai.com/v1/chat/completions"
     static final int MAX_RETRIES = 3
+    // allowance weight of image and speech tokens: output priced ~10x / ~4x a text token
+    static final int IMAGE_TOKEN_WEIGHT = 10
+    static final int TTS_TOKEN_WEIGHT = 4
 
     /** Fallback house voice, used when the tenant left SystemSettings.writingStyle empty. */
     static final String DEFAULT_HOUSE_VOICE = """- Write as the founder, in the first person: "I" for the work, "we" for the project.
@@ -148,6 +151,12 @@ class GeminiAiUtil {
         String ownerPartyId = options.ownerPartyId as String
         Map modelConfig = resolveModelConfig(ec, ownerPartyId, options.model as String,
             options.provider as String)
+        // the tenant's model choice only applies to its own key: on the GrowERP system key a
+        // pricier model would cost many times more under the same free token allowance
+        if (!options.model && !hasOwnApiKey(ec, ownerPartyId, modelConfig.provider as String,
+                options.apiKey as String)) {
+            modelConfig = resolveModelConfig(ec, null)
+        }
         String model = modelConfig.model as String
         String provider = modelConfig.provider as String
         String apiKey = resolveApiKey(ec, ownerPartyId, provider, options.apiKey as String)
@@ -158,7 +167,7 @@ class GeminiAiUtil {
         if (hasOwnApiKey(ec, ownerPartyId, provider, options.apiKey as String)) {
             checkOwnAllowance(ec, ownerPartyId)
         } else {
-            checkMonthlyAllowance(ec, ownerPartyId)
+            checkMonthlyAllowance(ec, ownerPartyId, options.purpose as String)
         }
 
         ec.logger.info("Calling ${provider} API with model: ${model}")
@@ -194,7 +203,7 @@ class GeminiAiUtil {
         if (hasOwnApiKey(ec, ownerPartyId, "gemini", options.apiKey as String)) {
             checkOwnAllowance(ec, ownerPartyId)
         } else {
-            checkMonthlyAllowance(ec, ownerPartyId)
+            checkMonthlyAllowance(ec, ownerPartyId, options.purpose as String)
         }
         String model = ec.user.getPreference("GEMINI_TTS_MODEL") ?: System.getenv("GEMINI_TTS_MODEL") ?:
             DEFAULT_MODEL
@@ -216,7 +225,7 @@ class GeminiAiUtil {
         logUsage(ec, ownerPartyId, "gemini", model,
             [tokensIn: (usage?.promptTokenCount ?: 0) as int,
              tokensOut: (usage?.candidatesTokenCount ?: 0) as int,
-             tokensTotal: (usage?.totalTokenCount ?: 0) as int], options)
+             tokensTotal: (usage?.totalTokenCount ?: 0) as int], options, TTS_TOKEN_WEIGHT)
         return Base64.decoder.decode(audio)
     }
 
@@ -236,7 +245,7 @@ class GeminiAiUtil {
         if (hasOwnApiKey(ec, ownerPartyId, "gemini", options.apiKey as String)) {
             checkOwnAllowance(ec, ownerPartyId)
         } else {
-            checkMonthlyAllowance(ec, ownerPartyId)
+            checkMonthlyAllowance(ec, ownerPartyId, options.purpose as String)
         }
         String model = ec.user.getPreference("GEMINI_IMAGE_MODEL") ?: System.getenv("GEMINI_IMAGE_MODEL") ?:
             DEFAULT_MODEL
@@ -253,7 +262,7 @@ class GeminiAiUtil {
         logUsage(ec, ownerPartyId, "gemini", model,
             [tokensIn: (usage?.promptTokenCount ?: 0) as int,
              tokensOut: (usage?.candidatesTokenCount ?: 0) as int,
-             tokensTotal: (usage?.totalTokenCount ?: 0) as int], options)
+             tokensTotal: (usage?.totalTokenCount ?: 0) as int], options, IMAGE_TOKEN_WEIGHT)
         return Base64.decoder.decode(image)
     }
 
@@ -420,8 +429,14 @@ class GeminiAiUtil {
      * agent gate applies in growerp.100.AdkGovernanceServices.govern#AgentAction.
      * Not enforced for calls without a real tenant (system tasks, ownerPartyId '_NA_').
      */
-    private static void checkMonthlyAllowance(def ec, String ownerPartyId) {
-        if (!ownerPartyId || ownerPartyId == "_NA_") return
+    static void checkMonthlyAllowance(def ec, String ownerPartyId, String purpose = null) {
+        if (!ownerPartyId || ownerPartyId == "_NA_") {
+            // unmetered spend on the system key: make every remaining caller visible in the log
+            String caller = purpose
+            try { caller = caller ?: ec.artifactExecution.peek()?.getName() } catch (Throwable ignored) { }
+            ec.logger.warn("System key LLM call without a tenant, not metered: ${caller ?: 'unknown'}")
+            return
+        }
         // a per tenant override (Support app owner list) wins over the system wide default
         def settings = ec.entity.find("growerp.general.SystemSettings")
             .condition("ownerPartyId", ownerPartyId).one()
@@ -476,9 +491,11 @@ class GeminiAiUtil {
      * Record what this LLM call cost, so the Support app can show per tenant token use.
      * Guarded: a no-op when the moqui-adk component is absent, and never fails the caller.
      * Own transaction: the tokens are spent even when the calling service later rolls back.
+     * [weight] scales tokensTotal (what the allowance counts) for outputs priced above text;
+     * tokensIn/tokensOut stay the raw counts.
      */
-    private static void logUsage(def ec, String ownerPartyId, String provider, String model,
-            Map result, Map options) {
+    static void logUsage(def ec, String ownerPartyId, String provider, String model,
+            Map result, Map options, int weight = 1) {
         try {
             String artifactName = null
             try { artifactName = ec.artifactExecution.peek()?.getName() } catch (Throwable ignored) { }
@@ -488,7 +505,7 @@ class GeminiAiUtil {
                              toolName: "${provider}:${model}".toString(),
                              verbClass: "ai", decision: "allowed",
                              tokensIn: result.tokensIn ?: 0, tokensOut: result.tokensOut ?: 0,
-                             tokensTotal: result.tokensTotal ?: 0,
+                             tokensTotal: ((result.tokensTotal ?: 0) as long) * weight,
                              actionTime: ec.user.nowTimestamp])
                 .disableAuthz().requireNewTransaction(true).call()
         } catch (Throwable t) {

@@ -23,6 +23,7 @@
  * - scriptContent: The script text to convert to video
  * - voiceStyle: Voice style preference (not used yet - for TTS integration)
  * - videoStyle: Video style preference (professional, casual, animated)
+ * - ownerPartyId: tenant the AI spend is metered on
  *
  * Output variables:
  * - videoUrl: URL to the generated video
@@ -58,11 +59,19 @@ try {
     ec.logger.info("Successfully obtained Google Cloud access token")
     
     // Step 1: Extract video prompt from script using Gemini
-    def videoPrompt = extractVideoPromptFromScript(ec, scriptContent, videoStyle)
+    def videoPrompt = extractVideoPromptFromScript(ec, scriptContent, videoStyle, ownerPartyId)
     ec.logger.info("Generated video prompt: ${videoPrompt?.take(200)}...")
     
-    // Step 2: Call Veo 2 API to generate video
+    // Step 2: Call Veo 2 API to generate video, on the GrowERP GCP account: metered like the
+    // Gemini image calls (4 key frames, ~1290 tokens each)
+    def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
+    GeminiAiUtil.checkMonthlyAllowance(ec, ownerPartyId, 'course video frames')
     def veoResponse = callVeoApi(ec, accessToken, googleProjectId, googleLocation, videoPrompt)
+    if (!veoResponse.error) {
+        GeminiAiUtil.logUsage(ec, ownerPartyId, 'vertex', 'imagegeneration@006',
+            [tokensIn: 0, tokensOut: 4 * 1290, tokensTotal: 4 * 1290],
+            [purpose: 'course video frames'], GeminiAiUtil.IMAGE_TOKEN_WEIGHT)
+    }
     
     if (veoResponse.error) {
         throw new Exception("Veo API error: ${veoResponse.error}")
@@ -237,7 +246,7 @@ def getTokenFromServiceAccount(def ec, String credentialsFile) {
 /**
  * Extract a video generation prompt from the YouTube script.
  */
-def extractVideoPromptFromScript(def ec, String script, String style) {
+def extractVideoPromptFromScript(def ec, String script, String style, String ownerPartyId) {
     def styleDescription = getStyleDescription(style)
     
     def prompt = """
@@ -259,17 +268,17 @@ Focus on VISUAL descriptions only - no audio/narration elements.
 Return ONLY the prompt text, no explanations.
 """
     
-    return callGeminiApiDirect(ec, prompt)
+    return callGeminiApiDirect(ec, prompt, ownerPartyId)
 }
 
 /**
  * Call whichever LLM the tenant configured (gemini, anthropic or openai) through the shared
- * helper, which resolves provider, model and API key and retries on a 429. This service has no
- * ownerPartyId in scope, so resolution falls through to the system default and the environment.
+ * helper, which resolves provider, model and API key, meters the tenant and retries on a 429.
  */
-def callGeminiApiDirect(def ec, String prompt) {
+def callGeminiApiDirect(def ec, String prompt, String ownerPartyId) {
     def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
-    return GeminiAiUtil.callLlmApi(ec, prompt, [temperature: 0.7, maxOutputTokens: 500]) ?: ""
+    return GeminiAiUtil.callLlmApi(ec, prompt,
+        [ownerPartyId: ownerPartyId, temperature: 0.7, maxOutputTokens: 500]) ?: ""
 }
 
 /**
