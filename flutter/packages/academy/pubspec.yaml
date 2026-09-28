@@ -36,6 +36,7 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
+  msix: ^3.16.12
 
 # to run icons: dart run flutter_launcher_icons
 flutter_launcher_icons:
