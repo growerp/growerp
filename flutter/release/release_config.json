@@ -27,7 +27,7 @@
     "hotel": { "apple": "1531267095", "windows": "9ngphmvmwfj1" },
     "agents": { "apple": "6793362262", "windows": "9PHK5D4MHV0Q" },
     "marketing": { "apple": "6793362708", "windows": "9NJH32VW90KX" },
-    "academy": { "windows": "9MZ23R5J6BJF" }
+    "academy": { "apple": "6816830945", "windows": "9MZ23R5J6BJF" }
   },
   "bundleIds": {},
   "androidIds": { "agents": "org.growerp.agent" },
