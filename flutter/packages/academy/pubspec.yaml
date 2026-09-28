@@ -66,3 +66,14 @@ flutter:
     - packages/growerp_core/images/growerpDark100.png
 flutter_intl:
   enabled: true
+
+msix_config:
+  display_name: GrowERP-Academy
+  description: "Follow online courses with an AI tutor, exercises and progress tracking."
+  publisher: CN=68EEF479-7015-49FC-9C60-33E5A2EB731C
+  publisher_display_name: "AntWebsystems Co.,Ltd"
+  identity_name: AntWebsystemsCo.LTD.growerp-academy
+  msix_version: 1.16.29.0
+  logo_path: "assets/icon/icon.png"
+  capabilities: internetClient
+  store: true
