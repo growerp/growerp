@@ -69,6 +69,24 @@ while [ $ELAPSED -lt $TIMEOUT ]; do
 done
 [ $ELAPSED -ge $TIMEOUT ] && { echo "ERROR: Moqui not ready"; exit 1; }
 
+# CommonTest.login() fails on a backend where GROWERP is not set up yet.
+# Scenario A of the registration test bootstraps it, and skips itself when
+# GROWERP already exists (the next app in the same job).
+echo "Bootstrapping GROWERP ..."
+(
+  cd packages/growerp_core/example
+  if [ ! -d "linux" ]; then
+    flutter create --platforms=linux .
+  fi
+  flutter pub get
+  flutter test -d linux integration_test/registration_scenarios_test.dart \
+    --plain-name "A: first account on a new system becomes the GROWERP admin" \
+    --dart-define="BACKEND_URL=$BACKEND_URL" \
+    --dart-define="CHAT_URL=$CHAT_URL" \
+    --dart-define="SCREEN_WIDTH=$SCREEN_WIDTH" \
+    --dart-define="SCREEN_HEIGHT=$SCREEN_HEIGHT"
+) || { echo "ERROR: GROWERP bootstrap failed"; exit 1; }
+
 PKG_DIR="packages/${APP:-hotel}"
 # Use an absolute path so the test binary (which may run with a different CWD
 # than the invoking shell) always writes PNGs inside the volume mount.
