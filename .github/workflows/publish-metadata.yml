@@ -372,7 +372,9 @@ jobs:
         continue-on-error: true
 
       - name: Install ImageMagick
-        run: sudo apt-get install -y imagemagick -qq
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y imagemagick -qq
 
       - name: Extract Android screenshots from artifact
         run: |
@@ -500,7 +502,9 @@ jobs:
         continue-on-error: true
 
       - name: Install ImageMagick
-        run: sudo apt-get install -y imagemagick -qq
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y imagemagick -qq
 
       - name: Extract Windows screenshots
         run: |

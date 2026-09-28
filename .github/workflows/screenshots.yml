@@ -261,6 +261,7 @@ jobs:
         env:
           APPS_INPUT: ${{ needs.resolve-apps.outputs.apps }}
         run: |
+          sudo apt-get update -qq
           sudo apt-get install -y imagemagick -qq
           APPS="$APPS_INPUT"
           IFS=',' read -ra app_list <<< "$APPS"
