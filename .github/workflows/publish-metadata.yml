@@ -688,6 +688,14 @@ jobs:
 
           sub['listings'] = listings
 
+          # A never-published app clones a submission with applicationCategory
+          # 'NotSet', which the update rejects (400 InvalidParameterValue).
+          # Fill it from category.txt (e.g. Education, Business_AccountingAndFinance);
+          # an existing category set in Partner Center is left untouched.
+          category = read_field('category.txt')
+          if category and sub.get('applicationCategory') in (None, '', 'NotSet'):
+              sub['applicationCategory'] = category
+
           # A cloned submission from an app whose baseline never set this returns
           # 400 InvalidParameterValue on update. GrowERP ships a Desktop MSIX, so
           # default Desktop=True and leave the other families as-is/False.
