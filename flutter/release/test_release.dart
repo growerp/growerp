@@ -139,7 +139,8 @@ void main() async {
       'hotel',
       'support',
       'agents',
-      'marketing'
+      'marketing',
+      'academy'
     ];
     var foundApps = <String>[];
 

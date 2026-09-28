@@ -43,6 +43,10 @@ on:
         description: "Marketing App"
         type: boolean
         default: true
+      app_academy:
+        description: "Academy App"
+        type: boolean
+        default: false
       store_ios:
         description: "iOS App Store"
         type: boolean
@@ -92,6 +96,7 @@ jobs:
           [[ "${{ inputs.app_agents }}" == "true" ]] && APPS="${APPS}agents,"
           [[ "${{ inputs.app_rental }}" == "true" ]] && APPS="${APPS}rental,"
           [[ "${{ inputs.app_marketing }}" == "true" ]] && APPS="${APPS}marketing,"
+          [[ "${{ inputs.app_academy }}" == "true" ]] && APPS="${APPS}academy,"
           
           STORES=""
           [[ "${{ inputs.store_ios }}" == "true" ]] && STORES="${STORES}ios,"

@@ -1,0 +1,5 @@
+Learn at your own pace with GrowERP Academy. Browse the courses your school or company publishes, enrol, and work through each module with an AI tutor at your side.
+
+Sign in with the demo account supplied in the review information fields. The app connects to the public GrowERP demo backend automatically; no server configuration is required. After signing in, dismiss the onboarding dialog to reach My Courses — the menu then gives access to the course catalog and every area described in the listing. All data in the demo account is test data and may be changed freely.
+
+GrowERP is open source; the full source of this app is at https://github.com/growerp/growerp

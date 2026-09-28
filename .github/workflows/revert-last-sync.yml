@@ -18,6 +18,7 @@ on:
           - marketing
           - rental
           - agents
+          - academy
 
 concurrency:
   group: revert-last-sync

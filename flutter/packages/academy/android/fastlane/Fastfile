@@ -1,0 +1,63 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:android)
+
+platform :android do
+  desc "Runs all the tests"
+  lane :test do
+    gradle(task: "test")
+  end
+
+  desc "Deploy a new version to the Google Play"
+  lane :deploy do
+    gradle(task: "clean assembleRelease")
+    upload_to_play_store
+  end
+
+  lane :upload do #(after: flutter build appbundle)
+    # Adjust the `build_type` and `flavor` params as needed to build the right APK for your setup
+#    gradle(
+#      task: 'bundle',
+#      build_type: 'Release',
+#    )
+    upload_to_play_store(
+      track: 'beta',
+      skip_upload_changelogs: true,
+      skip_upload_screenshots: true,
+      skip_upload_aab: false,
+      aab: "../build/app/outputs/bundle/release/app-release.aab"
+      )
+    end
+
+  lane :upload_metadata do
+    # sync_image_upload deletes Play Store images that are not present locally,
+    # so the caller sets SKIP_PLAY_IMAGES when it has no screenshots to sync —
+    # otherwise an empty local dir would wipe the live listing's screenshots.
+    skip_images = ENV['SKIP_PLAY_IMAGES'] == 'true'
+    UI.important("SKIP_PLAY_IMAGES set — uploading listing text only") if skip_images
+    upload_to_play_store(
+      json_key:                ENV['GOOGLE_PLAY_JSON_KEY_FILE'],
+      track:                   'production',
+      skip_upload_aab:         true,
+      skip_upload_apk:         true,
+      skip_upload_metadata:    false,
+      skip_upload_changelogs:  true,
+      skip_upload_screenshots: skip_images,
+      skip_upload_images:      skip_images,
+      sync_image_upload:       !skip_images
+    )
+  end
+end

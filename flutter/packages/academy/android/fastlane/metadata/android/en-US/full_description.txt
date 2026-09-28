@@ -1,0 +1,16 @@
+Learn at your own pace with GrowERP Academy. Browse the courses your school or company publishes, enrol, and work through each module with an AI tutor at your side.
+
+Key Features:
+• Course catalog of every published course
+• My Courses: pick up exactly where you left off
+• AI tutor that answers questions about the lesson
+• Exercises and quizzes with instant feedback
+• Review sessions to keep what you learned
+• Lessons translated into your own language
+• Modules that unlock as you progress
+• Cohorts and discussions with fellow learners
+• Learning history and progress tracking
+
+Built for schools, training providers and companies that train their own staff. Course authors create and publish courses in GrowERP; learners follow them here on phone, tablet or desktop. GrowERP is open source and runs on the Moqui and Apache OFBiz business platforms — no licence fees, no lock-in.
+
+Accessible on Linux, Windows, macOS, iOS, Android, and web browsers. All synchronized in real-time.

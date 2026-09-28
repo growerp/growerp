@@ -7,6 +7,7 @@
     "support",
     "agents",
     "marketing",
+    "academy",
     "growerp-moqui"
   ],
   "storeApps": {
@@ -16,7 +17,8 @@
     "hotel": ["ios", "macos", "android", "windows", "snap"],
     "support": ["android", "snap"],
     "agents": ["ios", "macos", "android", "windows", "snap"],
-    "marketing": ["ios", "macos", "android", "windows", "snap"]
+    "marketing": ["ios", "macos", "android", "windows", "snap"],
+    "academy": ["ios", "macos", "android", "windows", "snap"]
   },
   "storeIds": {
     "admin": { "apple": "1545521755", "windows": "9nwx6kftjnql" },
