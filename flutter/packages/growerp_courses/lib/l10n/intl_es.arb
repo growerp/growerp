@@ -389,5 +389,9 @@
   "courses_restore": "Restaurar",
   "courses_mayBeOutdated": "Puede estar desactualizado: {title}",
   "courses_dismiss": "Descartar",
-  "courses_updateWithAi": "Actualizar con IA"
+  "courses_updateWithAi": "Actualizar con IA",
+  "courses_chooseSchool": "Elija su escuela",
+  "courses_searchHintSchools": "Buscar escuelas",
+  "courses_tableHdrSchool": "Escuela",
+  "courses_couldNotLoadSchools": "No se pudieron cargar las escuelas"
 }

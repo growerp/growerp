@@ -389,5 +389,9 @@
   "courses_restore": "恢复",
   "courses_mayBeOutdated": "可能已过时：{title}",
   "courses_dismiss": "忽略",
-  "courses_updateWithAi": "用 AI 更新"
+  "courses_updateWithAi": "用 AI 更新",
+  "courses_chooseSchool": "选择您的学校",
+  "courses_searchHintSchools": "搜索学校",
+  "courses_tableHdrSchool": "学校",
+  "courses_couldNotLoadSchools": "无法加载学校"
 }

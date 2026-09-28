@@ -218,6 +218,44 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="get" noun="AcademyDirectory" authenticate="anonymous-all">
+        <description>Public list of the schools a learner can join in the academy app: the main
+            company of every owner with at least one PUBLISHED course.</description>
+        <in-parameters>
+            <parameter name="searchString" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="companies" type="List" />
+        </out-parameters>
+        <actions>
+            <set field="companies" from="[]" />
+            <entity-find entity-name="growerp.course.Course" list="owners" distinct="true">
+                <econdition field-name="status" value="PUBLISHED" />
+                <econdition field-name="ownerPartyId" operator="is-not-null" />
+                <select-field field-name="ownerPartyId" />
+            </entity-find>
+            <iterate list="owners" entry="owner">
+                <entity-find entity-name="growerp.party.OwnerCompany" list="mains" limit="1">
+                    <econdition field-name="ownerPartyId" from="owner.ownerPartyId" />
+                    <econdition field-name="role" value="OrgInternal" />
+                </entity-find>
+                <if condition="!mains">
+                    <continue />
+                </if>
+                <if condition="searchString &amp;&amp;
+                    !mains[0].name?.toLowerCase()?.contains(searchString.toLowerCase())">
+                    <continue />
+                </if>
+                <service-call name="growerp.100.PartyServices100.get#PublicCompany"
+                    in-map="[companyPartyId: mains[0].partyId]" out-map="publicOut" />
+                <if condition="publicOut.company">
+                    <script>companies.add(publicOut.company)</script>
+                </if>
+            </iterate>
+            <script>companies.sort { it.name?.toLowerCase() }</script>
+        </actions>
+    </service>
+
     <service verb="get" noun="CourseCatalog">
         <description>Learner view of the courses: published ones only (staff also see drafts),
             lesson content gated by get#CourseAccess. With courseId returns that course.</description>

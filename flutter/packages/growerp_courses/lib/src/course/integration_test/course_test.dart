@@ -20,6 +20,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import '../../directory/school_directory.dart';
+
 /// Course authoring (admin) and learning (customer) steps for integration tests.
 class CourseTest {
   // ---------------------------------------------------------------- authoring
@@ -580,6 +582,32 @@ class CourseTest {
   static String currentCompanyPartyId(WidgetTester tester) {
     final context = tester.element(find.byType(Scaffold).first);
     return context.read<AuthBloc>().state.authenticate!.company!.partyId!;
+  }
+
+  /// The academy school directory lists the current company once it has a
+  /// published course: search it by name and pick it.
+  static Future<void> chooseSchoolInDirectory(WidgetTester tester) async {
+    final context = tester.element(find.byType(Scaffold).first);
+    final company = context.read<AuthBloc>().state.authenticate!.company!;
+    Company? chosen;
+    showDialog(
+      context: tester.element(find.byType(Navigator).last),
+      builder: (dialogContext) => Dialog(
+        key: const Key('schoolDirectoryDialog'),
+        child: SchoolDirectory(
+          onSelected: (school) {
+            chosen = school;
+            Navigator.of(dialogContext).pop();
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await CommonTest.enterText(tester, 'searchField', company.name!);
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+    expect(find.byKey(const Key('schoolName1')), findsNothing);
+    await CommonTest.tapByKey(tester, 'schoolName0');
+    expect(chosen?.partyId, company.partyId);
   }
 
   /// Registers a learner (Customer, outside user) of an existing company, as

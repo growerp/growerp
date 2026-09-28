@@ -59,10 +59,16 @@ Company? _unlessFirstTenant(Company company) {
 /// Returns null when nothing was found: the app then shows all companies.
 /// The company of the first tenant(GROWERP) is ignored the same way: its
 /// admin app is the public entry point where a visitor registers a new company.
+/// [allowFirstTenant] keeps it: in the academy app GROWERP is a school like any
+/// other, a learner joins it and never registers a company.
 Future<Company?> getStartupCompany(
   RestClient restClient, {
   List<String> args = const [],
+  bool allowFirstTenant = false,
 }) async {
+  Company? unlessFirstTenant(Company company) =>
+      allowFirstTenant ? company : _unlessFirstTenant(company);
+
   final String? provided =
       _fromArgs(args) ?? _fromUri(Uri.base) ?? await _fromDeepLink();
 
@@ -89,7 +95,7 @@ Future<Company?> getStartupCompany(
       final company = await restClient
           .getCompanyFromHost(Uri.base.host)
           .timeout(_startupTimeout);
-      return company.partyId == null ? null : _unlessFirstTenant(company);
+      return company.partyId == null ? null : unlessFirstTenant(company);
     } catch (e) {
       debugPrint('=== company for host: ${Uri.base.host} not found: $e');
       return null;
@@ -106,10 +112,23 @@ Future<Company?> getStartupCompany(
       return null;
     }
     debugPrint('=== startup company: ${company.name}[${company.partyId}]');
-    return _unlessFirstTenant(company);
+    return unlessFirstTenant(company);
   } catch (e) {
     debugPrint('=== getting company: $companyPartyId error: $e');
     return null;
+  }
+}
+
+/// Remember [companyPartyId] as the startup company of the next launches, or
+/// forget it when null, the same as a company provided at launch.
+Future<void> rememberStartupCompany(String? companyPartyId) async {
+  final prefs = await SharedPreferences.getInstance();
+  if (companyPartyId == null || companyPartyId.isEmpty) {
+    await prefs.remove(_prefKey);
+    GlobalConfiguration().updateValue('singleCompany', '');
+  } else {
+    await prefs.setString(_prefKey, companyPartyId);
+    GlobalConfiguration().updateValue('singleCompany', companyPartyId);
   }
 }
 

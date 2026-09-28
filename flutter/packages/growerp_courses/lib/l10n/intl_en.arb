@@ -1863,5 +1863,21 @@
   "courses_updateWithAi": "Update with AI",
   "@courses_updateWithAi": {
     "description": "Update with AI"
+  },
+  "courses_chooseSchool": "Choose your school",
+  "@courses_chooseSchool": {
+    "description": "Academy school directory: title"
+  },
+  "courses_searchHintSchools": "Search schools",
+  "@courses_searchHintSchools": {
+    "description": "Academy school directory: search hint"
+  },
+  "courses_tableHdrSchool": "School",
+  "@courses_tableHdrSchool": {
+    "description": "Academy school directory: column header"
+  },
+  "courses_couldNotLoadSchools": "Could not load the schools",
+  "@courses_couldNotLoadSchools": {
+    "description": "Academy school directory: load error"
   }
 }

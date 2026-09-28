@@ -48,8 +48,13 @@ Future main(List<String> args) async {
   WsClient notificationClient = WsClient('notws');
 
   // optional company: --companyPartyId= on the command line, ?companyPartyId=
-  // in the url, a deeplink or the singleCompany app_settings key
-  Company? company = await getStartupCompany(restClient, args: args);
+  // in the url, a deeplink or the singleCompany app_settings key.
+  // GROWERP is a school here too: a learner joins it, never registers a company.
+  Company? company = await getStartupCompany(
+    restClient,
+    args: args,
+    allowFirstTenant: true,
+  );
 
   runApp(
     AcademyApp(
@@ -93,11 +98,40 @@ class _AcademyAppState extends State<AcademyApp> {
   GoRouter? _splashRouter;
   GoRouter? _dynamicRouter;
   String? _dynamicRouterKey;
+  GoRouter? _directoryRouter;
+
+  /// The school the learner joins: without one registration would create a
+  /// new company, so the school directory is shown until one is chosen.
+  Company? _company;
 
   @override
   void initState() {
     super.initState();
+    _company = widget.company;
     _menuConfigBloc = MenuConfigBloc(widget.restClient, 'academy');
+  }
+
+  Future<void> _setCompany(Company? company) async {
+    await rememberStartupCompany(company?.partyId);
+    setState(() {
+      _company = company;
+      // TopApp is rebuilt for the new company: give it fresh routers too
+      _splashRouter = null;
+      _dynamicRouter = null;
+      _dynamicRouterKey = null;
+      _directoryRouter = null;
+    });
+  }
+
+  GoRouter _schoolDirectoryRouter() {
+    Widget directory(BuildContext context, GoRouterState state) =>
+        SchoolDirectory(onSelected: _setCompany);
+    return _directoryRouter ??= GoRouter(
+      routes: [
+        GoRoute(path: '/', builder: directory),
+        GoRoute(path: '/:path', builder: directory),
+      ],
+    );
   }
 
   @override
@@ -117,7 +151,9 @@ class _AcademyAppState extends State<AcademyApp> {
           GoRouter router;
 
           final menuConfiguration = state.menuConfiguration;
-          if (state.status == MenuConfigStatus.success &&
+          if (_company == null) {
+            router = _schoolDirectoryRouter();
+          } else if (state.status == MenuConfigStatus.success &&
               menuConfiguration != null) {
             final routerKey =
                 '${menuConfiguration.menuConfigurationId}_'
@@ -132,7 +168,6 @@ class _AcademyAppState extends State<AcademyApp> {
                   dashboardBuilder: () => const CourseViewer(courseId: ''),
                   widgetLoader: WidgetRegistry.getWidget,
                   appTitle: 'GrowERP Academy',
-
                 ),
               );
             }
@@ -159,6 +194,7 @@ class _AcademyAppState extends State<AcademyApp> {
           }
 
           return TopApp(
+            key: ValueKey(_company?.partyId),
             restClient: widget.restClient,
             applicationId: widget.applicationId,
             chatClient: widget.chatClient,
@@ -170,11 +206,16 @@ class _AcademyAppState extends State<AcademyApp> {
               CoursesLocalizations.delegate,
             ],
             extraBlocProviders: [
-              ...getUserCompanyBlocProviders(widget.restClient, widget.applicationId),
+              ...getUserCompanyBlocProviders(
+                widget.restClient,
+                widget.applicationId,
+              ),
               ...getCoursesBlocProviders(widget.restClient),
             ],
             widgetRegistrations: academyWidgetRegistrations,
             forceUpdateInfo: widget.forceUpdateInfo,
+            company: _company,
+            onChangeCompany: () => _setCompany(null),
           );
         },
       ),

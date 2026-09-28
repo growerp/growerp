@@ -38,6 +38,7 @@ export 'src/viewer/bloc/course_viewer_bloc.dart';
 
 // Views exports
 export 'src/course/views/course_list.dart';
+export 'src/directory/school_directory.dart';
 export 'src/course/views/course_dialog.dart';
 export 'src/course/views/course_detail.dart';
 export 'src/course/views/course_participants_view.dart';

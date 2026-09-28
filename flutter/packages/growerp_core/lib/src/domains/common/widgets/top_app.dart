@@ -31,6 +31,13 @@ import '../../../services/ws_client.dart';
 import '../../../styles/color_schemes.dart';
 import '../../domains.dart';
 
+/// Lets the login screen send the user back to a company chooser, see
+/// [TopApp.onChangeCompany].
+class ChangeCompany {
+  const ChangeCompany(this.change);
+  final VoidCallback change;
+}
+
 /// TopApp is the main application wrapper that provides all core functionality.
 class TopApp extends StatefulWidget {
   const TopApp({
@@ -48,11 +55,16 @@ class TopApp extends StatefulWidget {
     this.widgetRegistrations = const [],
     this.widgetMetadata = const [],
     this.forceUpdateInfo,
+    this.onChangeCompany,
   });
 
   final RestClient restClient;
   final String applicationId;
   final Company? company;
+
+  /// When set, the login screen offers to choose another company: an app
+  /// started for a company picked by the user(academy school) lets it go back.
+  final VoidCallback? onChangeCompany;
 
   final WsClient chatClient;
   final WsClient notificationClient;
@@ -224,6 +236,11 @@ class _TopAppState extends State<TopApp> {
         RepositoryProvider(create: (context) => widget.notificationClient),
         RepositoryProvider(create: (context) => widget.applicationId),
         RepositoryProvider(create: (context) => widget.company),
+        RepositoryProvider<ChangeCompany?>(
+          create: (context) => widget.onChangeCompany == null
+              ? null
+              : ChangeCompany(widget.onChangeCompany!),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [

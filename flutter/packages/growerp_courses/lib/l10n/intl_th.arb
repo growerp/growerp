@@ -389,5 +389,9 @@
   "courses_restore": "กู้คืน",
   "courses_mayBeOutdated": "อาจล้าสมัย: {title}",
   "courses_dismiss": "ปิด",
-  "courses_updateWithAi": "อัปเดตด้วย AI"
+  "courses_updateWithAi": "อัปเดตด้วย AI",
+  "courses_chooseSchool": "เลือกโรงเรียนของคุณ",
+  "courses_searchHintSchools": "ค้นหาโรงเรียน",
+  "courses_tableHdrSchool": "โรงเรียน",
+  "courses_couldNotLoadSchools": "ไม่สามารถโหลดโรงเรียนได้"
 }

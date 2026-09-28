@@ -1778,5 +1778,9 @@
   "myCourses": "My Courses",
   "@myCourses": {
     "description": "Menu item title: My Courses"
+  },
+  "chooseAnotherSchool": "Choose another school",
+  "@chooseAnotherSchool": {
+    "description": "Academy login screen: go back to the list of schools"
   }
 }

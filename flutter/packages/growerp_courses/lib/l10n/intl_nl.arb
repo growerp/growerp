@@ -389,5 +389,9 @@
   "courses_restore": "Herstellen",
   "courses_mayBeOutdated": "Mogelijk verouderd: {title}",
   "courses_dismiss": "Negeren",
-  "courses_updateWithAi": "Bijwerken met AI"
+  "courses_updateWithAi": "Bijwerken met AI",
+  "courses_chooseSchool": "Kies je school",
+  "courses_searchHintSchools": "Scholen zoeken",
+  "courses_tableHdrSchool": "School",
+  "courses_couldNotLoadSchools": "De scholen konden niet worden geladen"
 }

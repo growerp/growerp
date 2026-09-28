@@ -184,6 +184,12 @@ limitations under the License.
                 <service name="growerp.100.PartyServices100.get#PublicCompany" />
             </method>
         </resource>
+        <!-- public list of schools with published courses, for the academy app -->
+        <resource name="AcademyDirectory" require-authentication="anonymous-all">
+            <method type="get">
+                <service name="growerp.100.CourseServices100.get#AcademyDirectory" />
+            </method>
+        </resource>
         <!-- public subscription plan list for pricing pages -->
         <resource name="SubscriptionPlans" require-authentication="anonymous-all">
             <method type="get">

@@ -389,5 +389,9 @@
   "courses_restore": "Wiederherstellen",
   "courses_mayBeOutdated": "Möglicherweise veraltet: {title}",
   "courses_dismiss": "Verwerfen",
-  "courses_updateWithAi": "Mit KI aktualisieren"
+  "courses_updateWithAi": "Mit KI aktualisieren",
+  "courses_chooseSchool": "Wählen Sie Ihre Schule",
+  "courses_searchHintSchools": "Schulen suchen",
+  "courses_tableHdrSchool": "Schule",
+  "courses_couldNotLoadSchools": "Die Schulen konnten nicht geladen werden"
 }

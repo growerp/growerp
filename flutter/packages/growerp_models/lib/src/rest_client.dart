@@ -317,6 +317,12 @@ abstract class RestClient {
     @Query('companyPartyId') required String companyPartyId,
   });
 
+  @GET("rest/s1/growerp/100/AcademyDirectory")
+  @Extra({'noApiKey': true})
+  Future<Companies> getAcademyDirectory({
+    @Query('searchString') String? searchString,
+  });
+
   // company
   @GET("rest/s1/growerp/100/Company")
   Future<Companies> getCompany({

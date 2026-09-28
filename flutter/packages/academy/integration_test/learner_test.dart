@@ -104,6 +104,8 @@ void main() {
       lessonContent: 'Academy lesson body text',
     );
     final companyPartyId = CourseTest.currentCompanyPartyId(tester);
+    // with a published course it is a school learners can find
+    await CourseTest.chooseSchoolInDirectory(tester);
     await CommonTest.gotoMainMenu(tester);
     await CommonTest.logout(tester);
 

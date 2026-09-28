@@ -392,6 +392,20 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
                                         RegisterUserDialog(company == null),
                                       ),
                                     ),
+                                  if (company != null &&
+                                      context.read<ChangeCompany?>() != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 16),
+                                      child: TextButton(
+                                        key: const Key('changeCompanyButton'),
+                                        onPressed: context
+                                            .read<ChangeCompany?>()!
+                                            .change,
+                                        child: Text(
+                                          _localizations!.chooseAnotherSchool,
+                                        ),
+                                      ),
+                                    ),
                                   const SizedBox(height: 60),
                                 ],
                               ),

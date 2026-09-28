@@ -1356,5 +1356,6 @@
   },
   "onboarding": "入职",
   "leaveRequests": "请假申请",
-  "myCourses": "我的课程"
+  "myCourses": "我的课程",
+  "chooseAnotherSchool": "选择其他学校"
 }

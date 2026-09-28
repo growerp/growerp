@@ -1356,5 +1356,6 @@
   },
   "onboarding": "การปฐมนิเทศ",
   "leaveRequests": "คำขอลา",
-  "myCourses": "คอร์สเรียนของฉัน"
+  "myCourses": "คอร์สเรียนของฉัน",
+  "chooseAnotherSchool": "เลือกโรงเรียนอื่น"
 }
