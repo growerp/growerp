@@ -126,8 +126,11 @@ echo "Building moqui backend image..."
 (cd "$REPO_ROOT/moqui" && ./gradlew build getPostgresJdbc)
 (cd "$REPO_ROOT/moqui/docker/simple" && bash docker-build.sh ../.. growerp/growerp-moqui eclipse-temurin:21-jdk)
 
-# Start backend services (no emulator needed — tests run on Linux desktop)
-docker compose -f ci/docker-compose-test.yml down moqui 2>/dev/null || true
+# Start backend services (no emulator needed — tests run on Linux desktop).
+# Remove the database with its anonymous volume too, so every run starts from
+# the seed data like CI does: the registration scenario test bootstraps GROWERP
+# on a fresh database, and a kept database also misses newer seed data.
+docker compose -f ci/docker-compose-test.yml rm -sfv moqui moqui-database 2>/dev/null || true
 docker compose -f ci/docker-compose-test.yml up -d moqui-database moqui
 
 # Wait for moqui to be ready (check REST API)

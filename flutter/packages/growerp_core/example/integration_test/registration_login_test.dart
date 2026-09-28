@@ -25,7 +25,8 @@
 ///
 /// PREREQUISITES:
 /// 1. Moqui backend must be running with instance_purpose=dev
-/// 2. GrowERP owner account (test@example.com/qqqqqq9!) must exist
+/// 2. GROWERP must be set up: run registration_scenarios_test.dart first
+///    (CI does this before any other test)
 
 // ignore_for_file: depend_on_referenced_packages
 import 'package:core_example/router_builder.dart';

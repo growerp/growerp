@@ -43,7 +43,7 @@ ci/
 
 The entry point script `build_run_all_tests.sh` (in the parent `flutter/` directory):
 
-1. Starts the backend services (`moqui-database`, `moqui`) via Docker Compose
+1. Starts the backend services (`moqui-database`, `moqui`) via Docker Compose. It removes both containers first, including the database volume, so every run starts from the seed data, like CI
 2. Waits for Moqui to be ready (polling its `/status` endpoint)
 3. Launches the `sut` container to execute the tests
 
@@ -62,8 +62,8 @@ The `test/run_tests.sh` script inside the `sut` container:
 
 1. **Bootstraps the workspace** — ensures melos dependencies are resolved
 2. **Verifies Moqui connectivity** — polls `$BACKEND_URL/status`
-3. **Creates the initial GrowERP admin user** — on a fresh database, seed data creates the `GROWERP` owner party but no user accounts. The script calls the `Register` REST endpoint to create an admin user (`test0@example.com`) so that subsequent tests start from a known state.
-4. **Runs tests** via `xvfb-run` using one of three modes:
+3. **Runs the registration scenario test first** — `packages/growerp_core/example/integration_test/registration_scenarios_test.dart`. On a fresh database its first scenario registers the first user, who claims the seeded `GROWERP` owner, and completes the GROWERP setup. It then checks registration, first and second login for every app (see `docs/Registration_and_First_Login_Scenarios.md`). Every other test needs GROWERP set up, and `CommonTest.login()` fails on a backend where this test has not run
+4. **Runs the other tests** via `xvfb-run` using one of three modes:
    - **Single test file**: `TEST_FILE=path/to/test.dart`
    - **Package filter**: `PACKAGE_FILTER=catalog`
    - **All tests**: `melos run test-headless`

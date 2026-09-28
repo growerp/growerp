@@ -105,17 +105,42 @@ HTTP_CODE=$(curl -s --max-time 10 \
   -o /dev/null -w "%{http_code}")
 echo "Backend connectivity test: HTTP $HTTP_CODE"
 
-# NOTE: We deliberately do NOT pre-register an initial GrowERP admin here.
-# On a fresh database the GROWERP owner party exists (seed data) but has no
-# users, so the first test's createCompanyAndAdmin -> create#Tenant claims the
-# GROWERP owner and the Flutter login sequence completes its TenantSetup
-# (setup#MainOrganization creates the GROWERP root category). Pre-registering a
-# GROWERP admin here without completing setup would steal that first-registration
-# slot, leaving GROWERP's setup incomplete and its product/plan list empty.
+# The registration scenario test bootstraps the GROWERP owner on this fresh
+# backend (its scenario A: the first registration claims the seeded GROWERP
+# party and completes its setup), then checks registration and first/second
+# login for every app. Every other test depends on GROWERP being set up, and
+# CommonTest.login() fails on a backend where it is not, so it runs first.
+SCENARIO_TEST="packages/growerp_core/example/integration_test/registration_scenarios_test.dart"
+SCENARIO_EXIT=0
+run_scenarios_first() {
+  echo ""
+  echo "============================================================"
+  echo "=== Registration scenarios (bootstraps GROWERP)"
+  echo "============================================================"
+  (
+    cd "packages/growerp_core/example" || exit 1
+    if [ ! -d "linux" ]; then
+      flutter create --platforms=linux .
+    fi
+    flutter pub get
+    flutter test -d linux "integration_test/$(basename "$SCENARIO_TEST")" \
+      --dart-define=BACKEND_URL="$BACKEND_URL" \
+      --dart-define=CHAT_URL="$CHAT_URL" \
+      --dart-define=SCREEN_WIDTH="$SCREEN_WIDTH" \
+      --dart-define=SCREEN_HEIGHT="$SCREEN_HEIGHT"
+  )
+  SCENARIO_EXIT=$?
+  if [ $SCENARIO_EXIT -eq 0 ]; then
+    echo ">>> RESULT: registration_scenarios PASSED <<<"
+  else
+    echo ">>> RESULT: registration_scenarios FAILED <<<"
+  fi
+}
 
 # Run tests
 if [ -n "$TEST_FILE" ]; then
   echo "Running specific test file: $TEST_FILE"
+  [[ "$TEST_FILE" == *registration_scenarios_test* ]] || run_scenarios_first
 
   # Check if file exists, if not try to find it
   if [ ! -f "$TEST_FILE" ]; then
@@ -157,6 +182,7 @@ if [ -n "$TEST_FILE" ]; then
         --dart-define=SCREEN_WIDTH="$SCREEN_WIDTH" \
         --dart-define=SCREEN_HEIGHT="$SCREEN_HEIGHT"
     TEST_EXIT=$?
+    [ $SCENARIO_EXIT -ne 0 ] && TEST_EXIT=1
     cd - > /dev/null || true
   else
     echo "ERROR: Could not find package directory for test: $TEST_FILE"
@@ -177,6 +203,8 @@ elif [ -n "$PACKAGE_FILTER" ]; then
 
   FAILED_PACKAGES=()
   TEST_EXIT=0
+  run_scenarios_first
+  [ $SCENARIO_EXIT -ne 0 ] && { TEST_EXIT=1; FAILED_PACKAGES+=("registration_scenarios"); }
 
   for pkg_path in "${PACKAGES_WITH_TESTS[@]}"; do
     PKG_NAME=$(basename "$pkg_path")
@@ -201,6 +229,7 @@ elif [ -n "$PACKAGE_FILTER" ]; then
       for f in integration_test/*.dart; do
         grep -qE 'void main\(|main\(' "$f" || continue
         [[ "$f" == *demo* ]] && continue
+        [[ "$f" == *registration_scenarios_test* ]] && continue
         flutter test "$f" -d linux \
           --dart-define=BACKEND_URL="$BACKEND_URL" \
           --dart-define=CHAT_URL="$CHAT_URL" \
@@ -249,6 +278,8 @@ else
   TOTAL_IND_PASSED=0
   TOTAL_IND_FAILED=0
 
+  run_scenarios_first
+
   for pkg_path in "${PACKAGES_WITH_TESTS[@]}"; do
     PKG_NAME=$(basename "$pkg_path")
     PARENT_NAME=$(basename "$(dirname "$pkg_path")")
@@ -276,6 +307,7 @@ else
       for f in integration_test/*.dart; do
         grep -qE 'void main\(|main\(' "$f" || continue
         [[ "$f" == *demo* ]] && continue
+        [[ "$f" == *registration_scenarios_test* ]] && continue
         flutter test "$f" -d linux \
           --dart-define=BACKEND_URL="$BACKEND_URL" \
           --dart-define=CHAT_URL="$CHAT_URL" \
@@ -315,6 +347,11 @@ else
   echo "Packages failed  : ${#FAILED_PACKAGES[@]}"
   echo "Tests passed     : $TOTAL_IND_PASSED"
   echo "Tests failed     : $TOTAL_IND_FAILED"
+  if [ $SCENARIO_EXIT -eq 0 ]; then
+    echo "Registration scenarios: passed"
+  else
+    echo "Registration scenarios: FAILED"
+  fi
 
   if [ ${#FAILED_PACKAGES[@]} -gt 0 ]; then
     echo ""
@@ -331,7 +368,7 @@ else
     echo "All packages passed!"
   fi
 
-  [ ${#FAILED_PACKAGES[@]} -eq 0 ]
+  [ ${#FAILED_PACKAGES[@]} -eq 0 ] && [ $SCENARIO_EXIT -eq 0 ]
   TEST_EXIT=$?
 fi
 

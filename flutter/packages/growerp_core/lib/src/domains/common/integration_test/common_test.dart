@@ -106,6 +106,7 @@ class CommonTest {
     bool clear = false,
     String title = "Growerp testing...",
     String applicationId = 'AppAdmin',
+    Company? company,
     List<Map<String, GrowerpWidgetBuilder>> widgetRegistrations = const [],
   }) async {
     // Override the logical screen size when SCREEN_WIDTH / SCREEN_HEIGHT are
@@ -174,6 +175,7 @@ class CommonTest {
       TopApp(
         restClient: restClient,
         applicationId: applicationId,
+        company: company,
         chatClient: WsClient('chat'),
         notificationClient: WsClient('notws'),
         router: router,
@@ -342,34 +344,14 @@ class CommonTest {
           await doesExistKey(tester, 'companyName')) {
         debugPrint('Login: TenantSetupDialog detected, completing...');
 
-        // If the company name is already filled with 'GrowERP', this is the
-        // initial master-tenant setup (first tenant ever, backend has no
-        // users yet). GrowERP carries its own permanent seed demo data, so
-        // don't run the actual test against it: complete the bootstrap, log
-        // off, then register a genuinely new admin/tenant for the real test.
-        final existingCompanyName = getFormBuilderTextFieldByName(
-          tester,
-          'companyName',
-        );
-        if (existingCompanyName == 'GrowERP') {
-          debugPrint(
-            'Login: GrowERP tenant detected - clicking Complete Setup then creating a fresh tenant...',
+        // A company name prefilled with 'GrowERP' means the first tenant ever:
+        // the backend is fresh and GROWERP is not set up. That bootstrap is a
+        // test of its own, which CI runs before everything else.
+        if (getFormBuilderTextFieldByName(tester, 'companyName') == 'GrowERP') {
+          fail(
+            'Fresh backend: GROWERP is not set up yet. Run '
+            'growerp_core/example/integration_test/registration_scenarios_test.dart first.',
           );
-          await tester.tap(find.byKey(const Key('submit')));
-          await tester.pump();
-          int gWaitAttempts = 0;
-          while (await doesExistKey(tester, 'submit') && gWaitAttempts < 120) {
-            await tester.pump(const Duration(seconds: 1));
-            gWaitAttempts++;
-          }
-          // Log off so the initial GrowERP company is fully persisted
-          await logout(tester);
-          await tester.pumpAndSettle(const Duration(seconds: 2));
-          // Register a brand-new admin: GrowERP now has a user, so the
-          // backend allocates a real new tenant for this registration.
-          await _registerNewAdmin(tester);
-          await login(tester, testData: testData, demoData: demoData);
-          return;
         }
 
         await enterText(tester, 'companyName', companyName);
