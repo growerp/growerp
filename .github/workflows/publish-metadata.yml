@@ -630,14 +630,15 @@ jobs:
                       # A pending submission that can't be deleted means the app has an
                       # in-flight submission (e.g. first-time onboarding still in
                       # certification). Metadata can't be replaced until it goes live —
-                      # skip this app rather than fail the job.
+                      # fail the job so the skipped upload isn't hidden behind a green run.
                       print(f'Cannot delete pending submission {old_sub_id} '
                             f'(status {del_resp.status_code}): {del_resp.text}')
-                      print(f'::warning::Windows {app_name}: skipped — an in-progress '
+                      print(f'::error::Windows {app_name}: not uploaded — an in-progress '
                             'submission exists that was NOT created via the API (likely '
                             'started in the Partner Center dashboard). Delete that draft '
-                            'submission in Partner Center, then re-run this workflow.')
-                      exit(0)
+                            'submission in Partner Center (or wait until it is published), '
+                            'then re-run this workflow.')
+                      exit(1)
 
           # Create new submission (clones last published).
           # Do NOT send json={} — an empty body tells the API to clone from
