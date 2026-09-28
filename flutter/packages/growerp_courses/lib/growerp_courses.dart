@@ -33,6 +33,7 @@ export 'package:growerp_models/growerp_models.dart'
 
 // BLoC exports
 export 'src/course/bloc/course_bloc.dart';
+export 'src/learner/bloc/course_learner_bloc.dart';
 export 'src/media/bloc/course_media_bloc.dart';
 export 'src/viewer/bloc/course_viewer_bloc.dart';
 
@@ -42,7 +43,8 @@ export 'src/directory/school_directory.dart';
 export 'src/course/views/course_dialog.dart';
 export 'src/course/views/course_detail.dart';
 export 'src/course/views/course_participants_view.dart';
-export 'src/course/views/all_course_participants_view.dart';
+export 'src/learner/views/course_participant_list.dart';
+export 'src/learner/views/participant_dialog.dart';
 export 'src/course/views/course_catalog_view.dart';
 export 'src/course/views/course_payment_dialog.dart';
 

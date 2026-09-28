@@ -215,17 +215,6 @@ class CourseParticipantsFetch extends CourseEvent {
   List<Object?> get props => [courseId];
 }
 
-/// Fetch participants across ALL courses (admin overview, searchable)
-class CourseAllParticipantsFetch extends CourseEvent {
-  final String? searchString;
-  final bool refresh;
-
-  const CourseAllParticipantsFetch({this.searchString, this.refresh = false});
-
-  @override
-  List<Object?> get props => [searchString, refresh];
-}
-
 /// Subscribe current user to a course (with optional payment)
 class CourseSubscribe extends CourseEvent {
   final String courseId;

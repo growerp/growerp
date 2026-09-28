@@ -30,6 +30,70 @@ class CourseTest {
     await CommonTest.selectOption(tester, '/courses', 'addNew');
   }
 
+  // ------------------------------------------------------------ participants
+
+  static Future<void> selectParticipants(WidgetTester tester) async {
+    await CommonTest.selectOption(tester, '/participants', 'addNewParticipant');
+  }
+
+  /// Adds a person; the dialog stays open to assign courses.
+  static Future<void> addParticipant(
+    WidgetTester tester, {
+    required String firstName,
+    required String lastName,
+    required String email,
+  }) async {
+    await CommonTest.tapByKey(tester, 'addNewParticipant');
+    await CommonTest.enterText(tester, 'firstName', firstName);
+    await CommonTest.enterText(tester, 'lastName', lastName);
+    await CommonTest.enterText(tester, 'email', email);
+    await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
+    await CommonTest.waitForSnackbarToGo(tester);
+    await CommonTest.dragUntil(tester, key: 'assignCourse');
+  }
+
+  /// Changes the last name of the person in the open dialog.
+  static Future<void> updateParticipant(
+    WidgetTester tester, {
+    required String lastName,
+  }) async {
+    await CommonTest.enterText(tester, 'lastName', lastName);
+    await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
+    await CommonTest.waitForSnackbarToGo(tester);
+  }
+
+  /// Assigns a course in the open participant dialog.
+  static Future<void> assignCourse(WidgetTester tester, String title) async {
+    await CommonTest.enterDropDown(
+      tester,
+      'assignCourse',
+      title,
+      seconds: CommonTest.waitTime,
+    );
+    await CommonTest.waitForSnackbarToGo(tester);
+    await CommonTest.dragUntil(tester, key: 'learnerCourse0');
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('learnerCourse0')),
+        matching: find.text(title),
+      ),
+      findsOneWidget,
+    );
+  }
+
+  /// Removes a course in the open participant dialog, after confirming.
+  static Future<void> removeCourse(WidgetTester tester, int index) async {
+    await CommonTest.dragUntil(tester, key: 'removeCourse$index');
+    await CommonTest.tapByKey(tester, 'removeCourse$index');
+    await CommonTest.tapByKey(tester, 'continue', seconds: CommonTest.waitTime);
+    await CommonTest.waitForSnackbarToGo(tester);
+    expect(CommonTest.hasKey('learnerCourse$index'), false);
+  }
+
+  static Future<void> closeParticipant(WidgetTester tester) async {
+    await CommonTest.tapByKey(tester, 'cancel');
+  }
+
   /// Adds a course from the list; new courses start as draft.
   static Future<void> addCourse(
     WidgetTester tester, {

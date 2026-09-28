@@ -737,6 +737,78 @@ class CourseParticipants {
   Map<String, dynamic> toJson() => _$CourseParticipantsToJson(this);
 }
 
+/// A course a learner follows (admin view)
+@JsonSerializable()
+class CourseLearnerCourse {
+  final String? courseId;
+  final String? title;
+
+  /// paid: by a subscription on the course product, else by a progress record
+  final bool? paid;
+  final int? progressPercent;
+  @NullableTimestampConverter()
+  final DateTime? lastAccessDate;
+  @NullableTimestampConverter()
+  final DateTime? completedDate;
+
+  CourseLearnerCourse({
+    this.courseId,
+    this.title,
+    this.paid,
+    this.progressPercent = 0,
+    this.lastAccessDate,
+    this.completedDate,
+  });
+
+  factory CourseLearnerCourse.fromJson(Map<String, dynamic> json) =>
+      _$CourseLearnerCourseFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseLearnerCourseToJson(this);
+}
+
+/// A person following at least one course, with those courses (admin view)
+@JsonSerializable()
+class CourseLearner {
+  final String? partyId;
+  final String? pseudoId;
+  final String? userId;
+  final String? firstName;
+  final String? lastName;
+  final String? email;
+  final List<CourseLearnerCourse> courses;
+
+  CourseLearner({
+    this.partyId,
+    this.pseudoId,
+    this.userId,
+    this.firstName,
+    this.lastName,
+    this.email,
+    this.courses = const [],
+  });
+
+  String get fullName =>
+      [firstName, lastName].where((s) => s != null && s.isNotEmpty).join(' ');
+
+  factory CourseLearner.fromJson(Map<String, dynamic> json) =>
+      _$CourseLearnerFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseLearnerToJson(this);
+
+  @override
+  String toString() => 'CourseLearner($fullName - ${courses.length} courses)';
+}
+
+/// List wrapper for course learners
+@JsonSerializable()
+class CourseLearners {
+  final List<CourseLearner> learners;
+
+  CourseLearners({required this.learners});
+
+  factory CourseLearners.fromJson(Map<String, dynamic> json) =>
+      _$CourseLearnersFromJson(json);
+  Map<String, dynamic> toJson() => _$CourseLearnersToJson(this);
+}
+
 /// One AI generation run for a course (OUTLINE, LESSONS), polled for progress
 @JsonSerializable()
 class CourseAiJob {

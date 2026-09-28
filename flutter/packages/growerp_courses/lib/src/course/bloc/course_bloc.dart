@@ -56,7 +56,6 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     on<CourseSubscribe>(_onCourseSubscribe);
     on<CourseMediaGenerate>(_onMediaGenerate);
     on<CourseParticipantsFetch>(_onParticipantsFetch);
-    on<CourseAllParticipantsFetch>(_onAllParticipantsFetch);
     on<CourseSearchChanged>(
       _onCourseSearchChanged,
       transformer: courseSearchDebounce(),
@@ -477,34 +476,6 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         state.copyWith(
           status: CourseBlocStatus.success,
           participants: response.participants,
-        ),
-      );
-    } catch (e) {
-      emit(
-        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
-      );
-    }
-  }
-
-  Future<void> _onAllParticipantsFetch(
-    CourseAllParticipantsFetch event,
-    Emitter<CourseState> emit,
-  ) async {
-    try {
-      emit(state.copyWith(status: CourseBlocStatus.loading));
-
-      final response = await restClient.getAllCourseParticipants(
-        filter: event.searchString,
-        start: event.refresh ? 0 : state.allParticipants.length,
-        limit: 50,
-      );
-
-      emit(
-        state.copyWith(
-          status: CourseBlocStatus.success,
-          allParticipants: event.refresh
-              ? response.participants
-              : [...state.allParticipants, ...response.participants],
         ),
       );
     } catch (e) {

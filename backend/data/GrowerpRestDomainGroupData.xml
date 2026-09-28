@@ -121,6 +121,9 @@ The 28 anonymous-* resources bypass authz entirely and need no domain.
     <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_TRAINING"
         artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
         artifactName="/growerp/100/(AllCourseParticipants|CourseParticipants|GenerateVideo|CourseMedia|Courses|Course)(/.*)?"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_TRAINING"
+        artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
+        artifactName="/growerp/100/CourseLearner(/.*)?"/>
 
     <moqui.security.ArtifactGroup artifactGroupId="GROWERP_LEARNING"
         description="Taking courses: catalog, enrolment and progress (no authoring)"/>

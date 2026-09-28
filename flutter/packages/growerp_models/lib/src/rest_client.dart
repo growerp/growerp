@@ -2549,6 +2549,25 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/CourseSubscription")
   Future<dynamic> subscribeCourse({@Body() required Map<String, dynamic> data});
 
+  @GET("rest/s1/growerp/100/CourseLearner")
+  Future<CourseLearners> getCourseLearners({
+    @Query('search') String? search,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @POST("rest/s1/growerp/100/CourseLearner")
+  Future<dynamic> addCourseLearner({
+    @Field() required String partyId,
+    @Field() required String courseId,
+  });
+
+  @DELETE("rest/s1/growerp/100/CourseLearner")
+  Future<dynamic> removeCourseLearner({
+    @Field() required String partyId,
+    @Field() required String courseId,
+  });
+
   // ADK Agent Config endpoints
   @GET("rest/s1/growerp/100/AdkAgentConfig")
   Future<AdkAgentConfigs> getAdkAgentConfigs({@Query('search') String? search});

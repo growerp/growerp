@@ -50,6 +50,15 @@ const coursesMenuConfig = MenuConfiguration(
       isActive: true,
     ),
     MenuItem(
+      menuItemId: 'COURSES_PARTICIPANTS',
+      title: 'Participants',
+      route: '/participants',
+      iconName: 'people',
+      sequenceNum: 25,
+      widgetName: 'CourseParticipantList',
+      isActive: true,
+    ),
+    MenuItem(
       menuItemId: 'COURSES_MEDIA',
       title: 'Course Media',
       route: '/media',
@@ -90,6 +99,7 @@ GoRouter createCoursesExampleRouter() {
     dashboard: const CoursesDashboard(menuConfiguration: coursesMenuConfig),
     widgetBuilder: (route) => switch (route) {
       '/courses' => const CourseList(),
+      '/participants' => const CourseParticipantList(),
       '/media' => const CourseMediaList(courseId: null),
       '/catalog' => const CourseCatalogView(),
       '/myCourses' => const CourseViewer(courseId: ''),

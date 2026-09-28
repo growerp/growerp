@@ -1488,6 +1488,243 @@ limitations under the License.
     </service>
 
     <!-- ========================================================= -->
+    <!--  Course Learners (admin: persons and their courses)       -->
+    <!-- ========================================================= -->
+
+    <service verb="get" noun="CourseLearners">
+        <description>Admin: the persons following at least one course of the company, one entry
+            per person with their courses. A person follows a paid course (with a product) by an
+            active subscription on its product, a free course by a progress record.</description>
+        <in-parameters>
+            <parameter name="search" />
+            <parameter name="start" type="Integer" default="0" />
+            <parameter name="limit" type="Integer" default="50" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="learners" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find entity-name="growerp.course.Course" list="courseList">
+                <econdition field-name="ownerPartyId" />
+                <order-by field-name="title" />
+            </entity-find>
+            <!-- partyId: [partyId, courses: [...]] -->
+            <set field="learnerMap" from="new LinkedHashMap()" />
+            <iterate list="courseList" entry="course">
+                <if condition="course.productId">
+                    <entity-find entity-name="mantle.product.subscription.Subscription"
+                        list="subscriptionList">
+                        <econdition field-name="ownerPartyId" />
+                        <econdition field-name="productId" from="course.productId" />
+                        <econdition field-name="thruDate" operator="greater"
+                            from="ec.user.nowTimestamp" or-null="true" />
+                    </entity-find>
+                    <iterate list="subscriptionList" entry="subscription">
+                        <entity-find-one entity-name="moqui.security.UserAccount"
+                            value-field="userAccount">
+                            <field-map field-name="partyId" from="subscription.subscriberPartyId" />
+                        </entity-find-one>
+                        <set field="prog" from="null" />
+                        <if condition="userAccount">
+                            <entity-find-one entity-name="growerp.course.CourseProgress"
+                                value-field="prog">
+                                <field-map field-name="userId" from="userAccount.userId" />
+                                <field-map field-name="courseId" from="course.courseId" />
+                            </entity-find-one>
+                        </if>
+                        <set field="learner" from="learnerMap[subscription.subscriberPartyId]" />
+                        <if condition="!learner">
+                            <set field="learner"
+                                from="[partyId: subscription.subscriberPartyId, courses: []]" />
+                            <script>learnerMap[subscription.subscriberPartyId] = learner</script>
+                        </if>
+                        <if condition="!learner.courses.any { it.courseId == course.courseId }">
+                            <script>learner.courses.add([courseId: course.courseId,
+                                title: course.title, paid: true,
+                                progressPercent: prog?.progressPercent ?: 0,
+                                lastAccessDate: prog?.lastAccessDate,
+                                completedDate: prog?.completedDate])</script>
+                        </if>
+                    </iterate>
+                    <else>
+                        <entity-find entity-name="growerp.course.CourseProgress" list="progressList">
+                            <econdition field-name="courseId" from="course.courseId" />
+                        </entity-find>
+                        <iterate list="progressList" entry="prog">
+                            <entity-find-one entity-name="moqui.security.UserAccount"
+                                value-field="userAccount">
+                                <field-map field-name="userId" from="prog.userId" />
+                            </entity-find-one>
+                            <if condition="userAccount?.partyId">
+                                <set field="learner" from="learnerMap[userAccount.partyId]" />
+                                <if condition="!learner">
+                                    <set field="learner"
+                                        from="[partyId: userAccount.partyId, courses: []]" />
+                                    <script>learnerMap[userAccount.partyId] = learner</script>
+                                </if>
+                                <script>learner.courses.add([courseId: course.courseId,
+                                    title: course.title, paid: false,
+                                    progressPercent: prog.progressPercent ?: 0,
+                                    lastAccessDate: prog.lastAccessDate,
+                                    completedDate: prog.completedDate])</script>
+                            </if>
+                        </iterate>
+                    </else>
+                </if>
+            </iterate>
+            <set field="learners" from="[]" />
+            <set field="searchText" from="search?.trim()?.toLowerCase()" />
+            <iterate list="learnerMap.values()" entry="learner">
+                <entity-find-one entity-name="mantle.party.Party" value-field="party">
+                    <field-map field-name="partyId" from="learner.partyId" />
+                </entity-find-one>
+                <entity-find-one entity-name="mantle.party.Person" value-field="person">
+                    <field-map field-name="partyId" from="learner.partyId" />
+                </entity-find-one>
+                <entity-find-one entity-name="moqui.security.UserAccount" value-field="userAccount">
+                    <field-map field-name="partyId" from="learner.partyId" />
+                </entity-find-one>
+                <set field="learner.pseudoId" from="party?.pseudoId" />
+                <set field="learner.userId" from="userAccount?.userId" />
+                <set field="learner.firstName" from="person?.firstName ?: ''" />
+                <set field="learner.lastName" from="person?.lastName ?: ''" />
+                <set field="learner.email"
+                    from="userAccount?.emailAddress ?: userAccount?.username ?: ''" />
+                <if condition="!searchText || (learner.firstName + ' ' + learner.lastName + ' ' +
+                    learner.email + ' ' + learner.courses*.title.join(' ')).toLowerCase().contains(searchText)">
+                    <script>learners.add(learner)</script>
+                </if>
+            </iterate>
+            <order-map-list list="learners">
+                <order-by field-name="lastName" />
+                <order-by field-name="firstName" />
+            </order-map-list>
+            <set field="learners" from="learners.drop(start).take(limit)" />
+        </actions>
+    </service>
+
+    <service verb="add" noun="CourseLearner">
+        <description>Admin: assign a course to a person of the company. A paid course gets a
+            subscription on its product (granted, no payment), a free course a progress record,
+            which needs the person to have a login.</description>
+        <in-parameters>
+            <parameter name="partyId" required="true" />
+            <parameter name="courseId" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity">
+                <field-map field-name="courseId" />
+            </entity-find-one>
+            <entity-find-one entity-name="mantle.party.Party" value-field="party">
+                <field-map field-name="partyId" />
+            </entity-find-one>
+            <if condition="!courseEntity || courseEntity.ownerPartyId != ownerPartyId
+                || party?.ownerPartyId != ownerPartyId">
+                <return error="true" message="Course or person not found" />
+            </if>
+            <if condition="courseEntity.productId">
+                <entity-find entity-name="mantle.product.subscription.Subscription" list="existingSubs">
+                    <econdition field-name="ownerPartyId" />
+                    <econdition field-name="subscriberPartyId" from="partyId" />
+                    <econdition field-name="productId" from="courseEntity.productId" />
+                    <econdition field-name="thruDate" operator="greater"
+                        from="ec.user.nowTimestamp" or-null="true" />
+                </entity-find>
+                <if condition="existingSubs">
+                    <return error="true" message="Course already assigned to this person" />
+                </if>
+                <service-call name="create#mantle.product.subscription.Subscription"
+                    in-map="[ownerPartyId: ownerPartyId, subscriberPartyId: partyId,
+                        productId: courseEntity.productId, fromDate: ec.user.nowTimestamp]" />
+                <else>
+                    <entity-find-one entity-name="moqui.security.UserAccount" value-field="userAccount">
+                        <field-map field-name="partyId" />
+                    </entity-find-one>
+                    <if condition="!userAccount">
+                        <return error="true"
+                            message="This person has no login: add an email address first" />
+                    </if>
+                    <entity-find-one entity-name="growerp.course.CourseProgress"
+                        value-field="progressEntity">
+                        <field-map field-name="userId" from="userAccount.userId" />
+                        <field-map field-name="courseId" />
+                    </entity-find-one>
+                    <if condition="progressEntity">
+                        <return error="true" message="Course already assigned to this person" />
+                    </if>
+                    <!-- startedDate stays empty: due dates count from the first visit -->
+                    <service-call name="create#growerp.course.CourseProgress"
+                        in-map="[userId: userAccount.userId, courseId: courseId,
+                            completedLessons: '[]', progressPercent: 0]" />
+                </else>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="remove" noun="CourseLearner">
+        <description>Admin: take a course away from a person. A paid course ends the
+            subscription, a free course deletes the progress record.</description>
+        <in-parameters>
+            <parameter name="partyId" required="true" />
+            <parameter name="courseId" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity">
+                <field-map field-name="courseId" />
+            </entity-find-one>
+            <entity-find-one entity-name="mantle.party.Party" value-field="party">
+                <field-map field-name="partyId" />
+            </entity-find-one>
+            <if condition="!courseEntity || courseEntity.ownerPartyId != ownerPartyId
+                || party?.ownerPartyId != ownerPartyId">
+                <return error="true" message="Course or person not found" />
+            </if>
+            <if condition="courseEntity.productId">
+                <entity-find entity-name="mantle.product.subscription.Subscription"
+                    list="subscriptionList">
+                    <econdition field-name="ownerPartyId" />
+                    <econdition field-name="subscriberPartyId" from="partyId" />
+                    <econdition field-name="productId" from="courseEntity.productId" />
+                    <econdition field-name="thruDate" operator="greater"
+                        from="ec.user.nowTimestamp" or-null="true" />
+                </entity-find>
+                <if condition="!subscriptionList">
+                    <return error="true" message="Course not assigned to this person" />
+                </if>
+                <iterate list="subscriptionList" entry="subscription">
+                    <service-call name="update#mantle.product.subscription.Subscription"
+                        in-map="[subscriptionId: subscription.subscriptionId,
+                            thruDate: ec.user.nowTimestamp]" />
+                </iterate>
+                <else>
+                    <entity-find-one entity-name="moqui.security.UserAccount" value-field="userAccount">
+                        <field-map field-name="partyId" />
+                    </entity-find-one>
+                    <if condition="!userAccount">
+                        <return error="true" message="Course not assigned to this person" />
+                    </if>
+                    <entity-find entity-name="growerp.course.CourseProgress" list="progressList">
+                        <econdition field-name="userId" from="userAccount.userId" />
+                        <econdition field-name="courseId" />
+                    </entity-find>
+                    <if condition="!progressList">
+                        <return error="true" message="Course not assigned to this person" />
+                    </if>
+                    <iterate list="progressList" entry="prog">
+                        <entity-delete value-field="prog" />
+                    </iterate>
+                </else>
+            </if>
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
     <!--  AI Media Generation Service (delegates to Groovy)       -->
     <!-- ========================================================= -->
 

@@ -180,6 +180,8 @@ limitations under the License.
     <!-- ADMIN_COURSES children -->
     <growerp.menu.MenuItem menuItemId="ADMIN_COURSES_LIST" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_COURSES"
         title="Course List" iconName="list" widgetName="CourseList" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_COURSES_PARTICIPANTS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_COURSES"
+        title="Participants" iconName="people" widgetName="CourseParticipantList" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_COURSES_MEDIA" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_COURSES"
         title="Course Media" iconName="auto_awesome" widgetName="CourseMediaList" sequenceNum="30"/>
 
@@ -715,6 +717,8 @@ limitations under the License.
     <!-- Courses children -->
     <growerp.menu.MenuItem menuItemId="COURSES_EX_COURSES_LIST" menuConfigurationId="COURSES_EXAMPLE_DEFAULT" parentMenuItemId="COURSES_EX_COURSES"
         title="Course List" iconName="list" widgetName="CourseList" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="COURSES_EX_COURSES_PARTICIPANTS" menuConfigurationId="COURSES_EXAMPLE_DEFAULT" parentMenuItemId="COURSES_EX_COURSES"
+        title="Participants" iconName="people" widgetName="CourseParticipantList" sequenceNum="15"/>
     <growerp.menu.MenuItem menuItemId="COURSES_EX_COURSES_VIEWER" menuConfigurationId="COURSES_EXAMPLE_DEFAULT" parentMenuItemId="COURSES_EX_COURSES"
         title="Take a Course" iconName="school" widgetName="CourseViewer" sequenceNum="20"/>
 

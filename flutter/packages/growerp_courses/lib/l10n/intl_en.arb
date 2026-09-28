@@ -117,15 +117,6 @@
   "@courses_notStarted": {
     "description": "Extracted string: Not Started"
   },
-  "courses_lastActiveFmtparticipantlastaccessdate": "Last active: {fmtparticipantlastAccessDate}",
-  "@courses_lastActiveFmtparticipantlastaccessdate": {
-    "description": "Extracted string: Last active: ${_fmt(participant.lastAccessDate!)}",
-    "placeholders": {
-      "fmtparticipantlastAccessDate": {
-        "type": "String"
-      }
-    }
-  },
   "courses_courseDetail": "Course Detail",
   "@courses_courseDetail": {
     "description": "Extracted string: Course Detail"
@@ -1222,15 +1213,6 @@
   "@courses_searchParticipantsHint": {
     "description": "Search by name, email or course..."
   },
-  "courses_noResultsFor": "No results for \"{search}\"",
-  "@courses_noResultsFor": {
-    "description": "No results for \"{search}\"",
-    "placeholders": {
-      "search": {
-        "type": "String"
-      }
-    }
-  },
   "courses_subscriptionFailed": "Subscription failed",
   "@courses_subscriptionFailed": {
     "description": "Subscription failed"
@@ -1879,5 +1861,105 @@
   "courses_couldNotLoadSchools": "Could not load the schools",
   "@courses_couldNotLoadSchools": {
     "description": "Academy school directory: load error"
+  },
+  "courses_learnerNew": "New participant",
+  "@courses_learnerNew": {
+    "description": "Participant: course participant list, dialog title for a new person"
+  },
+  "courses_learnerEdit": "Participant",
+  "@courses_learnerEdit": {
+    "description": "Participant: dialog title for an existing person"
+  },
+  "courses_learnerAdd": "Add participant",
+  "@courses_learnerAdd": {
+    "description": "Participant list: add button tooltip"
+  },
+  "courses_firstName": "First name",
+  "@courses_firstName": {
+    "description": "Participant dialog: first name field"
+  },
+  "courses_lastName": "Last name",
+  "@courses_lastName": {
+    "description": "Participant dialog: last name field"
+  },
+  "courses_email": "Email",
+  "@courses_email": {
+    "description": "Participant dialog: email field, also the login name"
+  },
+  "courses_fieldRequired": "Required",
+  "@courses_fieldRequired": {
+    "description": "Participant dialog: a required field is empty"
+  },
+  "courses_invalidEmail": "Not a valid email address",
+  "@courses_invalidEmail": {
+    "description": "Participant dialog: email is not valid"
+  },
+  "courses_learnerCourses": "Courses",
+  "@courses_learnerCourses": {
+    "description": "Participant dialog: header of the assigned courses"
+  },
+  "courses_learnerAssignCourse": "Assign course",
+  "@courses_learnerAssignCourse": {
+    "description": "Participant dialog: dropdown to assign a course"
+  },
+  "courses_learnerNoCourses": "No courses assigned",
+  "@courses_learnerNoCourses": {
+    "description": "Participant dialog: no course assigned"
+  },
+  "courses_learnerSaveFirst": "Save the person first to assign courses",
+  "@courses_learnerSaveFirst": {
+    "description": "Participant dialog: courses can be assigned once the person is saved"
+  },
+  "courses_learnerRemoveTitle": "Remove course?",
+  "@courses_learnerRemoveTitle": {
+    "description": "Participant dialog: confirm removing a course"
+  },
+  "courses_learnerRemoveFree": "The progress in this course will be deleted.",
+  "@courses_learnerRemoveFree": {
+    "description": "Participant dialog: removing a free course deletes the progress"
+  },
+  "courses_learnerRemovePaid": "The subscription to this course ends today.",
+  "@courses_learnerRemovePaid": {
+    "description": "Participant dialog: removing a paid course ends the subscription"
+  },
+  "courses_remove": "Remove",
+  "@courses_remove": {
+    "description": "Participant dialog: remove button"
+  },
+  "courses_paid": "Paid",
+  "@courses_paid": {
+    "description": "Participant dialog: course followed by a subscription"
+  },
+  "courses_learnerAddSuccess": "Participant added",
+  "@courses_learnerAddSuccess": {
+    "description": "Participant list: person added"
+  },
+  "courses_learnerUpdateSuccess": "Participant updated",
+  "@courses_learnerUpdateSuccess": {
+    "description": "Participant list: person updated"
+  },
+  "courses_learnerCourseAssigned": "Course assigned",
+  "@courses_learnerCourseAssigned": {
+    "description": "Participant dialog: course assigned"
+  },
+  "courses_learnerCourseRemoved": "Course removed",
+  "@courses_learnerCourseRemoved": {
+    "description": "Participant dialog: course removed"
+  },
+  "courses_tableHdrName": "Name",
+  "@courses_tableHdrName": {
+    "description": "Participant list: column header"
+  },
+  "courses_tableHdrEmail": "Email",
+  "@courses_tableHdrEmail": {
+    "description": "Participant list: column header"
+  },
+  "courses_tableHdrCourses": "Courses",
+  "@courses_tableHdrCourses": {
+    "description": "Participant list: column header"
+  },
+  "courses_tableHdrProgress": "Progress",
+  "@courses_tableHdrProgress": {
+    "description": "Participant list: column header, average progress"
   }
 }

@@ -95,6 +95,22 @@ void main() {
     await CourseTest.addCourse(tester, title: 'Draft To Delete');
     await CourseTest.deleteCourse(tester, 'Draft To Delete');
 
+    // --- admin: a participant, assigned the course, changed, unassigned
+    await CourseTest.selectParticipants(tester);
+    await CourseTest.addParticipant(
+      tester,
+      firstName: 'Pat',
+      lastName: 'Learner',
+      email: 'pat${DateTime.now().millisecondsSinceEpoch}@example.com',
+    );
+    await CourseTest.assignCourse(tester, 'Test Course Updated');
+    await CourseTest.updateParticipant(tester, lastName: 'Student');
+    await CourseTest.removeCourse(tester, 0);
+    await CourseTest.assignCourse(tester, 'Test Course Updated');
+    await CourseTest.closeParticipant(tester);
+    expect(find.text('Pat Student'), findsOneWidget);
+    await CourseTest.selectCourses(tester);
+
     // --- admin: AI designs the outline, then writes the lessons
     await CourseTest.createCourseWithAi(
       tester,

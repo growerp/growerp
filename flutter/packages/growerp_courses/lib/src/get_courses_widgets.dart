@@ -14,8 +14,8 @@
 
 import 'package:growerp_core/growerp_core.dart';
 import 'course/views/course_list.dart';
-import 'course/views/all_course_participants_view.dart';
 import 'course/views/course_catalog_view.dart';
+import 'learner/views/course_participant_list.dart';
 import 'media/views/course_media_list.dart';
 import 'viewer/views/course_viewer.dart';
 
@@ -27,7 +27,7 @@ Map<String, GrowerpWidgetBuilder> getCoursesWidgets() {
         CourseViewer(courseId: args?['courseId'] as String? ?? ''),
     'CourseMediaList': (args) =>
         CourseMediaList(courseId: args?['courseId'] as String?),
-    'AllCourseParticipantsView': (args) => const AllCourseParticipantsView(),
+    'CourseParticipantList': (args) => const CourseParticipantList(),
     'CourseCatalogView': (args) => CourseCatalogView(),
   };
 }
@@ -49,6 +49,13 @@ List<WidgetMetadata> getCoursesWidgetsWithMetadata() {
       keywords: ['viewer', 'player', 'lesson', 'progress'],
       builder: (args) =>
           CourseViewer(courseId: args?['courseId'] as String? ?? ''),
+    ),
+    WidgetMetadata(
+      widgetName: 'CourseParticipantList',
+      description: 'Course participants and their assigned courses',
+      iconName: 'people',
+      keywords: ['participant', 'learner', 'student', 'enrollment'],
+      builder: (args) => const CourseParticipantList(),
     ),
     WidgetMetadata(
       widgetName: 'CourseMediaList',

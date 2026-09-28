@@ -12,56 +12,65 @@
  * limitations under the License.
  */
 
-part of 'course_bloc.dart';
+part of 'course_learner_bloc.dart';
 
-enum CourseBlocStatus { initial, loading, success, failure }
+enum CourseLearnerStatus { initial, loading, success, failure }
 
-class CourseState extends Equatable {
-  final CourseBlocStatus status;
+class CourseLearnerState extends Equatable {
+  final CourseLearnerStatus status;
+  final List<CourseLearner> learners;
+
+  /// the courses of the company, to assign from
   final List<Course> courses;
-  final Course? selectedCourse;
-  final List<CourseParticipant> participants;
+
+  /// the learner last created or changed, shown in the open dialog
+  final CourseLearner? selected;
   final String? message;
   final bool hasReachedMax;
+  final String searchString;
 
-  const CourseState({
-    this.status = CourseBlocStatus.initial,
+  const CourseLearnerState({
+    this.status = CourseLearnerStatus.initial,
+    this.learners = const [],
     this.courses = const [],
-    this.selectedCourse,
-    this.participants = const [],
+    this.selected,
     this.message,
     this.hasReachedMax = false,
+    this.searchString = '',
   });
 
-  CourseState copyWith({
-    CourseBlocStatus? status,
+  CourseLearnerState copyWith({
+    CourseLearnerStatus? status,
+    List<CourseLearner>? learners,
     List<Course>? courses,
-    Course? selectedCourse,
-    List<CourseParticipant>? participants,
+    CourseLearner? selected,
     String? message,
     bool? hasReachedMax,
+    String? searchString,
   }) {
-    return CourseState(
+    return CourseLearnerState(
       status: status ?? this.status,
+      learners: learners ?? this.learners,
       courses: courses ?? this.courses,
-      selectedCourse: selectedCourse ?? this.selectedCourse,
-      participants: participants ?? this.participants,
+      selected: selected ?? this.selected,
       message: message,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+      searchString: searchString ?? this.searchString,
     );
   }
 
   @override
   List<Object?> get props => [
     status,
+    learners,
     courses,
-    selectedCourse,
-    participants,
+    selected,
     message,
     hasReachedMax,
+    searchString,
   ];
 
   @override
   String toString() =>
-      'CourseState(status: $status, courses: ${courses.length})';
+      'CourseLearnerState(status: $status, learners: ${learners.length})';
 }
