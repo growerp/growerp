@@ -53,12 +53,21 @@ dev_dependencies:
   msix: ^3.16.12
 
 flutter_launcher_icons:
-  android: launcher_icon
+  android: "launcher_icon"
   ios: true
-  image_path: "assets/images/launcher_icon.png"
+  image_path: "assets/icon/icon.png"
+  remove_alpha_ios: true
+  min_sdk_android: 21
   macos:
     generate: true
-    image_path: "assets/images/launcher_icon.png"
+    image_path: "assets/icon/icon.png"
+  web:
+    generate: true
+    image_path: "assets/icon/icon.png"
+  windows:
+    generate: true
+    image_path: "assets/icon/icon.png"
+    icon_size: 256
 
 msix_config:
   display_name: GrowERP-Hotel
@@ -67,7 +76,7 @@ msix_config:
   publisher_display_name: "AntWebsystems Co.,Ltd"
   identity_name: AntWebsystemsCo.LTD.GrowERP-Hotel
   msix_version: 1.16.17.0
-  logo_path: "assets/images/launcher_icon.png"
+  logo_path: "assets/icon/icon.png"
   capabilities: internetClient
   store: true
 
