@@ -867,6 +867,15 @@ limitations under the License.
                     </iterate>
                 </if>
             </if>
+            <!-- the website lists free courses first -->
+            <entity-find entity-name="mantle.product.ProductPrice" list="paidPriceList">
+                <econdition field-name="productId" />
+                <econdition field-name="pricePurposeEnumId" value="PppPurchase" />
+                <econdition field-name="priceTypeEnumId" operator="in" from="['PptCurrent', 'PptList']" />
+                <econdition field-name="price" operator="greater" from="0" />
+                <date-filter />
+            </entity-find>
+            <set field="sequenceNum" from="paidPriceList ? 2 : 1" type="Long" />
             <set field="categoryList"
                 from="(rootList ? [rootList[0]] : []) + (coursesList ? [coursesList[0]] : [])" />
             <iterate list="categoryList" entry="category">
@@ -879,7 +888,15 @@ limitations under the License.
                 <if condition="published &amp;&amp; !memberList">
                     <service-call name="create#mantle.product.category.ProductCategoryMember"
                         in-map="[productCategoryId: category.productCategoryId, productId: productId,
-                            fromDate: ec.user.nowTimestamp]" />
+                            fromDate: ec.user.nowTimestamp, sequenceNum: sequenceNum]" />
+                </if>
+                <if condition="published">
+                    <iterate list="memberList" entry="member">
+                        <if condition="member.sequenceNum != sequenceNum">
+                            <set field="member.sequenceNum" from="sequenceNum" />
+                            <entity-update value-field="member" />
+                        </if>
+                    </iterate>
                 </if>
                 <if condition="!published">
                     <iterate list="memberList" entry="member">

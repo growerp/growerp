@@ -757,8 +757,12 @@ along with this software (see the LICENSE.md file). If not, see
 
             <!-- get entire cached list then paginate, for huge numbers of products in a category
             this is a bad approach (such sites should probably be purely search based) -->
+            <!-- the category screen passes 'default', which is no field: sort by sequence, then name -->
+            <if condition="!orderBy || orderBy == 'default'">
+                <set field="orderBy" value="sequenceNum,productName" />
+            </if>
             <!-- use the name 'productList' so pagination out-parameters are created automatically -->
-            <entity-find entity-name="mantle.product.category.ProductCategoryMember"
+            <entity-find entity-name="mantle.product.category.ProductCategoryMemberProduct"
                 list="productList" cache="true">
                 <search-form-inputs default-order-by="${orderBy}" />
                 <date-filter />

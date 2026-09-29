@@ -1425,4 +1425,350 @@ Answer these questions, then check them against the lessons.
 Continue with **Requirements Gathering for ERP**, the second course of the ERP Implementation Engineer curriculum.]]></content>
     </growerp.course.CourseLesson>
 
+    <!-- ═══════════════════════════════════════════════════
+         GETTING STARTED WITH GROWERP: free course for end users of the Admin app,
+         listed first on the website (free courses come first, see sync#CourseProduct)
+    ═══════════════════════════════════════════════════ -->
+    <mantle.product.Product productId="ProductCourseGettingStarted" pseudoId="getting-started" productTypeEnumId="PtService"
+        productName="Getting Started with GrowERP"
+        ownerPartyId="GROWERP" requireInventory="N" />
+    <mantle.product.ProductContent productContentId="ProductCourseGettingStartedImg" productId="ProductCourseGettingStarted"
+        productContentTypeEnumId="PcntImageMedium" fromDate="1790000000000"
+        contentLocation="component://PopRestStore/screen/store/assets/courses/getting-started.png" />
+    <mantle.product.ProductContent productContentId="ProductCourseGettingStartedImgSmall" productId="ProductCourseGettingStarted"
+        productContentTypeEnumId="PcntImageSmall" fromDate="1790000000000"
+        contentLocation="component://PopRestStore/screen/store/assets/courses/getting-started.png" />
+
+    <growerp.course.Course courseId="CourseGettingStarted" coverImageUrl="/assets/courses/getting-started.png" pseudoId="getting-started" ownerPartyId="GROWERP"
+        productId="ProductCourseGettingStarted"
+        title="Getting Started with GrowERP"
+        description="A free, hands-on introduction for everyone who runs a business with GrowERP. Register your company, find your way around the Admin app, set up your company and team, add products and customers, and follow your first sale from order to payment. You finish with a working company, the reports that show how it is doing and an AI assistant that helps you along."
+        objectives="Register and set up your company in GrowERP, add products, customers and users, take a sales order through shipment and payment, and read your revenue and balance sheet."
+        status="PUBLISHED" difficulty="BEGINNER" estimatedDuration="165" />
+
+    <!-- Module 1: First Steps -->
+    <growerp.course.CourseModule moduleId="GetStartMod01" courseId="CourseGettingStarted"
+        title="First Steps"
+        description="Create your company, log in and find your way around the app."
+        sequenceNum="1" estimatedDuration="40" />
+
+    <growerp.course.CourseLesson lessonId="GetStartLess0101" moduleId="GetStartMod01"
+        courseId="CourseGettingStarted"
+        title="Register Your Company"
+        keyPoints='["Register a new company and its admin user in the Admin app", "Your password is sent to you by email", "The trial is free for two weeks, no credit card required", "Tick demo data to practise on ready-made products and customers"]'
+        sequenceNum="1" estimatedDuration="15">
+        <content><![CDATA[## Your Own Company in a Few Minutes
+
+GrowERP runs in the browser and as an app on your phone, tablet or desktop. Every business gets its **own company**, with its own data, users and settings.
+
+### Register
+1. Open the **GrowERP Admin** app: in your browser via the GrowERP website (**Start Free Trial**), or install it from the app store.
+2. Choose **Register new company and admin**.
+3. Enter your company name, your own name and your email address.
+4. After registering you receive an email with your **password**.
+
+### The trial
+- You can use GrowERP **free for two weeks**. No credit card is required during the trial.
+- The app shows how many days of the trial are left. Before it ends you choose a plan to continue.
+
+### Demo data
+When you set up your company you are asked whether to **generate demo data**. Say yes when you want to practise first: products, customers, suppliers and orders are created for you in a minute or so. You can continue without it too, and add your own data from the start.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="GetStartLess0102" moduleId="GetStartMod01"
+        courseId="CourseGettingStarted"
+        title="Log In and Your First Look"
+        keyPoints='["Log in with your email address and the emailed password", "A welcome appears on your first login only", "Use Forgot password? when you lose your password", "Logout is at the bottom of the menu"]'
+        sequenceNum="2" estimatedDuration="10">
+        <content><![CDATA[## Logging In
+
+1. Open the app and choose **Login**.
+2. Enter your email address and the password from the email.
+3. Change the password when you are asked to: pick one only you know.
+
+### Your first login
+The first time you log in you get a short **welcome**, with how long your trial lasts, and a few questions about your business. They appear only once.
+
+### Forgot your password?
+Choose **Forgot password?** on the login screen and a new one is sent to your email address.
+
+### Logging out
+On a shared computer always **log out** when you are done. You find it in the menu.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="GetStartLess0103" moduleId="GetStartMod01"
+        courseId="CourseGettingStarted"
+        title="The Dashboard and the Menu"
+        keyPoints='["The main dashboard shows a tile for every part of the system", "On a phone the menu opens from the top left, on a wide screen it is always on the left", "Most menu items have tabs along the top", "The same screens work in the browser, on a phone and on the desktop"]'
+        sequenceNum="3" estimatedDuration="15">
+        <content><![CDATA[## Finding Your Way Around
+
+After logging in you land on the **Main Dashboard**. It shows a tile for each part of the system, often with a count, such as open orders or unpaid invoices. Tap a tile to go there.
+
+### The menu
+- On a **phone** the menu opens with the menu button at the top left.
+- On a **tablet or computer** the menu is always visible along the left side.
+
+The main menu items of the Admin app:
+
+| Menu | What you do there |
+|---|---|
+| **CRM** | Leads, customers, opportunities and your to-do list |
+| **Organization** | Your company details, employees and security |
+| **Catalog** | Products, categories and subscriptions |
+| **Orders** | Sales orders, purchase orders, customers and suppliers |
+| **Inventory** | Outgoing and incoming shipments, warehouse locations |
+| **Acct Sales / Acct Purchase** | Invoices and payments |
+| **Acct Reports** | Revenue/expenses and balance sheet |
+| **System Setup** | Email, AI and setup guides |
+
+### Tabs
+Most menu items open a screen with **tabs** at the top, for example Orders has tabs for sales orders, customers, purchase orders and suppliers.
+
+### Lists and details
+Every list works the same way: **search** at the top, **tap a row** to open its details, and use the **+** button to add a new one.]]></content>
+    </growerp.course.CourseLesson>
+
+    <!-- Module 2: Your Company -->
+    <growerp.course.CourseModule moduleId="GetStartMod02" courseId="CourseGettingStarted"
+        title="Your Company and Team"
+        description="Complete your company details and invite the people you work with."
+        sequenceNum="2" estimatedDuration="30" />
+
+    <growerp.course.CourseLesson lessonId="GetStartLess0201" moduleId="GetStartMod02"
+        courseId="CourseGettingStarted"
+        title="Company Details"
+        keyPoints='["Organization > Company holds your company details", "Add address, phone, email and your logo", "They appear on your orders and invoices", "Check the currency before you create orders"]'
+        sequenceNum="1" estimatedDuration="15">
+        <content><![CDATA[## Make It Your Company
+
+Open **Organization** in the menu, tab **Company**.
+
+### Fill in
+- **Name**, **email address** and **telephone number**.
+- **Address**: used on your orders and invoices.
+- **Logo**: upload your logo so documents and the app carry your brand.
+- **Currency**: the currency your prices, orders and accounts are in. Check it before you create your first order.
+
+Press **Update** to save.
+
+### Why this matters
+Customers see these details on every order confirmation and invoice you send them. Take five minutes to get them right now and every document afterwards looks professional.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="GetStartLess0202" moduleId="GetStartMod02"
+        courseId="CourseGettingStarted"
+        title="Add Your Team"
+        keyPoints='["Add colleagues under Organization > Employees", "Each user logs in with their own email address", "The user group decides what someone may see and change", "Remove access when someone leaves"]'
+        sequenceNum="2" estimatedDuration="15">
+        <content><![CDATA[## Working Together
+
+Everybody gets their **own login**: you then see who did what, and you decide what each person may do.
+
+### Add a user
+1. Open **Organization**, tab **Employees**.
+2. Press **+** and enter first name, last name and email address.
+3. Choose the **user group**:
+   - **Admin**: everything, including settings and users.
+   - **Employee**: the daily work, without the company settings.
+4. Save. The new user receives an email with a password.
+
+### When someone leaves
+Open the user and remove their login access, so the history of their work is kept but they can no longer log in.
+
+### Tip
+Give admin rights to as few people as possible. Most people only need employee access.]]></content>
+    </growerp.course.CourseLesson>
+
+    <!-- Module 3: Products and Contacts -->
+    <growerp.course.CourseModule moduleId="GetStartMod03" courseId="CourseGettingStarted"
+        title="Products and Contacts"
+        description="Enter what you sell and who you sell to or buy from."
+        sequenceNum="3" estimatedDuration="30" />
+
+    <growerp.course.CourseLesson lessonId="GetStartLess0301" moduleId="GetStartMod03"
+        courseId="CourseGettingStarted"
+        title="Products and Categories"
+        keyPoints='["Catalog > Products holds everything you sell or buy", "A product has a name, a price and optionally a picture", "Services need no stock, physical goods do", "Categories group products, also on your website"]'
+        sequenceNum="1" estimatedDuration="15">
+        <content><![CDATA[## What You Sell
+
+Open **Catalog**, tab **Products**, and press **+**.
+
+### The main fields
+- **Name** and **description**: what the customer sees on orders and on your website.
+- **Price**: the normal selling price. You can still change it on an order.
+- **Picture**: optional, used in the app and on your website.
+- **Product type**: a **physical good** is kept in stock and shipped; a **service** (hours, a subscription, a course) is not.
+
+### Categories
+Use the **Categories** tab to group products, for example "Coffee" and "Tea". Categories help you find products and structure your website shop.
+
+### Tip
+Start with your ten best-selling products. You can add the rest later, or import them from a spreadsheet.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="GetStartLess0302" moduleId="GetStartMod03"
+        courseId="CourseGettingStarted"
+        title="Customers and Suppliers"
+        keyPoints='["Customers and suppliers are in Orders, tabs customers and suppliers", "A customer can be a company or a private person", "Leads in CRM become customers when they buy", "One record per company, with its contact persons"]'
+        sequenceNum="2" estimatedDuration="15">
+        <content><![CDATA[## Who You Work With
+
+### Customers
+Open **Orders**, tab **customers**, and press **+**.
+- For a **business customer** enter the company and the contact person. Invoices are addressed to the company.
+- For a **private customer** only the person is needed.
+- Add an email address: it is used to send order confirmations and invoices.
+
+### Suppliers
+The **suppliers** tab works the same way, for the companies you buy from.
+
+### Leads
+Not a customer yet? Add them in **CRM**, tab **leads**. Keep track of your contacts and to-dos there; when they place their first order they become a customer.
+
+### Tip
+Search before you add: one record per company keeps all its orders and invoices together.]]></content>
+    </growerp.course.CourseLesson>
+
+    <!-- Module 4: Your First Sale -->
+    <growerp.course.CourseModule moduleId="GetStartMod04" courseId="CourseGettingStarted"
+        title="Your First Sale"
+        description="Take a sales order all the way to delivery and payment, and see the purchase side."
+        sequenceNum="4" estimatedDuration="40" />
+
+    <growerp.course.CourseLesson lessonId="GetStartLess0401" moduleId="GetStartMod04"
+        courseId="CourseGettingStarted"
+        title="Create and Approve a Sales Order"
+        keyPoints='["Orders > sales orders, then + for a new order", "Pick the customer, add products and quantities", "An order starts in preparation, approving it confirms it", "Approving creates the follow-up documents for you"]'
+        sequenceNum="1" estimatedDuration="15">
+        <content><![CDATA[## Taking an Order
+
+1. Open **Orders**, tab **sales orders**, and press **+**.
+2. Select the **customer**.
+3. Add the **products** with quantity; the price is filled in from the product and can be changed.
+4. Check the total and save. The order is now **in preparation**: you can still change it.
+
+### Approve
+When the customer confirms, **approve** the order. GrowERP then prepares the follow-up documents for you:
+- a **shipment** for physical products,
+- an **invoice** and a **payment** to be received.
+
+You do not have to type anything twice: everything comes from the order.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="GetStartLess0402" moduleId="GetStartMod04"
+        courseId="CourseGettingStarted"
+        title="Ship, Invoice and Get Paid"
+        keyPoints='["Inventory > Outgoing shipments: approve, then complete to ship", "Completing the shipment lowers your stock", "Acct Sales holds the sales invoices and incoming payments", "When shipped and paid, the order is completed"]'
+        sequenceNum="2" estimatedDuration="15">
+        <content><![CDATA[## From Order to Money
+
+### Ship
+1. Open **Inventory**, tab **Outgoing shipments**.
+2. Find the shipment of your order, **approve** it and, when the goods leave, **complete** it.
+3. Your stock goes down automatically.
+
+### Invoice
+Open **Acct Sales**, tab **Sales Invoices**. The invoice of your order is there, ready to send to the customer.
+
+### Get paid
+1. Open **Acct Sales**, tab **Incoming Payments**.
+2. Find the payment of your order. When the money arrives, **approve** and **complete** it.
+
+### Done
+Back in **Orders**, your sales order now shows **completed**. Every step was also booked in your accounts for you: no separate bookkeeping needed.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="GetStartLess0403" moduleId="GetStartMod04"
+        courseId="CourseGettingStarted"
+        title="Buying from a Supplier"
+        keyPoints='["Purchase orders mirror sales orders", "Approve the order when you place it with the supplier", "Receive the goods in Inventory > Incoming shipments", "Pay in Acct Purchase > Outgoing Payments"]'
+        sequenceNum="3" estimatedDuration="10">
+        <content><![CDATA[## The Other Direction
+
+Buying works the same way as selling, mirrored:
+
+| Step | Where |
+|---|---|
+| Create the order for a supplier | **Orders**, tab **Purchase orders** |
+| Approve it when you place it | on the order |
+| Receive the goods into stock | **Inventory**, tab **Incoming shipments** |
+| Check the supplier's invoice | **Acct Purchase**, tab **Purchase Invoices** |
+| Pay the supplier | **Acct Purchase**, tab **Outgoing Payments** |
+
+Once you know the sales flow, you already know the purchase flow.]]></content>
+    </growerp.course.CourseLesson>
+
+    <!-- Module 5: Day to Day -->
+    <growerp.course.CourseModule moduleId="GetStartMod05" courseId="CourseGettingStarted"
+        title="Day to Day"
+        description="See how your business is doing, let the AI assistant help you, and put it all into practice."
+        sequenceNum="5" estimatedDuration="25" />
+
+    <growerp.course.CourseLesson lessonId="GetStartLess0501" moduleId="GetStartMod05"
+        courseId="CourseGettingStarted"
+        title="How Is My Business Doing?"
+        keyPoints='["Acct Reports shows revenue/expenses and the balance sheet", "Figures are always up to date: every order, shipment and payment is booked automatically", "The dashboard tiles show what needs attention today", "Give your accountant their own login instead of exporting"]'
+        sequenceNum="1" estimatedDuration="10">
+        <content><![CDATA[## Your Numbers, Live
+
+Open **Acct Reports**:
+- **Revenue/Expenses**: what you earned and spent in a period, your profit or loss.
+- **Balance Sheet**: what you own, what you owe and what is left for you.
+- **Balance Summary**: all accounts with their balance.
+
+Because every shipment, invoice and payment is booked automatically, these reports are **always up to date**.
+
+### Every day
+Start on the **Main Dashboard**: its tiles show open orders, shipments to send and payments to follow up.
+
+### Your accountant
+Add your accountant as a user: they can look at the books directly, without you exporting anything.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="GetStartLess0502" moduleId="GetStartMod05"
+        courseId="CourseGettingStarted"
+        title="Your AI Assistant and Getting Help"
+        keyPoints='["The robot button on the dashboard opens the AI Assistant", "Ask it questions or to open a screen for you", "System Setup > Guides walks you through setting up each area", "Chat with colleagues with the chat button at the top"]'
+        sequenceNum="2" estimatedDuration="5">
+        <content><![CDATA[## You Are Not Alone
+
+### AI Assistant
+On the Main Dashboard, tap the **robot button** (AI Assistant) at the bottom right. Ask in your own words, for example:
+- "Show my open sales orders"
+- "How do I add a new product?"
+- "Which invoices are not paid yet?"
+
+The assistant answers and can open the right screen for you.
+
+### Setup guides
+**System Setup**, tab **Guides**, has step-by-step guides for setting up each part of the system.
+
+### Chat
+The **chat** button at the top of the screen lets you message your colleagues inside GrowERP.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="GetStartLess0503" moduleId="GetStartMod05"
+        courseId="CourseGettingStarted"
+        title="Practice: Your First Week"
+        keyPoints='["Complete your company details and logo", "Add one colleague, three products and three customers", "Take one sales order through shipment and payment", "Check the result in Revenue/Expenses"]'
+        sequenceNum="3" estimatedDuration="10">
+        <content><![CDATA[## Put It Into Practice
+
+Work through this checklist in your own company (or the demo company):
+
+- [ ] Company details, address and **logo** filled in
+- [ ] One **colleague** added as a user
+- [ ] Three **products** with a price
+- [ ] Three **customers**, at least one company with a contact person
+- [ ] One **sales order** created and approved
+- [ ] Its **shipment** completed and its **payment** received
+- [ ] The sale visible in **Revenue/Expenses**
+- [ ] One question asked to the **AI Assistant**
+
+### What next?
+You now know the basics. Explore **CRM** and **Marketing** to find more customers, or take one of our other courses to go deeper.]]></content>
+    </growerp.course.CourseLesson>
+
 </entity-facade-xml>
