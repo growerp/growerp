@@ -110,6 +110,39 @@
                     <p style="color: var(--neutral-400);">No description available.</p>
                 </#if>
             </div>
+
+            <#-- a course: what it covers; lesson content is studied in the academy app -->
+            <#if course??>
+                <#function duration minutes><#if !(minutes??) || minutes == 0><#return ''></#if>
+                    <#if minutes lt 60><#return minutes + ' min'></#if>
+                    <#return (minutes / 60)?floor + ' h' + (minutes % 60 gt 0)?then(' ' + minutes % 60 + ' min', '')></#function>
+                <div class="mt-4">
+                    <ul class="list-inline" style="color: var(--neutral-600);">
+                        <#if course.difficulty?has_content><li class="list-inline-item">Level: ${course.difficulty?capitalize}</li></#if>
+                        <li class="list-inline-item">${course.moduleCount} modules, ${course.lessonCount} lessons</li>
+                        <#if duration(course.estimatedDuration!0)?has_content><li class="list-inline-item">Duration: ${duration(course.estimatedDuration)}</li></#if>
+                    </ul>
+                    <#if course.objectives?has_content>
+                        <div class="card mb-3"><div class="card-body">
+                            <h5>What you will achieve</h5>
+                            <p class="mb-0" style="color: var(--neutral-600);">${course.objectives}</p>
+                        </div></div>
+                    </#if>
+                    <h4 class="mb-3">Course outline</h4>
+                    <#list course.modules as module>
+                        <div class="card mb-2"><div class="card-body">
+                            <h6>${module?index + 1}. ${module.title}</h6>
+                            <#if module.description?has_content><p class="small mb-2" style="color: var(--neutral-600);">${module.description}</p></#if>
+                            <#list module.lessons![] as lesson>
+                                <div class="d-flex justify-content-between small" style="color: var(--neutral-600);">
+                                    <span><i class="fas fa-lock mr-2" style="color: var(--neutral-400);"></i>${lesson.title}</span>
+                                    <span>${duration(lesson.estimatedDuration!0)}</span>
+                                </div>
+                            </#list>
+                        </div></div>
+                    </#list>
+                </div>
+            </#if>
         </div>
         
         <!-- Add to Cart Card -->
@@ -169,7 +202,9 @@
                             </select>
                         </div>
                     </#if>
-                    <#if product.productTypeEnumId == 'PtService'>
+                    <#if course??>
+                        <input type="hidden" name="quantity" value="1">
+                    <#elseif product.productTypeEnumId == 'PtService'>
                         <div class="form-group">
                             <label style="font-weight: 600; color: var(--neutral-700);">Quantity</label>
                             <input type="number" name="quantity" id="quantity" value="1" min="1" class="form-control" style="border-radius: var(--radius-md);">
@@ -217,6 +252,11 @@
                         </div>
                     </#if>
                     
+                    <#if course??>
+                        <small class="d-block mt-3" style="color: var(--neutral-500);">After checkout, log in to the
+                            <a href="/academy/?companyPartyId=${storeInfo.productStore.organizationPartyId}">academy</a>
+                            with the same account to start learning.</small>
+                    <#else>
                     <!-- Trust Badges -->
                     <div class="trust-badges mt-4 text-center" style="color: var(--neutral-500); font-size: 0.8rem;">
                         <div class="d-flex justify-content-around">
@@ -224,6 +264,7 @@
                             <span><i class="fas fa-truck mr-1" style="color: var(--primary-500);"></i>Fast Shipping</span>
                         </div>
                     </div>
+                    </#if>
                 </div>
             </form>
         </div>

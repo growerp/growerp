@@ -65,9 +65,8 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   // organizations author courses in the admin app; the academy app has no
   // authoring rights (GROWERP_LEARNING only), so the organization registers
-  // for admin and the learner for academy
+  // for admin; learners buy courses on the website, they never register here
   const adminApplicationId = 'AppAdmin';
-  const learnerApplicationId = 'AppAcademy';
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset('app_settings');
@@ -82,10 +81,7 @@ void main() {
       tester,
       createAcademyTestRouter(),
       academyTestMenuConfig,
-      const [
-        UserCompanyLocalizations.delegate,
-        CoursesLocalizations.delegate,
-      ],
+      const [UserCompanyLocalizations.delegate, CoursesLocalizations.delegate],
       restClient: restClient,
       applicationId: adminApplicationId,
       clear: true,
@@ -98,25 +94,23 @@ void main() {
 
     // the organization publishes a course
     await CommonTest.createCompanyAndAdmin(tester);
-    await CourseTest.createPublishedCourse(
+    final courseId = await CourseTest.createPublishedCourse(
       restClient,
       title: 'Academy Course',
       lessonContent: 'Academy lesson body text',
     );
-    final companyPartyId = CourseTest.currentCompanyPartyId(tester);
+    // a learner bought it on the website
+    final learner = await CourseTest.addLearnerWithCourses(restClient, [
+      courseId,
+    ]);
     // with a published course it is a school learners can find
     await CourseTest.chooseSchoolInDirectory(tester);
     await CommonTest.gotoMainMenu(tester);
     await CommonTest.logout(tester);
 
-    // a learner of that organization takes it
-    final learner = await CourseTest.registerLearner(
-      restClient,
-      companyPartyId,
-      learnerApplicationId,
-    );
+    // the learner takes it
     await CommonTest.login(tester, username: learner);
-    await CourseTest.subscribeInCatalog(tester, '/courses');
+    await CourseTest.checkCatalog(tester, '/courses', owned: 1);
     await CourseTest.studyFirstLesson(
       tester,
       '/',

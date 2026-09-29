@@ -253,6 +253,13 @@ var storeInfo = ${storeInfoJson};
 
     <pre-actions>
         <set field="home" value="/"/>
+        <!-- the academy app, where courses bought here are studied, opened on this school:
+             academy.growerp.org on the staging installation, served by this backend at /academy/
+             when running locally, academy.growerp.com otherwise (tenant domains included) -->
+        <set field="requestHost" from="ec.web.getHostName(false) ?: ''"/>
+        <set field="academyUrl" from="(requestHost in ['localhost', '127.0.0.1', '10.0.2.2'] || requestHost.endsWith('.localhost')
+            ? '/academy/' : (requestHost.endsWith('growerp.org') ? 'https://academy.growerp.org/' : 'https://academy.growerp.com/'))
+            + '?companyPartyId=' + (storeInfo?.productStore?.organizationPartyId ?: '')"/>
         <!-- lookup configured browse root category from storeInfo -->
         <set field="browseRootCategory" from="storeInfo.categoryByType.PsctBrowseRoot"/>
         <set field="browseRootCategoryId" from="browseRootCategory?.productCategoryId"/>

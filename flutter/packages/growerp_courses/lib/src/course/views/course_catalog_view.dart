@@ -20,11 +20,11 @@ import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_bloc.dart';
 import '../../viewer/bloc/course_viewer_bloc.dart';
 import '../../viewer/views/course_viewer.dart';
-import 'course_payment_dialog.dart';
 import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
 
 /// Customer view that shows ALL published courses with a "Subscribed" badge
-/// on courses the current user has an active subscription for.
+/// on courses the current user has an active subscription for. Courses are
+/// bought on the website, never in the app.
 class CourseCatalogView extends StatefulWidget {
   const CourseCatalogView({super.key});
 
@@ -120,7 +120,6 @@ class _CourseCatalogViewState extends State<CourseCatalogView> {
                     course: course,
                     isSubscribed: isSubscribed,
                     onOpen: () => _openCourse(context, course.courseId!),
-                    onSubscribe: () => _showPaymentDialog(context, course),
                   );
                 },
               ),
@@ -129,20 +128,6 @@ class _CourseCatalogViewState extends State<CourseCatalogView> {
         );
       },
     );
-  }
-
-  void _showPaymentDialog(BuildContext context, Course course) {
-    showDialog<bool>(
-      context: context,
-      builder: (_) => BlocProvider.value(
-        value: context.read<CourseBloc>(),
-        child: CoursePaymentDialog(course: course),
-      ),
-    ).then((_) {
-      if (context.mounted) {
-        context.read<CourseViewerBloc>().add(FetchAvailableCourses());
-      }
-    });
   }
 
   void _openCourse(BuildContext context, String courseId) {
@@ -163,14 +148,12 @@ class _CourseCatalogTile extends StatelessWidget {
   final Course course;
   final bool isSubscribed;
   final VoidCallback onOpen;
-  final VoidCallback onSubscribe;
 
   const _CourseCatalogTile({
     super.key,
     required this.course,
     required this.isSubscribed,
     required this.onOpen,
-    required this.onSubscribe,
   });
 
   @override
@@ -178,7 +161,7 @@ class _CourseCatalogTile extends StatelessWidget {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 6),
       child: InkWell(
-        onTap: isSubscribed ? onOpen : onSubscribe,
+        onTap: isSubscribed ? onOpen : null,
         child: Padding(
           padding: EdgeInsets.all(12),
           child: Row(
@@ -300,19 +283,32 @@ class _CourseCatalogTile extends StatelessWidget {
                                   fontWeight: FontWeight.bold,
                                 ),
                           ),
-                          SizedBox(width: 4),
-                          TextButton.icon(
-                            onPressed: onSubscribe,
-                            icon: Icon(Icons.lock_outline, size: 16),
-                            label: Text(
-                              CoursesLocalizations.of(
-                                context,
-                              )!.courses_subscribe,
-                            ),
-                          ),
                         ],
                       ],
                     ),
+                    // bought on the website: plain text, no link (app store rules)
+                    if (!isSubscribed) ...[
+                      SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.lock_outline,
+                            size: 14,
+                            color: Colors.grey[600],
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            CoursesLocalizations.of(
+                              context,
+                            )!.courses_availableOnWebsite,
+                            key: const Key('availableOnWebsite'),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),

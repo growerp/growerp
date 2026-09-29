@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<!-- The orders of the logged in customer (not the open cart) -->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    require-authentication="anonymous-view" history="false">
+
+    <pre-actions>
+        <if condition="!ec.user.userId">
+            <script>sri.sendRedirectAndStopRender('/login?returnTo=/orders')</script>
+        </if>
+        <set field="pageTitle" value="My orders"/>
+    </pre-actions>
+    <actions>
+        <service-call name="popstore.CartServices.get#CustomerOrders" out-map="ordersOut"/>
+        <set field="orderList" from="[]"/>
+        <set field="orderInfoList" from="ordersOut.orderInfoList ?: []"/>
+        <iterate list="orderInfoList" entry="order">
+            <if condition="order.statusId == 'OrderOpen'"><continue/></if>
+            <entity-find-one entity-name="moqui.basic.StatusItem" value-field="statusItem" cache="true">
+                <field-map field-name="statusId" from="order.statusId"/>
+            </entity-find-one>
+            <script>orderList.add(order + [statusDescription: statusItem?.description])</script>
+        </iterate>
+        <set field="template_server_orders" from="storeInfo.settings.template_server_orders"
+            default-value="component://PopRestStore/template/store/modern/orders.html.ftl"/>
+    </actions>
+    <widgets>
+        <render-mode><text type="html" location="${template_server_header}"/></render-mode>
+        <render-mode><text type="html" location="${template_server_orders}"/></render-mode>
+        <render-mode><text type="html" location="${template_server_footer}"/></render-mode>
+    </widgets>
+</screen>

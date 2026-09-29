@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<!-- /order/{orderId}: one order of the logged in customer; with placed=true the confirmation
+     right after checkout. Courses in it are opened in the academy app. -->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    require-authentication="anonymous-view" allow-extra-path="true" history="false">
+    <parameter name="placed"/>
+
+    <pre-actions>
+        <set field="extraPathNameList" from="sri.screenUrlInfo.extraPathNameList"/>
+        <set field="orderId" from="extraPathNameList ? extraPathNameList[0] : null"/>
+        <if condition="!ec.user.userId">
+            <script>sri.sendRedirectAndStopRender('/login?returnTo=/order/' + (orderId ?: ''))</script>
+        </if>
+        <set field="pageTitle" value="Order ${orderId ?: ''}"/>
+    </pre-actions>
+    <actions>
+        <if condition="orderId">
+            <service-call name="popstore.CartServices.get#OrderDisplay" in-map="[orderId: orderId]"
+                out-map="context"/>
+        </if>
+        <set field="template_server_order" from="storeInfo.settings.template_server_order"
+            default-value="component://PopRestStore/template/store/modern/order.html.ftl"/>
+    </actions>
+    <widgets>
+        <render-mode><text type="html" location="${template_server_header}"/></render-mode>
+        <render-mode><text type="html" location="${template_server_order}"/></render-mode>
+        <render-mode><text type="html" location="${template_server_footer}"/></render-mode>
+    </widgets>
+</screen>

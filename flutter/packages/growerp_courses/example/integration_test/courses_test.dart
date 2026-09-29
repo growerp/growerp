@@ -130,18 +130,15 @@ void main() {
     await CourseTest.translateCourse(tester);
     await CommonTest.tapByKey(tester, 'cancelCourse');
 
-    // --- learner: registers into this company, pays, studies
-    final companyPartyId = CourseTest.currentCompanyPartyId(tester);
+    // --- learner: bought the course on the website, studies
+    final learner = await CourseTest.addLearnerWithCourses(restClient, [
+      await CourseTest.courseIdByTitle(restClient, 'Test Course Updated'),
+    ]);
     await CommonTest.gotoMainMenu(tester);
     await CommonTest.logout(tester);
-    final learner = await CourseTest.registerLearner(
-      restClient,
-      companyPartyId,
-      'AppAcademy',
-    );
     await CommonTest.login(tester, username: learner);
 
-    await CourseTest.subscribeInCatalog(tester, '/catalog');
+    await CourseTest.checkCatalog(tester, '/catalog', owned: 1);
     await CourseTest.studyFirstLesson(
       tester,
       '/myCourses',

@@ -12,73 +12,46 @@ You should have received a copy of the CC0 Public Domain Dedication
 along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
-<!-- Public course catalog: /courses lists the published courses of the store owner,
-     /courses/{courseId} shows one course's outline. Lesson content is never served here;
-     learners enroll and study in the app. -->
+<!-- Courses are sold as products: /courses redirects to the Courses category of the store
+     owner, /courses/{courseId} to the course's product page. Kept for links out there. -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
         require-authentication="anonymous-view" allow-extra-path="true" history="false">
 
     <pre-actions>
         <set field="extraPathNameList" from="sri.screenUrlInfo.extraPathNameList"/>
         <set field="courseId" from="extraPathNameList ? extraPathNameList[0] : null"/>
-        <set field="pageTitle" value="Courses"/>
         <entity-find-one entity-name="mantle.party.Party" value-field="storeCompany" cache="true">
             <field-map field-name="partyId" from="productStore.organizationPartyId"/></entity-find-one>
-        <entity-find entity-name="growerp.course.Course" list="courseEntityList">
-            <econdition field-name="ownerPartyId" from="storeCompany?.ownerPartyId ?: '-'"/>
-            <econdition field-name="status" value="PUBLISHED"/>
-            <econdition field-name="courseId" ignore-if-empty="true"/>
-            <order-by field-name="title"/>
-        </entity-find>
-        <!-- no published courses (menu link hidden) or unknown course: render a not-found page -->
-        <set field="notFound" from="!storeInfo.hasCourses || (courseId &amp;&amp; !courseEntityList)"/>
-        <if condition="notFound"><script>ec.web.response.setStatus(404)</script></if>
-
-        <set field="courseList" from="[]"/>
-        <iterate list="courseEntityList" entry="courseEntity">
-            <entity-find entity-name="growerp.course.CourseModule" list="moduleList">
-                <econdition field-name="courseId" from="courseEntity.courseId"/>
-                <order-by field-name="sequenceNum"/>
+        <set field="ownerPartyId" from="storeCompany?.ownerPartyId ?: '-'"/>
+        <set field="location" from="null"/>
+        <if condition="courseId">
+            <entity-find entity-name="growerp.course.Course" list="courseList">
+                <econdition field-name="ownerPartyId"/>
+                <econdition field-name="courseId"/>
+                <econdition field-name="status" value="PUBLISHED"/>
             </entity-find>
-            <set field="modules" from="[]"/>
-            <set field="lessonCount" from="0"/>
-            <iterate list="moduleList" entry="module">
-                <entity-find entity-name="growerp.course.CourseLesson" list="lessonList">
-                    <econdition field-name="moduleId" from="module.moduleId"/>
-                    <order-by field-name="sequenceNum"/>
-                    <select-field field-name="title,estimatedDuration"/>
-                </entity-find>
-                <set field="lessonCount" from="lessonCount + lessonList.size()"/>
-                <script>modules.add([title: module.title, description: module.description,
-                        lessons: lessonList.collect { [title: it.title, estimatedDuration: it.estimatedDuration] }])</script>
-            </iterate>
-            <set field="coursePrice" from="null"/>
-            <if condition="courseEntity.productId">
-                <entity-find entity-name="mantle.product.ProductPrice" list="priceList">
-                    <econdition field-name="productId" from="courseEntity.productId"/>
-                    <econdition field-name="priceTypeEnumId" value="PptCurrent"/>
-                    <date-filter/>
-                    <order-by field-name="-fromDate"/>
-                </entity-find>
-                <set field="coursePrice" from="priceList ? priceList[0] : null"/>
+            <if condition="courseList &amp;&amp; courseList[0].productId">
+                <set field="location" value="/product/${courseList[0].productId}"/>
             </if>
-            <script>courseList.add([courseId: courseEntity.courseId, title: courseEntity.title,
-                    description: courseEntity.description, objectives: courseEntity.objectives,
-                    difficulty: courseEntity.difficulty, estimatedDuration: courseEntity.estimatedDuration,
-                    coverImageUrl: courseEntity.coverImageUrl, price: coursePrice?.price,
-                    priceUomId: coursePrice?.priceUomId ?: productStore.defaultCurrencyUomId,
-                    moduleCount: moduleList.size(), lessonCount: lessonCount, modules: modules])</script>
-        </iterate>
-        <if condition="courseId &amp;&amp; courseList">
-            <set field="course" from="courseList[0]"/>
-            <set field="pageTitle" from="course.title"/>
+            <else>
+                <entity-find entity-name="mantle.product.category.ProductCategory" list="categoryList">
+                    <econdition field-name="ownerPartyId"/>
+                    <econdition field-name="productCategoryTypeEnumId" value="PctCatalog"/>
+                    <econdition field-name="categoryName" value="Courses"/>
+                </entity-find>
+                <if condition="storeInfo.hasCourses &amp;&amp; categoryList">
+                    <set field="location" value="/category/${categoryList[0].productCategoryId}"/>
+                </if>
+            </else>
         </if>
-        <set field="template_server_courses" from="storeInfo.settings.template_server_courses"
-            default-value="component://PopRestStore/template/store/${templateId}/courses.html.ftl"/>
+        <script>
+            if (location) {
+                ec.web.response.setStatus(301)
+                ec.web.response.setHeader('Location', location)
+            } else {
+                ec.web.response.setStatus(404)
+            }
+        </script>
     </pre-actions>
-    <widgets>
-        <render-mode><text type="html" location="${template_server_header}"/></render-mode>
-        <render-mode><text type="html" location="${template_server_courses}"/></render-mode>
-        <render-mode><text type="html" location="${template_server_footer}"/></render-mode>
-    </widgets>
+    <widgets/>
 </screen>

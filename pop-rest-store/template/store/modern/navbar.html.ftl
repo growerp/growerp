@@ -5,6 +5,57 @@
 <#assign isMarketing = storeInfo.productStore.productStoreId == "100000">
 <#-- brochure-only stores (no browse-root categories) get no shop/search/cart/login UI -->
 <#assign hasCommerce = (browseRootCategoryInfo.subCategoryList)?has_content>
+<#-- the customer's account menu (or log in links) and the cart -->
+<#macro accountAndCart>
+                    <#-- User Account -->
+                    <#if partyDetail??>
+                        <div class="relative">
+                            <button type="button" data-menu-button="accountDropdown" aria-expanded="false"
+                                    class="flex items-center gap-1 font-label text-sm text-on-primary-container/70 hover:text-on-primary-container transition-colors">
+                                <span class="material-symbols-outlined text-[22px]">account_circle</span>
+                                <span class="hidden lg:inline">${partyDetail.firstName}</span>
+                                <span class="material-symbols-outlined text-[18px]">expand_more</span>
+                            </button>
+                            <div id="accountDropdown" data-dropdown-panel class="hidden absolute right-0 top-full mt-2 w-56 l-glass bg-surface-container/90 rounded-xl py-2 shadow-2xl">
+                                <div class="px-4 py-2 border-b border-white/10">
+                                    <strong class="block text-sm text-on-surface">${partyDetail.firstName} ${partyDetail.lastName}</strong>
+                                    <#if partyDetail.organizationName?has_content>
+                                    <small class="block text-xs text-on-surface-variant">${partyDetail.organizationName}</small>
+                                    </#if>
+                                </div>
+                                <a href="/orders" class="flex items-center gap-2 px-4 py-2 text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">
+                                    <span class="material-symbols-outlined text-[18px]">package_2</span>${l('GrowerpWebsiteMyOrders')}
+                                </a>
+                                <form method="get" action="/logOut" class="border-t border-white/10 mt-1 pt-1">
+                                    <button id="logout" type="submit" class="w-full flex items-center gap-2 px-4 py-2 text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">logout</span>${l('GrowerpWebsiteLogout')}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    <#elseif !isMarketing>
+                        <a href="/signup" class="hidden sm:inline-flex font-label text-sm text-on-primary-container/70 hover:text-on-primary-container transition-colors">${l('GrowerpWebsiteRegister')}</a>
+                        <a href="/login" class="font-label text-sm text-on-primary-container hover:text-on-primary-container transition-colors">${l('GrowerpWebsiteLogIn')}</a>
+                    </#if>
+
+                    <#-- Shopping Cart -->
+                    <#assign cartCount = 0>
+                    <#if cartInfo.orderItemList??>
+                        <#list cartInfo.orderItemList as item>
+                            <#if item.itemTypeEnumId == "ItemProduct">
+                                <#assign cartCount = cartCount + (item.quantity!1)>
+                            </#if>
+                        </#list>
+                    </#if>
+                    <#if cartCount gt 0>
+                        <a href="/cart" class="relative flex items-center text-on-primary-container/70 hover:text-on-primary-container transition-colors">
+                    <#else>
+                        <a href="#" onclick="document.getElementById('emptyCartModal').showModal(); return false;" class="relative flex items-center text-on-primary-container/70 hover:text-on-primary-container transition-colors">
+                    </#if>
+                        <span class="material-symbols-outlined text-[24px]">shopping_cart</span>
+                        <span id="cart-quantity" class="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-on-primary-container text-primary-container text-[11px] font-bold">${cartCount}</span>
+                    </a>
+</#macro>
 <header class="fixed top-0 inset-x-0 z-40">
     <nav class="bg-primary-container/90 backdrop-blur-md border-b border-on-primary-container/10">
         <div class="max-w-container mx-auto px-4 md:px-12 h-16 flex items-center justify-between gap-4">
@@ -16,9 +67,8 @@
 
             <!-- Desktop navigation -->
             <div class="hidden md:flex items-center gap-6">
-                <#if !isMarketing>
-                    <#-- Shop Categories Dropdown -->
-                    <#if hasCommerce>
+                <#-- Shop Categories Dropdown: also on the marketing site, e.g. its Courses -->
+                <#if hasCommerce>
                     <div class="relative">
                         <button type="button" data-menu-button="shopDropdown" aria-expanded="false"
                                 class="flex items-center gap-1 font-label text-sm text-on-primary-container/70 hover:text-on-primary-container transition-colors">
@@ -33,8 +83,8 @@
                             </#list>
                         </div>
                     </div>
-                    </#if>
-
+                </#if>
+                <#if !isMarketing>
                     <#-- Deals Button -->
                     <#if ((storeInfo.categoryByType.PsctPromotions.nbrOfProducts)!0) != 0>
                         <a href="${up}/category/${storeInfo.categoryByType.PsctPromotions.productCategoryId}" class="flex items-center gap-1 font-label text-sm text-on-primary-container/70 hover:text-on-primary-container transition-colors">
@@ -43,9 +93,6 @@
                     </#if>
                 </#if>
 
-                <#if storeInfo.hasCourses!false>
-                    <a href="${up}/courses" class="font-label text-sm text-on-primary-container/70 hover:text-on-primary-container transition-colors">${l('GrowerpWebsiteCourses')}</a>
-                </#if>
                 <#-- Content Menu Items (both modes); marketing Features link inserted before getting-started -->
                 <#list storeInfo.menu as topItem>
                 <#if !topItem.title?has_content><#continue></#if>
@@ -87,6 +134,7 @@
                     <#if (storeOwnerPartyId!'') != 'GROWERP'>
                     <a href="https://admin.growerp.com" class="hidden sm:inline-flex font-label text-sm text-on-primary-container hover:text-on-primary-container transition-colors">${l('GrowerpWebsiteSignIn')}</a>
                     </#if>
+                    <#if hasCommerce><@accountAndCart/></#if>
                     <a href="/admin/" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-3 sm:px-5 py-2.5 rounded-lg l-glow transition-all active:scale-95 flex items-center gap-2 shrink-0">
                         <span class="hidden sm:inline">${l('GrowerpWebsiteGetStarted')}</span>
                         <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
@@ -101,57 +149,7 @@
                         </button>
                     </form>
 
-                    <#-- User Account -->
-                    <#if partyDetail??>
-                        <div class="relative">
-                            <button type="button" data-menu-button="accountDropdown" aria-expanded="false"
-                                    class="flex items-center gap-1 font-label text-sm text-on-primary-container/70 hover:text-on-primary-container transition-colors">
-                                <span class="material-symbols-outlined text-[22px]">account_circle</span>
-                                <span class="hidden lg:inline">${partyDetail.firstName}</span>
-                                <span class="material-symbols-outlined text-[18px]">expand_more</span>
-                            </button>
-                            <div id="accountDropdown" data-dropdown-panel class="hidden absolute right-0 top-full mt-2 w-56 l-glass bg-surface-container/90 rounded-xl py-2 shadow-2xl">
-                                <div class="px-4 py-2 border-b border-white/10">
-                                    <strong class="block text-sm text-on-surface">${partyDetail.firstName} ${partyDetail.lastName}</strong>
-                                    <#if partyDetail.organizationName?has_content>
-                                    <small class="block text-xs text-on-surface-variant">${partyDetail.organizationName}</small>
-                                    </#if>
-                                </div>
-                                <a href="/d#/account" class="flex items-center gap-2 px-4 py-2 text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">
-                                    <span class="material-symbols-outlined text-[18px]">settings</span>${l('GrowerpWebsiteAccountSettings')}
-                                </a>
-                                <a href="/d#/orders" class="flex items-center gap-2 px-4 py-2 text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">
-                                    <span class="material-symbols-outlined text-[18px]">package_2</span>${l('GrowerpWebsiteMyOrders')}
-                                </a>
-                                <form method="get" action="/logOut" class="border-t border-white/10 mt-1 pt-1">
-                                    <button id="logout" type="submit" class="w-full flex items-center gap-2 px-4 py-2 text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">
-                                        <span class="material-symbols-outlined text-[18px]">logout</span>${l('GrowerpWebsiteLogout')}
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    <#else>
-                        <a href="/d#/account/create/${storeInfo.productStore.organizationPartyId}" class="hidden sm:inline-flex font-label text-sm text-on-primary-container/70 hover:text-on-primary-container transition-colors">${l('GrowerpWebsiteRegister')}</a>
-                        <a href="/d#/login/${storeInfo.productStore.organizationPartyId}" class="font-label text-sm text-on-primary-container hover:text-on-primary-container transition-colors">${l('GrowerpWebsiteLogIn')}</a>
-                    </#if>
-
-                    <#-- Shopping Cart -->
-                    <#assign cartCount = 0>
-                    <#if cartInfo.orderItemList??>
-                        <#list cartInfo.orderItemList as item>
-                            <#if item.itemTypeEnumId == "ItemProduct">
-                                <#assign cartCount = cartCount + (item.quantity!1)>
-                            </#if>
-                        </#list>
-                    </#if>
-                    <#if cartCount gt 0>
-                        <a href="/d#/checkout/${storeInfo.productStore.organizationPartyId}" class="relative flex items-center text-on-primary-container/70 hover:text-on-primary-container transition-colors">
-                    <#else>
-                        <a href="#" onclick="document.getElementById('emptyCartModal').showModal(); return false;" class="relative flex items-center text-on-primary-container/70 hover:text-on-primary-container transition-colors">
-                    </#if>
-                        <span class="material-symbols-outlined text-[24px]">shopping_cart</span>
-                        <span id="cart-quantity" class="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-on-primary-container text-primary-container text-[11px] font-bold">${cartCount}</span>
-                    </a>
+                    <@accountAndCart/>
                 </#if>
 
                 <#-- Language switcher: only on a site that has translated pages, see
@@ -185,10 +183,13 @@
 
         <!-- Mobile menu panel -->
         <div id="mobileMenu" data-dropdown-panel class="hidden md:hidden border-t border-white/10 bg-surface-container-lowest/90 px-4 py-4 space-y-1">
-            <#if storeInfo.hasCourses!false>
-                <a href="${up}/courses" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">${l('GrowerpWebsiteCourses')}</a>
-            </#if>
             <#if isMarketing>
+                <#if hasCommerce>
+                    <span class="block px-2 pt-2 pb-1 text-xs uppercase tracking-wider text-outline">${l('GrowerpWebsiteShop')}</span>
+                    <#list browseRootCategoryInfo.subCategoryList as category>
+                        <a href="${up}/category/${category.productCategoryId}" class="block px-2 py-2 rounded-lg font-label text-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-colors">${category.categoryName}</a>
+                    </#list>
+                </#if>
                 <#list storeInfo.menu as topItem>
                 <#if !topItem.title?has_content><#continue></#if>
                 <#if topItem.path == 'verticals'>
@@ -251,7 +252,7 @@
     </nav>
 </header>
 
-<#if !isMarketing && hasCommerce>
+<#if hasCommerce>
 <!-- Empty Cart Dialog -->
 <dialog id="emptyCartModal" class="l-glass max-w-sm w-[90vw] p-0">
     <div class="p-6">

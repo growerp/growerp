@@ -23,7 +23,6 @@ String translateCourseBlocMessage(BuildContext context, String message) {
     'courseCreated' => l.courses_courseCreated,
     'courseUpdated' => l.courses_courseUpdated,
     'courseDeleted' => l.courses_courseDeleted,
-    'courseSubscribed' => l.courses_courseSubscribed,
     'courseIdRequired' => l.courses_courseIdRequired,
     _ => message,
   };

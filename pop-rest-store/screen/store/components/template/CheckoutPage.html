@@ -152,6 +152,8 @@
                         <div></div>
                     </div>
                 </div>
+                <!-- Address and shipping: not for service/digital only carts (e.g. courses) -->
+                <template v-if="productsInCart.shippingRequired !== false">
                 <!-- Shipping Address section title and change button -->
                 <p class="title-check-text"
                     :class="{'step-active':isCurrentStep(STEP_ADDRESS), 'step-complete':isCompleteStep(STEP_ADDRESS)}">
@@ -281,7 +283,9 @@
                 </div>
                 <br>
 
-                <!-- Payment method section -->
+                </template>
+                <!-- Payment method section: nothing to pay for a free order -->
+                <template v-if="needsPayment()">
                 <p class="title-check-text"
                     :class="{'step-active':isCurrentStep(STEP_BILLING), 'step-complete':isCompleteStep(STEP_BILLING)}">
                     <span v-if="isIncompleteStep(STEP_BILLING)" class="circle">3</span>
@@ -345,6 +349,7 @@
                     </button>
                 </div>
                 <br>
+                </template>
                 <p class="title-check-text"
                     :class="{'step-active':isCurrentStep(STEP_REVIEW), 'step-complete':isCompleteStep(STEP_REVIEW)}">
                     <span v-if="isIncompleteStep(STEP_REVIEW)" class="circle">4</span>

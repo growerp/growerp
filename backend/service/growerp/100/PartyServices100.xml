@@ -3155,12 +3155,15 @@ limitations under the License.
                 <return error="true"
                     message="Company ${ownerPartyId} has no ownerPartyId, cannot register a website user" />
             </if>
-            <entity-find-one entity-name="growerp.Application"
-                value-field="application">
-                <field-map field-name="applicationId" from="applicationId" />
-            </entity-find-one>
-            <if condition="!application">
-                <return error="true" message="Not a valid applicationId: ${applicationId}" />
+            <!-- optional: a website shop customer signs up for no particular app -->
+            <if condition="applicationId">
+                <entity-find-one entity-name="growerp.Application"
+                    value-field="application">
+                    <field-map field-name="applicationId" from="applicationId" />
+                </entity-find-one>
+                <if condition="!application">
+                    <return error="true" message="Not a valid applicationId: ${applicationId}" />
+                </if>
             </if>
             <!-- create account, not active when no login provided -->
             <set field="disabled" value="N" />
@@ -3692,6 +3695,17 @@ limitations under the License.
             <iterate list="storeImages" entry="image">
                 <service-call name="create#growerp.store.ProductStoreContent"
                     in-map="image + [productStoreContentId: null, productStoreId: productStoreId]" />
+            </iterate>
+
+            <!-- courses the owner already has (GROWERP: the seed courses) are sold on this new
+                 website: their products in the all products and a Courses category -->
+            <entity-find entity-name="growerp.course.Course" list="ownerCourseList">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="productId" operator="is-not-null" />
+            </entity-find>
+            <iterate list="ownerCourseList" entry="ownerCourse">
+                <service-call name="growerp.100.CourseServices100.sync#CourseProduct"
+                    in-map="[courseId: ownerCourse.courseId]" />
             </iterate>
 
             <!-- search function -->

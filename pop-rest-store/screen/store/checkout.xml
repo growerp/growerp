@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<!-- One page checkout for every product, courses included. Shipping is asked only when the cart
+     has something to ship, payment only when there is something to pay (a free course is not). -->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    require-authentication="anonymous-view" history="false">
+
+    <transition name="placeOrder">
+        <actions>
+            <if condition="!ec.user.userId">
+                <return error="true" message="Please log in first"/>
+            </if>
+            <service-call name="popstore.CartServices.get#OrderDisplay" out-map="cart"/>
+            <if condition="!cart.lines">
+                <return error="true" message="Your cart is empty"/>
+            </if>
+            <!-- shipping: an existing or a new address, and the way to ship -->
+            <if condition="cart.shippingRequired">
+                <if condition="!postalContactMechId">
+                    <service-call name="popstore.CustomerServices.store#ShippingAddress"
+                        in-map="[toName: toName, address1: address1, address2: address2, city: city,
+                            postalCode: postalCode, countryGeoId: countryGeoId,
+                            postalContactMechPurposeId: 'PostalShippingDest']" out-map="addressOut"/>
+                    <set field="postalContactMechId" from="addressOut.postalContactMechId"/>
+                </if>
+                <if condition="!carrierShipment">
+                    <return error="true" message="Please choose how to ship your order"/>
+                </if>
+                <service-call name="popstore.CartServices.set#BillingShippingInfo"
+                    in-map="[shippingPostalContactMechId: postalContactMechId,
+                        carrierPartyId: carrierShipment.split(':')[0],
+                        shipmentMethodEnumId: carrierShipment.split(':')[1]]"/>
+                <!-- the total now includes shipping -->
+                <service-call name="popstore.CartServices.get#OrderDisplay" out-map="cart"/>
+            </if>
+            <!-- payment: a saved or a new card, only when there is something to pay -->
+            <set field="paymentId" from="null"/>
+            <if condition="cart.grandTotal > 0">
+                <if condition="!paymentMethodId">
+                    <service-call name="popstore.CustomerServices.store#CreditCard"
+                        in-map="[firstNameOnAccount: firstNameOnAccount, lastNameOnAccount: lastNameOnAccount,
+                            cardNumber: cardNumber?.replaceAll('[^0-9]', ''), expireMonth: expireMonth,
+                            expireYear: expireYear, address1: billingAddress1, city: billingCity,
+                            postalCode: billingPostalCode, countryGeoId: billingCountryGeoId]"
+                        out-map="cardOut"/>
+                    <set field="paymentMethodId" from="cardOut.paymentMethodId"/>
+                </if>
+                <service-call name="popstore.CartServices.set#BillingShippingInfo"
+                    in-map="[paymentMethodId: paymentMethodId]" out-map="billingOut"/>
+                <set field="paymentId" from="billingOut.paymentId"/>
+            </if>
+            <service-call name="popstore.CartServices.place#CartOrder" out-map="placeOut"
+                in-map="[cardSecurityCodeByPaymentId: paymentId ? [(paymentId): cardSecurityCode] : [:]]"/>
+            <if condition="!placeOut.orderHeader?.orderId">
+                <return error="true"
+                    message="${ec.message.messages ? ec.message.messages.join(' ') : 'Your order could not be placed, please try again'}"/>
+            </if>
+            <set field="orderId" from="placeOut.orderHeader.orderId"/>
+        </actions>
+        <default-response url="/order/${orderId}?placed=true" url-type="plain"/>
+        <error-response url="."/>
+    </transition>
+
+    <pre-actions>
+        <if condition="!ec.user.userId">
+            <script>sri.sendRedirectAndStopRender('/login?returnTo=/checkout')</script>
+        </if>
+        <set field="pageTitle" value="Checkout"/>
+    </pre-actions>
+    <actions>
+        <service-call name="popstore.CartServices.get#OrderDisplay" out-map="context"/>
+        <if condition="!lines">
+            <script>sri.sendRedirectAndStopRender('/cart')</script>
+        </if>
+        <set field="needsPayment" from="grandTotal > 0 || shippingRequired"/>
+        <if condition="shippingRequired">
+            <service-call name="popstore.CustomerServices.get#ShippingAddresses" out-map="addressOut"/>
+            <set field="addressList" from="addressOut.postalAddressList ?: []"/>
+            <service-call name="popstore.CartServices.get#ShippingOptions" out-map="shippingOut"/>
+            <set field="shippingOptions" from="shippingOut.shippingOptions ?: []"/>
+        </if>
+        <if condition="needsPayment">
+            <service-call name="popstore.CustomerServices.get#PaymentMethods" out-map="paymentOut"/>
+            <set field="cardList" from="(paymentOut.methodInfoList ?: []).findAll { it.isCreditCard }"/>
+        </if>
+        <if condition="shippingRequired || needsPayment">
+            <entity-find entity-name="moqui.basic.Geo" list="countryList" cache="true">
+                <econdition field-name="geoTypeEnumId" value="GEOT_COUNTRY"/>
+                <order-by field-name="geoName"/>
+            </entity-find>
+        </if>
+        <set field="template_server_checkout" from="storeInfo.settings.template_server_checkout"
+            default-value="component://PopRestStore/template/store/modern/checkout.html.ftl"/>
+    </actions>
+    <widgets>
+        <render-mode><text type="html" location="${template_server_header}"/></render-mode>
+        <render-mode><text type="html" location="${template_server_checkout}"/></render-mode>
+        <render-mode><text type="html" location="${template_server_footer}"/></render-mode>
+    </widgets>
+</screen>

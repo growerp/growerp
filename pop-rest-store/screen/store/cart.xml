@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<!-- Shopping cart, the same for every product (courses included); the cart order lives in the
+     web session, see popstore.CartServices.get#ActiveOrderAndCustomer -->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    require-authentication="anonymous-view" history="false">
+
+    <transition name="updateQuantity">
+        <parameter name="orderId"/><parameter name="orderItemSeqId"/><parameter name="quantity"/>
+        <actions>
+            <service-call name="popstore.CartServices.update#OrderProductQuantity"
+                in-map="[orderId: orderId, orderItemSeqId: orderItemSeqId, quantity: quantity]"/>
+        </actions>
+        <default-response url="."/>
+        <error-response url="."/>
+    </transition>
+    <transition name="removeItem">
+        <parameter name="orderId"/><parameter name="orderItemSeqId"/>
+        <actions>
+            <service-call name="popstore.CartServices.delete#OrderItem"
+                in-map="[orderId: orderId, orderItemSeqId: orderItemSeqId]"/>
+        </actions>
+        <default-response url="."/>
+        <error-response url="."/>
+    </transition>
+
+    <pre-actions>
+        <set field="pageTitle" value="Shopping cart"/>
+    </pre-actions>
+    <actions>
+        <service-call name="popstore.CartServices.get#OrderDisplay" out-map="context"/>
+        <set field="template_server_cart" from="storeInfo.settings.template_server_cart"
+            default-value="component://PopRestStore/template/store/modern/cart.html.ftl"/>
+    </actions>
+    <widgets>
+        <render-mode><text type="html" location="${template_server_header}"/></render-mode>
+        <render-mode><text type="html" location="${template_server_cart}"/></render-mode>
+        <render-mode><text type="html" location="${template_server_footer}"/></render-mode>
+    </widgets>
+</screen>

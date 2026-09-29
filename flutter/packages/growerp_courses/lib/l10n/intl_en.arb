@@ -130,14 +130,6 @@
       }
     }
   },
-  "courses_price": "Price: ",
-  "@courses_price": {
-    "description": "Extracted string: Price: "
-  },
-  "courses_paymentInformation": "Payment Information",
-  "@courses_paymentInformation": {
-    "description": "Extracted string: Payment Information"
-  },
   "courses_generateMediaContent": "Generate Media Content",
   "@courses_generateMediaContent": {
     "description": "Extracted string: Generate Media Content"
@@ -1181,10 +1173,6 @@
   "@courses_free": {
     "description": "Free"
   },
-  "courses_subscribe": "Subscribe",
-  "@courses_subscribe": {
-    "description": "Subscribe"
-  },
   "courses_anErrorOccurred": "An error occurred",
   "@courses_anErrorOccurred": {
     "description": "An error occurred"
@@ -1212,26 +1200,6 @@
   "courses_searchParticipantsHint": "Search by name, email or course...",
   "@courses_searchParticipantsHint": {
     "description": "Search by name, email or course..."
-  },
-  "courses_subscriptionFailed": "Subscription failed",
-  "@courses_subscriptionFailed": {
-    "description": "Subscription failed"
-  },
-  "courses_subscribeToCourse": "Subscribe to Course",
-  "@courses_subscribeToCourse": {
-    "description": "Subscribe to Course"
-  },
-  "courses_nameOnCard": "Name on Card",
-  "@courses_nameOnCard": {
-    "description": "Name on Card"
-  },
-  "courses_cardNumber": "Card Number",
-  "@courses_cardNumber": {
-    "description": "Card Number"
-  },
-  "courses_subscribeForFree": "Subscribe for Free",
-  "@courses_subscribeForFree": {
-    "description": "Subscribe for Free"
   },
   "courses_platformContent": "{platform} Content",
   "@courses_platformContent": {
@@ -1370,10 +1338,6 @@
   "courses_courseDeleted": "Course deleted successfully",
   "@courses_courseDeleted": {
     "description": "Course deleted successfully"
-  },
-  "courses_courseSubscribed": "Successfully subscribed to course",
-  "@courses_courseSubscribed": {
-    "description": "Successfully subscribed to course"
   },
   "courses_courseIdRequired": "Course ID is required",
   "@courses_courseIdRequired": {
@@ -1961,5 +1925,9 @@
   "courses_tableHdrProgress": "Progress",
   "@courses_tableHdrProgress": {
     "description": "Participant list: column header, average progress"
+  },
+  "courses_availableOnWebsite": "Available on our website",
+  "@courses_availableOnWebsite": {
+    "description": "Academy catalog: a course not bought yet; courses are bought on the website, not in the app"
   }
 }

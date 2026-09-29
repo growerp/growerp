@@ -597,6 +597,10 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="productReview" />
         </in-parameters>
         <actions>
+            <!-- a rating alone says too little: the review text is required -->
+            <if condition="!productReview?.trim()">
+                <return error="true" message="Please write your review" />
+            </if>
             <service-call name="create#mantle.product.ProductReview"
                 in-map="context + [userId:(ec.user.userId ?: '_NA_'), statusId:'PrvwApproved',
                 postedAnonymous:(ec.user.userId ? 'N' : 'Y'), postedDateTime:ec.user.nowTimestamp]" />

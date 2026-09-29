@@ -122,6 +122,10 @@ storeComps.CheckOutPage = {
             return (this.addressOption == null || this.addressOption == ''
                 || this.listShippingAddress == null || this.listShippingAddress.length == 0);
         },
+        needsPayment: function () {
+            var header = this.productsInCart.orderHeader;
+            return !header || Number(header.grandTotal || 0) > 0;
+        },
         notPaymentSeleted: function () {
             return (this.paymentOption == null || this.paymentOption == ''
                 || this.listPaymentMethods == null || this.listPaymentMethods.length == 0);
@@ -232,6 +236,12 @@ storeComps.CheckOutPage = {
                     this.$set(this.productsInCart, 'orderItemList', this.productsInCart.orderItemList);
                     this.setShippingItemPrice();
                     this.afterDelete();
+                    // nothing to ship (e.g. only courses): no address and shipping steps,
+                    // and nothing to pay (free courses): no payment step either
+                    if (data.shippingRequired === false &&
+                        (this.isCurrentStep(STEP_ADDRESS) || this.isCurrentStep(STEP_SHIPPING))) {
+                        this.setCurrentStep(this.needsPayment() ? STEP_BILLING : STEP_REVIEW);
+                    }
 
                     resolve();
                 }.bind(this));

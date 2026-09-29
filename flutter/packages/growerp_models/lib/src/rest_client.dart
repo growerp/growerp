@@ -2549,9 +2549,6 @@ abstract class RestClient {
     @Query('limit') int? limit,
   });
 
-  @POST("rest/s1/growerp/100/CourseSubscription")
-  Future<dynamic> subscribeCourse({@Body() required Map<String, dynamic> data});
-
   @GET("rest/s1/growerp/100/CourseLearner")
   Future<CourseLearners> getCourseLearners({
     @Query('search') String? search,

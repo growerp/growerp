@@ -385,11 +385,7 @@ class CourseTest {
     await CommonTest.tapByKey(tester, 'submission0');
     await CommonTest.checkWidgetKey(tester, 'SubmissionReviewDialog');
     await CommonTest.enterText(tester, 'instructorScore', '$score');
-    await CommonTest.enterText(
-      tester,
-      'instructorFeedbackField',
-      'Good start',
-    );
+    await CommonTest.enterText(tester, 'instructorFeedbackField', 'Good start');
     await CommonTest.tapByKey(
       tester,
       'saveReview',
@@ -642,12 +638,6 @@ class CourseTest {
 
   // ----------------------------------------------------------------- learning
 
-  /// The company of the logged in admin: learners register into it.
-  static String currentCompanyPartyId(WidgetTester tester) {
-    final context = tester.element(find.byType(Scaffold).first);
-    return context.read<AuthBloc>().state.authenticate!.company!.partyId!;
-  }
-
   /// The academy school directory lists the current company once it has a
   /// published course: search it by name and pick it.
   static Future<void> chooseSchoolInDirectory(WidgetTester tester) async {
@@ -674,43 +664,57 @@ class CourseTest {
     expect(chosen?.partyId, company.partyId);
   }
 
-  /// Registers a learner (Customer, outside user) of an existing company, as
-  /// the academy app does when started with ?companyPartyId=. Returns the email.
-  static Future<String> registerLearner(
+  /// Adds a learner who bought these courses, as a website order does: with
+  /// the admin logged in, the person (customer login, password qqqqqq9!) is
+  /// created and the courses are assigned. Returns the email to log in with.
+  static Future<String> addLearnerWithCourses(
     RestClient restClient,
-    String companyPartyId,
-    String applicationId,
+    List<String> courseIds,
   ) async {
     final email = 'learner${DateTime.now().millisecondsSinceEpoch}@example.com';
-    await restClient.register(
-      applicationId: applicationId,
-      firstName: 'Lea',
-      lastName: 'Rner',
-      email: email,
-      companyPartyId: companyPartyId,
-      newPassword: 'qqqqqq9!',
+    final learner = await restClient.createUser(
+      user: User(
+        firstName: 'Lea',
+        lastName: 'Rner',
+        email: email,
+        loginName: email,
+        role: Role.customer,
+        userGroup: UserGroup.other,
+      ),
+      password: 'qqqqqq9!',
     );
+    for (final courseId in courseIds) {
+      await restClient.addCourseLearner(
+        partyId: learner.partyId!,
+        courseId: courseId,
+      );
+    }
     return email;
   }
 
-  /// Subscribes from the catalog; paid courses use the test card the payment
-  /// dialog pre-fills in debug builds.
-  static Future<void> subscribeInCatalog(
+  /// The id of the admin's course with this title.
+  static Future<String> courseIdByTitle(
+    RestClient restClient,
+    String title,
+  ) async {
+    final courses = await restClient.listCourses(filter: title);
+    return courses.courses.firstWhere((c) => c.title == title).courseId!;
+  }
+
+  /// The catalog shows owned courses as subscribed; the others can only be
+  /// bought on the website.
+  static Future<void> checkCatalog(
     WidgetTester tester,
     String route, {
-    int index = 0,
+    required int owned,
+    int notOwned = 0,
   }) async {
-    await CommonTest.selectOption(tester, route, 'catalogItem$index');
-    expect(find.text('Subscribed'), findsNothing);
-    await CommonTest.tapByKey(tester, 'catalogItem$index');
-    await CommonTest.tapByKey(
-      tester,
-      'subscribe',
-      seconds: CommonTest.waitTime,
+    await CommonTest.selectOption(tester, route, 'catalogItem0');
+    expect(find.text('Subscribed'), findsNWidgets(owned));
+    expect(
+      find.byKey(const Key('availableOnWebsite')),
+      findsNWidgets(notOwned),
     );
-    await CommonTest.waitForSnackbarToGo(tester);
-    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
-    expect(find.text('Subscribed'), findsOneWidget);
   }
 
   /// Opens the first subscribed course, checks the lesson text is there and

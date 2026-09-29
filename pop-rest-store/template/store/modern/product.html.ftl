@@ -1,3 +1,4 @@
+<#include "component://PopRestStore/template/store/modern/shopMessages.ftl">
 <#assign inStock = false>
 <#if (product.productTypeEnumId == "PtVirtual")!false>
     <#assign isVirtual = true >
@@ -20,6 +21,9 @@
         </ol>
     </nav>
 
+    <#-- e.g. adding to the cart failed -->
+    <@shopErrors/>
+
     <!-- Success Alert -->
     <#if addedCorrect?? && addedCorrect == 'true'>
         <div class="l-glass !border-primary/40 bg-primary-container/20 rounded-xl px-5 py-4 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" role="alert">
@@ -27,7 +31,7 @@
                 <span class="material-symbols-outlined text-primary">check_circle</span>
                 <span><strong>${product.productName}</strong> has been added to your cart!</span>
             </div>
-            <a href="/d#/checkout/${storeInfo.productStore.organizationPartyId}" class="inline-flex items-center gap-1 bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-4 py-2 rounded-lg transition-all active:scale-95">
+            <a href="/cart" class="inline-flex items-center gap-1 bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-4 py-2 rounded-lg transition-all active:scale-95">
                 Checkout <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
             </a>
         </div>
@@ -61,7 +65,7 @@
         </div>
 
         <!-- Main Product Image -->
-        <div class="col-span-9 sm:col-span-10 lg:col-span-5 order-2">
+        <div class="col-span-9 sm:col-span-10 lg:col-span-3 order-2">
             <div class="l-glass rounded-2xl overflow-hidden">
                 <img id="product-image-large" class="w-full h-auto object-contain bg-surface-container-high"
                     <#if imgDetail>onclick="document.getElementById('imageDialog').showModal();" style="cursor: zoom-in;"</#if>>
@@ -69,7 +73,7 @@
         </div>
 
         <!-- Product Info -->
-        <div class="col-span-12 lg:col-span-3 order-4 lg:order-3">
+        <div class="col-span-12 lg:col-span-5 order-4 lg:order-3">
             <h1 class="font-display text-2xl font-bold text-on-surface leading-snug">${product.productName}</h1>
 
             <!-- Reviews Summary -->
@@ -100,6 +104,45 @@
                     <p class="text-on-surface-variant/60">No description available.</p>
                 </#if>
             </div>
+
+            <#-- a course: what it covers; lesson content is studied in the academy app -->
+            <#if course??>
+                <#function duration minutes><#if !(minutes??) || minutes == 0><#return ''></#if>
+                    <#if minutes lt 60><#return minutes + ' min'></#if>
+                    <#return (minutes / 60)?floor + ' h' + (minutes % 60 gt 0)?then(' ' + minutes % 60 + ' min', '')></#function>
+                <div class="mt-8">
+                    <ul class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-on-surface-variant mb-4">
+                        <#if course.difficulty?has_content><li>Level: ${course.difficulty?capitalize}</li></#if>
+                        <li>${course.moduleCount} modules, ${course.lessonCount} lessons</li>
+                        <#if duration(course.estimatedDuration!0)?has_content><li>Duration: ${duration(course.estimatedDuration)}</li></#if>
+                    </ul>
+                    <#if course.objectives?has_content>
+                        <div class="l-glass rounded-2xl p-5 mb-6">
+                            <h2 class="font-display font-semibold text-on-surface mb-2">What you will achieve</h2>
+                            <p class="text-on-surface-variant">${course.objectives}</p>
+                        </div>
+                    </#if>
+                    <h2 class="font-display text-xl font-semibold text-on-surface mb-4">Course outline</h2>
+                    <ol class="space-y-3">
+                        <#list course.modules as module>
+                            <li class="l-glass rounded-2xl p-5">
+                                <h3 class="font-display font-semibold text-on-surface">${module?index + 1}. ${module.title}</h3>
+                                <#if module.description?has_content><p class="text-sm text-on-surface-variant mt-1">${module.description}</p></#if>
+                                <#if module.lessons?has_content>
+                                    <ul class="mt-3 space-y-1">
+                                        <#list module.lessons as lesson>
+                                            <li class="flex items-center justify-between gap-4 text-sm text-on-surface-variant">
+                                                <span class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-outline">lock</span>${lesson.title}</span>
+                                                <span class="shrink-0">${duration(lesson.estimatedDuration!0)}</span>
+                                            </li>
+                                        </#list>
+                                    </ul>
+                                </#if>
+                            </li>
+                        </#list>
+                    </ol>
+                </div>
+            </#if>
         </div>
 
         <!-- Add to Cart Card -->
@@ -154,7 +197,9 @@
                         </select>
                     </div>
                 </#if>
-                <#if product.productTypeEnumId == 'PtService'>
+                <#if course??>
+                    <input type="hidden" name="quantity" value="1">
+                <#elseif product.productTypeEnumId == 'PtService'>
                     <div class="mb-4">
                         <label class="block font-label text-sm font-semibold text-on-surface mb-1" for="quantity">Quantity</label>
                         <input type="number" name="quantity" id="quantity" value="1" min="1"
@@ -205,11 +250,17 @@
                     </div>
                 </#if>
 
+                <#if course??>
+                    <p class="text-xs text-on-surface-variant mt-4">After checkout, log in to the
+                        <a href="${academyUrl}" class="text-primary underline">academy</a>
+                        with the same account to start learning.</p>
+                <#else>
                 <!-- Trust Badges -->
                 <div class="flex justify-around mt-5 text-xs text-on-surface-variant/80">
                     <span class="flex items-center gap-1"><span class="material-symbols-outlined text-primary text-[16px]">lock</span>Secure</span>
                     <span class="flex items-center gap-1"><span class="material-symbols-outlined text-primary text-[16px]">local_shipping</span>Fast Shipping</span>
                 </div>
+                </#if>
             </form>
         </div>
     </div>
@@ -292,7 +343,7 @@
 
         <div class="mb-6">
             <label class="block font-label text-sm font-semibold text-on-surface mb-2" for="productReview">Your Review</label>
-            <textarea rows="4" name="productReview" id="productReview"
+            <textarea rows="4" name="productReview" id="productReview" required
                       placeholder="Share your experience with this product..."
                       class="w-full bg-surface-container-high border border-white/10 rounded-lg px-3 py-2.5 text-on-surface text-sm outline-none focus:border-primary/50 transition-colors resize-none placeholder:text-outline"></textarea>
         </div>

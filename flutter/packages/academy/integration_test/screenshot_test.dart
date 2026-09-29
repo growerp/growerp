@@ -111,10 +111,11 @@ const _courses = [
   ),
 ];
 
-Future<void> _createCourses(RestClient restClient) async {
+Future<List<String>> _createCourses(RestClient restClient) async {
   Map<String, dynamic> decode(dynamic response) => response is String
       ? jsonDecode(response) as Map<String, dynamic>
       : response as Map<String, dynamic>;
+  final courseIds = <String>[];
   for (final course in _courses) {
     final courseId =
         decode(
@@ -143,7 +144,9 @@ Future<void> _createCourses(RestClient restClient) async {
     await restClient.updateCourse(
       data: {'courseId': courseId, 'status': 'PUBLISHED'},
     );
+    courseIds.add(courseId);
   }
+  return courseIds;
 }
 
 // ---------------------------------------------------------------------------
@@ -206,13 +209,6 @@ Future<void> _screenshot(
   await file.writeAsBytes(bytes.buffer.asUint8List());
 }
 
-Future<void> _subscribe(WidgetTester tester, int index) async {
-  await CommonTest.tapByKey(tester, 'catalogItem$index');
-  await CommonTest.tapByKey(tester, 'subscribe', seconds: CommonTest.waitTime);
-  await CommonTest.waitForSnackbarToGo(tester);
-  await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
-}
-
 // ---------------------------------------------------------------------------
 // Test
 // ---------------------------------------------------------------------------
@@ -220,7 +216,6 @@ void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   // organizations author courses in the admin app; the learner uses academy
   const adminApplicationId = 'AppAdmin';
-  const learnerApplicationId = 'AppAcademy';
 
   setUp(() async {
     await GlobalConfiguration().loadFromAsset('app_settings');
@@ -235,10 +230,7 @@ void main() {
       tester,
       createAcademyScreenshotRouter(),
       _academyMenuConfig,
-      const [
-        UserCompanyLocalizations.delegate,
-        CoursesLocalizations.delegate,
-      ],
+      const [UserCompanyLocalizations.delegate, CoursesLocalizations.delegate],
       restClient: restClient,
       applicationId: adminApplicationId,
       clear: true,
@@ -251,25 +243,21 @@ void main() {
 
     // the organization publishes its courses
     await CommonTest.createCompanyAndAdmin(tester);
-    await _createCourses(restClient);
-    final companyPartyId = CourseTest.currentCompanyPartyId(tester);
+    final courseIds = await _createCourses(restClient);
+    // a learner bought the first two on the website
+    final learner = await CourseTest.addLearnerWithCourses(
+      restClient,
+      courseIds.take(2).toList(),
+    );
     await CommonTest.gotoMainMenu(tester);
     await CommonTest.logout(tester);
 
-    // a learner of that organization browses and studies
-    final learner = await CourseTest.registerLearner(
-      restClient,
-      companyPartyId,
-      learnerApplicationId,
-    );
+    // the learner browses and studies
     await CommonTest.login(tester, username: learner);
 
     await CommonTest.selectOption(tester, '/courses', 'catalogItem0');
     await tester.pumpAndSettle(const Duration(seconds: 2));
     await _screenshot(binding, tester, 'catalog');
-
-    await _subscribe(tester, 0);
-    await _subscribe(tester, 1);
 
     await CommonTest.selectOption(tester, '/', 'myCourse0');
     await tester.pumpAndSettle(const Duration(seconds: 2));

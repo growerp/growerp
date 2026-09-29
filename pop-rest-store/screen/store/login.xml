@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<!-- Customer log in for the shop; returnTo is the page to go back to (e.g. /checkout) -->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    require-authentication="anonymous-view" history="false">
+    <parameter name="returnTo"/>
+
+    <transition name="login">
+        <parameter name="returnTo"/>
+        <actions>
+            <!-- anonymous here, as through its REST resource -->
+            <set field="loginOut" from="ec.service.sync().name('popstore.CustomerServices.login#Customer')
+                .parameters([ownerPartyId: storeInfo.productStore.organizationPartyId,
+                    username: username?.trim(), password: password]).disableAuthz().call()"/>
+            <if condition="loginOut.forcePasswordChange">
+                <message error="true">Your password must be changed first: use 'Forgot your password?' to get a new one.</message>
+            </if>
+            <set field="safeReturn" from="returnTo?.startsWith('/') &amp;&amp; !returnTo.startsWith('//') ? returnTo : '/'"/>
+        </actions>
+        <default-response url="${safeReturn}" url-type="plain"/>
+        <error-response url="."/>
+    </transition>
+    <transition name="resetPassword">
+        <parameter name="returnTo"/>
+        <actions>
+            <service-call name="popstore.CustomerServices.reset#Password" in-map="[username: username?.trim()]"/>
+            <set field="passwordSent" value="true"/>
+        </actions>
+        <default-response url="."><parameter name="passwordSent"/><parameter name="returnTo"/></default-response>
+        <error-response url="."/>
+    </transition>
+
+    <pre-actions>
+        <set field="pageTitle" value="Log in"/>
+    </pre-actions>
+    <actions>
+        <set field="template_server_login" from="storeInfo.settings.template_server_login"
+            default-value="component://PopRestStore/template/store/modern/login.html.ftl"/>
+    </actions>
+    <widgets>
+        <render-mode><text type="html" location="${template_server_header}"/></render-mode>
+        <render-mode><text type="html" location="${template_server_login}"/></render-mode>
+        <render-mode><text type="html" location="${template_server_footer}"/></render-mode>
+    </widgets>
+</screen>

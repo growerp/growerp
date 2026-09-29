@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<!-- The server rendered shop pages (cart, log in, sign-up, checkout, orders) call the same
+     popstore services as the /pop REST API, so they get the same grant: every user, inherited
+     by those services (see POPRS_API in PopRestStoreAaaSetupData.xml). -->
+<entity-facade-xml type="seed">
+    <moqui.security.ArtifactGroup artifactGroupId="POPRS_SHOP" description="POP Store shop pages"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="POPRS_SHOP" artifactTypeEnumId="AT_XML_SCREEN"
+            inheritAuthz="Y" artifactName="component://PopRestStore/screen/store/cart.xml"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="POPRS_SHOP" artifactTypeEnumId="AT_XML_SCREEN"
+            inheritAuthz="Y" artifactName="component://PopRestStore/screen/store/login.xml"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="POPRS_SHOP" artifactTypeEnumId="AT_XML_SCREEN"
+            inheritAuthz="Y" artifactName="component://PopRestStore/screen/store/signup.xml"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="POPRS_SHOP" artifactTypeEnumId="AT_XML_SCREEN"
+            inheritAuthz="Y" artifactName="component://PopRestStore/screen/store/checkout.xml"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="POPRS_SHOP" artifactTypeEnumId="AT_XML_SCREEN"
+            inheritAuthz="Y" artifactName="component://PopRestStore/screen/store/order.xml"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="POPRS_SHOP" artifactTypeEnumId="AT_XML_SCREEN"
+            inheritAuthz="Y" artifactName="component://PopRestStore/screen/store/orders.xml"/>
+    <moqui.security.ArtifactAuthz artifactAuthzId="POPRS_SHOP_ALL" userGroupId="ALL_USERS" artifactGroupId="POPRS_SHOP"
+            authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+</entity-facade-xml>

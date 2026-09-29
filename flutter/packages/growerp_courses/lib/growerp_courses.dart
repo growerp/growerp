@@ -46,7 +46,6 @@ export 'src/course/views/course_participants_view.dart';
 export 'src/learner/views/course_participant_list.dart';
 export 'src/learner/views/participant_dialog.dart';
 export 'src/course/views/course_catalog_view.dart';
-export 'src/course/views/course_payment_dialog.dart';
 
 export 'src/media/views/course_media_list.dart';
 export 'src/media/views/generate_media_dialog.dart';

@@ -716,6 +716,8 @@ limitations under the License.
                     ]" />
                 </if>
             </if>
+            <service-call name="growerp.100.CourseServices100.sync#CourseProduct"
+                in-map="[courseId: courseId]" />
         </actions>
     </service>
 
@@ -733,6 +735,9 @@ limitations under the License.
                 <message error="true">Course not found or access denied</message>
                 <return />
             </if>
+            <!-- no longer sold on the website -->
+            <service-call name="growerp.100.CourseServices100.sync#CourseProduct"
+                in-map="[courseId: courseId, withdraw: true]" />
             <!-- Delete related media -->
             <entity-delete-by-condition entity-name="growerp.course.CourseMedia">
                 <econdition field-name="courseId" />
@@ -774,6 +779,237 @@ limitations under the License.
             </entity-delete-by-condition>
             <!-- Delete course -->
             <entity-delete value-field="courseEntity" />
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!--  Selling courses as website products                      -->
+    <!-- ========================================================= -->
+
+    <service verb="sync" noun="CourseProduct" allow-remote="false">
+        <description>Internal: a course is sold on the website as its product. While the course
+            is PUBLISHED the product carries its title and description and is in the owner's
+            all products (root) category, which the website shows and searches, and in its
+            'Courses' category; otherwise, or when withdrawn, it is taken out of both.</description>
+        <in-parameters>
+            <parameter name="courseId" required="true" />
+            <parameter name="withdraw" type="Boolean" default="false" />
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity">
+                <field-map field-name="courseId" />
+            </entity-find-one>
+            <if condition="!courseEntity?.productId">
+                <return />
+            </if>
+            <set field="ownerPartyId" from="courseEntity.ownerPartyId" />
+            <set field="productId" from="courseEntity.productId" />
+            <set field="published" from="!withdraw &amp;&amp; courseEntity.status == 'PUBLISHED'" />
+            <entity-find entity-name="mantle.product.category.ProductCategory" list="rootList">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="productCategoryTypeEnumId" value="PctRoot" />
+            </entity-find>
+            <entity-find entity-name="mantle.product.category.ProductCategory" list="coursesList">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="productCategoryTypeEnumId" value="PctCatalog" />
+                <econdition field-name="categoryName" value="Courses" />
+            </entity-find>
+            <if condition="published">
+                <service-call name="update#mantle.product.Product"
+                    in-map="[productId: productId, productName: courseEntity.title,
+                        description: courseEntity.description]" />
+                <!-- the Courses category, below the root so the website lists it -->
+                <if condition="!coursesList &amp;&amp; rootList">
+                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                        in-map="[ownerPartyId: ownerPartyId, seqName: 'category']" out-map="catSeq" />
+                    <service-call name="create#mantle.product.category.ProductCategory"
+                        in-map="[categoryName: 'Courses', pseudoId: catSeq.seqNum,
+                            productCategoryTypeEnumId: 'PctCatalog', ownerPartyId: ownerPartyId]"
+                        out-map="newCategory" />
+                    <service-call name="create#mantle.product.category.ProductCategoryRollup"
+                        in-map="[parentProductCategoryId: rootList[0].productCategoryId,
+                            productCategoryId: newCategory.productCategoryId]" />
+                    <entity-find-one entity-name="mantle.product.category.ProductCategory"
+                        value-field="newCategoryEntity">
+                        <field-map field-name="productCategoryId" from="newCategory.productCategoryId" />
+                    </entity-find-one>
+                    <set field="coursesList" from="[newCategoryEntity]" />
+                </if>
+                <!-- on the website: below the browse root of the owner's store(s), which the
+                     shop menu lists -->
+                <if condition="coursesList">
+                    <entity-find entity-name="mantle.product.category.ProductCategory"
+                        list="ownerCategoryList">
+                        <econdition field-name="ownerPartyId" />
+                        <select-field field-name="productCategoryId" />
+                    </entity-find>
+                    <entity-find entity-name="mantle.product.store.ProductStoreCategory"
+                        list="browseRootList">
+                        <econdition field-name="storeCategoryTypeEnumId" value="PsctBrowseRoot" />
+                        <econdition field-name="productCategoryId" operator="in"
+                            from="ownerCategoryList*.productCategoryId" />
+                        <date-filter />
+                    </entity-find>
+                    <iterate list="browseRootList" entry="browseRoot">
+                        <entity-find entity-name="mantle.product.category.ProductCategoryRollup"
+                            list="rollupList">
+                            <econdition field-name="parentProductCategoryId"
+                                from="browseRoot.productCategoryId" />
+                            <econdition field-name="productCategoryId"
+                                from="coursesList[0].productCategoryId" />
+                            <date-filter />
+                        </entity-find>
+                        <if condition="!rollupList">
+                            <service-call name="create#mantle.product.category.ProductCategoryRollup"
+                                in-map="[parentProductCategoryId: browseRoot.productCategoryId,
+                                    productCategoryId: coursesList[0].productCategoryId]" />
+                        </if>
+                    </iterate>
+                </if>
+            </if>
+            <set field="categoryList"
+                from="(rootList ? [rootList[0]] : []) + (coursesList ? [coursesList[0]] : [])" />
+            <iterate list="categoryList" entry="category">
+                <entity-find entity-name="mantle.product.category.ProductCategoryMember"
+                    list="memberList">
+                    <econdition field-name="productCategoryId" from="category.productCategoryId" />
+                    <econdition field-name="productId" />
+                    <date-filter />
+                </entity-find>
+                <if condition="published &amp;&amp; !memberList">
+                    <service-call name="create#mantle.product.category.ProductCategoryMember"
+                        in-map="[productCategoryId: category.productCategoryId, productId: productId,
+                            fromDate: ec.user.nowTimestamp]" />
+                </if>
+                <if condition="!published">
+                    <iterate list="memberList" entry="member">
+                        <set field="member.thruDate" from="ec.user.nowTimestamp" />
+                        <entity-update value-field="member" />
+                    </iterate>
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="migrate" noun="CourseProducts" authenticate="true">
+        <description>One-off: put the products of all published courses on their company's
+            website (courses created before they were sold as products). Safe to re-run.</description>
+        <out-parameters>
+            <parameter name="courseCount" type="Integer" />
+        </out-parameters>
+        <actions>
+            <if condition="!ec.user.isInGroup('GROWERP_M_SYSTEM')">
+                <return error="true" message="Only a system user can migrate course products" />
+            </if>
+            <entity-find entity-name="growerp.course.Course" list="courseList">
+                <econdition field-name="productId" operator="is-not-null" />
+            </entity-find>
+            <iterate list="courseList" entry="courseEntity">
+                <service-call name="growerp.100.CourseServices100.sync#CourseProduct"
+                    in-map="[courseId: courseEntity.courseId]" />
+            </iterate>
+            <set field="courseCount" from="courseList.size()" type="Integer" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="CourseOutline" authenticate="anonymous-view">
+        <description>Website: the outline of the published course sold as this product
+            (modules with their lesson titles, never lesson content), or none.</description>
+        <in-parameters>
+            <parameter name="productId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="course" type="Map" />
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="growerp.course.Course" list="courseList">
+                <econdition field-name="productId" />
+                <econdition field-name="status" value="PUBLISHED" />
+            </entity-find>
+            <if condition="!courseList">
+                <return />
+            </if>
+            <set field="courseEntity" from="courseList[0]" />
+            <entity-find entity-name="growerp.course.CourseModule" list="moduleList">
+                <econdition field-name="courseId" from="courseEntity.courseId" />
+                <order-by field-name="sequenceNum" />
+            </entity-find>
+            <set field="modules" from="[]" />
+            <set field="lessonCount" from="0" />
+            <iterate list="moduleList" entry="module">
+                <entity-find entity-name="growerp.course.CourseLesson" list="lessonList">
+                    <econdition field-name="moduleId" from="module.moduleId" />
+                    <order-by field-name="sequenceNum" />
+                    <select-field field-name="title,estimatedDuration" />
+                </entity-find>
+                <set field="lessonCount" from="lessonCount + lessonList.size()" />
+                <script>modules.add([title: module.title, description: module.description,
+                    lessons: lessonList.collect { [title: it.title, estimatedDuration: it.estimatedDuration] }])</script>
+            </iterate>
+            <set field="course" from="[courseId: courseEntity.courseId, title: courseEntity.title,
+                objectives: courseEntity.objectives, difficulty: courseEntity.difficulty,
+                estimatedDuration: courseEntity.estimatedDuration,
+                coverImageUrl: courseEntity.coverImageUrl, moduleCount: moduleList.size(),
+                lessonCount: lessonCount, modules: modules]" />
+        </actions>
+    </service>
+
+    <service verb="create" noun="CourseOrderSubscriptions" authenticate="false"
+        allow-remote="false">
+        <description>Called when an order is placed (SECA): each ordered course product gives
+            the person who ordered it a lifetime subscription, which opens the course in the
+            academy. Free courses too, ordered at 0. Skipped when the person already has an
+            active subscription on the product or this order item was done before.</description>
+        <in-parameters>
+            <parameter name="orderId" required="true" />
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="mantle.order.OrderItem" list="orderItemList">
+                <econdition field-name="orderId" />
+                <econdition field-name="productId" operator="is-not-null" />
+            </entity-find>
+            <iterate list="orderItemList" entry="orderItem">
+                <entity-find entity-name="growerp.course.Course" list="courseList">
+                    <econdition field-name="productId" from="orderItem.productId" />
+                </entity-find>
+                <if condition="!courseList">
+                    <continue />
+                </if>
+                <!-- the person: the contact person of a company order, else the customer -->
+                <entity-find entity-name="mantle.order.OrderPartParty" list="contactList">
+                    <econdition field-name="orderId" />
+                    <econdition field-name="orderPartSeqId" from="orderItem.orderPartSeqId" />
+                    <econdition field-name="roleTypeId" value="CustomerContactPerson" />
+                </entity-find>
+                <entity-find-one entity-name="mantle.order.OrderPart" value-field="orderPart">
+                    <field-map field-name="orderId" />
+                    <field-map field-name="orderPartSeqId" from="orderItem.orderPartSeqId" />
+                </entity-find-one>
+                <set field="subscriberPartyId"
+                    from="contactList ? contactList[0].partyId : orderPart?.customerPartyId" />
+                <if condition="!subscriberPartyId">
+                    <continue />
+                </if>
+                <entity-find entity-name="mantle.product.subscription.Subscription" list="existingSubs">
+                    <econdition field-name="subscriberPartyId" from="subscriberPartyId" />
+                    <econdition field-name="productId" from="orderItem.productId" />
+                    <econdition field-name="thruDate" operator="greater"
+                        from="ec.user.nowTimestamp" or-null="true" />
+                </entity-find>
+                <entity-find entity-name="mantle.product.subscription.Subscription" list="orderSubs">
+                    <econdition field-name="orderId" />
+                    <econdition field-name="orderItemSeqId" from="orderItem.orderItemSeqId" />
+                </entity-find>
+                <if condition="existingSubs || orderSubs">
+                    <continue />
+                </if>
+                <service-call name="create#mantle.product.subscription.Subscription"
+                    in-map="[subscriptionTypeEnumId: 'StProduct',
+                        ownerPartyId: courseList[0].ownerPartyId,
+                        subscriberPartyId: subscriberPartyId, productId: orderItem.productId,
+                        orderId: orderId, orderItemSeqId: orderItem.orderItemSeqId,
+                        fromDate: ec.user.nowTimestamp]" />
+            </iterate>
         </actions>
     </service>
 
@@ -1787,132 +2023,6 @@ limitations under the License.
 
             <!-- Call the Groovy script for video generation -->
             <script location="component://growerp/service/generateVideoFromScript.groovy"/>
-        </actions>
-    </service>
-
-    <!-- ========================================================= -->
-    <!--  Self-service Course Subscription (with optional payment) -->
-    <!-- ========================================================= -->
-
-    <service verb="subscribe" noun="Course">
-        <description>Subscribe the current authenticated user to a course, processing Stripe payment if the course has a price.</description>
-        <in-parameters>
-            <parameter name="courseId" required="true" />
-            <parameter name="creditCardNumber" />
-            <parameter name="nameOnCard" />
-            <parameter name="expireMonth" />
-            <parameter name="expireYear" />
-            <parameter name="cVC" />
-        </in-parameters>
-        <out-parameters>
-            <parameter name="subscriptionId" />
-        </out-parameters>
-        <actions>
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
-                out-map="context" />
-            <set field="ownerPartyId" from="context.ownerPartyId" />
-            <set field="companyPartyId" from="context.companyPartyId" />
-
-            <!-- Get current user's partyId -->
-            <entity-find-one entity-name="moqui.security.UserAccount" value-field="userAccount">
-                <field-map field-name="userId" from="ec.user.userId" />
-            </entity-find-one>
-            <set field="subscriberPartyId" from="userAccount.partyId" />
-
-            <!-- Get course -->
-            <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity">
-                <field-map field-name="courseId" />
-            </entity-find-one>
-            <if condition="!courseEntity">
-                <return error="true" message="Course not found" />
-            </if>
-            <set field="productId" from="courseEntity.productId" />
-
-            <!-- Check already subscribed -->
-            <entity-find entity-name="mantle.product.subscription.Subscription" list="existingSubs">
-                <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                <econdition field-name="subscriberPartyId" />
-                <econdition field-name="productId" />
-                <econdition field-name="thruDate" operator="greater" from="ec.user.nowTimestamp"
-                    ignore-if-empty="true" or-null="true" />
-            </entity-find>
-            <if condition="existingSubs">
-                <return error="true" message="Already subscribed to this course" />
-            </if>
-
-            <!-- Look up product price -->
-            <set field="coursePrice" from="null" />
-            <if condition="productId">
-                <entity-find entity-name="mantle.product.ProductPrice" list="priceList">
-                    <econdition field-name="productId" />
-                    <econdition field-name="priceTypeEnumId" value="PptCurrent" />
-                    <date-filter />
-                    <order-by field-name="-fromDate" />
-                </entity-find>
-                <if condition="priceList">
-                    <set field="coursePrice" from="priceList[0].price" />
-                </if>
-            </if>
-
-            <!-- Process payment if price > 0 -->
-            <if condition="coursePrice != null &amp;&amp; coursePrice > 0">
-                <if condition="!creditCardNumber">
-                    <return error="true" message="Payment information required for paid courses" />
-                </if>
-                <!-- Find or create payment method -->
-                <entity-find entity-name="mantle.account.method.PaymentMethod" list="pms">
-                    <econdition field-name="ownerPartyId" from="subscriberPartyId" />
-                </entity-find>
-                <if condition="pms">
-                    <set field="paymentMethodId" from="pms[0].paymentMethodId" />
-                    <else>
-                        <set field="expireDate" value="${expireMonth}/20${expireYear}" />
-                        <service-call name="mantle.account.PaymentMethodServices.create#CreditCard"
-                            in-map="[
-                                paymentMethodTypeEnumId: 'PmtCreditCard',
-                                ownerPartyId: subscriberPartyId,
-                                cardNumber: creditCardNumber,
-                                expireDate: expireDate,
-                                firstNameOnAccount: nameOnCard,
-                                lastNameOnAccount: '',
-                                paymentGatewayConfigId: System.getProperty('paymentGatewayConfigId')
-                            ]" out-map="ccOut" />
-                        <set field="paymentMethodId" from="ccOut.paymentMethodId" />
-                    </else>
-                </if>
-                <!-- Create payment record -->
-                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
-                    in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']" out-map="paySeq" />
-                <service-call name="create#mantle.account.payment.Payment"
-                    in-map="[
-                        statusId: 'PmntPromised',
-                        pseudoId: paySeq.seqNum,
-                        paymentMethodId: paymentMethodId,
-                        amount: coursePrice,
-                        amountUomId: 'USD',
-                        paymentInstrumentEnumId: 'PiCreditCard',
-                        effectiveDate: ec.user.nowTimestamp,
-                        paymentTypeEnumId: 'PmtCreditCard',
-                        fromPartyId: subscriberPartyId,
-                        toPartyId: companyPartyId
-                    ]" out-map="paymentInfo" />
-                <!-- Process via Stripe -->
-                <if condition="System.getProperty('paymentGatewayConfigId') == 'STRIPE'">
-                    <service-call name="Stripe.StripePaymentServices.authorizeAndCapture#Payment"
-                        in-map="[paymentId: paymentInfo.paymentId,
-                                 paymentGatewayConfigId: System.getProperty('paymentGatewayConfigId')]" />
-                </if>
-            </if>
-
-            <!-- Create subscription -->
-            <service-call name="create#mantle.product.subscription.Subscription"
-                in-map="[
-                    ownerPartyId: ownerPartyId,
-                    subscriberPartyId: subscriberPartyId,
-                    productId: productId,
-                    fromDate: ec.user.nowTimestamp
-                ]" out-map="subOut" />
-            <set field="subscriptionId" from="subOut.subscriptionId" />
         </actions>
     </service>
 

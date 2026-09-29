@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<!-- Customer sign-up for the shop: a customer (outside user) of the store's company, logged in
+     right away. The same account logs in to the academy app for courses bought here. -->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    require-authentication="anonymous-view" history="false">
+    <parameter name="returnTo"/>
+
+    <transition name="register">
+        <parameter name="returnTo"/>
+        <actions>
+            <if condition="!firstName?.trim() || !lastName?.trim() || !emailAddress?.trim()">
+                <return error="true" message="Please fill in your name and email address"/>
+            </if>
+            <if condition="password != passwordVerify">
+                <return error="true" message="The two passwords are not the same"/>
+            </if>
+            <set field="email" from="emailAddress.trim()"/>
+            <service-call name="growerp.100.PartyServices100.register#WebsiteUser"
+                in-map="[ownerPartyId: storeInfo.productStore.organizationPartyId, newPassword: password,
+                    user: [email: email, loginName: email, firstName: firstName.trim(),
+                        lastName: lastName.trim(), role: 'Customer']]"/>
+            <!-- log in without login#Customer: its api key is stored in a separate transaction,
+                 before this new account is committed -->
+            <script>ec.user.loginUser(email, password)</script>
+            <!-- the customer in the session, and the cart made before signing up becomes theirs -->
+            <service-call name="popstore.CustomerServices.postLogin#Customer"/>
+            <set field="safeReturn" from="returnTo?.startsWith('/') &amp;&amp; !returnTo.startsWith('//') ? returnTo : '/'"/>
+        </actions>
+        <default-response url="${safeReturn}" url-type="plain"/>
+        <error-response url="."/>
+    </transition>
+
+    <pre-actions>
+        <set field="pageTitle" value="Create an account"/>
+    </pre-actions>
+    <actions>
+        <set field="template_server_signup" from="storeInfo.settings.template_server_signup"
+            default-value="component://PopRestStore/template/store/modern/signup.html.ftl"/>
+    </actions>
+    <widgets>
+        <render-mode><text type="html" location="${template_server_header}"/></render-mode>
+        <render-mode><text type="html" location="${template_server_signup}"/></render-mode>
+        <render-mode><text type="html" location="${template_server_footer}"/></render-mode>
+    </widgets>
+</screen>

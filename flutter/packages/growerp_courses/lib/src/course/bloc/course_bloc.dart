@@ -53,7 +53,6 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     on<CourseQuizQuestionDelete>(_onQuizQuestionDelete);
     on<CourseExerciseSave>(_onExerciseSave);
     on<CourseExerciseDelete>(_onExerciseDelete);
-    on<CourseSubscribe>(_onCourseSubscribe);
     on<CourseMediaGenerate>(_onMediaGenerate);
     on<CourseParticipantsFetch>(_onParticipantsFetch);
     on<CourseSearchChanged>(
@@ -476,38 +475,6 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         state.copyWith(
           status: CourseBlocStatus.success,
           participants: response.participants,
-        ),
-      );
-    } catch (e) {
-      emit(
-        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
-      );
-    }
-  }
-
-  Future<void> _onCourseSubscribe(
-    CourseSubscribe event,
-    Emitter<CourseState> emit,
-  ) async {
-    try {
-      emit(state.copyWith(status: CourseBlocStatus.loading));
-
-      await restClient.subscribeCourse(
-        data: {
-          'courseId': event.courseId,
-          if (event.creditCardNumber != null)
-            'creditCardNumber': event.creditCardNumber,
-          if (event.nameOnCard != null) 'nameOnCard': event.nameOnCard,
-          if (event.expireMonth != null) 'expireMonth': event.expireMonth,
-          if (event.expireYear != null) 'expireYear': event.expireYear,
-          if (event.cVC != null) 'cVC': event.cVC,
-        },
-      );
-
-      emit(
-        state.copyWith(
-          status: CourseBlocStatus.success,
-          message: 'courseSubscribed',
         ),
       );
     } catch (e) {

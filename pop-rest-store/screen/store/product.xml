@@ -122,6 +122,10 @@ along with this software (see the LICENSE.md file). If not, see
     </pre-actions>
     <actions>
         <service-call name="popstore.ProductServices.get#ProductInfo" out-map="product" in-map="[productId:productId, priceUomId: currencyUomId]"/>
+        <!-- a course sold as this product: its outline, studied in the academy app -->
+        <service-call name="growerp.100.CourseServices100.get#CourseOutline" out-map="courseOut"
+            in-map="[productId: productId]"/>
+        <set field="course" from="courseOut.course"/>
         <service-call name="popstore.ProductServices.get#ProductQuantity" out-map="productQuantity" in-map="[productId:productId]"/>
         <service-call name="popstore.ProductServices.get#ProductReviews" out-map="reviewsList" in-map="[productId:productId]"/>
         <service-call name="popstore.ProductServices.find#ProductAvailability" in-map="context" out-map="context" />
