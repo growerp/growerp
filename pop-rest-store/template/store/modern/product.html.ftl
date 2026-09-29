@@ -39,41 +39,27 @@
 
     <!-- Product Details -->
     <div class="grid grid-cols-12 gap-6">
-        <!-- Product Thumbnails -->
-        <div class="col-span-3 sm:col-span-2 lg:col-span-1 order-1">
-            <div class="flex flex-col gap-2">
-                <#assign imgDetail = false/>
-                <#assign imgExists = false/>
-                <#list product.contentList as img>
-                    <#if img.productContentTypeEnumId == "PcntImageDetail">
-                        <#assign imgDetail = true/>
-                        <#if !imgContent??>
-                            <#assign imgContent = img>
-                        <#elseif (imgContent.sequenceNum!0) gt (img.sequenceNum!0)>
-                            <#assign imgContent = img>
-                        </#if>
-                    </#if>
-                    <#if img.productContentTypeEnumId == "PcntImageSmall">
-                        <#assign imgExists = true/>
-                        <img onClick="changeLargeImage('${img.productContentId}');"
-                            class="w-full rounded-lg border border-white/10 cursor-pointer hover:border-primary/50 transition-colors bg-surface-container-high"
-                            src="/content/productImage/${img.productContentId}"
-                            alt="Product thumbnail">
-                    </#if>
-                </#list>
-            </div>
-        </div>
-
-        <!-- Main Product Image -->
-        <div class="col-span-9 sm:col-span-10 lg:col-span-3 order-2">
-            <div class="l-glass rounded-2xl overflow-hidden">
-                <img id="product-image-large" class="w-full h-auto object-contain bg-surface-container-high"
-                    <#if imgDetail>onclick="document.getElementById('imageDialog').showModal();" style="cursor: zoom-in;"</#if>>
-            </div>
+        <!-- Product Images: the larger ones in one column, click to enlarge -->
+        <#assign largeImages = product.contentList?filter(c -> c.productContentTypeEnumId == 'PcntImageLarge' || c.productContentTypeEnumId == 'PcntImageMedium')>
+        <#if !largeImages?has_content>
+            <#assign largeImages = product.contentList?filter(c -> c.productContentTypeEnumId == 'PcntImageSmall')>
+        </#if>
+        <div class="col-span-12 sm:col-span-6 lg:col-span-3 order-1 flex flex-col gap-3" id="productImages">
+            <#list largeImages as img>
+                <button type="button" class="l-glass rounded-2xl overflow-hidden cursor-zoom-in"
+                        onclick="showProductImage('/content/productImage/${img.productContentId}')">
+                    <img class="w-full h-auto object-contain bg-surface-container-high"
+                         src="/content/productImage/${img.productContentId}" alt="${product.productName}">
+                </button>
+            <#else>
+                <div class="l-glass rounded-2xl overflow-hidden">
+                    <img class="w-full h-auto object-contain bg-surface-container-high" src="/assets/default.png" alt="${product.productName}">
+                </div>
+            </#list>
         </div>
 
         <!-- Product Info -->
-        <div class="col-span-12 lg:col-span-5 order-4 lg:order-3">
+        <div class="col-span-12 lg:col-span-6 order-3 lg:order-2">
             <h1 class="font-display text-2xl font-bold text-on-surface leading-snug">${product.productName}</h1>
 
             <!-- Reviews Summary -->
@@ -146,7 +132,7 @@
         </div>
 
         <!-- Add to Cart Card -->
-        <div class="col-span-12 lg:col-span-3 order-3 lg:order-4">
+        <div class="col-span-12 sm:col-span-6 lg:col-span-3 order-2 lg:order-3">
             <form method="post" action="/product/addToCart" class="l-glass rounded-2xl p-6 lg:sticky lg:top-24 block">
                 <!-- Save Badge -->
                 <#if product.listPrice??>
@@ -372,30 +358,19 @@
             </button>
         </div>
         <div class="text-center">
-            <#if imgContent?? && imgContent.productContentId??>
-                <img class="max-w-full max-h-[80vh] mx-auto rounded-lg" src="/content/productImage/${imgContent.productContentId}" alt="Product Image">
-            </#if>
+            <img id="imageDialogImg" class="max-w-full max-h-[80vh] mx-auto rounded-lg" alt="Product Image">
         </div>
     </div>
 </dialog>
 
 <script>
-    var prodImageUrl = "/content/productImage/";
-    var productImageLarge = document.getElementById("product-image-large");
     var baseProductId = "${product.productId}";
 
-    function changeLargeImage(productContentId) {
-        productImageLarge.src = prodImageUrl + productContentId;
-        productImageLarge.style.opacity = '0.7';
-        setTimeout(function() { productImageLarge.style.opacity = '1'; }, 150);
+    // an image of the column, enlarged
+    function showProductImage(src) {
+        document.getElementById('imageDialogImg').src = src;
+        document.getElementById('imageDialog').showModal();
     }
-
-    // Default image
-    <#if product.contentList?has_content && imgExists>
-        changeLargeImage("${product.contentList[0].productContentId}");
-    <#else>
-        productImageLarge.src = "/assets/default.png";
-    </#if>
 
     // Review star-rating input
     (function() {
