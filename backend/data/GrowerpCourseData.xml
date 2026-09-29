@@ -1015,4 +1015,414 @@ This is your capstone exercise. Work through each step in order. By the end you 
 You now have a fully operational Marketing to Outreach to Sales funnel in GrowERP. Return to each module to deepen your knowledge of the advanced features in each package.]]></content>
     </growerp.course.CourseLesson>
 
+    <!-- ═══════════════════════════════════════════════════
+         COURSE C1: GROWERP FOUNDATIONS (ERP Implementation Engineer curriculum,
+         docs/ERP_Implementation_Engineer_Curriculum.md) - sold for $29
+    ═══════════════════════════════════════════════════ -->
+    <mantle.product.Product productId="ProductCourseImplC01" pseudoId="implementation-foundations" productTypeEnumId="PtService"
+        productName="GrowERP Foundations: Architecture, Apps and Data Model"
+        ownerPartyId="GROWERP" requireInventory="N" />
+    <mantle.product.ProductPrice productPriceId="ProductCourseImplC01Price" productId="ProductCourseImplC01"
+        priceTypeEnumId="PptCurrent" pricePurposeEnumId="PppPurchase" priceUomId="USD"
+        price="29.00" fromDate="1790000000000" />
+    <mantle.product.ProductContent productContentId="ProductCourseImplC01Img" productId="ProductCourseImplC01"
+        productContentTypeEnumId="PcntImageMedium" fromDate="1790000000000"
+        contentLocation="component://PopRestStore/screen/store/assets/courses/implementation-foundations.png" />
+    <mantle.product.ProductContent productContentId="ProductCourseImplC01ImgSmall" productId="ProductCourseImplC01"
+        productContentTypeEnumId="PcntImageSmall" fromDate="1790000000000"
+        contentLocation="component://PopRestStore/screen/store/assets/courses/implementation-foundations.png" />
+
+    <growerp.course.Course courseId="CourseImplC01" coverImageUrl="/assets/courses/implementation-foundations.png" pseudoId="implementation-foundations" ownerPartyId="GROWERP"
+        productId="ProductCourseImplC01"
+        title="GrowERP Foundations: Architecture, Apps and Data Model"
+        description="The first course of the ERP Implementation Engineer curriculum. Learn what GrowERP is, how it is built and which application fits which customer: the open source platform and how it is delivered, the Flutter and Moqui architecture behind every screen, the family of applications, and the data model an implementer works with every day. The course ends with a hands-on lab in which you follow one sales order from order to ledger."
+        objectives="Explain GrowERP's architecture to a customer, choose the right GrowERP application for a business, and trace a sales order through orders, shipments, payments and the ledger."
+        status="PUBLISHED" difficulty="BEGINNER" estimatedDuration="360" />
+
+    <growerp.course.CourseModule moduleId="ImplC01Mod01" courseId="CourseImplC01"
+        title="Platform Overview"
+        description="What GrowERP is, how it is licensed and delivered, and the two ways it is installed."
+        sequenceNum="1" estimatedDuration="65" />
+
+    <growerp.course.CourseLesson lessonId="ImplC01Less0101" moduleId="ImplC01Mod01"
+        courseId="CourseImplC01"
+        title="Open Source ERP and Its Licence"
+        keyPoints='["GrowERP is open source under the Apache License 2.0", "You may use, change and redistribute it, also commercially", "Customisations do not have to be published, but keep the licence notices", "Source, issues and releases live in the public growerp repository"]'
+        sequenceNum="1" estimatedDuration="20">
+        <content><![CDATA[## An ERP You Can Look Inside
+
+GrowERP is a fully open-source ERP system. The whole code base, the Flutter apps as well as the Moqui backend components, is published under the **Apache License 2.0**.
+
+### What the Apache 2.0 licence allows
+- **Use** GrowERP for any purpose, including running it for paying customers.
+- **Change** it: add fields, screens, services or complete applications.
+- **Redistribute** it, changed or unchanged, as long as the licence and copyright notices stay with the code.
+- Keep your own changes **private**: the licence does not force you to publish them.
+
+### What it means for an implementation
+- No per-user licence fees: the costs of a project are implementation, hosting and support.
+- The customer is never locked in: the source is available, so another party can take over.
+- When a customer needs something the standard system does not do, it can be built, as configuration first and as an extension when needed (covered in the Light Extension course).
+
+### Community-driven
+Customisation and improvements flow back through the public repository. As an implementer you can report issues, follow releases and contribute fixes you made for a customer.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="ImplC01Less0102" moduleId="ImplC01Mod01"
+        courseId="CourseImplC01"
+        title="Multi-Platform Delivery"
+        keyPoints='["One Flutter code base gives web, Android, iOS, Linux, macOS and Windows apps", "Apps are published in the app stores and as web apps", "Users get the same screens and behaviour on every device", "Choose devices per role: desk staff on web/desktop, field staff on mobile"]'
+        sequenceNum="2" estimatedDuration="20">
+        <content><![CDATA[## One System, Every Device
+
+GrowERP's user interface is built with **Flutter**, which compiles one code base into apps for many platforms:
+
+| Platform | How users get it |
+|---|---|
+| Web | Any modern browser |
+| Android | Google Play Store |
+| iOS | Apple App Store |
+| Linux | Snap Store |
+| macOS | Mac App Store |
+| Windows | Microsoft Store |
+
+### Why this matters to an implementer
+- **One training.** A user who learned a screen on the web finds the same screen on the phone.
+- **One configuration.** Menus, access rights and settings live in the backend, so every device shows the same set-up.
+- **Device per role.** Office staff often work in the browser or the desktop app; warehouse, hotel or field staff use a phone or tablet.
+
+### In a project
+During discovery, list who works where: at a desk, on the move, or on a shared device. That decides which platforms you roll out and test, and which you mention in the user training.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="ImplC01Less0103" moduleId="ImplC01Mod01"
+        courseId="CourseImplC01"
+        title="SaaS Multi-Tenant or Single Company"
+        keyPoints='["SaaS: many organizations share one installation, each fully separated", "Every organization gets its own owner; all its data is tagged with that owner", "Single company: GrowERP runs for one organization only", "An app can start preset to one company (companyPartyId), e.g. for its customers"]'
+        sequenceNum="3" estimatedDuration="25">
+        <content><![CDATA[## Two Ways to Install GrowERP
+
+### SaaS: many organizations in one installation
+GrowERP supports **multi-company, multi-currency and multi-language** SaaS installations. Every organization that registers becomes a separate **tenant**:
+- a new **owner** is created for the organization;
+- everything the organization creates (users, products, orders, invoices, ledger entries) belongs to that owner;
+- users only ever see the data of their own organization.
+
+This is how the public GrowERP service works: a company registers in an app, answers a few set-up questions (company name, currency, fiscal year start, optional demo data) and can start working.
+
+### Single company
+GrowERP can also run for **one organization only**, for example on the customer's own server. The apps can be started preset to that company, so users never choose or register one. Web apps do this from the website address; other platforms from a start parameter or a setting.
+
+### Choosing for a customer
+| Question | Points to |
+|---|---|
+| Does the customer want to run and own the server? | Single company |
+| Are you serving many small customers? | SaaS |
+| Must data stay in a specific country or network? | Single company on their infrastructure |
+
+Either way the applications and the configuration work the same; only hosting, backups and upgrades differ (covered in the Deployment and Operations course).]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseModule moduleId="ImplC01Mod02" courseId="CourseImplC01"
+        title="Architecture for Implementers"
+        description="How the pieces fit together, just deep enough to configure, troubleshoot and explain the system."
+        sequenceNum="2" estimatedDuration="90" />
+
+    <growerp.course.CourseLesson lessonId="ImplC01Less0201" moduleId="ImplC01Mod02"
+        courseId="CourseImplC01"
+        title="Flutter Frontend and Moqui Backend"
+        keyPoints='["Frontend: Flutter apps, all business logic lives in the backend", "Backend: Moqui framework with the Mantle business data model", "The growerp component adds the multi-company services the apps call", "Troubleshooting starts by asking: screen, communication or backend?"]'
+        sequenceNum="1" estimatedDuration="25">
+        <content><![CDATA[## Two Halves of One System
+
+### The frontend: Flutter apps
+Everything a user sees is a Flutter app. The apps show data, collect input and call the backend. They hold no business rules of their own: prices, stock, postings and access rights are decided on the server.
+
+### The backend: Moqui
+The server runs the **Moqui Framework**, an established open-source platform for business applications. On top of it:
+- **Mantle** provides the business data model: parties, products, orders, invoices, payments, shipments, the general ledger and much more;
+- the **growerp component** adds the services the apps call, including the separation between organizations.
+
+### Why an implementer cares
+When something goes wrong, place it first:
+1. **Screen** - does the app show the data it received correctly?
+2. **Communication** - did the request reach the server, and was it allowed?
+3. **Backend** - did the service do the right thing with the data?
+
+Most configuration problems (a missing menu item, a user who cannot open a screen) are decided in the backend, not in the app.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="ImplC01Less0202" moduleId="ImplC01Mod02"
+        courseId="CourseImplC01"
+        title="REST Communication"
+        keyPoints="[&quot;Apps and backend talk only through a REST API with JSON&quot;, &quot;Each request is authenticated and runs for the user's own organization&quot;, &quot;Access to an endpoint follows from the menu screens a user may open&quot;, &quot;A 403 answer means: not authorized, usually a menu/security setting&quot;]"
+        sequenceNum="2" estimatedDuration="20">
+        <content><![CDATA[## How the Apps Talk to the Server
+
+All communication between the apps and the backend goes through a **REST API**: the app sends an HTTP request, the server answers with **JSON**. For example, opening the product list asks the server for the products; saving an order sends the order to the server.
+
+### What happens on every request
+1. The server checks **who** is calling (the logged-in user).
+2. It checks the user **may** use this endpoint. In GrowERP this follows from the menu: a user may call the endpoints behind the screens their user group can open.
+3. The service runs **for the user's own organization** only.
+4. The result goes back as JSON and the app shows it.
+
+### Messages worth recognising
+| Answer | Usually means |
+|---|---|
+| 401 | Not logged in or the session expired |
+| 403 | Logged in, but not allowed: check user group and menu access |
+| 400 with a message | The service rejected the data, read the message |
+
+The Security, Users and Menus course goes deeper into access rights; the Integrations course shows how you can read data through the API yourself.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="ImplC01Less0203" moduleId="ImplC01Mod02"
+        courseId="CourseImplC01"
+        title="Building Blocks and Applications"
+        keyPoints='["Building blocks (growerp_* packages) each cover one business area", "Applications combine building blocks into one app with its own menu", "Examples of blocks: catalog, order_accounting, inventory, courses", "A new vertical app is mostly a new combination of existing blocks"]'
+        sequenceNum="3" estimatedDuration="20">
+        <content><![CDATA[## Lego for ERP
+
+The Flutter side of GrowERP is split into two kinds of packages.
+
+### Building blocks
+Each **building block** covers one business area and brings its screens and logic:
+- **growerp_user_company** - companies, users, customers, suppliers
+- **growerp_catalog** - products, categories, subscriptions
+- **growerp_order_accounting** - orders, invoices, payments, shipments, ledger
+- **growerp_inventory** - locations, stock, assets
+- **growerp_manufacturing** - bills of material, work orders
+- **growerp_marketing**, **growerp_outreach**, **growerp_sales** - the growth pipeline
+- **growerp_website**, **growerp_courses**, **growerp_wiki** and more
+
+They all rest on **growerp_core** (login, menus, common screens) and **growerp_models** (the data structures).
+
+### Applications
+An **application** combines building blocks into one app with its own name, menu and dashboard. The Admin app uses most blocks; the Hotel app combines the blocks a hotel needs with its own room and reservation screens.
+
+### Why it matters
+- The same screen behaves the same in every app that includes it, so training material can be reused.
+- A customer who needs a different mix does not need new software: a new vertical is largely a new combination of existing blocks (covered in the Light Extension course).]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="ImplC01Less0204" moduleId="ImplC01Mod02"
+        courseId="CourseImplC01"
+        title="Where Configuration Lives"
+        keyPoints="[&quot;Organization settings and data: the database, changed through the apps&quot;, &quot;Menus: shipped per app, copied per organization when changed&quot;, &quot;Seed data: XML files that load standard and demo data&quot;, &quot;App settings: the app's own file with, e.g., backend address and application id&quot;]"
+        sequenceNum="4" estimatedDuration="25">
+        <content><![CDATA[## Knowing Where to Change What
+
+An implementer changes the system in different places. Knowing which one saves hours.
+
+### 1. The database, through the apps
+Company details, currency, users, products, ledger set-up, website content: almost everything you configure for a customer is data, entered through the apps and stored in the backend database.
+
+### 2. Menus and access
+Every application ships a **standard menu**. When an organization changes it (for example in the Security screen) it gets its **own copy**, so changes never affect other organizations. The menu also decides what each user group may see and change.
+
+### 3. Seed data
+The backend loads **XML data files** with standard data: types, statuses, default menus, and optional demo data. Implementers use the same mechanism to load prepared data into a new installation (covered in the Light Extension course).
+
+### 4. App settings
+Each app has a small settings file, delivered with the app, containing for example the application id and the backend address. It is set when the app is built and rarely changed in a project.
+
+### Rule of thumb
+Prefer **configuration in the apps** over everything else: it is visible to the customer, survives upgrades and needs no developer.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseModule moduleId="ImplC01Mod03" courseId="CourseImplC01"
+        title="The Application Family"
+        description="The ready-made GrowERP applications and how to pick one for a customer."
+        sequenceNum="3" estimatedDuration="55" />
+
+    <growerp.course.CourseLesson lessonId="ImplC01Less0301" moduleId="ImplC01Mod03"
+        courseId="CourseImplC01"
+        title="The GrowERP Applications"
+        keyPoints='["Admin: the complete ERP for a general business", "Hotel, Rental, Freelance: industry apps with their own screens", "Marketing, Support, Agents, Assessment: specialist apps", "Academy: learners take the courses an organization publishes"]'
+        sequenceNum="1" estimatedDuration="30">
+        <content><![CDATA[## One Platform, Many Apps
+
+GrowERP ships several applications, all built from the same building blocks and the same backend.
+
+| Application | For | Highlights |
+|---|---|---|
+| **Admin** | A general business | Company and users, catalog, sales and purchase orders, inventory, manufacturing, accounting, CRM, website |
+| **Hotel** | Hotels and guest houses | Rooms, reservations, check-in and check-out, housekeeping |
+| **Rental** | Equipment hire | Asset rental scheduling, availability and billing |
+| **Freelance** | Freelancers and service professionals | Projects, time entries, rates, invoicing from time, cash book |
+| **Marketing** | Marketing teams | Campaigns, website content, outreach and the sales pipeline |
+| **Support** | Support desks | Support and ticketing |
+| **Agents** | AI-assisted work | AI agent chat, governance and organization set-up |
+| **Assessment** | Lead capture | AI-scored assessments on landing pages |
+| **Academy** | Learners | Take the courses an organization sells on its website |
+
+Every app includes the common basics: login, company and users, chat and notifications, dark mode, and, where it fits, data import and export.
+
+### Same data, different view
+Because the apps share the backend, an organization can use more than one: the owner works in Admin, the front desk in Hotel, learners in Academy. Each app just shows a different part of the same data.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="ImplC01Less0302" moduleId="ImplC01Mod03"
+        courseId="CourseImplC01"
+        title="Choosing an Application for a Customer"
+        keyPoints="[&quot;Start from the customer's core process, not from the feature list&quot;, &quot;An industry app beats a configured general app when one exists&quot;, &quot;Admin covers most general trading, service and manufacturing businesses&quot;, &quot;Gaps: first configuration, then workarounds, then extension&quot;]"
+        sequenceNum="2" estimatedDuration="25">
+        <content><![CDATA[## Fit the App to the Business
+
+### Start from the core process
+Ask what the business does all day:
+- **Sells and delivers goods** (trading, webshop, small manufacturing) - Admin
+- **Rents out rooms** - Hotel
+- **Rents out equipment** - Rental
+- **Sells time** (consultant, designer, coach) - Freelance
+- **Mainly needs leads and campaigns** - Marketing
+- **Sells courses or training** - Admin for authoring and selling, Academy for the learners
+
+### Then check the edges
+Make a short list of must-have requirements and check each one in the candidate app:
+1. Covered by the **standard** app?
+2. Covered by **configuration** (settings, menu, user groups)?
+3. Needs a **workaround** the customer accepts?
+4. Needs an **extension** (new screen or process)?
+
+This is the start of the fit-gap analysis you will do properly in the Business Process Mapping course.
+
+### Combining apps
+Nothing stops a customer from using two apps on the same organization, for example Hotel for the front desk and Admin for purchasing and accounting. Plan the users and their menus per app.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseModule moduleId="ImplC01Mod04" courseId="CourseImplC01"
+        title="Core Data Model"
+        description="The handful of business concepts that everything else in GrowERP builds on."
+        sequenceNum="4" estimatedDuration="75" />
+
+    <growerp.course.CourseLesson lessonId="ImplC01Less0401" moduleId="ImplC01Mod04"
+        courseId="CourseImplC01"
+        title="Parties: Companies, Persons and Roles"
+        keyPoints='["A party is any actor: a person or a company", "B2C: a person buys or sells directly, without a company", "B2B: a person represents a company; the company is the trading party", "Roles tell what a party is to you: customer, supplier, employee, lead"]'
+        sequenceNum="1" estimatedDuration="25">
+        <content><![CDATA[## Who Is Who: Parties
+
+Every actor in GrowERP is a **party**:
+- a **person**: customer, employee, supplier contact, lead;
+- a **company**: customer company, supplier, or your own organization.
+
+### Three patterns
+1. **Standalone person (B2C)** - a consumer who buys directly. The person is the party on the order and the invoice.
+2. **Person in a company (B2B)** - a contact who works for a customer or supplier. The **company** is the party on orders and invoices; the person is the contact.
+3. **Standalone company (B2B)** - an organization without named contacts yet.
+
+### Roles
+A **role** says what the party is to your organization: **customer**, **supplier**, **employee**, **lead**. The same company can be both customer and supplier.
+
+### Why it matters in a project
+Decide early, per customer group, whether you sell B2C or B2B. It determines who appears on invoices, where payments are booked and how you import the customer list in the Data Migration course.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="ImplC01Less0402" moduleId="ImplC01Mod04"
+        courseId="CourseImplC01"
+        title="Tenants and Ownership"
+        keyPoints="[&quot;Each organization in an installation is a tenant with its own owner&quot;, &quot;Everything it creates is tagged with its owner&quot;, &quot;Every query is limited to the caller's own organization&quot;, &quot;Imported data must end up with the right owner, or it is invisible&quot;]"
+        sequenceNum="2" estimatedDuration="20">
+        <content><![CDATA[## Keeping Organizations Apart
+
+In a multi-tenant installation, many organizations share one database. GrowERP keeps them apart with an **owner**:
+- when an organization registers, an owner is created for it;
+- every party, product, order, invoice and ledger entry it creates is tagged with that owner;
+- every service the apps call only works on records of the caller's own organization.
+
+This is why two customers on the same GrowERP service never see each other's customers, prices or accounts.
+
+### What an implementer should remember
+- Data entered through the apps is always tagged correctly.
+- Data **loaded by other means** (seed files, scripts) must carry the right owner. A record without it looks fine in the database but appears nowhere in the apps.
+- When a customer reports "my data is gone", check that the user belongs to the organization you think it does.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="ImplC01Less0403" moduleId="ImplC01Mod04"
+        courseId="CourseImplC01"
+        title="From Product to Ledger"
+        keyPoints='["Products are what you sell or buy: physical, service or rental", "Orders create shipments, invoices and payments", "Each step moves through statuses: created, approved, completed", "Accounting postings to the double-entry ledger happen automatically"]'
+        sequenceNum="3" estimatedDuration="30">
+        <content><![CDATA[## The Document Chain
+
+### Products
+Everything you buy or sell is a **product**, of one of three types: **physical** goods, **services** and **rental** items. Products are organized in categories, with separate categories for the website.
+
+### Orders and the documents they create
+A **sales order** (to a customer) or **purchase order** (from a supplier) is the start of the chain. From an order GrowERP generates the follow-up documents:
+- a **shipment** - goods going out or coming in;
+- an **invoice** - what is owed;
+- a **payment** - money received or paid.
+
+### Statuses
+Documents move through statuses. The common path is **Created - Approved - Completed** (the Hotel app shows Checked In and Checked Out instead). Approving and completing are the moments that trigger the next step, such as stock movements or payments.
+
+### The ledger
+GrowERP has a complete **double-entry ledger**. Approving and completing documents **posts** the accounting transactions automatically according to the posting set-up, so the ledger, balance sheet and profit and loss are up to date without separate bookkeeping.
+
+In the lab that follows you will watch this chain happen for one sales order.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseModule moduleId="ImplC01Mod05" courseId="CourseImplC01"
+        title="Lab and Knowledge Check"
+        description="Put the course into practice on a demo organization and check your understanding."
+        sequenceNum="5" estimatedDuration="75" />
+
+    <growerp.course.CourseLesson lessonId="ImplC01Less0501" moduleId="ImplC01Mod05"
+        courseId="CourseImplC01"
+        title="Lab: Follow a Sales Order from Order to Ledger"
+        keyPoints='["Register a test organization in the Admin app with demo data", "Create and approve a sales order", "Approve and complete its shipment and its payment", "Find the resulting postings in the ledger transactions"]'
+        sequenceNum="1" estimatedDuration="60">
+        <content><![CDATA[## Lab: One Sales Order, End to End
+
+**Goal:** see with your own eyes how one order produces a shipment, a payment and ledger postings.
+
+### Preparation
+1. Open the **Admin** app and register a new organization. In the set-up questions choose your currency and tick **demo data**, so products and customers are ready to use.
+2. Log in and have a look around the menu: catalog, orders, shipments, accounting.
+
+### Steps
+1. **Create a sales order** for a demo customer with one or two products. Note the order number and the total.
+2. **Approve the order.** Its status changes and follow-up documents are created.
+3. Open **outgoing shipments**: find the shipment for your order, **approve** it and then **complete** it. Check that the stock of the products went down.
+4. Open **sales payments**: find the payment for your order, **approve** it and then **complete** it.
+5. Go back to the **sales orders**: your order is now **completed**.
+6. Open the **ledger transactions** in accounting and find the postings for your shipment and payment.
+
+### Reflect
+- Which step moved the stock?
+- Which accounts were used for the payment?
+- What would a customer see if the payment were never completed?
+
+Write down your answers: you will need this understanding in every implementation.]]></content>
+    </growerp.course.CourseLesson>
+
+    <growerp.course.CourseLesson lessonId="ImplC01Less0502" moduleId="ImplC01Mod05"
+        courseId="CourseImplC01"
+        title="Knowledge Check"
+        keyPoints='["Answer the questions without looking back first", "Then check your answers in the lessons", "Repeat the lab if the document chain is not yet clear"]'
+        sequenceNum="2" estimatedDuration="15">
+        <content><![CDATA[## Check Your Understanding
+
+Answer these questions, then check them against the lessons.
+
+1. Under which licence is GrowERP published, and may a customer keep its own changes private?
+2. Name four platforms on which the GrowERP apps are available.
+3. What is the difference between a SaaS installation and a single-company installation?
+4. Where does the business logic run: in the app or in the backend?
+5. A user gets a **403** answer when opening a screen. Where do you look first?
+6. What is the difference between a building block and an application?
+7. Where do you change the menu of one organization without affecting others?
+8. Which application would you propose for a hotel, a consultant and a small trading company?
+9. In a B2B sale, which party appears on the invoice: the contact person or the company?
+10. Records loaded by a script do not appear in the app. What is the most likely cause?
+11. Name the documents a sales order leads to.
+12. When are the ledger postings made?
+
+### Next step
+Continue with **Requirements Gathering for ERP**, the second course of the ERP Implementation Engineer curriculum.]]></content>
+    </growerp.course.CourseLesson>
+
 </entity-facade-xml>

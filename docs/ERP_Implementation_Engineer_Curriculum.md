@@ -426,6 +426,8 @@ Suggested identifiers for the later seed data (`difficulty` values and minutes a
 | Capstone | CourseImplCap | ProductCourseImplCap | ADVANCED | 1200 |
 
 Modules use ids such as `ImplC01Mod01`, lessons `ImplC01Less0101`, following the existing course seed data.
+
+**Available:** C1 GrowERP Foundations is published as `CourseImplC01` (product `ProductCourseImplC01`, US$ 29) in `backend/data/GrowerpCourseData.xml`, owned by GROWERP and sold on the GrowERP website: 5 modules, 14 lessons, 360 minutes.
 Each course has its own service product so it can be sold separately; a bundle product can cover a whole certificate path.
 
 ---
