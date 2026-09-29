@@ -22,11 +22,23 @@
         <#if hasCourses>
             <div class="l-glass rounded-2xl p-6 mb-6" id="academyNotice">
                 <h2 class="font-display font-semibold text-on-surface mb-2">Start learning</h2>
-                <p class="text-sm text-on-surface-variant mb-4">Your courses are ready in the academy app. Log in
-                    there with the email and password of this shop account.</p>
+                <p class="text-sm text-on-surface-variant mb-4">Your courses are ready in the academy, on the web
+                    or in the app. Log in with the email and password of this shop account.</p>
                 <a href="${academyUrl}" id="academyLink"
                    class="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-semibold px-6 py-3 rounded-lg l-glow transition-all active:scale-95">
                     <span class="material-symbols-outlined text-[18px]">school</span>Go to the academy</a>
+                <#assign storeLink = "inline-flex items-center gap-2 border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface font-label text-sm px-5 py-2.5 rounded-full transition-colors">
+                <p class="text-sm text-on-surface-variant mt-5 mb-3">Or install the academy app:</p>
+                <div class="flex flex-wrap gap-3">
+                    <a href="https://play.google.com/store/apps/details?id=org.growerp.academy" id="academyAndroid" target="_blank" rel="noopener" class="${storeLink}">
+                        <span class="material-symbols-outlined text-[18px]">android</span>Android</a>
+                    <a href="https://apps.apple.com/us/app/id6816830945" id="academyApple" target="_blank" rel="noopener" class="${storeLink}">
+                        <span class="material-symbols-outlined text-[18px]">phone_iphone</span>iOS &amp; macOS</a>
+                    <a href="https://snapcraft.io/growerp-academy" id="academyLinux" target="_blank" rel="noopener" class="${storeLink}">
+                        <span class="material-symbols-outlined text-[18px]">terminal</span>Linux</a>
+                    <a href="https://apps.microsoft.com/detail/9MZ23R5J6BJF" id="academyWindows" target="_blank" rel="noopener" class="${storeLink}">
+                        <span class="material-symbols-outlined text-[18px]">grid_view</span>Windows</a>
+                </div>
             </div>
         </#if>
 
