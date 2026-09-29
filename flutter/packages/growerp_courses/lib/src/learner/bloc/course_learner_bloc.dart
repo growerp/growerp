@@ -15,6 +15,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -93,8 +94,14 @@ class CourseLearnerBloc extends Bloc<CourseLearnerEvent, CourseLearnerState> {
         role: learner.partyId == null ? Role.customer : null,
         userGroup: needsLogin ? UserGroup.other : null,
       );
+      // as at registration: debug builds default to qqqqqq9!, release leaves
+      // it null (backend decides: staging test accounts still get qqqqqq9!,
+      // everything else a random emailed password)
       final result = learner.partyId == null
-          ? await restClient.createUser(user: user)
+          ? await restClient.createUser(
+              user: user,
+              password: kReleaseMode ? null : 'qqqqqq9!',
+            )
           : await restClient.updateUser(user: user);
       final updated = CourseLearner(
         partyId: result.partyId,

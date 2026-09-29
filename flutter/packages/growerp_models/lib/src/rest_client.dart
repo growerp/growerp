@@ -379,7 +379,10 @@ abstract class RestClient {
   });
 
   @POST("rest/s1/growerp/100/User")
-  Future<User> createUser({@Field() required User user});
+  Future<User> createUser({
+    @Field() required User user,
+    @Field() String? password,
+  });
 
   @PATCH("rest/s1/growerp/100/User")
   Future<User> updateUser({@Field() required User user});

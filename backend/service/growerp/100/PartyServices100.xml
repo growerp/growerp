@@ -1876,8 +1876,7 @@ limitations under the License.
                     <parameter name="partyClassificationId" />
                 </parameter>
             </parameter>
-            <parameter name="password"
-                default="org.moqui.util.StringUtilities.getRandomString(6) + '9!'" />
+            <parameter name="password" /><!-- empty: see the actions -->
             <parameter name="login" type="Boolean" default-value="false">
                 <description>Log the session in as the user just created. Only the anonymous
                     registration services need this: the rest of their work runs as that new
@@ -1972,6 +1971,19 @@ limitations under the License.
                 <else-if condition="user.role == 'Customer' || user.company?.role == 'Customer'">
                     <set field="customerStatusId" value="CUSTOMER_CONVERTED" />
                 </else-if>
+            </if>
+            <!-- as in register#User: a testN@example.com account added on the growerp.org
+                 staging backend gets the known qqqqqq9! password; production (growerp.com)
+                 and every other email get a random one. -->
+            <if condition="!password">
+                <if condition="user.email ==~ /(?i)^test[a-z0-9]*@example\.com$/
+                        &amp;&amp; ec.web?.getHostName(false)?.endsWith('.org') == true">
+                    <set field="password" value="qqqqqq9!" />
+                    <else>
+                        <set field="password"
+                            from="org.moqui.util.StringUtilities.getRandomString(6) + '9!'" />
+                    </else>
+                </if>
             </if>
             <!-- create account with or without login-->
             <!-- create#Account will always create a login even if username == null-->
