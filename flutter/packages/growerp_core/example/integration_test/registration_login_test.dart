@@ -589,12 +589,21 @@ void main() {
           // NOTE: demo data checkbox deliberately left checked (default in debug).
           await tester.tap(find.byKey(const Key('submit')));
           await tester.pump();
+          // Poll finely: on a warm backend the demo data load can finish within
+          // a second, so the dialog may be gone before a 1s poll looks for it.
           for (
             int w = 0;
-            w < 120 && await CommonTest.doesExistKey(tester, 'submit');
+            w < 1200 && await CommonTest.doesExistKey(tester, 'submit');
             w++
           ) {
-            await tester.pump(const Duration(seconds: 1));
+            await tester.pump(const Duration(milliseconds: 100));
+          }
+          for (int w = 0; w < 20 && !sawSetupInProgress; w++) {
+            if (await CommonTest.doesExistKey(tester, 'setupInProgress')) {
+              sawSetupInProgress = true;
+            } else {
+              await tester.pump(const Duration(milliseconds: 100));
+            }
           }
           tenantSetupDone = true;
           continue;
