@@ -454,6 +454,8 @@ storeComps.CreateAccountPage = {
             accountInfo.newPassword = 'qqqqqq9!';
         }
         accountInfo.ownerPartyId = this.$route.params.ownerPartyId;
+        // ?app=AppAcademy: signing up from the courses page, to learn in the academy app
+        if (this.$route.query.app) accountInfo.applicationId = this.$route.query.app;
         return {
             homePath: "", accountInfo: accountInfo, confirmPassword: "", errorMessage: "",
             axiosConfig: {
@@ -495,7 +497,12 @@ storeComps.CreateAccountPage = {
                     }
                 });
                 window.dispatchEvent(event);
-                this.$router.push({ name: 'login' });
+                if (this.accountInfo.applicationId === 'AppAcademy') {
+                    // learners log in and study in the academy app of this school
+                    window.location.href = '/academy/?companyPartyId=' + this.accountInfo.ownerPartyId;
+                } else {
+                    this.$router.push({ name: 'login' });
+                }
             }.bind(this)).catch(function (error) {
                 if (!!error.response.headers.moquisessiontoken) {
                     this.axiosConfig.headers.moquiSessionToken = error.response.headers.moquisessiontoken;

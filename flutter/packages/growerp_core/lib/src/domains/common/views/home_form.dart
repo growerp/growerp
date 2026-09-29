@@ -91,7 +91,8 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
     // dialog (prefilled with the typed email) so the user can finish signing up.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || _pendingRegisterHandled) return;
-      if (_authBloc.state.pendingRegistrationEmail != null) {
+      if (_authBloc.state.pendingRegistrationEmail != null &&
+          !_noRegistrationApps.contains(applicationId)) {
         _pendingRegisterHandled = true;
         _showAuthDialog(RegisterUserDialog(company == null));
       }
@@ -99,6 +100,10 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
   }
 
   bool _pendingRegisterHandled = false;
+
+  /// Apps without registration: support staff are set up internally, academy
+  /// learners register on the website or are added in the admin app.
+  static const _noRegistrationApps = {'AppSupport', 'AppAcademy'};
 
   /// Auth dialogs (login/register) show their own progress indicator, so while
   /// one is open this form must not swap to [AppLoadingScreen] underneath it:
@@ -370,7 +375,9 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
                                   // With a startup company the registration
                                   // joins that company as a new user, the
                                   // backend ignores the admin flag then.
-                                  if (applicationId != 'AppSupport' &&
+                                  if (!_noRegistrationApps.contains(
+                                        applicationId,
+                                      ) &&
                                       !(kReleaseMode &&
                                           GlobalConfiguration().get("test") ==
                                               true &&

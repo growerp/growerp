@@ -64,7 +64,7 @@
                     <#if duration(course.estimatedDuration!0)?has_content><li>Duration: ${duration(course.estimatedDuration)}</li></#if>
                 </ul>
                 <a href="/academy/?companyPartyId=${storeInfo.productStore.organizationPartyId}" class="btn btn-primary btn-block"><i class="fas fa-graduation-cap mr-1"></i>Enroll</a>
-                <small class="d-block mt-2" style="color: var(--neutral-500);">Log in or register in the app to enroll and start learning.</small>
+                <small class="d-block mt-2" style="color: var(--neutral-500);">New here? <a href="/d#/account/create/${storeInfo.productStore.organizationPartyId}?app=AppAcademy">Create an account</a>, then log in to enroll and start learning.</small>
             </div></div>
         </div>
     </div>

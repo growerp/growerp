@@ -3147,7 +3147,7 @@ limitations under the License.
                 <field-map field-name="roleTypeId" value="OrgInternal" />
             </entity-find-one>
             <if condition="!companyParty">
-                <return message="Not a valid companyId" />
+                <return error="true" message="Not a valid companyId" />
             </if>
             <!-- Party.ownerPartyId defaults to '_NA_' in mantle, so an unresolved owner here
                  would create a website user no tenant can see. Fail instead. -->
@@ -3160,7 +3160,7 @@ limitations under the License.
                 <field-map field-name="applicationId" from="applicationId" />
             </entity-find-one>
             <if condition="!application">
-                <return message="Not a valid applicationId: ${applicationId}" />
+                <return error="true" message="Not a valid applicationId: ${applicationId}" />
             </if>
             <!-- create account, not active when no login provided -->
             <set field="disabled" value="N" />

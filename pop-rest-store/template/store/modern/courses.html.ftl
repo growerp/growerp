@@ -71,7 +71,7 @@
                 </ul>
                 <a href="/academy/?companyPartyId=${storeInfo.productStore.organizationPartyId}" class="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-6 py-3 rounded-lg l-glow transition-all active:scale-95">
                     <span class="material-symbols-outlined text-[18px]">school</span>Enroll</a>
-                <p class="text-xs text-on-surface-variant">Log in or register in the app to enroll and start learning.</p>
+                <p class="text-xs text-on-surface-variant">New here? <a href="/d#/account/create/${storeInfo.productStore.organizationPartyId}?app=AppAcademy" class="text-primary underline">Create an account</a>, then log in to enroll and start learning.</p>
             </div>
         </aside>
     </div>
