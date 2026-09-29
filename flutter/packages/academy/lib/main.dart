@@ -98,10 +98,10 @@ class _AcademyAppState extends State<AcademyApp> {
   GoRouter? _splashRouter;
   GoRouter? _dynamicRouter;
   String? _dynamicRouterKey;
-  GoRouter? _directoryRouter;
 
-  /// The school the learner joins: without one registration would create a
-  /// new company, so the school directory is shown until one is chosen.
+  /// The school from the startup url/settings, if any. Without one the login
+  /// screen shows 'GrowERP Academy' and the learner's account decides the
+  /// school: learners are never registered here, so no school needs choosing.
   Company? _company;
 
   @override
@@ -109,29 +109,6 @@ class _AcademyAppState extends State<AcademyApp> {
     super.initState();
     _company = widget.company;
     _menuConfigBloc = MenuConfigBloc(widget.restClient, 'academy');
-  }
-
-  Future<void> _setCompany(Company? company) async {
-    await rememberStartupCompany(company?.partyId);
-    setState(() {
-      _company = company;
-      // TopApp is rebuilt for the new company: give it fresh routers too
-      _splashRouter = null;
-      _dynamicRouter = null;
-      _dynamicRouterKey = null;
-      _directoryRouter = null;
-    });
-  }
-
-  GoRouter _schoolDirectoryRouter() {
-    Widget directory(BuildContext context, GoRouterState state) =>
-        SchoolDirectory(onSelected: _setCompany);
-    return _directoryRouter ??= GoRouter(
-      routes: [
-        GoRoute(path: '/', builder: directory),
-        GoRoute(path: '/:path', builder: directory),
-      ],
-    );
   }
 
   @override
@@ -151,9 +128,7 @@ class _AcademyAppState extends State<AcademyApp> {
           GoRouter router;
 
           final menuConfiguration = state.menuConfiguration;
-          if (_company == null) {
-            router = _schoolDirectoryRouter();
-          } else if (state.status == MenuConfigStatus.success &&
+          if (state.status == MenuConfigStatus.success &&
               menuConfiguration != null) {
             final routerKey =
                 '${menuConfiguration.menuConfigurationId}_'
@@ -215,7 +190,6 @@ class _AcademyAppState extends State<AcademyApp> {
             widgetRegistrations: academyWidgetRegistrations,
             forceUpdateInfo: widget.forceUpdateInfo,
             company: _company,
-            onChangeCompany: () => _setCompany(null),
           );
         },
       ),

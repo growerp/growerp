@@ -343,6 +343,9 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
                                     child: Text(
                                       company == null
                                           ? widget.title
+                                          // the academy of this school
+                                          : applicationId == 'AppAcademy'
+                                          ? '${company!.name!} Academy'
                                           : company!.name!,
                                       style: TextStyle(
                                         fontSize: isPhone ? 20 : 28,
