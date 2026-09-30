@@ -100,5 +100,9 @@
   "suggestedNextStep": "Siguiente paso sugerido",
   "reviewFlags": "Comprobar en persona",
   "consistency": "Fotos vs. descripción",
-  "explainPolicy": "Explicar mi cobertura con palabras sencillas"
+  "explainPolicy": "Explicar mi cobertura con palabras sencillas",
+  "assistant": "Hacer una pregunta",
+  "assistantWelcome": "¡Hola! Pregúnteme sobre sus pólizas, su cobertura o una reclamación. Lo que no sepa, se lo responderá la agencia.",
+  "assistantHint": "Escriba su pregunta",
+  "assistantEscalated": "He pasado su pregunta a la agencia; una persona le contactará."
 }

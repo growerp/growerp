@@ -100,5 +100,9 @@
   "suggestedNextStep": "Étape suivante suggérée",
   "reviewFlags": "À vérifier soi-même",
   "consistency": "Photos vs description",
-  "explainPolicy": "Expliquer ma couverture simplement"
+  "explainPolicy": "Expliquer ma couverture simplement",
+  "assistant": "Poser une question",
+  "assistantWelcome": "Bonjour ! Posez-moi vos questions sur vos contrats, votre couverture ou un sinistre. Pour le reste, l'agence vous répondra.",
+  "assistantHint": "Votre question",
+  "assistantEscalated": "J'ai transmis votre question à l'agence ; quelqu'un vous contactera."
 }

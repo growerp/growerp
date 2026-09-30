@@ -943,6 +943,14 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/PolicyRenew")
   Future<Policy> renewPolicy({@Field() required Policy policy});
 
+  /// client assistant: answers about the caller's own policies and claims;
+  /// history is a list of {role: user|assistant, text}
+  @POST("rest/s1/growerp/100/InsuranceAssistant")
+  Future<dynamic> askInsuranceAssistant({
+    @Field() required String question,
+    @Field() List<Map<String, String>>? history,
+  });
+
   /// plain-language explanation of the policy in the user's language
   @POST("rest/s1/growerp/100/PolicyExplanation")
   Future<dynamic> explainPolicy({

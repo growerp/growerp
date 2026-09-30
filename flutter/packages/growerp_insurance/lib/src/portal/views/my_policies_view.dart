@@ -45,9 +45,24 @@ class MyPoliciesViewState extends State<MyPoliciesView> {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-          child: Text(
-            localizations.myPolicies,
-            style: Theme.of(context).textTheme.titleMedium,
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  localizations.myPolicies,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              TextButton.icon(
+                key: const Key('askAssistant'),
+                icon: const Icon(Icons.support_agent),
+                label: Text(localizations.assistant),
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (_) => const InsuranceAssistantDialog(),
+                ),
+              ),
+            ],
           ),
         ),
         BlocBuilder<PolicyBloc, PolicyState>(

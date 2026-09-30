@@ -431,5 +431,21 @@
   "explainPolicy": "Explain my cover in plain words",
   "@explainPolicy": {
     "description": "insurance label: Explain my cover in plain words"
+  },
+  "assistant": "Ask a question",
+  "@assistant": {
+    "description": "insurance label: Ask a question"
+  },
+  "assistantWelcome": "Hello! Ask me about your policies, your cover or a claim. For anything I cannot answer, the agency gets back to you.",
+  "@assistantWelcome": {
+    "description": "insurance label: Hello! Ask me about your policies, your cover or a claim. Fo"
+  },
+  "assistantHint": "Type your question",
+  "@assistantHint": {
+    "description": "insurance label: Type your question"
+  },
+  "assistantEscalated": "I passed your question on to the agency; a person will contact you.",
+  "@assistantEscalated": {
+    "description": "insurance label: I passed your question on to the agency; a person will conta"
   }
 }

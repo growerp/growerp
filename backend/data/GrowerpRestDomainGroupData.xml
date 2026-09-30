@@ -147,7 +147,7 @@ The 28 anonymous-* resources bypass authz entirely and need no domain.
         description="Insurance policies, claims and commissions"/>
     <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_INSURANCE"
         artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
-        artifactName="/growerp/100/(PolicyCommission|PolicyExplanation|PolicyRenewalRequest|PolicyRenew|Policies|Policy|Claims|Claim)(/.*)?"/>
+        artifactName="/growerp/100/(InsuranceAssistant|PolicyCommission|PolicyExplanation|PolicyRenewalRequest|PolicyRenew|Policies|Policy|Claims|Claim)(/.*)?"/>
 
     <moqui.security.ArtifactGroup artifactGroupId="GROWERP_ADK"
         description="AI agents, their jobs, tools and approvals"/>

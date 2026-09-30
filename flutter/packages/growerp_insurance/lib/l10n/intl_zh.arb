@@ -100,5 +100,9 @@
   "suggestedNextStep": "建议下一步",
   "reviewFlags": "需人工核查",
   "consistency": "照片与描述对比",
-  "explainPolicy": "用通俗语言解释我的保障"
+  "explainPolicy": "用通俗语言解释我的保障",
+  "assistant": "提问",
+  "assistantWelcome": "您好！可以问我关于保单、保障或理赔的问题。我无法回答的，代理会回复您。",
+  "assistantHint": "输入您的问题",
+  "assistantEscalated": "已将您的问题转给代理，工作人员会联系您。"
 }

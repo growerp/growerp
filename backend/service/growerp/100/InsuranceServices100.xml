@@ -788,6 +788,109 @@ Notes from the agency: ${policy.description ?: '-'}"""
         </actions>
     </service>
 
+    <!-- ===================== client assistant ===================== -->
+
+    <service verb="ask" noun="InsuranceAssistant">
+        <description>24/7 answers for a client about their own policies and claims. Runs as
+            the asking user, so it only sees what get#Policies and get#Claims return to that
+            user, plus the agency's knowledge base. It explains and guides; it never quotes
+            prices, promises payments or decides claims. When a person is needed the agency
+            is emailed and the client told so.</description>
+        <in-parameters>
+            <parameter name="question" required="true" />
+            <parameter name="history" type="List" /><!-- [[role: user|assistant, text: ..]] -->
+        </in-parameters>
+        <out-parameters>
+            <parameter name="answer" />
+            <parameter name="escalated" type="Boolean" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.InsuranceServices100.check#InsuranceAccess"
+                out-map="context" />
+            <service-call name="growerp.100.InsuranceServices100.get#Policies"
+                in-map="[limit: 20]" out-map="own" />
+            <service-call name="growerp.100.InsuranceServices100.get#Claims"
+                in-map="[limit: 10]" out-map="ownClaims" />
+            <set field="knowledge" from="[]" />
+            <script><![CDATA[
+                try {
+                    knowledge = ec.service.sync().name('AdkKnowledgeServices.search#AdkKnowledge')
+                        .parameters([ownerPartyId: ownerPartyId, query: question, limit: 4])
+                        .call()?.results ?: []
+                } catch (Throwable t) {
+                    ec.logger.info("Insurance assistant: no knowledge search: ${t.message}")
+                }
+                ec.message.clearErrors()
+            ]]></script>
+            <script><![CDATA[
+                import groovy.json.JsonOutput
+                def facts = [
+                    policies: own.policies.collect { [number: it.policyNumber ?: it.pseudoId,
+                        type: it.policyTypeEnumId, status: it.statusId, insurer: it.carrierName,
+                        plate: it.vehiclePlate, from: it.effectiveDate, until: it.expirationDate,
+                        renewalRequested: it.renewalRequestedDate, coverages: it.coverages] },
+                    claims: ownClaims.claims.collect { [number: it.claimNumber ?: it.pseudoId,
+                        policy: it.policyNumber, status: it.statusId, incident: it.incidentDate,
+                        description: it.description, amountPaid: it.amountPaid,
+                        stillNeeded: it.missingEvidence] }]
+                String kb = knowledge.collect { "[${it.title}] ${it.text}" }.join("\n---\n")
+                String past = (history ?: []).takeRight(8).collect { "${it.role}: ${it.text}" }.join("\n")
+                String prompt = """You are the assistant of an insurance agency, answering one of its
+clients in the app. Answer in the language of the client's question, in at most 5 short sentences.
+Rules:
+- Use only the client's data and the agency knowledge below. If the answer is not there, say you
+  are not sure and that the agency will reply.
+- Never quote or estimate prices, never offer discounts or cashback, never create urgency.
+- Never say a claim will be approved, denied or how much will be paid: people decide that.
+- For a new claim point to "Report a claim" in the app; to renew, the "Request renewal" button on
+  the policy card; proof of insurance is the QR code on the policy card.
+- If someone is hurt: tell them to call 115 (ambulance) and 113 (police) first.
+- Set "escalate" to true when the client asks for a person, complains, reports an emergency, or
+  asks something you cannot answer from the data.
+Answer with JSON only: {"answer": "...", "escalate": true|false}
+
+Client data (JSON, statuses are system codes: Inps* policy, Incl* claim):
+${JsonOutput.toJson(facts)}
+
+Agency knowledge:
+${kb ?: 'none'}
+
+Conversation so far:
+${past ?: 'none'}
+
+Client question: ${question}"""
+                def reply
+                if ('true'.equals(System.getenv('GROWERP_TEST_MODE'))) {
+                    reply = [answer: "Test answer: you have ${facts.policies.size()} policies.", escalate: false]
+                } else {
+                    def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
+                    String text = GeminiAiUtil.callLlmApi(ec, prompt, [ownerPartyId: ownerPartyId,
+                        jsonMode: true, temperature: 0.3, maxOutputTokens: 1024,
+                        purpose: "insurance client assistant"])
+                    try { reply = GeminiAiUtil.parseJsonResponse(text) }
+                    catch (Throwable t) { reply = [answer: text, escalate: false] }
+                }
+                answer = reply.answer?.toString()
+                escalated = reply.escalate == true
+            ]]></script>
+            <if condition="escalated">
+                <service-call name="growerp.100.InsuranceServices100.get#PartyName"
+                    in-map="[partyId: userPartyId]" out-map="asker" />
+                <set field="producerPartyId" from="own.policies ? own.policies[0].producerPartyId : null" />
+                <entity-find entity-name="moqui.security.UserAccount" list="producerAccounts" limit="1">
+                    <econdition field-name="partyId" from="producerPartyId" />
+                </entity-find>
+                <if condition="producerAccounts &amp;&amp; producerAccounts[0].emailAddress">
+                    <set field="escalationBody" value="&lt;p&gt;${groovy.xml.XmlUtil.escapeXml(asker.name ?: '')} (${ec.user.userAccount?.emailAddress}) asked the assistant:&lt;/p&gt;&lt;blockquote&gt;${groovy.xml.XmlUtil.escapeXml(question)}&lt;/blockquote&gt;&lt;p&gt;The assistant answered:&lt;/p&gt;&lt;blockquote&gt;${groovy.xml.XmlUtil.escapeXml(answer ?: '')}&lt;/blockquote&gt;&lt;p&gt;Please follow up with the client.&lt;/p&gt;" />
+                    <service-call name="growerp.100.GeneralServices100.send#DirectEmail" ignore-error="true"
+                        in-map="[ownerPartyId: ownerPartyId, toAddresses: producerAccounts[0].emailAddress,
+                            subject: 'Client question needs a person: ' + (asker.name ?: ''),
+                            bodyHtml: escalationBody]" />
+                </if>
+            </if>
+        </actions>
+    </service>
+
     <!-- ===================== claims ===================== -->
 
     <service verb="get" noun="Claims">
