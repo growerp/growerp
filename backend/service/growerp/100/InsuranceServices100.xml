@@ -1062,7 +1062,8 @@ Client question: ${question}"""
             <if condition="!policyList">
                 <return error="true" message="Policy ${claim.policyId} not found!" />
             </if>
-            <if condition="claim.incidentDate.after(ec.user.nowTimestamp)">
+            <!-- calendar dates arrive as noon UTC: today can still be 'later' than now -->
+            <if condition="claim.incidentDate.after(new java.sql.Timestamp(ec.user.nowTimestamp.time + 24L * 3600L * 1000L))">
                 <return error="true" message="The incident date is in the future" />
             </if>
             <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"

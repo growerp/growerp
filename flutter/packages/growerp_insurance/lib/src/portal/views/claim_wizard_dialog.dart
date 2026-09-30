@@ -45,7 +45,8 @@ class ClaimWizardDialogState extends State<ClaimWizardDialog> {
   int _step = 0;
   Policy? _policy;
   IncidentType? _incidentType;
-  DateTime? _incidentDate;
+  // most claims are reported the day it happened; the client can change it
+  DateTime? _incidentDate = DateUtils.dateOnly(DateTime.now());
   bool _consent = false;
 
   /// photo per checklist slot; extra photos after the slots
@@ -143,6 +144,7 @@ class ClaimWizardDialogState extends State<ClaimWizardDialog> {
   List<Widget> _whatStep(InsuranceLocalizations localizations) => [
     DropdownButtonFormField<Policy>(
       key: const Key('wizardPolicy'),
+      isExpanded: true,
       decoration: InputDecoration(labelText: localizations.policy),
       initialValue: _policy,
       items: widget.policies
@@ -150,6 +152,7 @@ class ClaimWizardDialogState extends State<ClaimWizardDialog> {
             (p) => DropdownMenuItem(
               value: p,
               child: Text(
+                overflow: TextOverflow.ellipsis,
                 '${p.policyType?.name ?? ''} '
                 '${p.vehiclePlate ?? ''} ${p.policyNumber ?? p.pseudoId}',
               ),
