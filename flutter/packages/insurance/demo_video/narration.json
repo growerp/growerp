@@ -1,0 +1,13 @@
+[
+  {"id": "title", "text": "GrowERP Insurance. Our answer to Tasco's AI for Insurance challenge: compulsory motor insurance in Vietnam that is easy to buy, easy to carry and easy to claim, without a single discount or price trick."},
+  {"id": "staff", "text": "The agency works in GrowERP: policies from several insurers, motor policies with their licence plate, the renewals due in the next sixty days, claims and commissions, all in one system with the accounting."},
+  {"id": "card", "text": "Now the customer. She logs in on her phone, in Vietnamese. Her compulsory motor policy is a digital card: plate, validity, cover and a QR code. Nothing to lose, nothing to print."},
+  {"id": "verify", "text": "Police or a garage scan the code and see a live check: valid or not, with a masked plate and no personal data."},
+  {"id": "explain", "text": "What am I actually covered for? One tap, and AI explains the policy in plain Vietnamese, using only the policy's own limits and deductibles, and inventing nothing."},
+  {"id": "claim", "text": "After an accident, a claim takes minutes. What happened, when and where, then a photo checklist: the plate, the whole car, the damage and the other vehicle. She agrees that the photos are checked with the help of AI, and that people decide."},
+  {"id": "triage", "text": "At the agency the claim arrives complete. In the background a vision model has already triaged the photos: damaged parts, severity, whether the plate matches the policy, and what evidence is missing. It is advice for the adjuster, never a decision."},
+  {"id": "filed", "text": "The adjuster reviews it and files the claim with the insurer."},
+  {"id": "timeline", "text": "The customer sees every step, what it means and what happens next, and gets an email on each change. No more calling to ask."},
+  {"id": "assistant", "text": "Questions at any hour go to the assistant. It answers from her own policies and claims, never quotes prices, and passes anything it cannot answer to a person."},
+  {"id": "close", "text": "Easy to buy, to carry and to claim. People decide, consent and minimal data by design, and ready for a four week pilot with Tasco. GrowERP, open source."}
+]
