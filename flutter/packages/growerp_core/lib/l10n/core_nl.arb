@@ -1361,5 +1361,8 @@
   "coursesPublished": "Gepubliceerd",
   "courseLearners": "Cursisten",
   "courseCompletions": "Voltooid",
-  "courseToReview": "Te beoordelen"
+  "courseToReview": "Te beoordelen",
+  "insActivePolicies": "Actief",
+  "insRenewalsDue": "Te verlengen",
+  "insOpenClaims": "Open schades"
 }

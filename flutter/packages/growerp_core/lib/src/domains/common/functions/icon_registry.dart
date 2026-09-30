@@ -23,6 +23,8 @@ final Map<String, Icon> iconRegistry = {
   'school': const Icon(Icons.school),
   'settings': const Icon(Icons.settings),
   'security': const Icon(Icons.security),
+  'shield': const Icon(Icons.shield),
+  'report': const Icon(Icons.report),
   'cleaning_services': const Icon(Icons.cleaning_services),
   'task': const Icon(Icons.task),
   'money': const Icon(Icons.money),

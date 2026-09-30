@@ -1,0 +1,12 @@
+Run your insurance agency from one app. GrowERP Insurance keeps every client policy in one place, warns you before a policy lapses, follows each claim with the carrier and shows which commissions the carriers still owe you.
+
+- Policies of any line of business: auto, home, liability, property, life, health, travel
+- Coverages with limits and deductibles, premium and payment frequency
+- Renewal list of the policies expiring in the next 60 days, renewal in one tap
+- Daily renewal reminders emailed to your clients
+- Claims followed from report to payment, with the carrier's claim number
+- Expected commission per policy against what the carrier paid, booked as an invoice
+- Client portal: your clients log in to see their policies and report a claim
+- Clients, carriers, tasks and accounting included
+
+Made for independent agents and brokers who sell policies of several insurance companies.

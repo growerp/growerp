@@ -1361,5 +1361,8 @@
   "coursesPublished": "Veröffentlicht",
   "courseLearners": "Lernende",
   "courseCompletions": "Abgeschlossen",
-  "courseToReview": "Zu prüfen"
+  "courseToReview": "Zu prüfen",
+  "insActivePolicies": "Aktiv",
+  "insRenewalsDue": "Verlängerungen fällig",
+  "insOpenClaims": "Offene Schäden"
 }

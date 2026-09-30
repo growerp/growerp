@@ -1361,5 +1361,8 @@
   "coursesPublished": "已发布",
   "courseLearners": "学员",
   "courseCompletions": "已完成",
-  "courseToReview": "待审阅"
+  "courseToReview": "待审阅",
+  "insActivePolicies": "有效",
+  "insRenewalsDue": "待续保",
+  "insOpenClaims": "未结理赔"
 }

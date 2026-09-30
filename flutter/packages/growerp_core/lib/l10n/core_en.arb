@@ -1787,6 +1787,18 @@
   "courseLearners": "Learners",
   "courseCompletions": "Completed",
   "courseToReview": "To review",
+  "insActivePolicies": "Active",
+  "insRenewalsDue": "Renewals due",
+  "insOpenClaims": "Open claims",
+  "@insActivePolicies": {
+    "description": "Active policies, insurance dashboard tile"
+  },
+  "@insRenewalsDue": {
+    "description": "Policies due for renewal, insurance dashboard tile"
+  },
+  "@insOpenClaims": {
+    "description": "Claims not paid, denied or closed, insurance dashboard tile"
+  },
   "@coursesPublished": {
     "description": "Published courses, courses dashboard tile"
   },

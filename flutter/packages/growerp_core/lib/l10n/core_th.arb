@@ -1361,5 +1361,8 @@
   "coursesPublished": "เผยแพร่แล้ว",
   "courseLearners": "ผู้เรียน",
   "courseCompletions": "เรียนจบแล้ว",
-  "courseToReview": "รอตรวจ"
+  "courseToReview": "รอตรวจ",
+  "insActivePolicies": "ใช้งานอยู่",
+  "insRenewalsDue": "ครบกำหนดต่ออายุ",
+  "insOpenClaims": "เคลมที่เปิดอยู่"
 }

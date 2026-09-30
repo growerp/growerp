@@ -321,6 +321,25 @@ const Map<String, AppBlock> appBlocks = {
       widgetName: 'MyHrView',
     ),
   ),
+  'insurance': AppBlock(
+    key: 'insurance',
+    package: 'growerp_insurance',
+    version: '^1.0.0',
+    importUri: 'package:growerp_insurance/growerp_insurance.dart',
+    description:
+        'Insurance agency: policies sold for carriers with coverages, '
+        'renewals, commission from carriers, claims, and a client portal.',
+    widgetsFn: 'getInsuranceWidgets',
+    blocProvidersFn: 'getInsuranceBlocProviders',
+    providerTakesAppId: false,
+    localizationsDelegate: 'InsuranceLocalizations.delegate',
+    menuItem: BlockMenuItem(
+      title: 'Policies',
+      route: '/policies',
+      iconName: 'shield',
+      widgetName: 'PolicyList',
+    ),
+  ),
   'rental': AppBlock(
     key: 'rental',
     package: 'growerp_rental',

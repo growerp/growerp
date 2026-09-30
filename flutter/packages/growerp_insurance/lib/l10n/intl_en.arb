@@ -1,0 +1,183 @@
+{
+  "@@locale": "en",
+  "add": "Add",
+  "@add": {
+    "description": "insurance label: Add"
+  },
+  "addCoverage": "Add coverage",
+  "@addCoverage": {
+    "description": "insurance label: Add coverage"
+  },
+  "addSuccess": "Added successfully",
+  "@addSuccess": {
+    "description": "insurance label: Added successfully"
+  },
+  "amount": "Amount",
+  "@amount": {
+    "description": "insurance label: Amount"
+  },
+  "amountClaimed": "Amount claimed",
+  "@amountClaimed": {
+    "description": "insurance label: Amount claimed"
+  },
+  "amountPaid": "Amount paid",
+  "@amountPaid": {
+    "description": "insurance label: Amount paid"
+  },
+  "carrier": "Carrier",
+  "@carrier": {
+    "description": "insurance label: Carrier"
+  },
+  "claim": "Claim",
+  "@claim": {
+    "description": "insurance label: Claim"
+  },
+  "claimNumber": "Carrier claim number",
+  "@claimNumber": {
+    "description": "insurance label: Carrier claim number"
+  },
+  "claims": "Claims",
+  "@claims": {
+    "description": "insurance label: Claims"
+  },
+  "comments": "Comments",
+  "@comments": {
+    "description": "insurance label: Comments"
+  },
+  "commissionExpected": "Commission expected (year)",
+  "@commissionExpected": {
+    "description": "insurance label: Commission expected (year)"
+  },
+  "commissionRate": "Commission rate %",
+  "@commissionRate": {
+    "description": "insurance label: Commission rate %"
+  },
+  "commissionReceived": "Commission received",
+  "@commissionReceived": {
+    "description": "insurance label: Commission received"
+  },
+  "commissionReceivedSuccess": "Commission recorded",
+  "@commissionReceivedSuccess": {
+    "description": "insurance label: Commission recorded"
+  },
+  "coverage": "Coverage",
+  "@coverage": {
+    "description": "insurance label: Coverage"
+  },
+  "coverages": "Coverages",
+  "@coverages": {
+    "description": "insurance label: Coverages"
+  },
+  "deductible": "Deductible",
+  "@deductible": {
+    "description": "insurance label: Deductible"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "insurance label: Delete"
+  },
+  "description": "Description",
+  "@description": {
+    "description": "insurance label: Description"
+  },
+  "effectiveDate": "Effective date",
+  "@effectiveDate": {
+    "description": "insurance label: Effective date"
+  },
+  "expirationDate": "Expiration date",
+  "@expirationDate": {
+    "description": "insurance label: Expiration date"
+  },
+  "fieldRequired": "Required",
+  "@fieldRequired": {
+    "description": "insurance label: Required"
+  },
+  "incidentDate": "Incident date",
+  "@incidentDate": {
+    "description": "insurance label: Incident date"
+  },
+  "insured": "Insured",
+  "@insured": {
+    "description": "insurance label: Insured"
+  },
+  "limit": "Limit",
+  "@limit": {
+    "description": "insurance label: Limit"
+  },
+  "myClaims": "My claims",
+  "@myClaims": {
+    "description": "insurance label: My claims"
+  },
+  "myPolicies": "My policies",
+  "@myPolicies": {
+    "description": "insurance label: My policies"
+  },
+  "newPolicy": "New policy",
+  "@newPolicy": {
+    "description": "insurance label: New policy"
+  },
+  "noPolicies": "You have no policies with us yet",
+  "@noPolicies": {
+    "description": "insurance label: You have no policies with us yet"
+  },
+  "policies": "Policies",
+  "@policies": {
+    "description": "insurance label: Policies"
+  },
+  "policy": "Policy",
+  "@policy": {
+    "description": "insurance label: Policy"
+  },
+  "policyNumber": "Policy number",
+  "@policyNumber": {
+    "description": "insurance label: Policy number"
+  },
+  "policyType": "Line of business",
+  "@policyType": {
+    "description": "insurance label: Line of business"
+  },
+  "premium": "Premium",
+  "@premium": {
+    "description": "insurance label: Premium"
+  },
+  "premiumFrequency": "Premium frequency",
+  "@premiumFrequency": {
+    "description": "insurance label: Premium frequency"
+  },
+  "receiveCommission": "Receive commission",
+  "@receiveCommission": {
+    "description": "insurance label: Receive commission"
+  },
+  "renew": "Renew",
+  "@renew": {
+    "description": "insurance label: Renew"
+  },
+  "renewConfirm": "Create the policy for the next term?",
+  "@renewConfirm": {
+    "description": "insurance label: Create the policy for the next term?"
+  },
+  "reportClaim": "Report a claim",
+  "@reportClaim": {
+    "description": "insurance label: Report a claim"
+  },
+  "searchHint": "Search by id, policy number or description",
+  "@searchHint": {
+    "description": "insurance label: Search by id, policy number or description"
+  },
+  "status": "Status",
+  "@status": {
+    "description": "insurance label: Status"
+  },
+  "update": "Update",
+  "@update": {
+    "description": "insurance label: Update"
+  },
+  "updateSuccess": "Updated successfully",
+  "@updateSuccess": {
+    "description": "insurance label: Updated successfully"
+  },
+  "whatHappened": "What happened?",
+  "@whatHappened": {
+    "description": "insurance label: What happened?"
+  }
+}
