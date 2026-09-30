@@ -104,5 +104,6 @@
   "assistant": "Đặt câu hỏi",
   "assistantWelcome": "Xin chào! Hãy hỏi tôi về hợp đồng, quyền lợi bảo hiểm hoặc hồ sơ bồi thường. Những gì tôi chưa trả lời được, đại lý sẽ phản hồi bạn.",
   "assistantHint": "Nhập câu hỏi của bạn",
-  "assistantEscalated": "Tôi đã chuyển câu hỏi của bạn cho đại lý; nhân viên sẽ liên hệ với bạn."
+  "assistantEscalated": "Tôi đã chuyển câu hỏi của bạn cho đại lý; nhân viên sẽ liên hệ với bạn.",
+  "startsOn": "Bắt đầu bảo hiểm từ {date}"
 }

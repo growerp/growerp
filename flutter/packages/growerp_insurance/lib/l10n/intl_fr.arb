@@ -104,5 +104,6 @@
   "assistant": "Poser une question",
   "assistantWelcome": "Bonjour ! Posez-moi vos questions sur vos contrats, votre couverture ou un sinistre. Pour le reste, l'agence vous répondra.",
   "assistantHint": "Votre question",
-  "assistantEscalated": "J'ai transmis votre question à l'agence ; quelqu'un vous contactera."
+  "assistantEscalated": "J'ai transmis votre question à l'agence ; quelqu'un vous contactera.",
+  "startsOn": "Couverture à partir du {date}"
 }

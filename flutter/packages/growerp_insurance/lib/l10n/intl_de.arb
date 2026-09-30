@@ -104,5 +104,6 @@
   "assistant": "Frage stellen",
   "assistantWelcome": "Hallo! Fragen Sie mich zu Ihren Policen, Ihrer Deckung oder einem Schaden. Was ich nicht beantworten kann, beantwortet die Agentur.",
   "assistantHint": "Ihre Frage",
-  "assistantEscalated": "Ich habe Ihre Frage an die Agentur weitergegeben; jemand meldet sich bei Ihnen."
+  "assistantEscalated": "Ich habe Ihre Frage an die Agentur weitergegeben; jemand meldet sich bei Ihnen.",
+  "startsOn": "Deckung beginnt am {date}"
 }

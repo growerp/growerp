@@ -114,12 +114,16 @@ class PolicyCardDialogState extends State<PolicyCardDialog> {
     final theme = Theme.of(context);
     final now = DateTime.now();
     final thru = _policy.expirationDate;
-    final valid =
-        (_policy.status == PolicyStatus.active ||
-            _policy.status == PolicyStatus.renewalDue) &&
-        thru != null &&
-        thru.isAfter(now);
-    final statusColor = !valid
+    final from = _policy.effectiveDate;
+    final inForce =
+        _policy.status == PolicyStatus.active ||
+        _policy.status == PolicyStatus.renewalDue ||
+        _policy.status == PolicyStatus.renewed;
+    final notStarted = inForce && from != null && from.isAfter(now);
+    final valid = inForce && !notStarted && thru != null && thru.isAfter(now);
+    final statusColor = notStarted
+        ? Colors.blueGrey.shade600
+        : !valid
         ? theme.colorScheme.error
         : _policy.status == PolicyStatus.renewalDue
         ? Colors.orange.shade800
@@ -140,7 +144,9 @@ class PolicyCardDialogState extends State<PolicyCardDialog> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            valid
+            notStarted
+                ? localizations.startsOn(from.toLocalizedDateOnly(context))
+                : valid
                 ? localizations.validUntil(thruText)
                 : localizations.notValid(thruText),
             textAlign: TextAlign.center,

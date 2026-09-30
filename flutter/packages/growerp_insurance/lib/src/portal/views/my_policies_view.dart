@@ -67,12 +67,15 @@ class MyPoliciesViewState extends State<MyPoliciesView> {
         ),
         BlocBuilder<PolicyBloc, PolicyState>(
           builder: (context, state) {
-            // renewed and cancelled policies are history for the client
+            // cancelled policies and expired renewed ones are history for the
+            // client; a renewed policy is the proof of cover until it expires
+            final now = DateTime.now();
             final policies = state.policies
                 .where(
                   (p) =>
-                      p.status != PolicyStatus.renewed &&
-                      p.status != PolicyStatus.cancelled,
+                      p.status != PolicyStatus.cancelled &&
+                      !(p.status == PolicyStatus.renewed &&
+                          (p.expirationDate?.isBefore(now) ?? true)),
                 )
                 .toList();
             if (policies.isEmpty) {

@@ -104,5 +104,6 @@
   "assistant": "Vraag stellen",
   "assistantWelcome": "Hallo! Vraag me naar uw polissen, uw dekking of een schade. Wat ik niet weet, beantwoordt het kantoor.",
   "assistantHint": "Typ uw vraag",
-  "assistantEscalated": "Ik heb uw vraag doorgegeven aan het kantoor; iemand neemt contact met u op."
+  "assistantEscalated": "Ik heb uw vraag doorgegeven aan het kantoor; iemand neemt contact met u op.",
+  "startsOn": "Dekking start op {date}"
 }

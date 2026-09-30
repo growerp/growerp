@@ -247,7 +247,8 @@ limitations under the License.
             <set field="agencyName" from="agency.name" />
             <set field="effectiveDate" from="policy.effectiveDate" />
             <set field="expirationDate" from="policy.expirationDate" />
-            <set field="valid" from="policy.statusId in ['InpsActive', 'InpsRenewalDue']
+            <!-- a renewed policy stays in force until it expires -->
+            <set field="valid" from="policy.statusId in ['InpsActive', 'InpsRenewalDue', 'InpsRenewed']
                 &amp;&amp; !policy.effectiveDate?.after(checkedDate)
                 &amp;&amp; policy.expirationDate?.after(checkedDate)" />
         </actions>

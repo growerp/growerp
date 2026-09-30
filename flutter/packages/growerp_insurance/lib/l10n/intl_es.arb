@@ -104,5 +104,6 @@
   "assistant": "Hacer una pregunta",
   "assistantWelcome": "¡Hola! Pregúnteme sobre sus pólizas, su cobertura o una reclamación. Lo que no sepa, se lo responderá la agencia.",
   "assistantHint": "Escriba su pregunta",
-  "assistantEscalated": "He pasado su pregunta a la agencia; una persona le contactará."
+  "assistantEscalated": "He pasado su pregunta a la agencia; una persona le contactará.",
+  "startsOn": "La cobertura empieza el {date}"
 }

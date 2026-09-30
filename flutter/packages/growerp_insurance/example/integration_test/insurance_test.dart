@@ -172,17 +172,19 @@ void main() {
     await CommonTest.logout(tester);
     await CommonTest.login(tester, username: clientEmail);
 
-    // the renewed policy is history: the next year one and the renewal
+    // the renewed policy is shown until it expires, as it is still the
+    // proof of cover; then the next year one and the renewal
     await MyPoliciesTest.selectMyPolicies(tester);
-    await MyPoliciesTest.checkMyPolicy(tester, 0, 'YEAR$random');
-    await MyPoliciesTest.checkMyPolicy(tester, 1, 'SOON$random');
-    await MyPoliciesTest.checkNoOtherPolicies(tester, 2);
-    // the digital card of the renewal carries the plate and the QR proof
-    await MyPoliciesTest.checkPolicyCard(tester, 1, plate: plate);
+    await MyPoliciesTest.checkMyPolicy(tester, 0, 'SOON$random');
+    await MyPoliciesTest.checkMyPolicy(tester, 1, 'YEAR$random');
+    await MyPoliciesTest.checkMyPolicy(tester, 2, 'SOON$random');
+    await MyPoliciesTest.checkNoOtherPolicies(tester, 3);
+    // the digital card of the policy in force carries the plate and QR proof
+    await MyPoliciesTest.checkPolicyCard(tester, 0, plate: plate);
     // a claim through the guided wizard, with a photo
     await MyPoliciesTest.reportClaim(
       tester,
-      policyLabel: plate,
+      policyLabel: 'YEAR$random',
       incidentDate: now.subtract(const Duration(days: 1)),
       description: 'Rear-ended at a traffic light',
       location: 'Nguyen Hue, District 1',

@@ -128,8 +128,7 @@ class ClaimListState extends State<ClaimList> {
               .where(
                 (p) =>
                     p.status != PolicyStatus.quote &&
-                    p.status != PolicyStatus.cancelled &&
-                    p.status != PolicyStatus.renewed,
+                    p.status != PolicyStatus.cancelled,
               )
               .toList()
         : <Policy>[];

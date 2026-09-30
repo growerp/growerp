@@ -151,7 +151,7 @@ class ClaimWizardDialogState extends State<ClaimWizardDialog> {
               value: p,
               child: Text(
                 '${p.policyType?.name ?? ''} '
-                '${p.vehiclePlate ?? p.policyNumber ?? p.pseudoId}',
+                '${p.vehiclePlate ?? ''} ${p.policyNumber ?? p.pseudoId}',
               ),
             ),
           )

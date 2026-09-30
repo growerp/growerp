@@ -104,5 +104,6 @@
   "assistant": "提问",
   "assistantWelcome": "您好！可以问我关于保单、保障或理赔的问题。我无法回答的，代理会回复您。",
   "assistantHint": "输入您的问题",
-  "assistantEscalated": "已将您的问题转给代理，工作人员会联系您。"
+  "assistantEscalated": "已将您的问题转给代理，工作人员会联系您。",
+  "startsOn": "保障自 {date} 起生效"
 }

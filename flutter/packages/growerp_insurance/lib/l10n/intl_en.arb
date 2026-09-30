@@ -447,5 +447,14 @@
   "assistantEscalated": "I passed your question on to the agency; a person will contact you.",
   "@assistantEscalated": {
     "description": "insurance label: I passed your question on to the agency; a person will conta"
+  },
+  "startsOn": "Cover starts on {date}",
+  "@startsOn": {
+    "description": "insurance label: Cover starts on {date}",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   }
 }
