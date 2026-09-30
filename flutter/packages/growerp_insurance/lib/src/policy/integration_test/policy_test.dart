@@ -95,6 +95,14 @@ class PolicyTest {
         policy.expirationDate!,
         usDate: true,
       );
+      if (policy.vehiclePlate != null) {
+        await _show(tester, 'vehiclePlate');
+        await CommonTest.enterText(
+          tester,
+          'vehiclePlate',
+          policy.vehiclePlate!,
+        );
+      }
       if (policy.premiumAmount != null) {
         await _show(tester, 'premium');
         await CommonTest.enterText(

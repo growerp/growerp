@@ -13,6 +13,8 @@
  */
 
 // ignore_for_file: depend_on_referenced_packages
+import 'dart:convert';
+
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -55,11 +57,13 @@ void main() {
     );
 
     final now = DateTime.now();
+    final plate = '51K-$random';
     final expiringSoon = Policy(
       policyNumber: 'SOON$random',
       insuredName: client.name,
       carrierName: carrier.name,
-      policyType: PolicyType.liability,
+      policyType: PolicyType.motorCompulsory,
+      vehiclePlate: plate,
       effectiveDate: now.subtract(const Duration(days: 345)),
       expirationDate: now.add(const Duration(days: 20)),
       premiumAmount: Decimal.parse('500'),
@@ -173,17 +177,57 @@ void main() {
     await MyPoliciesTest.checkMyPolicy(tester, 0, 'YEAR$random');
     await MyPoliciesTest.checkMyPolicy(tester, 1, 'SOON$random');
     await MyPoliciesTest.checkNoOtherPolicies(tester, 2);
-    await ClaimTest.addClaims(tester, [
-      Claim(
-        policyNumber: 'SOON$random',
-        incidentDate: now.subtract(const Duration(days: 1)),
-        description: 'Customer slipped in the shop',
-      ),
-    ]);
+    // the digital card of the renewal carries the plate and the QR proof
+    await MyPoliciesTest.checkPolicyCard(tester, 1, plate: plate);
+    // a claim through the guided wizard, with a photo
+    await MyPoliciesTest.reportClaim(
+      tester,
+      policyLabel: plate,
+      incidentDate: now.subtract(const Duration(days: 1)),
+      description: 'Rear-ended at a traffic light',
+      location: 'Nguyen Hue, District 1',
+    );
     await ClaimTest.checkClaim(tester, 0, status: ClaimStatus.submitted);
     await ClaimTest.checkClaim(tester, 1, status: ClaimStatus.filed);
+    // photos are stored with the claim and triaged in the background; the
+    // client only sees what extra evidence is asked (canned in test mode)
+    final myPolicies = await restClient.getPolicies(search: plate);
+    final withPhoto = await restClient.createClaim(
+      claim: Claim(
+        policyId: myPolicies.policies.first.policyId,
+        incidentType: IncidentType.parked,
+        incidentDate: now.subtract(const Duration(days: 1)),
+        description: 'Scratched while parked',
+        photos: [
+          ClaimPhoto(description: 'damage', image: base64Decode(_pixel)),
+        ],
+      ),
+    );
+    Claim? assessed;
+    for (var i = 0; i < 20; i++) {
+      final found = await restClient.getClaims(claimId: withPhoto.claimId);
+      assessed = found.claims.first;
+      if (assessed.status == ClaimStatus.aiAssessed) break;
+      await Future.delayed(const Duration(seconds: 1));
+    }
+    expect(assessed!.photos?.length, 1);
+    expect(assessed.photos!.first.image, isNotNull);
+    expect(assessed.status, ClaimStatus.aiAssessed);
+    expect(assessed.aiAssessment, isNull); // advice is for staff only
+    expect(assessed.missingEvidence, isNotEmpty);
+    expect(assessed.statusHistory?.first.status, ClaimStatus.submitted);
+
+    // the assistant answers from the client's own data (canned in test mode)
+    await MyPoliciesTest.askAssistant(
+      tester,
+      'When does my car insurance end?',
+    );
 
     await CommonTest.gotoMainMenu(tester);
     await CommonTest.logout(tester);
   });
 }
+
+/// 1x1 transparent png, a photo for the claim upload
+const _pixel =
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
