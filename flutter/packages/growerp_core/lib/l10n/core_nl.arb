@@ -1357,5 +1357,9 @@
   "onboarding": "Inwerken",
   "leaveRequests": "Verlofaanvragen",
   "myCourses": "Mijn cursussen",
-  "chooseAnotherSchool": "Andere school kiezen"
+  "chooseAnotherSchool": "Andere school kiezen",
+  "coursesPublished": "Gepubliceerd",
+  "courseLearners": "Cursisten",
+  "courseCompletions": "Voltooid",
+  "courseToReview": "Te beoordelen"
 }

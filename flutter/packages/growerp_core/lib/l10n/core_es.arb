@@ -446,5 +446,9 @@
   "onboarding": "Incorporación",
   "leaveRequests": "Solicitudes de permiso",
   "myCourses": "Mis cursos",
-  "chooseAnotherSchool": "Elegir otra escuela"
+  "chooseAnotherSchool": "Elegir otra escuela",
+  "coursesPublished": "Publicados",
+  "courseLearners": "Estudiantes",
+  "courseCompletions": "Completados",
+  "courseToReview": "Por revisar"
 }

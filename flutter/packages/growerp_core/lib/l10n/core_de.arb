@@ -1357,5 +1357,9 @@
   "onboarding": "Einarbeitung",
   "leaveRequests": "Urlaubsanträge",
   "myCourses": "Meine Kurse",
-  "chooseAnotherSchool": "Andere Schule wählen"
+  "chooseAnotherSchool": "Andere Schule wählen",
+  "coursesPublished": "Veröffentlicht",
+  "courseLearners": "Lernende",
+  "courseCompletions": "Abgeschlossen",
+  "courseToReview": "Zu prüfen"
 }

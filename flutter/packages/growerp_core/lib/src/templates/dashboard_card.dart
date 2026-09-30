@@ -1308,6 +1308,11 @@ String? getStatsForRoute(BuildContext context, String? route, Stats? stats) {
           '${l.events}: ${stats.eventActivities}';
     case '/assets':
       return '${l.assets}: ${stats.assets}';
+    case '/courses':
+      return '${l.coursesPublished}: ${stats.coursesPublished}\n'
+          '${l.courseLearners}: ${stats.courseLearners}\n'
+          '${l.courseCompletions}: ${stats.courseCompletions}\n'
+          '${l.courseToReview}: ${stats.courseSubmissionsToReview}';
     // Accounting sub-routes
     case '/accounting/sales':
       return '${l.open}: ${stats.salesInvoicesNotPaidCount}';

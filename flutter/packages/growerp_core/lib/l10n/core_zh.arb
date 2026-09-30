@@ -1357,5 +1357,9 @@
   "onboarding": "入职",
   "leaveRequests": "请假申请",
   "myCourses": "我的课程",
-  "chooseAnotherSchool": "选择其他学校"
+  "chooseAnotherSchool": "选择其他学校",
+  "coursesPublished": "已发布",
+  "courseLearners": "学员",
+  "courseCompletions": "已完成",
+  "courseToReview": "待审阅"
 }

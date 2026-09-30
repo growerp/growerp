@@ -1782,5 +1782,21 @@
   "chooseAnotherSchool": "Choose another school",
   "@chooseAnotherSchool": {
     "description": "Academy login screen: go back to the list of schools"
+  },
+  "coursesPublished": "Published",
+  "courseLearners": "Learners",
+  "courseCompletions": "Completed",
+  "courseToReview": "To review",
+  "@coursesPublished": {
+    "description": "Published courses, courses dashboard tile"
+  },
+  "@courseLearners": {
+    "description": "Learners still busy with a course, courses dashboard tile"
+  },
+  "@courseCompletions": {
+    "description": "Finished course enrolments, courses dashboard tile"
+  },
+  "@courseToReview": {
+    "description": "Exercise submissions waiting for instructor review, courses dashboard tile"
   }
 }

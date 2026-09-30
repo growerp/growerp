@@ -59,4 +59,31 @@ limitations under the License.
         <alias name="lessonCount" entity-alias="LES" field="lessonId" function="count-distinct" />
     </view-entity>
 
+    <!-- ========================================================= -->
+    <!--  Progress and submissions with the course owner (stats)   -->
+    <!-- ========================================================= -->
+    <view-entity entity-name="CourseProgressAndCourse" package="growerp.course">
+        <description>Course progress with the owner of the course, for dashboard statistics</description>
+        <member-entity entity-alias="PRG" entity-name="growerp.course.CourseProgress" />
+        <member-entity entity-alias="CRS" entity-name="growerp.course.Course" join-from-alias="PRG">
+            <key-map field-name="courseId" />
+        </member-entity>
+        <alias name="progressId" entity-alias="PRG" />
+        <alias name="userId" entity-alias="PRG" />
+        <alias name="completedDate" entity-alias="PRG" />
+        <alias name="ownerPartyId" entity-alias="CRS" />
+    </view-entity>
+
+    <view-entity entity-name="CourseSubmissionAndCourse" package="growerp.course">
+        <description>Exercise submissions with the owner of the course, for dashboard statistics</description>
+        <member-entity entity-alias="SUB" entity-name="growerp.course.CourseSubmission" />
+        <member-entity entity-alias="CRS" entity-name="growerp.course.Course" join-from-alias="SUB">
+            <key-map field-name="courseId" />
+        </member-entity>
+        <alias name="submissionId" entity-alias="SUB" />
+        <alias name="status" entity-alias="SUB" />
+        <alias name="ownerPartyId" entity-alias="CRS" />
+        <alias name="requireInstructorReview" entity-alias="CRS" />
+    </view-entity>
+
 </entities>

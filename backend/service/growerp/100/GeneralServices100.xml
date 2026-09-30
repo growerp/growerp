@@ -359,6 +359,29 @@ limitations under the License.
                 <econdition field-name="ownerPartyId"/>
                 <econdition field-name="statusId" value="HrlsPending"/>
             </entity-find-count>
+            <!-- course counts, live like the HR counts -->
+            <entity-find-count count-field="coursesPublished"
+                entity-name="growerp.course.Course">
+                <econdition field-name="ownerPartyId"/>
+                <econdition field-name="status" value="PUBLISHED"/>
+            </entity-find-count>
+            <entity-find-count count-field="courseLearners"
+                entity-name="growerp.course.CourseProgressAndCourse" distinct="true">
+                <econdition field-name="ownerPartyId"/>
+                <econdition field-name="completedDate" operator="is-null"/>
+                <select-field field-name="userId"/>
+            </entity-find-count>
+            <entity-find-count count-field="courseCompletions"
+                entity-name="growerp.course.CourseProgressAndCourse">
+                <econdition field-name="ownerPartyId"/>
+                <econdition field-name="completedDate" operator="is-not-null"/>
+            </entity-find-count>
+            <entity-find-count count-field="courseSubmissionsToReview"
+                entity-name="growerp.course.CourseSubmissionAndCourse">
+                <econdition field-name="ownerPartyId"/>
+                <econdition field-name="requireInstructorReview" value="Y"/>
+                <econdition field-name="status" operator="in" value="SUBMITTED,AI_GRADED"/>
+            </entity-find-count>
             <if condition="st">
                 <set field="stats"
                     from="[
@@ -386,6 +409,10 @@ limitations under the License.
                         requests: st.requests,
                         hrOnboarding: hrOnboarding,
                         hrLeaveRequests: hrLeaveRequests,
+                        coursesPublished: coursesPublished,
+                        courseLearners: courseLearners,
+                        courseCompletions: courseCompletions,
+                        courseSubmissionsToReview: courseSubmissionsToReview,
                     ]"/>
                 <else>
                     <set field="stats"
@@ -414,6 +441,10 @@ limitations under the License.
                         requests: 0,
                         hrOnboarding: hrOnboarding,
                         hrLeaveRequests: hrLeaveRequests,
+                        coursesPublished: coursesPublished,
+                        courseLearners: courseLearners,
+                        courseCompletions: courseCompletions,
+                        courseSubmissionsToReview: courseSubmissionsToReview,
                         notReadChatRooms: chatRooms
                         ]"/>
                 </else>

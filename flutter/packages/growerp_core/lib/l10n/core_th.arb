@@ -1357,5 +1357,9 @@
   "onboarding": "การปฐมนิเทศ",
   "leaveRequests": "คำขอลา",
   "myCourses": "คอร์สเรียนของฉัน",
-  "chooseAnotherSchool": "เลือกโรงเรียนอื่น"
+  "chooseAnotherSchool": "เลือกโรงเรียนอื่น",
+  "coursesPublished": "เผยแพร่แล้ว",
+  "courseLearners": "ผู้เรียน",
+  "courseCompletions": "เรียนจบแล้ว",
+  "courseToReview": "รอตรวจ"
 }

@@ -1357,5 +1357,9 @@
   "onboarding": "Intégration",
   "leaveRequests": "Demandes de congé",
   "myCourses": "Mes cours",
-  "chooseAnotherSchool": "Choisir une autre école"
+  "chooseAnotherSchool": "Choisir une autre école",
+  "coursesPublished": "Publiés",
+  "courseLearners": "Apprenants",
+  "courseCompletions": "Terminés",
+  "courseToReview": "À corriger"
 }
