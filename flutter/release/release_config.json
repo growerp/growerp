@@ -8,6 +8,7 @@
     "agents",
     "marketing",
     "academy",
+    "insurance",
     "growerp-moqui"
   ],
   "storeApps": {
@@ -18,7 +19,8 @@
     "support": ["android", "snap"],
     "agents": ["ios", "macos", "android", "windows", "snap"],
     "marketing": ["ios", "macos", "android", "windows", "snap"],
-    "academy": ["ios", "macos", "android", "windows", "snap"]
+    "academy": ["ios", "macos", "android", "windows", "snap"],
+    "insurance": ["ios", "macos", "android", "windows", "snap"]
   },
   "storeIds": {
     "admin": { "apple": "1545521755", "windows": "9nwx6kftjnql" },

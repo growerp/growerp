@@ -285,6 +285,7 @@ else
       [packages/growerp_marketing/example]=30
       [packages/growerp_outreach/example]=13
       [packages/growerp_courses/example]=8
+      [packages/growerp_insurance/example]=4
       [packages/admin]=2
       [packages/agents]=2
       [packages/hotel]=20
@@ -293,6 +294,7 @@ else
       [packages/rental]=7
       [packages/marketing]=6
       [packages/academy]=4
+      [packages/insurance]=4
     )
     declare -A PKG_SLICE=()
     SLICE_LOAD=()

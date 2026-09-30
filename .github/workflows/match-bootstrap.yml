@@ -50,6 +50,10 @@ on:
         description: "Academy App"
         type: boolean
         default: false
+      app_insurance:
+        description: "Insurance App"
+        type: boolean
+        default: false
       platform:
         description: "Which platform's signing assets to create"
         required: true
@@ -89,6 +93,7 @@ jobs:
           [[ "${{ inputs.app_rental }}"    == "true" ]] && apps+=(rental)
           [[ "${{ inputs.app_marketing }}" == "true" ]] && apps+=(marketing)
           [[ "${{ inputs.app_academy }}"   == "true" ]] && apps+=(academy)
+          [[ "${{ inputs.app_insurance }}" == "true" ]] && apps+=(insurance)
 
           if [[ ${#apps[@]} -eq 0 ]]; then
             echo "No app selected" >&2

@@ -12,7 +12,8 @@ app_identifier([
   "org.growerp.agents",
   "org.growerp.rental",
   "org.growerp.marketing",
-  "org.growerp.academy"
+  "org.growerp.academy",
+  "org.growerp.insurance"
 ])
 username("apple@hansbakker.com") # Your Apple Developer Portal username
 team_id("P64T65C668")

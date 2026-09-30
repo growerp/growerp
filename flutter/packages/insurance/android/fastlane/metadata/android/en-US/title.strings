@@ -1,7 +1,7 @@
 # title.strings
-"dashboard" = "Your business at a glance";
-"company" = "Company Information";
-"catalog" = "Services, rates & categories";
-"sales" = "Clients, orders & invoices";
-"accounting" = "Accounting Dashboard";
+"dashboard" = "Your agency at a glance";
+"policies" = "Every client policy in one place";
+"renewals" = "Renew before policies lapse";
+"claims" = "Claims followed with the carrier";
+"commissions" = "Commissions expected and received";
 "ledger" = "Ledger tree & transactions";

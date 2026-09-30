@@ -176,32 +176,11 @@ class _InsuranceAppState extends State<InsuranceApp> {
             notificationClient: widget.notificationClient,
             title: 'GrowERP Insurance',
             router: router,
-            extraDelegates: const [
-              UserCompanyLocalizations.delegate,
-              CatalogLocalizations.delegate,
-              OrderAccountingLocalizations.delegate,
-              ActivityLocalizations.delegate,
-              InsuranceLocalizations.delegate,
-            ],
-            extraBlocProviders: [
-              ...getUserCompanyBlocProviders(
-                widget.restClient,
-                widget.applicationId,
-              ),
-              ...getCatalogBlocProviders(
-                widget.restClient,
-                widget.applicationId,
-              ),
-              ...getOrderAccountingBlocProviders(
-                widget.restClient,
-                widget.applicationId,
-              ),
-              ...getActivityBlocProviders(
-                widget.restClient,
-                widget.applicationId,
-              ),
-              ...getInsuranceBlocProviders(widget.restClient),
-            ],
+            extraDelegates: delegates,
+            extraBlocProviders: getInsuranceAppBlocProviders(
+              widget.restClient,
+              widget.applicationId,
+            ),
             widgetRegistrations: insuranceWidgetRegistrations,
             forceUpdateInfo: widget.forceUpdateInfo,
           );
@@ -209,6 +188,27 @@ class _InsuranceAppState extends State<InsuranceApp> {
       ),
     );
   }
+}
+
+List<LocalizationsDelegate> delegates = const [
+  UserCompanyLocalizations.delegate,
+  CatalogLocalizations.delegate,
+  OrderAccountingLocalizations.delegate,
+  ActivityLocalizations.delegate,
+  InsuranceLocalizations.delegate,
+];
+
+List<BlocProvider> getInsuranceAppBlocProviders(
+  RestClient restClient,
+  String applicationId,
+) {
+  return [
+    ...getUserCompanyBlocProviders(restClient, applicationId),
+    ...getCatalogBlocProviders(restClient, applicationId),
+    ...getOrderAccountingBlocProviders(restClient, applicationId),
+    ...getActivityBlocProviders(restClient, applicationId),
+    ...getInsuranceBlocProviders(restClient),
+  ];
 }
 
 /// Widget registrations for all packages used by the Insurance app.

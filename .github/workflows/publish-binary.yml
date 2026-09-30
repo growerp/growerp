@@ -35,6 +35,10 @@ on:
         description: "Academy App"
         type: boolean
         default: false
+      app_insurance:
+        description: "Insurance App"
+        type: boolean
+        default: false
       store_ios:
         description: "iOS App Store"
         type: boolean
@@ -116,6 +120,7 @@ jobs:
           APP_RENTAL: ${{ inputs.app_rental }}
           APP_MARKETING: ${{ inputs.app_marketing }}
           APP_ACADEMY: ${{ inputs.app_academy }}
+          APP_INSURANCE: ${{ inputs.app_insurance }}
           STORE_IOS: ${{ inputs.store_ios }}
           STORE_MACOS: ${{ inputs.store_macos }}
           STORE_ANDROID: ${{ inputs.store_android }}
@@ -131,6 +136,7 @@ jobs:
           [[ "$APP_RENTAL" == "true" ]] && APPS="${APPS}rental,"
           [[ "$APP_MARKETING" == "true" ]] && APPS="${APPS}marketing,"
           [[ "$APP_ACADEMY" == "true" ]] && APPS="${APPS}academy,"
+          [[ "$APP_INSURANCE" == "true" ]] && APPS="${APPS}insurance,"
           APPS="${APPS%,}"
           echo "apps=${APPS}" >> "$GITHUB_OUTPUT"
 
@@ -1143,6 +1149,7 @@ jobs:
           [[ "${{ inputs.app_rental }}" == "true" ]] && APPS="${APPS}rental,"
           [[ "${{ inputs.app_marketing }}" == "true" ]] && APPS="${APPS}marketing,"
           [[ "${{ inputs.app_academy }}" == "true" ]] && APPS="${APPS}academy,"
+          [[ "${{ inputs.app_insurance }}" == "true" ]] && APPS="${APPS}insurance,"
           APPS="${APPS%,}"
 
           # Collect only platforms that were selected AND succeeded
