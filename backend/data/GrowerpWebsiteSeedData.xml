@@ -189,7 +189,7 @@
         parentResourceId="growerp_content_dir">
         <file mimeType="text/html" versionName="02" rootVersionName="01">
             <fileData><![CDATA[<#-- title: Verticals -->
-<#-- description: The GrowERP apps per industry: admin, hotel, freelance, support, marketing, rental and agents, all built from the same building blocks. -->
+<#-- description: The GrowERP apps per industry: admin, hotel, freelance, support, marketing, rental, agents, academy and insurance, all built from the same building blocks. -->
 <!-- Background Ambient Glow -->
 <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
     <div class="absolute top-[15%] left-[-10%] w-[45%] h-[45%] rounded-full bg-primary/5 blur-[120px]"></div>
@@ -382,6 +382,42 @@
                     </a>
                     <a href="https://apps.microsoft.com/detail/9PHK5D4MHV0Q" target="_blank" rel="noopener" title="Windows" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-tertiary/50 hover:text-tertiary text-on-surface-variant transition-colors">
                         <span class="material-symbols-outlined text-[18px]">grid_view</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Academy -->
+            <div class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-full blur-[40px] group-hover:bg-secondary/10 transition-all"></div>
+                <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-secondary mb-2">
+                    <span class="material-symbols-outlined icon-fill text-[24px]">school</span>
+                </div>
+                <h3 class="font-display text-xl font-semibold text-on-surface">Academy</h3>
+                <p class="text-on-surface-variant leading-relaxed">For training companies, coaches and schools. Sell courses on your website, let learners study lessons, quizzes and exercises with an AI tutor, and hand out certificates.</p>
+                <a href="https://academy.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-secondary font-label text-sm font-medium">
+                    academy.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                </a>
+                <div class="pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
+                    <a href="https://academy.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">language</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Insurance -->
+            <div class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[40px] group-hover:bg-primary/10 transition-all"></div>
+                <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-primary mb-2">
+                    <span class="material-symbols-outlined icon-fill text-[24px]">shield</span>
+                </div>
+                <h3 class="font-display text-xl font-semibold text-on-surface">Insurance</h3>
+                <p class="text-on-surface-variant leading-relaxed">For insurance agencies and brokers. Keep every client policy in one place, renew before policies lapse, follow claims with the carrier, track commissions, and give clients their own portal.</p>
+                <a href="https://insurance.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-primary font-label text-sm font-medium">
+                    insurance.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                </a>
+                <div class="pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
+                    <a href="https://insurance.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">language</span>
                     </a>
                 </div>
             </div>
