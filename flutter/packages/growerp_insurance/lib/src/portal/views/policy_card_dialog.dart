@@ -93,6 +93,7 @@ class PolicyCardDialogState extends State<PolicyCardDialog> {
     try {
       var result = await context.read<RestClient>().explainPolicy(
         policyId: _policy.policyId,
+        language: Localizations.localeOf(context).languageCode,
       );
       if (result is String) result = jsonDecode(result);
       if (!mounted) return;

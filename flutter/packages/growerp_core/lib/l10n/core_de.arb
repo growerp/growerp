@@ -1364,5 +1364,11 @@
   "courseToReview": "Zu prüfen",
   "insActivePolicies": "Aktiv",
   "insRenewalsDue": "Verlängerungen fällig",
-  "insOpenClaims": "Offene Schäden"
+  "insOpenClaims": "Offene Schäden",
+  "myPolicies": "Meine Policen",
+  "policies": "Policen",
+  "claims": "Schäden",
+  "carriers": "Versicherer",
+  "renewals": "Verlängerungen",
+  "commissions": "Provisionen"
 }

@@ -1810,5 +1810,29 @@
   },
   "@courseToReview": {
     "description": "Exercise submissions waiting for instructor review, courses dashboard tile"
+  },
+  "myPolicies": "My Policies",
+  "@myPolicies": {
+    "description": "insurance menu title"
+  },
+  "policies": "Policies",
+  "@policies": {
+    "description": "insurance menu title"
+  },
+  "claims": "Claims",
+  "@claims": {
+    "description": "insurance menu title"
+  },
+  "carriers": "Carriers",
+  "@carriers": {
+    "description": "insurance menu title"
+  },
+  "renewals": "Renewals",
+  "@renewals": {
+    "description": "insurance menu title"
+  },
+  "commissions": "Commissions",
+  "@commissions": {
+    "description": "insurance menu title"
   }
 }

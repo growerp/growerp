@@ -291,6 +291,18 @@ class HelperFunctions {
         return localizations.ledgerTransaction;
       case 'llmusage':
         return localizations.llmUsage;
+      case 'mypolicies':
+        return localizations.myPolicies;
+      case 'policies':
+        return localizations.policies;
+      case 'claims':
+        return localizations.claims;
+      case 'carriers':
+        return localizations.carriers;
+      case 'renewals':
+        return localizations.renewals;
+      case 'commissions':
+        return localizations.commissions;
       case 'main':
         return localizations.main;
       case 'manufacturing':

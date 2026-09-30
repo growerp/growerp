@@ -1,0 +1,6 @@
+{
+  "@@locale": "vi",
+  "pageHomeWelcome": "Welcome {name}",
+  "screenNotFound": "Screen {screen} not found",
+  "applicationNotDefined": "No {applicationId} company found in system\n Go to the admin app to create one!"
+}

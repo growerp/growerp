@@ -1364,5 +1364,11 @@
   "courseToReview": "待审阅",
   "insActivePolicies": "有效",
   "insRenewalsDue": "待续保",
-  "insOpenClaims": "未结理赔"
+  "insOpenClaims": "未结理赔",
+  "myPolicies": "我的保单",
+  "policies": "保单",
+  "claims": "理赔",
+  "carriers": "保险公司",
+  "renewals": "续保",
+  "commissions": "佣金"
 }

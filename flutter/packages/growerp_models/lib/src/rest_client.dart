@@ -956,6 +956,7 @@ abstract class RestClient {
   Future<dynamic> explainPolicy({
     @Field() required String policyId,
     @Field() bool? refresh,
+    @Field() String? language,
   });
 
   @POST("rest/s1/growerp/100/PolicyRenewalRequest")

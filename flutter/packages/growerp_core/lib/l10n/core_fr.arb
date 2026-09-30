@@ -1364,5 +1364,11 @@
   "courseToReview": "À corriger",
   "insActivePolicies": "Actifs",
   "insRenewalsDue": "Renouvellements dus",
-  "insOpenClaims": "Sinistres ouverts"
+  "insOpenClaims": "Sinistres ouverts",
+  "myPolicies": "Mes contrats",
+  "policies": "Contrats",
+  "claims": "Sinistres",
+  "carriers": "Assureurs",
+  "renewals": "Renouvellements",
+  "commissions": "Commissions"
 }

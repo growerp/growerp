@@ -1,0 +1,13 @@
+{
+  "@@locale": "vi",
+  "wikiSpace": "Wiki space",
+  "noPagesFound": "No pages found",
+  "searchPagePath": "Search page path",
+  "addPage": "Add page",
+  "cancel": "Cancel",
+  "pagePathHint": "Page path (e.g. 'notes/my-page' - avoid the generated tables/ and datasets/ prefixes)",
+  "markdownTextYamlFrontmatterAllowed": "Markdown text (YAML frontmatter allowed)",
+  "dashSpaces": "spaces",
+  "dashPages": "pages",
+  "dashNoWikiSpaces": "No wiki spaces"
+}

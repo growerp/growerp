@@ -1,0 +1,12 @@
+{
+  "@@locale": "vi",
+  "day": "Day",
+  "week": "Week",
+  "month": "Month",
+  "save": "Save",
+  "cancel": "Cancel",
+  "tableHdrFrom": "From",
+  "tableHdrRate": "Rate",
+  "tableHdrThru": "Thru",
+  "searchHintReservations": "Search reservation ID, customer name, date..."
+}

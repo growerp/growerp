@@ -1364,5 +1364,11 @@
   "courseToReview": "Te beoordelen",
   "insActivePolicies": "Actief",
   "insRenewalsDue": "Te verlengen",
-  "insOpenClaims": "Open schades"
+  "insOpenClaims": "Open schades",
+  "myPolicies": "Mijn polissen",
+  "policies": "Polissen",
+  "claims": "Schades",
+  "carriers": "Verzekeraars",
+  "renewals": "Verlengingen",
+  "commissions": "Provisies"
 }

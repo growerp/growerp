@@ -1364,5 +1364,11 @@
   "courseToReview": "รอตรวจ",
   "insActivePolicies": "ใช้งานอยู่",
   "insRenewalsDue": "ครบกำหนดต่ออายุ",
-  "insOpenClaims": "เคลมที่เปิดอยู่"
+  "insOpenClaims": "เคลมที่เปิดอยู่",
+  "myPolicies": "กรมธรรม์ของฉัน",
+  "policies": "กรมธรรม์",
+  "claims": "เคลม",
+  "carriers": "บริษัทประกัน",
+  "renewals": "การต่ออายุ",
+  "commissions": "ค่าคอมมิชชัน"
 }

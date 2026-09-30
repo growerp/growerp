@@ -453,5 +453,11 @@
   "courseToReview": "Por revisar",
   "insActivePolicies": "Activas",
   "insRenewalsDue": "Renovaciones pendientes",
-  "insOpenClaims": "Siniestros abiertos"
+  "insOpenClaims": "Siniestros abiertos",
+  "myPolicies": "Mis pólizas",
+  "policies": "Pólizas",
+  "claims": "Reclamaciones",
+  "carriers": "Aseguradoras",
+  "renewals": "Renovaciones",
+  "commissions": "Comisiones"
 }

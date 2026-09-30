@@ -531,6 +531,7 @@ limitations under the License.
         <in-parameters>
             <parameter name="policyId" required="true" />
             <parameter name="refresh" type="Boolean" default="false" />
+            <parameter name="language"><description>language code of the app, else the user's locale</description></parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="plainSummary" />
@@ -544,7 +545,7 @@ limitations under the License.
             </if>
             <set field="shown" from="found.policies[0]" />
             <entity-find-one entity-name="growerp.insurance.Policy" value-field="policy" for-update="true" />
-            <set field="language" from="ec.user.locale?.language ?: 'en'" />
+            <set field="language" from="language ?: ec.user.locale?.language ?: 'en'" />
             <if condition="policy.plainSummary &amp;&amp; policy.plainSummaryLocale == language &amp;&amp; !refresh">
                 <set field="plainSummary" from="policy.plainSummary" />
                 <return />
@@ -556,7 +557,7 @@ limitations under the License.
                     "- ${it.coverageName}: limit ${it.limitAmount ?: 'not stated'}, deductible ${it.deductibleAmount ?: 'none'}"
                 }.join("\n")
                 String prompt = """Explain this insurance policy to the policyholder in plain, friendly
-${ec.user.locale?.getDisplayLanguage(Locale.ENGLISH) ?: 'English'}, as a short list of at most 6 lines,
+${new Locale(language).getDisplayLanguage(Locale.ENGLISH)}, as a short list of at most 6 lines,
 each starting with "• ". No markdown, no headings. Use ONLY the facts below. Do not invent
 exclusions, prices, discounts or legal rules: where the policy data does not say, tell the reader
 to ask the agency. Explain what the limit and deductible mean with the actual numbers.
@@ -714,12 +715,18 @@ Notes from the agency: ${policy.description ?: '-'}"""
             <set field="policyRef" from="policy.policyNumber ?: policy.pseudoId" />
             <set field="plateText" from="policy.vehiclePlate ? ' (' + policy.vehiclePlate + ')' : ''" />
             <set field="expires" from="ec.l10n.format(policy.expirationDate, 'yyyy-MM-dd')" />
-            <set field="reminderBody" value="&lt;p&gt;Your insurance policy &lt;b&gt;${policyRef}&lt;/b&gt;${plateText} ends on ${expires}.&lt;/p&gt;&lt;p&gt;To continue your cover, open My Policies in the app and choose Request renewal, or reply to this email. Let us know if anything changed, such as a new vehicle or address.&lt;/p&gt;" />
+            <if condition="accounts[0].locale?.startsWith('vi')">
+                <set field="reminderSubject" value="Hợp đồng ${policyRef} hết hạn ngày ${expires}" />
+                <set field="reminderBody" value="&lt;p&gt;Hợp đồng bảo hiểm &lt;b&gt;${policyRef}&lt;/b&gt;${plateText} của bạn hết hạn ngày ${expires}.&lt;/p&gt;&lt;p&gt;Để tiếp tục được bảo hiểm, mở mục Hợp đồng của tôi trong ứng dụng và chọn Yêu cầu tái tục, hoặc trả lời email này. Hãy cho chúng tôi biết nếu có thay đổi, như xe mới hoặc địa chỉ mới.&lt;/p&gt;" />
+                <else>
+                    <set field="reminderSubject" value="Policy ${policyRef} ends on ${expires}" />
+                    <set field="reminderBody" value="&lt;p&gt;Your insurance policy &lt;b&gt;${policyRef}&lt;/b&gt;${plateText} ends on ${expires}.&lt;/p&gt;&lt;p&gt;To continue your cover, open My Policies in the app and choose Request renewal, or reply to this email. Let us know if anything changed, such as a new vehicle or address.&lt;/p&gt;" />
+                </else>
+            </if>
             <service-call name="growerp.100.GeneralServices100.send#DirectEmail"
                 ignore-error="true"
                 in-map="[ownerPartyId: policy.ownerPartyId, toAddresses: toAddress,
-                    subject: 'Policy ' + policyRef + ' ends on ' + expires,
-                    bodyHtml: reminderBody]" />
+                    subject: reminderSubject, bodyHtml: reminderBody]" />
             <set field="sent" from="true" />
         </actions>
     </service>
@@ -1195,6 +1202,13 @@ Client question: ${question}"""
             <parameter name="claim" type="Map" required="true" />
         </in-parameters>
         <actions>
+            <set field="explanationsVi" from="[
+                InclInReview: 'Đại lý đang kiểm tra hồ sơ và giấy tờ bạn đã gửi.',
+                InclFiled: 'Hồ sơ đã được gửi đến công ty bảo hiểm. Chúng tôi sẽ báo bạn ngay khi có phản hồi.',
+                InclApproved: 'Công ty bảo hiểm đã chấp nhận hồ sơ. Khoản chi trả đang được chuẩn bị.',
+                InclDenied: 'Công ty bảo hiểm không chấp nhận hồ sơ. Đại lý sẽ giải thích lý do và các lựa chọn của bạn.',
+                InclPaid: 'Hồ sơ đã được chi trả.',
+                InclClosed: 'Hồ sơ đã đóng. Liên hệ đại lý nếu bạn có câu hỏi.']" />
             <set field="explanations" from="[
                 InclInReview: 'The agency is checking your claim and the documents you sent.',
                 InclFiled: 'Your claim has been sent to the insurance company. We will let you know as soon as they answer.',
@@ -1209,15 +1223,22 @@ Client question: ${question}"""
             </entity-find>
             <set field="toAddress" from="accounts ? accounts[0].emailAddress : null" />
             <if condition="!toAddress || toAddress.contains('example.com')"><return /></if>
+            <set field="vietnamese" from="accounts[0].locale?.startsWith('vi')" />
             <entity-find-one entity-name="moqui.basic.StatusItem" value-field="statusItem" cache="true">
                 <field-map field-name="statusId" from="claim.statusId" />
             </entity-find-one>
             <set field="claimRef" from="claim.claimNumber ?: claim.pseudoId" />
-            <set field="statusBody" value="&lt;p&gt;Claim &lt;b&gt;${claimRef}&lt;/b&gt;: ${statusItem?.description}.&lt;/p&gt;&lt;p&gt;${explanation}&lt;/p&gt;&lt;p&gt;You can follow every step under My Policies in the app.&lt;/p&gt;" />
+            <if condition="vietnamese">
+                <set field="statusSubject" value="Cập nhật hồ sơ bồi thường ${claimRef}" />
+                <set field="statusBody" value="&lt;p&gt;Hồ sơ &lt;b&gt;${claimRef}&lt;/b&gt;: ${explanationsVi[claim.statusId]}&lt;/p&gt;&lt;p&gt;Bạn có thể theo dõi từng bước trong mục Hợp đồng của tôi trên ứng dụng.&lt;/p&gt;" />
+                <else>
+                    <set field="statusSubject" value="Claim ${claimRef}: ${statusItem?.description}" />
+                    <set field="statusBody" value="&lt;p&gt;Claim &lt;b&gt;${claimRef}&lt;/b&gt;: ${statusItem?.description}.&lt;/p&gt;&lt;p&gt;${explanation}&lt;/p&gt;&lt;p&gt;You can follow every step under My Policies in the app.&lt;/p&gt;" />
+                </else>
+            </if>
             <service-call name="growerp.100.GeneralServices100.send#DirectEmail" ignore-error="true"
                 in-map="[ownerPartyId: claim.ownerPartyId, toAddresses: toAddress,
-                    subject: 'Claim ' + claimRef + ': ' + statusItem?.description,
-                    bodyHtml: statusBody]" />
+                    subject: statusSubject, bodyHtml: statusBody]" />
         </actions>
     </service>
 

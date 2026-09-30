@@ -1,0 +1,9 @@
+{
+  "@@locale": "vi",
+  "errorWithArg": "Error: {error}",
+  "roomsToClean": "Rooms: {totalRooms}   To clean: {dirtyCount}",
+  "tableHdrOccupied": "Occupied",
+  "tableHdrRoom": "Room",
+  "tableHdrStatus": "Status",
+  "tableHdrType": "Type"
+}
