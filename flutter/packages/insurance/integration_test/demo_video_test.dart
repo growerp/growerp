@@ -162,9 +162,10 @@ void main() {
         of: find.byKey(Key(dialogKey)),
         matching: find.byType(Scrollable),
       );
+      // down first, then back up for a field above the current position
       for (var i = 0; i < 60 && !tester.any(finder); i++) {
         if (tester.any(list)) {
-          await tester.drag(list.first, const Offset(0, -150));
+          await tester.drag(list.first, Offset(0, i < 30 ? -150 : 150));
         }
         await hold(250);
       }
@@ -329,6 +330,7 @@ void main() {
     await scene('filed', () async {
       await scrollTo('ClaimDialog', 'status');
       await CommonTest.selectDropDown(tester, 'status', ClaimStatus.filed.name);
+      await scrollTo('ClaimDialog', 'claimNumber');
       await type('claimNumber', 'HM-CL-${random.toString().substring(0, 4)}');
       await scrollTo('ClaimDialog', 'update');
       await CommonTest.tapByKey(tester, 'update', seconds: 3);

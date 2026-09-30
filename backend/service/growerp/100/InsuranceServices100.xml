@@ -822,9 +822,11 @@ Notes from the agency: ${policy.description ?: '-'}"""
             <set field="knowledge" from="[]" />
             <script><![CDATA[
                 try {
+                    // own transaction: a failing search (no index, no embed key) must not
+                    // leave this one rollback-only for the LLM call below
                     knowledge = ec.service.sync().name('AdkKnowledgeServices.search#AdkKnowledge')
                         .parameters([ownerPartyId: ownerPartyId, query: question, limit: 4])
-                        .call()?.results ?: []
+                        .requireNewTransaction(true).call()?.results ?: []
                 } catch (Throwable t) {
                     ec.logger.info("Insurance assistant: no knowledge search: ${t.message}")
                 }
@@ -1387,7 +1389,7 @@ Client question: ${question}"""
                     policyTypeEnumId: 'InptMotorCompulsory', effectiveDate: at(-300), expirationDate: at(65),
                     premiumAmount: 40, premiumFrequencyEnumId: 'InpfAnnual', commissionRate: 5,
                     description: 'Compulsory civil liability of the company car',
-                    vehiclePlate: '51K-238.46', vehicleDescription: 'Geely Coolray 2024, grey',
+                    vehiclePlate: '51K-238.46', vehicleDescription: 'Toyota Corolla Cross 2024, grey',
                     coverages: [[coverageName: 'Third party bodily injury, per person', limitAmount: 6000, deductibleAmount: 0],
                         [coverageName: 'Third party property damage, per accident', limitAmount: 4000, deductibleAmount: 0]]]
             ]" />
