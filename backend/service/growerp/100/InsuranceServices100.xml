@@ -625,7 +625,7 @@ Notes from the agency: ${policy.description ?: '-'}"""
             <if condition="producerAccounts &amp;&amp; producerAccounts[0].emailAddress">
                 <set field="policyRef" from="item.policyNumber ?: item.pseudoId" />
                 <set field="requestBody" value="&lt;p&gt;${insured.name} asks to renew policy &lt;b&gt;${policyRef}&lt;/b&gt;${item.vehiclePlate ? ' (' + item.vehiclePlate + ')' : ''}, ending ${ec.l10n.format(item.expirationDate, 'yyyy-MM-dd')}.&lt;/p&gt;&lt;p&gt;${groovy.xml.XmlUtil.escapeXml(message ?: '')}&lt;/p&gt;" />
-                <service-call name="growerp.100.GeneralServices100.send#DirectEmail"
+                <service-call name="growerp.100.InsuranceServices100.send#InsuranceEmail"
                     ignore-error="true"
                     in-map="[ownerPartyId: item.ownerPartyId,
                         toAddresses: producerAccounts[0].emailAddress,
@@ -680,6 +680,28 @@ Notes from the agency: ${policy.description ?: '-'}"""
         </actions>
     </service>
 
+    <service verb="send" noun="InsuranceEmail" allow-remote="false" transaction="force-new">
+        <!-- internal: every insurance email goes through here -->
+        <description>Sends through the agency's own mail server, if it has one. Its own
+            transaction and no error out: a missing or failing mail setup (a new tenant, demo
+            data) must never roll back the policy or claim change that triggered the email.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="toAddresses" required="true" />
+            <parameter name="subject" required="true" />
+            <parameter name="bodyHtml" allow-html="any" />
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#ActiveEmailServer"
+                in-map="[ownerPartyId: ownerPartyId]" out-map="emailServer" />
+            <if condition="!emailServer.emailConfigured"><return /></if>
+            <service-call name="growerp.100.GeneralServices100.send#DirectEmail" ignore-error="true"
+                in-map="[ownerPartyId: ownerPartyId, toAddresses: toAddresses, subject: subject,
+                    bodyHtml: bodyHtml]" />
+            <script>ec.message.clearErrors()</script>
+        </actions>
+    </service>
+
     <service verb="send" noun="PolicyRenewalReminder" allow-remote="false"><!-- internal -->
         <description>Emails the insured that the policy expires, through the agency's own
             SMTP settings. Plain facts, no pressure or offers: when it ends and how to ask
@@ -724,7 +746,7 @@ Notes from the agency: ${policy.description ?: '-'}"""
                     <set field="reminderBody" value="&lt;p&gt;Your insurance policy &lt;b&gt;${policyRef}&lt;/b&gt;${plateText} ends on ${expires}.&lt;/p&gt;&lt;p&gt;To continue your cover, open My Policies in the app and choose Request renewal, or reply to this email. Let us know if anything changed, such as a new vehicle or address.&lt;/p&gt;" />
                 </else>
             </if>
-            <service-call name="growerp.100.GeneralServices100.send#DirectEmail"
+            <service-call name="growerp.100.InsuranceServices100.send#InsuranceEmail"
                 ignore-error="true"
                 in-map="[ownerPartyId: policy.ownerPartyId, toAddresses: toAddress,
                     subject: reminderSubject, bodyHtml: reminderBody]" />
@@ -892,7 +914,7 @@ Client question: ${question}"""
                 </entity-find>
                 <if condition="producerAccounts &amp;&amp; producerAccounts[0].emailAddress">
                     <set field="escalationBody" value="&lt;p&gt;${groovy.xml.XmlUtil.escapeXml(asker.name ?: '')} (${ec.user.userAccount?.emailAddress}) asked the assistant:&lt;/p&gt;&lt;blockquote&gt;${groovy.xml.XmlUtil.escapeXml(question)}&lt;/blockquote&gt;&lt;p&gt;The assistant answered:&lt;/p&gt;&lt;blockquote&gt;${groovy.xml.XmlUtil.escapeXml(answer ?: '')}&lt;/blockquote&gt;&lt;p&gt;Please follow up with the client.&lt;/p&gt;" />
-                    <service-call name="growerp.100.GeneralServices100.send#DirectEmail" ignore-error="true"
+                    <service-call name="growerp.100.InsuranceServices100.send#InsuranceEmail" ignore-error="true"
                         in-map="[ownerPartyId: ownerPartyId, toAddresses: producerAccounts[0].emailAddress,
                             subject: 'Client question needs a person: ' + (asker.name ?: ''),
                             bodyHtml: escalationBody]" />
@@ -1240,7 +1262,7 @@ Client question: ${question}"""
                     <set field="statusBody" value="&lt;p&gt;Claim &lt;b&gt;${claimRef}&lt;/b&gt;: ${statusItem?.description}.&lt;/p&gt;&lt;p&gt;${explanation}&lt;/p&gt;&lt;p&gt;You can follow every step under My Policies in the app.&lt;/p&gt;" />
                 </else>
             </if>
-            <service-call name="growerp.100.GeneralServices100.send#DirectEmail" ignore-error="true"
+            <service-call name="growerp.100.InsuranceServices100.send#InsuranceEmail" ignore-error="true"
                 in-map="[ownerPartyId: claim.ownerPartyId, toAddresses: toAddress,
                     subject: statusSubject, bodyHtml: statusBody]" />
         </actions>
