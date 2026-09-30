@@ -20,6 +20,8 @@ FROM ghcr.io/cirruslabs/flutter:stable AS build-env
 
 ARG BRANCH=development # currently either master or development we need to add existing
 ARG DOCKER_TAG=1.0.0+1
+# e.g. "--dart-define=BACKEND_URL=https://x --dart-define=CHAT_URL=wss://x" for a dedicated backend
+ARG DART_DEFINES=""
 USER root
 # Install linux dependencies
 RUN apt-get update && \
@@ -55,7 +57,7 @@ RUN melos build --no-select
 # build flutter app
 WORKDIR /root/flutter/packages/insurance
 RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
-RUN flutter build web --release
+RUN flutter build web --release $DART_DEFINES
 # Drop the engine .symbols maps: offline symboliser input only, never fetched
 # by the browser, ~7MB per image.
 RUN find build/web -name '*.symbols' -delete
