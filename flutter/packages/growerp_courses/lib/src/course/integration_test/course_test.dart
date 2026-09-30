@@ -14,6 +14,7 @@
 
 import 'dart:convert';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -21,6 +22,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../../directory/school_directory.dart';
+import 'memory_file_picker.dart';
 
 /// Course authoring (admin) and learning (customer) steps for integration tests.
 class CourseTest {
@@ -571,6 +573,45 @@ class CourseTest {
     await CommonTest.tapByText(tester, 'Delete');
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
     expect(find.text(title), findsNothing);
+  }
+
+  /// Downloads the course with this title and uploads the file again: a
+  /// second course with the same title and [fileContains] in its file.
+  static Future<void> downloadAndUploadCourse(
+    WidgetTester tester,
+    String title, {
+    List<String> fileContains = const [],
+  }) async {
+    final original = FilePickerPlatform.instance;
+    final picker = MemoryFilePicker();
+    FilePickerPlatform.instance = picker;
+    try {
+      final before = tester.widgetList(find.text(title)).length;
+      await openCourse(tester, title);
+      await CommonTest.dragUntil(tester, key: 'courseDownload');
+      await CommonTest.tapByKey(
+        tester,
+        'courseDownload',
+        seconds: CommonTest.waitTime,
+      );
+      await CommonTest.waitForSnackbarToGo(tester);
+      final file = utf8.decode(picker.bytes!);
+      expect(picker.fileName, endsWith('.course.json'));
+      for (final text in [title, ...fileContains]) {
+        expect(file, contains(text));
+      }
+      await CommonTest.dragUntil(tester, key: 'cancelCourse');
+      await CommonTest.tapByKey(tester, 'cancelCourse');
+      await CommonTest.tapByKey(
+        tester,
+        'courseUpload',
+        seconds: CommonTest.waitTime,
+      );
+      await CommonTest.waitForSnackbarToGo(tester);
+      expect(find.text(title), findsNWidgets(before + 1));
+    } finally {
+      FilePickerPlatform.instance = original;
+    }
   }
 
   /// Publishes a course through the edit dialog.

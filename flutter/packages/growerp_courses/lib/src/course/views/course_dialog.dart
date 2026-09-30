@@ -12,7 +12,11 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:decimal/decimal.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -702,6 +706,14 @@ class _CourseDialogState extends State<CourseDialog> {
                     onPressed: () => _showWorkbookPdf(docCourse),
                   ),
                 TextButton.icon(
+                  key: const Key('courseDownload'),
+                  icon: const Icon(Icons.download),
+                  label: Text(
+                    CoursesLocalizations.of(context)!.courses_downloadCourse,
+                  ),
+                  onPressed: () => _downloadCourse(docCourse),
+                ),
+                TextButton.icon(
                   key: const Key('addModule'),
                   icon: const Icon(Icons.add),
                   label: Text(
@@ -1299,6 +1311,30 @@ class _CourseDialogState extends State<CourseDialog> {
       format,
     ),
   );
+
+  /// The full course as a JSON file, to upload as a new course elsewhere
+  Future<void> _downloadCourse(Course course) async {
+    final l = CoursesLocalizations.of(context)!;
+    try {
+      var result = await context.read<RestClient>().exportCourse(
+        courseId: course.courseId!,
+      );
+      // a dynamic body can arrive as the raw JSON string
+      if (result is String) result = jsonDecode(result);
+      final uri = await FilePicker.saveFile(
+        dialogTitle: l.courses_downloadCourse,
+        fileName: result['fileName'] as String,
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+        bytes: Uint8List.fromList(utf8.encode(result['courseJson'] as String)),
+      );
+      if (!mounted || uri == null) return; // cancelled
+      HelperFunctions.showMessage(context, l.courses_courseSaved, Colors.green);
+    } catch (e) {
+      final message = await getDioError(e);
+      if (mounted) HelperFunctions.showMessage(context, message, Colors.red);
+    }
+  }
 
   void _showWorkbookPdf(Course course) => showPdfDialog(
     context,

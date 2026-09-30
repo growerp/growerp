@@ -408,5 +408,9 @@
   "courses_tableHdrEmail": "อีเมล",
   "courses_tableHdrCourses": "หลักสูตร",
   "courses_tableHdrProgress": "ความคืบหน้า",
-  "courses_availableOnWebsite": "มีจำหน่ายบนเว็บไซต์ของเรา"
+  "courses_availableOnWebsite": "มีจำหน่ายบนเว็บไซต์ของเรา",
+  "courses_downloadCourse": "ดาวน์โหลดหลักสูตร",
+  "courses_uploadCourse": "อัปโหลดหลักสูตร",
+  "courses_courseUploaded": "อัปโหลดหลักสูตรเป็นฉบับร่างใหม่แล้ว",
+  "courses_courseSaved": "บันทึกหลักสูตรแล้ว"
 }

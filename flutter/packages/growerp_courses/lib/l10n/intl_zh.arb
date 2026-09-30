@@ -408,5 +408,9 @@
   "courses_tableHdrEmail": "电子邮件",
   "courses_tableHdrCourses": "课程",
   "courses_tableHdrProgress": "进度",
-  "courses_availableOnWebsite": "可在我们的网站上获取"
+  "courses_availableOnWebsite": "可在我们的网站上获取",
+  "courses_downloadCourse": "下载课程",
+  "courses_uploadCourse": "上传课程",
+  "courses_courseUploaded": "课程已作为新草稿上传",
+  "courses_courseSaved": "课程已保存"
 }

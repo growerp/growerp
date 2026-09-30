@@ -408,5 +408,9 @@
   "courses_tableHdrEmail": "Correo",
   "courses_tableHdrCourses": "Cursos",
   "courses_tableHdrProgress": "Progreso",
-  "courses_availableOnWebsite": "Disponible en nuestro sitio web"
+  "courses_availableOnWebsite": "Disponible en nuestro sitio web",
+  "courses_downloadCourse": "Descargar curso",
+  "courses_uploadCourse": "Subir curso",
+  "courses_courseUploaded": "Curso subido como nuevo borrador",
+  "courses_courseSaved": "Curso guardado"
 }

@@ -2400,6 +2400,14 @@ abstract class RestClient {
   @DELETE("rest/s1/growerp/100/Course")
   Future<dynamic> deleteCourse({@Query('courseId') required String courseId});
 
+  /// The full course as a JSON file: returns {courseJson, fileName}
+  @GET("rest/s1/growerp/100/Course/Export")
+  Future<dynamic> exportCourse({@Query('courseId') required String courseId});
+
+  /// A new draft course from an exported file: returns {courseId, pseudoId}
+  @POST("rest/s1/growerp/100/Course/Import")
+  Future<dynamic> importCourse({@Field() required String courseJson});
+
   @POST("rest/s1/growerp/100/Course/Module")
   Future<dynamic> createCourseModule({
     @Body() required Map<String, dynamic> data,

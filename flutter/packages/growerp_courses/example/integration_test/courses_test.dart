@@ -159,6 +159,17 @@ void main() {
     await CommonTest.login(tester);
     await CourseTest.selectCourses(tester);
     await CourseTest.reviewSubmission(tester, 'Test Course Updated', score: 90);
+    // the full course as a file, uploaded again as a new draft
+    await CourseTest.downloadAndUploadCourse(
+      tester,
+      'Test Course Updated',
+      fileContains: [
+        'Module One',
+        'Lesson one body text',
+        'What does this course test?',
+        'Describe where you would use this course.',
+      ],
+    );
     await CommonTest.gotoMainMenu(tester);
     await CommonTest.logout(tester);
   });

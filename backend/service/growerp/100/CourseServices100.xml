@@ -783,6 +783,163 @@ limitations under the License.
     </service>
 
     <!-- ========================================================= -->
+    <!--  Download / upload a full course as a JSON file           -->
+    <!-- ========================================================= -->
+
+    <service verb="get" noun="CourseExport">
+        <description>The content of a course as a JSON file: the course, its modules with slides,
+            lessons, quiz questions and exercises, the capstone and the AI source material. No
+            learner data, videos, product or price: upload makes a new draft course from it.</description>
+        <in-parameters>
+            <parameter name="courseId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="courseJson" />
+            <parameter name="fileName" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.course.Course" value-field="courseEntity">
+                <field-map field-name="courseId" />
+            </entity-find-one>
+            <if condition="courseEntity?.ownerPartyId != context.ownerPartyId">
+                <message error="true">Course not found or access denied</message>
+                <return />
+            </if>
+            <entity-find entity-name="growerp.course.CourseModule" list="moduleList">
+                <econdition field-name="courseId" />
+                <order-by field-name="sequenceNum" />
+            </entity-find>
+            <entity-find entity-name="growerp.course.CourseLesson" list="lessonList">
+                <econdition field-name="courseId" />
+                <order-by field-name="sequenceNum" />
+            </entity-find>
+            <entity-find entity-name="growerp.course.CourseQuizQuestion" list="questionList">
+                <econdition field-name="courseId" />
+                <order-by field-name="sequenceNum" />
+            </entity-find>
+            <entity-find entity-name="growerp.course.CourseExercise" list="exerciseList">
+                <econdition field-name="courseId" />
+                <order-by field-name="sequenceNum" />
+            </entity-find>
+            <entity-find entity-name="growerp.course.CourseSource" list="sourceList">
+                <econdition field-name="courseId" />
+                <order-by field-name="createdDate" />
+            </entity-find>
+            <script><![CDATA[
+                def slurper = new groovy.json.JsonSlurper()
+                def exerciseMap = { e -> [exerciseType: e.exerciseType, title: e.title,
+                    prompt: e.prompt, rubric: e.rubric, sequenceNum: e.sequenceNum,
+                    lessonRef: e.lessonId] }
+                def export = [format: 'growerp-course', version: 1,
+                    exportedDate: ec.user.nowTimestamp.toInstant().toString(),
+                    course: [title: courseEntity.title, description: courseEntity.description,
+                        objectives: courseEntity.objectives, audience: courseEntity.audience,
+                        difficulty: courseEntity.difficulty,
+                        estimatedDuration: courseEntity.estimatedDuration,
+                        coverImageUrl: courseEntity.coverImageUrl,
+                        languageId: courseEntity.languageId,
+                        requireInstructorReview: courseEntity.requireInstructorReview,
+                        sequentialUnlock: courseEntity.sequentialUnlock,
+                        pacing: courseEntity.pacing],
+                    modules: moduleList.collect { m -> [ref: m.moduleId, title: m.title,
+                        description: m.description, sequenceNum: m.sequenceNum,
+                        estimatedDuration: m.estimatedDuration, dueDays: m.dueDays,
+                        slides: m.slides ? slurper.parseText(m.slides) : null,
+                        lessons: lessonList.findAll { it.moduleId == m.moduleId }.collect { l ->
+                            [ref: l.lessonId, title: l.title, content: l.content,
+                             keyPoints: l.keyPoints ? slurper.parseText(l.keyPoints) : null,
+                             sequenceNum: l.sequenceNum, estimatedDuration: l.estimatedDuration,
+                             videoUrl: l.videoUrl, imageUrl: l.imageUrl] },
+                        quizQuestions: questionList.findAll { it.moduleId == m.moduleId }.collect { q ->
+                            [question: q.question, options: slurper.parseText(q.optionsJson ?: '[]'),
+                             correctIndex: q.correctIndex, explanation: q.explanation,
+                             sequenceNum: q.sequenceNum, lessonRef: q.lessonId] },
+                        exercises: exerciseList.findAll { it.moduleId == m.moduleId }.collect(exerciseMap)] },
+                    exercises: exerciseList.findAll { !it.moduleId }.collect(exerciseMap),
+                    sources: sourceList.collect { s -> [sourceType: s.sourceType, title: s.title,
+                        location: s.location, content: s.content] }]
+                courseJson = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(export))
+                fileName = "${courseEntity.pseudoId}-${courseEntity.title.replaceAll('[^A-Za-z0-9]+', '_')}.course.json".toString()
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="import" noun="Course">
+        <description>A new draft course from a file made by get#CourseExport, with its own
+            product; the quiz questions and exercises keep the lesson they test.</description>
+        <in-parameters>
+            <parameter name="courseJson" required="true" allow-html="any" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="courseId" />
+            <parameter name="pseudoId" />
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                try { data = new groovy.json.JsonSlurper().parseText(courseJson) }
+                catch (Exception e) { data = null }
+            ]]></script>
+            <if condition="!(data instanceof Map) || data.format != 'growerp-course' || !data.course?.title">
+                <return error="true" message="This is not a course file" />
+            </if>
+            <set field="c" from="data.course" />
+            <service-call name="growerp.100.CourseServices100.create#Course" out-map="created"
+                in-map="[title: c.title, description: c.description, objectives: c.objectives,
+                         audience: c.audience, difficulty: c.difficulty ?: 'BEGINNER',
+                         estimatedDuration: c.estimatedDuration, coverImageUrl: c.coverImageUrl,
+                         languageId: c.languageId, requireInstructorReview: c.requireInstructorReview,
+                         sequentialUnlock: c.sequentialUnlock, pacing: c.pacing]" />
+            <set field="courseId" from="created.courseId" />
+            <set field="pseudoId" from="created.pseudoId" />
+            <set field="lessonIds" from="[:]" /> <!-- ref in the file: new lessonId -->
+            <iterate list="(data.modules ?: [])" entry="m">
+                <service-call name="growerp.100.CourseServices100.create#CourseModule" out-map="newModule"
+                    in-map="[courseId: courseId, title: m.title, description: m.description,
+                             sequenceNum: m.sequenceNum, estimatedDuration: m.estimatedDuration,
+                             dueDays: m.dueDays,
+                             slides: m.slides ? groovy.json.JsonOutput.toJson(m.slides) : null]" />
+                <iterate list="(m.lessons ?: [])" entry="l">
+                    <service-call name="growerp.100.CourseServices100.create#CourseLesson" out-map="newLesson"
+                        in-map="[moduleId: newModule.moduleId, title: l.title, content: l.content,
+                                 keyPoints: l.keyPoints != null ? groovy.json.JsonOutput.toJson(l.keyPoints) : null,
+                                 sequenceNum: l.sequenceNum, estimatedDuration: l.estimatedDuration,
+                                 videoUrl: l.videoUrl, imageUrl: l.imageUrl]" />
+                    <script>if (l.ref) lessonIds[l.ref] = newLesson.lessonId</script>
+                </iterate>
+                <iterate list="(m.quizQuestions ?: [])" entry="q">
+                    <service-call name="growerp.100.CourseQuizServices100.create#CourseQuizQuestion"
+                        in-map="[moduleId: newModule.moduleId, question: q.question,
+                                 options: q.options ?: [], correctIndex: q.correctIndex,
+                                 explanation: q.explanation, sequenceNum: q.sequenceNum,
+                                 lessonId: lessonIds[q.lessonRef]]" />
+                </iterate>
+                <iterate list="(m.exercises ?: [])" entry="e">
+                    <service-call name="growerp.100.CourseExerciseServices100.create#CourseExercise"
+                        in-map="[courseId: courseId, moduleId: newModule.moduleId,
+                                 lessonId: lessonIds[e.lessonRef], exerciseType: e.exerciseType ?: 'TEXT',
+                                 title: e.title, prompt: e.prompt, rubric: e.rubric,
+                                 sequenceNum: e.sequenceNum]" />
+                </iterate>
+            </iterate>
+            <!-- the capstone project -->
+            <iterate list="(data.exercises ?: [])" entry="e">
+                <service-call name="growerp.100.CourseExerciseServices100.create#CourseExercise"
+                    in-map="[courseId: courseId, lessonId: lessonIds[e.lessonRef],
+                             exerciseType: e.exerciseType ?: 'TEXT', title: e.title,
+                             prompt: e.prompt, rubric: e.rubric, sequenceNum: e.sequenceNum]" />
+            </iterate>
+            <iterate list="(data.sources ?: [])" entry="s">
+                <service-call name="create#growerp.course.CourseSource"
+                    in-map="[courseId: courseId, sourceType: s.sourceType, title: s.title,
+                             location: s.location, content: s.content,
+                             createdDate: ec.user.nowTimestamp]" />
+            </iterate>
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
     <!--  Selling courses as website products                      -->
     <!-- ========================================================= -->
 

@@ -14,6 +14,7 @@
 
 import 'dart:convert';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -194,6 +195,16 @@ class _CourseListViewState extends State<CourseListView> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           FloatingActionButton(
+                            heroTag: 'courseUpload',
+                            key: const Key('courseUpload'),
+                            onPressed: _uploadCourse,
+                            tooltip: CoursesLocalizations.of(
+                              context,
+                            )!.courses_uploadCourse,
+                            child: const Icon(Icons.upload_file),
+                          ),
+                          const SizedBox(height: 10),
+                          FloatingActionButton(
                             heroTag: 'courseNewAi',
                             key: const Key('addNewAi'),
                             onPressed: _createWithAi,
@@ -260,6 +271,32 @@ class _CourseListViewState extends State<CourseListView> {
           value: _courseBloc,
           child: CourseDialog(course: course),
         ),
+      );
+    } catch (e) {
+      final message = await getDioError(e);
+      if (mounted) HelperFunctions.showMessage(context, message, Colors.red);
+    }
+    _searchFocusNode.requestFocus();
+  }
+
+  /// A new draft course from a file made with the course download
+  Future<void> _uploadCourse() async {
+    final restClient = context.read<RestClient>();
+    final l = CoursesLocalizations.of(context)!;
+    final picked = await FilePicker.pickFile(
+      type: FileType.custom,
+      allowedExtensions: ['json'],
+    );
+    if (picked == null || !mounted) return;
+    try {
+      final courseJson = utf8.decode(await picked.readAsBytes());
+      await restClient.importCourse(courseJson: courseJson);
+      if (!mounted) return;
+      _courseBloc.add(const CourseFetch(refresh: true));
+      HelperFunctions.showMessage(
+        context,
+        l.courses_courseUploaded,
+        Colors.green,
       );
     } catch (e) {
       final message = await getDioError(e);

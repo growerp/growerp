@@ -408,5 +408,9 @@
   "courses_tableHdrEmail": "E-mail",
   "courses_tableHdrCourses": "Cursussen",
   "courses_tableHdrProgress": "Voortgang",
-  "courses_availableOnWebsite": "Verkrijgbaar op onze website"
+  "courses_availableOnWebsite": "Verkrijgbaar op onze website",
+  "courses_downloadCourse": "Cursus downloaden",
+  "courses_uploadCourse": "Cursus uploaden",
+  "courses_courseUploaded": "Cursus geüpload als nieuw concept",
+  "courses_courseSaved": "Cursus opgeslagen"
 }
