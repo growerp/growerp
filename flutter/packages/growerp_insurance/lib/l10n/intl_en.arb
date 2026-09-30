@@ -234,5 +234,198 @@
   "showCard": "Show card",
   "@showCard": {
     "description": "insurance label: Show card"
+  },
+  "wizardStep": "Step {step} of {total}",
+  "@wizardStep": {
+    "description": "insurance label: Step {step} of {total}",
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "back": "Back",
+  "@back": {
+    "description": "insurance label: Back"
+  },
+  "next": "Next",
+  "@next": {
+    "description": "insurance label: Next"
+  },
+  "submitClaim": "Submit claim",
+  "@submitClaim": {
+    "description": "insurance label: Submit claim"
+  },
+  "claimSubmitted": "Claim received. You can follow every step here.",
+  "@claimSubmitted": {
+    "description": "insurance label: Claim received. You can follow every step here."
+  },
+  "injuryFirst": "If someone is hurt, call 115 (ambulance) and 113 (police) first. You can finish this claim later.",
+  "@injuryFirst": {
+    "description": "insurance label: If someone is hurt, call 115 (ambulance) and 113 (police) fi"
+  },
+  "incidentLocation": "Where did it happen?",
+  "@incidentLocation": {
+    "description": "insurance label: Where did it happen?"
+  },
+  "describeIncident": "Tell in your own words what happened",
+  "@describeIncident": {
+    "description": "insurance label: Tell in your own words what happened"
+  },
+  "photoIntro": "Photos speed up your claim. Take what you can safely take now; you can add more later.",
+  "@photoIntro": {
+    "description": "insurance label: Photos speed up your claim. Take what you can safely take no"
+  },
+  "photoPlate": "Licence plate",
+  "@photoPlate": {
+    "description": "insurance label: Licence plate"
+  },
+  "photoOverview": "Whole vehicle",
+  "@photoOverview": {
+    "description": "insurance label: Whole vehicle"
+  },
+  "photoDamage": "Damage close-up",
+  "@photoDamage": {
+    "description": "insurance label: Damage close-up"
+  },
+  "photoOther": "Other vehicle or scene",
+  "@photoOther": {
+    "description": "insurance label: Other vehicle or scene"
+  },
+  "photoExtra": "Add more",
+  "@photoExtra": {
+    "description": "insurance label: Add more"
+  },
+  "photoCount": "{count} photos",
+  "@photoCount": {
+    "description": "insurance label: {count} photos",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "amountClaimedOptional": "Estimated amount, if you know it",
+  "@amountClaimedOptional": {
+    "description": "insurance label: Estimated amount, if you know it"
+  },
+  "claimConsent": "I agree that my claim and photos are shared with the agency and the insurer, and checked with the help of AI. A person makes every decision.",
+  "@claimConsent": {
+    "description": "insurance label: I agree that my claim and photos are shared with the agency "
+  },
+  "incidentCollision": "Collision with another vehicle",
+  "@incidentCollision": {
+    "description": "insurance label: Collision with another vehicle"
+  },
+  "incidentSingleVehicle": "Accident, no other vehicle",
+  "@incidentSingleVehicle": {
+    "description": "insurance label: Accident, no other vehicle"
+  },
+  "incidentParked": "Damaged while parked",
+  "@incidentParked": {
+    "description": "insurance label: Damaged while parked"
+  },
+  "incidentInjury": "Someone was hurt",
+  "@incidentInjury": {
+    "description": "insurance label: Someone was hurt"
+  },
+  "incidentFlood": "Flood or storm",
+  "@incidentFlood": {
+    "description": "insurance label: Flood or storm"
+  },
+  "incidentTheft": "Theft or break-in",
+  "@incidentTheft": {
+    "description": "insurance label: Theft or break-in"
+  },
+  "incidentGlass": "Broken glass",
+  "@incidentGlass": {
+    "description": "insurance label: Broken glass"
+  },
+  "incidentOther": "Something else",
+  "@incidentOther": {
+    "description": "insurance label: Something else"
+  },
+  "claimProgress": "Progress",
+  "@claimProgress": {
+    "description": "insurance label: Progress"
+  },
+  "statusExplainSubmitted": "We received your claim.",
+  "@statusExplainSubmitted": {
+    "description": "insurance label: We received your claim."
+  },
+  "statusExplainAiAssessed": "Photos checked; an adjuster reviews your claim next.",
+  "@statusExplainAiAssessed": {
+    "description": "insurance label: Photos checked; an adjuster reviews your claim next."
+  },
+  "statusExplainInReview": "The agency is checking your claim.",
+  "@statusExplainInReview": {
+    "description": "insurance label: The agency is checking your claim."
+  },
+  "statusExplainFiled": "Sent to the insurance company, waiting for their answer.",
+  "@statusExplainFiled": {
+    "description": "insurance label: Sent to the insurance company, waiting for their answer."
+  },
+  "statusExplainApproved": "Accepted; the payment is being prepared.",
+  "@statusExplainApproved": {
+    "description": "insurance label: Accepted; the payment is being prepared."
+  },
+  "statusExplainDenied": "Not accepted; the agency will explain why and your options.",
+  "@statusExplainDenied": {
+    "description": "insurance label: Not accepted; the agency will explain why and your options."
+  },
+  "statusExplainPaid": "Paid.",
+  "@statusExplainPaid": {
+    "description": "insurance label: Paid."
+  },
+  "statusExplainClosed": "Closed.",
+  "@statusExplainClosed": {
+    "description": "insurance label: Closed."
+  },
+  "missingEvidenceTitle": "Please add if you can",
+  "@missingEvidenceTitle": {
+    "description": "insurance label: Please add if you can"
+  },
+  "photos": "Photos",
+  "@photos": {
+    "description": "insurance label: Photos"
+  },
+  "addPhotos": "Add photos",
+  "@addPhotos": {
+    "description": "insurance label: Add photos"
+  },
+  "aiAssessment": "AI triage",
+  "@aiAssessment": {
+    "description": "insurance label: AI triage"
+  },
+  "aiAdvisoryNote": "Advice only: check it, the decision is yours.",
+  "@aiAdvisoryNote": {
+    "description": "insurance label: Advice only: check it, the decision is yours."
+  },
+  "severity": "Severity",
+  "@severity": {
+    "description": "insurance label: Severity"
+  },
+  "drivable": "Drivable",
+  "@drivable": {
+    "description": "insurance label: Drivable"
+  },
+  "plateCheck": "Plate in photos",
+  "@plateCheck": {
+    "description": "insurance label: Plate in photos"
+  },
+  "suggestedNextStep": "Suggested next step",
+  "@suggestedNextStep": {
+    "description": "insurance label: Suggested next step"
+  },
+  "reviewFlags": "Check in person",
+  "@reviewFlags": {
+    "description": "insurance label: Check in person"
+  },
+  "consistency": "Photos vs. description",
+  "@consistency": {
+    "description": "insurance label: Photos vs. description"
   }
 }

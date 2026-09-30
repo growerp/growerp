@@ -48,6 +48,7 @@ abstract class Claim with _$Claim {
     String? comments,
     String? aiAssessment,
     @DateTimeConverter() DateTime? aiAssessedDate,
+    List<String>? missingEvidence,
     List<ClaimPhoto>? photos,
     List<ClaimStatusChange>? statusHistory,
   }) = _Claim;

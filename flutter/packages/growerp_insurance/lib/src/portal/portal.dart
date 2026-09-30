@@ -15,3 +15,4 @@
 export 'views/my_policies_view.dart';
 export 'integration_test/my_policies_test.dart';
 export 'views/policy_card_dialog.dart';
+export 'views/claim_wizard_dialog.dart';

@@ -143,7 +143,8 @@ class GeminiAiUtil {
      * @param ec ExecutionContext from Moqui
      * @param prompt The text prompt to send
      * @param options Optional map with: apiKey, model, provider, ownerPartyId, temperature,
-     *        topK, topP, maxOutputTokens, jsonMode
+     *        topK, topP, maxOutputTokens, jsonMode, images (List of [mimeType, data] with data
+     *        base64 encoded, sent with the prompt to a vision capable model)
      * @return The generated text (markdown code fences stripped)
      * @throws Exception if no API key is configured or the API call fails
      */
@@ -312,7 +313,8 @@ class GeminiAiUtil {
 
     private static Map callGemini(def ec, String prompt, String model, String apiKey, Map options) {
         def requestMap = [
-            contents: [[parts: [[text: prompt]]]],
+            contents: [[parts: [[text: prompt]] + ((options.images ?: []) as List).collect {
+                [inline_data: [mime_type: it.mimeType ?: "image/jpeg", data: it.data]] }]],
             generationConfig: [
                 temperature: options.temperature ?: 0.7,
                 topK: options.topK ?: 40,
@@ -344,7 +346,10 @@ class GeminiAiUtil {
         def requestMap = [
             model: model,
             max_tokens: options.maxOutputTokens ?: 4096,
-            messages: [[role: "user", content: prompt]]
+            messages: [[role: "user", content: options.images
+                ? ((options.images as List).collect { [type: "image", source: [type: "base64",
+                    media_type: it.mimeType ?: "image/jpeg", data: it.data]] } + [[type: "text", text: prompt]])
+                : prompt]]
         ]
         def responseText = postJson(ec, ANTHROPIC_URL,
             ["x-api-key": apiKey, "anthropic-version": ANTHROPIC_VERSION],
@@ -372,7 +377,10 @@ class GeminiAiUtil {
     private static Map callOpenAi(def ec, String prompt, String model, String apiKey, Map options) {
         def requestMap = [
             model: model,
-            messages: [[role: "user", content: prompt]],
+            messages: [[role: "user", content: options.images
+                ? ([[type: "text", text: prompt]] + (options.images as List).collect { [type: "image_url",
+                    image_url: [url: "data:${it.mimeType ?: 'image/jpeg'};base64,${it.data}".toString()]] })
+                : prompt]],
             temperature: options.temperature ?: 0.7,
             max_tokens: options.maxOutputTokens ?: 4096,
             stream: false

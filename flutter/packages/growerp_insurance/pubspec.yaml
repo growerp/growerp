@@ -34,6 +34,7 @@ dependencies:
   flutter_test:
     sdk: flutter
   qr_flutter: ^4.1.0
+  image: ^4.3.0
 
 dev_dependencies:
   flutter_driver:

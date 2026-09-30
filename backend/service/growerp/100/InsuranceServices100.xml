@@ -762,6 +762,7 @@ limitations under the License.
                     <parameter name="comments" />
                     <parameter name="aiAssessment" />
                     <parameter name="aiAssessedDate" />
+                    <parameter name="missingEvidence" type="List" />
                     <parameter name="photos" type="List" />
                     <parameter name="statusHistory" type="List" />
                 </parameter>
@@ -851,6 +852,9 @@ limitations under the License.
                     amountPaid: item.amountPaid?.toString(),
                     comments: item.comments,
                     aiAssessment: isStaff ? item.aiAssessment : null,
+                    // the only AI output the client sees: what else to send, no verdicts
+                    missingEvidence: item.aiAssessment ? (new groovy.json.JsonSlurper()
+                        .parseText(item.aiAssessment).missingEvidence ?: []) : [],
                     aiAssessedDate: ec.l10n.format(item.aiAssessedDate, 'yyyy-MM-dd HH:mm:ssZ'),
                     photos: photos, statusHistory: statusHistory])</script>
             </iterate>
@@ -904,6 +908,8 @@ limitations under the License.
             <if condition="claim.photos">
                 <service-call name="growerp.100.InsuranceServices100.store#ClaimPhotos"
                     in-map="[claimId: claimId, ownerPartyId: ownerPartyId, photos: claim.photos]" />
+                <service-call name="growerp.100.InsuranceServices100.queue#ClaimAssessment"
+                    in-map="[claimId: claimId]" />
             </if>
             <service-call name="growerp.100.InsuranceServices100.get#Claims"
                 in-map="[claimId: claimId]" out-map="context" />
@@ -943,6 +949,7 @@ limitations under the License.
             <entity-find-one entity-name="growerp.insurance.Claim" value-field="old" for-update="true">
                 <field-map field-name="claimId" from="claim.claimId" />
             </entity-find-one>
+            <set field="previousStatusId" from="old.statusId" />
             <if condition="isStaff">
                 <iterate list="['claimNumber', 'statusId', 'incidentDate', 'incidentTypeEnumId',
                         'incidentLocation', 'description', 'amountClaimed', 'amountPaid', 'comments']"
@@ -952,7 +959,7 @@ limitations under the License.
                     </if>
                 </iterate>
                 <else>
-                    <if condition="old.statusId != 'InclSubmitted'">
+                    <if condition="!(old.statusId in ['InclSubmitted', 'InclAiAssessed'])">
                         <return error="true"
                             message="Claim ${old.pseudoId} is being handled, contact the agency to change it" />
                     </if>
@@ -968,9 +975,15 @@ limitations under the License.
                 </else>
             </if>
             <entity-update value-field="old" />
+            <if condition="old.statusId != previousStatusId">
+                <service-call name="growerp.100.InsuranceServices100.send#ClaimStatusEmail"
+                    in-map="[claim: old]" />
+            </if>
             <if condition="claim.photos">
                 <service-call name="growerp.100.InsuranceServices100.store#ClaimPhotos"
                     in-map="[claimId: old.claimId, ownerPartyId: old.ownerPartyId, photos: claim.photos]" />
+                <service-call name="growerp.100.InsuranceServices100.queue#ClaimAssessment"
+                    in-map="[claimId: old.claimId]" />
             </if>
             <service-call name="growerp.100.InsuranceServices100.get#Claims"
                 in-map="[claimId: claim.claimId]" out-map="context" />
@@ -1011,6 +1024,90 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="send" noun="ClaimStatusEmail" allow-remote="false"><!-- internal -->
+        <description>Tells the client who reported the claim what its new status means and
+            what happens next, so nobody has to call the agency to ask.</description>
+        <in-parameters>
+            <parameter name="claim" type="Map" required="true" />
+        </in-parameters>
+        <actions>
+            <set field="explanations" from="[
+                InclInReview: 'The agency is checking your claim and the documents you sent.',
+                InclFiled: 'Your claim has been sent to the insurance company. We will let you know as soon as they answer.',
+                InclApproved: 'The insurance company accepted your claim. The payment is being prepared.',
+                InclDenied: 'The insurance company did not accept your claim. The agency will explain the reason and your options.',
+                InclPaid: 'The claim has been paid.',
+                InclClosed: 'Your claim is closed. Contact the agency if you have questions.']" />
+            <set field="explanation" from="explanations[claim.statusId]" />
+            <if condition="!explanation || !claim.reportedByPartyId"><return /></if>
+            <entity-find entity-name="moqui.security.UserAccount" list="accounts" limit="1">
+                <econdition field-name="partyId" from="claim.reportedByPartyId" />
+            </entity-find>
+            <set field="toAddress" from="accounts ? accounts[0].emailAddress : null" />
+            <if condition="!toAddress || toAddress.contains('example.com')"><return /></if>
+            <entity-find-one entity-name="moqui.basic.StatusItem" value-field="statusItem" cache="true">
+                <field-map field-name="statusId" from="claim.statusId" />
+            </entity-find-one>
+            <set field="claimRef" from="claim.claimNumber ?: claim.pseudoId" />
+            <set field="statusBody" value="&lt;p&gt;Claim &lt;b&gt;${claimRef}&lt;/b&gt;: ${statusItem?.description}.&lt;/p&gt;&lt;p&gt;${explanation}&lt;/p&gt;&lt;p&gt;You can follow every step under My Policies in the app.&lt;/p&gt;" />
+            <service-call name="growerp.100.GeneralServices100.send#DirectEmail" ignore-error="true"
+                in-map="[ownerPartyId: claim.ownerPartyId, toAddresses: toAddress,
+                    subject: 'Claim ' + claimRef + ': ' + statusItem?.description,
+                    bodyHtml: statusBody]" />
+        </actions>
+    </service>
+
+    <service verb="queue" noun="ClaimAssessment" allow-remote="false"><!-- internal -->
+        <description>Starts the AI triage of the claim once the calling transaction has
+            committed: the background worker must see the claim and its photos.</description>
+        <in-parameters>
+            <parameter name="claimId" required="true" />
+        </in-parameters>
+        <actions>
+            <script>
+                ec.service.special().name('growerp.100.InsuranceServices100.start#ClaimAssessment')
+                    .parameters([claimId: claimId, username: ec.user.username]).registerOnCommit()
+            </script>
+        </actions>
+    </service>
+
+    <service verb="start" noun="ClaimAssessment" allow-remote="false"><!-- internal, after commit -->
+        <in-parameters>
+            <parameter name="claimId" required="true" />
+            <parameter name="username" />
+        </in-parameters>
+        <actions>
+            <script>
+                ec.service.async().name('growerp.100.InsuranceServices100.assess#Claim')
+                    .parameters([claimId: claimId, username: username]).call()
+            </script>
+        </actions>
+    </service>
+
+    <service verb="assess" noun="Claim" authenticate="anonymous" transaction="ignore">
+        <description>Background AI triage of a claim from its photos and description, advice
+            for the adjuster; see service/insurance/assessClaim.groovy. A failure only logs:
+            the claim stays Submitted and is handled as without AI.</description>
+        <in-parameters>
+            <parameter name="claimId" required="true" />
+            <parameter name="username" />
+        </in-parameters>
+        <actions>
+            <!-- the async worker has no web session: log in as the reporting user -->
+            <if condition="!ec.user.userId &amp;&amp; username">
+                <script>ec.user.internalLoginUser(username)</script>
+            </if>
+            <script><![CDATA[
+                try {
+                    ec.resource.script("component://growerp/service/insurance/assessClaim.groovy", null)
+                } catch (Throwable t) {
+                    ec.logger.warn("AI claim assessment of ${claimId} failed: ${t.message}")
+                    ec.message.clearErrors()
+                }
+            ]]></script>
+        </actions>
+    </service>
+
     <service verb="delete" noun="Claim">
         <in-parameters>
             <parameter name="claim" type="Map" required="true">
@@ -1023,7 +1120,7 @@ limitations under the License.
             <if condition="!found.claims">
                 <return error="true" message="Claim ${claim.claimId} not found!" />
             </if>
-            <if condition="found.claims[0].statusId != 'InclSubmitted'">
+            <if condition="!(found.claims[0].statusId in ['InclSubmitted', 'InclAiAssessed'])">
                 <return error="true" message="Only submitted claims can be deleted" />
             </if>
             <entity-find entity-name="growerp.insurance.ClaimContent" list="contentList">

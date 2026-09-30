@@ -118,11 +118,30 @@ class ClaimListState extends State<ClaimList> {
   }
 
   void _showDialog(Claim claim) {
+    // a client reports a new claim step by step, on its own current policies
+    final wizard = widget.portal && claim.claimId.isEmpty;
+    final policies = wizard
+        ? context
+              .read<PolicyBloc>()
+              .state
+              .policies
+              .where(
+                (p) =>
+                    p.status != PolicyStatus.quote &&
+                    p.status != PolicyStatus.cancelled &&
+                    p.status != PolicyStatus.renewed,
+              )
+              .toList()
+        : <Policy>[];
     showDialog(
       barrierDismissible: true,
       context: context,
-      builder: (BuildContext context) =>
-          BlocProvider.value(value: _claimBloc, child: ClaimDialog(claim)),
+      builder: (BuildContext context) => BlocProvider.value(
+        value: _claimBloc,
+        child: wizard
+            ? ClaimWizardDialog(policies: policies)
+            : ClaimDialog(claim),
+      ),
     );
   }
 

@@ -17,3 +17,4 @@ export 'views/claim_list.dart';
 export 'views/claim_list_styled_data.dart';
 export 'views/claim_dialog.dart';
 export 'integration_test/claim_test.dart';
+export 'views/claim_details_section.dart';

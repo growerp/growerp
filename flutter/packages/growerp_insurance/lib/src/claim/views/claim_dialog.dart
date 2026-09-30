@@ -112,7 +112,8 @@ class ClaimDialogState extends State<ClaimDialog> {
   }
 
   Widget _showForm(InsuranceLocalizations localizations) {
-    final isSubmitted = _status == ClaimStatus.submitted;
+    final isSubmitted =
+        _status == ClaimStatus.submitted || _status == ClaimStatus.aiAssessed;
     // what the client reported can be changed until the agency handles it
     final canEditReport = isNew || isStaff || isSubmitted;
     return Form(
@@ -220,6 +221,13 @@ class ClaimDialogState extends State<ClaimDialog> {
                 '${localizations.amountPaid}: ${widget.claim.amountPaid}',
                 key: const Key('claimAmountPaid'),
               ),
+          ],
+          if (!isNew) ...[
+            const SizedBox(height: 10),
+            ClaimDetailsSection(
+              claimId: widget.claim.claimId,
+              isStaff: isStaff,
+            ),
           ],
           const SizedBox(height: 20),
           if (canEditReport)
