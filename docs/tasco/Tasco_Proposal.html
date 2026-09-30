@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Proposal to Tasco — GrowERP Insurance</title>
+<style>
+  @page { size: A4; margin: 13mm 14mm 12mm 14mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "Public Sans", "Helvetica Neue", Arial, sans-serif; font-size: 8.9pt; line-height: 1.33; color: #2B3645; margin: 0; }
+  h1 { font-family: Georgia, "Times New Roman", serif; font-size: 18pt; color: #14233B; margin: 0 0 2mm; line-height: 1.15; }
+  h2 { font-size: 10.2pt; color: #14233B; margin: 2.6mm 0 1mm; text-transform: uppercase; letter-spacing: .4pt; border-bottom: 1.2pt solid #1B7F66; padding-bottom: .6mm; }
+  p { margin: 0 0 1.4mm; }
+  ul { margin: 0 0 1.4mm; padding-left: 4.5mm; }
+  li { margin: 0 0 .5mm; }
+  .meta { color: #5A6676; font-size: 8.8pt; margin-bottom: 2.5mm; }
+  .lead { font-size: 9.8pt; color: #14233B; }
+  table { width: 100%; border-collapse: collapse; margin: 1mm 0 1.6mm; font-size: 8.3pt; }
+  th { background: #14233B; color: #F7F5EF; text-align: left; padding: 1.1mm 1.6mm; font-weight: 600; }
+  td { padding: 1mm 1.6mm; border-bottom: .6pt solid #DCE3E6; vertical-align: top; }
+  tr:nth-child(even) td { background: #F2F5F5; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+  .box { background: #EEF4F2; border-left: 2.5pt solid #1B7F66; padding: 1.8mm 2.6mm; margin: 1mm 0 1.6mm; }
+  .foot { color: #5A6676; font-size: 8.2pt; margin-top: 2mm; }
+  b { color: #14233B; }
+</style>
+</head>
+<body>
+
+<h1>Proposal to Tasco: AI-assisted compulsory motor insurance that customers are glad to hold</h1>
+<p class="meta">GrowERP Insurance · BeyondPilot “AI for Insurance × Tasco” · submitted by GrowERP (Hans Bakker) · October 2026 · working prototype: tasco.growerp.net</p>
+
+<h2>1. Business problem</h2>
+<p>Compulsory motor insurance (TNDS) is regulated into sameness: identical cover and price from every insurer, bought only to comply. So nobody competes on experience, and it shows along the whole journey:</p>
+<ul>
+<li><b>Buy:</b> cover written as legal text; renewals forgotten; nothing fitted to the individual driver.</li>
+<li><b>Carry:</b> a paper certificate that gets lost; no instant, verifiable proof at a roadside check.</li>
+<li><b>Claim:</b> calls and visits to report, photos and documents chased afterwards, slow assessment, no view of status. Every question goes to a hotline.</li>
+</ul>
+<p>Tasco sees the whole journey (the car, VETC on the road, the service centre, the claim) and can turn this compliance product into a reason customers stay in its ecosystem, <b>without touching price</b>.</p>
+
+<h2>2. Proposed AI solution</h2>
+<p class="lead">One app for the driver (web/PWA, Android, iOS; Vietnamese and English) on the same system the agency or insurer runs its policies, claims and accounting on.</p>
+<ul>
+<li><b>Digital policy card with live QR proof.</b> Police or a garage scan it with any phone and see valid or not, plate masked, no personal data.</li>
+<li><b>Plain-language cover.</b> An LLM explains each policy from its own limits and deductibles, in the customer's language, inventing nothing.</li>
+<li><b>Guided claim (first notice of loss) in minutes.</b> Incident type, time and place, and a photo checklist (plate, vehicle, damage, other party), with explicit consent.</li>
+<li><b>AI photo triage for the adjuster.</b> A vision model reports damaged parts, severity, whether the car is drivable, whether the plate matches the policy, inconsistencies and missing evidence, plus a suggested next step (garage, roadside, inspection). <b>Advice only:</b> the AI never approves, denies or prices a claim.</li>
+<li><b>Transparent status.</b> A timeline with a plain explanation of every step, and an email (later Zalo/SMS) on each change.</li>
+<li><b>24/7 assistant.</b> Runs as the customer, so it sees only their own policies and claims plus the insurer's knowledge base. It hands off to a person when needed.</li>
+<li><b>Calm renewal.</b> Reminders at 30, 7 and 1 day, and a one-tap renewal request to staff. No discounts, cashback or artificial urgency anywhere.</li>
+</ul>
+<p>The model is configurable per tenant (Gemini by default; Anthropic or OpenAI). All of the above already runs in the hosted prototype; the source is open (Apache 2.0).</p>
+
+<h2>3. PoC scope</h2>
+<div class="two">
+<div>
+<p><b>In scope</b></p>
+<ul>
+<li>One segment: TNDS policyholders of one Tasco Auto dealer or branch (proposed 300–1,000 policies).</li>
+<li>Card and QR proof, plain-language cover, guided claim with AI triage, status timeline, assistant, and renewal reminders.</li>
+<li>Staff workspace for agents and adjusters, in Tasco branding and Vietnamese.</li>
+</ul>
+</div>
+<div>
+<p><b>Out of scope for the PoC</b></p>
+<ul>
+<li>Automated claim decisions or payments; pricing and underwriting changes.</li>
+<li>Full core-system integration: CSV import and manual status updates stand in (section 7).</li>
+<li>Telematics or usage-based data.</li>
+</ul>
+</div>
+</div>
+
+<h2>4. Expected business value</h2>
+<ul>
+<li><b>Lower claims handling cost:</b> complete first notice with photos, and a first read for the adjuster instead of phone calls.</li>
+<li><b>Fewer service contacts:</b> status and questions answered in the app, and escalations routed with context.</li>
+<li><b>Better retention:</b> timely, calm renewal and a product customers actually use, opening doors to Tasco's garage, roadside and vehicle-care services.</li>
+<li><b>Compliance and trust:</b> verifiable proof on the road, consent and audit built in.</li>
+</ul>
+
+<h2>5. Measurable success criteria</h2>
+<table>
+<thead><tr><th style="width:29%">Metric</th><th style="width:20%">Baseline</th><th style="width:17%">PoC target</th><th style="width:34%">How measured</th></tr></thead>
+<tr><td>Time to report a claim</td><td>Tasco data, week 1</td><td>&lt; 10 min median</td><td>Wizard start to submit, from app logs</td></tr>
+<tr><td>Claims complete at first submission</td><td>Tasco data, week 1</td><td>&gt; 70%</td><td>Adjuster requests no extra evidence</td></tr>
+<tr><td>Time to first adjuster decision</td><td>Tasco data, week 1</td><td>Same day for minor damage</td><td>Status audit log</td></tr>
+<tr><td>AI triage usefulness</td><td>n/a</td><td>≥ 80% rated “helpful”</td><td>Adjuster rating per claim</td></tr>
+<tr><td>“Where is my claim?” contacts</td><td>Hotline logs</td><td>−50% in segment</td><td>Hotline tags vs. assistant escalations</td></tr>
+<tr><td>Renewal requested before expiry</td><td>Tasco data, week 1</td><td>+10 points</td><td>Renewal requests vs. policies due</td></tr>
+<tr><td>Customer satisfaction</td><td>n/a</td><td>CSAT ≥ 4.2 / 5</td><td>In-app survey after a claim or renewal</td></tr>
+</table>
+<p>Targets are hypotheses to test; baselines and definitions are agreed in week 1.</p>
+
+<h2>6. Timeline and key deliverables</h2>
+<table>
+<tr><th style="width:21%">When</th><th style="width:37%">Work</th><th style="width:42%">Deliverable</th></tr>
+<tr><td>Week 1 · 3–7 Nov</td><td>Scope lock, NDA, consent texts, data access</td><td>Signed scope and metric definitions; legal review of consent (Decree 13/2023)</td></tr>
+<tr><td>Week 2 · 10–14 Nov</td><td>Policy import, branding, knowledge base, Vietnamese copy review</td><td>Tasco tenant live in a sandbox with real pilot policies</td></tr>
+<tr><td>Week 3 · 17–21 Nov</td><td>Claim status sync or staff workflow; Zalo/SMS if approved</td><td>Integration notes; mid-point checkpoint report</td></tr>
+<tr><td>Week 4 · 24–28 Nov</td><td>Live use by agents, adjusters and pilot customers</td><td>Metrics dashboard and results report</td></tr>
+<tr><td>By 5 Dec</td><td>Joint review</td><td>Written scale / extend / stop recommendation with production plan and quote</td></tr>
+</table>
+
+<h2>7. Resources and data required from Tasco</h2>
+<table>
+<tr><th style="width:36%">Item</th><th style="width:34%">Purpose</th><th style="width:30%">Fallback in the PoC</th></tr>
+<tr><td>TNDS policy extract for the segment (policy no., holder, plate, vehicle, dates, cover)</td><td>Cards, reminders and claims on real policies</td><td>CSV export, imported by us</td></tr>
+<tr><td>Claim status from the insurer's system</td><td>Live customer timeline</td><td>Staff update status in the app</td></tr>
+<tr><td>Policy wording, claim rules, FAQ</td><td>Assistant and explanations</td><td>Public TNDS rules</td></tr>
+<tr><td>VETC plate/vehicle data (with consent)</td><td>Pre-fill, plate check in triage</td><td>Plate entered by customer</td></tr>
+<tr><td>Garage and roadside contacts or API</td><td>Act on “suggested next step”</td><td>Staff call the garage</td></tr>
+<tr><td>Zalo OA or SMS sender</td><td>Reminders and status messages</td><td>Email and in-app</td></tr>
+</table>
+<p><b>People (estimated):</b> a business owner (about 2 h/week), an IT contact for data export (about 1 day), 2–3 agents or adjusters in week 4, and legal/compliance review of consent and data texts in week 1.</p>
+
+<h2>8. Estimated costs</h2>
+<div class="box">
+<p><b>The PoC is free of charge to Tasco.</b> GrowERP covers development, configuration, hosting and AI model usage for the four weeks. Tasco contributes only the staff time and data listed in section 7.</p>
+</div>
+<ul>
+<li><b>Production (only after a “scale” decision):</b> subscription per active policy, [VND ___ / policy / month], including hosting, updates and support. AI usage is passed through at cost (estimated [VND ___] per triaged claim and [VND ___] per 1,000 assistant questions).</li>
+<li><b>Integrations:</b> core policy system, claim status, VETC, Zalo, garage network. Fixed quote after the PoC, based on the interfaces Tasco chooses: [VND ___].</li>
+<li>Or on-premise or in Tasco's own cloud: licence-free (open source), with a support contract of [VND ___ / year].</li>
+</ul>
+
+<h2>9. Path to production</h2>
+<ul>
+<li><b>Roll out:</b> from one dealer to all Tasco Auto dealers, then voluntary motor, and then other lines on the same platform. The data model already covers any policy type.</li>
+<li><b>Integrate and operate:</b> REST connections to the core policy and claims systems, VETC, the garage and roadside network, and Zalo, or embed our screens in Tasco's customer app. Multi-tenant, containerised and deployable in Vietnam; the AI queue absorbs peaks (Tết renewals, rainy-season claims) without slowing claim intake.</li>
+<li><b>Govern:</b> human-in-the-loop decisions, audit logs of status changes and every AI call, monthly AI budgets per tenant, and periodic review of triage quality with adjusters.</li>
+</ul>
+
+<p class="foot">Contact: Hans Bakker, GrowERP · [email] · [phone] · Demo: https://tasco.growerp.net · Source: github.com/growerp/growerp (branch tasco) · Demo video: [link]</p>
+</body>
+</html>
