@@ -40,7 +40,6 @@ const List<String> _tenantApps = [
   'AppFreelance',
   'AppMarketing',
   'AppAgents',
-  'AppAcademy',
 ];
 
 const Timeout _timeout = Timeout(Duration(minutes: 20));
@@ -278,6 +277,12 @@ void main() {
     await CommonTest.skipOnboardingIfPresent(tester);
     await _expectNone(tester, ['startTrial', 'paymentForm']);
     expect(find.byType(TenantSetupDialog), findsNothing);
+  }, timeout: _timeout);
+
+  testWidgets('N: academy app has no registration', (tester) async {
+    await _start(tester, 'AppAcademy');
+    expect(await _waitFor(tester, ['loginButton']), 'loginButton');
+    expect(find.byKey(const Key('newUserButton')), findsNothing);
   }, timeout: _timeout);
 }
 

@@ -260,17 +260,64 @@ else
   echo "Packages with integration tests (${#PACKAGES_WITH_TESTS[@]}):"
   for p in "${PACKAGES_WITH_TESTS[@]}"; do echo "  $p"; done
 
-  # Apply slicing if PACKAGE_SLICE is set (e.g. "2/4" = second quarter of all packages)
+  # Apply slicing if PACKAGE_SLICE is set (e.g. "2/4" = second of 4 slices).
+  # Packages are balanced by their measured test minutes (CI run 36622478800,
+  # mobile): heaviest first, each to the slice with the lowest total so far.
+  # Unlisted packages count as 10 minutes; update the table when times drift.
   if [ -n "$PACKAGE_SLICE" ]; then
     SLICE_NUM="${PACKAGE_SLICE%/*}"
     SLICE_TOTAL="${PACKAGE_SLICE#*/}"
-    TOTAL_PKGS=${#PACKAGES_WITH_TESTS[@]}
-    SLICE_SIZE=$(( (TOTAL_PKGS + SLICE_TOTAL - 1) / SLICE_TOTAL ))
-    START=$(( (SLICE_NUM - 1) * SLICE_SIZE ))
-    END=$(( START + SLICE_SIZE ))
-    [ $END -gt $TOTAL_PKGS ] && END=$TOTAL_PKGS
-    echo "Slice $PACKAGE_SLICE: running packages $((START+1))-$END of $TOTAL_PKGS"
-    PACKAGES_WITH_TESTS=("${PACKAGES_WITH_TESTS[@]:$START:$((END-START))}")
+    declare -A PKG_MINUTES=(
+      [packages/growerp_core/example]=13
+      [packages/growerp_user_company/example]=53
+      [packages/growerp_catalog/example]=13
+      [packages/growerp_inventory/example]=8
+      [packages/growerp_manufacturing/example]=20
+      [packages/growerp_manuf_liner/example]=4
+      [packages/growerp_demos/example]=2
+      [packages/growerp_sales/example]=7
+      [packages/growerp_order_accounting/example]=87
+      [packages/growerp_website/example]=27
+      [packages/growerp_wiki/example]=2
+      [packages/growerp_activity/example]=3
+      [packages/growerp_hr/example]=5
+      [packages/growerp_adk/example]=21
+      [packages/growerp_marketing/example]=30
+      [packages/growerp_outreach/example]=13
+      [packages/growerp_courses/example]=8
+      [packages/admin]=2
+      [packages/agents]=2
+      [packages/hotel]=20
+      [packages/freelance]=7
+      [packages/support]=3
+      [packages/rental]=7
+      [packages/marketing]=6
+      [packages/academy]=4
+    )
+    declare -A PKG_SLICE=()
+    SLICE_LOAD=()
+    for ((s = 1; s <= SLICE_TOTAL; s++)); do SLICE_LOAD[$s]=0; done
+    # heaviest first; ties keep pubspec order (stable sort on the index)
+    mapfile -t SORTED < <(
+      for i in "${!PACKAGES_WITH_TESTS[@]}"; do
+        p="${PACKAGES_WITH_TESTS[$i]}"
+        echo "${PKG_MINUTES[$p]:-10} $i $p"
+      done | sort -k1,1nr -k2,2n | cut -d' ' -f3
+    )
+    for p in "${SORTED[@]}"; do
+      best=1
+      for ((s = 2; s <= SLICE_TOTAL; s++)); do
+        [ "${SLICE_LOAD[$s]}" -lt "${SLICE_LOAD[$best]}" ] && best=$s
+      done
+      PKG_SLICE[$p]=$best
+      SLICE_LOAD[$best]=$(( SLICE_LOAD[$best] + ${PKG_MINUTES[$p]:-10} ))
+    done
+    SLICED=()
+    for p in "${PACKAGES_WITH_TESTS[@]}"; do
+      [ "${PKG_SLICE[$p]}" = "$SLICE_NUM" ] && SLICED+=("$p")
+    done
+    echo "Slice $PACKAGE_SLICE: ${#SLICED[@]} of ${#PACKAGES_WITH_TESTS[@]} packages, ~${SLICE_LOAD[$SLICE_NUM]} min"
+    PACKAGES_WITH_TESTS=("${SLICED[@]}")
   fi
 
   FAILED_PACKAGES=()
