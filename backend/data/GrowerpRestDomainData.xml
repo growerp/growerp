@@ -136,6 +136,14 @@ when the organization's menu shows it a screen that drives that domain.
     <growerp.menu.WidgetDomain widgetName="JobTitleList" artifactGroupId="GROWERP_HR"/>
     <growerp.menu.WidgetDomain widgetName="OnboardingTaskList" artifactGroupId="GROWERP_HR"/>
 
+    <!-- GROWERP_INSURANCE -->
+    <growerp.menu.WidgetDomain widgetName="PolicyList" artifactGroupId="GROWERP_INSURANCE"/>
+    <growerp.menu.WidgetDomain widgetName="PolicyRenewalList" artifactGroupId="GROWERP_INSURANCE"/>
+    <growerp.menu.WidgetDomain widgetName="ClaimList" artifactGroupId="GROWERP_INSURANCE"/>
+    <growerp.menu.WidgetDomain widgetName="CommissionList" artifactGroupId="GROWERP_INSURANCE"/>
+    <growerp.menu.WidgetDomain widgetName="MyPoliciesView" artifactGroupId="GROWERP_INSURANCE"/>
+    <growerp.menu.WidgetDomain widgetName="InsuranceDbForm" artifactGroupId="GROWERP_BASE"/>
+
     <!-- GROWERP_TRAINING -->
     <growerp.menu.WidgetDomain widgetName="CourseList" artifactGroupId="GROWERP_TRAINING"/>
     <growerp.menu.WidgetDomain widgetName="CourseMediaList" artifactGroupId="GROWERP_TRAINING"/>

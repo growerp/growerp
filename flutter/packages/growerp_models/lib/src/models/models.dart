@@ -142,4 +142,7 @@ export 'job_title_model.dart';
 export 'onboarding_task_model.dart';
 export 'employee_model.dart';
 export 'leave_request_model.dart';
+export 'insurance_enums_model.dart';
+export 'policy_model.dart';
+export 'claim_model.dart';
 export 'leave_balance_model.dart';

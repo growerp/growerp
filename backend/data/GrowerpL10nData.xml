@@ -129,6 +129,23 @@ limitations under the License.
   <moqui.basic.LocalizedMessage locale="es" original="GrowerpEmailWelcomeFirstStepRental"
     localized="Agregue un artículo a su catálogo de alquiler y luego consulte su calendario de disponibilidad." />
 
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeIntroInsurance"
+    localized="Your agency is ready. Keep every client policy in one place, catch renewals before they lapse, follow claims with the carrier, and track your commissions." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeIntroInsurance"
+    localized="เอเจนซีของคุณพร้อมแล้ว เก็บกรมธรรม์ของลูกค้าทุกฉบับไว้ในที่เดียว ต่ออายุก่อนหมดอายุ ติดตามการเคลมกับบริษัทประกัน และติดตามค่าคอมมิชชัน" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeIntroInsurance"
+    localized="Uw kantoor is klaar. Beheer alle polissen van uw klanten op één plek, verleng op tijd, volg schades op bij de verzekeraar en houd uw provisies bij." />
+  <moqui.basic.LocalizedMessage locale="es" original="GrowerpEmailWelcomeIntroInsurance"
+    localized="Su agencia está lista. Tenga todas las pólizas de sus clientes en un solo lugar, renueve a tiempo, siga los siniestros con la aseguradora y controle sus comisiones." />
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeFirstStepInsurance"
+    localized="Add an insurance company as carrier and a client, then enter the client's first policy." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeFirstStepInsurance"
+    localized="เพิ่มบริษัทประกันและลูกค้า แล้วบันทึกกรมธรรม์ฉบับแรกของลูกค้า" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeFirstStepInsurance"
+    localized="Voeg een verzekeraar en een klant toe en leg daarna de eerste polis van de klant vast." />
+  <moqui.basic.LocalizedMessage locale="es" original="GrowerpEmailWelcomeFirstStepInsurance"
+    localized="Agregue una aseguradora y un cliente, y luego registre la primera póliza del cliente." />
+
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeIntroSupport"
     localized="Your helpdesk is ready. Take in customer requests, assign them, and follow each one through to resolution." />
   <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeIntroSupport"

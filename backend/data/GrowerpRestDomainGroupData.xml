@@ -143,6 +143,12 @@ The 28 anonymous-* resources bypass authz entirely and need no domain.
         artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
         artifactName="/growerp/100/(EmployeeOnboardingTask|LeaveAllowances|OnboardingTasks|LeaveAllowance|OnboardingTask|LeaveRequests|LeaveRequest|Departments|Department|JobTitles|Employees|JobTitle|Employee)(/.*)?"/>
 
+    <moqui.security.ArtifactGroup artifactGroupId="GROWERP_INSURANCE"
+        description="Insurance policies, claims and commissions"/>
+    <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_INSURANCE"
+        artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
+        artifactName="/growerp/100/(PolicyCommission|PolicyRenew|Policies|Policy|Claims|Claim)(/.*)?"/>
+
     <moqui.security.ArtifactGroup artifactGroupId="GROWERP_ADK"
         description="AI agents, their jobs, tools and approvals"/>
     <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_ADK"

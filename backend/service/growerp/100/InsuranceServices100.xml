@@ -1,0 +1,762 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <!-- ============ Insurance agency: policies, claims, commissions ============
+         The client portal (MyPoliciesView) is visible to GROWERP_M_OTHER, which gives
+         outside users write access on the whole GROWERP_INSURANCE REST domain, so every
+         service below checks isStaff or restricts to the caller's own policies: those
+         insured by the caller or by the caller's company. -->
+
+    <service verb="check" noun="InsuranceAccess" allow-remote="false"><!-- internal -->
+        <out-parameters>
+            <parameter name="userPartyId" />
+            <parameter name="ownerPartyId" />
+            <parameter name="isStaff" type="Boolean" />
+            <parameter name="ownPartyIds" type="List"><!-- insured parties an outside user may see --></parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="isStaff" from="ec.user.isInGroup('GROWERP_M_ADMIN')
+                || ec.user.isInGroup('GROWERP_M_SYSTEM') || ec.user.isInGroup('GROWERP_M_EMPLOYEE')" />
+            <set field="ownPartyIds" from="[userPartyId]" />
+            <if condition="userCompanyPartyId">
+                <script>ownPartyIds.add(userCompanyPartyId)</script>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="PartyName" allow-remote="false"><!-- internal -->
+        <in-parameters>
+            <parameter name="partyId" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="name" />
+        </out-parameters>
+        <actions>
+            <if condition="!partyId"><return /></if>
+            <entity-find-one entity-name="mantle.party.PartyDetail" value-field="party" cache="true" />
+            <set field="name" from="party?.organizationName
+                ?: &quot;${party?.firstName ?: ''} ${party?.lastName ?: ''}&quot;.toString().trim()" />
+        </actions>
+    </service>
+
+    <!-- ===================== policies ===================== -->
+
+    <service verb="get" noun="Policies">
+        <description>Policies of the agency; outside users only get their own.</description>
+        <in-parameters>
+            <parameter name="policyId" />
+            <parameter name="insuredPartyId" />
+            <parameter name="carrierPartyId" />
+            <parameter name="statusId" />
+            <parameter name="expiringWithinDays" type="Integer" />
+            <parameter name="start" type="Integer" default-value="0" />
+            <parameter name="limit" type="Integer" default-value="20" />
+            <parameter name="search" default="null" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="policies" type="List">
+                <parameter name="policy" type="Map">
+                    <parameter name="policyId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="policyNumber" />
+                    <parameter name="insuredPartyId" />
+                    <parameter name="insuredName" />
+                    <parameter name="carrierPartyId" />
+                    <parameter name="carrierName" />
+                    <parameter name="producerPartyId" />
+                    <parameter name="producerName" />
+                    <parameter name="policyTypeEnumId" />
+                    <parameter name="statusId" />
+                    <parameter name="effectiveDate" />
+                    <parameter name="expirationDate" />
+                    <parameter name="premiumAmount" />
+                    <parameter name="premiumFrequencyEnumId" />
+                    <parameter name="currencyUomId" />
+                    <parameter name="commissionRate" />
+                    <parameter name="commissionExpected" />
+                    <parameter name="commissionReceived" />
+                    <parameter name="renewedFromPolicyId" />
+                    <parameter name="description" />
+                    <parameter name="coverages" type="List" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.InsuranceServices100.check#InsuranceAccess"
+                out-map="context" />
+            <if condition="search != null">
+                <set field="search" value="%${search}%" />
+            </if>
+            <if condition="expiringWithinDays != null">
+                <set field="expiringBefore"
+                    from="new java.sql.Timestamp(ec.user.nowTimestamp.time + expiringWithinDays * 24L * 3600L * 1000L)" />
+            </if>
+            <entity-find entity-name="growerp.insurance.Policy" list="items"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="policyId" ignore-if-empty="true" />
+                <econdition field-name="insuredPartyId" ignore-if-empty="true" />
+                <econdition field-name="insuredPartyId" operator="in" from="ownPartyIds"
+                    ignore="isStaff" />
+                <econdition field-name="carrierPartyId" ignore-if-empty="true" />
+                <econdition field-name="statusId" ignore-if-empty="true" />
+                <econdition field-name="expirationDate" operator="less-equals"
+                    from="expiringBefore" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="pseudoId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="policyNumber" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="description" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="expirationDate" />
+            </entity-find>
+            <!-- periods per year of the premium, to calculate the yearly commission -->
+            <set field="periodsPerYear" from="[InpfMonthly: 12, InpfQuarterly: 4,
+                InpfSemiAnnual: 2, InpfAnnual: 1, InpfSingle: 1]" />
+            <set field="policies" from="[]" />
+            <iterate list="items" entry="item">
+                <service-call name="growerp.100.InsuranceServices100.get#PartyName"
+                    in-map="[partyId: item.insuredPartyId]" out-map="insured" />
+                <service-call name="growerp.100.InsuranceServices100.get#PartyName"
+                    in-map="[partyId: item.carrierPartyId]" out-map="carrier" />
+                <service-call name="growerp.100.InsuranceServices100.get#PartyName"
+                    in-map="[partyId: item.producerPartyId]" out-map="producer" />
+                <entity-find entity-name="growerp.insurance.PolicyCoverage" list="coverageList">
+                    <econdition field-name="policyId" from="item.policyId" />
+                    <order-by field-name="coverageSeqId" />
+                </entity-find>
+                <set field="commissionExpected" from="item.premiumAmount != null &amp;&amp; item.commissionRate != null
+                    ? (item.premiumAmount * (periodsPerYear[item.premiumFrequencyEnumId] ?: 1)
+                        * item.commissionRate / 100).setScale(2, java.math.RoundingMode.HALF_UP)
+                    : null" />
+                <script>policies.add([policyId: item.policyId, pseudoId: item.pseudoId,
+                    policyNumber: item.policyNumber,
+                    insuredPartyId: item.insuredPartyId, insuredName: insured.name,
+                    carrierPartyId: item.carrierPartyId, carrierName: carrier.name,
+                    producerPartyId: item.producerPartyId, producerName: producer.name,
+                    policyTypeEnumId: item.policyTypeEnumId, statusId: item.statusId,
+                    effectiveDate: ec.l10n.format(item.effectiveDate, 'yyyy-MM-dd HH:mm:ssZ'),
+                    expirationDate: ec.l10n.format(item.expirationDate, 'yyyy-MM-dd HH:mm:ssZ'),
+                    premiumAmount: item.premiumAmount?.toString(),
+                    premiumFrequencyEnumId: item.premiumFrequencyEnumId,
+                    currencyUomId: item.currencyUomId,
+                    // commissions are agency business, not shown to the client
+                    commissionRate: isStaff ? item.commissionRate?.toString() : null,
+                    commissionExpected: isStaff ? commissionExpected?.toString() : null,
+                    commissionReceived: isStaff ? item.commissionReceived?.toString() : null,
+                    renewedFromPolicyId: item.renewedFromPolicyId,
+                    description: item.description,
+                    coverages: coverageList.collect { [coverageSeqId: it.coverageSeqId,
+                        coverageName: it.coverageName,
+                        limitAmount: it.limitAmount?.toString(),
+                        deductibleAmount: it.deductibleAmount?.toString()] }])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="check" noun="PolicyParties" allow-remote="false"><!-- internal -->
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="insuredPartyId" />
+            <parameter name="carrierPartyId" />
+        </in-parameters>
+        <actions>
+            <iterate list="[insuredPartyId, carrierPartyId].findAll { it }" entry="checkPartyId">
+                <entity-find-one entity-name="mantle.party.Party" value-field="party" cache="true">
+                    <field-map field-name="partyId" from="checkPartyId" />
+                </entity-find-one>
+                <if condition="!party || party.ownerPartyId != ownerPartyId">
+                    <return error="true" message="Party ${checkPartyId} not found!" />
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="store" noun="PolicyCoverages" allow-remote="false"><!-- internal: replaces all -->
+        <in-parameters>
+            <parameter name="policyId" required="true" />
+            <parameter name="coverages" type="List" />
+        </in-parameters>
+        <actions>
+            <entity-delete-by-condition entity-name="growerp.insurance.PolicyCoverage">
+                <econdition field-name="policyId" />
+            </entity-delete-by-condition>
+            <set field="seq" from="1" />
+            <iterate list="coverages" entry="coverage">
+                <if condition="!coverage.coverageName"><continue /></if>
+                <service-call name="create#growerp.insurance.PolicyCoverage"
+                    in-map="[policyId: policyId, coverageSeqId: String.format('%02d', seq),
+                        coverageName: coverage.coverageName,
+                        limitAmount: coverage.limitAmount ? new BigDecimal(coverage.limitAmount.toString()) : null,
+                        deductibleAmount: coverage.deductibleAmount ? new BigDecimal(coverage.deductibleAmount.toString()) : null]" />
+                <set field="seq" from="seq + 1" />
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="Policy">
+        <in-parameters>
+            <parameter name="policy" type="Map" required="true">
+                <parameter name="policyNumber" />
+                <parameter name="insuredPartyId" required="true" />
+                <parameter name="carrierPartyId" required="true" />
+                <parameter name="producerPartyId" />
+                <parameter name="policyTypeEnumId" required="true" />
+                <parameter name="statusId" />
+                <parameter name="effectiveDate" type="Timestamp" required="true" />
+                <parameter name="expirationDate" type="Timestamp" required="true" />
+                <parameter name="premiumAmount" type="BigDecimal" />
+                <parameter name="premiumFrequencyEnumId" />
+                <parameter name="currencyUomId" />
+                <parameter name="commissionRate" type="BigDecimal" />
+                <parameter name="description" />
+                <parameter name="coverages" type="List" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="policy" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.InsuranceServices100.check#InsuranceAccess"
+                out-map="context" />
+            <if condition="!isStaff">
+                <return error="true" message="Only agency staff can create policies" />
+            </if>
+            <if condition="policy.expirationDate.before(policy.effectiveDate)">
+                <return error="true" message="Policy expiration date is before the effective date" />
+            </if>
+            <service-call name="growerp.100.InsuranceServices100.check#PolicyParties"
+                in-map="[ownerPartyId: ownerPartyId, insuredPartyId: policy.insuredPartyId,
+                    carrierPartyId: policy.carrierPartyId]" />
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'policy']"
+                out-map="context" />
+            <service-call name="create#growerp.insurance.Policy" out-map="context"
+                in-map="[pseudoId: seqNum, ownerPartyId: ownerPartyId,
+                    policyNumber: policy.policyNumber,
+                    insuredPartyId: policy.insuredPartyId, carrierPartyId: policy.carrierPartyId,
+                    producerPartyId: policy.producerPartyId ?: userPartyId,
+                    policyTypeEnumId: policy.policyTypeEnumId,
+                    statusId: policy.statusId ?: 'InpsActive',
+                    effectiveDate: policy.effectiveDate, expirationDate: policy.expirationDate,
+                    premiumAmount: policy.premiumAmount,
+                    premiumFrequencyEnumId: policy.premiumFrequencyEnumId ?: 'InpfAnnual',
+                    currencyUomId: policy.currencyUomId,
+                    commissionRate: policy.commissionRate, commissionReceived: 0,
+                    description: policy.description, createdDate: ec.user.nowTimestamp]" />
+            <service-call name="growerp.100.InsuranceServices100.store#PolicyCoverages"
+                in-map="[policyId: policyId, coverages: policy.coverages ?: []]" />
+            <service-call name="growerp.100.InsuranceServices100.get#Policies"
+                in-map="[policyId: policyId]" out-map="context" />
+            <set field="policy" from="policies[0]" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="Policy">
+        <in-parameters>
+            <parameter name="policy" type="Map" required="true">
+                <parameter name="policyId" required="true" />
+                <parameter name="policyNumber" />
+                <parameter name="insuredPartyId" />
+                <parameter name="carrierPartyId" />
+                <parameter name="producerPartyId" />
+                <parameter name="policyTypeEnumId" />
+                <parameter name="statusId" />
+                <parameter name="effectiveDate" type="Timestamp" />
+                <parameter name="expirationDate" type="Timestamp" />
+                <parameter name="premiumAmount" type="BigDecimal" />
+                <parameter name="premiumFrequencyEnumId" />
+                <parameter name="currencyUomId" />
+                <parameter name="commissionRate" type="BigDecimal" />
+                <parameter name="description" />
+                <parameter name="coverages" type="List" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="policy" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.InsuranceServices100.check#InsuranceAccess"
+                out-map="context" />
+            <if condition="!isStaff">
+                <return error="true" message="Only agency staff can update policies" />
+            </if>
+            <entity-find entity-name="growerp.insurance.Policy" list="items" for-update="true" limit="1">
+                <econdition field-name="policyId" from="policy.policyId" />
+                <econdition field-name="ownerPartyId" />
+            </entity-find>
+            <if condition="!items">
+                <return error="true" message="Policy ${policy.policyId} not found!" />
+            </if>
+            <set field="old" from="items[0]" />
+            <service-call name="growerp.100.InsuranceServices100.check#PolicyParties"
+                in-map="[ownerPartyId: ownerPartyId, insuredPartyId: policy.insuredPartyId,
+                    carrierPartyId: policy.carrierPartyId]" />
+            <!-- only the fields sent are changed -->
+            <iterate list="['policyNumber', 'insuredPartyId', 'carrierPartyId', 'producerPartyId',
+                    'policyTypeEnumId', 'statusId', 'effectiveDate', 'expirationDate', 'premiumAmount',
+                    'premiumFrequencyEnumId', 'currencyUomId', 'commissionRate', 'description']"
+                entry="fieldName">
+                <if condition="policy[fieldName] != null">
+                    <script>old.set(fieldName, policy[fieldName])</script>
+                </if>
+            </iterate>
+            <if condition="old.expirationDate.before(old.effectiveDate)">
+                <return error="true" message="Policy expiration date is before the effective date" />
+            </if>
+            <entity-update value-field="old" />
+            <if condition="policy.coverages != null">
+                <service-call name="growerp.100.InsuranceServices100.store#PolicyCoverages"
+                    in-map="[policyId: old.policyId, coverages: policy.coverages]" />
+            </if>
+            <service-call name="growerp.100.InsuranceServices100.get#Policies"
+                in-map="[policyId: old.policyId]" out-map="context" />
+            <set field="policy" from="policies[0]" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="Policy">
+        <in-parameters>
+            <parameter name="policy" type="Map" required="true">
+                <parameter name="policyId" required="true" />
+            </parameter>
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.InsuranceServices100.check#InsuranceAccess"
+                out-map="context" />
+            <if condition="!isStaff">
+                <return error="true" message="Only agency staff can delete policies" />
+            </if>
+            <entity-find entity-name="growerp.insurance.Policy" list="items" limit="1">
+                <econdition field-name="policyId" from="policy.policyId" />
+                <econdition field-name="ownerPartyId" />
+            </entity-find>
+            <if condition="!items">
+                <return error="true" message="Policy ${policy.policyId} not found!" />
+            </if>
+            <entity-find-count entity-name="growerp.insurance.Claim" count-field="claimCount">
+                <econdition field-name="policyId" from="policy.policyId" />
+            </entity-find-count>
+            <if condition="claimCount">
+                <return error="true"
+                    message="Policy ${items[0].pseudoId} has claims, cancel it instead of deleting" />
+            </if>
+            <entity-delete-by-condition entity-name="growerp.insurance.PolicyCoverage">
+                <econdition field-name="policyId" from="policy.policyId" />
+            </entity-delete-by-condition>
+            <entity-delete value-field="items[0]" />
+        </actions>
+    </service>
+
+    <service verb="renew" noun="Policy">
+        <description>A copy of the policy for the next term: it starts when the old one
+            expires and runs as long; the old policy gets the status Renewed.</description>
+        <in-parameters>
+            <parameter name="policy" type="Map" required="true">
+                <parameter name="policyId" required="true" />
+                <parameter name="premiumAmount" type="BigDecimal" />
+                <parameter name="policyNumber" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="policy" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.InsuranceServices100.check#InsuranceAccess"
+                out-map="context" />
+            <if condition="!isStaff">
+                <return error="true" message="Only agency staff can renew policies" />
+            </if>
+            <entity-find entity-name="growerp.insurance.Policy" list="items" for-update="true" limit="1">
+                <econdition field-name="policyId" from="policy.policyId" />
+                <econdition field-name="ownerPartyId" />
+            </entity-find>
+            <if condition="!items">
+                <return error="true" message="Policy ${policy.policyId} not found!" />
+            </if>
+            <set field="old" from="items[0]" />
+            <if condition="old.statusId in ['InpsRenewed', 'InpsCancelled']">
+                <return error="true" message="Policy ${old.pseudoId} is already renewed or cancelled" />
+            </if>
+            <entity-find entity-name="growerp.insurance.PolicyCoverage" list="coverageList">
+                <econdition field-name="policyId" from="old.policyId" />
+                <order-by field-name="coverageSeqId" />
+            </entity-find>
+            <set field="termMillis" from="old.expirationDate.time - old.effectiveDate.time" />
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'policy']"
+                out-map="context" />
+            <service-call name="create#growerp.insurance.Policy" out-map="newPolicy"
+                in-map="[pseudoId: seqNum, ownerPartyId: ownerPartyId,
+                    policyNumber: policy.policyNumber ?: old.policyNumber,
+                    insuredPartyId: old.insuredPartyId, carrierPartyId: old.carrierPartyId,
+                    producerPartyId: old.producerPartyId, policyTypeEnumId: old.policyTypeEnumId,
+                    statusId: 'InpsActive', effectiveDate: old.expirationDate,
+                    expirationDate: new java.sql.Timestamp(old.expirationDate.time + termMillis),
+                    premiumAmount: policy.premiumAmount ?: old.premiumAmount,
+                    premiumFrequencyEnumId: old.premiumFrequencyEnumId,
+                    currencyUomId: old.currencyUomId, commissionRate: old.commissionRate,
+                    commissionReceived: 0, renewedFromPolicyId: old.policyId,
+                    description: old.description, createdDate: ec.user.nowTimestamp]" />
+            <service-call name="growerp.100.InsuranceServices100.store#PolicyCoverages"
+                in-map="[policyId: newPolicy.policyId, coverages: coverageList]" />
+            <set field="old.statusId" value="InpsRenewed" />
+            <entity-update value-field="old" />
+            <service-call name="growerp.100.InsuranceServices100.get#Policies"
+                in-map="[policyId: newPolicy.policyId]" out-map="context" />
+            <set field="policy" from="policies[0]" />
+        </actions>
+    </service>
+
+    <service verb="receive" noun="PolicyCommission">
+        <description>Records a commission payment of the carrier: adds it to the policy and
+            books it as a sales invoice to the carrier.</description>
+        <in-parameters>
+            <parameter name="policyId" required="true" />
+            <parameter name="amount" type="BigDecimal" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="policy" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.InsuranceServices100.check#InsuranceAccess"
+                out-map="context" />
+            <if condition="!isStaff">
+                <return error="true" message="Only agency staff can record commissions" />
+            </if>
+            <if condition="amount &lt;= 0">
+                <return error="true" message="Commission amount should be more than zero" />
+            </if>
+            <entity-find entity-name="growerp.insurance.Policy" list="items" for-update="true" limit="1">
+                <econdition field-name="policyId" />
+                <econdition field-name="ownerPartyId" />
+            </entity-find>
+            <if condition="!items">
+                <return error="true" message="Policy ${policyId} not found!" />
+            </if>
+            <set field="old" from="items[0]" />
+            <service-call name="growerp.100.FinDocServices100.create#FinDoc"
+                in-map="[finDoc: [docType: 'invoice', sales: true,
+                    reference: old.policyNumber ?: old.pseudoId,
+                    description: 'Commission policy ' + (old.policyNumber ?: old.pseudoId),
+                    otherCompany: [partyId: old.carrierPartyId],
+                    items: [[itemType: [itemTypeId: 'ItemInsCommission'],
+                        description: 'Commission policy ' + (old.policyNumber ?: old.pseudoId),
+                        quantity: '1', price: amount.toString()]]]]" />
+            <set field="old.commissionReceived" from="(old.commissionReceived ?: 0) + amount" />
+            <entity-update value-field="old" />
+            <service-call name="growerp.100.InsuranceServices100.get#Policies"
+                in-map="[policyId: policyId]" out-map="context" />
+            <set field="policy" from="policies[0]" />
+        </actions>
+    </service>
+
+    <service verb="send" noun="InsuranceRenewalReminders" authenticate="false" allow-remote="false"
+        transaction-timeout="600">
+        <description>Daily batch (cron): active policies expiring within daysAhead get the
+            status Renewal Due, and the insured is emailed once through the agency's own SMTP
+            settings. Expired policies that were not renewed become Lapsed.</description>
+        <in-parameters>
+            <parameter name="daysAhead" type="Integer" default="30" />
+            <parameter name="dryRun" type="Boolean" default="false" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="renewalDueCount" type="Integer" />
+            <parameter name="lapsedCount" type="Integer" />
+            <parameter name="sentCount" type="Integer" />
+        </out-parameters>
+        <actions>
+            <!-- headless run: send#DirectEmail needs a user -->
+            <if condition="!ec.user.userId">
+                <script>ec.user.internalLoginUser('SystemSupport')</script>
+            </if>
+            <set field="now" from="ec.user.nowTimestamp" />
+            <set field="renewalDueCount" from="0" />
+            <set field="lapsedCount" from="0" />
+            <set field="sentCount" from="0" />
+            <entity-find entity-name="growerp.insurance.Policy" list="lapsedList" for-update="true">
+                <econdition field-name="statusId" operator="in" value="InpsActive,InpsRenewalDue" />
+                <econdition field-name="expirationDate" operator="less" from="now" />
+            </entity-find>
+            <iterate list="lapsedList" entry="lapsed">
+                <set field="lapsedCount" from="lapsedCount + 1" />
+                <if condition="dryRun"><continue /></if>
+                <set field="lapsed.statusId" value="InpsLapsed" />
+                <entity-update value-field="lapsed" />
+            </iterate>
+            <entity-find entity-name="growerp.insurance.Policy" list="dueList" for-update="true">
+                <econdition field-name="statusId" value="InpsActive" />
+                <econdition field-name="expirationDate" operator="less-equals"
+                    from="new java.sql.Timestamp(now.time + daysAhead * 24L * 3600L * 1000L)" />
+            </entity-find>
+            <iterate list="dueList" entry="due">
+                <set field="renewalDueCount" from="renewalDueCount + 1" />
+                <if condition="dryRun"><continue /></if>
+                <set field="due.statusId" value="InpsRenewalDue" />
+                <entity-update value-field="due" />
+                <!-- the insured person, or the first employee of the insured company -->
+                <entity-find entity-name="moqui.security.UserAccount" list="accounts" limit="1">
+                    <econdition field-name="partyId" from="due.insuredPartyId" />
+                </entity-find>
+                <if condition="!accounts">
+                    <entity-find entity-name="mantle.party.PartyRelationship" list="rels" limit="1">
+                        <econdition field-name="toPartyId" from="due.insuredPartyId" />
+                        <econdition field-name="relationshipTypeEnumId" value="PrtEmployee" />
+                        <date-filter />
+                    </entity-find>
+                    <if condition="rels">
+                        <entity-find entity-name="moqui.security.UserAccount" list="accounts" limit="1">
+                            <econdition field-name="partyId" from="rels[0].fromPartyId" />
+                        </entity-find>
+                    </if>
+                </if>
+                <set field="toAddress" from="accounts ? accounts[0].emailAddress : null" />
+                <if condition="!toAddress || toAddress.contains('example.com')"><continue /></if>
+                <service-call name="growerp.100.GeneralServices100.get#ActiveEmailServer"
+                    in-map="[ownerPartyId: due.ownerPartyId]" out-map="emailServer" />
+                <if condition="!emailServer.emailConfigured"><continue /></if>
+                <set field="policyRef" from="due.policyNumber ?: due.pseudoId" />
+                <set field="expires" from="ec.l10n.format(due.expirationDate, 'yyyy-MM-dd')" />
+                <set field="reminderBody" value="&lt;p&gt;Your insurance policy &lt;b&gt;${policyRef}&lt;/b&gt; expires on ${expires}.&lt;/p&gt;&lt;p&gt;We will contact you about the renewal; reply to this email with any changes in your situation.&lt;/p&gt;" />
+                <service-call name="growerp.100.GeneralServices100.send#DirectEmail"
+                    ignore-error="true"
+                    in-map="[ownerPartyId: due.ownerPartyId, toAddresses: toAddress,
+                        subject: 'Your policy ' + policyRef + ' is due for renewal',
+                        bodyHtml: reminderBody]" />
+                <set field="sentCount" from="sentCount + 1" />
+            </iterate>
+        </actions>
+    </service>
+
+    <!-- ===================== claims ===================== -->
+
+    <service verb="get" noun="Claims">
+        <description>Claims of the agency; outside users only get the claims on their own
+            policies.</description>
+        <in-parameters>
+            <parameter name="claimId" />
+            <parameter name="policyId" />
+            <parameter name="statusId" />
+            <parameter name="start" type="Integer" default-value="0" />
+            <parameter name="limit" type="Integer" default-value="20" />
+            <parameter name="search" default="null" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="claims" type="List">
+                <parameter name="claim" type="Map">
+                    <parameter name="claimId" />
+                    <parameter name="pseudoId" />
+                    <parameter name="policyId" />
+                    <parameter name="policyPseudoId" />
+                    <parameter name="policyNumber" />
+                    <parameter name="insuredName" />
+                    <parameter name="carrierName" />
+                    <parameter name="claimNumber" />
+                    <parameter name="statusId" />
+                    <parameter name="incidentDate" />
+                    <parameter name="reportedDate" />
+                    <parameter name="description" />
+                    <parameter name="amountClaimed" />
+                    <parameter name="amountPaid" />
+                    <parameter name="comments" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.InsuranceServices100.check#InsuranceAccess"
+                out-map="context" />
+            <if condition="!isStaff">
+                <entity-find entity-name="growerp.insurance.Policy" list="ownPolicies">
+                    <econdition field-name="ownerPartyId" />
+                    <econdition field-name="insuredPartyId" operator="in" from="ownPartyIds" />
+                    <select-field field-name="policyId" />
+                </entity-find>
+                <set field="ownPolicyIds" from="ownPolicies*.policyId ?: ['_NA_']" />
+            </if>
+            <if condition="search != null">
+                <set field="search" value="%${search}%" />
+            </if>
+            <entity-find entity-name="growerp.insurance.Claim" list="items"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="claimId" ignore-if-empty="true" />
+                <econdition field-name="policyId" ignore-if-empty="true" />
+                <econdition field-name="policyId" operator="in" from="ownPolicyIds"
+                    ignore="isStaff" />
+                <econdition field-name="statusId" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="pseudoId" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="claimNumber" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="description" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="-reportedDate" />
+            </entity-find>
+            <set field="claims" from="[]" />
+            <iterate list="items" entry="item">
+                <entity-find-one entity-name="growerp.insurance.Policy" value-field="claimPolicy">
+                    <field-map field-name="policyId" from="item.policyId" />
+                </entity-find-one>
+                <service-call name="growerp.100.InsuranceServices100.get#PartyName"
+                    in-map="[partyId: claimPolicy?.insuredPartyId]" out-map="insured" />
+                <service-call name="growerp.100.InsuranceServices100.get#PartyName"
+                    in-map="[partyId: claimPolicy?.carrierPartyId]" out-map="carrier" />
+                <script>claims.add([claimId: item.claimId, pseudoId: item.pseudoId,
+                    policyId: item.policyId, policyPseudoId: claimPolicy?.pseudoId,
+                    policyNumber: claimPolicy?.policyNumber,
+                    insuredName: insured.name, carrierName: carrier.name,
+                    claimNumber: item.claimNumber, statusId: item.statusId,
+                    incidentDate: ec.l10n.format(item.incidentDate, 'yyyy-MM-dd HH:mm:ssZ'),
+                    reportedDate: ec.l10n.format(item.reportedDate, 'yyyy-MM-dd HH:mm:ssZ'),
+                    description: item.description,
+                    amountClaimed: item.amountClaimed?.toString(),
+                    amountPaid: item.amountPaid?.toString(),
+                    comments: item.comments])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="Claim">
+        <description>Staff report a claim on any policy; clients on their own policies.</description>
+        <in-parameters>
+            <parameter name="claim" type="Map" required="true">
+                <parameter name="policyId" required="true" />
+                <parameter name="incidentDate" type="Timestamp" required="true" />
+                <parameter name="description" required="true" />
+                <parameter name="amountClaimed" type="BigDecimal" />
+                <parameter name="claimNumber" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="claim" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.InsuranceServices100.check#InsuranceAccess"
+                out-map="context" />
+            <entity-find entity-name="growerp.insurance.Policy" list="policyList" limit="1">
+                <econdition field-name="policyId" from="claim.policyId" />
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="insuredPartyId" operator="in" from="ownPartyIds"
+                    ignore="isStaff" />
+            </entity-find>
+            <if condition="!policyList">
+                <return error="true" message="Policy ${claim.policyId} not found!" />
+            </if>
+            <if condition="claim.incidentDate.after(ec.user.nowTimestamp)">
+                <return error="true" message="The incident date is in the future" />
+            </if>
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'claim']"
+                out-map="context" />
+            <service-call name="create#growerp.insurance.Claim" out-map="context"
+                in-map="[pseudoId: seqNum, ownerPartyId: ownerPartyId,
+                    policyId: claim.policyId, statusId: 'InclSubmitted',
+                    claimNumber: isStaff ? claim.claimNumber : null,
+                    incidentDate: claim.incidentDate, reportedDate: ec.user.nowTimestamp,
+                    reportedByPartyId: userPartyId, description: claim.description,
+                    amountClaimed: claim.amountClaimed]" />
+            <service-call name="growerp.100.InsuranceServices100.get#Claims"
+                in-map="[claimId: claimId]" out-map="context" />
+            <set field="claim" from="claims[0]" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="Claim">
+        <description>Staff follow the claim up with the carrier; the client can only change
+            the description and amount while it is still Submitted.</description>
+        <in-parameters>
+            <parameter name="claim" type="Map" required="true">
+                <parameter name="claimId" required="true" />
+                <parameter name="claimNumber" />
+                <parameter name="statusId" />
+                <parameter name="incidentDate" type="Timestamp" />
+                <parameter name="description" />
+                <parameter name="amountClaimed" type="BigDecimal" />
+                <parameter name="amountPaid" type="BigDecimal" />
+                <parameter name="comments" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="claim" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.InsuranceServices100.get#Claims"
+                in-map="[claimId: claim.claimId]" out-map="found" />
+            <if condition="!found.claims">
+                <return error="true" message="Claim ${claim.claimId} not found!" />
+            </if>
+            <service-call name="growerp.100.InsuranceServices100.check#InsuranceAccess"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.insurance.Claim" value-field="old" for-update="true">
+                <field-map field-name="claimId" from="claim.claimId" />
+            </entity-find-one>
+            <if condition="isStaff">
+                <iterate list="['claimNumber', 'statusId', 'incidentDate', 'description',
+                        'amountClaimed', 'amountPaid', 'comments']" entry="fieldName">
+                    <if condition="claim[fieldName] != null">
+                        <script>old.set(fieldName, claim[fieldName])</script>
+                    </if>
+                </iterate>
+                <else>
+                    <if condition="old.statusId != 'InclSubmitted'">
+                        <return error="true"
+                            message="Claim ${old.pseudoId} is being handled, contact the agency to change it" />
+                    </if>
+                    <if condition="claim.statusId &amp;&amp; claim.statusId != old.statusId">
+                        <return error="true" message="Only the agency can change the claim status" />
+                    </if>
+                    <iterate list="['incidentDate', 'description', 'amountClaimed']" entry="fieldName">
+                        <if condition="claim[fieldName] != null">
+                            <script>old.set(fieldName, claim[fieldName])</script>
+                        </if>
+                    </iterate>
+                </else>
+            </if>
+            <entity-update value-field="old" />
+            <service-call name="growerp.100.InsuranceServices100.get#Claims"
+                in-map="[claimId: claim.claimId]" out-map="context" />
+            <set field="claim" from="claims[0]" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="Claim">
+        <in-parameters>
+            <parameter name="claim" type="Map" required="true">
+                <parameter name="claimId" required="true" />
+            </parameter>
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.InsuranceServices100.get#Claims"
+                in-map="[claimId: claim.claimId]" out-map="found" />
+            <if condition="!found.claims">
+                <return error="true" message="Claim ${claim.claimId} not found!" />
+            </if>
+            <if condition="found.claims[0].statusId != 'InclSubmitted'">
+                <return error="true" message="Only submitted claims can be deleted" />
+            </if>
+            <entity-delete-by-condition entity-name="growerp.insurance.Claim">
+                <econdition field-name="claimId" from="claim.claimId" />
+            </entity-delete-by-condition>
+        </actions>
+    </service>
+</services>

@@ -382,6 +382,22 @@ limitations under the License.
                 <econdition field-name="requireInstructorReview" value="Y"/>
                 <econdition field-name="status" operator="in" value="SUBMITTED,AI_GRADED"/>
             </entity-find-count>
+            <!-- insurance counts, live like the HR counts -->
+            <entity-find-count count-field="insActivePolicies"
+                entity-name="growerp.insurance.Policy">
+                <econdition field-name="ownerPartyId"/>
+                <econdition field-name="statusId" operator="in" value="InpsActive,InpsRenewalDue"/>
+            </entity-find-count>
+            <entity-find-count count-field="insRenewalsDue"
+                entity-name="growerp.insurance.Policy">
+                <econdition field-name="ownerPartyId"/>
+                <econdition field-name="statusId" value="InpsRenewalDue"/>
+            </entity-find-count>
+            <entity-find-count count-field="insOpenClaims"
+                entity-name="growerp.insurance.Claim">
+                <econdition field-name="ownerPartyId"/>
+                <econdition field-name="statusId" operator="in" value="InclSubmitted,InclInReview,InclFiled,InclApproved"/>
+            </entity-find-count>
             <if condition="st">
                 <set field="stats"
                     from="[
@@ -413,6 +429,9 @@ limitations under the License.
                         courseLearners: courseLearners,
                         courseCompletions: courseCompletions,
                         courseSubmissionsToReview: courseSubmissionsToReview,
+                        insActivePolicies: insActivePolicies,
+                        insRenewalsDue: insRenewalsDue,
+                        insOpenClaims: insOpenClaims,
                     ]"/>
                 <else>
                     <set field="stats"
@@ -445,6 +464,9 @@ limitations under the License.
                         courseLearners: courseLearners,
                         courseCompletions: courseCompletions,
                         courseSubmissionsToReview: courseSubmissionsToReview,
+                        insActivePolicies: insActivePolicies,
+                        insRenewalsDue: insRenewalsDue,
+                        insOpenClaims: insOpenClaims,
                         notReadChatRooms: chatRooms
                         ]"/>
                 </else>

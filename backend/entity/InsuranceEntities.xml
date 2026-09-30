@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+    <!-- ========================================================= -->
+    <!--  Insurance agency: policies sold for carriers, and the    -->
+    <!--  claims of the insured clients.                           -->
+    <!--  The insured is a customer (Party with role Customer),    -->
+    <!--  the carrier a company with role Supplier. Premiums are   -->
+    <!--  billed by the carrier; the agency earns a commission.    -->
+    <!-- ========================================================= -->
+
+    <entity entity-name="Policy" package="growerp.insurance">
+        <field name="policyId" type="id" is-pk="true" />
+        <field name="pseudoId" type="id" />
+        <field name="ownerPartyId" type="id" />
+        <field name="policyNumber" type="text-short"><description>number given by the carrier</description></field>
+        <field name="insuredPartyId" type="id" />
+        <field name="carrierPartyId" type="id" />
+        <field name="producerPartyId" type="id"><description>agency employee handling the policy</description></field>
+        <field name="policyTypeEnumId" type="id" />
+        <field name="statusId" type="id" />
+        <field name="effectiveDate" type="date-time" />
+        <field name="expirationDate" type="date-time" />
+        <field name="premiumAmount" type="currency-amount" />
+        <field name="premiumFrequencyEnumId" type="id" />
+        <field name="currencyUomId" type="id" />
+        <field name="commissionRate" type="number-decimal"><description>percentage of the premium</description></field>
+        <field name="commissionReceived" type="currency-amount" />
+        <field name="renewedFromPolicyId" type="id" />
+        <field name="description" type="text-long" />
+        <field name="createdDate" type="date-time" />
+        <relationship type="one" title="Owner" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+        <relationship type="one" title="Insured" related="mantle.party.Party">
+            <key-map field-name="insuredPartyId" related="partyId" />
+        </relationship>
+        <relationship type="one" title="Carrier" related="mantle.party.Party">
+            <key-map field-name="carrierPartyId" related="partyId" />
+        </relationship>
+        <relationship type="one" title="Producer" related="mantle.party.Party">
+            <key-map field-name="producerPartyId" related="partyId" />
+        </relationship>
+        <relationship type="one" title="InsPolicyType" related="moqui.basic.Enumeration">
+            <key-map field-name="policyTypeEnumId" related="enumId" />
+        </relationship>
+        <relationship type="one" title="InsPremiumFrequency" related="moqui.basic.Enumeration">
+            <key-map field-name="premiumFrequencyEnumId" related="enumId" />
+        </relationship>
+        <relationship type="one" related="moqui.basic.StatusItem">
+            <key-map field-name="statusId" />
+        </relationship>
+        <relationship type="many" related="growerp.insurance.PolicyCoverage" short-alias="coverages">
+            <key-map field-name="policyId" />
+        </relationship>
+        <index name="PolicyPseudoIdx">
+            <index-field name="ownerPartyId" />
+            <index-field name="pseudoId" />
+        </index>
+    </entity>
+
+    <entity entity-name="PolicyCoverage" package="growerp.insurance">
+        <field name="policyId" type="id" is-pk="true" />
+        <field name="coverageSeqId" type="id" is-pk="true" />
+        <field name="coverageName" type="text-medium" />
+        <field name="limitAmount" type="currency-amount" />
+        <field name="deductibleAmount" type="currency-amount" />
+        <relationship type="one" related="growerp.insurance.Policy">
+            <key-map field-name="policyId" />
+        </relationship>
+    </entity>
+
+    <entity entity-name="Claim" package="growerp.insurance">
+        <field name="claimId" type="id" is-pk="true" />
+        <field name="pseudoId" type="id" />
+        <field name="ownerPartyId" type="id" />
+        <field name="policyId" type="id" />
+        <field name="claimNumber" type="text-short"><description>number given by the carrier</description></field>
+        <field name="statusId" type="id" />
+        <field name="incidentDate" type="date-time" />
+        <field name="reportedDate" type="date-time" />
+        <field name="reportedByPartyId" type="id" />
+        <field name="description" type="text-long" />
+        <field name="amountClaimed" type="currency-amount" />
+        <field name="amountPaid" type="currency-amount" />
+        <field name="comments" type="text-long" />
+        <relationship type="one" related="growerp.insurance.Policy">
+            <key-map field-name="policyId" />
+        </relationship>
+        <relationship type="one" related="moqui.basic.StatusItem">
+            <key-map field-name="statusId" />
+        </relationship>
+        <index name="ClaimPseudoIdx">
+            <index-field name="ownerPartyId" />
+            <index-field name="pseudoId" />
+        </index>
+    </entity>
+</entities>

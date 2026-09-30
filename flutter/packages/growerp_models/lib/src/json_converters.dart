@@ -294,3 +294,67 @@ class StringListConverter implements JsonConverter<List<String>?, dynamic> {
     return object;
   }
 }
+
+class PolicyTypeConverter implements JsonConverter<PolicyType?, String?> {
+  const PolicyTypeConverter();
+
+  @override
+  PolicyType? fromJson(String? json) {
+    if (json == null) return null;
+    return PolicyType.getByValue(json);
+  }
+
+  @override
+  String? toJson(PolicyType? object) {
+    if (object == null) return null;
+    return object.toString();
+  }
+}
+
+class PremiumFrequencyConverter implements JsonConverter<PremiumFrequency?, String?> {
+  const PremiumFrequencyConverter();
+
+  @override
+  PremiumFrequency? fromJson(String? json) {
+    if (json == null) return null;
+    return PremiumFrequency.getByValue(json);
+  }
+
+  @override
+  String? toJson(PremiumFrequency? object) {
+    if (object == null) return null;
+    return object.toString();
+  }
+}
+
+class PolicyStatusConverter implements JsonConverter<PolicyStatus?, String?> {
+  const PolicyStatusConverter();
+
+  @override
+  PolicyStatus? fromJson(String? json) {
+    if (json == null) return null;
+    return PolicyStatus.getByValue(json);
+  }
+
+  @override
+  String? toJson(PolicyStatus? object) {
+    if (object == null) return null;
+    return object.toString();
+  }
+}
+
+class ClaimStatusConverter implements JsonConverter<ClaimStatus?, String?> {
+  const ClaimStatusConverter();
+
+  @override
+  ClaimStatus? fromJson(String? json) {
+    if (json == null) return null;
+    return ClaimStatus.getByValue(json);
+  }
+
+  @override
+  String? toJson(ClaimStatus? object) {
+    if (object == null) return null;
+    return object.toString();
+  }
+}

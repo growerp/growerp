@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<entity-facade-xml type="seed">
+    <!-- Application record -->
+    <growerp.Application applicationId="AppInsurance"
+        description="GrowERP Insurance: agencies and brokers, policies, claims and commissions" />
+
+    <!-- ====================== policy types (generic, any line) ====================== -->
+    <moqui.basic.EnumerationType enumTypeId="InsPolicyType" description="Insurance Policy Type" />
+    <moqui.basic.Enumeration enumId="InptAuto" enumTypeId="InsPolicyType" description="Auto" sequenceNum="1" />
+    <moqui.basic.Enumeration enumId="InptHome" enumTypeId="InsPolicyType" description="Home" sequenceNum="2" />
+    <moqui.basic.Enumeration enumId="InptLiability" enumTypeId="InsPolicyType" description="Liability" sequenceNum="3" />
+    <moqui.basic.Enumeration enumId="InptProperty" enumTypeId="InsPolicyType" description="Commercial Property" sequenceNum="4" />
+    <moqui.basic.Enumeration enumId="InptLife" enumTypeId="InsPolicyType" description="Life" sequenceNum="5" />
+    <moqui.basic.Enumeration enumId="InptHealth" enumTypeId="InsPolicyType" description="Health" sequenceNum="6" />
+    <moqui.basic.Enumeration enumId="InptTravel" enumTypeId="InsPolicyType" description="Travel" sequenceNum="7" />
+    <moqui.basic.Enumeration enumId="InptOther" enumTypeId="InsPolicyType" description="Other" sequenceNum="99" />
+
+    <!-- ====================== premium frequency ====================== -->
+    <moqui.basic.EnumerationType enumTypeId="InsPremiumFrequency" description="Insurance Premium Frequency" />
+    <moqui.basic.Enumeration enumId="InpfMonthly" enumTypeId="InsPremiumFrequency" description="Monthly" sequenceNum="1" />
+    <moqui.basic.Enumeration enumId="InpfQuarterly" enumTypeId="InsPremiumFrequency" description="Quarterly" sequenceNum="2" />
+    <moqui.basic.Enumeration enumId="InpfSemiAnnual" enumTypeId="InsPremiumFrequency" description="Semi-annual" sequenceNum="3" />
+    <moqui.basic.Enumeration enumId="InpfAnnual" enumTypeId="InsPremiumFrequency" description="Annual" sequenceNum="4" />
+    <moqui.basic.Enumeration enumId="InpfSingle" enumTypeId="InsPremiumFrequency" description="Single" sequenceNum="5" />
+
+    <!-- ====================== policy status ====================== -->
+    <moqui.basic.StatusType statusTypeId="InsPolicyStatus" description="Insurance Policy Status" />
+    <moqui.basic.StatusItem statusId="InpsQuote" statusTypeId="InsPolicyStatus" description="Quote" sequenceNum="1" />
+    <moqui.basic.StatusItem statusId="InpsActive" statusTypeId="InsPolicyStatus" description="Active" sequenceNum="2" />
+    <moqui.basic.StatusItem statusId="InpsRenewalDue" statusTypeId="InsPolicyStatus" description="Renewal Due" sequenceNum="3" />
+    <moqui.basic.StatusItem statusId="InpsRenewed" statusTypeId="InsPolicyStatus" description="Renewed" sequenceNum="4" />
+    <moqui.basic.StatusItem statusId="InpsLapsed" statusTypeId="InsPolicyStatus" description="Lapsed" sequenceNum="5" />
+    <moqui.basic.StatusItem statusId="InpsCancelled" statusTypeId="InsPolicyStatus" description="Cancelled" sequenceNum="6" />
+
+    <!-- ====================== claim status ====================== -->
+    <moqui.basic.StatusType statusTypeId="InsClaimStatus" description="Insurance Claim Status" />
+    <moqui.basic.StatusItem statusId="InclSubmitted" statusTypeId="InsClaimStatus" description="Submitted" sequenceNum="1" />
+    <moqui.basic.StatusItem statusId="InclInReview" statusTypeId="InsClaimStatus" description="In Review" sequenceNum="2" />
+    <moqui.basic.StatusItem statusId="InclFiled" statusTypeId="InsClaimStatus" description="Filed with Carrier" sequenceNum="3" />
+    <moqui.basic.StatusItem statusId="InclApproved" statusTypeId="InsClaimStatus" description="Approved" sequenceNum="4" />
+    <moqui.basic.StatusItem statusId="InclDenied" statusTypeId="InsClaimStatus" description="Denied" sequenceNum="5" />
+    <moqui.basic.StatusItem statusId="InclPaid" statusTypeId="InsClaimStatus" description="Paid" sequenceNum="6" />
+    <moqui.basic.StatusItem statusId="InclClosed" statusTypeId="InsClaimStatus" description="Closed" sequenceNum="7" />
+
+    <!-- ====================== commission income ====================== -->
+    <!-- sales invoice line to the carrier, booked as other revenue; the mapping is copied
+         to a company when its ledger is set up, so existing companies post it only after
+         their own ItemTypeGlAccount row is added -->
+    <moqui.basic.Enumeration description="Insurance Commission" enumId="ItemInsCommission"
+        parentEnumId="ItemSales" enumTypeId="ItemType" />
+    <moqui.basic.EnumGroupMember enumId="ItemInsCommission" enumGroupEnumId="EngItemsSales" />
+    <mantle.ledger.config.ItemTypeGlAccount glAccountId="41900" direction="O"
+        itemTypeEnumId="ItemInsCommission" organizationPartyId="DefaultSettings" />
+
+    <!-- ====================== renewal reminders: daily ====================== -->
+    <moqui.service.job.ServiceJob jobName="send_insurance_renewal_reminders"
+        description="Mark policies expiring within 30 days as Renewal Due and email the insured; expired ones become Lapsed"
+        serviceName="growerp.100.InsuranceServices100.send#InsuranceRenewalReminders"
+        cronExpression="0 30 7 * * ?" paused="N" transactionTimeout="600" />
+
+    <!-- ====================== menu ====================== -->
+    <growerp.menu.MenuConfiguration menuConfigurationId="INSURANCE_DEFAULT" appId="insurance"
+        name="Insurance Menu" description="Default insurance agency application menu structure"/>
+
+    <!-- The main screen is the staff dashboard, or the client portal for outside users
+         (GROWERP_M_OTHER: clients of the agency). Clients write only in My Policies
+         (reporting a claim), which grants them the GROWERP_INSURANCE domain: every
+         insurance service restricts them to their own policies. -->
+    <growerp.menu.MenuItem menuItemId="INSURANCE_MAIN" menuConfigurationId="INSURANCE_DEFAULT"
+        title="Main" route="/" iconName="dashboard" widgetName="InsuranceDbForm"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN","GROWERP_M_EMPLOYEE","GROWERP_M_OTHER"]'
+        updateGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN","GROWERP_M_EMPLOYEE"]' sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_MY_POLICIES" menuConfigurationId="INSURANCE_DEFAULT"
+        title="My Policies" route="/myPolicies" iconName="shield" widgetName="MyPoliciesView"
+        userGroupsJson='["GROWERP_M_OTHER"]' updateGroupsJson='["GROWERP_M_OTHER"]' sequenceNum="15"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_POLICIES" menuConfigurationId="INSURANCE_DEFAULT"
+        title="Policies" route="/policies" iconName="shield" widgetName="PolicyList"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN","GROWERP_M_EMPLOYEE"]' sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_CLAIMS" menuConfigurationId="INSURANCE_DEFAULT"
+        title="Claims" route="/claims" iconName="report" widgetName="ClaimList"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN","GROWERP_M_EMPLOYEE"]' sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_CLIENTS" menuConfigurationId="INSURANCE_DEFAULT"
+        title="Clients" route="/clients" iconName="people" widgetName="CompanyUserListCustomer"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN","GROWERP_M_EMPLOYEE"]' sequenceNum="40"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_CARRIERS" menuConfigurationId="INSURANCE_DEFAULT"
+        title="Carriers" route="/carriers" iconName="business" widgetName="CompanyUserListSupplier"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN","GROWERP_M_EMPLOYEE"]' sequenceNum="50"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_COMMISSIONS" menuConfigurationId="INSURANCE_DEFAULT"
+        title="Commissions" route="/commissions" iconName="payments" widgetName="CommissionList"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="60"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_TASKS" menuConfigurationId="INSURANCE_DEFAULT" itemKey="allTasks"
+        title="Tasks" route="/tasks" iconName="task" widgetName="ActivityList"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN","GROWERP_M_EMPLOYEE"]' sequenceNum="70"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_ACC_SALES" menuConfigurationId="INSURANCE_DEFAULT" itemKey="salesInvoicesNotPaidCount"
+        title="Acct Sales" route="/acct-sales" iconName="receipt_long" widgetName="SalesInvoiceList"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="80"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_ACC_LEDGER" menuConfigurationId="INSURANCE_DEFAULT"
+        title="Acct Ledger" route="/acct-ledger" iconName="account_balance" widgetName="LedgerTreeForm"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="85"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_MYCOMPANY" menuConfigurationId="INSURANCE_DEFAULT"
+        title="My Company" route="/myCompany" iconName="business" widgetName="ShowCompanyDialog"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="90"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_ABOUT" menuConfigurationId="INSURANCE_DEFAULT"
+        title="About" route="/about" iconName="info" widgetName="AboutForm"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN","GROWERP_M_EMPLOYEE","GROWERP_M_OTHER"]' sequenceNum="100"/>
+
+    <!-- Every app menu needs this: it is the only item that carries GROWERP_SETUP,
+         and without it the organization has no access to import/export, email or
+         system settings. injectAdminSetup() adds the screen client side, but the
+         backend authorizes from the menu, so the row has to exist here too. -->
+    <growerp.menu.MenuItem menuItemId="INSURANCE_SYSTEM_SETUP" menuConfigurationId="INSURANCE_DEFAULT"
+        title="System Setup" route="/systemSetup" iconName="settings" widgetName="SystemSetupDialog"
+        userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="999"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_SETUP_AI" menuConfigurationId="INSURANCE_DEFAULT" parentMenuItemId="INSURANCE_SYSTEM_SETUP"
+        title="AI" iconName="psychology" widgetName="SystemSetupAiView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_SETUP_EMAIL" menuConfigurationId="INSURANCE_DEFAULT" parentMenuItemId="INSURANCE_SYSTEM_SETUP"
+        title="Email" iconName="mail_outline" widgetName="SystemSetupEmailView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="20"/>
+
+    <!-- Policies children -->
+    <growerp.menu.MenuItem menuItemId="INSURANCE_POL_ALL" menuConfigurationId="INSURANCE_DEFAULT" parentMenuItemId="INSURANCE_POLICIES"
+        title="Policies" iconName="shield" widgetName="PolicyList" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_POL_RENEWALS" menuConfigurationId="INSURANCE_DEFAULT" parentMenuItemId="INSURANCE_POLICIES"
+        title="Renewals" iconName="autorenew" widgetName="PolicyRenewalList" sequenceNum="20"/>
+
+    <!-- My Company children -->
+    <growerp.menu.MenuItem menuItemId="INSURANCE_MC_COMPANY" menuConfigurationId="INSURANCE_DEFAULT" parentMenuItemId="INSURANCE_MYCOMPANY"
+        title="company" iconName="home" widgetName="ShowCompanyDialog" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_MC_USERS" menuConfigurationId="INSURANCE_DEFAULT" parentMenuItemId="INSURANCE_MYCOMPANY"
+        title="employees" iconName="school" widgetName="UserListCompany" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_MC_SECURITY" menuConfigurationId="INSURANCE_DEFAULT" parentMenuItemId="INSURANCE_MYCOMPANY"
+        title="security" iconName="security" widgetName="SecurityList" artifactGroupId="GROWERP_BASE"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]'
+        updateGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="25"/>
+
+    <!-- Accounting sales children. The invoice list reads /FinDoc, which is in the
+         order domain, and this menu has no order screen to grant it. -->
+    <growerp.menu.MenuItem menuItemId="INSURANCE_ACCS_INV" menuConfigurationId="INSURANCE_DEFAULT" parentMenuItemId="INSURANCE_ACC_SALES"
+        title="Sales Invoices" iconName="shopping_cart" widgetName="SalesInvoiceList" artifactGroupId="GROWERP_ORDER" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_ACCS_PAY" menuConfigurationId="INSURANCE_DEFAULT" parentMenuItemId="INSURANCE_ACC_SALES"
+        title="Incoming Payments" iconName="input" widgetName="SalesPaymentList" sequenceNum="20"/>
+
+    <!-- Accounting ledger children -->
+    <growerp.menu.MenuItem menuItemId="INSURANCE_ACCL_TREE" menuConfigurationId="INSURANCE_DEFAULT" parentMenuItemId="INSURANCE_ACC_LEDGER"
+        title="Ledger" iconName="account_balance" widgetName="LedgerTreeForm" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_ACCL_ACCT" menuConfigurationId="INSURANCE_DEFAULT" parentMenuItemId="INSURANCE_ACC_LEDGER"
+        title="Ledger Accounts" iconName="format_list_bulleted" widgetName="GlAccountList" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_ACCL_TRANS" menuConfigurationId="INSURANCE_DEFAULT" parentMenuItemId="INSURANCE_ACC_LEDGER"
+        title="transactions" iconName="view_list" widgetName="TransactionList" sequenceNum="30"/>
+</entity-facade-xml>

@@ -473,6 +473,23 @@ abstract class LeaveRequests with _$LeaveRequests {
 }
 
 @freezed
+abstract class Policies with _$Policies {
+  factory Policies({@Default([]) List<Policy> policies}) = _Policies;
+  Policies._();
+
+  factory Policies.fromJson(Map<String, dynamic> json) =>
+      _$PoliciesFromJson(json);
+}
+
+@freezed
+abstract class Claims with _$Claims {
+  factory Claims({@Default([]) List<Claim> claims}) = _Claims;
+  Claims._();
+
+  factory Claims.fromJson(Map<String, dynamic> json) => _$ClaimsFromJson(json);
+}
+
+@freezed
 abstract class LeaveBalances with _$LeaveBalances {
   factory LeaveBalances({@Default([]) List<LeaveBalance> leaveBalances}) =
       _LeaveBalances;
