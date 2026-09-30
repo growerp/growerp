@@ -44,5 +44,7 @@
   "status": "Statut",
   "update": "Mettre à jour",
   "updateSuccess": "Mis à jour avec succès",
-  "whatHappened": "Que s'est-il passé ?"
+  "whatHappened": "Que s'est-il passé ?",
+  "vehiclePlate": "Plaque d'immatriculation",
+  "vehicleDescription": "Véhicule"
 }

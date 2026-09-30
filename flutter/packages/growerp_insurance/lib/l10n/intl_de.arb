@@ -44,5 +44,7 @@
   "status": "Status",
   "update": "Aktualisieren",
   "updateSuccess": "Erfolgreich aktualisiert",
-  "whatHappened": "Was ist passiert?"
+  "whatHappened": "Was ist passiert?",
+  "vehiclePlate": "Kennzeichen",
+  "vehicleDescription": "Fahrzeug"
 }

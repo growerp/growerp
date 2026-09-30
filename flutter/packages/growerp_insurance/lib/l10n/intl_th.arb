@@ -44,5 +44,7 @@
   "status": "สถานะ",
   "update": "อัปเดต",
   "updateSuccess": "อัปเดตเรียบร้อยแล้ว",
-  "whatHappened": "เกิดอะไรขึ้น?"
+  "whatHappened": "เกิดอะไรขึ้น?",
+  "vehiclePlate": "ป้ายทะเบียน",
+  "vehicleDescription": "ยานพาหนะ"
 }

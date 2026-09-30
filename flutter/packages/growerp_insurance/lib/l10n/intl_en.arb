@@ -179,5 +179,13 @@
   "whatHappened": "What happened?",
   "@whatHappened": {
     "description": "insurance label: What happened?"
+  },
+  "vehiclePlate": "Licence plate",
+  "@vehiclePlate": {
+    "description": "insurance label: Licence plate"
+  },
+  "vehicleDescription": "Vehicle",
+  "@vehicleDescription": {
+    "description": "insurance label: Vehicle"
   }
 }

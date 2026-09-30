@@ -63,6 +63,8 @@ class PolicyDialogState extends State<PolicyDialog> {
   final _premiumController = TextEditingController();
   final _commissionRateController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _vehiclePlateController = TextEditingController();
+  final _vehicleDescriptionController = TextEditingController();
   final List<_CoverageRow> _coverages = [];
   CompanyUser? _insured;
   CompanyUser? _carrier;
@@ -84,6 +86,8 @@ class PolicyDialogState extends State<PolicyDialog> {
     _premiumController.text = policy.premiumAmount?.toString() ?? '';
     _commissionRateController.text = policy.commissionRate?.toString() ?? '';
     _descriptionController.text = policy.description ?? '';
+    _vehiclePlateController.text = policy.vehiclePlate ?? '';
+    _vehicleDescriptionController.text = policy.vehicleDescription ?? '';
     if (policy.insuredPartyId != null) {
       _insured = CompanyUser(
         partyId: policy.insuredPartyId,
@@ -295,6 +299,34 @@ class PolicyDialogState extends State<PolicyDialog> {
             controller: _descriptionController,
             maxLines: 2,
           ),
+          if (_policyType == PolicyType.auto ||
+              _policyType == PolicyType.motorCompulsory) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    key: const Key('vehiclePlate'),
+                    decoration: InputDecoration(
+                      labelText: localizations.vehiclePlate,
+                    ),
+                    controller: _vehiclePlateController,
+                    textCapitalization: TextCapitalization.characters,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextFormField(
+                    key: const Key('vehicleDescription'),
+                    decoration: InputDecoration(
+                      labelText: localizations.vehicleDescription,
+                    ),
+                    controller: _vehicleDescriptionController,
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 10),
           Text(
             localizations.coverages,
@@ -427,6 +459,8 @@ class PolicyDialogState extends State<PolicyDialog> {
           premiumFrequency: _frequency,
           commissionRate: Decimal.tryParse(_commissionRateController.text),
           description: _descriptionController.text,
+          vehiclePlate: _vehiclePlateController.text,
+          vehicleDescription: _vehicleDescriptionController.text,
           coverages: _coverages
               .map((row) => row.coverage)
               .where((c) => (c.coverageName ?? '').isNotEmpty)
@@ -442,6 +476,8 @@ class PolicyDialogState extends State<PolicyDialog> {
     _premiumController.dispose();
     _commissionRateController.dispose();
     _descriptionController.dispose();
+    _vehiclePlateController.dispose();
+    _vehicleDescriptionController.dispose();
     for (final row in _coverages) {
       row.dispose();
     }

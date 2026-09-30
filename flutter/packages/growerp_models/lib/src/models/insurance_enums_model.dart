@@ -21,6 +21,7 @@ enum PolicyType {
   life('InptLife', 'Life'),
   health('InptHealth', 'Health'),
   travel('InptTravel', 'Travel'),
+  motorCompulsory('InptMotorCompulsory', 'Compulsory Motor Liability'),
   other('InptOther', 'Other');
 
   const PolicyType(this.value, this.name);
@@ -91,6 +92,7 @@ enum PolicyStatus {
 /// Status of an insurance claim, backend field: statusId.
 enum ClaimStatus {
   submitted('InclSubmitted', 'Submitted'),
+  aiAssessed('InclAiAssessed', 'Assessed, awaiting adjuster'),
   inReview('InclInReview', 'In Review'),
   filed('InclFiled', 'Filed with Carrier'),
   approved('InclApproved', 'Approved'),
@@ -106,6 +108,34 @@ enum ClaimStatus {
   static ClaimStatus? getByValue(String value) {
     for (final status in ClaimStatus.values) {
       if (status.value == value) return status;
+    }
+    return null;
+  }
+
+  @override
+  String toString() => value;
+}
+
+/// What happened, chosen by the client in the guided claim wizard,
+/// backend field: incidentTypeEnumId.
+enum IncidentType {
+  collision('InitCollision', 'Collision with another vehicle'),
+  singleVehicle('InitSingleVehicle', 'Single vehicle accident'),
+  parked('InitParked', 'Damaged while parked'),
+  injury('InitInjury', 'Someone was injured'),
+  flood('InitFlood', 'Flood or storm'),
+  theft('InitTheft', 'Theft or break-in'),
+  glass('InitGlass', 'Broken glass'),
+  other('InitOther', 'Something else');
+
+  const IncidentType(this.value, this.name);
+
+  final String value;
+  final String name;
+
+  static IncidentType? getByValue(String value) {
+    for (final type in IncidentType.values) {
+      if (type.value == value) return type;
     }
     return null;
   }

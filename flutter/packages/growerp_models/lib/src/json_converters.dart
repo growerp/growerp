@@ -358,3 +358,19 @@ class ClaimStatusConverter implements JsonConverter<ClaimStatus?, String?> {
     return object.toString();
   }
 }
+
+class IncidentTypeConverter implements JsonConverter<IncidentType?, String?> {
+  const IncidentTypeConverter();
+
+  @override
+  IncidentType? fromJson(String? json) {
+    if (json == null) return null;
+    return IncidentType.getByValue(json);
+  }
+
+  @override
+  String? toJson(IncidentType? object) {
+    if (object == null) return null;
+    return object.toString();
+  }
+}

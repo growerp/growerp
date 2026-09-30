@@ -44,5 +44,7 @@
   "status": "Status",
   "update": "Bijwerken",
   "updateSuccess": "Bijgewerkt",
-  "whatHappened": "Wat is er gebeurd?"
+  "whatHappened": "Wat is er gebeurd?",
+  "vehiclePlate": "Kenteken",
+  "vehicleDescription": "Voertuig"
 }

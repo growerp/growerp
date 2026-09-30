@@ -19,7 +19,7 @@
         <field name="carrierPartyId" type="id" />
         <field name="producerPartyId" type="id"><description>agency employee handling the policy</description></field>
         <field name="policyTypeEnumId" type="id" />
-        <field name="statusId" type="id" />
+        <field name="statusId" type="id" enable-audit-log="true" />
         <field name="effectiveDate" type="date-time" />
         <field name="expirationDate" type="date-time" />
         <field name="premiumAmount" type="currency-amount" />
@@ -29,6 +29,11 @@
         <field name="commissionReceived" type="currency-amount" />
         <field name="renewedFromPolicyId" type="id" />
         <field name="description" type="text-long" />
+        <field name="vehiclePlate" type="text-short"><description>motor policies: licence plate of the insured vehicle</description></field>
+        <field name="vehicleDescription" type="text-medium" />
+        <field name="verificationToken" type="id"><description>random token in the QR code of the digital policy card, public proof of insurance</description></field>
+        <field name="plainSummary" type="text-very-long"><description>AI plain-language explanation of the coverage, cleared when the policy changes</description></field>
+        <field name="plainSummaryLocale" type="text-short" />
         <field name="createdDate" type="date-time" />
         <relationship type="one" title="Owner" related="mantle.party.Party">
             <key-map field-name="ownerPartyId" related="partyId" />
@@ -58,6 +63,9 @@
             <index-field name="ownerPartyId" />
             <index-field name="pseudoId" />
         </index>
+        <index name="PolicyVerifyIdx" unique="true">
+            <index-field name="verificationToken" />
+        </index>
     </entity>
 
     <entity entity-name="PolicyCoverage" package="growerp.insurance">
@@ -77,16 +85,26 @@
         <field name="ownerPartyId" type="id" />
         <field name="policyId" type="id" />
         <field name="claimNumber" type="text-short"><description>number given by the carrier</description></field>
-        <field name="statusId" type="id" />
+        <field name="statusId" type="id" enable-audit-log="true" />
+        <field name="incidentTypeEnumId" type="id" />
         <field name="incidentDate" type="date-time" />
+        <field name="incidentLocation" type="text-medium" />
         <field name="reportedDate" type="date-time" />
         <field name="reportedByPartyId" type="id" />
         <field name="description" type="text-long" />
         <field name="amountClaimed" type="currency-amount" />
         <field name="amountPaid" type="currency-amount" />
         <field name="comments" type="text-long" />
+        <field name="aiAssessment" type="text-very-long"><description>JSON triage of the claim photos by AI, advice for the adjuster only</description></field>
+        <field name="aiAssessedDate" type="date-time" />
         <relationship type="one" related="growerp.insurance.Policy">
             <key-map field-name="policyId" />
+        </relationship>
+        <relationship type="one" title="InsIncidentType" related="moqui.basic.Enumeration">
+            <key-map field-name="incidentTypeEnumId" related="enumId" />
+        </relationship>
+        <relationship type="many" related="growerp.insurance.ClaimContent" short-alias="contents">
+            <key-map field-name="claimId" />
         </relationship>
         <relationship type="one" related="moqui.basic.StatusItem">
             <key-map field-name="statusId" />
@@ -95,5 +113,17 @@
             <index-field name="ownerPartyId" />
             <index-field name="pseudoId" />
         </index>
+    </entity>
+
+    <entity entity-name="ClaimContent" package="growerp.insurance">
+        <description>Photos and documents of a claim, stored in the content store.</description>
+        <field name="claimId" type="id" is-pk="true" />
+        <field name="contentSeqId" type="id" is-pk="true" />
+        <field name="contentLocation" type="text-medium" />
+        <field name="description" type="text-medium" />
+        <field name="createdDate" type="date-time" />
+        <relationship type="one" related="growerp.insurance.Claim">
+            <key-map field-name="claimId" />
+        </relationship>
     </entity>
 </entities>

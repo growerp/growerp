@@ -44,5 +44,7 @@
   "status": "状态",
   "update": "更新",
   "updateSuccess": "更新成功",
-  "whatHappened": "发生了什么？"
+  "whatHappened": "发生了什么？",
+  "vehiclePlate": "车牌号",
+  "vehicleDescription": "车辆"
 }

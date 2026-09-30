@@ -93,6 +93,10 @@ limitations under the License.
                     <parameter name="commissionReceived" />
                     <parameter name="renewedFromPolicyId" />
                     <parameter name="description" />
+                    <parameter name="vehiclePlate" />
+                    <parameter name="vehicleDescription" />
+                    <parameter name="verificationToken" />
+                    <parameter name="plainSummary" />
                     <parameter name="coverages" type="List" />
                 </parameter>
             </parameter>
@@ -124,6 +128,8 @@ limitations under the License.
                     <econdition field-name="policyNumber" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
                     <econdition field-name="description" ignore-case="true"
+                        operator="like" from="search" ignore-if-empty="true" />
+                    <econdition field-name="vehiclePlate" ignore-case="true"
                         operator="like" from="search" ignore-if-empty="true" />
                 </econditions>
                 <order-by field-name="expirationDate" />
@@ -164,6 +170,10 @@ limitations under the License.
                     commissionReceived: isStaff ? item.commissionReceived?.toString() : null,
                     renewedFromPolicyId: item.renewedFromPolicyId,
                     description: item.description,
+                    vehiclePlate: item.vehiclePlate,
+                    vehicleDescription: item.vehicleDescription,
+                    verificationToken: item.verificationToken,
+                    plainSummary: item.plainSummary,
                     coverages: coverageList.collect { [coverageSeqId: it.coverageSeqId,
                         coverageName: it.coverageName,
                         limitAmount: it.limitAmount?.toString(),
@@ -228,6 +238,8 @@ limitations under the License.
                 <parameter name="currencyUomId" />
                 <parameter name="commissionRate" type="BigDecimal" />
                 <parameter name="description" />
+                <parameter name="vehiclePlate" />
+                <parameter name="vehicleDescription" />
                 <parameter name="coverages" type="List" />
             </parameter>
         </in-parameters>
@@ -261,7 +273,11 @@ limitations under the License.
                     premiumFrequencyEnumId: policy.premiumFrequencyEnumId ?: 'InpfAnnual',
                     currencyUomId: policy.currencyUomId,
                     commissionRate: policy.commissionRate, commissionReceived: 0,
-                    description: policy.description, createdDate: ec.user.nowTimestamp]" />
+                    description: policy.description,
+                    vehiclePlate: policy.vehiclePlate?.toUpperCase(),
+                    vehicleDescription: policy.vehicleDescription,
+                    verificationToken: java.util.UUID.randomUUID().toString().replace('-', ''),
+                    createdDate: ec.user.nowTimestamp]" />
             <service-call name="growerp.100.InsuranceServices100.store#PolicyCoverages"
                 in-map="[policyId: policyId, coverages: policy.coverages ?: []]" />
             <service-call name="growerp.100.InsuranceServices100.get#Policies"
@@ -287,6 +303,8 @@ limitations under the License.
                 <parameter name="currencyUomId" />
                 <parameter name="commissionRate" type="BigDecimal" />
                 <parameter name="description" />
+                <parameter name="vehiclePlate" />
+                <parameter name="vehicleDescription" />
                 <parameter name="coverages" type="List" />
             </parameter>
         </in-parameters>
@@ -313,12 +331,18 @@ limitations under the License.
             <!-- only the fields sent are changed -->
             <iterate list="['policyNumber', 'insuredPartyId', 'carrierPartyId', 'producerPartyId',
                     'policyTypeEnumId', 'statusId', 'effectiveDate', 'expirationDate', 'premiumAmount',
-                    'premiumFrequencyEnumId', 'currencyUomId', 'commissionRate', 'description']"
+                    'premiumFrequencyEnumId', 'currencyUomId', 'commissionRate', 'description',
+                    'vehiclePlate', 'vehicleDescription']"
                 entry="fieldName">
                 <if condition="policy[fieldName] != null">
-                    <script>old.set(fieldName, policy[fieldName])</script>
+                    <script>old.set(fieldName, fieldName == 'vehiclePlate'
+                        ? policy[fieldName].toUpperCase() : policy[fieldName])</script>
                 </if>
             </iterate>
+            <!-- the explanation follows the policy; regenerated on next request -->
+            <if condition="old.isModified() || policy.coverages != null">
+                <set field="old.plainSummary" from="null" />
+            </if>
             <if condition="old.expirationDate.before(old.effectiveDate)">
                 <return error="true" message="Policy expiration date is before the effective date" />
             </if>
@@ -415,7 +439,10 @@ limitations under the License.
                     premiumFrequencyEnumId: old.premiumFrequencyEnumId,
                     currencyUomId: old.currencyUomId, commissionRate: old.commissionRate,
                     commissionReceived: 0, renewedFromPolicyId: old.policyId,
-                    description: old.description, createdDate: ec.user.nowTimestamp]" />
+                    description: old.description, vehiclePlate: old.vehiclePlate,
+                    vehicleDescription: old.vehicleDescription,
+                    verificationToken: java.util.UUID.randomUUID().toString().replace('-', ''),
+                    createdDate: ec.user.nowTimestamp]" />
             <service-call name="growerp.100.InsuranceServices100.store#PolicyCoverages"
                 in-map="[policyId: newPolicy.policyId, coverages: coverageList]" />
             <set field="old.statusId" value="InpsRenewed" />
@@ -571,12 +598,18 @@ limitations under the License.
                     <parameter name="carrierName" />
                     <parameter name="claimNumber" />
                     <parameter name="statusId" />
+                    <parameter name="incidentTypeEnumId" />
                     <parameter name="incidentDate" />
+                    <parameter name="incidentLocation" />
                     <parameter name="reportedDate" />
                     <parameter name="description" />
                     <parameter name="amountClaimed" />
                     <parameter name="amountPaid" />
                     <parameter name="comments" />
+                    <parameter name="aiAssessment" />
+                    <parameter name="aiAssessedDate" />
+                    <parameter name="photos" type="List" />
+                    <parameter name="statusHistory" type="List" />
                 </parameter>
             </parameter>
         </out-parameters>
@@ -621,17 +654,51 @@ limitations under the License.
                     in-map="[partyId: claimPolicy?.insuredPartyId]" out-map="insured" />
                 <service-call name="growerp.100.InsuranceServices100.get#PartyName"
                     in-map="[partyId: claimPolicy?.carrierPartyId]" out-map="carrier" />
+                <entity-find entity-name="growerp.insurance.ClaimContent" list="contentList">
+                    <econdition field-name="claimId" from="item.claimId" />
+                    <order-by field-name="contentSeqId" />
+                </entity-find>
+                <set field="photos" from="[]" />
+                <set field="statusHistory" from="[]" />
+                <!-- images and timeline only when a single claim is read -->
+                <if condition="claimId">
+                    <iterate list="contentList" entry="content">
+                        <service-call name="growerp.100.ImageServices100.download#Image"
+                            in-map="[contentLocation: content.contentLocation]" out-map="downloaded" />
+                        <script>photos.add([contentSeqId: content.contentSeqId,
+                            description: content.description, image: downloaded.imageFile])</script>
+                    </iterate>
+                    <entity-find entity-name="moqui.entity.EntityAuditLog" list="auditList">
+                        <econdition field-name="changedEntityName" value="growerp.insurance.Claim" />
+                        <econdition field-name="changedFieldName" value="statusId" />
+                        <econdition field-name="pkPrimaryValue" from="item.claimId" />
+                        <order-by field-name="changedDate" />
+                    </entity-find>
+                    <iterate list="auditList" entry="audit">
+                        <script>statusHistory.add([statusId: audit.newValueText,
+                            changedDate: ec.l10n.format(audit.changedDate, 'yyyy-MM-dd HH:mm:ssZ')])</script>
+                    </iterate>
+                    <else>
+                        <script>contentList.each { photos.add([contentSeqId: it.contentSeqId,
+                            description: it.description]) }</script>
+                    </else>
+                </if>
                 <script>claims.add([claimId: item.claimId, pseudoId: item.pseudoId,
                     policyId: item.policyId, policyPseudoId: claimPolicy?.pseudoId,
                     policyNumber: claimPolicy?.policyNumber,
                     insuredName: insured.name, carrierName: carrier.name,
                     claimNumber: item.claimNumber, statusId: item.statusId,
+                    incidentTypeEnumId: item.incidentTypeEnumId,
+                    incidentLocation: item.incidentLocation,
                     incidentDate: ec.l10n.format(item.incidentDate, 'yyyy-MM-dd HH:mm:ssZ'),
                     reportedDate: ec.l10n.format(item.reportedDate, 'yyyy-MM-dd HH:mm:ssZ'),
                     description: item.description,
                     amountClaimed: item.amountClaimed?.toString(),
                     amountPaid: item.amountPaid?.toString(),
-                    comments: item.comments])</script>
+                    comments: item.comments,
+                    aiAssessment: isStaff ? item.aiAssessment : null,
+                    aiAssessedDate: ec.l10n.format(item.aiAssessedDate, 'yyyy-MM-dd HH:mm:ssZ'),
+                    photos: photos, statusHistory: statusHistory])</script>
             </iterate>
         </actions>
     </service>
@@ -645,6 +712,9 @@ limitations under the License.
                 <parameter name="description" required="true" />
                 <parameter name="amountClaimed" type="BigDecimal" />
                 <parameter name="claimNumber" />
+                <parameter name="incidentTypeEnumId" />
+                <parameter name="incidentLocation" />
+                <parameter name="photos" type="List" />
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -673,8 +743,14 @@ limitations under the License.
                     policyId: claim.policyId, statusId: 'InclSubmitted',
                     claimNumber: isStaff ? claim.claimNumber : null,
                     incidentDate: claim.incidentDate, reportedDate: ec.user.nowTimestamp,
+                    incidentTypeEnumId: claim.incidentTypeEnumId,
+                    incidentLocation: claim.incidentLocation,
                     reportedByPartyId: userPartyId, description: claim.description,
                     amountClaimed: claim.amountClaimed]" />
+            <if condition="claim.photos">
+                <service-call name="growerp.100.InsuranceServices100.store#ClaimPhotos"
+                    in-map="[claimId: claimId, ownerPartyId: ownerPartyId, photos: claim.photos]" />
+            </if>
             <service-call name="growerp.100.InsuranceServices100.get#Claims"
                 in-map="[claimId: claimId]" out-map="context" />
             <set field="claim" from="claims[0]" />
@@ -690,10 +766,13 @@ limitations under the License.
                 <parameter name="claimNumber" />
                 <parameter name="statusId" />
                 <parameter name="incidentDate" type="Timestamp" />
+                <parameter name="incidentTypeEnumId" />
+                <parameter name="incidentLocation" />
                 <parameter name="description" />
                 <parameter name="amountClaimed" type="BigDecimal" />
                 <parameter name="amountPaid" type="BigDecimal" />
                 <parameter name="comments" />
+                <parameter name="photos" type="List" />
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -711,8 +790,9 @@ limitations under the License.
                 <field-map field-name="claimId" from="claim.claimId" />
             </entity-find-one>
             <if condition="isStaff">
-                <iterate list="['claimNumber', 'statusId', 'incidentDate', 'description',
-                        'amountClaimed', 'amountPaid', 'comments']" entry="fieldName">
+                <iterate list="['claimNumber', 'statusId', 'incidentDate', 'incidentTypeEnumId',
+                        'incidentLocation', 'description', 'amountClaimed', 'amountPaid', 'comments']"
+                    entry="fieldName">
                     <if condition="claim[fieldName] != null">
                         <script>old.set(fieldName, claim[fieldName])</script>
                     </if>
@@ -725,7 +805,8 @@ limitations under the License.
                     <if condition="claim.statusId &amp;&amp; claim.statusId != old.statusId">
                         <return error="true" message="Only the agency can change the claim status" />
                     </if>
-                    <iterate list="['incidentDate', 'description', 'amountClaimed']" entry="fieldName">
+                    <iterate list="['incidentDate', 'incidentTypeEnumId', 'incidentLocation',
+                            'description', 'amountClaimed']" entry="fieldName">
                         <if condition="claim[fieldName] != null">
                             <script>old.set(fieldName, claim[fieldName])</script>
                         </if>
@@ -733,9 +814,46 @@ limitations under the License.
                 </else>
             </if>
             <entity-update value-field="old" />
+            <if condition="claim.photos">
+                <service-call name="growerp.100.InsuranceServices100.store#ClaimPhotos"
+                    in-map="[claimId: old.claimId, ownerPartyId: old.ownerPartyId, photos: claim.photos]" />
+            </if>
             <service-call name="growerp.100.InsuranceServices100.get#Claims"
                 in-map="[claimId: claim.claimId]" out-map="context" />
             <set field="claim" from="claims[0]" />
+        </actions>
+    </service>
+
+    <service verb="store" noun="ClaimPhotos" allow-remote="false"><!-- internal: adds -->
+        <description>Adds the photos, base64 in 'image', to the content store of the owner;
+            photos with a contentSeqId are already stored and skipped.</description>
+        <in-parameters>
+            <parameter name="claimId" required="true" />
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="photos" type="List" />
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="growerp.insurance.ClaimContent" list="existing">
+                <econdition field-name="claimId" />
+                <order-by field-name="-contentSeqId" />
+            </entity-find>
+            <set field="seq" from="existing ? (existing[0].contentSeqId as Integer) + 1 : 1" />
+            <iterate list="photos" entry="photo">
+                <if condition="photo.contentSeqId || !photo.image"><continue /></if>
+                <set field="contentLocation"
+                    value="dbresource://C${ownerPartyId}/claims/${claimId}/${String.format('%02d', seq)}" />
+                <script>
+                    byte[] imageBytes = Base64.getMimeDecoder().decode(photo.image.toString())
+                    InputStream imageStream = new ByteArrayInputStream(imageBytes)
+                    try { ec.resource.getLocationReference(contentLocation).putStream(imageStream) }
+                    finally { imageStream.close() }
+                </script>
+                <service-call name="create#growerp.insurance.ClaimContent"
+                    in-map="[claimId: claimId, contentSeqId: String.format('%02d', seq),
+                        contentLocation: contentLocation, description: photo.description,
+                        createdDate: ec.user.nowTimestamp]" />
+                <set field="seq" from="seq + 1" />
+            </iterate>
         </actions>
     </service>
 
@@ -754,6 +872,15 @@ limitations under the License.
             <if condition="found.claims[0].statusId != 'InclSubmitted'">
                 <return error="true" message="Only submitted claims can be deleted" />
             </if>
+            <entity-find entity-name="growerp.insurance.ClaimContent" list="contentList">
+                <econdition field-name="claimId" from="claim.claimId" />
+            </entity-find>
+            <iterate list="contentList" entry="content">
+                <script>ec.resource.getLocationReference(content.contentLocation).delete()</script>
+            </iterate>
+            <entity-delete-by-condition entity-name="growerp.insurance.ClaimContent">
+                <econdition field-name="claimId" from="claim.claimId" />
+            </entity-delete-by-condition>
             <entity-delete-by-condition entity-name="growerp.insurance.Claim">
                 <econdition field-name="claimId" from="claim.claimId" />
             </entity-delete-by-condition>
@@ -814,7 +941,8 @@ limitations under the License.
                 [policyNumber: 'HM-AUT-51903', insuredPartyId: client2, carrierPartyId: carrierIds[0],
                     policyTypeEnumId: 'InptAuto', effectiveDate: at(-200), expirationDate: at(165),
                     premiumAmount: 85, premiumFrequencyEnumId: 'InpfMonthly', commissionRate: 10,
-                    description: 'Delivery van',
+                    description: 'Delivery van', vehiclePlate: '30A-512.87',
+                    vehicleDescription: 'Ford Transit 2022, white',
                     coverages: [[coverageName: 'Third party liability', limitAmount: 5000000, deductibleAmount: 0],
                         [coverageName: 'Collision', limitAmount: 40000, deductibleAmount: 500]]],
                 [policyNumber: 'SG-HEA-30055', insuredPartyId: client2, carrierPartyId: carrierIds[1],
@@ -828,7 +956,14 @@ limitations under the License.
                     effectiveDate: at(14), expirationDate: at(379),
                     premiumAmount: 310, premiumFrequencyEnumId: 'InpfAnnual', commissionRate: 20,
                     description: 'Annual business travel, quote sent to the client',
-                    coverages: [[coverageName: 'Medical abroad', limitAmount: 1000000, deductibleAmount: 100]]]
+                    coverages: [[coverageName: 'Medical abroad', limitAmount: 1000000, deductibleAmount: 100]]],
+                [policyNumber: 'HM-TNDS-60218', insuredPartyId: client2, carrierPartyId: carrierIds[0],
+                    policyTypeEnumId: 'InptMotorCompulsory', effectiveDate: at(-300), expirationDate: at(65),
+                    premiumAmount: 40, premiumFrequencyEnumId: 'InpfAnnual', commissionRate: 5,
+                    description: 'Compulsory civil liability of the company car',
+                    vehiclePlate: '51K-238.46', vehicleDescription: 'Geely Coolray 2024, grey',
+                    coverages: [[coverageName: 'Third party bodily injury, per person', limitAmount: 6000, deductibleAmount: 0],
+                        [coverageName: 'Third party property damage, per accident', limitAmount: 4000, deductibleAmount: 0]]]
             ]" />
             <set field="policyIds" from="[]" />
             <iterate list="demoPolicies" entry="demoPolicy">

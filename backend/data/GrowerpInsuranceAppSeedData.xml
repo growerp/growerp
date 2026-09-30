@@ -26,6 +26,7 @@ limitations under the License.
     <moqui.basic.Enumeration enumId="InptLife" enumTypeId="InsPolicyType" description="Life" sequenceNum="5" />
     <moqui.basic.Enumeration enumId="InptHealth" enumTypeId="InsPolicyType" description="Health" sequenceNum="6" />
     <moqui.basic.Enumeration enumId="InptTravel" enumTypeId="InsPolicyType" description="Travel" sequenceNum="7" />
+    <moqui.basic.Enumeration enumId="InptMotorCompulsory" enumTypeId="InsPolicyType" description="Compulsory Motor Liability" sequenceNum="8" />
     <moqui.basic.Enumeration enumId="InptOther" enumTypeId="InsPolicyType" description="Other" sequenceNum="99" />
 
     <!-- ====================== premium frequency ====================== -->
@@ -48,12 +49,24 @@ limitations under the License.
     <!-- ====================== claim status ====================== -->
     <moqui.basic.StatusType statusTypeId="InsClaimStatus" description="Insurance Claim Status" />
     <moqui.basic.StatusItem statusId="InclSubmitted" statusTypeId="InsClaimStatus" description="Submitted" sequenceNum="1" />
-    <moqui.basic.StatusItem statusId="InclInReview" statusTypeId="InsClaimStatus" description="In Review" sequenceNum="2" />
-    <moqui.basic.StatusItem statusId="InclFiled" statusTypeId="InsClaimStatus" description="Filed with Carrier" sequenceNum="3" />
-    <moqui.basic.StatusItem statusId="InclApproved" statusTypeId="InsClaimStatus" description="Approved" sequenceNum="4" />
-    <moqui.basic.StatusItem statusId="InclDenied" statusTypeId="InsClaimStatus" description="Denied" sequenceNum="5" />
-    <moqui.basic.StatusItem statusId="InclPaid" statusTypeId="InsClaimStatus" description="Paid" sequenceNum="6" />
-    <moqui.basic.StatusItem statusId="InclClosed" statusTypeId="InsClaimStatus" description="Closed" sequenceNum="7" />
+    <moqui.basic.StatusItem statusId="InclAiAssessed" statusTypeId="InsClaimStatus" description="Assessed, awaiting adjuster" sequenceNum="2" />
+    <moqui.basic.StatusItem statusId="InclInReview" statusTypeId="InsClaimStatus" description="In Review" sequenceNum="3" />
+    <moqui.basic.StatusItem statusId="InclFiled" statusTypeId="InsClaimStatus" description="Filed with Carrier" sequenceNum="4" />
+    <moqui.basic.StatusItem statusId="InclApproved" statusTypeId="InsClaimStatus" description="Approved" sequenceNum="5" />
+    <moqui.basic.StatusItem statusId="InclDenied" statusTypeId="InsClaimStatus" description="Denied" sequenceNum="6" />
+    <moqui.basic.StatusItem statusId="InclPaid" statusTypeId="InsClaimStatus" description="Paid" sequenceNum="7" />
+    <moqui.basic.StatusItem statusId="InclClosed" statusTypeId="InsClaimStatus" description="Closed" sequenceNum="8" />
+
+    <!-- ====================== claim incident types (guided claim wizard) ====================== -->
+    <moqui.basic.EnumerationType enumTypeId="InsIncidentType" description="Insurance Claim Incident Type" />
+    <moqui.basic.Enumeration enumId="InitCollision" enumTypeId="InsIncidentType" description="Collision with another vehicle" sequenceNum="1" />
+    <moqui.basic.Enumeration enumId="InitSingleVehicle" enumTypeId="InsIncidentType" description="Single vehicle accident" sequenceNum="2" />
+    <moqui.basic.Enumeration enumId="InitParked" enumTypeId="InsIncidentType" description="Damaged while parked" sequenceNum="3" />
+    <moqui.basic.Enumeration enumId="InitInjury" enumTypeId="InsIncidentType" description="Someone was injured" sequenceNum="4" />
+    <moqui.basic.Enumeration enumId="InitFlood" enumTypeId="InsIncidentType" description="Flood or storm" sequenceNum="5" />
+    <moqui.basic.Enumeration enumId="InitTheft" enumTypeId="InsIncidentType" description="Theft or break-in" sequenceNum="6" />
+    <moqui.basic.Enumeration enumId="InitGlass" enumTypeId="InsIncidentType" description="Broken glass" sequenceNum="7" />
+    <moqui.basic.Enumeration enumId="InitOther" enumTypeId="InsIncidentType" description="Something else" sequenceNum="99" />
 
     <!-- ====================== commission income ====================== -->
     <!-- sales invoice line to the carrier, booked as other revenue; the mapping is copied

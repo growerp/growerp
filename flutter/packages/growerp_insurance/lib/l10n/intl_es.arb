@@ -44,5 +44,7 @@
   "status": "Estado",
   "update": "Actualizar",
   "updateSuccess": "Actualizado correctamente",
-  "whatHappened": "¿Qué pasó?"
+  "whatHappened": "¿Qué pasó?",
+  "vehiclePlate": "Matrícula",
+  "vehicleDescription": "Vehículo"
 }

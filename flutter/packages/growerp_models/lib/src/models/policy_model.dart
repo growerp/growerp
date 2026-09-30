@@ -50,6 +50,10 @@ abstract class Policy with _$Policy {
     Decimal? commissionReceived,
     String? renewedFromPolicyId,
     String? description,
+    String? vehiclePlate,
+    String? vehicleDescription,
+    String? verificationToken,
+    String? plainSummary,
     List<PolicyCoverage>? coverages,
   }) = _Policy;
   Policy._();
