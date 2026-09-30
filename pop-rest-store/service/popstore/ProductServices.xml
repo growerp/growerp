@@ -230,115 +230,13 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="productList" />
         </out-parameters>
         <actions>
-            <script>
-                import org.moqui.entity.EntityCondition
-                import org.moqui.entity.EntityConditionFactory
-            </script>
-            <if condition="orderBy=='popularity'">
-                <then>
-                    <script>
-                        def cal = ec.user.nowCalendar
-                        cal.add(Calendar.YEAR, -1)
-                        def yearAgo = new Timestamp(cal.getTimeInMillis())
-                    </script>
-                    <entity-find entity-name="ProductCategoryProductOrderItemSort"
-                        list="productList">
-                        <econdition field-name="productCategoryId" />
-                        <econdition field-name="lastUpdatedStamp" operator="greater" from="yearAgo"
-                            or-null="true" />
-                        <date-filter />
-                        <date-filter thru-field-name="salesDiscontinuationDate" />
-                        <select-field field-name="productId" />
-                        <select-field field-name="productTypeEnumId" />
-                        <select-field field-name="productName" />
-                        <select-field field-name="orderedTotal" />
-                        <order-by field-name="-orderedTotal,sequenceNum,productName" />
-                    </entity-find>
-                    <script><![CDATA[
-                        def sortedList = [] as List
-                        productList.each{ product ->
-                            if ('PtVirtual' == product.productTypeEnumId) {
-                                def virtualSumQuantity = 0
-                                // sum of ordered variants
-                                def variants = ec.entity.find("mantle.product.ProductAssoc")
-                                        .condition([productId:product.productId, productAssocTypeEnumId:'PatVariant'])
-                                        .conditionDate("fromDate", "thruDate", ec.user.nowTimestamp).list();
-                                if (variants) {
-                                    variants.each{variant ->
-                                        def variantOrderItems = ec.entity.find("mantle.order.OrderItem")
-                                                .condition('lastUpdatedStamp', 'greater-than', yearAgo)
-                                                .condition([productId:variant.toProductId]).list()
-                                        variantOrderItems.each { orderItem ->
-                                            virtualSumQuantity += orderItem.quantity
-                                        }
-                                    }
-                                }
-                                product.orderedTotal = virtualSumQuantity
-                            }
-                            if (!product.orderedTotal) {
-                                product.orderedTotal = 0
-                            }
-                            sortedList.add(product)
-                        }
-                        sortedList.sort({-it.orderedTotal})
-                        productList = sortedList
-                        ec.web.sessionAttributes.defaultSorting = orderBy
-                    ]]></script>
-                    <return />
-                </then>
-            </if>
-            <if condition="orderBy=='price-asc' || orderBy=='price-desc'">
-                <then>
-                    <set field="orderByField" value="price" />
-                    <if condition="orderBy=='price-desc'">
-                        <set field="orderByField" value="-price" />
-                    </if>
-                    <entity-find entity-name="ProductCategoryProductPriceSort" list="productList">
-                        <econdition field-name="productCategoryId" />
-                        <econdition field-name="variantProductStoreId" from="productStoreId"
-                            or-null="true" />
-                        <econditions combine="or">
-                            <econdition field-name="priceTypeEnumId" operator="in"
-                                from="['PptList','PptCurrent']" />
-                            <econdition field-name="variantPriceTypeEnumId" operator="in"
-                                from="['PptList','PptCurrent']" />
-                        </econditions>
-                        <econditions combine="or">
-                            <econdition field-name="pricePurposeEnumId" value="PppPurchase" />
-                            <econdition field-name="variantPricePurposeEnumId" value="PppPurchase" />
-                        </econditions>
-                        <date-filter />
-                        <date-filter from-field-name="priceFromDate" thru-field-name="priceThruDate" />
-                        <date-filter from-field-name="variantPriceFromDate"
-                            thru-field-name="variantPriceThruDate" />
-                        <date-filter thru-field-name="salesDiscontinuationDate" />
-                        <order-by field-name="${orderByField}" />
-                    </entity-find>
-                    <script>
-                        // list of products are postprocessed to remove list prices if a current price exists
-                        def currentPriceProductIds = [] as Set
-                        productList.each{product ->
-                            if (product.priceTypeEnumId == 'PptCurrent' || product.variantPricePurposeEnumId == 'PptCurrent') {
-                                if (!currentPriceProductIds.contains(product.productId)) {
-                                    currentPriceProductIds.add(product.productId)
-                                }
-                            }
-                        }
-                        def sortedList = [] as List
-                        productList.each{product ->
-                            if ((product.priceTypeEnumId == 'PptList' || product.variantPricePurposeEnumId == 'PptList')) {
-                                if (!currentPriceProductIds.contains(product.productId)) {
-                                    sortedList.add(product)
-                                }
-                            } else {
-                                sortedList.add(product)
-                            }
-                        }
-                        productList = sortedList
-                        ec.web.sessionAttributes.defaultSorting = orderBy
-                    </script>
-                    <return />
-                </then>
+            <!-- price and popularity sorting: the order of the category page -->
+            <if condition="orderBy in ['popularity', 'price-asc', 'price-desc']">
+                <service-call name="popstore.ProductServices.get#CategoryProducts" out-map="sortedOut"
+                    in-map="[productCategoryId: productCategoryId, productStoreId: productStoreId,
+                        orderBy: orderBy, pageSize: 10000]" />
+                <set field="sortedIds" from="sortedOut.productList*.productId" />
+                <script>ec.web.sessionAttributes.defaultSorting = orderBy</script>
             </if>
 
             <!-- default sorting -->
@@ -348,6 +246,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <date-filter thru-field-name="salesDiscontinuationDate" />
                 <order-by field-name="sequenceNum,productName" />
             </entity-find>
+            <if condition="sortedIds">
+                <set field="productList" from="productList.sort(false) { sortedIds.indexOf(it.productId) }" />
+            </if>
             <if condition="orderBy=='default'">
                 <script>ec.web.sessionAttributes.remove('defaultSorting')</script>
             </if>
@@ -757,18 +658,31 @@ along with this software (see the LICENSE.md file). If not, see
 
             <!-- get entire cached list then paginate, for huge numbers of products in a category
             this is a bad approach (such sites should probably be purely search based) -->
+            <!-- price-asc, price-desc and popularity are no fields: sorted after the prices and
+                 sales are known, over the whole category, then paginated -->
+            <set field="sortBy" from="orderBy in ['price-asc', 'price-desc', 'popularity'] ? orderBy : null" />
             <!-- the category screen passes 'default', which is no field: sort by sequence, then name -->
-            <if condition="!orderBy || orderBy == 'default'">
+            <if condition="!orderBy || orderBy == 'default' || sortBy">
                 <set field="orderBy" value="sequenceNum,productName" />
             </if>
-            <!-- use the name 'productList' so pagination out-parameters are created automatically -->
-            <entity-find entity-name="mantle.product.category.ProductCategoryMemberProduct"
-                list="productList" cache="true">
-                <search-form-inputs default-order-by="${orderBy}" />
-                <date-filter />
-                <econdition field-name="productCategoryId" />
-            </entity-find>
-            <set field="pcmList" from="productList" />
+            <if condition="sortBy">
+                <entity-find entity-name="mantle.product.category.ProductCategoryMemberProduct"
+                    list="pcmList" cache="true">
+                    <date-filter />
+                    <econdition field-name="productCategoryId" />
+                    <order-by field-name="${orderBy}" />
+                </entity-find>
+                <else>
+                    <!-- use the name 'productList' so pagination out-parameters are created automatically -->
+                    <entity-find entity-name="mantle.product.category.ProductCategoryMemberProduct"
+                        list="productList" cache="true">
+                        <search-form-inputs default-order-by="${orderBy}" />
+                        <date-filter />
+                        <econdition field-name="productCategoryId" />
+                    </entity-find>
+                    <set field="pcmList" from="productList" />
+                </else>
+            </if>
 
             <set field="productList" from="[]" />
             <iterate list="pcmList" entry="pcmp">
@@ -817,6 +731,37 @@ along with this software (see the LICENSE.md file). If not, see
                         description:product.description, price:priceMap.price, listPrice:priceMap.listPrice, priceUomId:priceMap.priceUomId,
                         sequenceNum:pcmp.sequenceNum, smallImageInfo:smallImageInfo, mediumImageInfo:mediumImageInfo])</script>
             </iterate>
+            <if condition="sortBy == 'popularity'">
+                <!-- quantity ordered in the last year, for a virtual product that of its variants -->
+                <set field="yearAgo" from="new Timestamp(ec.user.nowTimestamp.time - 365L * 24 * 60 * 60 * 1000)" />
+                <iterate list="productList" entry="productInfo">
+                    <entity-find entity-name="mantle.product.ProductAssoc" list="variantList" cache="true">
+                        <date-filter />
+                        <econdition field-name="productId" from="productInfo.productId" />
+                        <econdition field-name="productAssocTypeEnumId" value="PatVariant" />
+                        <select-field field-name="toProductId" />
+                    </entity-find>
+                    <entity-find entity-name="mantle.order.OrderItem" list="orderItemList">
+                        <econdition field-name="productId" operator="in"
+                            from="[productInfo.productId] + variantList*.toProductId" />
+                        <econdition field-name="lastUpdatedStamp" operator="greater" from="yearAgo" />
+                        <select-field field-name="quantity" />
+                    </entity-find>
+                    <set field="productInfo.orderedTotal" from="orderItemList.sum(0) { it.quantity ?: 0 }" />
+                </iterate>
+                <script>productList.sort { a, b -> b.orderedTotal &lt;=&gt; a.orderedTotal }</script>
+            </if>
+            <if condition="sortBy == 'price-asc' || sortBy == 'price-desc'">
+                <!-- stable sort: equal prices keep the sequence and name order -->
+                <script>
+                    def priceOf = { (it.price ?: it.listPrice ?: 0) as BigDecimal }
+                    productList.sort { a, b -> sortBy == 'price-asc' ?
+                        priceOf(a) &lt;=&gt; priceOf(b) : priceOf(b) &lt;=&gt; priceOf(a) }
+                </script>
+            </if>
+            <if condition="sortBy">
+                <script>org.moqui.util.CollectionUtilities.paginateList("productList", null, context)</script>
+            </if>
         </actions>
     </service>
 
