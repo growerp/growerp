@@ -46,5 +46,13 @@
   "updateSuccess": "Erfolgreich aktualisiert",
   "whatHappened": "Was ist passiert?",
   "vehiclePlate": "Kennzeichen",
-  "vehicleDescription": "Fahrzeug"
+  "vehicleDescription": "Fahrzeug",
+  "digitalCard": "Digitale Versicherungskarte",
+  "validUntil": "Versichert · gültig bis {date}",
+  "notValid": "Heute nicht gültig · endet {date}",
+  "qrHint": "Zeigen Sie diesen Code Polizei oder Werkstatt: er öffnet eine aktuelle Prüfung dieser Police.",
+  "requestRenewal": "Verlängerung anfragen",
+  "renewalRequested": "Verlängerung am {date} angefragt, die Agentur meldet sich.",
+  "renewalRequestSent": "Verlängerungsanfrage gesendet",
+  "showCard": "Karte zeigen"
 }

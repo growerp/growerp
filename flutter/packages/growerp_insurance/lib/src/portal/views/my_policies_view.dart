@@ -111,50 +111,75 @@ class MyPoliciesViewState extends State<MyPoliciesView> {
     return Card(
       key: Key('myPolicy$index'),
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${policy.policyType?.name ?? ''} '
-              '${policy.policyNumber ?? policy.pseudoId}',
-              key: Key('myPolicyTitle$index'),
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 5),
-            Wrap(
-              spacing: 20,
-              runSpacing: 5,
-              children: [
-                Text(
-                  '${localizations.carrier}: ${policy.carrierName ?? ''}',
-                  key: Key('myPolicyCarrier$index'),
-                ),
-                Text('$from - $thru', key: Key('myPolicyPeriod$index')),
-                Text(
-                  '${localizations.status}: ${policy.status?.name ?? ''}',
-                  key: Key('myPolicyStatus$index'),
-                ),
-                if (policy.premiumAmount != null)
-                  Text(
-                    '${localizations.premium}: ${policy.premiumAmount} '
-                    '${policy.premiumFrequency?.name ?? ''}',
-                    key: Key('myPolicyPremium$index'),
+      child: InkWell(
+        onTap: () => _showCard(policy),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${policy.policyType?.name ?? ''} '
+                      '${policy.policyNumber ?? policy.pseudoId}'
+                      '${(policy.vehiclePlate ?? '').isEmpty ? '' : ' · ${policy.vehiclePlate}'}',
+                      key: Key('myPolicyTitle$index'),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
-              ],
-            ),
-            ...(policy.coverages ?? <PolicyCoverage>[]).map(
-              (coverage) => Text(
-                '${coverage.coverageName ?? ''}: '
-                '${localizations.limit} ${coverage.limitAmount ?? '-'}, '
-                '${localizations.deductible} '
-                '${coverage.deductibleAmount ?? '-'}',
+                  IconButton(
+                    key: Key('myPolicyCard$index'),
+                    tooltip: localizations.showCard,
+                    icon: const Icon(Icons.qr_code_2),
+                    onPressed: () => _showCard(policy),
+                  ),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 5),
+              Wrap(
+                spacing: 20,
+                runSpacing: 5,
+                children: [
+                  Text(
+                    '${localizations.carrier}: ${policy.carrierName ?? ''}',
+                    key: Key('myPolicyCarrier$index'),
+                  ),
+                  Text('$from - $thru', key: Key('myPolicyPeriod$index')),
+                  Text(
+                    '${localizations.status}: ${policy.status?.name ?? ''}',
+                    key: Key('myPolicyStatus$index'),
+                  ),
+                  if (policy.premiumAmount != null)
+                    Text(
+                      '${localizations.premium}: ${policy.premiumAmount} '
+                      '${policy.premiumFrequency?.name ?? ''}',
+                      key: Key('myPolicyPremium$index'),
+                    ),
+                ],
+              ),
+              ...(policy.coverages ?? <PolicyCoverage>[]).map(
+                (coverage) => Text(
+                  '${coverage.coverageName ?? ''}: '
+                  '${localizations.limit} ${coverage.limitAmount ?? '-'}, '
+                  '${localizations.deductible} '
+                  '${coverage.deductibleAmount ?? '-'}',
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+
+  Future<void> _showCard(Policy policy) => showDialog(
+    context: context,
+    barrierDismissible: true,
+    builder: (_) => BlocProvider.value(
+      value: context.read<PolicyBloc>(),
+      child: PolicyCardDialog(policy),
+    ),
+  );
 }

@@ -33,6 +33,7 @@ dependencies:
   form_builder_validators: ^11.2.0
   flutter_test:
     sdk: flutter
+  qr_flutter: ^4.1.0
 
 dev_dependencies:
   flutter_driver:

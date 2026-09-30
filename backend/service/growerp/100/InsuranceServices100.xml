@@ -96,7 +96,9 @@ limitations under the License.
                     <parameter name="vehiclePlate" />
                     <parameter name="vehicleDescription" />
                     <parameter name="verificationToken" />
+                    <parameter name="verificationUrl" />
                     <parameter name="plainSummary" />
+                    <parameter name="renewalRequestedDate" />
                     <parameter name="coverages" type="List" />
                 </parameter>
             </parameter>
@@ -137,6 +139,8 @@ limitations under the License.
             <!-- periods per year of the premium, to calculate the yearly commission -->
             <set field="periodsPerYear" from="[InpfMonthly: 12, InpfQuarterly: 4,
                 InpfSemiAnnual: 2, InpfAnnual: 1, InpfSingle: 1]" />
+            <!-- the QR code of the policy card points at the public verify page of this server -->
+            <set field="verifyBase" from="(ec.web ? ec.web.getWebappRootUrl(true, null) : '') + '/verify/'" />
             <set field="policies" from="[]" />
             <iterate list="items" entry="item">
                 <service-call name="growerp.100.InsuranceServices100.get#PartyName"
@@ -173,12 +177,79 @@ limitations under the License.
                     vehiclePlate: item.vehiclePlate,
                     vehicleDescription: item.vehicleDescription,
                     verificationToken: item.verificationToken,
+                    verificationUrl: item.verificationToken ? verifyBase + item.verificationToken : null,
                     plainSummary: item.plainSummary,
+                    renewalRequestedDate: ec.l10n.format(item.renewalRequestedDate, 'yyyy-MM-dd HH:mm:ssZ'),
                     coverages: coverageList.collect { [coverageSeqId: it.coverageSeqId,
                         coverageName: it.coverageName,
                         limitAmount: it.limitAmount?.toString(),
                         deductibleAmount: it.deductibleAmount?.toString()] }])</script>
             </iterate>
+        </actions>
+    </service>
+
+    <service verb="get" noun="PolicyVerification" authenticate="false">
+        <description>Public proof of insurance behind the QR code of the digital policy card,
+            for police, garages and toll staff. Only what is needed to check that a vehicle
+            is insured: no insured name, address, premium or claims; the plate is masked.</description>
+        <in-parameters>
+            <parameter name="verificationToken" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="found" type="Boolean" />
+            <parameter name="valid" type="Boolean" />
+            <parameter name="statusId" />
+            <parameter name="policyNumber" />
+            <parameter name="policyTypeEnumId" />
+            <parameter name="policyType" />
+            <parameter name="vehiclePlate" />
+            <parameter name="vehicleDescription" />
+            <parameter name="carrierName" />
+            <parameter name="agencyName" />
+            <parameter name="effectiveDate" type="Timestamp" />
+            <parameter name="expirationDate" type="Timestamp" />
+            <parameter name="checkedDate" type="Timestamp" />
+        </out-parameters>
+        <actions>
+            <set field="checkedDate" from="ec.user.nowTimestamp" />
+            <set field="found" from="false" />
+            <set field="valid" from="false" />
+            <if condition="!verificationToken || verificationToken.length() &lt; 20">
+                <return />
+            </if>
+            <entity-find entity-name="growerp.insurance.Policy" list="items" limit="1">
+                <econdition field-name="verificationToken" />
+            </entity-find>
+            <if condition="!items">
+                <return />
+            </if>
+            <set field="policy" from="items[0]" />
+            <set field="found" from="true" />
+            <set field="statusId" from="policy.statusId" />
+            <set field="policyNumber" from="policy.policyNumber ?: policy.pseudoId" />
+            <set field="policyTypeEnumId" from="policy.policyTypeEnumId" />
+            <entity-find-one entity-name="moqui.basic.Enumeration" value-field="typeEnum" cache="true">
+                <field-map field-name="enumId" from="policy.policyTypeEnumId" />
+            </entity-find-one>
+            <set field="policyType" from="typeEnum?.description" />
+            <!-- 51K-238.46 shows as 51K-***.46: enough to match the car in front of you -->
+            <set field="plate" from="policy.vehiclePlate ?: ''" />
+            <set field="vehiclePlate" from="plate.length() &gt; 7
+                ? plate.substring(0, 4) + plate.substring(4, plate.length() - 3).replaceAll('[A-Za-z0-9]', '*')
+                    + plate.substring(plate.length() - 3)
+                : (plate ?: null)" />
+            <set field="vehicleDescription" from="policy.vehicleDescription" />
+            <service-call name="growerp.100.InsuranceServices100.get#PartyName"
+                in-map="[partyId: policy.carrierPartyId]" out-map="carrier" />
+            <service-call name="growerp.100.InsuranceServices100.get#PartyName"
+                in-map="[partyId: policy.ownerPartyId]" out-map="agency" />
+            <set field="carrierName" from="carrier.name" />
+            <set field="agencyName" from="agency.name" />
+            <set field="effectiveDate" from="policy.effectiveDate" />
+            <set field="expirationDate" from="policy.expirationDate" />
+            <set field="valid" from="policy.statusId in ['InpsActive', 'InpsRenewalDue']
+                &amp;&amp; !policy.effectiveDate?.after(checkedDate)
+                &amp;&amp; policy.expirationDate?.after(checkedDate)" />
         </actions>
     </service>
 
@@ -453,6 +524,56 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="request" noun="PolicyRenewal">
+        <description>The client asks for the renewal of an own policy in the portal. Nothing
+            is renewed automatically: the producer is emailed and the policy shows the request
+            in the renewal list, where the agency renews it with the carrier.</description>
+        <in-parameters>
+            <parameter name="policyId" required="true" />
+            <parameter name="message" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="policy" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.InsuranceServices100.check#InsuranceAccess"
+                out-map="context" />
+            <entity-find entity-name="growerp.insurance.Policy" list="items" for-update="true" limit="1">
+                <econdition field-name="policyId" />
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="insuredPartyId" operator="in" from="ownPartyIds"
+                    ignore="isStaff" />
+            </entity-find>
+            <if condition="!items">
+                <return error="true" message="Policy ${policyId} not found!" />
+            </if>
+            <set field="item" from="items[0]" />
+            <if condition="!(item.statusId in ['InpsActive', 'InpsRenewalDue', 'InpsLapsed'])">
+                <return error="true" message="Policy ${item.pseudoId} cannot be renewed" />
+            </if>
+            <set field="item.renewalRequestedDate" from="ec.user.nowTimestamp" />
+            <entity-update value-field="item" />
+            <!-- tell the producer; a missing mail setup must not fail the request -->
+            <entity-find entity-name="moqui.security.UserAccount" list="producerAccounts" limit="1">
+                <econdition field-name="partyId" from="item.producerPartyId" />
+            </entity-find>
+            <service-call name="growerp.100.InsuranceServices100.get#PartyName"
+                in-map="[partyId: item.insuredPartyId]" out-map="insured" />
+            <if condition="producerAccounts &amp;&amp; producerAccounts[0].emailAddress">
+                <set field="policyRef" from="item.policyNumber ?: item.pseudoId" />
+                <set field="requestBody" value="&lt;p&gt;${insured.name} asks to renew policy &lt;b&gt;${policyRef}&lt;/b&gt;${item.vehiclePlate ? ' (' + item.vehiclePlate + ')' : ''}, ending ${ec.l10n.format(item.expirationDate, 'yyyy-MM-dd')}.&lt;/p&gt;&lt;p&gt;${groovy.xml.XmlUtil.escapeXml(message ?: '')}&lt;/p&gt;" />
+                <service-call name="growerp.100.GeneralServices100.send#DirectEmail"
+                    ignore-error="true"
+                    in-map="[ownerPartyId: item.ownerPartyId,
+                        toAddresses: producerAccounts[0].emailAddress,
+                        subject: 'Renewal requested: ' + policyRef, bodyHtml: requestBody]" />
+            </if>
+            <service-call name="growerp.100.InsuranceServices100.get#Policies"
+                in-map="[policyId: item.policyId]" out-map="context" />
+            <set field="policy" from="policies[0]" />
+        </actions>
+    </service>
+
     <service verb="receive" noun="PolicyCommission">
         <description>Records a commission payment of the carrier: adds it to the policy and
             books it as a sales invoice to the carrier.</description>
@@ -493,6 +614,52 @@ limitations under the License.
             <service-call name="growerp.100.InsuranceServices100.get#Policies"
                 in-map="[policyId: policyId]" out-map="context" />
             <set field="policy" from="policies[0]" />
+        </actions>
+    </service>
+
+    <service verb="send" noun="PolicyRenewalReminder" allow-remote="false"><!-- internal -->
+        <description>Emails the insured that the policy expires, through the agency's own
+            SMTP settings. Plain facts, no pressure or offers: when it ends and how to ask
+            for the renewal.</description>
+        <in-parameters>
+            <parameter name="policy" type="Map" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="sent" type="Boolean" />
+        </out-parameters>
+        <actions>
+            <set field="sent" from="false" />
+            <!-- the insured person, or the first employee of the insured company -->
+            <entity-find entity-name="moqui.security.UserAccount" list="accounts" limit="1">
+                <econdition field-name="partyId" from="policy.insuredPartyId" />
+            </entity-find>
+            <if condition="!accounts">
+                <entity-find entity-name="mantle.party.PartyRelationship" list="rels" limit="1">
+                    <econdition field-name="toPartyId" from="policy.insuredPartyId" />
+                    <econdition field-name="relationshipTypeEnumId" value="PrtEmployee" />
+                    <date-filter />
+                </entity-find>
+                <if condition="rels">
+                    <entity-find entity-name="moqui.security.UserAccount" list="accounts" limit="1">
+                        <econdition field-name="partyId" from="rels[0].fromPartyId" />
+                    </entity-find>
+                </if>
+            </if>
+            <set field="toAddress" from="accounts ? accounts[0].emailAddress : null" />
+            <if condition="!toAddress || toAddress.contains('example.com')"><return /></if>
+            <service-call name="growerp.100.GeneralServices100.get#ActiveEmailServer"
+                in-map="[ownerPartyId: policy.ownerPartyId]" out-map="emailServer" />
+            <if condition="!emailServer.emailConfigured"><return /></if>
+            <set field="policyRef" from="policy.policyNumber ?: policy.pseudoId" />
+            <set field="plateText" from="policy.vehiclePlate ? ' (' + policy.vehiclePlate + ')' : ''" />
+            <set field="expires" from="ec.l10n.format(policy.expirationDate, 'yyyy-MM-dd')" />
+            <set field="reminderBody" value="&lt;p&gt;Your insurance policy &lt;b&gt;${policyRef}&lt;/b&gt;${plateText} ends on ${expires}.&lt;/p&gt;&lt;p&gt;To continue your cover, open My Policies in the app and choose Request renewal, or reply to this email. Let us know if anything changed, such as a new vehicle or address.&lt;/p&gt;" />
+            <service-call name="growerp.100.GeneralServices100.send#DirectEmail"
+                ignore-error="true"
+                in-map="[ownerPartyId: policy.ownerPartyId, toAddresses: toAddress,
+                    subject: 'Policy ' + policyRef + ' ends on ' + expires,
+                    bodyHtml: reminderBody]" />
+            <set field="sent" from="true" />
         </actions>
     </service>
 
@@ -539,36 +706,23 @@ limitations under the License.
                 <if condition="dryRun"><continue /></if>
                 <set field="due.statusId" value="InpsRenewalDue" />
                 <entity-update value-field="due" />
-                <!-- the insured person, or the first employee of the insured company -->
-                <entity-find entity-name="moqui.security.UserAccount" list="accounts" limit="1">
-                    <econdition field-name="partyId" from="due.insuredPartyId" />
-                </entity-find>
-                <if condition="!accounts">
-                    <entity-find entity-name="mantle.party.PartyRelationship" list="rels" limit="1">
-                        <econdition field-name="toPartyId" from="due.insuredPartyId" />
-                        <econdition field-name="relationshipTypeEnumId" value="PrtEmployee" />
-                        <date-filter />
-                    </entity-find>
-                    <if condition="rels">
-                        <entity-find entity-name="moqui.security.UserAccount" list="accounts" limit="1">
-                            <econdition field-name="partyId" from="rels[0].fromPartyId" />
-                        </entity-find>
-                    </if>
-                </if>
-                <set field="toAddress" from="accounts ? accounts[0].emailAddress : null" />
-                <if condition="!toAddress || toAddress.contains('example.com')"><continue /></if>
-                <service-call name="growerp.100.GeneralServices100.get#ActiveEmailServer"
-                    in-map="[ownerPartyId: due.ownerPartyId]" out-map="emailServer" />
-                <if condition="!emailServer.emailConfigured"><continue /></if>
-                <set field="policyRef" from="due.policyNumber ?: due.pseudoId" />
-                <set field="expires" from="ec.l10n.format(due.expirationDate, 'yyyy-MM-dd')" />
-                <set field="reminderBody" value="&lt;p&gt;Your insurance policy &lt;b&gt;${policyRef}&lt;/b&gt; expires on ${expires}.&lt;/p&gt;&lt;p&gt;We will contact you about the renewal; reply to this email with any changes in your situation.&lt;/p&gt;" />
-                <service-call name="growerp.100.GeneralServices100.send#DirectEmail"
-                    ignore-error="true"
-                    in-map="[ownerPartyId: due.ownerPartyId, toAddresses: toAddress,
-                        subject: 'Your policy ' + policyRef + ' is due for renewal',
-                        bodyHtml: reminderBody]" />
-                <set field="sentCount" from="sentCount + 1" />
+                <service-call name="growerp.100.InsuranceServices100.send#PolicyRenewalReminder"
+                    in-map="[policy: due]" out-map="reminder" />
+                <if condition="reminder.sent"><set field="sentCount" from="sentCount + 1" /></if>
+            </iterate>
+            <!-- one more reminder a week and a day before the expiration, unless the client
+                 already asked for the renewal; the job runs daily, so each fires once -->
+            <entity-find entity-name="growerp.insurance.Policy" list="followUpList">
+                <econdition field-name="statusId" value="InpsRenewalDue" />
+                <econdition field-name="renewalRequestedDate" from="null" />
+                <econdition field-name="expirationDate" operator="greater-equals" from="now" />
+            </entity-find>
+            <iterate list="followUpList" entry="due">
+                <set field="daysLeft" from="Math.ceil((due.expirationDate.time - now.time) / (24D * 3600D * 1000D)) as int" />
+                <if condition="!(daysLeft in [7, 1]) || dryRun"><continue /></if>
+                <service-call name="growerp.100.InsuranceServices100.send#PolicyRenewalReminder"
+                    in-map="[policy: due]" out-map="reminder" />
+                <if condition="reminder.sent"><set field="sentCount" from="sentCount + 1" /></if>
             </iterate>
         </actions>
     </service>

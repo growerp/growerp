@@ -66,3 +66,11 @@ class PolicyCommissionReceive extends PolicyEvent {
   final String policyId;
   final Decimal amount;
 }
+
+/// The client asks the agency to renew [policyId]; staff renew it with the
+/// carrier.
+class PolicyRenewalRequest extends PolicyEvent {
+  const PolicyRenewalRequest({required this.policyId, this.message});
+  final String policyId;
+  final String? message;
+}

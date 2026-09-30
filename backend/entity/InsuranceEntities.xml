@@ -34,6 +34,7 @@
         <field name="verificationToken" type="id"><description>random token in the QR code of the digital policy card, public proof of insurance</description></field>
         <field name="plainSummary" type="text-very-long"><description>AI plain-language explanation of the coverage, cleared when the policy changes</description></field>
         <field name="plainSummaryLocale" type="text-short" />
+        <field name="renewalRequestedDate" type="date-time"><description>the client asked for the renewal in the portal</description></field>
         <field name="createdDate" type="date-time" />
         <relationship type="one" title="Owner" related="mantle.party.Party">
             <key-map field-name="ownerPartyId" related="partyId" />

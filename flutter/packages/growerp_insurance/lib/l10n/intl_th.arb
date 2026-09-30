@@ -46,5 +46,13 @@
   "updateSuccess": "อัปเดตเรียบร้อยแล้ว",
   "whatHappened": "เกิดอะไรขึ้น?",
   "vehiclePlate": "ป้ายทะเบียน",
-  "vehicleDescription": "ยานพาหนะ"
+  "vehicleDescription": "ยานพาหนะ",
+  "digitalCard": "บัตรกรมธรรม์ดิจิทัล",
+  "validUntil": "มีความคุ้มครอง · ถึง {date}",
+  "notValid": "ไม่มีผลวันนี้ · สิ้นสุด {date}",
+  "qrHint": "แสดงรหัสนี้ต่อตำรวจหรืออู่ซ่อม เพื่อเปิดการตรวจสอบกรมธรรม์แบบเรียลไทม์",
+  "requestRenewal": "ขอต่ออายุ",
+  "renewalRequested": "ขอต่ออายุเมื่อ {date} ตัวแทนจะติดต่อกลับ",
+  "renewalRequestSent": "ส่งคำขอต่ออายุแล้ว",
+  "showCard": "แสดงบัตร"
 }

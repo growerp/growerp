@@ -46,5 +46,13 @@
   "updateSuccess": "Mis à jour avec succès",
   "whatHappened": "Que s'est-il passé ?",
   "vehiclePlate": "Plaque d'immatriculation",
-  "vehicleDescription": "Véhicule"
+  "vehicleDescription": "Véhicule",
+  "digitalCard": "Carte d'assurance numérique",
+  "validUntil": "Assuré · valable jusqu'au {date}",
+  "notValid": "Non valable aujourd'hui · fin {date}",
+  "qrHint": "Montrez ce code à la police ou au garage : il ouvre une vérification en direct de ce contrat.",
+  "requestRenewal": "Demander le renouvellement",
+  "renewalRequested": "Renouvellement demandé le {date}, l'agence vous contactera.",
+  "renewalRequestSent": "Demande de renouvellement envoyée",
+  "showCard": "Afficher la carte"
 }

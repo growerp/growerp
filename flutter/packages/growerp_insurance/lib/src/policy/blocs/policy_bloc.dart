@@ -60,6 +60,7 @@ class PolicyBloc extends Bloc<PolicyEvent, PolicyState> {
     on<PolicyDelete>(_onPolicyDelete);
     on<PolicyRenew>(_onPolicyRenew);
     on<PolicyCommissionReceive>(_onPolicyCommissionReceive);
+    on<PolicyRenewalRequest>(_onPolicyRenewalRequest);
   }
 
   Future<void> _onPoliciesFetch(
@@ -221,6 +222,32 @@ class PolicyBloc extends Bloc<PolicyEvent, PolicyState> {
       final updated = await restClient.receivePolicyCommission(
         policyId: event.policyId,
         amount: event.amount.toString(),
+      );
+      emit(
+        state.copyWith(
+          status: PolicyStatusBloc.success,
+          policies: _replace(updated),
+        ),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(
+          status: PolicyStatusBloc.failure,
+          message: await getDioError(e),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onPolicyRenewalRequest(
+    PolicyRenewalRequest event,
+    Emitter<PolicyState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: PolicyStatusBloc.loading));
+      final updated = await restClient.requestPolicyRenewal(
+        policyId: event.policyId,
+        message: event.message,
       );
       emit(
         state.copyWith(

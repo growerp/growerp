@@ -198,6 +198,25 @@ var storeInfo = ${storeInfoJson};
         <default-response type="none"/>
     </transition>
 
+    <transition name="verify" read-only="true">
+        <!-- public proof of insurance behind the QR code of the GrowERP insurance policy card:
+             /verify/{verificationToken}, on any host, also when no website is configured -->
+        <actions>
+            <service-call name="growerp.100.InsuranceServices100.get#PolicyVerification"
+                    in-map="[verificationToken: sri.screenUrlInfo.extraPathNameList?.getAt(0)]"
+                    out-map="verification"/>
+            <script>
+                ec.web.response.setStatus(verification.found ? 200 : 404)
+                ec.web.response.setHeader("Cache-Control", "no-store")
+                ec.web.response.setHeader("X-Robots-Tag", "noindex")
+                ec.web.sendTextResponse(ec.resource.template(
+                        "component://PopRestStore/template/insurance/verify.html.ftl", null),
+                        "text/html; charset=utf-8", null)
+            </script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
     <transition name="robots.txt" read-only="true">
         <actions>
             <service-call name="popstore.SeoServices.get#RobotsTxt" out-map="robotsOut"

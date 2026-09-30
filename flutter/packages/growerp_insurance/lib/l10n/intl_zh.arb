@@ -46,5 +46,13 @@
   "updateSuccess": "更新成功",
   "whatHappened": "发生了什么？",
   "vehiclePlate": "车牌号",
-  "vehicleDescription": "车辆"
+  "vehicleDescription": "车辆",
+  "digitalCard": "电子保单卡",
+  "validUntil": "已投保 · 有效期至 {date}",
+  "notValid": "今日无效 · 截止 {date}",
+  "qrHint": "向警察或修车厂出示此码：可实时查验本保单。",
+  "requestRenewal": "申请续保",
+  "renewalRequested": "已于 {date} 申请续保，代理人将与您联系。",
+  "renewalRequestSent": "续保申请已发送",
+  "showCard": "显示卡片"
 }

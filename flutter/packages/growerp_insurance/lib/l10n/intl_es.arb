@@ -46,5 +46,13 @@
   "updateSuccess": "Actualizado correctamente",
   "whatHappened": "¿Qué pasó?",
   "vehiclePlate": "Matrícula",
-  "vehicleDescription": "Vehículo"
+  "vehicleDescription": "Vehículo",
+  "digitalCard": "Tarjeta digital de póliza",
+  "validUntil": "Asegurado · válido hasta {date}",
+  "notValid": "No válido hoy · termina {date}",
+  "qrHint": "Muestre este código a la policía o al taller: abre una verificación en vivo de esta póliza.",
+  "requestRenewal": "Solicitar renovación",
+  "renewalRequested": "Renovación solicitada el {date}, la agencia le contactará.",
+  "renewalRequestSent": "Solicitud de renovación enviada",
+  "showCard": "Mostrar tarjeta"
 }

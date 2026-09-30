@@ -46,5 +46,13 @@
   "updateSuccess": "Bijgewerkt",
   "whatHappened": "Wat is er gebeurd?",
   "vehiclePlate": "Kenteken",
-  "vehicleDescription": "Voertuig"
+  "vehicleDescription": "Voertuig",
+  "digitalCard": "Digitale polispas",
+  "validUntil": "Verzekerd · geldig tot {date}",
+  "notValid": "Vandaag niet geldig · eindigt {date}",
+  "qrHint": "Toon deze code aan politie of garage: hij opent een actuele controle van deze polis.",
+  "requestRenewal": "Verlenging aanvragen",
+  "renewalRequested": "Verlenging aangevraagd op {date}, het kantoor neemt contact op.",
+  "renewalRequestSent": "Verlengingsaanvraag verstuurd",
+  "showCard": "Pas tonen"
 }

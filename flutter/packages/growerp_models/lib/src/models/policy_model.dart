@@ -53,7 +53,9 @@ abstract class Policy with _$Policy {
     String? vehiclePlate,
     String? vehicleDescription,
     String? verificationToken,
+    String? verificationUrl,
     String? plainSummary,
+    @DateTimeConverter() DateTime? renewalRequestedDate,
     List<PolicyCoverage>? coverages,
   }) = _Policy;
   Policy._();

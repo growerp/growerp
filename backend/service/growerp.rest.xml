@@ -1821,9 +1821,19 @@ limitations under the License.
                 <service name="growerp.100.InsuranceServices100.delete#Policy" />
             </method>
         </resource>
+        <resource name="PolicyVerification" require-authentication="anonymous-all">
+            <method type="get">
+                <service name="growerp.100.InsuranceServices100.get#PolicyVerification" />
+            </method>
+        </resource>
         <resource name="PolicyRenew">
             <method type="post">
                 <service name="growerp.100.InsuranceServices100.renew#Policy" />
+            </method>
+        </resource>
+        <resource name="PolicyRenewalRequest">
+            <method type="post">
+                <service name="growerp.100.InsuranceServices100.request#PolicyRenewal" />
             </method>
         </resource>
         <resource name="PolicyCommission">

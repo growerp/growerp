@@ -97,7 +97,11 @@ List<Widget> getPolicyListRow({
                 ] else ...[
                   Text(expires, key: Key('expirationDate$index')),
                   const Text(' '),
-                  Text(policy.status?.name ?? '', key: Key('status$index')),
+                  Text(
+                    '${policy.status?.name ?? ''}'
+                    '${policy.renewalRequestedDate != null ? ' ↻' : ''}',
+                    key: Key('status$index'),
+                  ),
                 ],
               ],
             ),
@@ -120,7 +124,11 @@ List<Widget> getPolicyListRow({
     ] else ...[
       Text(policy.policyType?.name ?? '', key: Key('policyType$index')),
       Text(expires, key: Key('expirationDate$index')),
-      Text(policy.status?.name ?? '', key: Key('status$index')),
+      Text(
+        '${policy.status?.name ?? ''}'
+        '${policy.renewalRequestedDate != null ? ' ↻' : ''}',
+        key: Key('status$index'),
+      ),
     ],
   ];
 }

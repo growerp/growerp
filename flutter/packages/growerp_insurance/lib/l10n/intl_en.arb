@@ -187,5 +187,52 @@
   "vehicleDescription": "Vehicle",
   "@vehicleDescription": {
     "description": "insurance label: Vehicle"
+  },
+  "digitalCard": "Digital policy card",
+  "@digitalCard": {
+    "description": "insurance label: Digital policy card"
+  },
+  "validUntil": "Insured · valid until {date}",
+  "@validUntil": {
+    "description": "insurance label: Insured · valid until {date}",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "notValid": "Not valid today · ends {date}",
+  "@notValid": {
+    "description": "insurance label: Not valid today · ends {date}",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "qrHint": "Show this code to the police or a garage: it opens a live check of this policy.",
+  "@qrHint": {
+    "description": "insurance label: Show this code to the police or a garage: it opens a live ch"
+  },
+  "requestRenewal": "Request renewal",
+  "@requestRenewal": {
+    "description": "insurance label: Request renewal"
+  },
+  "renewalRequested": "Renewal requested on {date}, the agency will contact you.",
+  "@renewalRequested": {
+    "description": "insurance label: Renewal requested on {date}, the agency will contact you.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "renewalRequestSent": "Renewal request sent",
+  "@renewalRequestSent": {
+    "description": "insurance label: Renewal request sent"
+  },
+  "showCard": "Show card",
+  "@showCard": {
+    "description": "insurance label: Show card"
   }
 }

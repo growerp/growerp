@@ -943,6 +943,12 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/PolicyRenew")
   Future<Policy> renewPolicy({@Field() required Policy policy});
 
+  @POST("rest/s1/growerp/100/PolicyRenewalRequest")
+  Future<Policy> requestPolicyRenewal({
+    @Field() required String policyId,
+    @Field() String? message,
+  });
+
   @POST("rest/s1/growerp/100/PolicyCommission")
   Future<Policy> receivePolicyCommission({
     @Field() required String policyId,
