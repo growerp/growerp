@@ -99,5 +99,6 @@
   "plateCheck": "照片中车牌",
   "suggestedNextStep": "建议下一步",
   "reviewFlags": "需人工核查",
-  "consistency": "照片与描述对比"
+  "consistency": "照片与描述对比",
+  "explainPolicy": "用通俗语言解释我的保障"
 }

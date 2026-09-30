@@ -99,5 +99,6 @@
   "plateCheck": "Matrícula en fotos",
   "suggestedNextStep": "Siguiente paso sugerido",
   "reviewFlags": "Comprobar en persona",
-  "consistency": "Fotos vs. descripción"
+  "consistency": "Fotos vs. descripción",
+  "explainPolicy": "Explicar mi cobertura con palabras sencillas"
 }

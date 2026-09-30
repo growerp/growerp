@@ -99,5 +99,6 @@
   "plateCheck": "Plaque sur les photos",
   "suggestedNextStep": "Étape suivante suggérée",
   "reviewFlags": "À vérifier soi-même",
-  "consistency": "Photos vs description"
+  "consistency": "Photos vs description",
+  "explainPolicy": "Expliquer ma couverture simplement"
 }

@@ -943,6 +943,13 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/PolicyRenew")
   Future<Policy> renewPolicy({@Field() required Policy policy});
 
+  /// plain-language explanation of the policy in the user's language
+  @POST("rest/s1/growerp/100/PolicyExplanation")
+  Future<dynamic> explainPolicy({
+    @Field() required String policyId,
+    @Field() bool? refresh,
+  });
+
   @POST("rest/s1/growerp/100/PolicyRenewalRequest")
   Future<Policy> requestPolicyRenewal({
     @Field() required String policyId,

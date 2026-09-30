@@ -524,6 +524,67 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="explain" noun="Policy">
+        <description>Plain-language explanation of what a policy covers, for the client, in
+            the user's language. Built by AI from the policy data only and kept on the policy
+            until the policy changes or another language is asked.</description>
+        <in-parameters>
+            <parameter name="policyId" required="true" />
+            <parameter name="refresh" type="Boolean" default="false" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="plainSummary" />
+        </out-parameters>
+        <actions>
+            <!-- same access as reading the policy -->
+            <service-call name="growerp.100.InsuranceServices100.get#Policies"
+                in-map="[policyId: policyId]" out-map="found" />
+            <if condition="!found.policies">
+                <return error="true" message="Policy ${policyId} not found!" />
+            </if>
+            <set field="shown" from="found.policies[0]" />
+            <entity-find-one entity-name="growerp.insurance.Policy" value-field="policy" for-update="true" />
+            <set field="language" from="ec.user.locale?.language ?: 'en'" />
+            <if condition="policy.plainSummary &amp;&amp; policy.plainSummaryLocale == language &amp;&amp; !refresh">
+                <set field="plainSummary" from="policy.plainSummary" />
+                <return />
+            </if>
+            <script><![CDATA[
+                def typeEnum = ec.entity.find("moqui.basic.Enumeration")
+                    .condition("enumId", policy.policyTypeEnumId).useCache(true).one()
+                String coverageText = (shown.coverages ?: []).collect {
+                    "- ${it.coverageName}: limit ${it.limitAmount ?: 'not stated'}, deductible ${it.deductibleAmount ?: 'none'}"
+                }.join("\n")
+                String prompt = """Explain this insurance policy to the policyholder in plain, friendly
+${ec.user.locale?.getDisplayLanguage(Locale.ENGLISH) ?: 'English'}, as a short list of at most 6 lines,
+each starting with "• ". No markdown, no headings. Use ONLY the facts below. Do not invent
+exclusions, prices, discounts or legal rules: where the policy data does not say, tell the reader
+to ask the agency. Explain what the limit and deductible mean with the actual numbers.
+Include one line on what to do first after an accident or loss: keep safe, take photos, report
+the claim in the app.
+
+Policy type: ${typeEnum?.description ?: policy.policyTypeEnumId}
+Insurer: ${shown.carrierName}
+Valid: ${ec.l10n.format(policy.effectiveDate, 'yyyy-MM-dd')} to ${ec.l10n.format(policy.expirationDate, 'yyyy-MM-dd')}
+Vehicle: ${policy.vehiclePlate ?: '-'} ${policy.vehicleDescription ?: ''}
+Currency: ${policy.currencyUomId ?: 'the agency currency'}
+Coverages:
+${coverageText ?: '- none recorded'}
+Notes from the agency: ${policy.description ?: '-'}"""
+                if ('true'.equals(System.getenv('GROWERP_TEST_MODE'))) {
+                    plainSummary = "• Test explanation of ${typeEnum?.description ?: 'the policy'}."
+                } else {
+                    def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
+                    plainSummary = GeminiAiUtil.callLlmApi(ec, prompt, [ownerPartyId: policy.ownerPartyId,
+                        temperature: 0.3, maxOutputTokens: 1024, purpose: "insurance policy explanation"])?.trim()
+                }
+            ]]></script>
+            <set field="policy.plainSummary" from="plainSummary" />
+            <set field="policy.plainSummaryLocale" from="language" />
+            <entity-update value-field="policy" />
+        </actions>
+    </service>
+
     <service verb="request" noun="PolicyRenewal">
         <description>The client asks for the renewal of an own policy in the portal. Nothing
             is renewed automatically: the producer is emailed and the policy shows the request
@@ -1241,6 +1302,18 @@ limitations under the License.
                 [policyId: policyIds[0], incidentDate: at(-2), amountClaimed: 4000,
                     description: 'Customer slipped on the wet floor near the entrance']
             ]" />
+            <!-- public quote request on the agency website: a lead for the agency, no pricing -->
+            <service-call name="growerp.100.WebsiteServices100.create#WebsiteForm" ignore-error="true"
+                in-map="[webForm: [formName: 'Get insured',
+                    title: 'Get insured: tell us about your vehicle. We only use these details to prepare your quote and contact you.',
+                    submitLabel: 'Ask for a quote',
+                    successMessage: 'Thank you, the agency will contact you within one working day.',
+                    fields: [[fieldId: 'name', sequenceNum: 1, label: 'Name', fieldType: 'text', isRequired: 'Y'],
+                        [fieldId: 'email', sequenceNum: 2, label: 'Email', fieldType: 'email', isRequired: 'Y'],
+                        [fieldId: 'phone', sequenceNum: 3, label: 'Phone', fieldType: 'phone', isRequired: 'N'],
+                        [fieldId: 'plate', sequenceNum: 4, label: 'Licence plate', fieldType: 'text', isRequired: 'N'],
+                        [fieldId: 'vehicle', sequenceNum: 5, label: 'Vehicle make, model and year', fieldType: 'text', isRequired: 'N'],
+                        [fieldId: 'question', sequenceNum: 6, label: 'What would you like to insure?', fieldType: 'textarea', isRequired: 'N']]]]" />
             <iterate list="demoClaims" entry="demoClaim">
                 <service-call name="growerp.100.InsuranceServices100.create#Claim"
                     in-map="[claim: demoClaim]" out-map="createdClaim" />

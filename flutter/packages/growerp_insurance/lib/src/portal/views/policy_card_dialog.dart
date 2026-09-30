@@ -12,6 +12,8 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -34,6 +36,7 @@ class PolicyCardDialog extends StatefulWidget {
 class PolicyCardDialogState extends State<PolicyCardDialog> {
   late Policy _policy;
   bool _requesting = false;
+  bool _explaining = false;
 
   @override
   void initState() {
@@ -83,6 +86,27 @@ class PolicyCardDialogState extends State<PolicyCardDialog> {
         ),
       ),
     );
+  }
+
+  Future<void> _explain() async {
+    setState(() => _explaining = true);
+    try {
+      var result = await context.read<RestClient>().explainPolicy(
+        policyId: _policy.policyId,
+      );
+      if (result is String) result = jsonDecode(result);
+      if (!mounted) return;
+      setState(
+        () => _policy = _policy.copyWith(
+          plainSummary: result['plainSummary'] as String?,
+        ),
+      );
+    } catch (e) {
+      final message = await getDioError(e);
+      if (mounted) HelperFunctions.showMessage(context, message, Colors.red);
+    } finally {
+      if (mounted) setState(() => _explaining = false);
+    }
   }
 
   Widget _card(InsuranceLocalizations localizations) {
@@ -203,10 +227,26 @@ class PolicyCardDialogState extends State<PolicyCardDialog> {
             '${localizations.deductible} ${coverage.deductibleAmount ?? '-'}',
           ),
         ),
-        if ((_policy.plainSummary ?? '').isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Text(_policy.plainSummary!, key: const Key('plainSummary')),
-        ],
+        const SizedBox(height: 12),
+        if ((_policy.plainSummary ?? '').isNotEmpty)
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Text(
+                _policy.plainSummary!,
+                key: const Key('plainSummary'),
+              ),
+            ),
+          )
+        else if (_explaining)
+          const LoadingIndicator()
+        else
+          OutlinedButton.icon(
+            key: const Key('explainPolicy'),
+            icon: const Icon(Icons.auto_awesome),
+            label: Text(localizations.explainPolicy),
+            onPressed: _explain,
+          ),
       ],
     );
   }

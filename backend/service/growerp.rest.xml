@@ -1831,6 +1831,11 @@ limitations under the License.
                 <service name="growerp.100.InsuranceServices100.renew#Policy" />
             </method>
         </resource>
+        <resource name="PolicyExplanation">
+            <method type="post">
+                <service name="growerp.100.InsuranceServices100.explain#Policy" />
+            </method>
+        </resource>
         <resource name="PolicyRenewalRequest">
             <method type="post">
                 <service name="growerp.100.InsuranceServices100.request#PolicyRenewal" />

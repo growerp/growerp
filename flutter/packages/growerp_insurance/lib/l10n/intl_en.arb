@@ -427,5 +427,9 @@
   "consistency": "Photos vs. description",
   "@consistency": {
     "description": "insurance label: Photos vs. description"
+  },
+  "explainPolicy": "Explain my cover in plain words",
+  "@explainPolicy": {
+    "description": "insurance label: Explain my cover in plain words"
   }
 }
