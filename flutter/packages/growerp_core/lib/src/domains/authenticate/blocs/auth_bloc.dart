@@ -274,7 +274,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         timeZoneOffset: DateTime.now().timeZoneOffset.toString(),
         // language code only: the backend does new Locale(locale), which takes a
         // full tag like en-US as one language code
-        locale: (event.locale ?? PlatformDispatcher.instance.locale).languageCode,
+        locale:
+            (event.locale ?? PlatformDispatcher.instance.locale).languageCode,
       );
       // register#User returns the sentinel string 'registered' in apiKey, not a
       // login key: persisting it puts api_key: registered on every later request,
@@ -354,15 +355,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (state.status == AuthStatus.authenticated) return;
     // the demo data landed after login, so drop cached GETs taken before it
     await clearRestCache();
-    final completed = authenticate!.copyWith(loginStatus: null);
+    // and so do the dashboard counts of the login: fetch them again
+    Stats? stats = authenticate!.stats;
+    try {
+      stats =
+          (await restClient.getAuthenticate(
+            applicationId: applicationId,
+          )).stats ??
+          stats;
+    } catch (_) {}
+    final completed = authenticate.copyWith(loginStatus: null, stats: stats);
     if (completed.user?.userId != null) {
       await chat.connect(completed.apiKey!, completed.user!.userId!);
     }
     emit(
-      state.copyWith(
-        status: AuthStatus.authenticated,
-        authenticate: completed,
-      ),
+      state.copyWith(status: AuthStatus.authenticated, authenticate: completed),
     );
     await PersistFunctions.persistAuthenticate(completed);
     await PersistFunctions.persistKeyValue('apiKey', completed.apiKey ?? '');
@@ -425,12 +432,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             'registered', // User registered for existing company
             'passwordChange', // Password reset required
           ].contains(authenticate.loginStatus)) {
-
         if (authenticate.user?.userId != null) {
-          await chat.connect(
-            authenticate.apiKey!,
-            authenticate.user!.userId!,
-          );
+          await chat.connect(authenticate.apiKey!, authenticate.user!.userId!);
           await notification.connect(
             authenticate.apiKey!,
             authenticate.user!.userId!,

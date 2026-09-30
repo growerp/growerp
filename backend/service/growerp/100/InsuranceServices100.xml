@@ -759,4 +759,112 @@ limitations under the License.
             </entity-delete-by-condition>
         </actions>
     </service>
+
+    <!-- ===================== demo data ===================== -->
+
+    <service verb="load" noun="InsuranceDemoData" allow-remote="false">
+        <description>Demo book of an agency, called from load#DemoData for AppInsurance with
+            the tenant admin logged in: two carriers, policies of the demo customers
+            (one due for renewal, one renewed), received commissions and claims in
+            several states. Built with the insurance services so pseudo ids, commission
+            invoices and renewals are what the app itself would make.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+        </in-parameters>
+        <actions>
+            <entity-find entity-name="growerp.party.OwnerCompanyDetailAndEmployee" list="customers">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="companyRole" value="Customer" />
+                <order-by field-name="companyPartyId" />
+            </entity-find>
+            <set field="clientIds" from="customers*.companyPartyId.unique()" />
+            <if condition="!clientIds">
+                <log level="warn" message="Insurance demo data: no customers for ${ownerPartyId}" />
+                <return />
+            </if>
+            <set field="carrierIds" from="[]" />
+            <iterate list="['Harbor Mutual Insurance', 'Summit General Assurance']" entry="carrierName">
+                <service-call name="growerp.100.PartyServices100.create#Company"
+                    in-map="[company: [name: carrierName, role: 'Supplier']]" out-map="carrierOut" />
+                <script>carrierIds.add(carrierOut.company.partyId)</script>
+            </iterate>
+            <set field="day" from="24L * 3600L * 1000L" />
+            <!-- noon UTC today, as the app sends calendar dates -->
+            <set field="today" from="java.sql.Timestamp.valueOf(java.time.LocalDate.now(java.time.ZoneOffset.UTC).atTime(12, 0))" />
+            <script>def at = { int days -> new java.sql.Timestamp(today.time + days * day) }</script>
+            <set field="client1" from="clientIds[0]" />
+            <set field="client2" from="clientIds.size() > 1 ? clientIds[1] : clientIds[0]" />
+            <set field="demoPolicies" from="[
+                [policyNumber: 'HM-LIA-20417', insuredPartyId: client1, carrierPartyId: carrierIds[0],
+                    policyTypeEnumId: 'InptLiability', statusId: 'InpsRenewalDue',
+                    effectiveDate: at(-340), expirationDate: at(25),
+                    premiumAmount: 450, premiumFrequencyEnumId: 'InpfAnnual', commissionRate: 15,
+                    description: 'General liability for the shop and deliveries',
+                    coverages: [[coverageName: 'General liability', limitAmount: 1000000, deductibleAmount: 1000],
+                        [coverageName: 'Product liability', limitAmount: 500000, deductibleAmount: 1000]],
+                    received: 67.5],
+                [policyNumber: 'SG-PRO-88120', insuredPartyId: client1, carrierPartyId: carrierIds[1],
+                    policyTypeEnumId: 'InptProperty', effectiveDate: at(-60), expirationDate: at(305),
+                    premiumAmount: 120, premiumFrequencyEnumId: 'InpfMonthly', commissionRate: 12,
+                    description: 'Building and contents of the warehouse',
+                    coverages: [[coverageName: 'Building', limitAmount: 750000, deductibleAmount: 2500],
+                        [coverageName: 'Contents', limitAmount: 150000, deductibleAmount: 1000],
+                        [coverageName: 'Business interruption', limitAmount: 100000, deductibleAmount: 0]],
+                    received: 28.8],
+                [policyNumber: 'HM-AUT-51903', insuredPartyId: client2, carrierPartyId: carrierIds[0],
+                    policyTypeEnumId: 'InptAuto', effectiveDate: at(-200), expirationDate: at(165),
+                    premiumAmount: 85, premiumFrequencyEnumId: 'InpfMonthly', commissionRate: 10,
+                    description: 'Delivery van',
+                    coverages: [[coverageName: 'Third party liability', limitAmount: 5000000, deductibleAmount: 0],
+                        [coverageName: 'Collision', limitAmount: 40000, deductibleAmount: 500]]],
+                [policyNumber: 'SG-HEA-30055', insuredPartyId: client2, carrierPartyId: carrierIds[1],
+                    policyTypeEnumId: 'InptHealth', effectiveDate: at(-400), expirationDate: at(-35),
+                    premiumAmount: 1450, premiumFrequencyEnumId: 'InpfQuarterly', commissionRate: 8,
+                    description: 'Group health plan, 6 employees',
+                    coverages: [[coverageName: 'Hospital', limitAmount: 250000, deductibleAmount: 250]],
+                    renew: true],
+                [policyNumber: 'HM-TRA-70311', insuredPartyId: client1, carrierPartyId: carrierIds[0],
+                    policyTypeEnumId: 'InptTravel', statusId: 'InpsQuote',
+                    effectiveDate: at(14), expirationDate: at(379),
+                    premiumAmount: 310, premiumFrequencyEnumId: 'InpfAnnual', commissionRate: 20,
+                    description: 'Annual business travel, quote sent to the client',
+                    coverages: [[coverageName: 'Medical abroad', limitAmount: 1000000, deductibleAmount: 100]]]
+            ]" />
+            <set field="policyIds" from="[]" />
+            <iterate list="demoPolicies" entry="demoPolicy">
+                <service-call name="growerp.100.InsuranceServices100.create#Policy"
+                    in-map="[policy: demoPolicy]" out-map="created" />
+                <script>policyIds.add(created.policy.policyId)</script>
+                <if condition="demoPolicy.received">
+                    <service-call name="growerp.100.InsuranceServices100.receive#PolicyCommission"
+                        in-map="[policyId: created.policy.policyId,
+                            amount: new BigDecimal(demoPolicy.received.toString())]" />
+                </if>
+                <if condition="demoPolicy.renew">
+                    <service-call name="growerp.100.InsuranceServices100.renew#Policy"
+                        in-map="[policy: [policyId: created.policy.policyId, premiumAmount: 1520]]" />
+                </if>
+            </iterate>
+            <set field="demoClaims" from="[
+                [policyId: policyIds[1], incidentDate: at(-12), amountClaimed: 12500,
+                    description: 'Water damage in the storage room after a burst pipe',
+                    statusId: 'InclFiled', claimNumber: 'SG-CL-4471'],
+                [policyId: policyIds[2], incidentDate: at(-45), amountClaimed: 3200,
+                    description: 'Rear-end collision in the supermarket parking lot',
+                    statusId: 'InclPaid', claimNumber: 'HM-CL-9012', amountPaid: 2700],
+                [policyId: policyIds[0], incidentDate: at(-2), amountClaimed: 4000,
+                    description: 'Customer slipped on the wet floor near the entrance']
+            ]" />
+            <iterate list="demoClaims" entry="demoClaim">
+                <service-call name="growerp.100.InsuranceServices100.create#Claim"
+                    in-map="[claim: demoClaim]" out-map="createdClaim" />
+                <if condition="demoClaim.statusId">
+                    <service-call name="growerp.100.InsuranceServices100.update#Claim"
+                        in-map="[claim: [claimId: createdClaim.claim.claimId,
+                            statusId: demoClaim.statusId, claimNumber: demoClaim.claimNumber,
+                            amountPaid: demoClaim.amountPaid]]" />
+                </if>
+            </iterate>
+        </actions>
+    </service>
 </services>

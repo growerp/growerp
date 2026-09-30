@@ -4715,6 +4715,11 @@ limitations under the License.
                     ignore-error="true" />
                 <log message="Marketing agent team for ${ownerPartyId}: ${teamOut?.enabledCount} agents" />
             </if>
+            <!-- insurance: carriers, policies, commissions and claims of the demo customers -->
+            <if condition="applicationId == 'AppInsurance'">
+                <service-call name="growerp.100.InsuranceServices100.load#InsuranceDemoData"
+                    in-map="[ownerPartyId: ownerPartyId]" />
+            </if>
         </actions>
     </service>
 
