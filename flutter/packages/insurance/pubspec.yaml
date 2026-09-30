@@ -1,6 +1,6 @@
 name: insurance
 resolution: workspace
-version: 1.0.0+1
+version: 1.0.1+2
 publish_to: none
 
 environment:
