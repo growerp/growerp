@@ -525,7 +525,7 @@ See the full [Developer Documentation](https://github.com/growerp/growerp/blob/m
 
 ## Deleting Your Data
 
-You can delete your account and company data from any GrowERP application (GrowERP Admin, GrowERP Hotel, GrowERP Freelance, GrowERP Support, GrowERP Marketing, GrowERP Agents, GrowERP Rental), developed by AntWebsystems Co., Ltd:
+You can delete your account and company data from any GrowERP application (GrowERP Admin, GrowERP Hotel, GrowERP Freelance, GrowERP Support, GrowERP Marketing, GrowERP Agents, GrowERP Rental, GrowERP Academy, GrowERP Insurance), developed by AntWebsystems Co., Ltd:
 1. Log in as the administrator
 2. Navigate to your **Personal Screen** (found under "Company" in the employee section)
 3. Click the **Delete** button
@@ -1177,13 +1177,15 @@ Whether you need requirements gathering, implementation, custom interfacing, or 
 
 **Effective Date:** October 2024
 
-This Privacy Policy explains how GrowERP, developed by AntWebsystems Co., Ltd, collects, uses, discloses, and safeguards your information when you use any GrowERP application (App) — including GrowERP Admin, GrowERP Hotel, GrowERP Freelance, GrowERP Support, GrowERP Marketing, GrowERP Agents, and GrowERP Rental. By using our App, you agree to the collection and use of information in accordance with this policy.
+This Privacy Policy explains how GrowERP, developed by AntWebsystems Co., Ltd, collects, uses, discloses, and safeguards your information when you use any GrowERP application (App) — including GrowERP Admin, GrowERP Hotel, GrowERP Freelance, GrowERP Support, GrowERP Marketing, GrowERP Agents, GrowERP Rental, GrowERP Academy, and GrowERP Insurance. By using our App, you agree to the collection and use of information in accordance with this policy.
 
 ## 1. Information We Collect
 ### a. Personal Information
 We may collect personal information that you provide directly to us, such as: Name, Email address, Phone number, Payment information when you use the E-Commerce part.
 ### b. Usage Data
 We may collect information automatically when you use our App, including: Device type and model, IP address, Operating system version, App usage information.
+### c. Data You Enter About Others
+Businesses using the App store data about their own customers in it, for example the course progress of learners in GrowERP Academy, or the insurance policies and claims of clients in GrowERP Insurance. This data is processed on behalf of that business and is only visible to the business and, through their own login, to the customer it concerns.
 
 ## 2. How We Use Your Information
 - To provide, maintain, and improve the App
