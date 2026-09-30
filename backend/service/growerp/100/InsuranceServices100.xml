@@ -1243,28 +1243,16 @@ Client question: ${question}"""
     </service>
 
     <service verb="queue" noun="ClaimAssessment" allow-remote="false"><!-- internal -->
-        <description>Starts the AI triage of the claim once the calling transaction has
-            committed: the background worker must see the claim and its photos.</description>
+        <description>Starts the AI triage of the claim in the background once the calling
+            transaction has committed: the worker must see the claim and its photos.</description>
         <in-parameters>
             <parameter name="claimId" required="true" />
         </in-parameters>
         <actions>
             <script>
-                ec.service.special().name('growerp.100.InsuranceServices100.start#ClaimAssessment')
+                // runs async after the commit, in a worker without user: assess#Claim logs in
+                ec.service.special().name('growerp.100.InsuranceServices100.assess#Claim')
                     .parameters([claimId: claimId, username: ec.user.username]).registerOnCommit()
-            </script>
-        </actions>
-    </service>
-
-    <service verb="start" noun="ClaimAssessment" allow-remote="false"><!-- internal, after commit -->
-        <in-parameters>
-            <parameter name="claimId" required="true" />
-            <parameter name="username" />
-        </in-parameters>
-        <actions>
-            <script>
-                ec.service.async().name('growerp.100.InsuranceServices100.assess#Claim')
-                    .parameters([claimId: claimId, username: username]).call()
             </script>
         </actions>
     </service>

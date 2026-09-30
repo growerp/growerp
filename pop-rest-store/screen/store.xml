@@ -206,11 +206,10 @@ var storeInfo = ${storeInfoJson};
                     in-map="[verificationToken: sri.screenUrlInfo.extraPathNameList?.getAt(0)]"
                     out-map="verification"/>
             <script>
-                ec.web.response.setStatus(verification.found ? 200 : 404)
                 ec.web.response.setHeader("Cache-Control", "no-store")
                 ec.web.response.setHeader("X-Robots-Tag", "noindex")
                 ec.web.sendTextResponse(ec.resource.template(
-                        "component://PopRestStore/template/insurance/verify.html.ftl", null),
+                        "component://PopRestStore/template/insurance/verify.html.ftl", (String) null),
                         "text/html; charset=utf-8", null)
             </script>
         </actions>
