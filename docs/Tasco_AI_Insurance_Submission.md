@@ -118,6 +118,12 @@ how each is measured.
 
 ## 7. Where to look
 
-- Hosted demo: *(link, demo customer and agent logins)*
-- Demo video: *(link)*
+- Hosted demo: https://tasco.growerp.net
+  - Agency staff: `test970444@example.com` / `qqqqqq9!`: policies, renewals, claims with the AI
+    triage panel, commissions.
+  - Customer (choose *Tiếng Việt* on the login screen): `lan.970445@example.com` / `qqqqqq9!`:
+    My Policies, the digital card, *explain my cover*, the claim wizard, the assistant.
+  - Public proof of insurance (what the QR code opens):
+    https://tasco-backend.growerp.net/verify/68d8c0d06cbe423a92f1d3492cad9e70
+- Demo video: *(link)*, 2 min 48 s. The claim photos in it are AI-generated illustrations.
 - Source: https://github.com/growerp/growerp (branch `tasco`), Apache 2.0.
