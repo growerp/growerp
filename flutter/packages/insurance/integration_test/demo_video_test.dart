@@ -42,20 +42,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 const _demoDir = String.fromEnvironment('DEMO_DIR', defaultValue: 'demo_video');
 const _plate = '51K-238.46';
 
-const _menuConfig = MenuConfiguration(
+const demoMenuConfig = MenuConfiguration(
   menuConfigurationId: 'INSURANCE_DEFAULT',
   appId: 'insurance',
   name: 'Insurance',
   menuItems: [],
 );
 
-GoRouter _router() {
+GoRouter createDemoRouter() {
   WidgetRegistry.clear();
   for (final reg in insuranceWidgetRegistrations) {
     WidgetRegistry.register(reg);
   }
   return createDynamicAppRouter(
-    [_menuConfig],
+    [demoMenuConfig],
     config: DynamicRouterConfig(
       mainConfigId: 'INSURANCE_DEFAULT',
       dashboardBuilder: () => const InsuranceDbForm(),
@@ -186,8 +186,8 @@ void main() {
     final restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       tester,
-      _router(),
-      _menuConfig,
+      createDemoRouter(),
+      demoMenuConfig,
       delegates,
       restClient: restClient,
       blocProviders: getInsuranceAppBlocProviders(restClient, applicationId),
