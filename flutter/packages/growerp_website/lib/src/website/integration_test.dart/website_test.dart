@@ -57,6 +57,38 @@ class WebsiteTest {
     );
   }
 
+  /// Enters a mailing list provider url (stored in colorJson like the social
+  /// links) and checks the public homepage then renders the subscribe overlay
+  /// and footer link.
+  static Future<void> updateMailingListUrl(
+    WidgetTester tester,
+    RestClient restClient,
+  ) async {
+    const url = 'https://example.com/subscribe';
+    await CommonTest.dragUntil(tester, key: 'mailingListUrl');
+    await CommonTest.enterText(tester, 'mailingListUrl', url);
+    await CommonTest.drag(tester);
+    await CommonTest.tapByKey(
+      tester,
+      'modifyWebsiteInfo',
+      seconds: CommonTest.waitTime,
+    );
+    await CommonTest.waitForSnackbarToGo(tester);
+    expect(CommonTest.getTextFormField('mailingListUrl'), equals(url));
+    final Website website = await restClient.getWebsite();
+    final String home = await _publicGet(website, '/');
+    expect(
+      home.contains('growerp-ml-overlay'),
+      isTrue,
+      reason: 'subscribe overlay on homepage?',
+    );
+    expect(
+      home.contains('data-growerp-mailing-list'),
+      isTrue,
+      reason: 'subscribe link in footer?',
+    );
+  }
+
   static Future<void> updateTitle(WidgetTester tester) async {
     await CommonTest.enterText(tester, 'title', 'Test Company');
     await CommonTest.drag(tester);

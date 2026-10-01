@@ -1531,6 +1531,142 @@ limitations under the License.
   <moqui.basic.LocalizedMessage locale="es" original="GrowerpWebsiteFormError"
     localized="No se pudo enviar, inténtelo de nuevo" />
 
+  <!-- website homepage email list overlay (template/mailingListWidget.html.ftl) -->
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpMailingListTitle"
+    localized="Stay in touch" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpMailingListTitle"
+    localized="ติดตามข่าวสารกับเรา" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpMailingListTitle"
+    localized="保持联系" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpMailingListTitle"
+    localized="Bleiben Sie in Kontakt" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpMailingListTitle"
+    localized="Restons en contact" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpMailingListTitle"
+    localized="Blijf op de hoogte" />
+  <moqui.basic.LocalizedMessage locale="es" original="GrowerpMailingListTitle"
+    localized="Mantente en contacto" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpMailingListIntro"
+    localized="Join our email list and receive our latest news." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpMailingListIntro"
+    localized="สมัครรับข่าวสารจากเราเพื่อรับข่าวล่าสุด" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpMailingListIntro"
+    localized="订阅我们的邮件列表，获取最新消息。" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpMailingListIntro"
+    localized="Abonnieren Sie unsere E-Mail-Liste und erhalten Sie unsere neuesten Nachrichten." />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpMailingListIntro"
+    localized="Abonnez-vous à notre liste de diffusion pour recevoir nos dernières nouvelles." />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpMailingListIntro"
+    localized="Schrijf je in op onze e-maillijst en ontvang ons laatste nieuws." />
+  <moqui.basic.LocalizedMessage locale="es" original="GrowerpMailingListIntro"
+    localized="Suscríbete a nuestra lista de correo y recibe nuestras últimas noticias." />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpMailingListFirstName"
+    localized="First name" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpMailingListFirstName"
+    localized="ชื่อ" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpMailingListFirstName"
+    localized="名字" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpMailingListFirstName"
+    localized="Vorname" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpMailingListFirstName"
+    localized="Prénom" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpMailingListFirstName"
+    localized="Voornaam" />
+  <moqui.basic.LocalizedMessage locale="es" original="GrowerpMailingListFirstName"
+    localized="Nombre" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpMailingListEmail"
+    localized="Email address" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpMailingListEmail"
+    localized="อีเมล" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpMailingListEmail"
+    localized="电子邮件地址" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpMailingListEmail"
+    localized="E-Mail-Adresse" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpMailingListEmail"
+    localized="Adresse e-mail" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpMailingListEmail"
+    localized="E-mailadres" />
+  <moqui.basic.LocalizedMessage locale="es" original="GrowerpMailingListEmail"
+    localized="Correo electrónico" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailListLink"
+    localized="Email list" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailListLink"
+    localized="รายชื่ออีเมล" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpEmailListLink"
+    localized="邮件列表" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpEmailListLink"
+    localized="E-Mail-Liste" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpEmailListLink"
+    localized="Liste e-mail" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailListLink"
+    localized="E-maillijst" />
+  <moqui.basic.LocalizedMessage locale="es" original="GrowerpEmailListLink"
+    localized="Lista de correo" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpMailingListSubscribe"
+    localized="Subscribe" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpMailingListSubscribe"
+    localized="สมัครรับข่าวสาร" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpMailingListSubscribe"
+    localized="订阅" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpMailingListSubscribe"
+    localized="Abonnieren" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpMailingListSubscribe"
+    localized="S'abonner" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpMailingListSubscribe"
+    localized="Inschrijven" />
+  <moqui.basic.LocalizedMessage locale="es" original="GrowerpMailingListSubscribe"
+    localized="Suscribirse" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpMailingListThanks"
+    localized="Thank you for subscribing!" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpMailingListThanks"
+    localized="ขอบคุณที่สมัครรับข่าวสาร!" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpMailingListThanks"
+    localized="感谢您的订阅！" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpMailingListThanks"
+    localized="Vielen Dank für Ihr Abonnement!" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpMailingListThanks"
+    localized="Merci pour votre abonnement !" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpMailingListThanks"
+    localized="Bedankt voor je inschrijving!" />
+  <moqui.basic.LocalizedMessage locale="es" original="GrowerpMailingListThanks"
+    localized="¡Gracias por suscribirte!" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpMailingListInvalidEmail"
+    localized="Please enter a valid email address" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpMailingListInvalidEmail"
+    localized="กรุณากรอกอีเมลที่ถูกต้อง" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpMailingListInvalidEmail"
+    localized="请输入有效的电子邮件地址" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpMailingListInvalidEmail"
+    localized="Bitte geben Sie eine gültige E-Mail-Adresse ein" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpMailingListInvalidEmail"
+    localized="Veuillez saisir une adresse e-mail valide" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpMailingListInvalidEmail"
+    localized="Vul een geldig e-mailadres in" />
+  <moqui.basic.LocalizedMessage locale="es" original="GrowerpMailingListInvalidEmail"
+    localized="Introduce un correo electrónico válido" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpMailingListNoThanks"
+    localized="No thanks" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpMailingListNoThanks"
+    localized="ไม่ ขอบคุณ" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpMailingListNoThanks"
+    localized="不用了，谢谢" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpMailingListNoThanks"
+    localized="Nein danke" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpMailingListNoThanks"
+    localized="Non merci" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpMailingListNoThanks"
+    localized="Nee, bedankt" />
+  <moqui.basic.LocalizedMessage locale="es" original="GrowerpMailingListNoThanks"
+    localized="No, gracias" />
+
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsitePlanPerMonth"
     localized="/month" />
   <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsitePlanPerMonth"

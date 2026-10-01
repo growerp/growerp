@@ -525,6 +525,10 @@ var storeInfo = ${storeInfoJson};
                 <render-mode>
                     <text type="html" location="component://PopRestStore/template/formWidget.html.ftl"/>
                 </render-mode>
+                <!-- homepage mailing-list overlay, when a provider form url is set in the website dialog -->
+                <render-mode>
+                    <text type="html" location="component://PopRestStore/template/mailingListWidget.html.ftl"/>
+                </render-mode>
                 <!-- pricing plan renderer for data-growerp-plans markers in page content -->
                 <render-mode>
                     <text type="html" location="component://PopRestStore/template/plansWidget.html.ftl"/>

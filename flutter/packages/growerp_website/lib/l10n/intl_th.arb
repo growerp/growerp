@@ -19,6 +19,8 @@
   "websiteObsidianUrl": "Obsidian URL",
   "websiteObsidianSynch": "ซิงค์ Obsidian",
   "websiteObsidianZip": "ไฟล์ Obsidian Zip",
+  "websiteMailingListUrl": "URL แบบฟอร์มรายชื่ออีเมล",
+  "websiteMailingListUrlHelper": "URL แบบฟอร์มของผู้ให้บริการรายชื่ออีเมล เมื่อกำหนดไว้ ผู้เยี่ยมชมหน้าแรกจะได้รับเชิญให้สมัครรับข่าวสาร",
   "websiteMeasurementId": "รหัสการวัด",
   "websiteStripeApiKey": "คีย์ API ของ Stripe",
   "websiteProductCategories": "หมวดหมู่สินค้า",

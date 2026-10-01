@@ -19,6 +19,8 @@
   "websiteObsidianUrl": "Obsidian URL",
   "websiteObsidianSynch": "Synchroniseer Obsidian",
   "websiteObsidianZip": "Obsidian Zip Bestand",
+  "websiteMailingListUrl": "E-maillijst formulier-URL",
+  "websiteMailingListUrlHelper": "Formulier-URL van uw e-maillijst-aanbieder; indien ingevuld worden bezoekers van de homepage uitgenodigd zich in te schrijven op uw e-maillijst",
   "websiteMeasurementId": "Meting ID",
   "websiteStripeApiKey": "Stripe API Sleutel",
   "websiteProductCategories": "Product Categorieën",

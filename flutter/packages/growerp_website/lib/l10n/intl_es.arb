@@ -19,6 +19,8 @@
   "websiteObsidianUrl": "URL de obsidiana",
   "websiteObsidianSynch": "Obsidiana sincronizada",
   "websiteObsidianZip": "Zip de obsidiana",
+  "websiteMailingListUrl": "URL del formulario de lista de correo",
+  "websiteMailingListUrlHelper": "URL de acción del formulario de su proveedor de lista de correo; si se indica, se invita a los visitantes de la página de inicio a suscribirse",
   "websiteMeasurementId": "ID de medición",
   "websiteStripeApiKey": "Clave API de banda",
   "websiteProductCategories": "Categorías de productos",

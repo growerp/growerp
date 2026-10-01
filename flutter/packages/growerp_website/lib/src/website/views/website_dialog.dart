@@ -57,6 +57,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
   final _youtubeController = TextEditingController();
   final _linkedinController = TextEditingController();
   final _substackController = TextEditingController();
+  final _mailingListUrlController = TextEditingController();
   final _websiteFormKey1 = GlobalKey<FormState>();
   ScrollController myScrollController = ScrollController();
   late String applicationId;
@@ -210,6 +211,8 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                   (socialJson['LinkedInUrl'] ?? '') as String;
               _substackController.text =
                   (socialJson['SubstackUrl'] ?? '') as String;
+              _mailingListUrlController.text =
+                  (socialJson['MailingListUrl'] ?? '') as String;
             }
             return _showForm(websiteState);
           case WebsiteStatus.failure:
@@ -850,6 +853,15 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                       hintText: 'https://yourname.substack.com',
                     ),
                   ),
+                  TextFormField(
+                    key: const Key('mailingListUrl'),
+                    controller: _mailingListUrlController,
+                    decoration: InputDecoration(
+                      labelText: _localizations.websiteMailingListUrl,
+                      helperText: _localizations.websiteMailingListUrlHelper,
+                      helperMaxLines: 2,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -883,6 +895,8 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                     updatedColor['YouTubeUrl'] = _youtubeController.text;
                     updatedColor['LinkedInUrl'] = _linkedinController.text;
                     updatedColor['SubstackUrl'] = _substackController.text;
+                    updatedColor['MailingListUrl'] =
+                        _mailingListUrlController.text.trim();
                     _websiteBloc.add(
                       WebsiteUpdate(
                         Website(

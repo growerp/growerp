@@ -76,10 +76,18 @@
   "@websiteObsidianZip": {
     "description": "Obsidian zip file label"
   },
-  "websiteMeasurementId": "Measurement ID",
   "@websiteMeasurementId": {
     "description": "Measurement ID label"
   },
+  "websiteMailingListUrl": "Email list form URL",
+  "@websiteMailingListUrl": {
+    "description": "Website dialog: email list provider form URL field label"
+  },
+  "websiteMailingListUrlHelper": "Form action URL of your email list provider; when set, homepage visitors are invited to join your email list",
+  "@websiteMailingListUrlHelper": {
+    "description": "Website dialog: helper text of the email list form URL field"
+  },
+  "websiteMeasurementId": "Measurement ID",
   "websiteStripeApiKey": "Stripe API Key",
   "@websiteStripeApiKey": {
     "description": "Stripe API key label"

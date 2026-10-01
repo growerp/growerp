@@ -47,6 +47,9 @@
                     </#if>
                 </div>
                 </#if>
+                <#if (MailingListUrl!'')?has_content>
+                <a href="#" data-growerp-mailing-list class="inline-block mt-4 font-label text-sm text-on-primary-container/70 hover:text-on-primary-container transition-colors underline">${l('GrowerpEmailListLink')}</a>
+                </#if>
             </div>
 
             <!-- Quick Links -->

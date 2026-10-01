@@ -19,6 +19,8 @@
   "websiteObsidianUrl": "Obsidian-URL",
   "websiteObsidianSynch": "Obsidian synchronisieren",
   "websiteObsidianZip": "Obsidian-Zip-Datei",
+  "websiteMailingListUrl": "E-Mail-Listen-Formular-URL",
+  "websiteMailingListUrlHelper": "Formular-URL Ihres E-Mail-Listen-Anbieters; wenn gesetzt, werden Besucher der Startseite eingeladen, sich in Ihre E-Mail-Liste einzutragen",
   "websiteMeasurementId": "Mess-ID",
   "websiteStripeApiKey": "Stripe-API-Schlüssel",
   "websiteProductCategories": "Produktkategorien",

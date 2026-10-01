@@ -19,6 +19,8 @@
   "websiteObsidianUrl": "Obsidian网址",
   "websiteObsidianSynch": "同步Obsidian",
   "websiteObsidianZip": "Obsidian Zip文件",
+  "websiteMailingListUrl": "邮件列表表单网址",
+  "websiteMailingListUrlHelper": "邮件列表服务商的表单提交网址；设置后，首页访客会被邀请订阅",
   "websiteMeasurementId": "测量ID",
   "websiteStripeApiKey": "Stripe API密钥",
   "websiteProductCategories": "产品类别",
