@@ -205,12 +205,6 @@ limitations under the License.
                 <service name="growerp.100.WebsiteServices100.submit#WebsiteForm" />
             </method>
         </resource>
-        <!-- public website homepage mailing-list overlay -->
-        <resource name="SubscribeMailingList" require-authentication="anonymous-all">
-            <method type="post">
-                <service name="growerp.100.WebsiteServices100.subscribe#MailingList" />
-            </method>
-        </resource>
         <resource name="PublicRooms" require-authentication="anonymous-all">
             <method type="get">
                 <service name="growerp.100.HotelServices100.get#PublicRooms" />

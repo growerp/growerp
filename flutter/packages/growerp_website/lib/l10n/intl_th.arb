@@ -20,7 +20,7 @@
   "websiteObsidianSynch": "ซิงค์ Obsidian",
   "websiteObsidianZip": "ไฟล์ Obsidian Zip",
   "websiteMailingListUrl": "URL แบบฟอร์มรายชื่ออีเมล",
-  "websiteMailingListUrlHelper": "URL แบบฟอร์มของผู้ให้บริการรายชื่ออีเมล เมื่อกำหนดไว้ ผู้เยี่ยมชมหน้าแรกจะได้รับเชิญให้สมัครรับข่าวสาร",
+  "websiteMailingListUrlHelper": "URL หน้าลงทะเบียนของผู้ให้บริการรายชื่ออีเมล เปิดในหน้าต่างป๊อปอัปจากส่วนท้ายเว็บไซต์และเมื่อเข้าชมหน้าแรกครั้งแรก",
   "websiteMeasurementId": "รหัสการวัด",
   "websiteStripeApiKey": "คีย์ API ของ Stripe",
   "websiteProductCategories": "หมวดหมู่สินค้า",

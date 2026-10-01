@@ -79,13 +79,13 @@
   "@websiteMeasurementId": {
     "description": "Measurement ID label"
   },
-  "websiteMailingListUrl": "Email list form URL",
+  "websiteMailingListUrl": "Email list signup URL",
   "@websiteMailingListUrl": {
-    "description": "Website dialog: email list provider form URL field label"
+    "description": "Website dialog: email list provider signup URL field label"
   },
-  "websiteMailingListUrlHelper": "Form action URL of your email list provider; when set, homepage visitors are invited to join your email list",
+  "websiteMailingListUrlHelper": "Signup page URL of your email list provider; opened in a popup window from the website footer and the first homepage visit",
   "@websiteMailingListUrlHelper": {
-    "description": "Website dialog: helper text of the email list form URL field"
+    "description": "Website dialog: helper text of the email list signup URL field"
   },
   "websiteMeasurementId": "Measurement ID",
   "websiteStripeApiKey": "Stripe API Key",

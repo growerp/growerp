@@ -1562,36 +1562,6 @@ limitations under the License.
   <moqui.basic.LocalizedMessage locale="es" original="GrowerpMailingListIntro"
     localized="Suscríbete a nuestra lista de correo y recibe nuestras últimas noticias." />
 
-  <moqui.basic.LocalizedMessage locale="default" original="GrowerpMailingListFirstName"
-    localized="First name" />
-  <moqui.basic.LocalizedMessage locale="th" original="GrowerpMailingListFirstName"
-    localized="ชื่อ" />
-  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpMailingListFirstName"
-    localized="名字" />
-  <moqui.basic.LocalizedMessage locale="de" original="GrowerpMailingListFirstName"
-    localized="Vorname" />
-  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpMailingListFirstName"
-    localized="Prénom" />
-  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpMailingListFirstName"
-    localized="Voornaam" />
-  <moqui.basic.LocalizedMessage locale="es" original="GrowerpMailingListFirstName"
-    localized="Nombre" />
-
-  <moqui.basic.LocalizedMessage locale="default" original="GrowerpMailingListEmail"
-    localized="Email address" />
-  <moqui.basic.LocalizedMessage locale="th" original="GrowerpMailingListEmail"
-    localized="อีเมล" />
-  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpMailingListEmail"
-    localized="电子邮件地址" />
-  <moqui.basic.LocalizedMessage locale="de" original="GrowerpMailingListEmail"
-    localized="E-Mail-Adresse" />
-  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpMailingListEmail"
-    localized="Adresse e-mail" />
-  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpMailingListEmail"
-    localized="E-mailadres" />
-  <moqui.basic.LocalizedMessage locale="es" original="GrowerpMailingListEmail"
-    localized="Correo electrónico" />
-
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailListLink"
     localized="Email list" />
   <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailListLink"
@@ -1621,36 +1591,6 @@ limitations under the License.
     localized="Inschrijven" />
   <moqui.basic.LocalizedMessage locale="es" original="GrowerpMailingListSubscribe"
     localized="Suscribirse" />
-
-  <moqui.basic.LocalizedMessage locale="default" original="GrowerpMailingListThanks"
-    localized="Thank you for subscribing!" />
-  <moqui.basic.LocalizedMessage locale="th" original="GrowerpMailingListThanks"
-    localized="ขอบคุณที่สมัครรับข่าวสาร!" />
-  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpMailingListThanks"
-    localized="感谢您的订阅！" />
-  <moqui.basic.LocalizedMessage locale="de" original="GrowerpMailingListThanks"
-    localized="Vielen Dank für Ihr Abonnement!" />
-  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpMailingListThanks"
-    localized="Merci pour votre abonnement !" />
-  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpMailingListThanks"
-    localized="Bedankt voor je inschrijving!" />
-  <moqui.basic.LocalizedMessage locale="es" original="GrowerpMailingListThanks"
-    localized="¡Gracias por suscribirte!" />
-
-  <moqui.basic.LocalizedMessage locale="default" original="GrowerpMailingListInvalidEmail"
-    localized="Please enter a valid email address" />
-  <moqui.basic.LocalizedMessage locale="th" original="GrowerpMailingListInvalidEmail"
-    localized="กรุณากรอกอีเมลที่ถูกต้อง" />
-  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpMailingListInvalidEmail"
-    localized="请输入有效的电子邮件地址" />
-  <moqui.basic.LocalizedMessage locale="de" original="GrowerpMailingListInvalidEmail"
-    localized="Bitte geben Sie eine gültige E-Mail-Adresse ein" />
-  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpMailingListInvalidEmail"
-    localized="Veuillez saisir une adresse e-mail valide" />
-  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpMailingListInvalidEmail"
-    localized="Vul een geldig e-mailadres in" />
-  <moqui.basic.LocalizedMessage locale="es" original="GrowerpMailingListInvalidEmail"
-    localized="Introduce un correo electrónico válido" />
 
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpMailingListNoThanks"
     localized="No thanks" />

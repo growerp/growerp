@@ -20,7 +20,7 @@
   "websiteObsidianSynch": "Synchroniser Obsidian",
   "websiteObsidianZip": "Fichier Zip Obsidian",
   "websiteMailingListUrl": "URL du formulaire de liste de diffusion",
-  "websiteMailingListUrlHelper": "URL d'action du formulaire de votre fournisseur de liste de diffusion ; si renseignée, les visiteurs de la page d'accueil sont invités à s'abonner",
+  "websiteMailingListUrlHelper": "URL de la page d'inscription de votre fournisseur de liste e-mail ; ouverte dans une fenêtre pop-up depuis le pied de page et lors de la première visite de la page d'accueil",
   "websiteMeasurementId": "ID de mesure",
   "websiteStripeApiKey": "Clé API Stripe",
   "websiteProductCategories": "Catégories de produits",

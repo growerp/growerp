@@ -12,7 +12,7 @@
                     <span class="footer-brand-name">${storeInfo.productStore.storeName!''}</span>
                 </div>
                 <div class="social-links mt-4">
-                    <#if (TwitterUrl!'')?has_content || (FacebookUrl!'')?has_content || (InstagramUrl!'')?has_content || (YouTubeUrl!'')?has_content || (LinkedInUrl!'')?has_content || (SubstackUrl!'')?has_content>
+                    <#if (TwitterUrl!'')?has_content || (FacebookUrl!'')?has_content || (InstagramUrl!'')?has_content || (YouTubeUrl!'')?has_content || (LinkedInUrl!'')?has_content || (SubstackUrl!'')?has_content || (MailingListUrl!'')?has_content>
                     <span class="footer-follow-text d-block mb-3">${l('GrowerpWebsiteFollowUs')}</span>
                     </#if>
                     <#if (TwitterUrl!'')?has_content>
@@ -35,10 +35,10 @@
                         <svg class="footer-icons" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" style="vertical-align:middle"><path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"/></svg>
                     </a>
                     </#if>
+                    <#if (MailingListUrl!'')?has_content>
+                    <a href="#" data-growerp-mailing-list class="footer-a ms-2" style="vertical-align:middle">${l('GrowerpEmailListLink')}</a>
+                    </#if>
                 </div>
-                <#if (MailingListUrl!'')?has_content>
-                <a href="#" data-growerp-mailing-list class="footer-a d-inline-block mt-3">${l('GrowerpEmailListLink')}</a>
-                </#if>
             </div>
 
             <!-- Quick Links -->

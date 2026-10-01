@@ -12,7 +12,7 @@
                     <img src="${logoUrl!'/getLogo'}" alt="Logo" class="${isMarketing?then('h-8 w-8', 'h-[64px] w-[64px]')} object-contain rounded opacity-80">
                     <span class="font-display font-bold text-lg text-on-primary-container">${storeInfo.productStore.storeName!''}</span>
                 </div>
-                <#if (TwitterUrl!'')?has_content || (FacebookUrl!'')?has_content || (InstagramUrl!'')?has_content || (YouTubeUrl!'')?has_content || (LinkedInUrl!'')?has_content || (SubstackUrl!'')?has_content>
+                <#if (TwitterUrl!'')?has_content || (FacebookUrl!'')?has_content || (InstagramUrl!'')?has_content || (YouTubeUrl!'')?has_content || (LinkedInUrl!'')?has_content || (SubstackUrl!'')?has_content || (MailingListUrl!'')?has_content>
                 <span class="block font-label text-xs uppercase tracking-widest text-on-primary-container/50 mb-3">${l('GrowerpWebsiteFollowUs')}</span>
                 <div class="flex items-center gap-4">
                     <#if (TwitterUrl!'')?has_content>
@@ -45,10 +45,10 @@
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"/></svg>
                     </a>
                     </#if>
+                    <#if (MailingListUrl!'')?has_content>
+                    <a href="#" data-growerp-mailing-list class="font-label text-sm text-on-primary-container/70 hover:text-on-primary-container transition-colors underline">${l('GrowerpEmailListLink')}</a>
+                    </#if>
                 </div>
-                </#if>
-                <#if (MailingListUrl!'')?has_content>
-                <a href="#" data-growerp-mailing-list class="inline-block mt-4 font-label text-sm text-on-primary-container/70 hover:text-on-primary-container transition-colors underline">${l('GrowerpEmailListLink')}</a>
                 </#if>
             </div>
 
