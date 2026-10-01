@@ -3,6 +3,17 @@
     // Example: "--dart-define=BACKEND_PORT=9090" in the toolArgs array
     "configurations": [
         {
+            "name": "Insurance linux (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/insurance",
+            "program": "lib/main.dart",
+            "deviceId": "linux",
+            "toolArgs": [
+                "--dart-define=BACKEND_PORT=8080"
+            ]
+        },
+        {
             "name": "Academy linux (lib/main.dart)",
             "type": "dart",
             "request": "launch",
