@@ -3283,6 +3283,9 @@ limitations under the License.
     itemTypeEnumId="ItemMkgtPkgAdj" organizationPartyId="DefaultSettings"/-->
     <mantle.ledger.config.ItemTypeGlAccount glAccountId="41200" direction="O"
         itemTypeEnumId="ItemServiceProduct" organizationPartyId="DefaultSettings" />
+    <!-- insurance commission (enum in GrowerpInsuranceAppSeedData.xml) -->
+    <mantle.ledger.config.ItemTypeGlAccount glAccountId="41900" direction="O"
+        itemTypeEnumId="ItemInsCommission" organizationPartyId="DefaultSettings" />
 
     <!--mantle.ledger.config.ItemTypeGlAccount
     glAccountId="45000" direction="O" itemTypeEnumId="ItemSalesThirdParty"

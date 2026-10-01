@@ -58,12 +58,11 @@ limitations under the License.
     <!-- ====================== commission income ====================== -->
     <!-- sales invoice line to the carrier, booked as other revenue; the mapping is copied
          to a company when its ledger is set up, so existing companies post it only after
-         their own ItemTypeGlAccount row is added -->
+         their own ItemTypeGlAccount row is added. The DefaultSettings ItemTypeGlAccount row
+         is in ZaaGlAccountsInstallData.xml: GL account 41900 is install data, loaded after seed -->
     <moqui.basic.Enumeration description="Insurance Commission" enumId="ItemInsCommission"
         parentEnumId="ItemSales" enumTypeId="ItemType" />
     <moqui.basic.EnumGroupMember enumId="ItemInsCommission" enumGroupEnumId="EngItemsSales" />
-    <mantle.ledger.config.ItemTypeGlAccount glAccountId="41900" direction="O"
-        itemTypeEnumId="ItemInsCommission" organizationPartyId="DefaultSettings" />
 
     <!-- ====================== renewal reminders: daily ====================== -->
     <moqui.service.job.ServiceJob jobName="send_insurance_renewal_reminders"
