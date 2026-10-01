@@ -18,6 +18,10 @@ name: Bootstrap Apple Signing (match)
 on:
   workflow_dispatch:
     inputs:
+      all_apps:
+        description: "All Apps (overrides the app boxes below)"
+        type: boolean
+        default: false
       app_admin:
         description: "Admin App"
         type: boolean
@@ -29,7 +33,7 @@ on:
       app_freelance:
         description: "Freelance App"
         type: boolean
-        default: true
+        default: false
       app_support:
         description: "Support App (android/snap only — no Apple signing needed)"
         type: boolean
@@ -37,15 +41,15 @@ on:
       app_agents:
         description: "Agents App"
         type: boolean
-        default: true
+        default: false
       app_rental:
         description: "Rental App"
         type: boolean
-        default: true
+        default: false
       app_marketing:
         description: "Marketing App"
         type: boolean
-        default: true
+        default: false
       app_academy:
         description: "Academy App"
         type: boolean
@@ -82,18 +86,30 @@ jobs:
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: flutter/release/release_config.json
+          sparse-checkout-cone-mode: false
       - id: set
         run: |
           apps=()
-          [[ "${{ inputs.app_admin }}"     == "true" ]] && apps+=(admin)
-          [[ "${{ inputs.app_hotel }}"     == "true" ]] && apps+=(hotel)
-          [[ "${{ inputs.app_freelance }}" == "true" ]] && apps+=(freelance)
-          [[ "${{ inputs.app_support }}"   == "true" ]] && apps+=(support)
-          [[ "${{ inputs.app_agents }}"    == "true" ]] && apps+=(agents)
-          [[ "${{ inputs.app_rental }}"    == "true" ]] && apps+=(rental)
-          [[ "${{ inputs.app_marketing }}" == "true" ]] && apps+=(marketing)
-          [[ "${{ inputs.app_academy }}"   == "true" ]] && apps+=(academy)
-          [[ "${{ inputs.app_insurance }}" == "true" ]] && apps+=(insurance)
+          if [[ "${{ inputs.all_apps }}" == "true" ]]; then
+            # Every app that ships to an Apple store (central list: storeApps
+            # in flutter/release/release_config.json).
+            mapfile -t apps < <(jq -r '.storeApps | to_entries[]
+              | select(.value | index("ios") or index("macos")) | .key' \
+              flutter/release/release_config.json)
+          else
+            [[ "${{ inputs.app_admin }}"     == "true" ]] && apps+=(admin)
+            [[ "${{ inputs.app_hotel }}"     == "true" ]] && apps+=(hotel)
+            [[ "${{ inputs.app_freelance }}" == "true" ]] && apps+=(freelance)
+            [[ "${{ inputs.app_support }}"   == "true" ]] && apps+=(support)
+            [[ "${{ inputs.app_agents }}"    == "true" ]] && apps+=(agents)
+            [[ "${{ inputs.app_rental }}"    == "true" ]] && apps+=(rental)
+            [[ "${{ inputs.app_marketing }}" == "true" ]] && apps+=(marketing)
+            [[ "${{ inputs.app_academy }}"   == "true" ]] && apps+=(academy)
+            [[ "${{ inputs.app_insurance }}" == "true" ]] && apps+=(insurance)
+          fi
 
           if [[ ${#apps[@]} -eq 0 ]]; then
             echo "No app selected" >&2

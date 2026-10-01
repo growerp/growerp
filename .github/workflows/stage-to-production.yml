@@ -3,23 +3,50 @@ name: Copy Staging to Production
 on:
   workflow_dispatch:
     inputs:
-      app:
-        description: "App to sync (all = every changed service)"
-        required: true
-        default: "all"
-        type: choice
-        options:
-          - all
-          - moqui
-          - admin
-          - support
-          - hotel
-          - freelance
-          - marketing
-          - rental
-          - agents
-          - academy
-          - insurance
+      all_apps:
+        description: "All Apps (overrides the app boxes below)"
+        type: boolean
+        default: false
+      app_admin:
+        description: "Admin App"
+        type: boolean
+        default: false
+      app_hotel:
+        description: "Hotel App"
+        type: boolean
+        default: false
+      app_freelance:
+        description: "Freelance App"
+        type: boolean
+        default: false
+      app_support:
+        description: "Support App"
+        type: boolean
+        default: false
+      app_agents:
+        description: "Agents App"
+        type: boolean
+        default: false
+      app_rental:
+        description: "Rental App"
+        type: boolean
+        default: false
+      app_marketing:
+        description: "Marketing App"
+        type: boolean
+        default: false
+      app_academy:
+        description: "Academy App"
+        type: boolean
+        default: false
+      app_insurance:
+        description: "Insurance App"
+        type: boolean
+        default: false
+      app_moqui:
+        description: "Moqui Backend"
+        type: boolean
+        default: false
 
 concurrency:
   group: stage-to-production
@@ -31,10 +58,50 @@ jobs:
     timeout-minutes: 30
 
     steps:
+      - name: Resolve services
+        id: services
+        env:
+          ALL_APPS: ${{ inputs.all_apps }}
+          APP_MOQUI: ${{ inputs.app_moqui }}
+          APP_ADMIN: ${{ inputs.app_admin }}
+          APP_HOTEL: ${{ inputs.app_hotel }}
+          APP_FREELANCE: ${{ inputs.app_freelance }}
+          APP_SUPPORT: ${{ inputs.app_support }}
+          APP_AGENTS: ${{ inputs.app_agents }}
+          APP_RENTAL: ${{ inputs.app_rental }}
+          APP_MARKETING: ${{ inputs.app_marketing }}
+          APP_ACADEMY: ${{ inputs.app_academy }}
+          APP_INSURANCE: ${{ inputs.app_insurance }}
+        run: |
+          # All Apps = one script run with 'all' (the script picks the services).
+          if [[ "$ALL_APPS" == "true" ]]; then
+            SERVICES="all"
+          else
+            SERVICES=""
+            [[ "$APP_MOQUI" == "true" ]] && SERVICES="${SERVICES}moqui "
+            [[ "$APP_ADMIN" == "true" ]] && SERVICES="${SERVICES}admin "
+            [[ "$APP_HOTEL" == "true" ]] && SERVICES="${SERVICES}hotel "
+            [[ "$APP_FREELANCE" == "true" ]] && SERVICES="${SERVICES}freelance "
+            [[ "$APP_SUPPORT" == "true" ]] && SERVICES="${SERVICES}support "
+            [[ "$APP_AGENTS" == "true" ]] && SERVICES="${SERVICES}agents "
+            [[ "$APP_RENTAL" == "true" ]] && SERVICES="${SERVICES}rental "
+            [[ "$APP_MARKETING" == "true" ]] && SERVICES="${SERVICES}marketing "
+            [[ "$APP_ACADEMY" == "true" ]] && SERVICES="${SERVICES}academy "
+            [[ "$APP_INSURANCE" == "true" ]] && SERVICES="${SERVICES}insurance "
+            SERVICES="${SERVICES% }"
+          fi
+          if [[ -z "$SERVICES" ]]; then echo "No apps selected" >&2; exit 1; fi
+          echo "services=$SERVICES" >> "$GITHUB_OUTPUT"
+
       - name: Sync staging to production on growerp.com
         uses: appleboy/ssh-action@v1
         with:
           host: growerp.com
           username: ${{ secrets.PROD_SSH_USER }}
           key: ${{ secrets.PROD_SSH_KEY }}
-          script: server/swarm/sync-to-prod.sh ${{ inputs.app }} --apply
+          script: |
+            rc=0
+            for svc in ${{ steps.services.outputs.services }}; do
+              server/swarm/sync-to-prod.sh "$svc" --apply || rc=1
+            done
+            exit $rc

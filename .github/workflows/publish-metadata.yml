@@ -15,34 +15,38 @@ name: Publish Metadata to Stores
 on:
   workflow_dispatch:
     inputs:
+      all_apps:
+        description: "All Apps (overrides the app boxes below)"
+        type: boolean
+        default: false
       app_admin:
         description: "Admin App"
         type: boolean
-        default: true
+        default: false
       app_hotel:
         description: "Hotel App"
         type: boolean
-        default: true
+        default: false
       app_freelance:
         description: "Freelance App"
         type: boolean
-        default: true
+        default: false
       app_support:
         description: "Support App"
         type: boolean
-        default: true
+        default: false
       app_agents:
         description: "Agents App"
         type: boolean
-        default: true
+        default: false
       app_rental:
         description: "Rental App"
         type: boolean
-        default: true
+        default: false
       app_marketing:
         description: "Marketing App"
         type: boolean
-        default: true
+        default: false
       app_academy:
         description: "Academy App"
         type: boolean
@@ -51,26 +55,30 @@ on:
         description: "Insurance App"
         type: boolean
         default: false
+      all_stores:
+        description: "All Stores (overrides the store boxes below)"
+        type: boolean
+        default: false
       store_ios:
         description: "iOS App Store"
         type: boolean
-        default: true
+        default: false
       store_macos:
         description: "Mac App Store"
         type: boolean
-        default: true
+        default: false
       store_android:
         description: "Google Play"
         type: boolean
-        default: true
+        default: false
       store_windows:
         description: "Windows Store"
         type: boolean
-        default: true
+        default: false
       store_snap:
         description: "Snap Store"
         type: boolean
-        default: true
+        default: false
 
 concurrency:
   group: store-metadata-upload
@@ -90,25 +98,42 @@ jobs:
       apps: ${{ steps.params.outputs.apps }}
       stores: ${{ steps.params.outputs.stores }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: flutter/release/release_config.json
+          sparse-checkout-cone-mode: false
       - id: params
         run: |
-          APPS=""
-          [[ "${{ inputs.app_admin }}" == "true" ]] && APPS="${APPS}admin,"
-          [[ "${{ inputs.app_hotel }}" == "true" ]] && APPS="${APPS}hotel,"
-          [[ "${{ inputs.app_freelance }}" == "true" ]] && APPS="${APPS}freelance,"
-          [[ "${{ inputs.app_support }}" == "true" ]] && APPS="${APPS}support,"
-          [[ "${{ inputs.app_agents }}" == "true" ]] && APPS="${APPS}agents,"
-          [[ "${{ inputs.app_rental }}" == "true" ]] && APPS="${APPS}rental,"
-          [[ "${{ inputs.app_marketing }}" == "true" ]] && APPS="${APPS}marketing,"
-          [[ "${{ inputs.app_academy }}" == "true" ]] && APPS="${APPS}academy,"
-          [[ "${{ inputs.app_insurance }}" == "true" ]] && APPS="${APPS}insurance,"
+          if [[ "${{ inputs.all_apps }}" == "true" ]]; then
+            APPS=$(jq -r '.storeApps | keys_unsorted | join(",")' flutter/release/release_config.json)
+          else
+            APPS=""
+            [[ "${{ inputs.app_admin }}" == "true" ]] && APPS="${APPS}admin,"
+            [[ "${{ inputs.app_hotel }}" == "true" ]] && APPS="${APPS}hotel,"
+            [[ "${{ inputs.app_freelance }}" == "true" ]] && APPS="${APPS}freelance,"
+            [[ "${{ inputs.app_support }}" == "true" ]] && APPS="${APPS}support,"
+            [[ "${{ inputs.app_agents }}" == "true" ]] && APPS="${APPS}agents,"
+            [[ "${{ inputs.app_rental }}" == "true" ]] && APPS="${APPS}rental,"
+            [[ "${{ inputs.app_marketing }}" == "true" ]] && APPS="${APPS}marketing,"
+            [[ "${{ inputs.app_academy }}" == "true" ]] && APPS="${APPS}academy,"
+            [[ "${{ inputs.app_insurance }}" == "true" ]] && APPS="${APPS}insurance,"
+            APPS="${APPS%,}"
+          fi
           
-          STORES=""
-          [[ "${{ inputs.store_ios }}" == "true" ]] && STORES="${STORES}ios,"
-          [[ "${{ inputs.store_macos }}" == "true" ]] && STORES="${STORES}macos,"
-          [[ "${{ inputs.store_android }}" == "true" ]] && STORES="${STORES}android,"
-          [[ "${{ inputs.store_windows }}" == "true" ]] && STORES="${STORES}windows,"
-          [[ "${{ inputs.store_snap }}" == "true" ]] && STORES="${STORES}snap,"
+          if [[ "${{ inputs.all_stores }}" == "true" ]]; then
+            STORES="ios,macos,android,windows,snap"
+          else
+            STORES=""
+            [[ "${{ inputs.store_ios }}" == "true" ]] && STORES="${STORES}ios,"
+            [[ "${{ inputs.store_macos }}" == "true" ]] && STORES="${STORES}macos,"
+            [[ "${{ inputs.store_android }}" == "true" ]] && STORES="${STORES}android,"
+            [[ "${{ inputs.store_windows }}" == "true" ]] && STORES="${STORES}windows,"
+            [[ "${{ inputs.store_snap }}" == "true" ]] && STORES="${STORES}snap,"
+            STORES="${STORES%,}"
+          fi
+
+          if [[ -z "$APPS" ]]; then echo "No apps selected" >&2; exit 1; fi
+          if [[ -z "$STORES" ]]; then echo "No stores selected" >&2; exit 1; fi
 
           echo "apps=${APPS%,}" >> "$GITHUB_OUTPUT"
           echo "stores=${STORES%,}" >> "$GITHUB_OUTPUT"
