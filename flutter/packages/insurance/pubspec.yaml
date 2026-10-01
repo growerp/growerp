@@ -74,7 +74,7 @@ flutter_launcher_icons:
     icon_size: 256
 
 msix_config:
-  display_name: GrowERP-Insurance
+  display_name: GrowERP Insurance
   description: "Policies, renewals, claims and commissions for insurance agencies."
   publisher: CN=68EEF479-7015-49FC-9C60-33E5A2EB731C
   publisher_display_name: "AntWebsystems Co.,Ltd"
