@@ -401,6 +401,18 @@
                     <a href="https://academy.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
                         <span class="material-symbols-outlined text-[18px]">language</span>
                     </a>
+                    <a href="https://play.google.com/store/apps/details?id=org.growerp.academy" target="_blank" rel="noopener" title="Android" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">android</span>
+                    </a>
+                    <a href="https://apps.apple.com/us/app/id6816830945" target="_blank" rel="noopener" title="iOS &amp; macOS" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">phone_iphone</span>
+                    </a>
+                    <a href="https://snapcraft.io/growerp-academy" target="_blank" rel="noopener" title="Linux" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">terminal</span>
+                    </a>
+                    <a href="https://apps.microsoft.com/detail/9MZ23R5J6BJF" target="_blank" rel="noopener" title="Windows" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">grid_view</span>
+                    </a>
                 </div>
             </div>
 
@@ -419,20 +431,19 @@
                     <a href="https://insurance.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
                         <span class="material-symbols-outlined text-[18px]">language</span>
                     </a>
+                    <a href="https://play.google.com/store/apps/details?id=org.growerp.insurance" target="_blank" rel="noopener" title="Android" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">android</span>
+                    </a>
+                    <a href="https://apps.apple.com/us/app/id6817623020" target="_blank" rel="noopener" title="iOS &amp; macOS" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">phone_iphone</span>
+                    </a>
+                    <a href="https://snapcraft.io/growerp-insurance" target="_blank" rel="noopener" title="Linux" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">terminal</span>
+                    </a>
+                    <a href="https://apps.microsoft.com/detail/9PHGTNGX519Z" target="_blank" rel="noopener" title="Windows" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">grid_view</span>
+                    </a>
                 </div>
-            </div>
-
-            <!-- AI Agents -->
-            <div class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[40px] group-hover:bg-primary/10 transition-all"></div>
-                <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-primary mb-2">
-                    <span class="material-symbols-outlined icon-fill text-[24px]">smart_toy</span>
-                </div>
-                <h3 class="font-display text-xl font-semibold text-on-surface">AI Agents</h3>
-                <p class="text-on-surface-variant leading-relaxed">Two ready-to-run agent teams &mdash; marketing &amp; outreach, and day-to-day operations &mdash; built on Google's Agent Development Kit (ADK) and included with every GrowERP install.</p>
-                <a href="/ai-agents" class="mt-auto pt-4 flex items-center text-primary font-label text-sm font-medium">
-                    Learn more <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
-                </a>
             </div>
         </div>
 
