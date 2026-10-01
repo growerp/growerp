@@ -78,7 +78,7 @@ msix_config:
   description: "Policies, renewals, claims and commissions for insurance agencies."
   publisher: CN=68EEF479-7015-49FC-9C60-33E5A2EB731C
   publisher_display_name: "AntWebsystems Co.,Ltd"
-  identity_name: AntWebsystemsCo.LTD.growerp-insurance
+  identity_name: AntWebsystemsCo.LTD.GrowERPInsurance
   msix_version: 1.19.5.0
   logo_path: "assets/icon/icon.png"
   capabilities: internetClient
