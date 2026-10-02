@@ -42,6 +42,7 @@ it finds at most 5 new candidates per run. A run takes about 2–3 minutes.
 |---|---|
 | A GrowERP version with agent web search (the release after 1.19.8) | — |
 | Your own Gemini API key | **System Setup → AI Settings** |
+| Optional: a Google Calendar booking page | **Booking page URL** in the Google Workspace settings |
 | The agent file `team-partner-recruitment.json` | [moqui-adk/data/agents](../moqui-adk/data/agents/team-partner-recruitment.json) |
 
 The free monthly AI allowance is too small for research agents: a run uses up to 40 AI calls.
@@ -89,7 +90,10 @@ without anything being stored. See
    * *LinkedIn:* open the **LinkedIn send queue**, copy the text, send it from your own
      account and mark it sent.
 4. **Follow the conversation.** Every sent message appears in the lead's **Communications**:
-   emails automatically, LinkedIn messages when you mark them sent.
+   emails automatically, LinkedIn messages when you mark them sent. Each draft ends with
+   *Pick a time for a 20-minute call:* and your booking link (the line is left out when no
+   booking page is set). A Meet call the candidate books there shows up as a *Video call*,
+   with the Gemini meeting notes added after the call.
 5. **When they answer**, set the message to *Responded*. GrowERP then creates an opportunity
    for that same lead in **CRM → Opportunities**.
 

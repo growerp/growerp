@@ -235,8 +235,8 @@ link into the messages.
 - **Create:** press **+**, name the campaign, write the base message, select
   platforms, set daily limits, optionally attach a landing page.
 - **Placeholders:** the message template and the e-mail subject accept
-  `{name}`, `{firstName}`, `{company}`, `{companyName}`, `{title}` and
-  `{landingPageUrl}`, each with an optional fallback after a pipe
+  `{name}`, `{firstName}`, `{company}`, `{companyName}`, `{title}`,
+  `{landingPageUrl}` and `{meetingUrl}`, each with an optional fallback after a pipe
   (`{company|your team}`) used when the field is empty.
 - **The landing page link:** the attached page's public url
   (`https://<your host>/landing/<pseudoId>`) is what `{landingPageUrl}` resolves
@@ -245,6 +245,12 @@ link into the messages.
 - **Execute:** open the campaign and use the execution dialog to run it; messages
   are generated per recipient and platform.
 - **Metrics:** each campaign tracks messages sent, responses and leads generated.
+
+- **The booking link:** `{meetingUrl}` is the *Booking page URL* from the Google
+  Workspace settings (your Google Calendar appointment schedule). Without one, a line
+  holding a plain `{meetingUrl}` is left out of the message. A Google Meet call booked
+  through the page appears in the person's **Communications** as a *Video call*, within
+  15 minutes, and its Gemini notes are added after the call.
 
 ### 4.3 Automation
 
