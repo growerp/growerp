@@ -27,6 +27,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../../common/common.dart';
+import '../../communication/communication.dart';
 import '../company_user.dart';
 import 'user_dialog.dart';
 
@@ -652,6 +653,19 @@ class CompanyFormState extends State<CompanyDialog> {
 
     Widget updateButton = Row(
       children: [
+        if (company.partyId != null && company.pseudoId != null) ...[
+          OutlinedButton(
+            key: const Key('communications'),
+            onPressed: () => showCommunicationListDialog(
+              context,
+              companyPseudoId: company.pseudoId,
+              partyPseudoId: company.pseudoId!,
+              title: '${localizations.communications} ${company.name ?? ''}',
+            ),
+            child: Text(localizations.communications),
+          ),
+          const SizedBox(width: 10),
+        ],
         Expanded(
           child: Visibility(
             visible: isAdmin,

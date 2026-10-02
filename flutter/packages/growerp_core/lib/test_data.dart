@@ -532,6 +532,23 @@ List<User> hotelCustomers = [
   ),
 ];
 
+List<CommunicationEvent> communications = [
+  CommunicationEvent(
+    type: CommunicationEventType.phone,
+    direction: CommunicationDirection.incoming,
+    subject: 'Asked for a quote',
+    body: 'Needs 10 units before the end of the month',
+    note: 'call back on friday',
+  ),
+  CommunicationEvent(
+    type: CommunicationEventType.email,
+    direction: CommunicationDirection.outgoing,
+    subject: 'Quote sent',
+    body: 'Price list attached',
+    note: '',
+  ),
+];
+
 List<Activity> activities = [
   Activity(
     activityName: 'activity1',

@@ -107,6 +107,13 @@ limitations under the License.
         </index>
     </extend-entity>
 
+    <extend-entity entity-name="CommunicationEvent" package="mantle.party.communication">
+        <field name="ownerPartyId" type="id" /><!-- tenant scope -->
+        <index name="COMMEVT_OWNER" unique="false">
+            <index-field name="ownerPartyId" />
+        </index>
+    </extend-entity>
+
     <extend-entity entity-name="SalesOpportunity" package="mantle.sales.opportunity">
         <field name="pseudoId" type="id" />
         <field name="ownerPartyId" type="id">

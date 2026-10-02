@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eecas xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-eca-3.xsd">
+    <!-- Every sent email (send#EmailTemplate and send#DirectEmail both mark the message
+         ES_SENT in a separate transaction) is logged as an AutoEmail CommunicationEvent
+         of its recipient parties. registerOnCommit: the logger runs after that
+         transaction commits, on a worker without a user. -->
+    <eeca id="EmailMessageSent" entity="moqui.basic.email.EmailMessage" on-update="true"
+            get-original-value="true">
+        <condition>
+            <expression>statusId == 'ES_SENT' &amp;&amp; originalValue?.statusId != 'ES_SENT'</expression>
+        </condition>
+        <actions>
+            <script>ec.service.special().name('growerp.100.CommunicationServices100.log#EmailMessageCommEvent')
+                .parameters([emailMessageId: emailMessageId]).registerOnCommit()</script>
+        </actions>
+    </eeca>
+</eecas>

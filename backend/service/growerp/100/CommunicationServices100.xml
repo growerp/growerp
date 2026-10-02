@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!--
+Communication log of persons and companies (mantle CommunicationEvent).
+
+Manual events (Phone, FaceToFace, Letter, Email, Comment, Message) are entered by
+users. Every email the system sends is logged automatically as an AutoEmail event
+(see entity/Communication.eecas.xml); those are read only.
+
+direction is relative to the tenant: 'outgoing' = from us to the party (status
+CeSent), 'incoming' = from the party to us (status CeReceived).
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <service verb="get" noun="CommunicationEvent">
+        <description>A single event, or the events of a person (userPseudoId) or of a
+            company plus all its employees (companyPseudoId), newest first.</description>
+        <in-parameters>
+            <parameter name="communicationEventId" />
+            <parameter name="userPseudoId" />
+            <parameter name="companyPseudoId" />
+            <parameter name="search" />
+            <parameter name="start" default-value="0" type="Integer" />
+            <parameter name="limit" default-value="20" type="Integer" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="communicationEvents" type="List">
+                <parameter name="communicationEvent" type="Map">
+                    <parameter name="communicationEventId" />
+                    <parameter name="type" />
+                    <parameter name="direction" />
+                    <parameter name="statusId" />
+                    <parameter name="entryDate" />
+                    <parameter name="subject" />
+                    <parameter name="body" />
+                    <parameter name="contentType" />
+                    <parameter name="note" />
+                    <parameter name="isAuto" type="Boolean" />
+                    <parameter name="fromPartyPseudoId" />
+                    <parameter name="fromPartyName" />
+                    <parameter name="toPartyPseudoId" />
+                    <parameter name="toPartyName" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="communicationEvents" from="[]" />
+            <if condition="!ownerPartyId">
+                <return error="true" message="No owner found for the logged in user" />
+            </if>
+
+            <set field="partyIds" from="[]" />
+            <if condition="userPseudoId">
+                <entity-find entity-name="mantle.party.Party" list="users" limit="1">
+                    <econdition field-name="pseudoId" from="userPseudoId" />
+                    <econdition field-name="ownerPartyId" />
+                </entity-find>
+                <script>partyIds.addAll(users*.partyId)</script>
+            </if>
+            <if condition="companyPseudoId">
+                <entity-find entity-name="mantle.party.Party" list="companies" limit="1">
+                    <econdition field-name="pseudoId" from="companyPseudoId" />
+                    <econdition field-name="ownerPartyId" />
+                </entity-find>
+                <if condition="companies">
+                    <script>partyIds.add(companies[0].partyId)</script>
+                    <entity-find entity-name="mantle.party.PartyRelationship" list="employeeRels">
+                        <econdition field-name="toPartyId" from="companies[0].partyId" />
+                        <econdition field-name="relationshipTypeEnumId" value="PrtEmployee" />
+                        <date-filter />
+                    </entity-find>
+                    <script>partyIds.addAll(employeeRels*.fromPartyId)</script>
+                </if>
+            </if>
+            <!-- a party filter that matched nothing must not fall back to all events -->
+            <if condition="(userPseudoId || companyPseudoId) &amp;&amp; !partyIds">
+                <return />
+            </if>
+            <if condition="!communicationEventId &amp;&amp; !partyIds">
+                <return error="true"
+                    message="Getting a list of communications requires a user or company" />
+            </if>
+            <if condition="search">
+                <set field="searchString" value="%${search}%" />
+            </if>
+
+            <entity-find entity-name="mantle.party.communication.CommunicationEvent"
+                list="events" offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="communicationEventId" ignore-if-empty="true" />
+                <econditions combine="or">
+                    <econdition field-name="fromPartyId" operator="in" from="partyIds"
+                        ignore-if-empty="true" />
+                    <econdition field-name="toPartyId" operator="in" from="partyIds"
+                        ignore-if-empty="true" />
+                </econditions>
+                <econditions combine="or">
+                    <econdition field-name="subject" operator="like" ignore-case="true"
+                        from="searchString" ignore-if-empty="true" />
+                    <econdition field-name="body" operator="like" ignore-case="true"
+                        from="searchString" ignore-if-empty="true" />
+                    <econdition field-name="note" operator="like" ignore-case="true"
+                        from="searchString" ignore-if-empty="true" />
+                </econditions>
+                <order-by field-name="-entryDate" />
+            </entity-find>
+
+            <script><![CDATA[
+                Map parties = [:]
+                def partyInfo = { String partyId ->
+                    if (!partyId) return null
+                    if (!parties.containsKey(partyId)) {
+                        def pd = ec.entity.find('mantle.party.PartyDetail')
+                            .condition('partyId', partyId).useCache(true).one()
+                        parties[partyId] = [pseudoId: pd?.pseudoId,
+                            name: pd?.organizationName ?: [pd?.firstName, pd?.lastName].findAll().join(' ')]
+                    }
+                    return parties[partyId]
+                }
+                for (event in events) {
+                    communicationEvents.add([
+                        communicationEventId: event.communicationEventId,
+                        type: event.communicationEventTypeId,
+                        direction: event.statusId == 'CeReceived' ? 'incoming' : 'outgoing',
+                        statusId: event.statusId,
+                        entryDate: event.entryDate?.toInstant()?.toString(),
+                        subject: event.subject,
+                        body: event.body,
+                        contentType: event.contentType,
+                        note: event.note,
+                        isAuto: event.emailMessageId != null,
+                        fromPartyPseudoId: partyInfo(event.fromPartyId)?.pseudoId,
+                        fromPartyName: partyInfo(event.fromPartyId)?.name,
+                        toPartyPseudoId: partyInfo(event.toPartyId)?.pseudoId,
+                        toPartyName: partyInfo(event.toPartyId)?.name,
+                    ])
+                }
+            ]]></script>
+            <if condition="communicationEventId &amp;&amp; !communicationEvents">
+                <return error="true"
+                    message="Communication ${communicationEventId} not found" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="create" noun="CommunicationEvent">
+        <description>Log a manual communication with a person or company: the other
+            side is the logged in user.</description>
+        <in-parameters>
+            <parameter name="communicationEvent" type="Map" required="true">
+                <parameter name="partyPseudoId" required="true" />
+                <parameter name="type" required="true" />
+                <parameter name="direction" />
+                <parameter name="entryDate" type="Timestamp" />
+                <parameter name="subject" />
+                <parameter name="body" />
+                <parameter name="note" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="communicationEvent" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="!ownerPartyId">
+                <return error="true" message="No owner found for the logged in user" />
+            </if>
+            <if condition="communicationEvent.type == 'AutoEmail'">
+                <return error="true"
+                    message="System emails are logged automatically and cannot be entered" />
+            </if>
+            <entity-find-one entity-name="mantle.party.communication.CommunicationEventType"
+                value-field="eventType" cache="true">
+                <field-map field-name="communicationEventTypeId" from="communicationEvent.type" />
+            </entity-find-one>
+            <if condition="!eventType">
+                <return error="true"
+                    message="Unknown communication type: ${communicationEvent.type}" />
+            </if>
+            <entity-find entity-name="mantle.party.Party" list="targets" limit="1">
+                <econdition field-name="pseudoId" from="communicationEvent.partyPseudoId" />
+                <econdition field-name="ownerPartyId" />
+            </entity-find>
+            <if condition="!targets">
+                <return error="true"
+                    message="Party ${communicationEvent.partyPseudoId} not found" />
+            </if>
+
+            <set field="incoming" from="communicationEvent.direction == 'incoming'" />
+            <service-call name="create#mantle.party.communication.CommunicationEvent"
+                out-map="context"
+                in-map="[ownerPartyId: ownerPartyId,
+                    communicationEventTypeId: eventType.communicationEventTypeId,
+                    contactMechTypeEnumId: eventType.contactMechTypeEnumId,
+                    statusId: incoming ? 'CeReceived' : 'CeSent',
+                    fromPartyId: incoming ? targets[0].partyId : userPartyId,
+                    toPartyId: incoming ? userPartyId : targets[0].partyId,
+                    entryDate: communicationEvent.entryDate ?: ec.user.nowTimestamp,
+                    subject: communicationEvent.subject,
+                    body: communicationEvent.body,
+                    contentType: 'text/plain',
+                    note: communicationEvent.note]" />
+            <service-call name="growerp.100.CommunicationServices100.get#CommunicationEvent"
+                in-map="[communicationEventId: communicationEventId]" out-map="result" />
+            <set field="communicationEvent" from="result.communicationEvents[0]" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="CommunicationEvent">
+        <description>Update a manual communication; system emails are read only.</description>
+        <in-parameters>
+            <parameter name="communicationEvent" type="Map" required="true">
+                <parameter name="communicationEventId" required="true" />
+                <parameter name="type" />
+                <parameter name="direction" />
+                <parameter name="entryDate" type="Timestamp" />
+                <parameter name="subject" />
+                <parameter name="body" />
+                <parameter name="note" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="communicationEvent" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="mantle.party.communication.CommunicationEvent"
+                list="events" for-update="true" limit="1">
+                <econdition field-name="communicationEventId"
+                    from="communicationEvent.communicationEventId" />
+                <econdition field-name="ownerPartyId" />
+            </entity-find>
+            <if condition="!ownerPartyId || !events">
+                <return error="true"
+                    message="Communication ${communicationEvent.communicationEventId} not found" />
+            </if>
+            <set field="event" from="events[0]" />
+            <if condition="event.emailMessageId">
+                <return error="true" message="System emails are read only" />
+            </if>
+            <if condition="communicationEvent.type &amp;&amp;
+                    communicationEvent.type != event.communicationEventTypeId">
+                <if condition="communicationEvent.type == 'AutoEmail'">
+                    <return error="true" message="Cannot change a communication to a system email" />
+                </if>
+                <entity-find-one entity-name="mantle.party.communication.CommunicationEventType"
+                    value-field="eventType" cache="true">
+                    <field-map field-name="communicationEventTypeId" from="communicationEvent.type" />
+                </entity-find-one>
+                <if condition="!eventType">
+                    <return error="true"
+                        message="Unknown communication type: ${communicationEvent.type}" />
+                </if>
+                <set field="event.communicationEventTypeId" from="eventType.communicationEventTypeId" />
+                <set field="event.contactMechTypeEnumId" from="eventType.contactMechTypeEnumId" />
+            </if>
+            <!-- direction change: swap the parties. Status set directly, a mantle
+                 status flow transition CeSent to CeReceived does not exist -->
+            <if condition="communicationEvent.direction &amp;&amp;
+                    (communicationEvent.direction == 'incoming') != (event.statusId == 'CeReceived')">
+                <set field="oldFromPartyId" from="event.fromPartyId" />
+                <set field="event.fromPartyId" from="event.toPartyId" />
+                <set field="event.toPartyId" from="oldFromPartyId" />
+                <set field="event.statusId"
+                    from="communicationEvent.direction == 'incoming' ? 'CeReceived' : 'CeSent'" />
+            </if>
+            <if condition="communicationEvent.entryDate">
+                <set field="event.entryDate" from="communicationEvent.entryDate" />
+            </if>
+            <set field="event.subject" from="communicationEvent.subject" />
+            <set field="event.body" from="communicationEvent.body" />
+            <set field="event.note" from="communicationEvent.note" />
+            <entity-update value-field="event" />
+            <service-call name="growerp.100.CommunicationServices100.get#CommunicationEvent"
+                in-map="[communicationEventId: event.communicationEventId]" out-map="result" />
+            <set field="communicationEvent" from="result.communicationEvents[0]" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="CommunicationEvent">
+        <description>Delete a manual communication; system emails are read only.</description>
+        <in-parameters>
+            <parameter name="communicationEvent" type="Map" required="true">
+                <parameter name="communicationEventId" required="true" />
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="communicationEvent" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="mantle.party.communication.CommunicationEvent"
+                list="events" for-update="true" limit="1">
+                <econdition field-name="communicationEventId"
+                    from="communicationEvent.communicationEventId" />
+                <econdition field-name="ownerPartyId" />
+            </entity-find>
+            <if condition="!ownerPartyId || !events">
+                <return error="true"
+                    message="Communication ${communicationEvent.communicationEventId} not found" />
+            </if>
+            <set field="event" from="events[0]" />
+            <if condition="event.emailMessageId">
+                <return error="true" message="System emails are read only" />
+            </if>
+            <service-call name="growerp.100.CommunicationServices100.get#CommunicationEvent"
+                in-map="[communicationEventId: event.communicationEventId]" out-map="result" />
+            <set field="communicationEvent" from="result.communicationEvents[0]" />
+            <entity-delete value-field="event" />
+        </actions>
+    </service>
+
+    <service verb="log" noun="EmailMessageCommEvent" authenticate="false">
+        <description>Log a sent EmailMessage as an AutoEmail CommunicationEvent of every
+            recipient party. Called by the EmailMessageSent EECA after commit, on a
+            worker thread without a user.
+
+            Recipient: the party of toUserId (UserAccount.partyId) when set, otherwise
+            the parties whose email address (ContactMech or UserAccount.emailAddress)
+            matches a To/CC address. Those are limited
+            to the owner of the message: the sending EmailServer (a tenant server id is
+            its ownerPartyId), else the owner of the sending user, else the single owner
+            all matches share. An unresolved owner logs nothing, so a message never
+            shows up in another tenant. Idempotent per (emailMessageId, toPartyId).</description>
+        <in-parameters>
+            <parameter name="emailMessageId" required="true" />
+        </in-parameters>
+        <actions>
+            <script>ec.artifactExecution.disableAuthz()</script>
+            <entity-find-one entity-name="moqui.basic.email.EmailMessage" value-field="em" />
+            <if condition="!em || em.statusId != 'ES_SENT'">
+                <return />
+            </if>
+
+            <set field="ownerHint"
+                from="em.emailServerId &amp;&amp; em.emailServerId != 'SYSTEM' ? em.emailServerId : null" />
+            <if condition="em.fromUserId">
+                <entity-find-one entity-name="moqui.security.UserAccount" value-field="fromUser">
+                    <field-map field-name="userId" from="em.fromUserId" />
+                </entity-find-one>
+                <set field="senderPartyId" from="fromUser?.partyId" />
+                <if condition="!ownerHint &amp;&amp; senderPartyId">
+                    <entity-find-one entity-name="mantle.party.Party" value-field="senderParty">
+                        <field-map field-name="partyId" from="senderPartyId" />
+                    </entity-find-one>
+                    <set field="ownerHint" from="senderParty?.ownerPartyId" />
+                </if>
+            </if>
+
+            <!-- candidates: [partyId, ownerPartyId] -->
+            <set field="candidates" from="[]" />
+            <if condition="em.toUserId">
+                <then>
+                    <entity-find-one entity-name="moqui.security.UserAccount" value-field="toUser">
+                        <field-map field-name="userId" from="em.toUserId" />
+                    </entity-find-one>
+                    <if condition="toUser?.partyId">
+                        <entity-find-one entity-name="mantle.party.Party" value-field="toParty">
+                            <field-map field-name="partyId" from="toUser.partyId" />
+                        </entity-find-one>
+                        <!-- the user is known: its own owner, no hint needed -->
+                        <set field="ownerHint" from="toParty?.ownerPartyId" />
+                        <script>if (toParty) candidates.add([partyId: toParty.partyId,
+                            ownerPartyId: toParty.ownerPartyId])</script>
+                    </if>
+                </then>
+                <else>
+                    <script><![CDATA[
+                        // "Name <a@b.c>, d@e.f" -> [a@b.c, d@e.f]
+                        addresses = ((em.toAddresses ?: '') + ',' + (em.ccAddresses ?: ''))
+                            .split(/[,;]/)
+                            .collect { String a -> def m = a =~ /<([^>]+)>/; (m.find() ? m.group(1) : a).trim() }
+                            .findAll { it.contains('@') }
+                            .unique { it.toLowerCase() }
+                    ]]></script>
+                    <iterate list="addresses" entry="address">
+                        <set field="addressParties" from="[]" />
+                        <entity-find entity-name="mantle.party.contact.PartyContactMechInfo"
+                            list="pcmList">
+                            <econdition field-name="contactMechTypeEnumId" value="CmtEmailAddress" />
+                            <econdition field-name="infoString" from="address" ignore-case="true" />
+                            <date-filter />
+                        </entity-find>
+                        <iterate list="pcmList" entry="pcm">
+                            <entity-find-one entity-name="mantle.party.Party" value-field="party">
+                                <field-map field-name="partyId" from="pcm.partyId" />
+                            </entity-find-one>
+                            <script>if (party) addressParties.add(party)</script>
+                        </iterate>
+                        <!-- users with a login keep their email on the UserAccount only -->
+                        <entity-find entity-name="moqui.security.UserAccount" list="accounts">
+                            <econdition field-name="emailAddress" from="address" ignore-case="true" />
+                            <econdition field-name="partyId" operator="is-not-null" />
+                        </entity-find>
+                        <iterate list="accounts" entry="account">
+                            <entity-find-one entity-name="mantle.party.Party" value-field="party">
+                                <field-map field-name="partyId" from="account.partyId" />
+                            </entity-find-one>
+                            <script>if (party) addressParties.add(party)</script>
+                        </iterate>
+                        <!-- an address shared by a person and a company (often its own
+                             employer) is the person's: log it once, not on both -->
+                        <script><![CDATA[
+                            def persons = addressParties.findAll { it.partyTypeEnumId == 'PtyPerson' }
+                            for (party in (persons ?: addressParties))
+                                candidates.add([partyId: party.partyId, ownerPartyId: party.ownerPartyId])
+                        ]]></script>
+                    </iterate>
+                </else>
+            </if>
+
+            <if condition="!ownerHint">
+                <set field="owners" from="candidates*.ownerPartyId.unique()" />
+                <if condition="owners.size() != 1">
+                    <if condition="candidates">
+                        <log level="info"
+                            message="EmailMessage ${emailMessageId} not logged: recipients belong to owners ${owners}" />
+                    </if>
+                    <return />
+                </if>
+                <set field="ownerHint" from="owners[0]" />
+            </if>
+            <set field="recipientPartyIds"
+                from="candidates.findAll { it.ownerPartyId == ownerHint }*.partyId.unique()" />
+
+            <iterate list="recipientPartyIds" entry="recipientPartyId">
+                <entity-find entity-name="mantle.party.communication.CommunicationEvent"
+                    list="existing" limit="1">
+                    <econdition field-name="emailMessageId" from="em.emailMessageId" />
+                    <econdition field-name="toPartyId" from="recipientPartyId" />
+                </entity-find>
+                <if condition="!existing">
+                    <service-call name="create#mantle.party.communication.CommunicationEvent"
+                        in-map="[ownerPartyId: ownerHint,
+                            communicationEventTypeId: 'AutoEmail',
+                            contactMechTypeEnumId: 'CmtEmailAddress',
+                            statusId: 'CeSent',
+                            fromPartyId: senderPartyId ?: ownerHint,
+                            toPartyId: recipientPartyId,
+                            entryDate: em.sentDate ?: ec.user.nowTimestamp,
+                            subject: em.subject,
+                            body: em.body ?: em.bodyText,
+                            contentType: em.body ? (em.contentType ?: 'text/html') : 'text/plain',
+                            emailMessageId: em.emailMessageId]" />
+                </if>
+            </iterate>
+        </actions>
+    </service>
+</services>

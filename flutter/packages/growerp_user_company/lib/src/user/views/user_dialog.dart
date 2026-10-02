@@ -31,6 +31,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:flutter/rendering.dart';
 
 import '../../common/address_dialog.dart';
+import '../../communication/communication.dart';
 import '../../common/lead_status_name.dart';
 import '../../common/payment_method_dialog.dart';
 import '../../company/views/company_dialog.dart';
@@ -942,6 +943,21 @@ class UserDialogState extends State<UserDialogStateFull> {
           : const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 10),
       child: Row(
         children: [
+          if (widget.user.partyId != null && widget.user.pseudoId != null) ...[
+            OutlinedButton(
+              key: const Key('communications'),
+              onPressed: () => showCommunicationListDialog(
+                context,
+                userPseudoId: widget.user.pseudoId,
+                partyPseudoId: widget.user.pseudoId!,
+                title:
+                    '${localizations.communications} '
+                    '${widget.user.firstName ?? ''} ${widget.user.lastName ?? ''}',
+              ),
+              child: Text(localizations.communications),
+            ),
+            const SizedBox(width: 10),
+          ],
           if (widget.user.partyId != null)
             OutlinedButton(
               style: ButtonStyle(

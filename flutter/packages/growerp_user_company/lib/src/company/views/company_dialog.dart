@@ -737,6 +737,19 @@ class CompanyFormState extends State<CompanyDialog> {
 
     Widget updateButton = Row(
       children: [
+        if (company.partyId != null && company.pseudoId != null) ...[
+          OutlinedButton(
+            key: const Key('communications'),
+            onPressed: () => showCommunicationListDialog(
+              context,
+              companyPseudoId: company.pseudoId,
+              partyPseudoId: company.pseudoId!,
+              title: '${_localizations.communications} ${company.name ?? ''}',
+            ),
+            child: Text(_localizations.communications),
+          ),
+          const SizedBox(width: 10),
+        ],
         Expanded(
           child: Visibility(
             visible: isAdmin,

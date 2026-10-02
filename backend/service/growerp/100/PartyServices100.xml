@@ -2168,6 +2168,8 @@ limitations under the License.
                         async="true">
                         <field-map field-name="emailTemplateId" from="templateId" />
                         <field-map field-name="toAddresses" from="user.email" />
+                        <!-- links the sent mail to the user's communications -->
+                        <field-map field-name="toUserId" from="userAccount.userId" />
                         <!-- userLocale, not locale: sent async, so the sending thread's
                              ec.user.locale is the system default, not the registrant's -->
                         <field-map field-name="bodyParameters"
@@ -3229,6 +3231,7 @@ limitations under the License.
                         async="true">
                         <field-map field-name="emailTemplateId" value="WELCOME" />
                         <field-map field-name="toAddresses" from="user.email" />
+                        <field-map field-name="toUserId" from="userAccount.userId" />
                         <field-map field-name="bodyParameters"
                             from="[application: applicationId? applicationId.substring(3) : 'Admin',
                                     newPassword:newPassword, firstName: user.firstName,

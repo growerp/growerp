@@ -307,6 +307,17 @@ abstract class Activities with _$Activities {
 }
 
 @freezed
+abstract class CommunicationEvents with _$CommunicationEvents {
+  factory CommunicationEvents({
+    @Default([]) List<CommunicationEvent> communicationEvents,
+  }) = _CommunicationEvents;
+  CommunicationEvents._();
+
+  factory CommunicationEvents.fromJson(Map<String, dynamic> json) =>
+      _$CommunicationEventsFromJson(json);
+}
+
+@freezed
 abstract class Opportunities with _$Opportunities {
   factory Opportunities({@Default([]) List<Opportunity> opportunities}) =
       _Opportunities;

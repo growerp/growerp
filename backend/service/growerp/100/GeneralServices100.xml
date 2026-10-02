@@ -3035,6 +3035,10 @@ limitations under the License.
             </parameter>
             <parameter name="attachmentFileName"/>
             <parameter name="attachmentContentType" default-value="application/octet-stream"/>
+            <parameter name="toUserId">
+                <description>Optional recipient user: links the mail to that user's party in
+                    the communications log without matching the email address.</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="emailMessageId"/>
@@ -3059,7 +3063,7 @@ limitations under the License.
                 transaction="force-new"
                 in-map="[statusId: 'ES_READY', emailServerId: emailServerId,
                     fromAddress: fromAddress, fromName: fromName,
-                    toAddresses: toAddresses, subject: subject,
+                    toAddresses: toAddresses, toUserId: toUserId, subject: subject,
                     body: bodyHtml, bodyText: bodyText,
                     contentType: bodyHtml ? 'text/html' : 'text/plain',
                     attachmentFileName: attachmentFileName,
@@ -3094,6 +3098,9 @@ limitations under the License.
             <parameter name="sendDescription" default-value="email">
                 <description>What is being sent, used in the warning message.</description>
             </parameter>
+            <parameter name="toUserId">
+                <description>Optional recipient user, see send#DirectEmail.</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="emailSent" type="Boolean"/>
@@ -3112,7 +3119,7 @@ limitations under the License.
             </if>
             <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true"
                 in-map="[emailTemplateId: emailTemplateId, toAddresses: toAddresses,
-                    bodyParameters: bodyParameters]"/>
+                    toUserId: toUserId, bodyParameters: bodyParameters]"/>
             <set field="emailSent" from="true"/>
         </actions>
     </service>

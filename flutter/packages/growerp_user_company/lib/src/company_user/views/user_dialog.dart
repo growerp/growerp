@@ -29,6 +29,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../common/common.dart';
+import '../../communication/communication.dart';
 import '../../company/bloc/company_bloc.dart';
 import '../bloc/company_user_bloc.dart';
 import 'company_dialog.dart';
@@ -767,6 +768,21 @@ class UserDialogState extends State<UserDialog> {
     ];
     Widget updateButton = Row(
       children: [
+        if (widget.user.partyId != null && widget.user.pseudoId != null) ...[
+          OutlinedButton(
+            key: const Key('communications'),
+            onPressed: () => showCommunicationListDialog(
+              context,
+              userPseudoId: widget.user.pseudoId,
+              partyPseudoId: widget.user.pseudoId!,
+              title:
+                  '${_localizations.communications} '
+                  '${widget.user.firstName ?? ''} ${widget.user.lastName ?? ''}',
+            ),
+            child: Text(_localizations.communications),
+          ),
+          const SizedBox(width: 10),
+        ],
         if (widget.user.partyId != null)
           OutlinedButton(
             style: ButtonStyle(

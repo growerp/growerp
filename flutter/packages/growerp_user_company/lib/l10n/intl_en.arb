@@ -1106,5 +1106,101 @@
   "leadStatusConverted": "Converted",
   "@leadStatusConverted": {
     "description": "Lead status: converted into a customer"
+  },
+  "communications": "Communications",
+  "@communications": {
+    "description": "Title of the communications log of a person or company"
+  },
+  "communication": "Communication",
+  "@communication": {
+    "description": "Communications log: Communication"
+  },
+  "commNew": "New communication",
+  "@commNew": {
+    "description": "Communications log: New communication"
+  },
+  "commDate": "Date",
+  "@commDate": {
+    "description": "Communications log: Date"
+  },
+  "commType": "Type",
+  "@commType": {
+    "description": "Communications log: Type"
+  },
+  "commDirection": "Direction",
+  "@commDirection": {
+    "description": "Communications log: Direction"
+  },
+  "commIncoming": "Incoming",
+  "@commIncoming": {
+    "description": "Communication from the party to us"
+  },
+  "commOutgoing": "Outgoing",
+  "@commOutgoing": {
+    "description": "Communication from us to the party"
+  },
+  "commSubject": "Subject",
+  "@commSubject": {
+    "description": "Communications log: Subject"
+  },
+  "commBody": "Content",
+  "@commBody": {
+    "description": "Communications log: Content"
+  },
+  "commNote": "Note",
+  "@commNote": {
+    "description": "Communications log: Note"
+  },
+  "commWith": "With",
+  "@commWith": {
+    "description": "Column header: the other party of a communication"
+  },
+  "commAutoEmailReadOnly": "System email: read only",
+  "@commAutoEmailReadOnly": {
+    "description": "Communications log: System email: read only"
+  },
+  "commNotFound": "No communications found",
+  "@commNotFound": {
+    "description": "Communications log: No communications found"
+  },
+  "commAddSuccess": "Communication added",
+  "@commAddSuccess": {
+    "description": "Communications log: Communication added"
+  },
+  "commUpdateSuccess": "Communication updated",
+  "@commUpdateSuccess": {
+    "description": "Communications log: Communication updated"
+  },
+  "commDeleteSuccess": "Communication deleted",
+  "@commDeleteSuccess": {
+    "description": "Communications log: Communication deleted"
+  },
+  "commTypePhone": "Phone",
+  "@commTypePhone": {
+    "description": "Communications log: Phone"
+  },
+  "commTypeEmail": "Email",
+  "@commTypeEmail": {
+    "description": "Communications log: Email"
+  },
+  "commTypeFaceToFace": "Meeting",
+  "@commTypeFaceToFace": {
+    "description": "Communication type: a face to face meeting"
+  },
+  "commTypeLetter": "Letter",
+  "@commTypeLetter": {
+    "description": "Communications log: Letter"
+  },
+  "commTypeComment": "Comment",
+  "@commTypeComment": {
+    "description": "Communications log: Comment"
+  },
+  "commTypeMessage": "Message",
+  "@commTypeMessage": {
+    "description": "Communications log: Message"
+  },
+  "commTypeAutoEmail": "System email",
+  "@commTypeAutoEmail": {
+    "description": "Communication type: email sent automatically by the system"
   }
 }

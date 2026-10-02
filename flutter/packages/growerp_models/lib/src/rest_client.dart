@@ -1179,6 +1179,32 @@ abstract class RestClient {
   @PATCH("rest/s1/growerp/100/Activity")
   Future<Activity> updateActivity({@Field() required Activity activity});
 
+  // communications of persons and companies
+  @GET("rest/s1/growerp/100/CommunicationEvent")
+  Future<CommunicationEvents> getCommunicationEvents({
+    @Query('communicationEventId') String? communicationEventId,
+    @Query('userPseudoId') String? userPseudoId,
+    @Query('companyPseudoId') String? companyPseudoId,
+    @Query('search') String? searchString,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @POST("rest/s1/growerp/100/CommunicationEvent")
+  Future<CommunicationEvent> createCommunicationEvent({
+    @Field() required CommunicationEvent communicationEvent,
+  });
+
+  @PATCH("rest/s1/growerp/100/CommunicationEvent")
+  Future<CommunicationEvent> updateCommunicationEvent({
+    @Field() required CommunicationEvent communicationEvent,
+  });
+
+  @DELETE("rest/s1/growerp/100/CommunicationEvent")
+  Future<CommunicationEvent> deleteCommunicationEvent({
+    @Field() required CommunicationEvent communicationEvent,
+  });
+
   // time entry
   @POST("rest/s1/growerp/100/TimeEntry")
   Future<TimeEntry> createTimeEntry({@Field() required TimeEntry timeEntry});
