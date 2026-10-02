@@ -53,6 +53,12 @@
              GrowERP support (AdkCatalogPromotionView, promote#AgentToCatalog) ever queries
              across tenants by this flag; it is never visible cross-tenant otherwise. -->
         <field name="catalogNominated"   type="text-indicator"/>
+        <!-- Shared catalog ("_NA_" rows) only. catalogPublished: N → hidden from tenants'
+             function catalog and the public website list (draft); null/Y → published.
+             catalogCategory: grouping label on the picker and the website (Marketing,
+             Operations, Sales, ...). -->
+        <field name="catalogPublished"   type="text-indicator"/>
+        <field name="catalogCategory"    type="text-short"/>
     </entity>
 
     <!-- Phase 4: members of a coordinator/workflow agent's team. A coordinator delegates to

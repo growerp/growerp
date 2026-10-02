@@ -3,18 +3,31 @@
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
 
     <service verb="get" noun="AdkAgentConfig">
-        <in-parameters><parameter name="search"/></in-parameters>
+        <in-parameters>
+            <parameter name="search"/>
+            <parameter name="catalog" type="Boolean" default="false"/>
+        </in-parameters>
         <out-parameters>
             <parameter name="adkAgentConfigs" type="List"/>
         </out-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="context"/>
+            <!-- catalog=true: support maintains the shared "_NA_" catalog instead of its own agents -->
+            <if condition="catalog">
+                <if condition="!ec.user.isInGroup('GROWERP_M_SYSTEM')">
+                    <return error="true" message="Only GrowERP support may maintain the shared agent catalog."/>
+                </if>
+                <set field="ownerPartyId" value="_NA_"/>
+            </if>
             <if condition="!ownerPartyId">
                 <return error="true" message="Cannot determine your company, please log in again."/>
             </if>
             <entity-find entity-name="moqui.adk.AdkAgentConfig" list="cfgList">
                 <econdition field-name="ownerPartyId" from="ownerPartyId"/>
+                <!-- same internal teams get#AgentCatalog never offers to tenants -->
+                <econdition field-name="teamName" operator="not-in" from="['Operations Assistant', 'System Internal']"
+                    or-null="true" ignore="!catalog"/>
                 <econdition field-name="agentName" operator="like" ignore-case="true"
                     from="search ? ('%' + search + '%') : null" ignore-if-empty="true"/>
                 <order-by field-name="agentName"/>
@@ -45,6 +58,8 @@
                     maxLlmCalls       : cfg.maxLlmCalls,
                     teamName          : cfg.teamName,
                     catalogNominated  : cfg.catalogNominated == 'Y',
+                    catalogPublished  : cfg.catalogPublished != 'N',
+                    catalogCategory   : cfg.catalogCategory,
                 ]"/>
                 <script>adkAgentConfigs.add(cfgOut)</script>
             </iterate>
@@ -156,6 +171,9 @@
             <parameter name="loopMaxIterations" type="Integer"/>
             <parameter name="maxLlmCalls" type="Integer"/>
             <parameter name="teamName"/>
+            <parameter name="catalog" type="Boolean" default="false"/>
+            <parameter name="catalogPublished" type="Boolean"/>
+            <parameter name="catalogCategory"/>
         </in-parameters>
         <out-parameters>
             <parameter name="adkAgentConfig" type="Map"/>
@@ -163,8 +181,18 @@
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="context"/>
+            <!-- catalog=true: support maintains the shared "_NA_" catalog instead of its own agents -->
+            <if condition="catalog">
+                <if condition="!ec.user.isInGroup('GROWERP_M_SYSTEM')">
+                    <return error="true" message="Only GrowERP support may maintain the shared agent catalog."/>
+                </if>
+                <set field="ownerPartyId" value="_NA_"/>
+            </if>
             <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="existing"
                 auto-field-map="[adkAgentConfigId: adkAgentConfigId]"/>
+            <if condition="catalog &amp;&amp; existing?.ownerPartyId != '_NA_'">
+                <return error="true" message="Agent ${adkAgentConfigId} is not in the shared catalog."/>
+            </if>
             <service-call name="AdkServices100.check#AdkAgentConfig" out-map="chk"
                 in-map="[adkAgentConfigId: adkAgentConfigId, instruction: instruction, schedulePrompt: schedulePrompt, llmProvider: llmProvider,
                          toolMode: toolMode, serviceAllowlist: serviceAllowlist, writePolicy: writePolicy,
@@ -189,7 +217,9 @@
                           websiteChat: websiteChat ? 'Y' : 'N',
                           webSearch: webSearch ? 'Y' : 'N',
                           agentRole: agentRole, orchestrationType: orchestrationType,
-                          loopMaxIterations: loopMaxIterations, maxLlmCalls: maxLlmCalls, teamName: teamName]"/>
+                          loopMaxIterations: loopMaxIterations, maxLlmCalls: maxLlmCalls, teamName: teamName,
+                          catalogPublished: (catalog &amp;&amp; catalogPublished != null) ? (catalogPublished ? 'Y' : 'N') : null,
+                          catalogCategory: catalog ? catalogCategory : null]"/>
             <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
                 auto-field-map="[adkAgentConfigId: adkAgentConfigId]"/>
             <set field="adkAgentConfig" from="[
@@ -216,6 +246,8 @@
                 loopMaxIterations : cfg.loopMaxIterations,
                 maxLlmCalls       : cfg.maxLlmCalls,
                 teamName          : cfg.teamName,
+                catalogPublished  : cfg.catalogPublished != 'N',
+                catalogCategory   : cfg.catalogCategory,
             ]"/>
         </actions>
     </service>
@@ -223,9 +255,17 @@
     <service verb="delete" noun="AdkAgentConfig" transaction="force-new">
         <in-parameters>
             <parameter name="adkAgentConfigId" required="true"/>
+            <parameter name="catalog" type="Boolean" default="false"/>
         </in-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <!-- catalog=true: support maintains the shared "_NA_" catalog instead of its own agents -->
+            <if condition="catalog">
+                <if condition="!ec.user.isInGroup('GROWERP_M_SYSTEM')">
+                    <return error="true" message="Only GrowERP support may maintain the shared agent catalog."/>
+                </if>
+                <set field="ownerPartyId" value="_NA_"/>
+            </if>
             <if condition="!ownerPartyId">
                 <return error="true" message="Cannot determine your company, please log in again."/>
             </if>
@@ -253,6 +293,18 @@
                 <econdition field-name="jobName" from="jobName"/>
             </entity-find>
             <iterate list="jobs" entry="j"><entity-delete value-field="j"/></iterate>
+            <if condition="catalog">
+                <!-- catalog templates carry team/MCP links; tenant copies are independent rows -->
+                <entity-delete-by-condition entity-name="moqui.adk.AdkAgentTeamMember">
+                    <econditions combine="or">
+                        <econdition field-name="coordinatorConfigId" from="adkAgentConfigId"/>
+                        <econdition field-name="memberConfigId" from="adkAgentConfigId"/>
+                    </econditions>
+                </entity-delete-by-condition>
+                <entity-delete-by-condition entity-name="moqui.adk.AdkAgentMcpServer">
+                    <econdition field-name="configId" from="adkAgentConfigId"/>
+                </entity-delete-by-condition>
+            </if>
             <entity-delete value-field="cfg"/>
             <!-- unload only this agent: destroy() would tear down the ADK runtime for every
                  tenant in this JVM and leave it shut down until a restart -->
@@ -309,6 +361,12 @@
             <if condition="!src || src.catalogNominated != 'Y'">
                 <return error="true" message="Agent ${adkAgentConfigId} is not nominated for the catalog."/>
             </if>
+            <!-- a first promotion lands unpublished: support sets its category and
+                 publishes it in the catalog Maintain tab; a re-promote keeps both -->
+            <entity-find entity-name="moqui.adk.AdkAgentConfig" list="already" limit="1">
+                <econdition field-name="ownerPartyId" value="_NA_"/>
+                <econdition field-name="agentName" from="src.agentName"/>
+            </entity-find>
             <!-- upsert by (ownerPartyId='_NA_', agentName): safe to re-promote after edits -->
             <service-call name="AdkServices.update#AgentConfig" out-map="promoteOut"
                 in-map="[ownerPartyId: '_NA_',
@@ -320,7 +378,8 @@
                     writePolicy: src.writePolicy, websiteChat: src.websiteChat,
                     webSearch: src.webSearch,
                     agentRole: src.agentRole, orchestrationType: src.orchestrationType,
-                    loopMaxIterations: src.loopMaxIterations, maxLlmCalls: src.maxLlmCalls, teamName: src.teamName]"/>
+                    loopMaxIterations: src.loopMaxIterations, maxLlmCalls: src.maxLlmCalls, teamName: src.teamName,
+                    catalogPublished: already ? null : 'N']"/>
             <!-- explicitly NOT copied: apiKey, agentPartyId, scheduleChatRoomId,
                  approvalChatRoomId, catalogNominated — all tenant-specific or must
                  self-reference at clone time per the existing template convention -->
@@ -1268,6 +1327,7 @@
                     <parameter name="writePolicy"/>
                     <parameter name="scheduleEnabled" type="Boolean"/>
                     <parameter name="agentRole"/>
+                    <parameter name="catalogCategory"/>
                     <parameter name="alreadyEnabled" type="Boolean"/>
                 </parameter>
             </parameter>
@@ -1279,6 +1339,7 @@
                 <econdition field-name="ownerPartyId" value="_NA_"/>
                 <econdition field-name="teamName" operator="not-equals" value="Operations Assistant"/>
                 <econdition field-name="teamName" operator="not-equals" value="System Internal"/>
+                <econdition field-name="catalogPublished" operator="not-equals" value="N" or-null="true"/>
                 <order-by field-name="teamName"/>
                 <order-by field-name="adkAgentConfigId"/>
             </entity-find>
@@ -1291,10 +1352,43 @@
                     [adkAgentConfigId: tmpl.adkAgentConfigId, agentName: tmpl.agentName,
                      teamName: tmpl.teamName, description: tmpl.description, toolMode: tmpl.toolMode,
                      writePolicy: tmpl.writePolicy, scheduleEnabled: tmpl.scheduleEnabled == 'Y',
-                     agentRole: tmpl.agentRole,
+                     agentRole: tmpl.agentRole, catalogCategory: tmpl.catalogCategory,
                      alreadyEnabled: ownKeys.contains("${tmpl.teamName}::${tmpl.agentName}".toString())]
                 }
             </script>
+        </actions>
+    </service>
+
+    <!-- Public (anonymous) list of published catalog agents for the website's AI agents
+         page (agentsWidget.html.ftl). Only descriptive fields: never the instruction,
+         service allowlist or any id. -->
+    <service verb="get" noun="PublicAgentCatalog" authenticate="anonymous-all">
+        <out-parameters>
+            <parameter name="agents" type="List">
+                <parameter name="agent" type="Map">
+                    <parameter name="agentName"/>
+                    <parameter name="teamName"/>
+                    <parameter name="catalogCategory"/>
+                    <parameter name="description"/>
+                    <parameter name="agentRole"/>
+                    <parameter name="scheduleEnabled" type="Boolean"/>
+                    <parameter name="writePolicy"/>
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="moqui.adk.AdkAgentConfig" list="templates" disable-authz="true">
+                <econdition field-name="ownerPartyId" value="_NA_"/>
+                <econdition field-name="teamName" operator="not-in"
+                    from="['Operations Assistant', 'System Internal']" or-null="true"/>
+                <econdition field-name="catalogPublished" operator="not-equals" value="N" or-null="true"/>
+                <order-by field-name="catalogCategory"/>
+                <order-by field-name="teamName"/>
+                <order-by field-name="agentName"/>
+            </entity-find>
+            <set field="agents" from="templates.collect { t -> [agentName: t.agentName, teamName: t.teamName,
+                catalogCategory: t.catalogCategory, description: t.description, agentRole: t.agentRole ?: 'specialist',
+                scheduleEnabled: t.scheduleEnabled == 'Y', writePolicy: t.writePolicy ?: 'approve'] }"/>
         </actions>
     </service>
 

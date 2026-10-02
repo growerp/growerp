@@ -38,6 +38,9 @@
             <parameter name="maxLlmCalls" type="Integer"/>
             <!-- free-form grouping label; agents sharing (ownerPartyId, teamName) are one team -->
             <parameter name="teamName"/>
+            <!-- shared catalog ("_NA_") only -->
+            <parameter name="catalogPublished"/>
+            <parameter name="catalogCategory"/>
         </in-parameters>
         <out-parameters>
             <parameter name="adkAgentConfigId"/>
@@ -87,6 +90,8 @@
                 <if condition="loopMaxIterations != null"><set field="existing.loopMaxIterations" from="loopMaxIterations"/></if>
                 <if condition="maxLlmCalls != null"><set field="existing.maxLlmCalls" from="maxLlmCalls"/></if>
                 <if condition="teamName != null"><set field="existing.teamName" from="teamName"/></if>
+                <if condition="catalogPublished != null"><set field="existing.catalogPublished" from="catalogPublished"/></if>
+                <if condition="catalogCategory != null"><set field="existing.catalogCategory" from="catalogCategory"/></if>
                 <entity-update value-field="existing"/>
                 <set field="adkAgentConfigId" from="existing.adkAgentConfigId"/>
                 <else>
@@ -118,6 +123,8 @@
                     <set field="newCfg.loopMaxIterations"  from="loopMaxIterations"/>
                     <set field="newCfg.maxLlmCalls"        from="maxLlmCalls"/>
                     <set field="newCfg.teamName"           from="teamName"/>
+                    <set field="newCfg.catalogPublished"   from="catalogPublished"/>
+                    <set field="newCfg.catalogCategory"    from="catalogCategory"/>
                     <entity-sequenced-id-primary value-field="newCfg"/>
                     <entity-create value-field="newCfg"/>
                     <set field="adkAgentConfigId" from="newCfg.adkAgentConfigId"/>

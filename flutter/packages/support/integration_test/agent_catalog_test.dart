@@ -14,8 +14,10 @@
 
 // ignore_for_file: depend_on_referenced_packages
 
-// "Agent Catalog" screen of the support app (AdkAgentCatalogView): the two
-// tabs render and their key controls are present. The Suggestion tab's real
+// "Agent Catalog" screen of the support app (AdkAgentCatalogView): the
+// Maintain tab lists the shared catalog and round-trips the published flag of
+// a catalog agent; the other two tabs render and their key controls are
+// present. The Suggestion tab's real
 // feasibility check needs a live LLM call *and* a real tenant ownerPartyId to
 // test cross-tenant with — neither is stable enough to hardcode into a test
 // that runs in arbitrary environments, so this stays a structural smoke test.
@@ -81,7 +83,7 @@ void main() {
     await prefs.setString('selected_locale', 'en');
   });
 
-  testWidgets('agent catalog: promotion and suggestion tabs render', (
+  testWidgets('agent catalog: maintain, promotion and suggestion tabs', (
     WidgetTester tester,
   ) async {
     final restClient = RestClient(await buildDioClient());
@@ -108,7 +110,31 @@ void main() {
     router.go('/agent-catalog');
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
-    // ---- Promotion tab (default) -------------------------------------------
+    // ---- Maintain tab (default) --------------------------------------------
+    expect(find.byKey(const Key('agentCatalogMaintainTab')), findsOneWidget);
+    expect(find.byKey(const Key('catalogMaintainList')), findsOneWidget,
+        reason: 'seeded GrowERP Operations Team templates are in the catalog');
+    expect(find.byKey(const Key('uploadCatalogTeam')), findsOneWidget);
+    // unpublish the first catalog agent, then publish it again
+    for (final published in [false, true]) {
+      await CommonTest.tapByKey(tester, 'catalogName0', seconds: 2);
+      expect(find.byKey(const Key('AdkAgentConfigDialog')), findsOneWidget);
+      expect(find.byKey(const Key('catalogCategory')), findsOneWidget);
+      expect(
+          find.descendant(
+              of: find.byKey(const Key('AdkAgentConfigDialog')),
+              matching: find.byKey(const Key('apiKey'))),
+          findsNothing);
+      await CommonTest.tapByKey(tester, 'catalogPublished');
+      await CommonTest.tapByKey(tester, 'AdkAgentConfigSave', seconds: 3);
+      expect(find.byKey(const Key('AdkAgentConfigDialog')), findsNothing);
+      final icon = tester.widget<Icon>(find.byKey(const Key('catalogPublished0')));
+      expect(icon.icon, published ? Icons.check_circle : Icons.edit_note);
+    }
+
+    // ---- Promotion tab ------------------------------------------------------
+    await tester.tap(find.byKey(const Key('agentCatalogPromotionTab')));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.byKey(const Key('agentCatalogPromotionTab')), findsOneWidget);
     expect(find.byKey(const Key('agentCatalogSuggestionTab')), findsOneWidget);
     expect(find.byKey(const Key('refreshCatalogPromotion')), findsOneWidget);

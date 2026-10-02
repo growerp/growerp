@@ -196,6 +196,12 @@ limitations under the License.
                 <service name="growerp.100.TenantServices100.get#SubscriptionPlans" />
             </method>
         </resource>
+        <!-- public list of published shared-catalog agents for the website AI agents page -->
+        <resource name="PublicAgentCatalog" require-authentication="anonymous-all">
+            <method type="get">
+                <service name="AdkServices100.get#PublicAgentCatalog" />
+            </method>
+        </resource>
         <!-- public website lead-capture form: definition + submit -->
         <resource name="SubmitWebsiteForm" require-authentication="anonymous-all">
             <method type="get">

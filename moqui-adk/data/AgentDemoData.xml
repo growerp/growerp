@@ -107,6 +107,7 @@ requestHumanHandoff tool with a short reason, then tell them a member of the tea
         ownerPartyId="_NA_"
         adkAgentConfigId="ADK_DEMO_DIGEST"
         agentName="Ops Digest"
+        teamName="Operations Assistant"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"

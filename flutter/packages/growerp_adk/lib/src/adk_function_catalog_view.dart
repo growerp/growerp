@@ -304,7 +304,9 @@ class _AdkFunctionCatalogViewState extends State<AdkFunctionCatalogView> {
     }
     final byTeam = <String, List<AdkAgentCatalogFunction>>{};
     for (final f in _functions) {
-      byTeam.putIfAbsent(f.teamName ?? 'Other', () => []).add(f);
+      byTeam
+          .putIfAbsent(f.catalogCategory ?? f.teamName ?? 'Other', () => [])
+          .add(f);
     }
     return ListView(
       key: const Key('functionCatalogList'),

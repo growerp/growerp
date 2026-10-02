@@ -1622,6 +1622,67 @@ limitations under the License.
   <moqui.basic.LocalizedMessage locale="es" original="GrowerpWebsitePlanPerMonth"
     localized="/mes" />
 
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteAgentScheduled"
+    localized="Runs on a schedule" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteAgentScheduled"
+    localized="ทำงานตามกำหนดเวลา" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteAgentScheduled"
+    localized="按计划运行" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteAgentScheduled"
+    localized="Läuft nach Zeitplan" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteAgentScheduled"
+    localized="S&apos;exécute selon un planning" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteAgentScheduled"
+    localized="Draait volgens schema" />
+  <moqui.basic.LocalizedMessage locale="es" original="GrowerpWebsiteAgentScheduled"
+    localized="Se ejecuta según un horario" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteAgentApproval"
+    localized="Writes need your approval" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteAgentApproval"
+    localized="การเขียนข้อมูลต้องได้รับการอนุมัติ" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteAgentApproval"
+    localized="写入需要您的批准" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteAgentApproval"
+    localized="Änderungen brauchen Ihre Freigabe" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteAgentApproval"
+    localized="Les écritures nécessitent votre approbation" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteAgentApproval"
+    localized="Wijzigingen vereisen uw goedkeuring" />
+  <moqui.basic.LocalizedMessage locale="es" original="GrowerpWebsiteAgentApproval"
+    localized="Los cambios requieren su aprobación" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteAgentCoordinator"
+    localized="Team coordinator" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteAgentCoordinator"
+    localized="ผู้ประสานงานทีม" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteAgentCoordinator"
+    localized="团队协调者" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteAgentCoordinator"
+    localized="Team-Koordinator" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteAgentCoordinator"
+    localized="Coordinateur d&apos;équipe" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteAgentCoordinator"
+    localized="Teamcoördinator" />
+  <moqui.basic.LocalizedMessage locale="es" original="GrowerpWebsiteAgentCoordinator"
+    localized="Coordinador del equipo" />
+
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteAgentOther"
+    localized="Other" />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteAgentOther"
+    localized="อื่น ๆ" />
+  <moqui.basic.LocalizedMessage locale="zh" original="GrowerpWebsiteAgentOther"
+    localized="其他" />
+  <moqui.basic.LocalizedMessage locale="de" original="GrowerpWebsiteAgentOther"
+    localized="Sonstige" />
+  <moqui.basic.LocalizedMessage locale="fr" original="GrowerpWebsiteAgentOther"
+    localized="Autres" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpWebsiteAgentOther"
+    localized="Overig" />
+  <moqui.basic.LocalizedMessage locale="es" original="GrowerpWebsiteAgentOther"
+    localized="Otros" />
+
+
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpWebsiteBookingRoom"
     localized="room" />
   <moqui.basic.LocalizedMessage locale="th" original="GrowerpWebsiteBookingRoom"

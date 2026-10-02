@@ -25,6 +25,7 @@ export 'src/adk_governance_service.dart';
 export 'src/adk_actions_list_view.dart';
 export 'src/adk_system_usage_view.dart';
 export 'src/adk_catalog_promotion_view.dart';
+export 'src/adk_catalog_maintain_view.dart';
 export 'src/adk_agent_catalog_view.dart';
 export 'src/adk_approvals_list_view.dart';
 // Knowledge base (RAG)

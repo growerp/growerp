@@ -77,6 +77,14 @@ class AdkAgentConfig {
   @JsonKey(defaultValue: false)
   final bool catalogNominated;
 
+  /// Shared catalog ("_NA_") agents only: false → draft, hidden from tenants'
+  /// function catalog and the public website list.
+  @JsonKey(defaultValue: true)
+  final bool catalogPublished;
+
+  /// Shared catalog agents only: grouping label (Marketing, Operations, ...).
+  final String? catalogCategory;
+
   /// Write-only: sent on create/update, never returned by GET.
   @JsonKey(includeFromJson: false)
   final String? apiKey;
@@ -107,6 +115,8 @@ class AdkAgentConfig {
     this.maxLlmCalls,
     this.teamName,
     this.catalogNominated = false,
+    this.catalogPublished = true,
+    this.catalogCategory,
     this.apiKey,
   });
 
@@ -141,6 +151,8 @@ class AdkAgentConfig {
     int? maxLlmCalls,
     String? teamName,
     bool? catalogNominated,
+    bool? catalogPublished,
+    String? catalogCategory,
     String? apiKey,
   }) =>
       AdkAgentConfig(
@@ -169,6 +181,8 @@ class AdkAgentConfig {
         maxLlmCalls: maxLlmCalls ?? this.maxLlmCalls,
         teamName: teamName ?? this.teamName,
         catalogNominated: catalogNominated ?? this.catalogNominated,
+        catalogPublished: catalogPublished ?? this.catalogPublished,
+        catalogCategory: catalogCategory ?? this.catalogCategory,
         apiKey: apiKey ?? this.apiKey,
       );
 

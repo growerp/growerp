@@ -256,6 +256,8 @@ limitations under the License.
                     ec.entity.makeDataLoader().location("component://growerp/data/ErpLandingPageData.xml").load()
                     ec.entity.makeDataLoader().location("component://growerp/data/ErpOnboardAssessmentData.xml").load()
                     ec.entity.makeDataLoader().location("component://growerp/data/GrowerpWebsiteSeedData.xml").load()
+                    // request / contribute an agent forms on the /content/ai-agents page
+                    ec.entity.makeDataLoader().location("component://growerp/data/GrowerpAgentCatalogFormsData.xml").load()
                     // self-marketing sprint content: MarketingCampaign references
                     // landingPageId=ERP_LANDING_PAGE just loaded above
                     ec.entity.makeDataLoader().location("component://growerp/data/GrowerpMarketingContentData.xml").load()

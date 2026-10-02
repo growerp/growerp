@@ -2653,8 +2653,13 @@ abstract class RestClient {
   });
 
   // ADK Agent Config endpoints
+  /// [catalog]: support only, the shared "_NA_" catalog agents instead of
+  /// the caller's own.
   @GET("rest/s1/growerp/100/AdkAgentConfig")
-  Future<AdkAgentConfigs> getAdkAgentConfigs({@Query('search') String? search});
+  Future<AdkAgentConfigs> getAdkAgentConfigs({
+    @Query('search') String? search,
+    @Query('catalog') bool? catalog,
+  });
 
   @POST("rest/s1/growerp/100/AdkAgentConfig/EnableMarketingTeam")
   Future<void> enableMarketingAgentTeam();
@@ -2752,6 +2757,9 @@ abstract class RestClient {
     @Field() int? maxLlmCalls,
     @Field() int? loopMaxIterations,
     @Field() String? teamName,
+    @Field() bool? catalog,
+    @Field() bool? catalogPublished,
+    @Field() String? catalogCategory,
   });
 
   /// Rule checks on an agent (no AI call); with adkAgentConfigId the stored
@@ -2787,6 +2795,7 @@ abstract class RestClient {
   @DELETE("rest/s1/growerp/100/AdkAgentConfig")
   Future<void> deleteAdkAgentConfig({
     @Query('adkAgentConfigId') required String adkAgentConfigId,
+    @Query('catalog') bool? catalog,
   });
 
   // Phase 4: coordinator team membership
@@ -2817,6 +2826,7 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/AdkAgentTeam/Import")
   Future<AdkAgentTeamImportResult> postAdkAgentTeamImport({
     @Field() required String jsonText,
+    @Field() bool? toCatalog,
   });
 
   // External MCP server registry (tenant-level)

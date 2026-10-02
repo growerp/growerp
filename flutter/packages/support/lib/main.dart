@@ -199,6 +199,7 @@ List<LocalizationsDelegate> delegates = [
   UserCompanyLocalizations.delegate,
   ActivityLocalizations.delegate,
   SupportLocalizations.delegate,
+  AdkLocalizations.delegate,
 ];
 
 List<Map<String, GrowerpWidgetBuilder>> supportWidgetRegistrations = [

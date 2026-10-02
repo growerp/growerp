@@ -95,6 +95,10 @@ along with this software (see the LICENSE.md file). If not, see
                 <render-mode>
                     <text type="html" location="component://PopRestStore/template/plansWidget.html.ftl"/>
                 </render-mode>
+                <!-- shared AI agent catalog renderer for data-growerp-agents markers -->
+                <render-mode>
+                    <text type="html" location="component://PopRestStore/template/agentsWidget.html.ftl"/>
+                </render-mode>
                 <!-- hotel room booking renderer for data-growerp-booking markers -->
                 <render-mode>
                     <text type="html" location="component://PopRestStore/template/bookingWidget.html.ftl"/>

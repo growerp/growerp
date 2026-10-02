@@ -35,6 +35,8 @@
     <moqui.adk.AdkAgentConfig
         ownerPartyId="_NA_"
         adkAgentConfigId="OPS_COORD"
+        catalogPublished="Y"
+        catalogCategory="Operations"
         agentName="Operations Coordinator"
         teamName="GrowERP Operations Team"
         llmProvider="gemini"
@@ -59,6 +61,8 @@ several domains, delegate them in turn. Never invent data."/>
     <moqui.adk.AdkAgentConfig
         ownerPartyId="_NA_"
         adkAgentConfigId="OPS_SALES_DIGEST"
+        catalogPublished="Y"
+        catalogCategory="Sales"
         agentName="Sales Digest"
         teamName="GrowERP Operations Team"
         llmProvider="gemini"
@@ -83,6 +87,8 @@ moqui_search_services with a single noun first."/>
     <moqui.adk.AdkAgentConfig
         ownerPartyId="_NA_"
         adkAgentConfigId="OPS_PURCH_DIGEST"
+        catalogPublished="Y"
+        catalogCategory="Purchasing"
         agentName="Purchasing Digest"
         teamName="GrowERP Operations Team"
         llmProvider="gemini"
@@ -107,6 +113,8 @@ moqui_search_services with a single noun first."/>
     <moqui.adk.AdkAgentConfig
         ownerPartyId="_NA_"
         adkAgentConfigId="OPS_INV_DIGEST"
+        catalogPublished="Y"
+        catalogCategory="Inventory"
         agentName="Inventory Digest"
         teamName="GrowERP Operations Team"
         llmProvider="gemini"
@@ -134,6 +142,8 @@ name, call moqui_search_services with a single noun first."/>
     <moqui.adk.AdkAgentConfig
         ownerPartyId="_NA_"
         adkAgentConfigId="OPS_FIN_DIGEST"
+        catalogPublished="Y"
+        catalogCategory="Finance"
         agentName="Finance Digest"
         teamName="GrowERP Operations Team"
         llmProvider="gemini"
@@ -165,6 +175,8 @@ moqui_search_services with a single noun first."/>
     <moqui.adk.AdkAgentConfig
         ownerPartyId="_NA_"
         adkAgentConfigId="OPS_HR_DIGEST"
+        catalogPublished="Y"
+        catalogCategory="HR"
         agentName="HR Digest"
         teamName="GrowERP Operations Team"
         llmProvider="gemini"
@@ -191,6 +203,8 @@ of an exact service name, call moqui_search_services with a single noun first."/
     <moqui.adk.AdkAgentConfig
         ownerPartyId="_NA_"
         adkAgentConfigId="OPS_INV_REPLEN"
+        catalogPublished="Y"
+        catalogCategory="Inventory"
         agentName="Inventory Replenishment Assistant"
         teamName="GrowERP Operations Team"
         llmProvider="gemini"
@@ -223,6 +237,8 @@ first."/>
     <moqui.adk.AdkAgentConfig
         ownerPartyId="_NA_"
         adkAgentConfigId="OPS_SALES_DRAFT"
+        catalogPublished="Y"
+        catalogCategory="Sales"
         agentName="Sales Quote and Order Assistant"
         teamName="GrowERP Operations Team"
         llmProvider="gemini"
@@ -252,6 +268,8 @@ before creating a new one. Every draft you create is queued for a human to appro
     <moqui.adk.AdkAgentConfig
         ownerPartyId="_NA_"
         adkAgentConfigId="OPS_PURCH_DRAFT"
+        catalogPublished="Y"
+        catalogCategory="Purchasing"
         agentName="Purchasing Assistant"
         teamName="GrowERP Operations Team"
         llmProvider="gemini"

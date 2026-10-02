@@ -28,6 +28,7 @@ class AdkAgentCatalogFunction {
   final String? writePolicy;
   final bool scheduleEnabled;
   final String? agentRole;
+  final String? catalogCategory;
   final bool alreadyEnabled;
 
   const AdkAgentCatalogFunction({
@@ -39,6 +40,7 @@ class AdkAgentCatalogFunction {
     this.writePolicy,
     this.scheduleEnabled = false,
     this.agentRole,
+    this.catalogCategory,
     this.alreadyEnabled = false,
   });
 

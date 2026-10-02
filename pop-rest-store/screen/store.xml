@@ -533,6 +533,10 @@ var storeInfo = ${storeInfoJson};
                 <render-mode>
                     <text type="html" location="component://PopRestStore/template/plansWidget.html.ftl"/>
                 </render-mode>
+                <!-- shared AI agent catalog renderer for data-growerp-agents markers -->
+                <render-mode>
+                    <text type="html" location="component://PopRestStore/template/agentsWidget.html.ftl"/>
+                </render-mode>
             </widgets>
         </section>
     </widgets>

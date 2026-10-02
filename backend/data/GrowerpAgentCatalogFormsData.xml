@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-facade-xml type="demo">
+  <!-- "Request an agent" / "Contribute an agent" forms embedded on the website's
+       /content/ai-agents page (GrowerpWebsiteSeedData.xml) with
+       <div data-growerp-form="FORM_ID">. Submissions become GROWERP leads via
+       WebsiteServices100.submit#WebsiteForm. ownerPartyId holds the GROWERP COMPANY
+       partyId (100001), same as SpreadsheetFreedomLandingPageData.xml.
+       Loaded from TenantServices100.xml in the ownerPartyId=='GROWERP' block. -->
+
+  <growerp.website.WebsiteForm formId="AGENT_REQUEST_FORM" pseudoId="agent-request-form"
+      ownerPartyId="100001"
+      formName="Request an AI Agent"
+      title="Request an agent"
+      submitLabel="Send request"
+      successMessage="Thank you! We will review your request and get back to you." />
+
+  <growerp.website.WebsiteFormField formId="AGENT_REQUEST_FORM" fieldId="AR_NAME"
+      sequenceNum="10" label="Name" fieldType="text" isRequired="Y" />
+  <growerp.website.WebsiteFormField formId="AGENT_REQUEST_FORM" fieldId="AR_EMAIL"
+      sequenceNum="20" label="Email" fieldType="email" isRequired="Y" />
+  <growerp.website.WebsiteFormField formId="AGENT_REQUEST_FORM" fieldId="AR_COMPANY"
+      sequenceNum="30" label="Company" fieldType="text" isRequired="N" />
+  <growerp.website.WebsiteFormField formId="AGENT_REQUEST_FORM" fieldId="AR_AREA"
+      sequenceNum="40" label="Business area (sales, inventory, accounting, ...)" fieldType="text" isRequired="N" />
+  <growerp.website.WebsiteFormField formId="AGENT_REQUEST_FORM" fieldId="AR_TASK"
+      sequenceNum="50" label="What should the agent do?" fieldType="textarea" isRequired="Y" />
+
+  <growerp.website.WebsiteForm formId="AGENT_CONTRIBUTE_FORM" pseudoId="agent-contribute-form"
+      ownerPartyId="100001"
+      formName="Contribute an AI Agent"
+      title="Contribute an agent"
+      submitLabel="Submit agent"
+      successMessage="Thank you for your contribution! We will review the agent and contact you." />
+
+  <growerp.website.WebsiteFormField formId="AGENT_CONTRIBUTE_FORM" fieldId="AC_NAME"
+      sequenceNum="10" label="Name" fieldType="text" isRequired="Y" />
+  <growerp.website.WebsiteFormField formId="AGENT_CONTRIBUTE_FORM" fieldId="AC_EMAIL"
+      sequenceNum="20" label="Email" fieldType="email" isRequired="Y" />
+  <growerp.website.WebsiteFormField formId="AGENT_CONTRIBUTE_FORM" fieldId="AC_AGENT_NAME"
+      sequenceNum="30" label="Agent name" fieldType="text" isRequired="Y" />
+  <growerp.website.WebsiteFormField formId="AGENT_CONTRIBUTE_FORM" fieldId="AC_DESCRIPTION"
+      sequenceNum="40" label="What does the agent do?" fieldType="textarea" isRequired="Y" />
+  <growerp.website.WebsiteFormField formId="AGENT_CONTRIBUTE_FORM" fieldId="AC_TEAM_JSON"
+      sequenceNum="50" label="Link to, or paste of, the downloaded team JSON" fieldType="textarea" isRequired="N" />
+</entity-facade-xml>

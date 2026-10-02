@@ -30,12 +30,18 @@ class AdkConfigService {
   /// Tenant settings, used to see which LLM providers have an API key.
   Future<SystemSettings> systemSettings() => _client.getSystemSettings();
 
-  Future<List<AdkAgentConfig>> list({String? search}) async {
-    final result = await _client.getAdkAgentConfigs(search: search);
+  /// [catalog]: support only, the shared "_NA_" catalog agents (published
+  /// and draft) instead of this tenant's own.
+  Future<List<AdkAgentConfig>> list({String? search, bool catalog = false}) async {
+    final result = await _client.getAdkAgentConfigs(
+        search: search, catalog: catalog ? true : null);
     return result.adkAgentConfigs;
   }
 
-  Future<AdkAgentConfig> save(AdkAgentConfig cfg, {String? apiKey}) async {
+  /// [catalog]: support only, update an existing shared catalog agent,
+  /// including its published flag and category.
+  Future<AdkAgentConfig> save(AdkAgentConfig cfg,
+      {String? apiKey, bool catalog = false}) async {
     if (cfg.adkAgentConfigId == null || cfg.adkAgentConfigId!.isEmpty) {
       return _client.createAdkAgentConfig(
         agentName: cfg.agentName,
@@ -84,6 +90,9 @@ class AdkConfigService {
       websiteChat: cfg.websiteChat,
       webSearch: cfg.webSearch,
       maxLlmCalls: cfg.maxLlmCalls,
+      catalog: catalog ? true : null,
+      catalogPublished: catalog ? cfg.catalogPublished : null,
+      catalogCategory: catalog ? cfg.catalogCategory : null,
     );
   }
 
@@ -100,8 +109,9 @@ class AdkConfigService {
   Future<AdkAgentTestRun> testRun(String testRunId) =>
       _client.getAdkAgentTest(testRunId: testRunId);
 
-  Future<void> delete(String configId) async {
-    await _client.deleteAdkAgentConfig(adkAgentConfigId: configId);
+  Future<void> delete(String configId, {bool catalog = false}) async {
+    await _client.deleteAdkAgentConfig(
+        adkAgentConfigId: configId, catalog: catalog ? true : null);
   }
 
   /// Opt one of this tenant's own agents in/out of the support app's catalog
@@ -195,8 +205,11 @@ class AdkConfigService {
       _client.getAdkAgentTeamExport(teamName: teamName);
 
   /// Upload a team JSON payload previously produced by [exportTeam].
-  Future<AdkAgentTeamImportResult> importTeam(String jsonText) async =>
-      _client.postAdkAgentTeamImport(jsonText: jsonText);
+  /// [toCatalog]: support only, into the shared catalog as drafts.
+  Future<AdkAgentTeamImportResult> importTeam(String jsonText,
+          {bool toCatalog = false}) async =>
+      _client.postAdkAgentTeamImport(
+          jsonText: jsonText, toCatalog: toCatalog ? true : null);
 
   // ── System settings (read-only here; used for tool-auth status badges) ─────
   Future<SystemSettings> getSystemSettings() => _client.getSystemSettings();

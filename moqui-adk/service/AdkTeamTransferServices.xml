@@ -97,6 +97,9 @@
     <service verb="import" noun="AdkAgentTeam">
         <in-parameters>
             <parameter name="jsonText" required="true"/>
+            <!-- support only: import into the shared "_NA_" catalog, unpublished -->
+            <parameter name="toCatalog" type="Boolean" default="false"/>
+            <parameter name="catalogCategory"/>
         </in-parameters>
         <out-parameters>
             <parameter name="importedTeamName"/>
@@ -106,6 +109,12 @@
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
             <if condition="!ownerPartyId">
                 <return error="true" message="Cannot determine your company, please log in again."/>
+            </if>
+            <if condition="toCatalog">
+                <if condition="!ec.user.isInGroup('GROWERP_M_SYSTEM')">
+                    <return error="true" message="Only GrowERP support may upload agents to the shared catalog."/>
+                </if>
+                <set field="ownerPartyId" value="_NA_"/>
             </if>
             <!-- assigned via <set>, not a <script>-local var, so it stays visible to the
                  mini-language <if>/<iterate> elements below -->
@@ -149,11 +158,14 @@
                              writePolicy: a.writePolicy, websiteChat: a.websiteChat ? 'Y' : 'N',
                              webSearch: a.webSearch ? 'Y' : 'N',
                              agentRole: a.agentRole, orchestrationType: a.orchestrationType,
-                             loopMaxIterations: a.loopMaxIterations, maxLlmCalls: a.maxLlmCalls, teamName: importedTeamName]"/>
+                             loopMaxIterations: a.loopMaxIterations, maxLlmCalls: a.maxLlmCalls, teamName: importedTeamName,
+                             catalogPublished: toCatalog ? 'N' : null,
+                             catalogCategory: toCatalog ? catalogCategory : null]"/>
                 <script>idMap[a.adkAgentConfigId as String] = cfgOut.adkAgentConfigId</script>
                 <!-- scheduled agents need a chat room to report to; self-reference the new id
                      the same way AdkDemoServices.load#AgentDemo does for the built-in demo -->
-                <if condition="a.scheduleEnabled">
+                <!-- not for catalog templates: clone#AgentTeam self-references at clone time -->
+                <if condition="a.scheduleEnabled &amp;&amp; !toCatalog">
                     <service-call name="AdkServices.update#AgentConfig"
                         in-map="[adkAgentConfigId: cfgOut.adkAgentConfigId, ownerPartyId: ownerPartyId,
                                  agentName: a.agentName, modelName: a.modelName,
@@ -179,10 +191,15 @@
                         <econdition field-name="coordinatorConfigId" from="newCoord"/>
                         <econdition field-name="memberConfigId" from="newMember"/>
                     </entity-find>
-                    <if condition="!existingTm">
-                        <service-call name="AdkServices100.create#AdkAgentTeam" ignore-error="true"
-                            in-map="[coordinatorConfigId: newCoord, memberConfigId: newMember,
-                                     sequenceNum: tm.sequenceNum, delegationMode: tm.delegationMode ?: 'tool']"/>
+                    <if condition="!existingTm &amp;&amp; toCatalog">
+                        <service-call name="create#moqui.adk.AdkAgentTeamMember"
+                            in-map="[ownerPartyId: '_NA_', coordinatorConfigId: newCoord, memberConfigId: newMember,
+                                     sequenceNum: tm.sequenceNum, delegationMode: tm.delegationMode ?: 'tool', enabled: 'Y']"/>
+                        <else-if condition="!existingTm">
+                            <service-call name="AdkServices100.create#AdkAgentTeam" ignore-error="true"
+                                in-map="[coordinatorConfigId: newCoord, memberConfigId: newMember,
+                                         sequenceNum: tm.sequenceNum, delegationMode: tm.delegationMode ?: 'tool']"/>
+                        </else-if>
                     </if>
                 </if>
             </iterate>

@@ -13,11 +13,14 @@
  */
 
 import 'package:flutter/material.dart';
+import 'adk_catalog_maintain_view.dart';
 import 'adk_catalog_promotion_view.dart';
 import 'adk_suggest_function_panel.dart';
 
-/// Support App View: "Agent Catalog" — the two admin-facing halves of catalog
-/// curation, combined behind one menu entry:
+/// Support App View: "Agent Catalog" — catalog curation, combined behind one
+/// menu entry:
+/// - **Maintain**: the shared "_NA_" catalog itself — edit, publish,
+///   categorize, delete, upload a team file (`AdkCatalogMaintainView`).
 /// - **Promotion**: review tenant-nominated agents and promote them into the
 ///   shared "_NA_" catalog (`AdkCatalogPromotionView`).
 /// - **Suggestion**: run the same "Suggest a function" feasibility check
@@ -29,11 +32,12 @@ class AdkAgentCatalogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Column(
         children: [
           const TabBar(
             tabs: [
+              Tab(key: Key('agentCatalogMaintainTab'), text: 'Maintain'),
               Tab(key: Key('agentCatalogPromotionTab'), text: 'Promotion'),
               Tab(key: Key('agentCatalogSuggestionTab'), text: 'Suggestion'),
             ],
@@ -41,6 +45,7 @@ class AdkAgentCatalogView extends StatelessWidget {
           const Expanded(
             child: TabBarView(
               children: [
+                AdkCatalogMaintainView(),
                 AdkCatalogPromotionView(),
                 AdkSuggestFunctionPanel(showOwnerField: true),
               ],

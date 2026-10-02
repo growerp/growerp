@@ -24,15 +24,22 @@ import 'package:growerp_adk/l10n/generated/adk_localizations.dart';
 class AdkAgentConfigDialog extends StatefulWidget {
   final AdkAgentConfig? existing;
 
-  const AdkAgentConfigDialog({super.key, this.existing});
+  /// Support only: edit a shared catalog ("_NA_") agent. Adds published and
+  /// category, hides the tenant-only parts (API key, team members, MCP
+  /// servers, nominate, test).
+  final bool catalog;
+
+  const AdkAgentConfigDialog({super.key, this.existing, this.catalog = false});
 
   static Future<AdkAgentConfig?> show(
     BuildContext context, {
     AdkAgentConfig? existing,
+    bool catalog = false,
   }) =>
       showDialog<AdkAgentConfig>(
         context: context,
-        builder: (_) => AdkAgentConfigDialog(existing: existing),
+        builder: (_) =>
+            AdkAgentConfigDialog(existing: existing, catalog: catalog),
       );
 
   @override
@@ -55,6 +62,9 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   final _loopMaxCtrl = TextEditingController();
   final _maxLlmCallsCtrl = TextEditingController();
   final _teamNameCtrl = TextEditingController();
+  final _catalogCategoryCtrl = TextEditingController();
+  bool _catalogPublished = true;
+  bool _deleting = false;
 
   bool _scheduleEnabled = false;
   bool _saving = false;
@@ -114,8 +124,14 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       _maxLlmCallsCtrl.text = e.maxLlmCalls?.toString() ?? '';
       _teamNameCtrl.text = e.teamName ?? '';
       _nominated = e.catalogNominated;
-      if (_agentRole != 'specialist' && e.adkAgentConfigId != null) _loadTeam();
-      if (e.adkAgentConfigId != null) _loadMcpServers();
+      _catalogPublished = e.catalogPublished;
+      _catalogCategoryCtrl.text = e.catalogCategory ?? '';
+      if (!widget.catalog) {
+        if (_agentRole != 'specialist' && e.adkAgentConfigId != null) {
+          _loadTeam();
+        }
+        if (e.adkAgentConfigId != null) _loadMcpServers();
+      }
     } else {
       _modelCtrl.text = defaultLlmModel.modelId;
       _llmProviderCtrl.text = 'gemini';
@@ -146,6 +162,8 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   /// Providers to offer: those with a key, plus the one this agent was saved
   /// with, so editing an existing agent never rewrites its provider.
   List<String> _providerOptions() {
+    // catalog templates run on each tenant's own keys, not support's
+    if (widget.catalog) return llmProviders;
     final saved = _llmProviderCtrl.text.trim();
     return [
       ...llmProviders.where(_providersWithKey.contains),
@@ -292,6 +310,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     _loopMaxCtrl.dispose();
     _maxLlmCallsCtrl.dispose();
     _teamNameCtrl.dispose();
+    _catalogCategoryCtrl.dispose();
     super.dispose();
   }
 
@@ -325,6 +344,49 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       }
     } finally {
       if (mounted) setState(() => _nominating = false);
+    }
+  }
+
+  /// Catalog mode only: remove the agent from the shared catalog. Tenants
+  /// that already loaded it keep their own copy.
+  Future<void> _deleteFromCatalog() async {
+    final id = widget.existing?.adkAgentConfigId;
+    if (id == null) return;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Delete ${widget.existing?.agentName} from the catalog?'),
+        content: Text(
+            'Companies that already loaded this agent keep their own copy.'),
+        actions: [
+          TextButton(
+            key: Key('cancelCatalogDelete'),
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            key: Key('confirmCatalogDelete'),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    setState(() => _deleting = true);
+    try {
+      final svc = await AdkConfigService.create();
+      await svc.delete(id, catalog: true);
+      if (mounted) Navigator.of(context).pop();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Delete failed: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _deleting = false);
     }
   }
 
@@ -382,9 +444,12 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
         teamName: _teamNameCtrl.text.trim().isEmpty
             ? null
             : _teamNameCtrl.text.trim(),
+        catalogPublished: _catalogPublished,
+        catalogCategory: _catalogCategoryCtrl.text.trim(),
       );
       final apiKey = _apiKeyCtrl.text.trim();
-      final saved = await svc.save(cfg, apiKey: apiKey.isEmpty ? null : apiKey);
+      final saved = await svc.save(cfg,
+          apiKey: apiKey.isEmpty ? null : apiKey, catalog: widget.catalog);
       if (mounted) {
         Navigator.of(context).pop(saved);
       }
@@ -599,6 +664,29 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                         validator: (v) =>
                             (v == null || v.trim().isEmpty) ? 'Required' : null,
                       ),
+                      if (widget.catalog) ...[
+                        SwitchListTile(
+                          key: Key('catalogPublished'),
+                          contentPadding: EdgeInsets.zero,
+                          title: Text('Published'),
+                          subtitle: Text(
+                            'Visible in every company\'s function catalog and '
+                            'on the website',
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                          value: _catalogPublished,
+                          onChanged: (v) =>
+                              setState(() => _catalogPublished = v),
+                        ),
+                        TextFormField(
+                          key: Key('catalogCategory'),
+                          controller: _catalogCategoryCtrl,
+                          decoration: InputDecoration(
+                            labelText: 'Catalog category',
+                            hintText: 'Marketing, Operations, Sales, ...',
+                          ),
+                        ),
+                      ],
                       SizedBox(height: 8),
                       if (!_providersLoading && _providerOptions().isEmpty)
                         Padding(
@@ -703,6 +791,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                         decoration: InputDecoration(
                             labelText: 'Description (optional)'),
                       ),
+                      if (!widget.catalog) ...[
                       SizedBox(height: 8),
                       TextFormField(
                         key: Key('apiKey'),
@@ -714,6 +803,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                         ),
                         obscureText: true,
                       ),
+                      ],
                       Divider(height: 24),
                       Text(AdkLocalizations.of(context)!.adk_permissionsGovernance,
                           style: TextStyle(fontWeight: FontWeight.bold)),
@@ -880,9 +970,12 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                             ),
                           ),
                         ],
-                        SizedBox(height: 8),
-                        _teamMembersSection(isNew: widget.existing == null),
+                        if (!widget.catalog) ...[
+                          SizedBox(height: 8),
+                          _teamMembersSection(isNew: widget.existing == null),
+                        ],
                       ],
+                      if (!widget.catalog) ...[
                       Divider(height: 24),
                       Text(AdkLocalizations.of(context)!.adk_mcpServers,
                           style: TextStyle(fontWeight: FontWeight.bold)),
@@ -893,6 +986,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                       ),
                       SizedBox(height: 8),
                       _mcpServersSection(isNew: widget.existing == null),
+                      ],
                       Divider(height: 24),
                       SwitchListTile(
                         key: Key('scheduleEnabled'),
@@ -961,7 +1055,17 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
               SizedBox(height: 8),
               Row(
                 children: [
-                  if (widget.existing?.adkAgentConfigId != null)
+                  if (widget.catalog &&
+                      widget.existing?.adkAgentConfigId != null)
+                    TextButton.icon(
+                      key: Key('deleteCatalogAgent'),
+                      onPressed:
+                          (_saving || _deleting) ? null : _deleteFromCatalog,
+                      icon: Icon(Icons.delete_outline),
+                      label: Text('Delete'),
+                    ),
+                  if (!widget.catalog &&
+                      widget.existing?.adkAgentConfigId != null)
                     TextButton.icon(
                       key: Key('nominateForCatalog'),
                       onPressed: _nominating ? null : _toggleNominate,
@@ -975,7 +1079,8 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                       ),
                     ),
                   Spacer(),
-                  if (widget.existing?.adkAgentConfigId != null)
+                  if (!widget.catalog &&
+                      widget.existing?.adkAgentConfigId != null)
                     TextButton.icon(
                       key: Key('AdkAgentConfigTest'),
                       onPressed: _saving
