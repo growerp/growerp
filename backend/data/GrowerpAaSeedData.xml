@@ -88,6 +88,8 @@ limitations under the License.
 
     <growerp.Application applicationId="AppAgents"
         description="App for agents" />
+    <growerp.Application applicationId="AppLandingPage"
+        description="Assessment landing page app, shown in the website /assessment/ iframe" />
 
     <!-- sales opportunity stage -->
     <mantle.sales.opportunity.SalesOpportunityStage opportunityStageId="Prospecting" sequenceNum="1" />
