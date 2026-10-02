@@ -3983,6 +3983,67 @@ limitations under the License.
             </if>
             <set field="productStoreId" from="productStore.productStoreId" />
             <set field="facilityId" from="productStore.inventoryFacilityId" />
+
+            <!-- the agents app is no ERP: instead of the ERP demo data it gets its own demo
+                 agent team (GrowerpAgentsDemoTeamData.xml) plus a few wiki pages and knowledge
+                 documents for it to work on. ignore-error: a missing moqui-adk component must not fail the demo load. -->
+            <if condition="applicationId == 'AppAgents'">
+                <service-call name="AdkDemoServices.clone#AgentTeam"
+                    in-map="[ownerPartyId: ownerPartyId, teamName: 'Demo Agent Team']"
+                    ignore-error="true" />
+                <set field="demoWikiPages"
+                    from="[
+                    [ pagePath: 'Company-FAQ', pageText: '# Company FAQ\n\n' +
+                        '## Opening hours\nMonday to Friday 9:00-17:30. Closed on public holidays.\n\n' +
+                        '## Contact\nGeneral questions go to info@example.com, urgent matters to the office phone.\n\n' +
+                        '## Returns\nCustomers can return unused goods within 30 days with the receipt. ' +
+                        'Refunds are paid within 5 working days after the return arrives.\n'],
+                    [ pagePath: 'Travel-Expense-Policy', pageText: '# Travel and expense policy\n\n' +
+                        '- Book economy class for flights under 6 hours.\n' +
+                        '- Hotels up to 150 per night; more needs approval from your manager.\n' +
+                        '- Meals up to 50 per day while travelling.\n' +
+                        '- Submit receipts within 14 days after the trip; late claims are not refunded.\n'],
+                    [ pagePath: 'Onboarding-Checklist', pageText: '# Onboarding checklist\n\n' +
+                        '## Before day one\n- Laptop and accounts ready\n- Welcome mail with start time\n\n' +
+                        '## First week\n- Meet the team\n- Read the Company FAQ and the Travel and expense policy\n' +
+                        '- Set up a first meeting with your manager\n']
+                ]" />
+                <if condition="productStore.wikiSpaceId">
+                    <iterate list="demoWikiPages" entry="demoWikiPage">
+                        <service-call name="growerp.100.WikiServices100.update#WikiPage"
+                            in-map="demoWikiPage + [wikiSpaceId: productStore.wikiSpaceId]" />
+                    </iterate>
+                </if>
+                <!-- knowledge base documents, found by the agents' searchKnowledge tool.
+                     Ingesting embeds each document, which needs an LLM key (the tenant's or the
+                     GOOGLE_API_KEY environment one): without one they are skipped, force-new so
+                     that failure does not roll back the rest of the demo data. -->
+                <set field="demoKnowledgeDocs"
+                    from="[
+                    [ title: 'Products and prices 2026', text: 'Products and prices 2026. ' +
+                        'Basic plan: 29 per month, one user, email support within two working days. ' +
+                        'Business plan: 79 per month, up to ten users, phone support and a monthly review call. ' +
+                        'Enterprise plan: price on request, unlimited users, a named account manager. ' +
+                        'Yearly payment gives two months free. Prices exclude sales tax.'],
+                    [ title: 'Customer service guidelines', text: 'Customer service guidelines. ' +
+                        'Answer every customer email within one working day, even when the answer is not ready yet. ' +
+                        'Call the customer back when a problem takes more than two mails to explain. ' +
+                        'A refund up to 100 can be given by any team member; larger refunds need a manager. ' +
+                        'Never promise a delivery date before checking it with the warehouse.'],
+                    [ title: 'Holidays and office closures 2026', text: 'Holidays and office closures 2026. ' +
+                        'The office is closed on New Year (January 1), Easter Monday, Labour Day (May 1), ' +
+                        'and from December 24 to December 31. Everyone has 25 vacation days per year; ' +
+                        'request them at least two weeks ahead with your manager. ' +
+                        'Up to 5 unused days can be carried over to next year.']
+                ]" />
+                <iterate list="demoKnowledgeDocs" entry="demoKnowledgeDoc">
+                    <service-call name="AdkKnowledgeServices.ingest#AdkKnowledge"
+                        in-map="demoKnowledgeDoc + [ownerPartyId: ownerPartyId, sourceType: 'note']"
+                        ignore-error="true" transaction="force-new" />
+                </iterate>
+                <return message="Agents demo data loaded for ${ownerPartyId}" />
+            </if>
+
             <!-- get root (browse) category -->
             <entity-find entity-name="mantle.product.store.ProductStoreCategory"
                 list="browseRootList">

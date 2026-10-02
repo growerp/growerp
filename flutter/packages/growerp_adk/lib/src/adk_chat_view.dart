@@ -144,6 +144,17 @@ class _AdkChatViewState extends State<AdkChatView> {
   // (e.g. local-AI wording). Best-effort: stays null when the config can't be read.
   String? _activeProvider;
   String? _activeModel;
+  // Example questions shown at the top of the chat when the tenant loaded the
+  // agents app demo data (its "Demo Agent Team", see GrowerpAgentsDemoTeamData.xml);
+  // they are answered from the demo wiki pages and knowledge documents.
+  List<String> _exampleQuestions = const [];
+  static const _demoTeamName = 'Demo Agent Team';
+  static const _demoExampleQuestions = [
+    'How much does the Business plan cost per month?',
+    'How many vacation days do I get per year?',
+    'What is our returns policy?',
+    'Write three slogans for our website.',
+  ];
 
   @override
   void initState() {
@@ -214,6 +225,9 @@ class _AdkChatViewState extends State<AdkChatView> {
             : (cfgs.isNotEmpty ? cfgs.first : null);
         _activeProvider = active?.llmProvider;
         _activeModel = active?.modelName;
+        if (mounted && cfgs.any((c) => c.teamName == _demoTeamName)) {
+          setState(() => _exampleQuestions = _demoExampleQuestions);
+        }
       } catch (_) {/* provider stays null → generic wording */}
       // Put the cursor in the input field once the chat is ready.
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -808,6 +822,28 @@ class _AdkChatViewState extends State<AdkChatView> {
     return Column(
       children: [
         if (_busy) const LinearProgressIndicator(),
+        if (_exampleQuestions.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                for (int i = 0; i < _exampleQuestions.length; i++)
+                  ActionChip(
+                    key: Key('exampleQuestion$i'),
+                    avatar: const Icon(Icons.lightbulb_outline, size: 18),
+                    label: Text(_exampleQuestions[i]),
+                    onPressed: _ready && !_busy
+                        ? () {
+                            _inputController.text = _exampleQuestions[i];
+                            _send();
+                          }
+                        : null,
+                  ),
+              ],
+            ),
+          ),
         Expanded(
           child: ListView.builder(
             controller: _scrollController,
