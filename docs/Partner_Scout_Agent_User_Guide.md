@@ -67,6 +67,11 @@ The agent runs on its schedule. To set one up:
 One country per run works best. To cover several countries, change the scheduled-run prompt each
 week or upload the agent a second time under another name.
 
+Before scheduling, tap **Test** in the agent dialog and run it once with **Simulate writes**
+on. You see which candidates it finds and the leads and opportunities it would create,
+without anything being stored. See
+[Testing an Agent](Agent_Control_Center_User_Guide.md#testing-an-agent).
+
 ## 5. Working with the results
 
 1. Open **CRM → Opportunities** and filter on *Partner:*.

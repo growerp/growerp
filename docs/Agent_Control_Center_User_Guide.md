@@ -75,6 +75,30 @@ Agents can be triggered automatically on a recurring schedule.
 
 ---
 
+## Testing an Agent
+
+Open a saved agent and tap **Test** next to Cancel. The test always uses the **saved**
+version of the agent, so save your changes first.
+
+* **Check only** runs the rule checks, without any AI call. Errors are problems the next run
+  will hit for sure, for example `{name}` in the instruction (read as a variable that does not
+  exist) or scheduled runs without a cron expression. Warnings are likely problems, such as an
+  allowed service that matches nothing, or web search with a provider other than Gemini.
+* **Run test** runs the agent once with the **Prompt** (empty uses the prompt for scheduled
+  runs). It takes as long as a real run, often a few minutes.
+* **Simulate writes** (on by default): every create, update or delete goes through the
+  permission rules but is not executed. Email, GitHub and Substack tools and external MCP
+  servers are left out, because they cannot be simulated. Turn it off only when you want the
+  test to really change data.
+
+The result shows the number of AI calls against the agent's limit, the tokens used and the
+duration. Then it lists every tool call with its outcome (**ok**, **simulated**, **approval**
+or **blocked**) and the agent's answer. When a run fails you get the error and, for common
+mistakes, a fix. The tokens count toward your AI usage like any other run.
+
+The same rule checks also run when you save an agent or upload a team: an agent with errors
+is not saved.
+
 ## MCP Servers (external tools)
 
 Agents reach Moqui/GrowERP through a built-in MCP (Model Context Protocol) toolset
