@@ -20,13 +20,13 @@ import 'package:growerp_models/growerp_models.dart';
 import 'adk_agent_config_dialog.dart';
 import 'adk_config_service.dart';
 
-/// Function catalog: every "_NA_" template agent function across every real
-/// team (the toy Agent Demo team is excluded server-side), grouped by team,
-/// with a checkbox to add just the ones the admin wants — instead of a single
-/// all-or-nothing "load the whole team" button.
+/// Agent catalog: every published "_NA_" template agent across every real
+/// team, grouped by catalog category (else team), with a checkbox to add just
+/// the ones the admin wants — instead of a single all-or-nothing "load the
+/// whole team" button.
 ///
 /// Reachable from Agent Control (`AdkAgentListView`'s toolbar); on save,
-/// clones exactly the newly-checked functions into this tenant via
+/// clones exactly the newly-checked agents into this tenant via
 /// `AdkConfigService.loadAgentTeam(adkAgentConfigIds: ...)`.
 class AdkFunctionCatalogView extends StatefulWidget {
   const AdkFunctionCatalogView({super.key});
@@ -108,7 +108,7 @@ class _AdkFunctionCatalogViewState extends State<AdkFunctionCatalogView> {
       await _load();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Added $added function(s)')),
+          SnackBar(content: Text('Added $added agent(s)')),
         );
       }
     } catch (e) {
@@ -249,7 +249,7 @@ class _AdkFunctionCatalogViewState extends State<AdkFunctionCatalogView> {
             children: [
               const Expanded(
                 child: Text(
-                  'Function catalog',
+                  'Agent catalog',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -300,7 +300,7 @@ class _AdkFunctionCatalogViewState extends State<AdkFunctionCatalogView> {
       return Center(child: Text('Error: $_error'));
     }
     if (_functions.isEmpty) {
-      return const Center(child: Text('No catalog functions available.'));
+      return const Center(child: Text('No catalog agents available.'));
     }
     final byTeam = <String, List<AdkAgentCatalogFunction>>{};
     for (final f in _functions) {

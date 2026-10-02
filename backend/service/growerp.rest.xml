@@ -1875,16 +1875,6 @@ limitations under the License.
         </resource>
         <!-- ADK Agent Config & Job management -->
         <resource name="AdkAgentConfig">
-            <resource name="EnableMarketingTeam">
-                <method type="post">
-                    <service name="AdkServices100.enable#MarketingAgentTeam"/>
-                </method>
-            </resource>
-            <resource name="LoadAgentDemo">
-                <method type="post">
-                    <service name="AdkServices100.load#AgentDemo"/>
-                </method>
-            </resource>
             <resource name="LoadAgentTeam">
                 <method type="post">
                     <service name="AdkServices100.load#AgentTeam"/>

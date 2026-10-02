@@ -8,7 +8,7 @@ The Agent Development Kit (ADK) package for the GrowERP Flutter frontend. It pro
 
 - **AI Agents Management** - Listing, viewing, and managing AI agents
 - **Agent Configuration** - Configuring agent behaviors, properties, and system prompts
-- **Function Catalog** - Picking individual pre-built agent functions (e.g. the GrowERP Operations Team) into a tenant one at a time, instead of an all-or-nothing team load, plus an AI-assisted "Suggest a function" feasibility check that pre-fills the config dialog
+- **Agent Catalog** - Picking individual pre-built agents (e.g. the Marketing Team or the GrowERP Operations Team) into a tenant one at a time, instead of an all-or-nothing team load, plus an AI-assisted "Suggest a function" feasibility check that pre-fills the config dialog
 - **Scheduled Jobs** - Setting up and managing recurring or scheduled tasks for agents
 - **Agent Chat** - Conversational interfaces for interacting with agents directly
 - **Governance & Audit** - Action auditing and write approvals to safely manage agent actions

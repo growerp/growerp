@@ -134,20 +134,9 @@ class AdkConfigService {
   Future<void> promoteToCatalog(String configId) =>
       _client.promoteAgentToCatalog(adkAgentConfigId: configId);
 
-  /// Clone the GROWERP marketing agent team into this tenant (idempotent).
-  Future<void> enableMarketingTeam() async {
-    await _client.enableMarketingAgentTeam();
-  }
-
-  /// Load the Agent Control Center demo into this tenant (idempotent).
-  Future<void> loadAgentDemo() async {
-    await _client.loadAgentDemo();
-  }
-
   /// Load a named production-ready template team (e.g. "GrowERP Operations
-  /// Team") into this tenant, independently of the Agent Control demo above
-  /// (idempotent). Pass [adkAgentConfigIds] to clone exactly those catalog
-  /// functions instead of the whole team.
+  /// Team") into this tenant (idempotent). Pass [adkAgentConfigIds] to clone
+  /// exactly those catalog agents instead of the whole team.
   Future<void> loadAgentTeam({
     String? teamName,
     List<String>? adkAgentConfigIds,
@@ -158,8 +147,8 @@ class AdkConfigService {
     );
   }
 
-  /// The function catalog: every "_NA_" template function across every real
-  /// team, plus whether this tenant already has each one.
+  /// The agent catalog: every published "_NA_" template agent across every
+  /// real team, plus whether this tenant already has each one.
   Future<List<AdkAgentCatalogFunction>> agentCatalog() async {
     final r = await _client.getAdkAgentCatalog();
     return r.functions;

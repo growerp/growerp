@@ -22,7 +22,7 @@ import 'adk_agent_config_dialog.dart';
 import 'adk_config_service.dart';
 
 /// Support App View: maintain the shared "_NA_" agent catalog — the generally
-/// available agents every tenant can load from its Function catalog and that
+/// available agents every tenant can load from its Agent catalog and that
 /// the public website lists. Edit (incl. published + category), delete, and
 /// upload a team JSON file into the catalog as drafts.
 class AdkCatalogMaintainView extends StatefulWidget {

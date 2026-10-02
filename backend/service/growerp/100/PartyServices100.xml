@@ -4709,8 +4709,8 @@ limitations under the License.
                                 createdDate: nowDate, lastModifiedDate: nowDate]" />
                 </iterate>
             </if>
-            <!-- marketing runs on agents instead of a catalog: clone the GROWERP marketing
-                 agent team into this new tenant. ignore-error: a missing moqui-adk component
+            <!-- marketing runs on agents instead of a catalog: clone the agent catalog's
+                 marketing team into this new tenant. ignore-error: a missing moqui-adk component
                  or a template problem must not fail the whole demo load. -->
             <if condition="applicationId == 'AppMarketing'">
                 <service-call name="AdkServices100.enable#MarketingAgentTeam"

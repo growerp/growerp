@@ -1,13 +1,7 @@
 {
   "@@locale": "th",
-  "adk_enableMarketingAgentTeam": "เปิดใช้งานทีมเอเจนต์การตลาดหรือไม่?",
   "adk_addsTheFiveGrowerp": "เพิ่มs the five GrowERP marketing agents (Outreach Personalizer, ",
-  "adk_marketingAgentTeamEnabled": "เปิดใช้งานทีมตัวแทนการตลาดแล้ว",
-  "adk_enableFailedE": "เปิดใช้งาน failed: {e}",
-  "adk_loadAgentDemo": "โหลดตัวอย่างเอเจนต์หรือไม่?",
   "adk_addsTheAgentControl": "เพิ่มs the Agent Control Center demo: an Operations Assistant that ",
-  "adk_agentDemoLoaded": "โหลดตัวอย่างตัวแทนแล้ว",
-  "adk_loadFailedE": "โหลด failed: {e}",
   "adk_deleteAgent": "ลบเอเจนต์หรือไม่?",
   "adk_deleteFailedE": "ลบ failed: {e}",
   "adk_noAgentsYetNtap": "No agents yet.\\nTap + to create your first agent.",

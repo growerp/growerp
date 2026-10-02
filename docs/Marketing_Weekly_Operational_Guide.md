@@ -10,7 +10,7 @@
 
 | Requirement | Where |
 |---|---|
-| Marketing agent team enabled, each agent has a delivery chat room | **Agent Control → AI Agents** (🚀 rocket icon) |
+| Marketing agent team enabled, each agent has a delivery chat room | **Agent Control → AI Agents** (agent catalog, category *Marketing*) |
 | LLM API key configured | **System Setup** |
 | Platforms enabled with daily limits (LinkedIn, X, Substack, …) | **Outreach → Platforms** |
 | At least one active outreach campaign with recipients | **Outreach → Campaigns** |

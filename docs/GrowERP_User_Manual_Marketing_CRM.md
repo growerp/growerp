@@ -321,7 +321,8 @@ correct titles, descriptions and social-sharing (Open Graph) tags automatically.
 
 Under **Agent Control** you can enable a pre-configured team of five AI marketing
 agents (outreach personaliser, SDR, lead triage, content & social, weekly ops
-digest): press the **rocket button** in the top bar of the agent list and confirm.
+digest): open the **agent catalog** in the top bar of the agent list, check the
+agents under *Marketing* and tap **Add selected**.
 The agents are added to your company with schedules off, except the weekly digest.
 Review each agent's configuration before enabling its schedule.
 

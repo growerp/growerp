@@ -9,7 +9,7 @@ are actually allowed to do, and how to verify it.
 
 Related docs:
 - [Agent Control Center User Guide](./Agent_Control_Center_User_Guide.md) — short UI-only guide
-- [Agent Demo Walkthrough](./Agent_Control_Center_Demo.md) — guided demo of the built-in team
+- [Agent Demo Walkthrough](./Agent_Control_Center_Demo.md) — guided demo with the GrowERP Operations Team
 - [Moqui MCP User Guide](./Moqui_MCP_User_Guide.md) — connecting external MCP clients
 - [Marketing Agent Team User Guide](./Marketing_Agent_Team_User_Guide.md) — the marketing team preset
 - [AI Agent Teams Overview](./AI_Agent_Teams_Overview.md) — short summary of every ready-to-run team, including the GrowERP Operations Team (§16 below)
@@ -599,18 +599,18 @@ and the assistant still knows it. Nothing to configure.
 
 ---
 
-## 13. Walkthrough: the built-in demo team
+## 13. Walkthrough: a demo with the GrowERP Operations Team
 
-**AI Agents → Load agent demo** (flask icon) clones five template agents into your company. It is
-idempotent, and refuses to run for the GROWERP system tenant.
+There is no separate demo team: a demo uses the real **GrowERP Operations Team** (§16), loaded
+from the **agent catalog** (§17) like any other team.
 
 | Agent | Configuration | Demonstrates |
 |---|---|---|
-| Operations Assistant | coordinator, router, read-only | Routing by member description |
-| Inventory Specialist | read-only | Safe autonomous reads + the action log |
-| Support Specialist | read-only, website chat | RAG over policy documents |
-| Sales Specialist | scoped allow-list, `writePolicy=approve` | Tool scoping + approvals |
-| Ops Digest | scheduled `0 0 9 * * ?` | Scheduled autonomous runs |
+| Operations Coordinator | coordinator, router, read-only | Routing by member description |
+| Inventory Digest | read-only | Safe autonomous reads + the action log |
+| Sales Quote and Order Assistant | scoped allow-list, `writePolicy=approve` | Tool scoping + approvals |
+| Sales / Purchasing / Finance / HR Digest | scheduled | Scheduled autonomous runs |
+| any agent | `searchKnowledge` over your own documents | RAG |
 
 Full script in [Agent_Control_Center_Demo.md](./Agent_Control_Center_Demo.md).
 
@@ -662,7 +662,7 @@ Common symptoms:
 
 ## 16. GrowERP Operations Team
 
-Beyond the Marketing team and the toy demo (§13), there is a third, real preset:
+Next to the Marketing team, the agent catalog ships a second preset:
 **`backend/data/GrowerpOperationsTeamData.xml`** covers the company's own core ERP domains —
 Sales, Purchasing, Inventory, Finance, HR — the way the Marketing team covers outreach/CRM.
 
@@ -694,18 +694,20 @@ anything it could not confidently match.
 
 ---
 
-## 17. Function catalog — pick functions individually
+## 17. Agent catalog — pick agents individually
 
 Loading a whole team is sometimes too coarse: the admin may want only the Inventory digest, or
-only the Purchasing assistant. The **function catalog** (toolbar icon next to "Load agent demo"
-on **AI Agents**) lists every *published* `_NA_` template agent across every real team — today the
-GrowERP Operations Team — grouped by catalog category (falling back to team), each with a risk badge (read-only / approval-gated write /
-auto-write) and a checkbox. Already-enabled functions show checked and disabled. **Add selected**
-clones exactly the checked ones.
+only the Purchasing assistant. The **agent catalog** (toolbar icon *Agent catalog* on **AI
+Agents**) lists every *published* `_NA_` template agent across every team — today the Marketing
+Team (`GrowerpMarketingCatalogData.xml`) and the GrowERP Operations Team — grouped by catalog
+category (falling back to team), each with a risk badge (read-only / approval-gated write /
+auto-write) and a checkbox. Agents the company already has (matched by agent name, the key a save
+upserts on) show checked and disabled. **Add selected** clones exactly the checked ones.
 
-The toy demo team (§13, `teamName="Operations Assistant"`) is excluded from the catalog by name —
-it is a fixed onboarding bundle behind its own "Load agent demo" button, not meant to be
-cherry-picked function-by-function.
+The catalog replaces the former "Load agent demo" and "Enable marketing agent team" buttons.
+`AdkServices100.enable#MarketingAgentTeam` remains as the internal call that clones the Marketing
+Team when AppMarketing demo data is loaded. The retired "Operations Assistant" demo team is still
+excluded by name, in case its rows remain in an older database.
 
 Selecting a specialist alone still works: cloning auto-includes its team's coordinator if it is
 not already present, since a specialist is unreachable without one
@@ -751,14 +753,14 @@ restricted to the `GROWERP_M_SYSTEM` group like the other cross-tenant ADK view 
 
 ### Maintain
 
-`AdkCatalogMaintainView` lists every shared catalog agent (`_NA_`, excluding the "Operations
-Assistant" demo team and "System Internal"), published or draft. It is the place to keep the
+`AdkCatalogMaintainView` lists every shared catalog agent (`_NA_`, excluding the retired
+"Operations Assistant" demo team and "System Internal"), published or draft. It is the place to keep the
 catalog itself in shape:
 
 - **Edit** — row tap opens `AdkAgentConfigDialog` in catalog mode: the usual agent fields plus
   **Published** (`catalogPublished`) and **Catalog category** (`catalogCategory`); the
   tenant-only parts (API key, team members, MCP servers, nominate, test) are hidden.
-- **Unpublish** — a draft (`catalogPublished=N`) disappears from every tenant's function catalog
+- **Unpublish** — a draft (`catalogPublished=N`) disappears from every tenant's agent catalog
   (§17) and from the public website list (§20). A null value counts as published.
 - **Delete** — removes the template and its team/MCP links; tenants that already loaded it keep
   their own copy.
@@ -783,7 +785,7 @@ every nominated agent across every tenant (name, owner, description, instruction
 `_NA_` catalog template, stripping `apiKey`, `agentPartyId`, and any literal `scheduleChatRoomId`/
 `approvalChatRoomId` — a real tenant's room id must never leak into a shared template. A first
 promotion lands **unpublished**: set its category and publish it in the Maintain tab, after which it
-shows up in every tenant's function catalog (§17) and on the website (§20). Re-promoting an
+shows up in every tenant's agent catalog (§17) and on the website (§20). Re-promoting an
 already published agent keeps its published flag and category.
 
 ### Suggestion

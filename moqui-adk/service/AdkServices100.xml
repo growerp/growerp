@@ -1205,12 +1205,13 @@
         </actions>
     </service>
 
-    <!-- Clone the GROWERP marketing agent team (Outreach Personalizer, SDR, Lead Triage,
-         Content and Social, Marketing Ops Digest — seeded in GrowerpMarketingAgentsData.xml)
-         into the calling admin's tenant. Same pattern as AdkDemoServices.load#AgentDemo:
-         update#AgentConfig with no id upserts by (ownerPartyId, agentName), so re-running
-         is idempotent. Schedules are cloned disabled except the Ops Digest so a fresh
-         tenant does not immediately start consuming LLM tokens. -->
+    <!-- Clone the catalog marketing team (Outreach Personalizer, Sales Development Rep, Lead
+         Triage, Content and Social, Marketing Ops Digest — "_NA_" templates seeded in
+         GrowerpMarketingCatalogData.xml) into a tenant. Called when AppMarketing demo data is
+         loaded (PartyServices100); admins otherwise pick the team from the agent catalog.
+         clone#AgentTeam upserts by (ownerPartyId, agentName), so re-running is idempotent.
+         Only the Ops Digest template is scheduled, so a fresh tenant does not immediately
+         start consuming LLM tokens. -->
     <service verb="enable" noun="MarketingAgentTeam" transaction-timeout="600">
         <in-parameters>
             <!-- only honoured for an internal call: the tenant setup demo load runs on a worker
@@ -1230,70 +1231,25 @@
                 <return error="true"
                     message="The GROWERP owner already has the marketing team"/>
             </if>
-            <entity-find entity-name="moqui.adk.AdkAgentConfig" list="templates">
-                <econdition field-name="ownerPartyId" value="GROWERP"/>
-                <econdition field-name="adkAgentConfigId" operator="like"
-                    value="GROWERP_%"/>
-                <order-by field-name="adkAgentConfigId"/>
-            </entity-find>
-            <if condition="!templates">
+            <!-- the "_NA_" catalog templates (GrowerpMarketingCatalogData.xml), worded for any
+                 company; only the daily digest is scheduled on a fresh clone -->
+            <entity-count entity-name="moqui.adk.AdkAgentConfig" count-field="enabledCount">
+                <econdition field-name="ownerPartyId" value="_NA_"/>
+                <econdition field-name="teamName" value="Marketing Team"/>
+            </entity-count>
+            <if condition="!enabledCount">
                 <return error="true" message="No marketing agent templates found"/>
             </if>
-            <set field="enabledCount" from="0"/>
-            <iterate list="templates" entry="tmpl">
-                <!-- only the digest keeps its schedule enabled on a fresh clone -->
-                <set field="cloneScheduleEnabled"
-                    from="tmpl.adkAgentConfigId == 'GROWERP_OPS_DIGEST'
-                        ? (tmpl.scheduleEnabled ?: 'N') : 'N'"/>
-                <service-call name="AdkServices.update#AgentConfig" out-map="cfgOut"
-                    in-map="[ownerPartyId: ownerPartyId,
-                             agentName: tmpl.agentName, modelName: tmpl.modelName,
-                             llmProvider: tmpl.llmProvider, instruction: tmpl.instruction,
-                             description: tmpl.description,
-                             scheduleExpression: tmpl.scheduleExpression,
-                             scheduleEnabled: cloneScheduleEnabled,
-                             schedulePrompt: tmpl.schedulePrompt,
-                             toolMode: tmpl.toolMode,
-                             serviceAllowlist: tmpl.serviceAllowlist,
-                             writePolicy: tmpl.writePolicy,
-                             websiteChat: tmpl.websiteChat,
-                             webSearch: tmpl.webSearch,
-                             agentRole: tmpl.agentRole,
-                             orchestrationType: tmpl.orchestrationType,
-                             loopMaxIterations: tmpl.loopMaxIterations,
-                             maxLlmCalls: tmpl.maxLlmCalls,
-                             teamName: tmpl.teamName]"/>
-                <service-call name="AdkSchedulerServices.sync#AgentJob" ignore-error="true"
-                    in-map="[adkAgentConfigId: cfgOut.adkAgentConfigId]"/>
-                <set field="enabledCount" from="enabledCount + 1"/>
-            </iterate>
+            <service-call name="AdkDemoServices.clone#AgentTeam"
+                in-map="[ownerPartyId: ownerPartyId, teamName: 'Marketing Team']"/>
         </actions>
     </service>
 
-    <!-- Load the Agent Control Center demo (Operations Assistant + Sales, Inventory and
-         Support specialists) into the calling admin's tenant on demand. Thin REST wrapper
-         around AdkDemoServices.load#AgentDemo, which is idempotent (upserts by
-         (ownerPartyId, agentName)). -->
-    <service verb="load" noun="AgentDemo" transaction-timeout="600">
-        <actions>
-            <service-call out-map="context"
-                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"/>
-            <if condition="ownerPartyId == 'GROWERP'">
-                <return error="true"
-                    message="The agent demo cannot be loaded for the GROWERP owner"/>
-            </if>
-            <service-call name="AdkDemoServices.load#AgentDemo"
-                in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId,
-                         userPartyId: userPartyId]"/>
-        </actions>
-    </service>
-
-    <!-- Load a named, production-ready "_NA_" template team (as opposed to the toy Agent Demo
-         above) into the calling admin's tenant on demand. Thin REST wrapper around
-         AdkDemoServices.clone#AgentTeam, which is idempotent (upserts by (ownerPartyId,
-         agentName)) and restricted to the given teamName so it never touches the demo team's
+    <!-- Load a named, production-ready "_NA_" template team into the calling admin's tenant on
+         demand. Thin REST wrapper around AdkDemoServices.clone#AgentTeam, which is idempotent (upserts by (ownerPartyId,
+         agentName)) and restricted to the given teamName so it never touches another team's
          rows. Defaults to "GrowERP Operations Team" (Sales/Purchasing/Inventory/Finance/HR
-         digest + scoped-write specialists) since that is the only such team shipped today. -->
+         digest + scoped-write specialists). The agent-catalog picker passes adkAgentConfigIds. -->
     <service verb="load" noun="AgentTeam" transaction-timeout="600">
         <in-parameters>
             <parameter name="teamName" default-value="GrowERP Operations Team"/>
@@ -1311,9 +1267,11 @@
         </actions>
     </service>
 
-    <!-- Function catalog: every "_NA_" template function (across every real team, not just one),
-         excluding the toy Agent Demo's own team, plus whether the calling tenant already has each
-         one (matched by (teamName, agentName), the same key update#AgentConfig upserts on). Backs
+    <!-- Agent catalog: every published "_NA_" template agent (across every real team, not just
+         one), excluding the retired "Operations Assistant" demo team (its rows may remain in
+         older databases) and "System Internal", plus whether the calling tenant already has each
+         one (matched by agentName alone, the same key update#AgentConfig upserts on, so an agent
+         loaded under another team name, e.g. from the old marketing button, still counts). Backs
          AdkFunctionCatalogView's picker. -->
     <service verb="get" noun="AgentCatalog">
         <out-parameters>
@@ -1347,13 +1305,13 @@
                 <econdition field-name="ownerPartyId" from="ownerPartyId"/>
             </entity-find>
             <script>
-                def ownKeys = (ownAgents ?: []).collect { "${it.teamName}::${it.agentName}".toString() } as Set
+                def ownNames = (ownAgents ?: []).collect { it.agentName as String } as Set
                 functions = (templates ?: []).collect { tmpl ->
                     [adkAgentConfigId: tmpl.adkAgentConfigId, agentName: tmpl.agentName,
                      teamName: tmpl.teamName, description: tmpl.description, toolMode: tmpl.toolMode,
                      writePolicy: tmpl.writePolicy, scheduleEnabled: tmpl.scheduleEnabled == 'Y',
                      agentRole: tmpl.agentRole, catalogCategory: tmpl.catalogCategory,
-                     alreadyEnabled: ownKeys.contains("${tmpl.teamName}::${tmpl.agentName}".toString())]
+                     alreadyEnabled: ownNames.contains(tmpl.agentName as String)]
                 }
             </script>
         </actions>

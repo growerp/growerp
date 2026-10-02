@@ -49,6 +49,7 @@ void main() {
     await CommonTest.createCompanyAndAdmin(tester);
 
     await AdkTest.openFunctionCatalog(tester);
+    await AdkTest.addCatalogAgent(tester);
     await AdkTest.openSuggestFunctionDialog(tester);
 
     await CommonTest.logout(tester);

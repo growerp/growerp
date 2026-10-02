@@ -93,109 +93,6 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
     if (result != null) await _load();
   }
 
-  Future<void> _enableMarketingTeam() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(AdkLocalizations.of(context)!.adk_enableMarketingAgentTeam),
-        content: const Text(
-          'Adds the five GrowERP marketing agents (Outreach Personalizer, '
-          'SDR, Lead Triage, Content and Social, Marketing Ops Digest) to '
-          'your company. Schedules start disabled except the daily digest. '
-          'Safe to run again: existing agents are updated, not duplicated.',
-        ),
-        actions: [
-          TextButton(
-            key: const Key('cancelEnableTeam'),
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            key: const Key('confirmEnableTeam'),
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Enable'),
-          ),
-        ],
-      ),
-    );
-    if (confirm != true) return;
-    try {
-      final svc = await AdkConfigService.create();
-      await svc.enableMarketingTeam();
-      await _load();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AdkLocalizations.of(context)!.adk_marketingAgentTeamEnabled,
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AdkLocalizations.of(context)!.adk_enableFailedE(e.toString()),
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _loadAgentDemo() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(AdkLocalizations.of(context)!.adk_loadAgentDemo),
-        content: const Text(
-          'Adds the Agent Control Center demo: an Operations Assistant that '
-          'delegates to Sales, Inventory and Support specialists. '
-          'Safe to run again: existing agents are updated, not duplicated.',
-        ),
-        actions: [
-          TextButton(
-            key: const Key('cancelLoadAgentDemo'),
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            key: const Key('confirmLoadAgentDemo'),
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Load'),
-          ),
-        ],
-      ),
-    );
-    if (confirm != true) return;
-    try {
-      final svc = await AdkConfigService.create();
-      await svc.loadAgentDemo();
-      await _load();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AdkLocalizations.of(context)!.adk_agentDemoLoaded),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AdkLocalizations.of(context)!.adk_loadFailedE(e.toString()),
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
   Future<void> _openFunctionCatalog() async {
     await AdkFunctionCatalogView.show(context);
     await _load();
@@ -338,21 +235,9 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
           },
           actions: [
             IconButton(
-              key: const Key('loadAgentDemo'),
-              icon: const Icon(Icons.science),
-              tooltip: 'Load agent demo',
-              onPressed: _loadAgentDemo,
-            ),
-            IconButton(
-              key: const Key('enableMarketingTeam'),
-              icon: const Icon(Icons.rocket_launch),
-              tooltip: 'Enable marketing agent team',
-              onPressed: _enableMarketingTeam,
-            ),
-            IconButton(
               key: const Key('openFunctionCatalog'),
               icon: const Icon(Icons.precision_manufacturing),
-              tooltip: 'Function catalog',
+              tooltip: 'Agent catalog',
               onPressed: _openFunctionCatalog,
             ),
             IconButton(

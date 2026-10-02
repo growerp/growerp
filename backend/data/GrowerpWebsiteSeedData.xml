@@ -1084,7 +1084,7 @@ You can delete your account and company data from any GrowERP application (GrowE
 
 GrowERP is an AI-native ERP: every company can run governed, auditable AI agents built on Google's **Agent Development Kit (ADK)**, managed from the Agent Control Center in the GrowERP Agents app.
 
-The agents below are in the shared **agent catalog**. Any GrowERP company can add them from the Agent Control Center (**Function catalog**), next to uploading its own agent team file. All agents are open source and can be adjusted after loading.
+The agents below are in the shared **agent catalog**. Any GrowERP company can add them from the Agent Control Center (**Agent catalog**), next to uploading its own agent team file. All agents are open source and can be adjusted after loading.
 
 <div data-growerp-agents></div>
 

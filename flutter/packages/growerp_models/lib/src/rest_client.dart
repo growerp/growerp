@@ -2661,21 +2661,14 @@ abstract class RestClient {
     @Query('catalog') bool? catalog,
   });
 
-  @POST("rest/s1/growerp/100/AdkAgentConfig/EnableMarketingTeam")
-  Future<void> enableMarketingAgentTeam();
-
-  @POST("rest/s1/growerp/100/AdkAgentConfig/LoadAgentDemo")
-  Future<void> loadAgentDemo();
-
   @POST("rest/s1/growerp/100/AdkAgentConfig/LoadAgentTeam")
   Future<void> loadAgentTeam({
     @Query("teamName") String? teamName,
     @Field() List<String>? adkAgentConfigIds,
   });
 
-  /// The function catalog: every "_NA_" template AdkAgentConfig across every real
-  /// team (excludes the toy Agent Demo's own team), plus whether this tenant
-  /// already has each one.
+  /// The agent catalog: every published "_NA_" template AdkAgentConfig across
+  /// every real team, plus whether this tenant already has each one.
   @GET("rest/s1/growerp/100/AdkAgentConfig/AgentCatalog")
   Future<AdkAgentCatalog> getAdkAgentCatalog();
 

@@ -4,35 +4,9 @@
   "@adk_addsTheFiveGrowerp": {
     "description": "Extracted string: Adds the five GrowERP marketing agents (Outreach Personalizer, "
   },
-  "adk_marketingAgentTeamEnabled": "Marketing agent team enabled",
-  "@adk_marketingAgentTeamEnabled": {
-    "description": "Extracted string: Marketing agent team enabled"
-  },
-  "adk_enableFailedE": "Enable failed: {e}",
-  "@adk_enableFailedE": {
-    "description": "Extracted string: Enable failed: $e",
-    "placeholders": {
-      "e": {
-        "type": "String"
-      }
-    }
-  },
   "adk_addsTheAgentControl": "Adds the Agent Control Center demo: an Operations Assistant that ",
   "@adk_addsTheAgentControl": {
     "description": "Extracted string: Adds the Agent Control Center demo: an Operations Assistant that "
-  },
-  "adk_agentDemoLoaded": "Agent demo loaded",
-  "@adk_agentDemoLoaded": {
-    "description": "Extracted string: Agent demo loaded"
-  },
-  "adk_loadFailedE": "Load failed: {e}",
-  "@adk_loadFailedE": {
-    "description": "Extracted string: Load failed: $e",
-    "placeholders": {
-      "e": {
-        "type": "String"
-      }
-    }
   },
   "adk_deleteFailedE": "Delete failed: {e}",
   "@adk_deleteFailedE": {
@@ -367,14 +341,6 @@
         "type": "String"
       }
     }
-  },
-  "adk_enableMarketingAgentTeam": "Enable marketing agent team?",
-  "@adk_enableMarketingAgentTeam": {
-    "description": "Enable marketing agent team?"
-  },
-  "adk_loadAgentDemo": "Load agent demo?",
-  "@adk_loadAgentDemo": {
-    "description": "Load agent demo?"
   },
   "adk_deleteAgent": "Delete agent?",
   "@adk_deleteAgent": {

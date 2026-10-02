@@ -3,16 +3,15 @@
           xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
 
     <!-- Clone "_NA_" template AdkAgentConfig/AdkAgentTeamMember rows into a tenant, restricted
-         either to one teamName or to an explicit list of template ids (the function-catalog
-         picker). Shared by load#AgentDemo (teamName "Operations Assistant", the demo team only),
-         load#AgentTeam (teamName given -> clones a whole named team, e.g. "GrowERP
-         Operations Team") and the catalog picker (adkAgentConfigIds given -> clones exactly the
-         selected functions). Idempotent: re-running upserts agents by (ownerPartyId, agentName)
-         and skips team links that already exist. No GROWERP block here: whether GROWERP itself
-         may load a given team is a per-caller decision (load#AgentDemo's own wrapper blocks it —
-         the toy demo doesn't apply to a tenant that already has a real team; load#AgentTeam does
-         not — the Operations Team is a generic team GROWERP-the-company can use for its own ERP
-         operations too). -->
+         either to one teamName or to an explicit list of template ids (the agent-catalog
+         picker). Shared by enable#MarketingAgentTeam (teamName "Marketing Team"), load#AgentTeam
+         (teamName given -> clones a whole named team, e.g. "GrowERP Operations Team") and the
+         catalog picker (adkAgentConfigIds given -> clones exactly the selected agents).
+         Idempotent: re-running upserts agents by (ownerPartyId, agentName) and skips team links
+         that already exist. No GROWERP block here: whether GROWERP itself may load a given team
+         is a per-caller decision (enable#MarketingAgentTeam blocks it — GROWERP runs its own
+         marketing agents; load#AgentTeam does not — the Operations Team is a generic team
+         GROWERP-the-company can use for its own ERP operations too). -->
     <service verb="clone" noun="AgentTeam" transaction-timeout="600">
         <in-parameters>
             <parameter name="ownerPartyId" required="true"/>
@@ -126,61 +125,6 @@
             <iterate list="coordIds" entry="cid">
                 <script>org.moqui.adk.AdkManager.reloadConfig(cid as String)</script>
             </iterate>
-        </actions>
-    </service>
-
-    <!-- Clone the Agent Control Center demo ("Operations Assistant", the _NA_ template rows in
-         AgentDemoData.xml) into a tenant. Called from AdkServices100.load#AgentDemo when the
-         admin taps "Load agent demo" on the Agent Control screen. Clones only the
-         "Operations Assistant" templates — other named teams (e.g. "GrowERP Operations Team") are loaded separately via
-         load#AgentTeam and never bundled in here. -->
-    <service verb="load" noun="AgentDemo" transaction-timeout="600">
-        <in-parameters>
-            <parameter name="ownerPartyId" required="true"/>
-            <parameter name="companyPartyId"/>
-            <parameter name="userPartyId"/>
-        </in-parameters>
-        <actions>
-            <if condition="ownerPartyId == '_NA_' || ownerPartyId == 'GROWERP'">
-                <return message="Agent demo not loaded for owner ${ownerPartyId}"/>
-            </if>
-
-            <!-- the demo team only: an unfiltered clone would also copy every other shared
-                 catalog agent, including unpublished drafts -->
-            <service-call name="AdkDemoServices.clone#AgentTeam"
-                in-map="[ownerPartyId: ownerPartyId, teamName: 'Operations Assistant']"/>
-
-            <!-- Ingest demo policy docs for the Support specialist's RAG — only when an
-                 embedding-capable key is available (gemini or openai; Anthropic has no
-                 embeddings API). Failures here must never break tenant setup, so each ingest
-                 is best-effort. -->
-            <service-call name="AdkKnowledgeServices.get#TenantEmbedKey" out-map="keyOut"
-                in-map="[ownerPartyId: ownerPartyId]"/>
-            <if condition="keyOut.apiKey">
-                <set field="demoDocs" from="[
-                    ['Return policy': 'Customers may return any item within 30 days of delivery for a full refund, provided it is unused and in its original packaging. Refunds are issued to the original payment method within 5 business days of us receiving the return. Sale items are final and cannot be returned.'],
-                    ['Shipping policy': 'Standard shipping takes 3-5 business days. Express shipping (1-2 business days) is available at checkout for an extra fee. Orders placed before 2pm ship the same day. We currently ship only within the country; international shipping is not yet offered.'],
-                    ['Support hours': 'Customer support is available Monday to Friday, 9am to 6pm. We are closed on weekends and public holidays. Urgent order issues can be flagged in the chat and are picked up the next business day.']
-                ]"/>
-                <iterate list="demoDocs" entry="doc">
-                    <script>
-                        def title = doc.keySet().iterator().next()
-                        def body = doc[title]
-                        // skip if a doc with this title already exists for the tenant
-                        def existingDoc = ec.entity.find('moqui.adk.AdkKnowledgeDoc')
-                            .condition('ownerPartyId', ownerPartyId).condition('title', title).one()
-                        if (existingDoc == null) {
-                            try {
-                                ec.service.sync().name('AdkKnowledgeServices.ingest#AdkKnowledge')
-                                    .parameters([ownerPartyId: ownerPartyId, title: title,
-                                                 text: body, sourceType: 'policy']).call()
-                            } catch (Throwable t) {
-                                ec.logger.warn("Agent demo: knowledge ingest of '${title}' failed: ${t.message}")
-                            }
-                        }
-                    </script>
-                </iterate>
-            </if>
         </actions>
     </service>
 

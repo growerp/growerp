@@ -163,7 +163,7 @@
                              catalogCategory: toCatalog ? catalogCategory : null]"/>
                 <script>idMap[a.adkAgentConfigId as String] = cfgOut.adkAgentConfigId</script>
                 <!-- scheduled agents need a chat room to report to; self-reference the new id
-                     the same way AdkDemoServices.load#AgentDemo does for the built-in demo -->
+                     the same way AdkDemoServices.clone#AgentTeam does for catalog templates -->
                 <!-- not for catalog templates: clone#AgentTeam self-references at clone time -->
                 <if condition="a.scheduleEnabled &amp;&amp; !toCatalog">
                     <service-call name="AdkServices.update#AgentConfig"

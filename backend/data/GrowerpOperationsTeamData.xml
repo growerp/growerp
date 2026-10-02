@@ -4,9 +4,7 @@
     <!-- ════════════════════════════════════════════════════════════════════════
          GrowERP Operations Team — TEMPLATE rows (ownerPartyId="_NA_"), cloned into a
          tenant either whole (AdkServices100.load#AgentTeam) or function-by-function via
-         the "Function catalog" picker on the Agent Control screen (AdkFunctionCatalogView),
-         NOT via the unrelated "Load agent demo" button (that only ever clones the toy
-         "Operations Assistant" demo team, see AgentDemoData.xml).
+         the "Agent catalog" picker on the Agent Control screen (AdkFunctionCatalogView).
 
          Coordinator + read-only digest specialists across every core ERP domain
          (Sales, Purchasing, Inventory, Finance, HR), plus three scoped, approval-gated

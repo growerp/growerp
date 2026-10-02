@@ -12,6 +12,7 @@
  * limitations under the License.
  */
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -346,7 +347,7 @@ class AdkTest {
     await PersistFunctions.persistTest(test.copyWith(adkKnowledgeDocs: []));
   }
 
-  // ── Function catalog ──────────────────────────────────────────────────────
+  // ── Agent catalog ─────────────────────────────────────────────────────────
   /// Open the catalog picker from Agent Control, confirm it lists a real seed
   /// function (the Operations Team coordinator, always present once
   /// backend/data/GrowerpOperationsTeamData.xml is loaded) grouped under its
@@ -359,6 +360,36 @@ class AdkTest {
     await CommonTest.checkWidgetKey(tester, 'functionCatalogList');
     await CommonTest.checkWidgetKey(tester, 'function_OPS_COORD');
     await CommonTest.tapByKey(tester, 'closeFunctionCatalog');
+  }
+
+  /// Add one catalog agent (the Marketing Team's Sales Development Rep,
+  /// seeded by backend/data/GrowerpMarketingCatalogData.xml) through the
+  /// picker, then reopen the picker and confirm it now shows as already
+  /// enabled (checkbox disabled), so it cannot be added twice.
+  static Future<void> addCatalogAgent(WidgetTester tester) async {
+    await selectAgents(tester);
+    await CommonTest.tapByKey(tester, 'openFunctionCatalog',
+        seconds: CommonTest.waitTime);
+    // the picker list is lazy: scroll the Marketing category into view first
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('function_MKT_SDR')),
+      200.0,
+      scrollable: find.descendant(
+        of: find.byKey(const Key('functionCatalogList')),
+        matching: find.byType(Scrollable),
+      ),
+      maxScrolls: 30,
+    );
+    await CommonTest.tapByKey(tester, 'function_MKT_SDR');
+    await CommonTest.tapByKey(tester, 'addSelectedFunctions',
+        seconds: CommonTest.waitTime);
+    final tile = tester.widget<CheckboxListTile>(
+        find.byKey(const Key('function_MKT_SDR')));
+    expect(tile.value, true);
+    expect(tile.onChanged, isNull,
+        reason: 'an agent the company already has cannot be added again');
+    await CommonTest.tapByKey(tester, 'closeFunctionCatalog');
+    expect(find.text('Sales Development Rep'), findsWidgets);
   }
 
   /// Whether an agent created by this test could actually reach an LLM: either

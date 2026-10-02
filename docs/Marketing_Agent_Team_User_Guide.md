@@ -4,15 +4,15 @@ The **marketing agent team** is a ready-made set of five AI agents that run Grow
 marketing loop for you: personalising outreach, answering website visitors, triaging replies,
 producing weekly content, and mailing you a daily digest.
 
-You install the team with one click: the **rocket icon** (🚀 *Enable marketing agent team*)
-on the **Agent Control → AI Agents** screen.
+You add the team from the **agent catalog** on the **Agent Control → AI Agents** screen
+(category *Marketing*). Companies created with marketing demo data get it automatically.
 
 See also: [Agent Control Center User Guide](Agent_Control_Center_User_Guide.md) for the
 general agent screens (Jobs, Approvals, Actions, Knowledge).
 
 ---
 
-## 1. Before you press the rocket
+## 1. Before you add the team
 
 | Requirement | Where |
 |---|---|
@@ -27,15 +27,14 @@ the SDR agent will honestly answer "I don't know" instead of making things up.
 ## 2. Enabling the team
 
 1. Open **Agent Control → AI Agents**.
-2. Tap the **rocket icon** in the search bar (tooltip *Enable marketing agent team*).
-3. Confirm the dialog.
+2. Tap the **agent catalog** icon in the search bar (tooltip *Agent catalog*).
+3. Under **Marketing**, check the agents you want (or all five) and tap **Add selected**.
 
 What happens:
 
-* The five agents are copied into **your company** from the GrowERP templates.
+* The checked agents are copied into **your company** from the shared catalog templates.
 * All schedules start **disabled**, except **Marketing Ops Digest** (daily 9:00).
-* It is **safe to run again** — an existing agent with the same name is updated, not duplicated.
-* You cannot run it on the GROWERP company itself (it already owns the templates).
+* Agents you already have show checked and greyed out, so nothing is duplicated.
 
 You land back on the agent list with five new agents.
 
@@ -49,10 +48,10 @@ LinkedIn messages get no URL and end on a question; e-mails include your assessm
 * Default schedule: hourly, 09:00–17:00 (`0 0 9-17 * * ?`) — **starts disabled**
 * Tool access: scoped to the outreach services; writes allowed
 
-### GrowERP SDR
+### Sales Development Rep (SDR)
 The **public website chat** agent. It answers visitor questions from your Knowledge base
-(RAG), pushes the free trial, and hands hot leads to a human. Read-only — it cannot change
-data. Not scheduled: it reacts to website chat visitors.
+(RAG), encourages the next step (trial, demo or signup), and hands hot leads to a human.
+Read-only — it cannot change data. Not scheduled: it reacts to website chat visitors.
 
 ### Lead Triage
 Every 30 minutes in work hours it lists replied outreach messages plus new opportunities,
@@ -137,5 +136,5 @@ Recommended order: enable the **Digest** first (it only reads), then **Lead Tria
 | Job stuck "running" | Stale lock — use **Clear Lock** in **Agent Jobs**. |
 | SDR answers "I don't know" | Knowledge base empty — add documents under **Knowledge**. |
 | A social post stays READY and never publishes | Its master content isn't approved yet (approve it in **Master Content**), the platform is disabled in **Platform Configuration**, its `scheduledDate` is still in the future, or the platform's daily limit is already reached today. |
-| You already installed the team before this update | The old copy still gates every step through **Approvals** (`writePolicy=approve`). Press the rocket again on **Agent Control → AI Agents** — it updates your existing agents in place with the new approval model, no duplicates. |
+| You already installed the team before this update | The old copy still gates every step through **Approvals** (`writePolicy=approve`). Delete the old agents on **Agent Control → AI Agents** and add them again from the agent catalog. |
 | Article published to Medium isn't public | The Medium publisher intentionally creates a **draft** on Medium — publish it manually there once you're happy with it. |

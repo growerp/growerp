@@ -134,8 +134,8 @@
 **For:** All roles, Developers, Testers
 
 **Contents:**
-- Step-by-step walkthrough of the Operations Assistant team
-- How to load the agent demo data
+- Step-by-step walkthrough with the GrowERP Operations Team
+- How to load the team from the agent catalog
 - Demonstrating tool scoping and approval queues (Sales Specialist)
 - Demonstrating RAG retrieval (Support Specialist)
 - Viewing the Agent Actions audit trail

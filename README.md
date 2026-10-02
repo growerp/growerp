@@ -54,7 +54,7 @@ GrowERP is an open-source, multi-platform ERP application built with a modular a
 - **[🤖 Invoice Scan & AI Extraction](./docs/Invoice_Scan_Documentation.md)** - Invoice scanning and AI-powered data extraction with Google Gemini
 - **[🤖 LLM & API Key Architecture](./docs/GrowERP_LLM_And_API_Key_Architecture.md)** - How GrowERP uses LLMs, resolves API keys, and enforces token limits, plus a catalog of Gemini/Vertex AI (Veo 2) and GenUI features
 - **[🧠 Agent Control Center (ADK)](./docs/Agent_Control_Center_User_Guide.md)** - Guide to multi-agent orchestration, tool scoping, and RAG knowledge ingest
-- **[🎮 Agent Demo Walkthrough](./docs/Agent_Control_Center_Demo.md)** - Test the operations assistant and specialist agent team
+- **[🎮 Agent Demo Walkthrough](./docs/Agent_Control_Center_Demo.md)** - Test the GrowERP Operations Team from the agent catalog
 - **[✨ AI Landing Page Generation](./docs/AI_GENERATED_LANDING_PAGE_PLAN.md)** - Generate professional landing pages with AI and internet research
 - **[💳 Stripe Payment Processing](./docs/Stripe_Payment_Processing_Documentation.md)** - Complete payment integration guide
 - **[🌐 WebSocket Notifications](./docs/WebSocket_Notification_System.md)** - Real-time notification system
