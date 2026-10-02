@@ -26,7 +26,7 @@ class AdkAgentConfigDialog extends StatefulWidget {
 
   /// Support only: edit a shared catalog ("_NA_") agent. Adds published and
   /// category, hides the tenant-only parts (API key, team members, MCP
-  /// servers, nominate, test).
+  /// servers, nominate, run).
   final bool catalog;
 
   const AdkAgentConfigDialog({super.key, this.existing, this.catalog = false});
@@ -1115,7 +1115,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                                 builder: (_) =>
                                     AdkAgentTestDialog(agent: widget.existing!),
                               ),
-                      icon: Icon(Icons.science_outlined),
+                      icon: Icon(Icons.play_arrow),
                       label: Text(AdkLocalizations.of(context)!.adk_testButton),
                     ),
                   TextButton(

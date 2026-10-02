@@ -388,7 +388,7 @@ Approval status values: `pending`, `approved`, `rejected`, `expired`.
   Marketing Ops Digest scheduled, so a fresh or refreshed database does not start writing outreach
   data or spending tokens. In production, switch the other schedules on in Agent Control: seed data
   only loads into an empty database there, so later deploys do not change them.
-- **To run an agent once**, use **Test** in the agent dialog (empty prompt = the scheduled-run
+- **To run an agent once**, use **Run** in the agent dialog (empty prompt = the scheduled-run
   prompt; turn **Simulate writes** off for a real run). Its result shows in the dialog only and is
   not posted to the delivery room. The backend equivalent is
   `AdkSchedulerServices.run#ScheduledAgent` with the `adkAgentConfigId`.
@@ -783,7 +783,7 @@ catalog itself in shape:
 
 - **Edit** — row tap opens `AdkAgentConfigDialog` in catalog mode: the usual agent fields plus
   **Published** (`catalogPublished`) and **Catalog category** (`catalogCategory`); the
-  tenant-only parts (API key, team members, MCP servers, nominate, test) are hidden.
+  tenant-only parts (API key, team members, MCP servers, nominate, run) are hidden.
 - **Unpublish** — a draft (`catalogPublished=N`) disappears from every tenant's agent catalog
   (§17) and from the public website list (§20). A null value counts as published.
 - **Delete** — removes the template and its team/MCP links; tenants that already loaded it keep

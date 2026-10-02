@@ -81,43 +81,35 @@ paused automatically within a minute.
 
 ---
 
-## Testing an Agent
+## Running an Agent
 
-Open a saved agent and tap **Test** next to Cancel. The test always uses the **saved**
-version of the agent, so save your changes first.
+To run an agent one time, without a schedule, open the saved agent and tap **Run** next to
+Cancel. It always runs the **saved** version of the agent, so save your changes first.
 
+* **Prompt**: leave it empty to use the agent's prompt for scheduled runs, or type a one-off
+  task, for example *Find up to 5 new partners in Vietnam.*
+* **Simulate writes** (on by default): every create, update or delete goes through the
+  permission rules but is not executed. Email, GitHub and Substack tools and external MCP
+  servers are left out, because they cannot be simulated. Turn it off for a real run that
+  changes data.
 * **Check only** runs the rule checks, without any AI call. Errors are problems the next run
   will hit for sure, for example `{name}` in the instruction (read as a variable that does not
   exist) or scheduled runs without a cron expression. Warnings are likely problems, such as an
-  allowed service that matches nothing, or web search with a provider other than Gemini.
-* **Run test** runs the agent once with the **Prompt** (empty uses the prompt for scheduled
-  runs). It takes as long as a real run, often a few minutes.
-* **Simulate writes** (on by default): every create, update or delete goes through the
-  permission rules but is not executed. Email, GitHub and Substack tools and external MCP
-  servers are left out, because they cannot be simulated. Turn it off only when you want the
-  test to really change data.
+  allowed service that matches nothing, web search with a provider other than Gemini, or
+  `[[...]]` fill-ins that keep the agent inactive.
+* **Run** runs the agent once with the prompt. It takes as long as a scheduled run, often a few
+  minutes.
 
 The result shows the number of AI calls against the agent's limit, the tokens used and the
 duration. Then it lists every tool call with its outcome (**ok**, **simulated**, **approval**
 or **blocked**) and the agent's answer. When a run fails you get the error and, for common
-mistakes, a fix. The tokens count toward your AI usage like any other run.
+mistakes, a fix. The tokens count toward your AI usage like any other run. The result appears
+only in this dialog; nothing is posted to the agent's delivery chat room.
 
 The same rule checks also run when you save an agent or upload a team: an agent with errors
-is not saved. Open `[[...]]` fill-ins are reported as a warning: the agent is saved but stays
+is not saved. Open `[[...]]` fill-ins are only a warning: the agent is saved but stays
 inactive until they are replaced.
 
-## Running an Agent Once
-
-To run an agent one time without a schedule, use **Test** (above):
-
-1. Open the agent and tap **Test**.
-2. Leave the prompt empty to use the agent's prompt for scheduled runs, or type a one-off task,
-   for example *Find up to 5 new partners in Vietnam.*
-3. Leave **Simulate writes** on for a dry run, or turn it off for a real run that creates the
-   records.
-4. Tap **Run test**.
-
-The result appears only in the test dialog; nothing is posted to the agent's delivery chat room.
 For a back-and-forth instead of a single run, select the agent in **AI Chat**.
 
 ## MCP Servers (external tools)

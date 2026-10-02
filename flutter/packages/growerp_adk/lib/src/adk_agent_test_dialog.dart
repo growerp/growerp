@@ -21,7 +21,8 @@ import 'package:growerp_adk/l10n/generated/adk_localizations.dart';
 
 import 'adk_config_service.dart';
 
-/// Test a saved agent: rule checks without AI, then one run with a prompt.
+/// Run a saved agent once ("Run" in the agent dialog): optional rule checks
+/// without AI, then one run with a prompt.
 /// With "Simulate writes" on, writes are checked by the governance gate but
 /// not executed; the dialog shows every tool call with its decision.
 class AdkAgentTestDialog extends StatefulWidget {
