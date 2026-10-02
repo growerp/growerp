@@ -150,6 +150,25 @@ limitations under the License.
                     </else></if>
                     <entity-update value-field="workEffort" />
                 </if>
+                <if condition="syncRow.communicationEventId">
+                    <entity-find-one entity-name="mantle.party.communication.CommunicationEvent"
+                        value-field="commEvent" for-update="true">
+                        <field-map field-name="communicationEventId" from="syncRow.communicationEventId" />
+                    </entity-find-one>
+                    <if condition="commEvent">
+                        <if condition="event.status == 'cancelled'"><then>
+                            <!-- status stays CeReceived: it decides the direction shown -->
+                            <if condition="!commEvent.subject?.startsWith('Cancelled: ')">
+                                <set field="commEvent.subject" from="'Cancelled: ' + (commEvent.subject ?: '')" /></if>
+                        </then><else>
+                            <if condition="event.summary">
+                                <set field="commEvent.subject" from="event.summary" /></if>
+                            <if condition="startTs">
+                                <set field="commEvent.entryDate" from="startTs" /></if>
+                        </else></if>
+                        <entity-update value-field="commEvent" />
+                    </if>
+                </if>
                 <set field="syncRow.googleUpdated" from="updatedTs" />
                 <if condition="endTs"><set field="syncRow.eventEnd" from="endTs" /></if>
                 <entity-update value-field="syncRow" />
@@ -243,13 +262,48 @@ limitations under the License.
                         roleTypeId: 'ThirdParty',
                         statusId: 'WeptAssigned']" />
             </if>
+            <!-- the booking in the lead's communications: from the lead (they booked) to the
+                 internal organizer, else to the company -->
+            <set field="communicationEventId" from="null" />
+            <if condition="visitorPartyId">
+                <set field="hostPartyId" from="null" />
+                <if condition="event.organizer?.email">
+                    <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany"
+                        list="organizers" limit="1">
+                        <econdition field-name="ownerPartyId" />
+                        <econdition field-name="emailAddress" from="event.organizer.email" />
+                    </entity-find>
+                    <set field="hostPartyId" from="organizers ? organizers[0].userPartyId : null" />
+                </if>
+                <if condition="!hostPartyId">
+                    <entity-find entity-name="mantle.party.PartyDetailAndRole" list="companies" limit="1">
+                        <econdition field-name="ownerPartyId" />
+                        <econdition field-name="partyTypeEnumId" value="PtyOrganization" />
+                        <econdition field-name="roleTypeId" value="OrgInternal" />
+                    </entity-find>
+                    <set field="hostPartyId" from="companies ? companies[0].partyId : null" />
+                </if>
+                <service-call name="create#mantle.party.communication.CommunicationEvent"
+                    out-map="commOut"
+                    in-map="[ownerPartyId: ownerPartyId,
+                        communicationEventTypeId: 'VideoCall',
+                        statusId: 'CeReceived',
+                        fromPartyId: visitorPartyId,
+                        toPartyId: hostPartyId,
+                        entryDate: startTs ?: ec.user.nowTimestamp,
+                        subject: event.summary ?: 'Google Meet with ' + externalName,
+                        body: description,
+                        contentType: 'text/plain']" />
+                <set field="communicationEventId" from="commOut.communicationEventId" />
+            </if>
             <service-call name="create#growerp.crm.CalendarEventSync"
                 in-map="[ownerPartyId: ownerPartyId,
                     googleEventId: event.id,
                     workEffortId: workEffortId,
                     googleUpdated: updatedTs,
                     eventEnd: endTs,
-                    minutesAttached: 'N']" />
+                    minutesAttached: 'N',
+                    communicationEventId: communicationEventId]" />
         </actions>
     </service>
 
@@ -329,6 +383,18 @@ limitations under the License.
                 from="(workEffort.description ?: '') +
                     '\n\n--- Meeting notes (Gemini) ---\n' + notesText" />
             <entity-update value-field="workEffort" />
+            <if condition="syncRow.communicationEventId">
+                <entity-find-one entity-name="mantle.party.communication.CommunicationEvent"
+                    value-field="commEvent" for-update="true">
+                    <field-map field-name="communicationEventId" from="syncRow.communicationEventId" />
+                </entity-find-one>
+                <if condition="commEvent">
+                    <set field="commEvent.note"
+                        from="(commEvent.note ? commEvent.note + '\n\n' : '') +
+                            'Meeting notes (Gemini):\n' + notesText" />
+                    <entity-update value-field="commEvent" />
+                </if>
+            </if>
             <set field="syncRow.minutesAttached" value="Y" />
             <set field="syncRow.minutesDocId" from="minutesDocId" />
             <entity-update value-field="syncRow" />

@@ -28,6 +28,10 @@
                     <description>Public url of the landing page, the value the
                         {landingPageUrl} placeholder resolves to</description>
                 </parameter>
+                <parameter name="meetingUrl">
+                    <description>The tenant's booking page (SystemSettings.googleBookingUrl),
+                        the value the {meetingUrl} placeholder resolves to</description>
+                </parameter>
                 <parameter name="messageTemplate" />
                 <parameter name="emailSubject" />
                 <parameter name="statusId" />
@@ -76,6 +80,9 @@
             <service-call name="growerp.100.NurtureServices100.get#TenantBaseUrl"
                 in-map="[ownerPartyId: ownerPartyId]" out-map="baseUrlOut" />
 
+            <entity-find-one entity-name="growerp.general.SystemSettings" value-field="bookingSettings">
+                <field-map field-name="ownerPartyId" />
+            </entity-find-one>
             <set field="campaigns" from="[]" />
             <iterate list="campaignList" entry="camp">
                 <set field="campLandingPageUrl" value="" />
@@ -103,6 +110,7 @@
                     targetAudience: camp.targetAudience,
                     landingPageId: camp.landingPageId,
                     landingPageUrl: campLandingPageUrl,
+                    meetingUrl: bookingSettings?.googleBookingUrl ?: '',
                     messageTemplate: camp.messageTemplate,
                     emailSubject: camp.emailSubject,
                     platformSettings: camp.platformSettings,
@@ -149,6 +157,10 @@
                 <parameter name="landingPageUrl">
                     <description>Public url of the landing page, the value the
                         {landingPageUrl} placeholder resolves to</description>
+                </parameter>
+                <parameter name="meetingUrl">
+                    <description>The tenant's booking page (SystemSettings.googleBookingUrl),
+                        the value the {meetingUrl} placeholder resolves to</description>
                 </parameter>
                 <parameter name="messageTemplate" />
                 <parameter name="emailSubject" />
@@ -208,6 +220,7 @@
                 targetAudience: campaignValue.targetAudience,
                 landingPageId: campaignValue.landingPageId,
                 landingPageUrl: landingOut.landingPageUrl,
+                meetingUrl: landingOut.meetingUrl,
                 messageTemplate: campaignValue.messageTemplate,
                 emailSubject: campaignValue.emailSubject,
                 platformSettings: campaignValue.platformSettings,
@@ -1251,7 +1264,8 @@
                              recipientName: recipient.recipientName,
                              recipientCompany: recipient.recipientCompany,
                              recipientTitle: recipient.recipientTitle,
-                             landingPageUrl: landingOut.landingPageUrl]" />
+                             landingPageUrl: landingOut.landingPageUrl,
+                             meetingUrl: landingOut.meetingUrl]" />
                 <set field="computedMessageContent"
                     from="recipient.messageContent ?: contentOut.text" />
                 <service-call name="create#growerp.marketing.OutreachMessage"
@@ -1754,8 +1768,16 @@
         </in-parameters>
         <out-parameters>
             <parameter name="landingPageUrl" />
+            <parameter name="meetingUrl">
+                <description>The tenant's booking page, for {meetingUrl}; every caller needs
+                    both, so it comes from the same lookup</description>
+            </parameter>
         </out-parameters>
         <actions>
+            <entity-find-one entity-name="growerp.general.SystemSettings" value-field="bookingSettings">
+                <field-map field-name="ownerPartyId" />
+            </entity-find-one>
+            <set field="meetingUrl" from="bookingSettings?.googleBookingUrl ?: ''" />
             <set field="landingPageUrl" value="" />
             <if condition="!landingPageId">
                 <return />
@@ -1774,9 +1796,10 @@
 
     <service verb="personalize" noun="OutreachText">
         <description>Substitute the recipient placeholders of a subject or body:
-            {name}, {firstName}, {company}, {companyName}, {title} and {landingPageUrl}.
-            Each accepts a fallback after a pipe, {company|your team}, used when the
-            recipient field is empty.
+            {name}, {firstName}, {company}, {companyName}, {title}, {landingPageUrl} and
+            {meetingUrl}. Each accepts a fallback after a pipe, {company|your team}, used when
+            the recipient field is empty. Without a booking page a line holding a plain
+            {meetingUrl} is dropped, so no "book a call:" line is left without a link.
             Used when a message is created from a template AND again at send time, so a
             hand-written subject or an AI-rewritten body gets the same treatment. Idempotent:
             substituted text holds no placeholders left to replace.</description>
@@ -1793,6 +1816,10 @@
                     the campaign has no landing page, which blanks the token like any other
                     empty field.</description>
             </parameter>
+            <parameter name="meetingUrl" allow-html="any">
+                <description>The tenant's booking page for {meetingUrl}; resolve it with
+                    get#CampaignLandingPageUrl.</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="text" allow-html="any" />
@@ -1808,11 +1835,14 @@
                               company: recipientCompany ?: '',
                               companyName: recipientCompany ?: '',
                               title: recipientTitle ?: '',
-                              landingPageUrl: landingPageUrl ?: '']
+                              landingPageUrl: landingPageUrl ?: '',
+                              meetingUrl: meetingUrl ?: '']
+                // no booking page: drop each line with a plain {meetingUrl} (a fallback keeps it)
+                if (!meetingUrl) text = text.replaceAll(/(?m)^[^\n]*\{meetingUrl\}[^\n]*(\r?\n|$)/, '')
                 // {company} substitutes the field, {company|your team} falls back to the text
                 // after the pipe when the field is empty. Without a fallback an unknown field
                 // leaves a hole: "does {company} re-key" went out as "does  re-key".
-                text = text.replaceAll(/\{(name|firstName|company|companyName|title|landingPageUrl)(?:\|([^}]*))?\}/)
+                text = text.replaceAll(/\{(name|firstName|company|companyName|title|landingPageUrl|meetingUrl)(?:\|([^}]*))?\}/)
                         { full, token, fallback -> values[token] ?: (fallback ?: '') }
                 // tidy the seam a blanked token leaves behind, without touching newlines:
                 // the body layout depends on them
@@ -1926,11 +1956,11 @@
                 value="${baseUrl}/nurture/unsubscribe?email=${toEmail}&amp;campaign=${marketingCampaignId}" />
             <service-call name="growerp.100.OutreachServices100.personalize#OutreachText"
                 out-map="subjectOut" in-map="[text: subject, recipientName: toName,
-                    landingPageUrl: landingOut.landingPageUrl]" />
+                    landingPageUrl: landingOut.landingPageUrl, meetingUrl: landingOut.meetingUrl]" />
             <set field="subject" from="subjectOut.text" />
             <service-call name="growerp.100.OutreachServices100.personalize#OutreachText"
                 out-map="bodyOut" in-map="[text: body, recipientName: toName,
-                    landingPageUrl: landingOut.landingPageUrl]" />
+                    landingPageUrl: landingOut.landingPageUrl, meetingUrl: landingOut.meetingUrl]" />
             <service-call name="growerp.100.OutreachServices100.render#OutreachEmailBody"
                 out-map="renderOut"
                 in-map="[bodyText: bodyOut.text, unsubscribeUrl: unsubscribeUrl]" />

@@ -16,6 +16,9 @@ limitations under the License.
     <!-- owner party type -->
 
     <moqui.basic.Enumeration description="Owner" enumId="PtyOwner" enumTypeId="PartyType" />
+    <!-- communications log: a video call, e.g. a Google Meet booked through the booking page -->
+    <mantle.party.communication.CommunicationEventType communicationEventTypeId="VideoCall"
+        description="Video call" />
 
     <moqui.basic.Enumeration enumCode="product_store_id_from_hostname"
         description="Hostname of the html website" enumId="PsstHostname"

@@ -39,6 +39,10 @@ class OutreachCampaign {
   /// placeholder in a message template resolves to.
   final String? landingPageUrl;
 
+  /// The tenant's booking page, set in the Google Workspace settings.
+  /// Read-only: it is the value the {meetingUrl} placeholder resolves to.
+  final String? meetingUrl;
+
   /// Message template with personalization tokens
   final String? messageTemplate;
 
@@ -125,6 +129,7 @@ class OutreachCampaign {
     this.targetAudience,
     this.landingPageId,
     this.landingPageUrl,
+    this.meetingUrl,
     this.messageTemplate,
     this.emailSubject,
     this.platformSettings,
@@ -159,6 +164,7 @@ class OutreachCampaign {
     String? targetAudience,
     String? landingPageId,
     String? landingPageUrl,
+    String? meetingUrl,
     String? messageTemplate,
     String? emailSubject,
     String? platformSettings,
@@ -191,6 +197,7 @@ class OutreachCampaign {
       targetAudience: targetAudience ?? this.targetAudience,
       landingPageId: landingPageId ?? this.landingPageId,
       landingPageUrl: landingPageUrl ?? this.landingPageUrl,
+      meetingUrl: meetingUrl ?? this.meetingUrl,
       messageTemplate: messageTemplate ?? this.messageTemplate,
       emailSubject: emailSubject ?? this.emailSubject,
       platformSettings: platformSettings ?? this.platformSettings,

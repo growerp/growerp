@@ -2576,6 +2576,7 @@ limitations under the License.
             <parameter name="googleClientSecret"/>
             <parameter name="googleRefreshToken"/>
             <parameter name="googleCalendarId"/>
+            <parameter name="googleBookingUrl"/>
             <parameter name="touristTaxPerNight" type="BigDecimal"/>
         </in-parameters>
         <out-parameters>
@@ -2656,6 +2657,7 @@ limitations under the License.
                 <set field="ss.googleRefreshToken" from="googleRefreshToken"/>
             </if>
             <if condition="googleCalendarId != null"><set field="ss.googleCalendarId" from="googleCalendarId"/></if>
+            <if condition="googleBookingUrl != null"><set field="ss.googleBookingUrl" from="googleBookingUrl"/></if>
             <if condition="touristTaxPerNight != null"><set field="ss.touristTaxPerNight" from="touristTaxPerNight"/></if>
 
             <if condition="isNew"><then><script>ss.create()</script></then>

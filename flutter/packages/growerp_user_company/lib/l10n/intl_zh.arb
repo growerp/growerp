@@ -256,6 +256,7 @@
   "commTypePhone": "电话",
   "commTypeEmail": "电子邮件",
   "commTypeFaceToFace": "会面",
+  "commTypeVideoCall": "视频通话",
   "commTypeLetter": "信函",
   "commTypeComment": "评论",
   "commTypeMessage": "消息",

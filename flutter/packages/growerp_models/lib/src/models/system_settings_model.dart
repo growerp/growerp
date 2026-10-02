@@ -52,6 +52,8 @@ abstract class SystemSettings with _$SystemSettings {
     // write-only: backend returns '****' when set
     String? googleRefreshToken,
     String? googleCalendarId,
+    // Public booking page (appointment schedule) link, the {meetingUrl} outreach placeholder
+    String? googleBookingUrl,
     // Hotel: lodging/tourist tax charged per room per night
     @JsonKey(fromJson: _decimalFromJson) Decimal? touristTaxPerNight,
     // Tenant-wide default model for AI content generation; empty uses the system default.

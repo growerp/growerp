@@ -120,25 +120,30 @@ class _LinkedInSendQueueScreenState extends State<LinkedInSendQueueScreen> {
         .replaceAll('{company}', m.recipientCompany ?? '')
         .replaceAll('{companyName}', m.recipientCompany ?? '')
         .replaceAll('{title}', m.recipientTitle ?? '');
-    final landingPageUrl = _landingPageUrl(m);
-    // null = the campaigns are still loading; dropping the token now would
-    // lose the link for good, so leave it and substitute on the rebuild
-    return landingPageUrl == null
-        ? substituted
-        : substituted.replaceAll('{landingPageUrl}', landingPageUrl);
+    final campaign = _campaign(m);
+    // null = the campaigns are still loading; dropping a token now would
+    // lose the link for good, so leave them and substitute on the rebuild
+    if (campaign == null) return substituted;
+    final meetingUrl = campaign.meetingUrl ?? '';
+    // same rule as the backend: without a booking page the line with
+    // {meetingUrl} goes, so no "book a call:" line is left without a link
+    final withMeeting = meetingUrl.isEmpty
+        ? substituted.replaceAll(RegExp(r'^[^\n]*\{meetingUrl\}[^\n]*(\r?\n|$)',
+            multiLine: true), '')
+        : substituted.replaceAll('{meetingUrl}', meetingUrl);
+    return withMeeting.replaceAll(
+        '{landingPageUrl}', campaign.landingPageUrl ?? '');
   }
 
-  /// Public landing page url of the message's campaign: empty when the
-  /// campaign has none, null while the campaign list has not arrived yet.
-  String? _landingPageUrl(OutreachMessage m) {
+  /// The message's campaign: an empty campaign when it is not in the list,
+  /// null while the campaign list has not arrived yet.
+  OutreachCampaign? _campaign(OutreachMessage m) {
     final campaigns = context.read<OutreachCampaignBloc>().state.campaigns;
     if (campaigns.isEmpty) return null;
     for (final campaign in campaigns) {
-      if (campaign.campaignId == m.campaignId) {
-        return campaign.landingPageUrl ?? '';
-      }
+      if (campaign.campaignId == m.campaignId) return campaign;
     }
-    return '';
+    return const OutreachCampaign(name: '', platforms: '', status: '');
   }
 
   Future<void> _copyAndOpen(OutreachMessage m) async {
@@ -214,12 +219,13 @@ class _LinkedInSendQueueScreenState extends State<LinkedInSendQueueScreen> {
         final current = queue.isEmpty ? null : queue[_index];
 
         // Sync the editable body when the current message changes, and once
-        // more when a still-open {landingPageUrl} can finally be resolved
-        // (the campaign list arrives after the first build).
+        // more when a still-open {landingPageUrl} or {meetingUrl} can finally
+        // be resolved (the campaign list arrives after the first build).
         if (current?.messageId != _loadedMessageId ||
             (current != null &&
-                _bodyController.text.contains('{landingPageUrl}') &&
-                _landingPageUrl(current) != null)) {
+                (_bodyController.text.contains('{landingPageUrl}') ||
+                    _bodyController.text.contains('{meetingUrl}')) &&
+                _campaign(current) != null)) {
           _loadedMessageId = current?.messageId;
           _bodyController.text = current == null
               ? ''

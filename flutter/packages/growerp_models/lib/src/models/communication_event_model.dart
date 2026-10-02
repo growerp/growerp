@@ -33,6 +33,8 @@ enum CommunicationEventType {
   comment,
   @JsonValue('Message')
   message,
+  @JsonValue('VideoCall')
+  videoCall,
   @JsonValue('AutoEmail')
   autoEmail,
 }

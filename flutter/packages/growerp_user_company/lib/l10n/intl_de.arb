@@ -256,6 +256,7 @@
   "commTypePhone": "Telefon",
   "commTypeEmail": "E-Mail",
   "commTypeFaceToFace": "Treffen",
+  "commTypeVideoCall": "Videoanruf",
   "commTypeLetter": "Brief",
   "commTypeComment": "Kommentar",
   "commTypeMessage": "Nachricht",

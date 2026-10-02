@@ -256,6 +256,7 @@
   "commTypePhone": "โทรศัพท์",
   "commTypeEmail": "อีเมล",
   "commTypeFaceToFace": "การประชุม",
+  "commTypeVideoCall": "วิดีโอคอล",
   "commTypeLetter": "จดหมาย",
   "commTypeComment": "ความคิดเห็น",
   "commTypeMessage": "ข้อความ",

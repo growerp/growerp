@@ -487,6 +487,10 @@ limitations under the License.
         <field name="googleCalendarId"   type="text-medium">
             <description>Google Calendar id to sync bookings from; 'primary' when empty</description>
         </field>
+        <field name="googleBookingUrl"   type="text-medium">
+            <description>Public Google Calendar booking page (appointment schedule) link; the
+                {meetingUrl} outreach placeholder</description>
+        </field>
         <field name="touristTaxPerNight" type="currency-amount">
             <description>Hotel: lodging/tourist tax charged per room per night; 0/empty = none</description>
         </field>
@@ -537,6 +541,8 @@ limitations under the License.
         <field name="eventEnd"        type="date-time"/>
         <field name="minutesDocId"    type="text-medium"/>
         <field name="minutesAttached" type="text-indicator"/>
+        <field name="communicationEventId" type="id">
+            <description>The VideoCall communication logged for the booking</description></field>
         <relationship type="one" related="mantle.work.effort.WorkEffort"/>
         <index name="CAL_EVT_SYNC_OWNER_EVT" unique="true">
             <index-field name="ownerPartyId"/>

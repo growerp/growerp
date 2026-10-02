@@ -1187,6 +1187,10 @@
   "@commTypeFaceToFace": {
     "description": "Communication type: a face to face meeting"
   },
+  "commTypeVideoCall": "Video call",
+  "@commTypeVideoCall": {
+    "description": "Communication type: a video call, e.g. a booked Google Meet"
+  },
   "commTypeLetter": "Letter",
   "@commTypeLetter": {
     "description": "Communications log: Letter"

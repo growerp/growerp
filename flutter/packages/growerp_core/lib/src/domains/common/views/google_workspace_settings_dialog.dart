@@ -52,6 +52,7 @@ class _GoogleWorkspaceSettingsDialogState
   bool _obscureRefreshToken = true;
   bool _refreshTokenSet = false;
   final _calendarIdCtrl = TextEditingController();
+  final _bookingUrlCtrl = TextEditingController();
 
   RestClient? _restClient;
 
@@ -70,6 +71,7 @@ class _GoogleWorkspaceSettingsDialogState
     _clientSecretCtrl.dispose();
     _refreshTokenCtrl.dispose();
     _calendarIdCtrl.dispose();
+    _bookingUrlCtrl.dispose();
     super.dispose();
   }
 
@@ -86,6 +88,7 @@ class _GoogleWorkspaceSettingsDialogState
       _refreshTokenSet = (s.googleRefreshToken ?? '').isNotEmpty;
       _refreshTokenCtrl.text = _refreshTokenSet ? '****' : '';
       _calendarIdCtrl.text = s.googleCalendarId ?? '';
+      _bookingUrlCtrl.text = s.googleBookingUrl ?? '';
     } catch (e) {
       if (mounted) {
         HelperFunctions.showMessage(
@@ -112,6 +115,7 @@ class _GoogleWorkspaceSettingsDialogState
         if (refreshToken.isNotEmpty && refreshToken != '****')
           'googleRefreshToken': refreshToken,
         'googleCalendarId': _calendarIdCtrl.text,
+        'googleBookingUrl': _bookingUrlCtrl.text.trim(),
         // preserve email/store fields untouched
         'smtpHost': s?.smtpHost ?? '',
         'smtpPort': s?.smtpPort ?? '',
@@ -240,6 +244,28 @@ class _GoogleWorkspaceSettingsDialogState
                                 hintText: 'primary',
                                 prefixIcon: Icon(Icons.calendar_month_outlined),
                               ),
+                            ),
+                            SizedBox(height: 12),
+                            TextFormField(
+                              key: const Key('googleBookingUrl'),
+                              controller: _bookingUrlCtrl,
+                              keyboardType: TextInputType.url,
+                              decoration: const InputDecoration(
+                                labelText: 'Booking page URL',
+                                hintText: 'https://calendar.app.google/...',
+                                helperText:
+                                    'Your appointment schedule link: outreach messages '
+                                    'use it for {meetingUrl}; booked Meet calls are '
+                                    'logged as video calls',
+                                helperMaxLines: 2,
+                                prefixIcon: Icon(Icons.event_available_outlined),
+                              ),
+                              validator: (v) {
+                                final t = (v ?? '').trim();
+                                return t.isEmpty || t.startsWith('https://')
+                                    ? null
+                                    : 'Must start with https://';
+                              },
                             ),
                           ],
                         ),
