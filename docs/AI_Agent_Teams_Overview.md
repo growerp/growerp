@@ -37,7 +37,11 @@ nothing else. **Suggest a function** in the same screen lets an admin describe a
 their own words and get an AI-checked, feasibility-verified draft — grounded in the company's real
 services, never a fabricated one — ready to review before it becomes a real agent.
 
-See [AGENT_CONTROL_CENTER_AND_MCP_GUIDE.md §16-19](./AGENT_CONTROL_CENTER_AND_MCP_GUIDE.md#16-growerp-operations-team) for the full reference.
+The function catalog is the shared **agent catalog**: GrowERP support maintains it (publish,
+categorize, upload contributed teams) and the public [AI Agents](https://www.growerp.com/content/ai-agents)
+website page lists every published agent live, with forms to request a new agent or contribute one.
+
+See [AGENT_CONTROL_CENTER_AND_MCP_GUIDE.md §16-20](./AGENT_CONTROL_CENTER_AND_MCP_GUIDE.md#16-growerp-operations-team) for the full reference.
 
 ## Built for governance, not just automation
 

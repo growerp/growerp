@@ -12,7 +12,8 @@ Built from these building blocks (`flutter/packages/growerp_*`):
 App-specific:
 - `ApplicationList` — registered applications/tenants overview
 - `AdkSystemUsageView` — ADK/system usage monitoring
-- `AdkAgentCatalogView` — "Agent Catalog": two tabs, **Promotion** (review/promote a
+- `AdkAgentCatalogView` — "Agent Catalog": three tabs, **Maintain** (edit, publish/unpublish,
+  categorize, delete and upload agents of the shared catalog), **Promotion** (review/promote a
   tenant-nominated agent into the shared `_NA_` catalog) and **Suggestion** (the tenant-facing
   "Suggest a function" AI feasibility check, run here on behalf of a named tenant, since
   support's own session has no tenant of its own)

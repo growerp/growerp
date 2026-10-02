@@ -698,8 +698,8 @@ anything it could not confidently match.
 
 Loading a whole team is sometimes too coarse: the admin may want only the Inventory digest, or
 only the Purchasing assistant. The **function catalog** (toolbar icon next to "Load agent demo"
-on **AI Agents**) lists every `_NA_` template agent across every real team — today the GrowERP
-Operations Team — grouped by team, each with a risk badge (read-only / approval-gated write /
+on **AI Agents**) lists every *published* `_NA_` template agent across every real team — today the
+GrowERP Operations Team — grouped by catalog category (falling back to team), each with a risk badge (read-only / approval-gated write /
 auto-write) and a checkbox. Already-enabled functions show checked and disabled. **Add selected**
 clones exactly the checked ones.
 
@@ -747,7 +747,26 @@ The Function Scout is cloned into the asking tenant on first use (same catalog-c
 The **support app**'s "Agent Catalog" screen (`AdkAgentCatalogView`, menu item
 `SUPPORT_CATALOG_PROMOTION`, route `/agent-catalog`) is the support-side counterpart to §17-18,
 restricted to the `GROWERP_M_SYSTEM` group like the other cross-tenant ADK view (System Usage,
-§2). It has two tabs:
+§2). It has three tabs:
+
+### Maintain
+
+`AdkCatalogMaintainView` lists every shared catalog agent (`_NA_`, excluding the "Operations
+Assistant" demo team and "System Internal"), published or draft. It is the place to keep the
+catalog itself in shape:
+
+- **Edit** — row tap opens `AdkAgentConfigDialog` in catalog mode: the usual agent fields plus
+  **Published** (`catalogPublished`) and **Catalog category** (`catalogCategory`); the
+  tenant-only parts (API key, team members, MCP servers, nominate, test) are hidden.
+- **Unpublish** — a draft (`catalogPublished=N`) disappears from every tenant's function catalog
+  (§17) and from the public website list (§20). A null value counts as published.
+- **Delete** — removes the template and its team/MCP links; tenants that already loaded it keep
+  their own copy.
+- **Upload team to catalog** — the same team JSON file the AI Agents screen downloads
+  (`import#AdkAgentTeam` with `toCatalog=true`), imported as unpublished drafts.
+
+These reuse the tenant services with a `catalog=true` flag (`get`/`update`/`delete#AdkAgentConfig`,
+`import#AdkAgentTeam`), honoured only for `GROWERP_M_SYSTEM`; it switches the owner to `_NA_`.
 
 ### Promotion
 
@@ -762,8 +781,10 @@ The tab (`AdkCatalogPromotionView`, embedded here rather than its own top-level 
 every nominated agent across every tenant (name, owner, description, instruction,
 `serviceAllowlist`) for a human to actually read before deciding. **Promote** clones it into a new
 `_NA_` catalog template, stripping `apiKey`, `agentPartyId`, and any literal `scheduleChatRoomId`/
-`approvalChatRoomId` — a real tenant's room id must never leak into a shared template. It then
-shows up in every tenant's function catalog (§17), the same as `OPS_PURCH_DRAFT` does today.
+`approvalChatRoomId` — a real tenant's room id must never leak into a shared template. A first
+promotion lands **unpublished**: set its category and publish it in the Maintain tab, after which it
+shows up in every tenant's function catalog (§17) and on the website (§20). Re-promoting an
+already published agent keeps its published flag and category.
 
 ### Suggestion
 
@@ -775,3 +796,23 @@ tenant-side flow would fail for them with no way to test anything. `suggest#Agen
 `ownerPartyId` in-parameter is honoured only for a caller in `GROWERP_M_SYSTEM` — a normal tenant
 admin cannot use it to test on another tenant's behalf, so this is support-only by construction,
 not just by convention.
+
+---
+
+## 20. Public agent catalog on the website
+
+The website's **AI Agents** page (`/content/ai-agents`, wiki page `growerp_ai_agents` in
+`GrowerpWebsiteSeedData.xml`) lists the published catalog live, so it never drifts from what
+tenants can actually load:
+
+- `<div data-growerp-agents></div>` in the page content is filled by
+  `pop-rest-store/template/agentsWidget.html.ftl` (included by `store.xml` and `website.xml`, like
+  the plans widget). It renders cards grouped by `catalogCategory` with badges for coordinator,
+  scheduled and approval-gated agents.
+- Data comes from the anonymous `GET /rest/s1/growerp/100/PublicAgentCatalog`
+  (`AdkServices100.get#PublicAgentCatalog`), which returns only name, team, category, description,
+  role, schedule flag and write policy — never the instruction or service allowlist.
+- Two website forms (`GrowerpAgentCatalogFormsData.xml`) below the list let visitors **request an
+  agent** (`AGENT_REQUEST_FORM`) or **contribute one** (`AGENT_CONTRIBUTE_FORM`, with an optional
+  pasted team JSON). Submissions become GROWERP leads via `submit#WebsiteForm`; a contributed team
+  file can then be uploaded in the Maintain tab (§19) and published after review.

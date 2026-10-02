@@ -115,7 +115,10 @@ void main() {
     expect(find.byKey(const Key('catalogMaintainList')), findsOneWidget,
         reason: 'seeded GrowERP Operations Team templates are in the catalog');
     expect(find.byKey(const Key('uploadCatalogTeam')), findsOneWidget);
-    // unpublish the first catalog agent, then publish it again
+    // unpublish the first catalog agent, then publish it again; a draft must
+    // drop out of the tenant function catalog (get#AgentCatalog)
+    final agentName =
+        tester.widget<Text>(find.byKey(const Key('catalogName0'))).data!;
     for (final published in [false, true]) {
       await CommonTest.tapByKey(tester, 'catalogName0', seconds: 2);
       expect(find.byKey(const Key('AdkAgentConfigDialog')), findsOneWidget);
@@ -130,6 +133,12 @@ void main() {
       expect(find.byKey(const Key('AdkAgentConfigDialog')), findsNothing);
       final icon = tester.widget<Icon>(find.byKey(const Key('catalogPublished0')));
       expect(icon.icon, published ? Icons.check_circle : Icons.edit_note);
+      final picker = await restClient.getAdkAgentCatalog();
+      expect(
+        picker.functions.any((f) => f.agentName == agentName),
+        published,
+        reason: 'tenant function catalog lists only published agents',
+      );
     }
 
     // ---- Promotion tab ------------------------------------------------------
