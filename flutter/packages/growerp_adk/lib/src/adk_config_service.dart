@@ -96,6 +96,19 @@ class AdkConfigService {
     );
   }
 
+  /// The next runs of [cron] (server time zone) plus the server's time zone.
+  Future<AdkSchedulePreview> schedulePreview(String? cron) =>
+      _client.getAdkSchedulePreview(cronExpression: cron);
+
+  /// The server's time zone, loaded once per session: agent schedules are
+  /// stored in server time and shown in local time.
+  static Future<AdkSchedulePreview>? _serverTime;
+  static Future<AdkSchedulePreview> serverTime() => _serverTime ??=
+      create().then((s) => s.schedulePreview(null)).catchError((Object e) {
+        _serverTime = null;
+        throw e;
+      });
+
   /// Rule checks on a saved agent (no AI call).
   Future<List<AdkAgentCheckIssue>> check(String configId) async =>
       (await _client.checkAdkAgentConfig(adkAgentConfigId: configId)).issues;

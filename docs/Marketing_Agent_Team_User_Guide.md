@@ -96,7 +96,8 @@ The clone deliberately does **not** copy chat-room settings, so each agent needs
    Without it a scheduled run only writes to the log.
 3. For *Content and Social*, also set **Approval Chat Room ID** so approval cards reach you.
 4. Turn on **Enable scheduled runs** when you are ready for that agent to work.
-5. Adjust the **cron expression** to your timezone / working hours.
+5. Tap **Change** next to the schedule to set the days and time in your own time (for example
+   *Mon–Fri at 08:00*); the popup shows the next runs before you save.
 
 Recommended order: enable the **Digest** first (it only reads), then **Lead Triage**, then
 **Outreach Personalizer**, and last **Content and Social**.

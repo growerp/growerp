@@ -77,10 +77,11 @@ Open **Agent Actions**. Every step is logged for your tenant only: the digest re
 show the specialist `configId` and the coordinator as `parentConfigId`.
 
 ### 5. Agent Jobs — scheduled work
-Open **Agent Jobs**. The digests are scheduled (`scheduleEnabled=Y`: Sales, Purchasing and
-Inventory daily, Finance and HR weekly) and the Inventory Replenishment Assistant daily. To see a
-run now, trigger `AdkSchedulerServices.run#ScheduledAgent` for one of them. The clone gives each
-scheduled agent its own delivery room id (template rows cannot carry a tenant's room id).
+The digests (Sales, Purchasing and Inventory daily, Finance and HR weekly) and the Inventory
+Replenishment Assistant come with a schedule that is **off**. Open e.g. **Sales Digest**, switch
+**Enable scheduled runs** on and save: it now appears under **Agent Jobs**. To see a run right
+away, use **Run** in the agent dialog. The clone gives each agent with a schedule its own delivery
+room id (template rows cannot carry a tenant's room id).
 
 ### 6. Knowledge — the RAG corpus
 Open **Knowledge** and add a short policy document, e.g. a return policy. Then ask the

@@ -17,6 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'adk_job_service.dart';
+import 'adk_schedule_dialog.dart';
 import 'package:growerp_adk/l10n/generated/adk_localizations.dart';
 
 class AdkJobListView extends StatefulWidget {
@@ -363,13 +364,11 @@ class _AdkJobListViewState extends State<AdkJobListView> {
           key: Key('name$i'),
           style: TextStyle(fontWeight: FontWeight.w500),
         ),
-        Text(
-          job.cronExpression ?? '—',
-          style: TextStyle(
-            fontFamily: 'monospace',
-            fontSize: 12,
-            color: Colors.grey,
-          ),
+        job.cronExpression == null
+            ? Text('—', style: TextStyle(fontSize: 12, color: Colors.grey))
+            : ScheduleText(
+                job.cronExpression!,
+                style: TextStyle(fontSize: 12, color: Colors.grey),
         ),
         Text(lastRunText, style: TextStyle(fontSize: 12)),
         Row(
@@ -477,12 +476,10 @@ class _JobCard extends StatelessWidget {
                 children: [
                   Icon(Icons.access_time, size: 13, color: Colors.grey),
                   SizedBox(width: 4),
-                  Text(
-                    job.cronExpression!,
-                    style: TextStyle(
-                      fontFamily: 'monospace',
-                      fontSize: 12,
-                      color: Colors.grey,
+                  Flexible(
+                    child: ScheduleText(
+                      job.cronExpression!,
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ),
                 ],

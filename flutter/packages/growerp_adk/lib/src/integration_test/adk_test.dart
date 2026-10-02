@@ -205,14 +205,18 @@ class AdkTest {
       await CommonTest.enterDropDown(tester, 'writePolicy', writeLabel);
     }
     if (a.scheduleEnabled) {
-      // Turning the switch on reveals the schedule fields. The 'scheduleEnabled'
+      // Turning the switch on reveals the schedule summary. The 'scheduleEnabled'
       // key is on the SwitchListTile (not the inner Switch), so detect the
-      // current state by whether the schedule field is already shown.
-      if (!await CommonTest.doesExistKey(tester, 'scheduleExpression')) {
+      // current state by whether the summary is already shown.
+      if (!await CommonTest.doesExistKey(tester, 'scheduleSummary')) {
         await CommonTest.tapByKey(tester, 'scheduleEnabled');
       }
+      // the schedule popup's custom option takes the cron as is (server time)
+      await CommonTest.tapByKey(tester, 'editSchedule', seconds: CommonTest.waitTime);
+      await CommonTest.tapByKey(tester, 'scheduleKind_custom');
       await CommonTest.enterText(
           tester, 'scheduleExpression', a.scheduleExpression ?? '0 * * * * ?');
+      await CommonTest.tapByKey(tester, 'scheduleSave', seconds: CommonTest.waitTime);
       if ((a.schedulePrompt ?? '').isNotEmpty) {
         await CommonTest.enterText(tester, 'schedulePrompt', a.schedulePrompt!);
       }

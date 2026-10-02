@@ -1875,6 +1875,11 @@ limitations under the License.
         </resource>
         <!-- ADK Agent Config & Job management -->
         <resource name="AdkAgentConfig">
+            <resource name="SchedulePreview">
+                <method type="get">
+                    <service name="AdkSchedulerServices.get#SchedulePreview"/>
+                </method>
+            </resource>
             <resource name="LoadAgentTeam">
                 <method type="post">
                     <service name="AdkServices100.load#AgentTeam"/>

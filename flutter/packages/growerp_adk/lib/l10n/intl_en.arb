@@ -248,18 +248,6 @@
   "@adk_enableScheduledRuns": {
     "description": "Extracted string: Enable scheduled runs"
   },
-  "adk_h1H2": "{h1}  ({h2})",
-  "@adk_h1H2": {
-    "description": "Extracted string: ${h.$1}  (${h.$2})",
-    "placeholders": {
-      "h1": {
-        "type": "String"
-      },
-      "h2": {
-        "type": "String"
-      }
-    }
-  },
   "adk_noApprovalData": "No approval data",
   "@adk_noApprovalData": {
     "description": "Extracted string: No approval data"
@@ -652,5 +640,67 @@
   "adk_testToolCalls": "Tool calls ({count})",
   "@adk_testToolCalls": {"description": "Agent test dialog", "placeholders": {"count": {"type": "int"}}},
   "adk_testResponse": "Response",
-  "@adk_testResponse": {"description": "Agent test dialog"}
+  "@adk_testResponse": {"description": "Agent test dialog"},
+  "adk_schedEveryMinutes": "Every {n} minutes",
+  "@adk_schedEveryMinutes": {"description": "Agent schedule popup", "placeholders": {"n": {"type": "int"}}},
+  "adk_schedEveryHour": "Every hour at :{minute}",
+  "@adk_schedEveryHour": {"description": "Agent schedule popup", "placeholders": {"minute": {"type": "String"}}},
+  "adk_schedDaily": "Daily at {time}",
+  "@adk_schedDaily": {"description": "Agent schedule popup", "placeholders": {"time": {"type": "String"}}},
+  "adk_schedOnDays": "{days} at {time}",
+  "@adk_schedOnDays": {"description": "Agent schedule popup", "placeholders": {"days": {"type": "String"}, "time": {"type": "String"}}},
+  "adk_schedMonthly": "Monthly on day {day} at {time}",
+  "@adk_schedMonthly": {"description": "Agent schedule popup", "placeholders": {"day": {"type": "int"}, "time": {"type": "String"}}},
+  "adk_schedWindow": "{from}–{to}",
+  "@adk_schedWindow": {"description": "Agent schedule popup", "placeholders": {"from": {"type": "String"}, "to": {"type": "String"}}},
+  "adk_schedCustom": "Custom: {cron} (server time)",
+  "@adk_schedCustom": {"description": "Agent schedule popup", "placeholders": {"cron": {"type": "String"}}},
+  "adk_schedTitle": "Schedule",
+  "@adk_schedTitle": {"description": "Agent schedule popup"},
+  "adk_schedChange": "Change",
+  "@adk_schedChange": {"description": "Agent schedule popup"},
+  "adk_schedKindMinutes": "Every few minutes",
+  "@adk_schedKindMinutes": {"description": "Agent schedule popup"},
+  "adk_schedKindHourly": "Hourly",
+  "@adk_schedKindHourly": {"description": "Agent schedule popup"},
+  "adk_schedKindDaily": "Daily",
+  "@adk_schedKindDaily": {"description": "Agent schedule popup"},
+  "adk_schedKindMonthly": "Monthly",
+  "@adk_schedKindMonthly": {"description": "Agent schedule popup"},
+  "adk_schedKindCustom": "Custom",
+  "@adk_schedKindCustom": {"description": "Agent schedule popup"},
+  "adk_schedAtMinute": "At minute",
+  "@adk_schedAtMinute": {"description": "Agent schedule popup"},
+  "adk_schedTime": "Time",
+  "@adk_schedTime": {"description": "Agent schedule popup"},
+  "adk_schedDays": "Days",
+  "@adk_schedDays": {"description": "Agent schedule popup"},
+  "adk_schedEveryDay": "Every day",
+  "@adk_schedEveryDay": {"description": "Agent schedule popup"},
+  "adk_schedWorkdays": "Mon–Fri",
+  "@adk_schedWorkdays": {"description": "Agent schedule popup"},
+  "adk_schedOnlyBetween": "Only between",
+  "@adk_schedOnlyBetween": {"description": "Agent schedule popup"},
+  "adk_schedFrom": "From",
+  "@adk_schedFrom": {"description": "Agent schedule popup"},
+  "adk_schedTo": "To",
+  "@adk_schedTo": {"description": "Agent schedule popup"},
+  "adk_schedDayOfMonth": "Day of the month",
+  "@adk_schedDayOfMonth": {"description": "Agent schedule popup"},
+  "adk_schedCron": "Cron expression (server time)",
+  "@adk_schedCron": {"description": "Agent schedule popup"},
+  "adk_schedCronHelp": "Quartz: second minute hour day-of-month month day-of-week",
+  "@adk_schedCronHelp": {"description": "Agent schedule popup"},
+  "adk_schedNextRuns": "Next runs (your time)",
+  "@adk_schedNextRuns": {"description": "Agent schedule popup"},
+  "adk_schedTimeZoneNote": "Runs on the server in {server}; times are shown in your time ({local}).",
+  "@adk_schedTimeZoneNote": {"description": "Agent schedule popup", "placeholders": {"server": {"type": "String"}, "local": {"type": "String"}}},
+  "adk_schedErrCrossesMidnight": "In the server's time zone these runs cross midnight. Pick every day, or other hours.",
+  "@adk_schedErrCrossesMidnight": {"description": "Agent schedule popup"},
+  "adk_schedErrMonthEnd": "In the server's time zone this day moves past the 28th. Pick an earlier day.",
+  "@adk_schedErrMonthEnd": {"description": "Agent schedule popup"},
+  "adk_schedErrPartialHour": "Your time zone is not a whole number of hours from the server's. Use every day without an hour window, or a custom cron.",
+  "@adk_schedErrPartialHour": {"description": "Agent schedule popup"},
+  "adk_schedInvalid": "Invalid schedule: {error}",
+  "@adk_schedInvalid": {"description": "Agent schedule popup", "placeholders": {"error": {"type": "String"}}}
 }

@@ -2661,6 +2661,12 @@ abstract class RestClient {
     @Query('catalog') bool? catalog,
   });
 
+  /// The server's time zone, plus the next runs of [cronExpression] when given.
+  @GET("rest/s1/growerp/100/AdkAgentConfig/SchedulePreview")
+  Future<AdkSchedulePreview> getAdkSchedulePreview({
+    @Query('cronExpression') String? cronExpression,
+  });
+
   @POST("rest/s1/growerp/100/AdkAgentConfig/LoadAgentTeam")
   Future<void> loadAgentTeam({
     @Query("teamName") String? teamName,

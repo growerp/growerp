@@ -20,6 +20,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'adk_agent_config_dialog.dart';
+import 'adk_schedule_dialog.dart';
 import 'adk_config_service.dart';
 import 'adk_function_catalog_view.dart';
 import 'package:growerp_adk/l10n/generated/adk_localizations.dart';
@@ -533,12 +534,10 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
                 children: [
                   Icon(Icons.schedule, size: 14, color: cs.primary),
                   const SizedBox(width: 4),
-                  Text(
-                    cfg.scheduleExpression!,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: cs.primary,
-                      fontFamily: 'monospace',
+                  Flexible(
+                    child: ScheduleText(
+                      cfg.scheduleExpression!,
+                      style: TextStyle(fontSize: 12, color: cs.primary),
                     ),
                   ),
                 ],

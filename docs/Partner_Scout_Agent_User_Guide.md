@@ -80,8 +80,8 @@ leads, notes and messages are stored. You can also ask it in **AI Chat**. See
 To run it on a schedule:
 
 1. Tap the **Edit** icon next to the agent.
-2. Tick **Enable scheduled runs** and enter a **Cron Expression**, for example
-   `0 0 8 ? * MON` (Mondays 08:00).
+2. Tick **Enable scheduled runs**, tap **Change** next to the schedule and pick, for example,
+   *Daily*, only **Mon**, at 08:00 in your time. The popup shows the next runs.
 3. Change **Prompt for each scheduled run** to the country and number you want, for example
    *Find up to 5 new ERP implementation freelancer partners in Malaysia.*
 4. Optional: enter a **Chat Room ID for delivery** to get the agent's summary table in chat.

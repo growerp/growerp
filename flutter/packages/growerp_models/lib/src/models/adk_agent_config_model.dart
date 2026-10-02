@@ -328,3 +328,37 @@ class AdkAgentTestRun {
       _$AdkAgentTestRunFromJson(json['testRun'] ?? json);
   Map<String, dynamic> toJson() => _$AdkAgentTestRunToJson(this);
 }
+
+/// The server's time zone and the next runs of a cron expression
+/// (AdkSchedulerServices.get#SchedulePreview). Agent schedules run in the
+/// server's time zone; the schedule popup converts to the user's local time.
+@JsonSerializable()
+class AdkSchedulePreview {
+  final String? serverTimeZone;
+  @JsonKey(defaultValue: 0)
+  final int serverUtcOffsetMinutes;
+
+  /// null when no cron expression was given
+  final bool? valid;
+  final String? error;
+
+  /// ISO-8601 UTC instants
+  @JsonKey(defaultValue: [])
+  final List<String> nextRuns;
+
+  const AdkSchedulePreview({
+    this.serverTimeZone,
+    this.serverUtcOffsetMinutes = 0,
+    this.valid,
+    this.error,
+    this.nextRuns = const [],
+  });
+
+  /// The next runs in the device's local time.
+  List<DateTime> get nextRunsLocal =>
+      nextRuns.map((r) => DateTime.parse(r).toLocal()).toList();
+
+  factory AdkSchedulePreview.fromJson(Map<String, dynamic> json) =>
+      _$AdkSchedulePreviewFromJson(json);
+  Map<String, dynamic> toJson() => _$AdkSchedulePreviewToJson(this);
+}

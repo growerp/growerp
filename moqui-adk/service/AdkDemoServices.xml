@@ -77,8 +77,9 @@
                 <!-- Scheduled agents need a room to report output/errors to. ChatRoom ids are a
                      global PK, so a literal id can't be hardcoded in the _NA_ template (it would
                      collide across tenants) — self-reference the newly-sequenced config id instead,
-                     which is unique per tenant. -->
-                <if condition="tmpl.scheduleEnabled == 'Y'">
+                     which is unique per tenant. Done for every template with a schedule, also
+                     when it starts switched off, so switching it on later delivers to a room. -->
+                <if condition="tmpl.scheduleExpression">
                     <service-call name="AdkServices.update#AgentConfig"
                         in-map="[adkAgentConfigId: cfgOut.adkAgentConfigId, ownerPartyId: ownerPartyId,
                                  agentName: tmpl.agentName, modelName: tmpl.modelName,

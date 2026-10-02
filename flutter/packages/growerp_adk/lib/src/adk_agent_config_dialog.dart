@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'adk_config_service.dart';
+import 'adk_schedule_dialog.dart';
 import 'adk_agent_test_dialog.dart';
 import 'package:growerp_adk/l10n/generated/adk_localizations.dart';
 
@@ -90,13 +91,6 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   /// provider without a key cannot serve an agent, so it is not offered.
   Set<String> _providersWithKey = {};
   bool _providersLoading = true;
-
-  static const _cronHints = [
-    ('Every minute', '0 * * * * ?'),
-    ('Every 5 minutes', '0 */5 * * * ?'),
-    ('Every hour', '0 0 * * * ?'),
-    ('Every day at 9am', '0 0 9 * * ?'),
-  ];
 
   @override
   void initState() {
@@ -1017,41 +1011,34 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                         contentPadding: EdgeInsets.zero,
                         title: Text(AdkLocalizations.of(context)!.adk_enableScheduledRuns),
                         value: _scheduleEnabled,
-                        onChanged: (v) =>
-                            setState(() => _scheduleEnabled = v),
+                        onChanged: (v) async {
+                          setState(() => _scheduleEnabled = v);
+                          // a new schedule starts as daily at 09:00 local time
+                          if (v && _scheduleCronCtrl.text.trim().isEmpty) {
+                            final cron = await defaultScheduleCron();
+                            if (mounted) setState(() => _scheduleCronCtrl.text = cron);
+                          }
+                        },
                       ),
                       if (_scheduleEnabled) ...[
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                key: Key('scheduleExpression'),
-                                controller: _scheduleCronCtrl,
-                                decoration: InputDecoration(
-                                  labelText: 'Cron expression *',
-                                  hintText: '0 * * * * ?',
-                                ),
-                                validator: (v) => (_scheduleEnabled &&
-                                        (v == null || v.trim().isEmpty))
-                                    ? 'Required when schedule enabled'
-                                    : null,
-                              ),
-                            ),
-                            PopupMenuButton<String>(
-                              tooltip: 'Quick schedules',
-                              icon: Icon(Icons.schedule),
-                              onSelected: (v) =>
-                                  setState(() => _scheduleCronCtrl.text = v),
-                              itemBuilder: (_) => _cronHints
-                                  .map(
-                                    (h) => PopupMenuItem<String>(
-                                      value: h.$2,
-                                      child: Text(AdkLocalizations.of(context)!.adk_h1H2(h.$1.toString(), h.$2.toString())),
-                                    ),
-                                  )
-                                  .toList(),
-                            ),
-                          ],
+                        ListTile(
+                          key: Key('scheduleSummary'),
+                          contentPadding: EdgeInsets.zero,
+                          leading: Icon(Icons.schedule),
+                          title: _scheduleCronCtrl.text.trim().isEmpty
+                              ? Text('—')
+                              : ScheduleText(_scheduleCronCtrl.text.trim()),
+                          trailing: TextButton(
+                            key: Key('editSchedule'),
+                            onPressed: () async {
+                              final cron = await AdkScheduleDialog.show(context,
+                                  cron: _scheduleCronCtrl.text.trim());
+                              if (cron != null) {
+                                setState(() => _scheduleCronCtrl.text = cron);
+                              }
+                            },
+                            child: Text(AdkLocalizations.of(context)!.adk_schedChange),
+                          ),
                         ),
                         SizedBox(height: 8),
                         TextFormField(

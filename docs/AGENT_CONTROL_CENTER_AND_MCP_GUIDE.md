@@ -128,8 +128,20 @@ New agents are created with the safe defaults `readOnly` + `approve`.
   need an existing config id. Delegation mode is `tool` (member exposed as a tool) or `transfer`.
 
 ### 3.4 Scheduled runs
-- **Enable scheduled runs**, **Cron Expression** (Quartz 6-field, e.g. `0 0 9 * * ?` = 09:00 daily),
-  **Prompt for each run**, **Chat Room ID for delivery**.
+- **Enable scheduled runs**, **Schedule**, **Prompt for each run**, **Chat Room ID for delivery**.
+- The schedule is stored as a Quartz 6-field cron (`scheduleExpression`, e.g. `0 0 9 * * ?`) that
+  runs in the **server's** time zone (`ScheduledJobRunner` uses the JVM default zone). The UI never
+  shows it raw: `AdkScheduleDialog` (`adk_schedule_dialog.dart`) edits it as every-N-minutes /
+  hourly / daily / monthly with weekdays and an hour window **in the user's local time** and
+  converts with `delta = serverUtcOffset − localUtcOffset` (`AgentSchedule` in `adk_schedule.dart`,
+  unit-tested in `test/adk_schedule_test.dart`). Combinations one cron cannot express after the
+  shift (some weekdays + runs crossing server midnight, day 28 → 29, an hour window in a
+  half-hour zone) are refused in the popup; *Custom* takes a raw server-time cron. The agent list,
+  the dialog and Agent Jobs show any stored cron as plain local-time text (`ScheduleText`),
+  falling back to *Custom: <cron> (server time)*.
+- `GET AdkAgentConfig/SchedulePreview?cronExpression=…` (`AdkSchedulerServices.get#SchedulePreview`)
+  returns the server's time zone and UTC offset and, for a cron, `valid`/`error` and the next five
+  runs as ISO-8601 UTC, with the same cron-utils QUARTZ parser the job runner uses.
 
 Saving syncs a real Moqui `ServiceJob` named `adk_scheduled_<configId>` — see §8.
 
@@ -623,7 +635,7 @@ from the **agent catalog** (§17) like any other team.
 | Operations Coordinator | coordinator, router, read-only | Routing by member description |
 | Inventory Digest | read-only | Safe autonomous reads + the action log |
 | Sales Quote and Order Assistant | scoped allow-list, `writePolicy=approve` | Tool scoping + approvals |
-| Sales / Purchasing / Finance / HR Digest | scheduled | Scheduled autonomous runs |
+| Sales / Purchasing / Finance / HR Digest | schedule (switch on) | Scheduled autonomous runs |
 | any agent | `searchKnowledge` over your own documents | RAG |
 
 Full script in [Agent_Control_Center_Demo.md](./Agent_Control_Center_Demo.md).
@@ -683,12 +695,12 @@ Sales, Purchasing, Inventory, Finance, HR — the way the Marketing team covers 
 | Agent | Domain | Type | Notes |
 |---|---|---|---|
 | Operations Coordinator | — | coordinator, router, read-only | Routes by domain keyword (orders/quotes → Sales, PO/vendor → Purchasing, stock → Inventory, GL → Finance, employees → HR) |
-| Sales Digest | Sales | read-only, scheduled daily | Order stage funnel, AR funnel, oldest open orders |
-| Purchasing Digest | Purchasing | read-only, scheduled daily | PO counts, AP funnel, oldest open POs |
-| Inventory Digest | Inventory | read-only, scheduled daily | Stockouts, and below-minimum-stock when `ProductFacility.minimumStock` is configured |
-| Finance Digest | Finance | read-only, scheduled weekly | Calls `get#FinanceSubsystem` first to branch between full-GL and cash-book reporting deterministically, never guesses from an empty result |
-| HR Digest | HR | read-only, scheduled weekly | Headcount, pending leave, allowance exhaustion |
-| Inventory Replenishment Assistant | Inventory | scoped write, `writePolicy=approve`, scheduled daily | Drafts a PO per vendor for out-of-stock/below-minimum products; every draft held for approval |
+| Sales Digest | Sales | read-only, daily schedule (off by default) | Order stage funnel, AR funnel, oldest open orders |
+| Purchasing Digest | Purchasing | read-only, daily schedule (off by default) | PO counts, AP funnel, oldest open POs |
+| Inventory Digest | Inventory | read-only, daily schedule (off by default) | Stockouts, and below-minimum-stock when `ProductFacility.minimumStock` is configured |
+| Finance Digest | Finance | read-only, weekly schedule (off by default) | Calls `get#FinanceSubsystem` first to branch between full-GL and cash-book reporting deterministically, never guesses from an empty result |
+| HR Digest | HR | read-only, weekly schedule (off by default) | Headcount, pending leave, allowance exhaustion |
+| Inventory Replenishment Assistant | Inventory | scoped write, `writePolicy=approve`, daily schedule (off by default) | Drafts a PO per vendor for out-of-stock/below-minimum products; every draft held for approval |
 | Sales Quote and Order Assistant | Sales | scoped write, `writePolicy=approve`, chat-driven | Drafts a sales quote/order on request |
 | Purchasing Assistant | Purchasing | scoped write, `writePolicy=approve`, chat-driven | Drafts a purchase order on request, including non-catalog items (e.g. office equipment) via a description-only line item |
 

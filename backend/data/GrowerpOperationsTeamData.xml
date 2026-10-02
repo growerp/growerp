@@ -24,6 +24,9 @@
          approval is itself admin-gated in HrServices100 — neither belongs in an agent's
          serviceAllowlist without a separate compliance review.
 
+         Schedules ship switched off (scheduleEnabled="N") with cron and prompt ready, so a
+         company that adds an agent decides when it starts running and spending tokens.
+
          Agents deliberately name no modelName: AdkManager.defaultModelFor resolves it at
          build time (SystemDefault row -> env -> constant), so seed rows never go stale.
          ════════════════════════════════════════════════════════════════════════ -->
@@ -69,7 +72,7 @@ several domains, delegate them in turn. Never invent data."/>
         toolMode="scoped"
         serviceAllowlist="*get#OrderDashboard,*get#AcctSalesDashboard,*get#FinDoc"
         writePolicy="block"
-        scheduleEnabled="Y"
+        scheduleEnabled="N"
         scheduleExpression="0 0 8 * * ?"
         schedulePrompt="Summarize sales order-to-cash health: order stage funnel and salesOrders
 count from growerp.100.FinDocServices100.get#OrderDashboard; AR invoice funnel
@@ -95,7 +98,7 @@ moqui_search_services with a single noun first."/>
         toolMode="scoped"
         serviceAllowlist="*get#OrderDashboard,*get#AcctPurchaseDashboard,*get#FinDoc"
         writePolicy="block"
-        scheduleEnabled="Y"
+        scheduleEnabled="N"
         scheduleExpression="0 0 8 * * ?"
         schedulePrompt="Summarize procure-to-pay health: purchaseOrders count from
 growerp.100.FinDocServices100.get#OrderDashboard; AP invoice funnel (received/approved/paid) and
@@ -121,7 +124,7 @@ moqui_search_services with a single noun first."/>
         toolMode="scoped"
         serviceAllowlist="*get#InventoryDashboard,*get#Assets,*get#Location"
         writePolicy="block"
-        scheduleEnabled="Y"
+        scheduleEnabled="N"
         scheduleExpression="0 0 8 * * ?"
         schedulePrompt="Summarize warehouse status from growerp.100.InventoryServices100.get#InventoryDashboard
 (whLocations, incoming/outgoing shipment funnel); then call growerp.100.InventoryServices100.get#Assets and,
@@ -150,7 +153,7 @@ name, call moqui_search_services with a single noun first."/>
         toolMode="scoped"
         serviceAllowlist="*get#FinanceSubsystem,*get#LedgerDashboard,*get#BalanceSheet,*get#BalanceSummary,*get#TimePeriod,*get#ProfitLoss,*get#CashBookEntry"
         writePolicy="block"
-        scheduleEnabled="Y"
+        scheduleEnabled="N"
         scheduleExpression="0 0 8 ? * MON"
         schedulePrompt="Call growerp.100.AccountingServices100.get#FinanceSubsystem first. If hasAnyActivity is
 false, report that this company has no financial activity yet and stop. If usesCashBookCategories is true,
@@ -183,7 +186,7 @@ moqui_search_services with a single noun first."/>
         toolMode="scoped"
         serviceAllowlist="*get#Employees,*get#Departments,*get#LeaveRequests,*get#LeaveAllowances"
         writePolicy="block"
-        scheduleEnabled="Y"
+        scheduleEnabled="N"
         scheduleExpression="0 0 8 ? * MON"
         schedulePrompt="Weekly HR digest: headcount by department from growerp.100.HrServices100.get#Employees
 and get#Departments; pending (not yet approved) leave requests and upcoming leave from
@@ -211,7 +214,7 @@ of an exact service name, call moqui_search_services with a single noun first."/
         toolMode="scoped"
         serviceAllowlist="*get#Assets,*get#InventoryDashboard,*create#Order,*get#FinDoc"
         writePolicy="approve"
-        scheduleEnabled="Y"
+        scheduleEnabled="N"
         scheduleExpression="0 0 7 * * ?"
         schedulePrompt="Find products needing replenishment via growerp.100.InventoryServices100.get#Assets:
 below their configured minimumStock when one is set for that product/warehouse (mantle.facility.ProductFacility),

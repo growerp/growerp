@@ -68,8 +68,24 @@ GrowERP agents can work together. An agent can either be a specialist doing the 
 ### 4. Scheduled Runs
 Agents can be triggered automatically on a recurring schedule.
 
-* **Enable scheduled runs**: Toggle this on to make the agent a scheduled task.
-* **Cron Expression**: Define the schedule using standard cron syntax (e.g., `0 0 9 * * ?` for every day at 9am). Quick schedules are available via the clock icon.
+* **Enable scheduled runs**: Toggle this on to make the agent a scheduled task. A new schedule
+  starts as daily at 09:00 in your time.
+* **Schedule**: shown in plain words in your own time, e.g. *Mon–Fri at 08:00*. Tap **Change** to
+  open the schedule popup:
+  * **How often**: *Every few minutes* (5–30), *Hourly* (at a chosen minute), *Daily* (at a
+    time), *Monthly* (day 1–28 at a time) or *Custom*.
+  * **Days**: tap weekdays, or use *Every day* / *Mon–Fri* (not for monthly).
+  * **Only between**: for every few minutes and hourly, limit the runs to a block of hours,
+    e.g. 09:00–17:59.
+  * **Custom**: a Quartz cron expression in the **server's** time zone, for anything else.
+  * Below, the popup shows the schedule in words, the **next five runs in your time**, and the
+    server's time zone. Agents run on the server, which may be in another time zone (UTC on
+    growerp.com); the popup converts your time for you.
+  * Some combinations cannot be converted exactly, for example hourly on only some weekdays when
+    those runs cross midnight in the server's time zone. The popup then says so and Save stays
+    off until you pick every day or limit the hours.
+  * The conversion uses your current UTC offset. After a daylight-saving change, open the
+    schedule and save it again.
 * **Prompt for each scheduled run**: The explicit prompt given to the agent when the schedule triggers (e.g., "Summarize the orders from the last 24 hours").
 * **Chat Room ID for delivery**: If provided, the agent will post the result of its scheduled run to this chat room. If left blank, the run will only be logged.
 

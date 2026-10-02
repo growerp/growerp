@@ -2,6 +2,57 @@
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
 
+    <!-- The server's time zone and the next runs of a cron expression, for the Flutter schedule
+         popup: agent jobs run in the server's system time zone (ScheduledJobRunner), with the
+         same cron-utils QUARTZ parser used here. nextRuns are ISO-8601 UTC strings. -->
+    <service verb="get" noun="SchedulePreview">
+        <in-parameters>
+            <parameter name="cronExpression"/>
+            <parameter name="count" type="Integer" default="5"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="serverTimeZone"/>
+            <parameter name="serverUtcOffsetMinutes" type="Integer"/>
+            <parameter name="valid" type="Boolean"/>
+            <parameter name="error"/>
+            <parameter name="nextRuns" type="List"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                import com.cronutils.model.CronType
+                import com.cronutils.model.definition.CronDefinitionBuilder
+                import com.cronutils.model.time.ExecutionTime
+                import com.cronutils.parser.CronParser
+                import java.time.ZoneId
+                import java.time.ZoneOffset
+                import java.time.ZonedDateTime
+                import java.time.format.DateTimeFormatter
+
+                ZonedDateTime now = ZonedDateTime.now(ZoneId.systemDefault())
+                serverTimeZone = ZoneId.systemDefault().getId()
+                serverUtcOffsetMinutes = now.getOffset().getTotalSeconds().intdiv(60) as Integer
+                nextRuns = []
+                if (cronExpression?.trim()) {
+                    try {
+                        def parser = new CronParser(CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ))
+                        def executionTime = ExecutionTime.forCron(parser.parse(cronExpression.trim()))
+                        ZonedDateTime t = now
+                        for (int i = 0; i < (count ?: 5); i++) {
+                            def next = executionTime.nextExecution(t)
+                            if (!next.isPresent()) break
+                            t = next.get()
+                            nextRuns.add(t.withZoneSameInstant(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT))
+                        }
+                        valid = true
+                    } catch (Exception e) {
+                        valid = false
+                        error = e.getMessage()
+                    }
+                }
+            ]]></script>
+        </actions>
+    </service>
+
     <!-- Sync a config's per-agent ServiceJob: create/update when scheduleEnabled=Y with a
          scheduleExpression, pause otherwise. The per-agent job (cron = scheduleExpression) is
          the source of truth for the schedule. Called from create#/update#AdkAgentConfig and
