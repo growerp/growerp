@@ -101,6 +101,14 @@ The clone deliberately does **not** copy chat-room settings, so each agent needs
 Recommended order: enable the **Digest** first (it only reads), then **Lead Triage**, then
 **Outreach Personalizer**, and last **Content and Social**.
 
+Before switching on a schedule, run the agent once with **Test** in its dialog: an empty prompt
+uses the scheduled-run prompt, and **Simulate writes** (on by default) shows what it would create
+without changing data. See [Running an Agent Once](Agent_Control_Center_User_Guide.md#running-an-agent-once).
+
+**GrowERP company:** its own marketing agents come with the seed data and, like a copy from the
+catalog, only the **Marketing Ops Digest** is scheduled. After a database refresh, switch the
+other schedules on here when you want them to work; in production they keep the schedules you set.
+
 ## 5. Running the team day to day
 
 * **Agent Control → Agent Jobs** — see the last run, its status and schedule. Pause/resume an

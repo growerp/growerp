@@ -71,7 +71,13 @@ run.
 
 ## 4. Running it
 
-The agent runs on its schedule. To set one up:
+The agent is not scheduled by default. To run it **once**, tap **Test** in the agent dialog,
+type the country and number as the prompt (for example *Find up to 5 new partners in Vietnam.*),
+turn **Simulate writes** off and tap **Run test**. The summary table appears in the dialog; the
+leads, notes and messages are stored. You can also ask it in **AI Chat**. See
+[Running an Agent Once](Agent_Control_Center_User_Guide.md#running-an-agent-once).
+
+To run it on a schedule:
 
 1. Tap the **Edit** icon next to the agent.
 2. Tick **Enable scheduled runs** and enter a **Cron Expression**, for example
@@ -82,7 +88,7 @@ The agent runs on its schedule. To set one up:
 5. Save. The run appears under **Agent Control → Jobs** with its last status.
 
 One country per run works best. To cover several countries, change the scheduled-run prompt each
-week or upload the agent a second time under another name.
+week, or run it once per extra country as described above.
 
 Before scheduling, tap **Test** in the agent dialog and run it once with **Simulate writes**
 on. You see which candidates it finds and the leads, notes and messages it would create,

@@ -374,10 +374,24 @@ Approval status values: `pending`, `approved`, `rejected`, `expired`.
 
 - Saving a schedule-enabled agent creates/updates a Moqui `ServiceJob` named
   `adk_scheduled_<configId>` with the agent's cron expression.
-- A master job `AdkScheduledAgents` runs every minute purely to **backfill** missing per-agent jobs;
+- A master job `AdkScheduledAgents` runs every minute to **backfill** missing per-agent jobs;
   it does not run agents inline when they have their own cron expression. (Historically it did,
   which drained tokens every minute — fixed via `sync#AgentJob`.)
-- The `_NA_` template rows and disabled agents are always left paused.
+- The same master job **pauses** every running `adk_scheduled_*` job whose agent was deleted, has
+  scheduled runs off, is inactive (`enabled=N`, e.g. unfilled `[[...]]` fill-ins, §17) or is a
+  `_NA_` template. This catches changes made outside the save path, such as a seed reload that
+  switched a schedule off.
+- After a failed run Moqui waits `ServiceJob.minRetryTime` (default 5 minutes) before running that
+  job again, so a fix to a failing job service takes effect on the first retry after that.
+- The `_NA_` template rows and inactive agents are always left paused.
+- **GrowERP's own marketing agents** (`GrowerpMarketingAgentsData.xml`) seed with only the
+  Marketing Ops Digest scheduled, so a fresh or refreshed database does not start writing outreach
+  data or spending tokens. In production, switch the other schedules on in Agent Control: seed data
+  only loads into an empty database there, so later deploys do not change them.
+- **To run an agent once**, use **Test** in the agent dialog (empty prompt = the scheduled-run
+  prompt; turn **Simulate writes** off for a real run). Its result shows in the dialog only and is
+  not posted to the delivery room. The backend equivalent is
+  `AdkSchedulerServices.run#ScheduledAgent` with the `adkAgentConfigId`.
 - A run calls the agent once with **Prompt for each scheduled run** (falling back to the
   instruction), then posts `[<agentName>] <result>` into the delivery chat room — creating the room
   and its members if needed — and pushes a live notification.

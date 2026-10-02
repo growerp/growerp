@@ -73,6 +73,12 @@ Agents can be triggered automatically on a recurring schedule.
 * **Prompt for each scheduled run**: The explicit prompt given to the agent when the schedule triggers (e.g., "Summarize the orders from the last 24 hours").
 * **Chat Room ID for delivery**: If provided, the agent will post the result of its scheduled run to this chat room. If left blank, the run will only be logged.
 
+A schedule only runs while the agent is **active**. An agent added from the agent catalog
+with `[[...]]` fill-ins left in its instruction is saved but inactive (marked in the agent
+list), and its schedule does not run until every fill-in is replaced. Under **Agent Jobs** you
+can pause and resume a schedule; a job whose agent was deleted, unscheduled or made inactive is
+paused automatically within a minute.
+
 ---
 
 ## Testing an Agent
@@ -97,7 +103,22 @@ or **blocked**) and the agent's answer. When a run fails you get the error and, 
 mistakes, a fix. The tokens count toward your AI usage like any other run.
 
 The same rule checks also run when you save an agent or upload a team: an agent with errors
-is not saved.
+is not saved. Open `[[...]]` fill-ins are reported as a warning: the agent is saved but stays
+inactive until they are replaced.
+
+## Running an Agent Once
+
+To run an agent one time without a schedule, use **Test** (above):
+
+1. Open the agent and tap **Test**.
+2. Leave the prompt empty to use the agent's prompt for scheduled runs, or type a one-off task,
+   for example *Find up to 5 new partners in Vietnam.*
+3. Leave **Simulate writes** on for a dry run, or turn it off for a real run that creates the
+   records.
+4. Tap **Run test**.
+
+The result appears only in the test dialog; nothing is posted to the agent's delivery chat room.
+For a back-and-forth instead of a single run, select the agent in **AI Chat**.
 
 ## MCP Servers (external tools)
 
