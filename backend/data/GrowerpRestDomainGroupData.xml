@@ -46,7 +46,7 @@ The 28 anonymous-* resources bypass authz entirely and need no domain.
         description="Own company and the people in it"/>
     <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_COMPANY"
         artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
-        artifactName="/growerp/100/(CompanyUser|Company|User)(/.*)?"/>
+        artifactName="/growerp/100/(CommunicationEvent|CompanyUser|Company|User)(/.*)?"/>
 
     <moqui.security.ArtifactGroup artifactGroupId="GROWERP_CRM"
         description="Opportunities and pipeline"/>
@@ -153,7 +153,7 @@ The 28 anonymous-* resources bypass authz entirely and need no domain.
         description="AI agents, their jobs, tools and approvals"/>
     <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_ADK"
         artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
-        artifactName="/growerp/100/(AdkKnowledgeImportProducts|AgentControlDashboard|AdkAgentMcpServer|AdkAgentConfig|AdkSystemUsage|AdkAgentTeam|AdkKnowledge|AdkMcpServer|AdkApproval|AdkAction|AdkMemory|AdkJob)(/.*)?"/>
+        artifactName="/growerp/100/(AdkKnowledgeImportProducts|AgentControlDashboard|AdkAgentMcpServer|AdkAgentConfig|AdkSystemUsage|AdkAgentTeam|AdkAgentTest|AdkKnowledge|AdkMcpServer|AdkApproval|AdkAction|AdkMemory|AdkJob)(/.*)?"/>
 
     <moqui.security.ArtifactGroup artifactGroupId="GROWERP_SETUP"
         description="Tenant setup: email, system settings, subscriptions, import/export"/>
