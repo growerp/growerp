@@ -8,6 +8,9 @@
          re-run on an existing database).
          Agents need an LLM key (config/AdkAgentConfig.apiKey or GOOGLE_API_KEY env).
          Each scheduled agent ships with a default scheduleChatRoomId; change it per agent in /adk if needed.
+         Only the Marketing Ops Digest is scheduled by default, so a fresh or refreshed database
+         does not start writing outreach data or spending LLM tokens; switch the other schedules
+         on in Agent Control in production (seed only loads into an empty database there).
          See plans/marketing-sales-plan.md.
          Agents deliberately name no modelName: AdkManager.defaultModelFor resolves it at
          build time (SystemDefault row -> env -> constant), so seed rows never go stale.
@@ -25,7 +28,7 @@
         toolMode="scoped"
         serviceAllowlist="*list#OutreachMessages,*get#OutreachCampaign,*generate#PlatformMessage,*update#OutreachMessageContent"
         writePolicy="allow"
-        scheduleEnabled="Y"
+        scheduleEnabled="N"
         scheduleChatRoomId="GROWERP_OUTREACH_ROOM"
         scheduleExpression="0 0 9-17 * * ?"
         schedulePrompt="Fill in PENDING outreach messages that have an EMPTY body, up to 50: fetch with growerp.100.OutreachServices100.list#OutreachMessages (status=PENDING), SKIP every message that already has messageContent, and for the empty ones call growerp.100.OutreachServices100.generate#PlatformMessage grounded on the campaign template + recipient name/title/company, then save with growerp.100.OutreachServices100.update#OutreachMessageContent. Never touch SENT messages and never overwrite a body that already has text. Report how many you filled and how many you skipped."
@@ -88,7 +91,7 @@ Hans can follow up here."/>
         toolMode="scoped"
         serviceAllowlist="*list#OutreachMessages,*get#Opportunity,*get#CampaignProgress,*create#ChatMessage,*enroll#EmailSequence,*create#Activity"
         writePolicy="allow"
-        scheduleEnabled="Y"
+        scheduleEnabled="N"
         scheduleChatRoomId="GROWERP_LEAD_TRIAGE_ROOM"
         scheduleExpression="0 0,30 9-18 * * ?"
         schedulePrompt="List RESPONDED outreach messages (growerp.100.OutreachServices100.list#OutreachMessages) and new opportunities (growerp.100.CrmServices100.get#Opportunity); rank hottest-first by fit and intent; draft a short follow-up for the top few and post a ranked summary to team chat (growerp.100.ChatServices100.create#ChatMessage)."
@@ -121,7 +124,7 @@ moqui_search_services with a single noun and use the exact name it returns."/>
         toolMode="scoped"
         serviceAllowlist="*MarketingPersona*,*ContentPlan*,*list#SocialPosts,*list#MasterContents,*create#MasterContent,*update#MasterContent,*generate#MasterContent,*adapt#ContentForPlatform"
         writePolicy="allow"
-        scheduleEnabled="Y"
+        scheduleEnabled="N"
         scheduleChatRoomId="GROWERP_CONTENT_ROOM"
         scheduleExpression="0 0 8 ? * MON"
         schedulePrompt="Ensure a persona for SMB owners on spreadsheets (generate if missing) with

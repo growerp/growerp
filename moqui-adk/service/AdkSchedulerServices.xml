@@ -60,6 +60,21 @@
     <service verb="run" noun="AllScheduledAgents" authenticate="anonymous-all">
         <description>Backfill per-agent jobs for scheduled configs; run only legacy (expression-less) configs inline.</description>
         <actions>
+            <!-- Pause the job of any agent that is no longer scheduled or active: its config was
+                 changed outside the save path (e.g. a seed reload switched the schedule off), or
+                 the agent was deleted. sync#AgentJob below only ever looks at scheduled configs. -->
+            <entity-find entity-name="moqui.service.job.ServiceJob" list="agentJobs" for-update="true">
+                <econdition field-name="jobName" operator="like" value="adk_scheduled_%"/>
+                <econdition field-name="paused" operator="not-equals" value="Y" or-null="true"/>
+            </entity-find>
+            <iterate list="agentJobs" entry="agentJob">
+                <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="jobCfg"
+                    auto-field-map="[adkAgentConfigId: agentJob.jobName.substring('adk_scheduled_'.length())]"/>
+                <if condition="!jobCfg || jobCfg.scheduleEnabled != 'Y' || jobCfg.enabled == 'N' || jobCfg.ownerPartyId == '_NA_'">
+                    <set field="agentJob.paused" value="Y"/>
+                    <entity-update value-field="agentJob"/>
+                </if>
+            </iterate>
             <entity-find entity-name="moqui.adk.AdkAgentConfig" list="cfgList">
                 <econdition field-name="scheduleEnabled" value="Y"/>
                 <econdition field-name="enabled"         value="Y"/>
