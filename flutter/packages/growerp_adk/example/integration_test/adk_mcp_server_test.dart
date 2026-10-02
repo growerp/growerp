@@ -90,6 +90,9 @@ void main() {
     await CommonTest.tapByKey(tester, 'addAdkAgent');
     await CommonTest.checkWidgetKey(tester, 'AdkAgentConfigDialog');
     await CommonTest.enterText(tester, 'agentName', 'McpHost');
+    // save rejects an agent without an instruction or scheduled-run prompt
+    await CommonTest.enterText(
+        tester, 'instruction', 'Host for an external MCP server.');
     await CommonTest.tapByKey(tester, 'AdkAgentConfigSave',
         seconds: CommonTest.waitTime);
     await CommonTest.waitForSnackbarToGo(tester);

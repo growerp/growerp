@@ -376,21 +376,24 @@ class AdkTest {
     await selectAgents(tester);
     await CommonTest.tapByKey(tester, 'openFunctionCatalog',
         seconds: CommonTest.waitTime);
+    // the picker list is lazy: scroll the entry into view first
+    Future<void> scrollTo(String id) => tester.scrollUntilVisible(
+          find.byKey(Key('function_$id')),
+          200.0,
+          scrollable: find.descendant(
+            of: find.byKey(const Key('functionCatalogList')),
+            matching: find.byType(Scrollable),
+          ),
+          maxScrolls: 30,
+        );
     for (final id in ['PARTNER_SCOUT', 'MKT_SDR']) {
-      // the picker list is lazy: scroll the entry into view first
-      await tester.scrollUntilVisible(
-        find.byKey(Key('function_$id')),
-        200.0,
-        scrollable: find.descendant(
-          of: find.byKey(const Key('functionCatalogList')),
-          matching: find.byType(Scrollable),
-        ),
-        maxScrolls: 30,
-      );
+      await scrollTo(id);
       await CommonTest.tapByKey(tester, 'function_$id');
     }
     await CommonTest.tapByKey(tester, 'addSelectedFunctions',
         seconds: CommonTest.waitTime);
+    // the list reloads after adding and starts at the top again
+    await scrollTo('MKT_SDR');
     final tile = tester.widget<CheckboxListTile>(
         find.byKey(const Key('function_MKT_SDR')));
     expect(tile.value, true);

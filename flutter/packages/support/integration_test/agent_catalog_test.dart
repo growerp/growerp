@@ -115,11 +115,15 @@ void main() {
     expect(find.byKey(const Key('catalogMaintainList')), findsOneWidget,
         reason: 'seeded GrowERP Operations Team templates are in the catalog');
     expect(find.byKey(const Key('uploadCatalogTeam')), findsOneWidget);
-    // unpublish the first catalog agent, then publish it again; a draft must
-    // drop out of the tenant function catalog (get#AgentCatalog)
+    // toggle the published flag of the first catalog agent, then restore it
+    // (row 0 may be a draft, e.g. the demo team); a draft must drop out of
+    // the tenant function catalog (get#AgentCatalog)
     final agentName =
         tester.widget<Text>(find.byKey(const Key('catalogName0'))).data!;
-    for (final published in [false, true]) {
+    final wasPublished =
+        tester.widget<Icon>(find.byKey(const Key('catalogPublished0'))).icon ==
+            Icons.check_circle;
+    for (final published in [!wasPublished, wasPublished]) {
       await CommonTest.tapByKey(tester, 'catalogName0', seconds: 2);
       expect(find.byKey(const Key('AdkAgentConfigDialog')), findsOneWidget);
       expect(find.byKey(const Key('catalogCategory')), findsOneWidget);

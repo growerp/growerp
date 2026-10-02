@@ -1064,7 +1064,13 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                 ),
               ),
               SizedBox(height: 8),
-              Row(
+              // Wrap, not Row: with all buttons shown the row is wider than a
+              // phone, which pushed Save off-screen
+              Wrap(
+                alignment: WrapAlignment.end,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 8,
+                runSpacing: 4,
                 children: [
                   if (widget.catalog &&
                       widget.existing?.adkAgentConfigId != null)
@@ -1089,7 +1095,6 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                             : 'Suggest for shared catalog',
                       ),
                     ),
-                  Spacer(),
                   if (!widget.catalog &&
                       widget.existing?.adkAgentConfigId != null)
                     TextButton.icon(
@@ -1111,7 +1116,6 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                         _saving ? null : () => Navigator.of(context).pop(),
                     child: Text('Cancel'),
                   ),
-                  SizedBox(width: 8),
                   FilledButton(
                     key: Key('AdkAgentConfigSave'),
                     onPressed: _saving ? null : _save,
