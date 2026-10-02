@@ -136,5 +136,19 @@
   "adk_dashTokens": "tokens",
   "adk_dashServers": "servidores",
   "adk_dashDocs": "docs",
-  "adk_dashChunks": "fragmentos"
+  "adk_dashChunks": "fragmentos",
+  "adk_testButton": "Probar",
+  "adk_testAgentTitle": "Probar {name}",
+  "adk_testPrompt": "Prompt",
+  "adk_testPromptHint": "Vacío usa el prompt de ejecución programada; prueba el agente guardado",
+  "adk_testSimulateWrites": "Simular escrituras",
+  "adk_testSimulateOn": "Las escrituras se comprueban pero no se ejecutan",
+  "adk_testSimulateOff": "Las escrituras se ejecutan de verdad",
+  "adk_testCheckOnly": "Solo comprobar",
+  "adk_testRun": "Ejecutar prueba",
+  "adk_testChecks": "Comprobaciones",
+  "adk_testNoIssues": "No se encontraron problemas",
+  "adk_testStats": "{status} · {calls}/{max} llamadas de IA · {tokens} tokens · {seconds}s",
+  "adk_testToolCalls": "Llamadas a herramientas ({count})",
+  "adk_testResponse": "Respuesta"
 }

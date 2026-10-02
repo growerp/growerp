@@ -114,6 +114,40 @@ class AdkTest {
     await PersistFunctions.persistTest(test.copyWith(adkAgentConfigs: []));
   }
 
+  /// Open the first persisted agent's Test dialog and run the rule checks
+  /// (no AI call): a valid agent reports no issues.
+  static Future<void> checkAgentTestDialog(WidgetTester tester) async {
+    SaveTest test = await PersistFunctions.getTest();
+    final cfg = test.adkAgentConfigs.first;
+    await CommonTest.doNewSearch(tester, searchString: cfg.agentName!);
+    await CommonTest.checkWidgetKey(tester, 'AdkAgentConfigDialog');
+    await CommonTest.tapByKey(tester, 'AdkAgentConfigTest');
+    await CommonTest.checkWidgetKey(tester, 'AdkAgentTestDialog');
+    await CommonTest.checkWidgetKey(tester, 'testDryRun');
+    await CommonTest.tapByKey(tester, 'testCheck', seconds: CommonTest.waitTime);
+    await CommonTest.checkWidgetKey(tester, 'testNoIssues');
+    await CommonTest.tapByKey(tester, 'cancel'); // test dialog
+    await CommonTest.tapByKey(tester, 'cancel'); // agent dialog
+    await CommonTest.enterText(tester, 'searchField', '');
+  }
+
+  /// Saving an instruction with an unknown {variable} is refused, because the
+  /// run would fail: the dialog stays open and nothing is stored.
+  static Future<void> saveRejectsUnknownVariable(WidgetTester tester) async {
+    SaveTest test = await PersistFunctions.getTest();
+    final cfg = test.adkAgentConfigs.first;
+    await CommonTest.doNewSearch(tester, searchString: cfg.agentName!);
+    await CommonTest.checkWidgetKey(tester, 'AdkAgentConfigDialog');
+    await CommonTest.enterText(
+        tester, 'instruction', 'Report on {bogusVariable} every day.');
+    await CommonTest.tapByKey(tester, 'AdkAgentConfigSave',
+        seconds: CommonTest.waitTime);
+    await CommonTest.checkWidgetKey(tester, 'AdkAgentConfigDialog');
+    await CommonTest.waitForSnackbarToGo(tester);
+    await CommonTest.tapByKey(tester, 'cancel');
+    await CommonTest.enterText(tester, 'searchField', '');
+  }
+
   /// Create each persisted (new) agent via the config dialog, then re-open it to
   /// capture the generated id (from the `topHeader` title) into the saved data.
   static Future<void> enterAgentData(WidgetTester tester) async {

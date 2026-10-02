@@ -212,3 +212,105 @@ class AdkAgentTeamImportResult {
       _$AdkAgentTeamImportResultFromJson(json);
   Map<String, dynamic> toJson() => _$AdkAgentTeamImportResultToJson(this);
 }
+
+/// One rule-check finding on an agent configuration (no AI call involved).
+@JsonSerializable()
+class AdkAgentCheckIssue {
+  /// error | warning
+  final String level;
+  final String? field;
+  final String message;
+
+  const AdkAgentCheckIssue(
+      {required this.level, this.field, required this.message});
+
+  bool get isError => level == 'error';
+
+  factory AdkAgentCheckIssue.fromJson(Map<String, dynamic> json) =>
+      _$AdkAgentCheckIssueFromJson(json);
+  Map<String, dynamic> toJson() => _$AdkAgentCheckIssueToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class AdkAgentCheckResult {
+  @JsonKey(defaultValue: [])
+  final List<AdkAgentCheckIssue> issues;
+
+  const AdkAgentCheckResult({required this.issues});
+
+  factory AdkAgentCheckResult.fromJson(Map<String, dynamic> json) =>
+      _$AdkAgentCheckResultFromJson(json);
+  Map<String, dynamic> toJson() => _$AdkAgentCheckResultToJson(this);
+}
+
+/// Answer to starting a test run: no [testRunId] when a check error stopped it.
+@JsonSerializable(explicitToJson: true)
+class AdkAgentTestStart {
+  final String? testRunId;
+  @JsonKey(defaultValue: [])
+  final List<AdkAgentCheckIssue> issues;
+
+  const AdkAgentTestStart({this.testRunId, required this.issues});
+
+  factory AdkAgentTestStart.fromJson(Map<String, dynamic> json) =>
+      _$AdkAgentTestStartFromJson(json);
+  Map<String, dynamic> toJson() => _$AdkAgentTestStartToJson(this);
+}
+
+/// One tool call made during a test run.
+@JsonSerializable()
+class AdkAgentToolCall {
+  final String? tool;
+  final String? service;
+  final String? args;
+  final String? result;
+
+  /// ok | simulated | approval | blocked; null while the call is running
+  final String? decision;
+
+  const AdkAgentToolCall(
+      {this.tool, this.service, this.args, this.result, this.decision});
+
+  factory AdkAgentToolCall.fromJson(Map<String, dynamic> json) =>
+      _$AdkAgentToolCallFromJson(json);
+  Map<String, dynamic> toJson() => _$AdkAgentToolCallToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class AdkAgentTestRun {
+  final String? testRunId;
+
+  /// running | done | failed
+  final String? status;
+  @JsonKey(defaultValue: true)
+  final bool dryRun;
+  final String? response;
+  final String? error;
+  final String? hint;
+  @JsonKey(defaultValue: [])
+  final List<AdkAgentToolCall> toolCalls;
+  final int? llmCalls;
+  final int? maxLlmCalls;
+  final int? tokensTotal;
+  final int? durationMs;
+
+  const AdkAgentTestRun({
+    this.testRunId,
+    this.status,
+    this.dryRun = true,
+    this.response,
+    this.error,
+    this.hint,
+    this.toolCalls = const [],
+    this.llmCalls,
+    this.maxLlmCalls,
+    this.tokensTotal,
+    this.durationMs,
+  });
+
+  bool get isRunning => status == 'running';
+
+  factory AdkAgentTestRun.fromJson(Map<String, dynamic> json) =>
+      _$AdkAgentTestRunFromJson(json['testRun'] ?? json);
+  Map<String, dynamic> toJson() => _$AdkAgentTestRunToJson(this);
+}

@@ -48,6 +48,8 @@ void main() {
     // A read-only (safe-by-default) agent + a scoped/approval agent.
     await AdkTest.addAgents(tester, agents.sublist(0, 2));
     await AdkTest.checkAgents(tester);
+    await AdkTest.checkAgentTestDialog(tester);
+    await AdkTest.saveRejectsUnknownVariable(tester);
     await AdkTest.updateAgents(tester, agentsUpdate.sublist(0, 2));
     await AdkTest.checkAgents(tester);
     await AdkTest.deleteAgents(tester);

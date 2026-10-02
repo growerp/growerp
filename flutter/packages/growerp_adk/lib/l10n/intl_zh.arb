@@ -136,5 +136,19 @@
   "adk_dashTokens": "令牌",
   "adk_dashServers": "服务器",
   "adk_dashDocs": "文档",
-  "adk_dashChunks": "分块"
+  "adk_dashChunks": "分块",
+  "adk_testButton": "测试",
+  "adk_testAgentTitle": "测试 {name}",
+  "adk_testPrompt": "提示词",
+  "adk_testPromptHint": "留空则使用计划运行提示词；测试已保存的代理",
+  "adk_testSimulateWrites": "模拟写入",
+  "adk_testSimulateOn": "写入会被检查但不会执行",
+  "adk_testSimulateOff": "写入会真实执行",
+  "adk_testCheckOnly": "仅检查",
+  "adk_testRun": "运行测试",
+  "adk_testChecks": "检查",
+  "adk_testNoIssues": "未发现问题",
+  "adk_testStats": "{status} · {calls}/{max} 次 AI 调用 · {tokens} 令牌 · {seconds} 秒",
+  "adk_testToolCalls": "工具调用（{count}）",
+  "adk_testResponse": "回复"
 }

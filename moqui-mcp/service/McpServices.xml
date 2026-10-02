@@ -242,14 +242,16 @@
                     hits.size() == 1 ? hits[0] : null
                 }
                 // returns [allowed:bool, decision:String, args:Map, logId:String, message:String]
+                // Agent test run (AdkManager.startTestRun): writes are gated but not executed
+                boolean adkDryRun = adkHdrs?.dryRun == 'Y'
                 def applyGate = { String svcName, Map svcArgs ->
                     if (!ec.service.isServiceDefined(GOV_SVC)) return [allowed: true, args: svcArgs, logId: null]
                     def gov = ec.service.sync().name(GOV_SVC).parameters([
                             configId: resolveAdkConfigId(), toolName: name, serviceName: svcName,
-                            parameters: svcArgs, adkSessionId: sessionId]).call()
+                            parameters: svcArgs, adkSessionId: sessionId, dryRun: adkDryRun]).call()
                     return [allowed: (gov?.decision == 'allowed'), decision: gov?.decision,
                             args: (gov?.parameters ?: svcArgs), logId: gov?.adkActionLogId,
-                            message: gov?.message]
+                            message: gov?.message, verbClass: gov?.verbClass]
                 }
                 def recordResult = { logId, res ->
                     if (logId && ec.service.isServiceDefined(REC_SVC))
@@ -588,6 +590,13 @@
                                 result = [content: [[type: "text", text: msg]], isError: true]
                                 return
                             }
+                        }
+                        if (adkDryRun && gate.verbClass == 'write') {
+                            def dryMsg = "DRY RUN (test): not executed. It would run ${svcName} with " +
+                                groovy.json.JsonOutput.toJson(callArgs) +
+                                ". Continue as if it succeeded; use 'DRYRUN' for any id it would return.${paramNote}"
+                            result = [content: [[type: "text", text: dryMsg]]]
+                            return
                         }
                         // An ADK agent acts as its tenant's agent user, not as the SystemSupport
                         // MCP login, so services resolving the company from the logged-in user

@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'adk_config_service.dart';
+import 'adk_agent_test_dialog.dart';
 import 'package:growerp_adk/l10n/generated/adk_localizations.dart';
 
 /// Dialog to create or edit an [AdkAgentConfig].
@@ -974,6 +975,20 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                       ),
                     ),
                   Spacer(),
+                  if (widget.existing?.adkAgentConfigId != null)
+                    TextButton.icon(
+                      key: Key('AdkAgentConfigTest'),
+                      onPressed: _saving
+                          ? null
+                          : () => showDialog(
+                                context: context,
+                                barrierDismissible: true,
+                                builder: (_) =>
+                                    AdkAgentTestDialog(agent: widget.existing!),
+                              ),
+                      icon: Icon(Icons.science_outlined),
+                      label: Text(AdkLocalizations.of(context)!.adk_testButton),
+                    ),
                   TextButton(
                     key: Key('AdkAgentConfigCancel'),
                     onPressed:

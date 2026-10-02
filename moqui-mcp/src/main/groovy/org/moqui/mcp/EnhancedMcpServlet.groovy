@@ -379,8 +379,10 @@ class EnhancedMcpServlet extends HttpServlet {
         try {
             String adkCid   = request.getHeader("adk_config_id")
             String adkOwner = request.getHeader("adk_owner_party_id")
+            // adk_dry_run=Y: agent test run, writes are reported instead of executed
+            String adkDryRun = request.getHeader("adk_dry_run")
             if (adkCid || adkOwner) {
-                adkSessionHeaders.put(sessionId, [configId: adkCid, owner: adkOwner])
+                adkSessionHeaders.put(sessionId, [configId: adkCid, owner: adkOwner, dryRun: adkDryRun])
                 logger.info("Captured ADK headers for session ${sessionId}: configId=${adkCid}, owner=${adkOwner}")
             }
         } catch (Exception e) {

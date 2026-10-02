@@ -136,5 +136,19 @@
   "adk_dashTokens": "tokens",
   "adk_dashServers": "servers",
   "adk_dashDocs": "docs",
-  "adk_dashChunks": "chunks"
+  "adk_dashChunks": "chunks",
+  "adk_testButton": "Testen",
+  "adk_testAgentTitle": "{name} testen",
+  "adk_testPrompt": "Prompt",
+  "adk_testPromptHint": "Leeg = prompt voor geplande runs; test de opgeslagen agent",
+  "adk_testSimulateWrites": "Schrijfacties simuleren",
+  "adk_testSimulateOn": "Schrijfacties worden gecontroleerd maar niet uitgevoerd",
+  "adk_testSimulateOff": "Schrijfacties worden echt uitgevoerd",
+  "adk_testCheckOnly": "Alleen controleren",
+  "adk_testRun": "Test starten",
+  "adk_testChecks": "Controles",
+  "adk_testNoIssues": "Geen problemen gevonden",
+  "adk_testStats": "{status} · {calls}/{max} AI-aanroepen · {tokens} tokens · {seconds}s",
+  "adk_testToolCalls": "Tool-aanroepen ({count})",
+  "adk_testResponse": "Antwoord"
 }

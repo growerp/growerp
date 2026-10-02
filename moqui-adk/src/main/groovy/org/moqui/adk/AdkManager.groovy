@@ -1001,10 +1001,11 @@ CRITICAL tool-use rules — follow exactly:
      * MoquiSessionService.getSession. In-memory sessions need no DB round-trip.
      */
     static List<Map> runOneOff(String configId, String userId, String text,
-                               Map<String, Object> initialState = [:]) {
+                               Map<String, Object> initialState = [:],
+                               LlmAgent agentOverride = null, Closure eventSink = null) {
         if (shuttingDown) return []
         String cid = configId ?: DEFAULT_CONFIG
-        LlmAgent agent = agentRegistry[cid] ?: agentRegistry.values().find()
+        LlmAgent agent = agentOverride ?: agentRegistry[cid] ?: agentRegistry.values().find()
         if (!agent) throw new IllegalStateException('ADK not initialized — add API key in ADK → Configuration')
         String tenantId = initialState?.tenantId as String
         String blocked = allowanceBlock(cid, null, tenantId)
@@ -1036,7 +1037,7 @@ CRITICAL tool-use rules — follow exactly:
 
         oneOff.runAsync(userId, session.id(), userContent, defaultRunConfig(cid))
               .blockingSubscribe(
-                  { Event e -> events << eventToMap(e) },
+                  { Event e -> events << eventToMap(e); if (eventSink) eventSink(e) },
                   { Throwable t -> err[0] = t; logger.error("ADK runOneOff error (config={}): {}", cid, t.message, t) }
               )
 
@@ -1046,6 +1047,119 @@ CRITICAL tool-use rules — follow exactly:
                 'Scheduled or one-off agent run', text, events, tenantId)
         if (err[0]) throw err[0]
         events
+    }
+
+    // ── Agent test runs (agent dialog → Test) ────────────────────────────────
+
+    /** Test runs by id. In memory only: a result is read within minutes, never after a restart. */
+    private static final Map<String, Map> testRuns = new ConcurrentHashMap<>()
+
+    /** Start a test run of one agent on a background thread; poll {@link #getTestRun}.
+     *  dryRun: writes reach the governance gate but are not executed (adk_dry_run MCP header),
+     *  and the in-process write tools (email, GitHub, Substack) and external MCP servers are
+     *  left out, since those can not be simulated. */
+    static String startTestRun(String configId, String prompt, boolean dryRun, Map initialState) {
+        long now = System.currentTimeMillis()
+        testRuns.values().removeIf { (it.startedAt as long) < now - 3600000L && it.status != 'running' }
+        String testRunId = UUID.randomUUID().toString()
+        Map run = Collections.synchronizedMap([testRunId: testRunId, configId: configId, status: 'running',
+                dryRun: dryRun, startedAt: now, llmCalls: 0, toolCalls: Collections.synchronizedList([])])
+        testRuns[testRunId] = run
+        Thread.start("adk-test-${configId}") {
+            try { executeTestRun(run, prompt, dryRun, initialState) }
+            finally { try { sharedSessionService?.ecf?.getExecutionContext()?.destroy() } catch (ignore) {} }
+        }
+        testRunId
+    }
+
+    static Map getTestRun(String testRunId) { testRunId ? testRuns[testRunId] : null }
+
+    private static void executeTestRun(Map run, String prompt, boolean dryRun, Map initialState) {
+        String configId = run.configId as String
+        def testToolset = null
+        try {
+            if (sharedSessionService == null) throw new IllegalStateException('ADK not initialized — add an API key in AI Settings')
+            def ec = sharedSessionService.ecf.getExecutionContext()
+            def cfg
+            boolean wasDisabled = ec.artifactExecution.disableAuthz()
+            try { cfg = ec.entity.find('moqui.adk.AdkAgentConfig').condition('adkAgentConfigId', configId).one() }
+            finally { if (!wasDisabled) ec.artifactExecution.enableAuthz() }
+            if (!cfg) throw new IllegalArgumentException("Agent ${configId} not found")
+            if (cfg.agentRole in ['coordinator', 'workflow'])
+                throw new IllegalArgumentException('Test run works on a single agent: test each team member instead.')
+            String provider = cfg.llmProvider ?: 'gemini'
+            if (!SUPPORTED_PROVIDERS.contains(provider)) throw new IllegalArgumentException("Provider ${provider} can not run agents")
+            String key = (cfg.apiKey as String) ?: resolveTenantKey(cfg.ownerPartyId as String, provider)
+            if (!key && !envKeyFor(provider)) throw new IllegalStateException("No ${provider} API key")
+            def modelArg = buildModel(provider, (cfg.modelName as String) ?: defaultModelFor(provider), key)
+            String toolMode = (cfg.toolMode ?: 'full') as String
+            boolean webSearch = cfg.webSearch == 'Y' && provider == 'gemini'
+            List tools = assembleFunctionTools(!dryRun && toolMode != 'readOnly', webSearch, modelArg)
+            testToolset = buildMcpToolset(configId, cfg.ownerPartyId as String, toolMode, dryRun)
+            if (testToolset) tools.add(testToolset)
+            if (!dryRun) loadExternalMcpToolsets(configId, cfg.ownerPartyId as String).each { tools.add(it) }
+            String agentName = sanitizeAgentName((cfg.agentName ?: configId) as String)
+            LlmAgent agent = LlmAgent.builder()
+                    .name(agentName)
+                    .description((cfg.description ?: cfg.agentName ?: 'GrowERP agent') as String)
+                    .model(modelArg)
+                    .instruction(CONTEXT_PREAMBLE + ((cfg.instruction ?: '') as String))
+                    .tools(tools)
+                    .build()
+            run.maxLlmCalls = (cfg.maxLlmCalls as Integer) ?: 10
+            List<Map> events = runOneOff(configId, 'agent-test', prompt, initialState, agent,
+                    { Event e -> collectTestEvent(run, e) })
+            run.tokensTotal = extractTokensFromEvents(events)[2]
+            run.response = events.findAll { !it.partial && it.author != 'agent-test' }
+                    .collect { (it.content?.parts ?: []).collect { it.text ?: '' }.join('') }
+                    .findAll { it }.join('\n\n')
+            run.status = 'done'
+        } catch (Throwable t) {
+            run.status = 'failed'
+            run.error = t.message ?: t.class.simpleName
+            run.hint = testRunHint(run.error as String)
+        } finally {
+            run.durationMs = System.currentTimeMillis() - (run.startedAt as long)
+            if (testToolset) try { testToolset.close() } catch (ignore) {}
+        }
+    }
+
+    /** Add one ADK event to a test run: model responses count as LLM calls, function calls
+     *  and their responses become the tool-call trace. */
+    private static void collectTestEvent(Map run, Event e) {
+        if (!e.content().isPresent()) return
+        Content c = e.content().get()
+        if (c.role().orElse('') == 'model' && !e.partial().orElse(false)) run.llmCalls = (run.llmCalls as int) + 1
+        c.parts().orElse([]).each { Part p ->
+            p.functionCall().ifPresent { fc ->
+                Map args = fc.args().orElse([:]) as Map
+                run.toolCalls << [tool: fc.name().orElse(''), service: args.serviceName,
+                        args: groovy.json.JsonOutput.toJson(args.serviceName ? (args.parameters ?: [:]) : args).take(600)]
+            }
+            p.functionResponse().ifPresent { fr ->
+                String tool = fr.name().orElse('')
+                Map call = run.toolCalls.reverse().find { it.tool == tool && it.result == null }
+                if (call == null) return
+                String text = groovy.json.JsonOutput.toJson(fr.response().orElse([:]))
+                call.result = text.take(800)
+                call.decision = text.contains('DRY RUN') ? 'simulated' :
+                        text.contains('human approval') ? 'approval' :
+                        (text.contains('"isError":true') || text.contains('not in this agent') ||
+                                text.contains('denied') || text.contains('Unknown service')) ? 'blocked' : 'ok'
+            }
+        }
+    }
+
+    /** A plain-language fix for the run errors agent builders hit. */
+    private static String testRunHint(String error) {
+        if (!error) return null
+        if (error.contains('Context variable not found'))
+            return 'The instruction contains {name}, which is read as a variable. Write [name] instead.'
+        if (error.contains('llm calls limit'))
+            return "The run used all its AI calls. Raise 'Max AI calls per run'."
+        if (error.contains('allowance') || error.contains('API key'))
+            return 'Add your own API key in System Setup → AI Settings.'
+        return null
     }
 
     static void runAgentSse(String userId, String sessionId, String text,
@@ -1173,7 +1287,8 @@ CRITICAL tool-use rules — follow exactly:
      *  tenant `adk_owner_party_id`) so the governance gate / searchKnowledge on the MCP
      *  server can resolve the calling agent and its tenant. `toolMode` 'readOnly' drops
      *  {@link #MCP_WRITE_TOOL_NAME} from the exposed tool list. */
-    private static com.google.adk.tools.mcp.McpToolset buildMcpToolset(String configId, String ownerPartyId = null, String toolMode = null) {
+    private static com.google.adk.tools.mcp.McpToolset buildMcpToolset(String configId, String ownerPartyId = null, String toolMode = null,
+                                                                    boolean dryRun = false) {
         if (shuttingDown) return null
         if (mcpApiKey == null && sharedSessionService != null) {
             mcpApiKey = generateMcpApiKey(sharedSessionService.ecf)
@@ -1188,6 +1303,8 @@ CRITICAL tool-use rules — follow exactly:
         // Tenant owner — lets searchKnowledge resolve the company even for the general
         // per-tenant interactive agent (whose configId is not an AdkAgentConfig row).
         if (ownerPartyId) sseHeaders['adk_owner_party_id'] = ownerPartyId
+        // test run: the MCP server reports writes instead of executing them
+        if (dryRun) sseHeaders['adk_dry_run'] = 'Y'
         // Check system properties ('port' is commonly used by Moqui runner like -Dport=8081)
         String mcpInternalPort = System.getProperty('webapp_http_port') ?: System.getProperty('port') ?: System.getenv('webapp_http_port')
         String mcpInternalHost = System.getProperty('webapp_http_host') ?: System.getenv('webapp_http_host')
@@ -1237,7 +1354,8 @@ CRITICAL tool-use rules — follow exactly:
                 .url(sseUrl)
                 .headers(sseHeaders)
                 .build()
-        def prior = configMcpToolsets[configId]
+        // a test-run toolset is private to that run: leave the agent's cached toolset alone
+        def prior = dryRun ? null : configMcpToolsets[configId]
         if (prior != null) { try { prior.close() } catch (Exception ignore) {} }
         def ts
         if (toolMode == 'readOnly') {
@@ -1248,6 +1366,7 @@ CRITICAL tool-use rules — follow exactly:
         } else {
             ts = new com.google.adk.tools.mcp.McpToolset(sseParams)
         }
+        if (dryRun) return ts
         configMcpToolsets[configId] = ts
         if (mcpToolset == null) mcpToolset = ts   // keep a default reference for legacy paths
         return ts

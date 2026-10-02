@@ -81,6 +81,13 @@
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="context"/>
+            <service-call name="AdkServices100.check#AdkAgentConfig" out-map="chk"
+                in-map="[instruction: instruction, schedulePrompt: schedulePrompt, llmProvider: llmProvider,
+                         toolMode: toolMode, serviceAllowlist: serviceAllowlist, writePolicy: writePolicy,
+                         webSearch: webSearch, scheduleEnabled: scheduleEnabled,
+                         scheduleExpression: scheduleExpression, maxLlmCalls: maxLlmCalls]"/>
+            <set field="checkErrors" from="chk.issues.findAll { it.level == 'error' }"/>
+            <if condition="checkErrors"><return error="true" message="${checkErrors*.message.join(' ')}"/></if>
             <service-call name="AdkServices.update#AgentConfig" out-map="context"
                 in-map="[ownerPartyId: ownerPartyId, agentName: agentName,
                           modelName: modelName, apiKey: apiKey, llmProvider: llmProvider,
@@ -158,6 +165,13 @@
                 out-map="context"/>
             <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="existing"
                 auto-field-map="[adkAgentConfigId: adkAgentConfigId]"/>
+            <service-call name="AdkServices100.check#AdkAgentConfig" out-map="chk"
+                in-map="[adkAgentConfigId: adkAgentConfigId, instruction: instruction, schedulePrompt: schedulePrompt, llmProvider: llmProvider,
+                         toolMode: toolMode, serviceAllowlist: serviceAllowlist, writePolicy: writePolicy,
+                         webSearch: webSearch, scheduleEnabled: scheduleEnabled,
+                         scheduleExpression: scheduleExpression, maxLlmCalls: maxLlmCalls]"/>
+            <set field="checkErrors" from="chk.issues.findAll { it.level == 'error' }"/>
+            <if condition="checkErrors"><return error="true" message="${checkErrors*.message.join(' ')}"/></if>
             <service-call name="AdkServices.update#AgentConfig" out-map="context"
                 in-map="[ownerPartyId: ownerPartyId,
                           adkAgentConfigId: adkAgentConfigId,
@@ -1437,6 +1451,153 @@
             <entity-find-count count-field="mcpServers" entity-name="moqui.adk.AdkMcpServer">
                 <econdition field-name="ownerPartyId"/>
             </entity-find-count>
+        </actions>
+    </service>
+
+    <!-- Rule checks on an agent configuration, no AI call: issues a run would hit for sure
+         (error) or probably (warning). With adkAgentConfigId the stored row is checked, with
+         the given non-null values laid over it. Used on save, on team upload and by the test run. -->
+    <service verb="check" noun="AdkAgentConfig">
+        <in-parameters>
+            <parameter name="adkAgentConfigId"/>
+            <parameter name="instruction"/>
+            <parameter name="schedulePrompt"/>
+            <parameter name="llmProvider"/>
+            <parameter name="toolMode"/>
+            <parameter name="serviceAllowlist"/>
+            <parameter name="writePolicy"/>
+            <parameter name="webSearch" type="Boolean"/>
+            <parameter name="scheduleEnabled" type="Boolean"/>
+            <parameter name="scheduleExpression"/>
+            <parameter name="maxLlmCalls" type="Integer"/>
+        </in-parameters>
+        <out-parameters>
+            <!-- [level: error|warning, field, message] -->
+            <parameter name="issues" type="List"/>
+        </out-parameters>
+        <actions>
+            <if condition="adkAgentConfigId">
+                <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
+                    auto-field-map="[adkAgentConfigId: adkAgentConfigId]"/>
+            </if>
+            <script><![CDATA[
+                def v = { String name, def given -> given != null ? given : cfg?.get(name) }
+                String instr = v('instruction', instruction) ?: ''
+                String prompt = v('schedulePrompt', schedulePrompt) ?: ''
+                String provider = v('llmProvider', llmProvider) ?: 'gemini'
+                String mode = v('toolMode', toolMode) ?: 'readOnly'
+                String allow = v('serviceAllowlist', serviceAllowlist) ?: ''
+                String policy = v('writePolicy', writePolicy) ?: 'approve'
+                boolean search = webSearch != null ? webSearch : cfg?.webSearch == 'Y'
+                boolean scheduled = scheduleEnabled != null ? scheduleEnabled : cfg?.scheduleEnabled == 'Y'
+                String cron = v('scheduleExpression', scheduleExpression) ?: ''
+                Integer maxCalls = v('maxLlmCalls', maxLlmCalls) as Integer
+                issues = []
+
+                // ADK reads {name} as a session-state variable (same rule as its InstructionUtils):
+                // an identifier, optional '?' suffix, optional app:/user:/temp: prefix. Only these
+                // keys are seeded for every run (scheduler, chat, suggest, test).
+                def knownKeys = ['userId', 'username', 'userFullName', 'organizationName', 'companyPseudoId',
+                                 'tenantId', 'timeZone', 'locale', 'memory', 'screenCatalog'] as Set
+                [instruction: instr, schedulePrompt: prompt].each { field, text ->
+                    (text =~ /\{+([^{}]*)\}+/).each { m ->
+                        String key = (m[1] as String).trim()
+                        if (key.endsWith('?') || key.startsWith('artifact.')) return
+                        String bare = key.replaceFirst(/^(app|user|temp):/, '')
+                        if (!(bare ==~ /[A-Za-z_][A-Za-z0-9_]*/)) return
+                        if (key != bare)
+                            issues << [level: 'warning', field: field, message: "{${key}} must be set in session state before the run, or the run fails."]
+                        else if (!knownKeys.contains(key))
+                            issues << [level: 'error', field: field, message: "{${key}} is read as a variable that does not exist, so the run fails. Write [${key}] instead."]
+                    }
+                }
+                if (!instr.trim() && !prompt.trim())
+                    issues << [level: 'error', field: 'instruction', message: 'Set an instruction or a scheduled-run prompt.']
+                if (mode == 'scoped') {
+                    def globs = allow.split(/[,\s]+/).findAll { it }
+                    if (!globs) {
+                        issues << [level: 'error', field: 'serviceAllowlist', message: 'Tool access is scoped but no services are allowed.']
+                    } else {
+                        Set names = null
+                        try { names = org.moqui.mcp.adapter.McpToolAdapter.getCachedGroWerpServiceNames(ec) } catch (Throwable ignore) { }
+                        if (names) globs.each { String g ->
+                            def rx = '^' + g.split(/\*/, -1).collect { it ? java.util.regex.Pattern.quote(it) : '' }.join('.*') + '$'
+                            if (!names.any { it ==~ rx })
+                                issues << [level: 'warning', field: 'serviceAllowlist', message: "Allowed service '${g}' matches no service."]
+                        }
+                    }
+                }
+                if (mode == 'full' && policy == 'allow')
+                    issues << [level: 'warning', field: 'writePolicy', message: 'Full tool access with auto-run writes: the agent can change any data without approval.']
+                if (search && provider != 'gemini')
+                    issues << [level: 'warning', field: 'webSearch', message: "Web search only works with Gemini; it is ignored for ${provider}."]
+                if (maxCalls != null && maxCalls < 1)
+                    issues << [level: 'error', field: 'maxLlmCalls', message: 'Max AI calls per run must be at least 1.']
+                if (scheduled && !cron.trim())
+                    issues << [level: 'error', field: 'scheduleExpression', message: 'Scheduled runs are on but there is no cron expression.']
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- Start a test run of an agent in the background; poll get#AdkAgentTest with the id.
+         dryRun (default): writes are checked by the governance gate but not executed. The rule
+         checks run first; with an error no AI call is made. -->
+    <service verb="start" noun="AdkAgentTest">
+        <in-parameters>
+            <parameter name="adkAgentConfigId" required="true"/>
+            <parameter name="prompt"/>
+            <parameter name="dryRun" type="Boolean" default="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="testRunId"/>
+            <parameter name="issues" type="List"/>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
+                auto-field-map="[adkAgentConfigId: adkAgentConfigId]"/>
+            <if condition="!cfg || cfg.ownerPartyId != ownerPartyId">
+                <return error="true" message="Agent ${adkAgentConfigId} not found for your company."/>
+            </if>
+            <service-call name="AdkServices100.check#AdkAgentConfig" out-map="chk"
+                in-map="[adkAgentConfigId: adkAgentConfigId]"/>
+            <set field="issues" from="chk.issues"/>
+            <if condition="issues.any { it.level == 'error' }"><return/></if>
+            <set field="runPrompt" from="prompt ?: cfg.schedulePrompt ?: 'Perform your task.'"/>
+            <entity-find-one entity-name="mantle.party.PartyDetail" value-field="org" cache="true"
+                auto-field-map="[partyId: companyPartyId]"/>
+            <script><![CDATA[
+                if (!org.moqui.adk.AdkManager.isInitialized()) org.moqui.adk.AdkManager.lazyInit(ec.factory)
+                Map state = [userId: ec.user.userId ?: 'agent-test', username: ec.user.username ?: 'agent-test',
+                             userFullName: (ec.user.userAccount?.userFullName ?: 'Agent test') as String,
+                             organizationName: (org?.organizationName ?: '') as String,
+                             companyPseudoId: (org?.pseudoId ?: '') as String,
+                             tenantId: ownerPartyId as String, timeZone: 'UTC', locale: 'en_US']
+                testRunId = org.moqui.adk.AdkManager.startTestRun(adkAgentConfigId, runPrompt, dryRun, state)
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- Progress and result of a test run: status running|done|failed, response, error, hint,
+         toolCalls [tool, service, args, result, decision], llmCalls, maxLlmCalls, tokensTotal,
+         durationMs. -->
+    <service verb="get" noun="AdkAgentTest">
+        <in-parameters>
+            <parameter name="testRunId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="testRun" type="Map"/>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <set field="run" from="org.moqui.adk.AdkManager.getTestRun(testRunId)"/>
+            <if condition="!run"><return error="true" message="Test run not found, it may have expired."/></if>
+            <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
+                auto-field-map="[adkAgentConfigId: run.configId]"/>
+            <if condition="cfg?.ownerPartyId != ownerPartyId">
+                <return error="true" message="Test run not found, it may have expired."/>
+            </if>
+            <script>testRun = new LinkedHashMap(run); testRun.toolCalls = new ArrayList(run.toolCalls ?: [])</script>
         </actions>
     </service>
 

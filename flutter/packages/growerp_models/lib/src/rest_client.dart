@@ -2695,6 +2695,9 @@ abstract class RestClient {
     @Field() String? approvalChatRoomId,
     @Field() String? agentRole,
     @Field() String? orchestrationType,
+    @Field() bool? websiteChat,
+    @Field() bool? webSearch,
+    @Field() int? maxLlmCalls,
     @Field() int? loopMaxIterations,
     @Field() String? teamName,
   });
@@ -2718,8 +2721,41 @@ abstract class RestClient {
     @Field() String? approvalChatRoomId,
     @Field() String? agentRole,
     @Field() String? orchestrationType,
+    @Field() bool? websiteChat,
+    @Field() bool? webSearch,
+    @Field() int? maxLlmCalls,
     @Field() int? loopMaxIterations,
     @Field() String? teamName,
+  });
+
+  /// Rule checks on an agent (no AI call); with adkAgentConfigId the stored
+  /// agent with the given values laid over it.
+  @POST("rest/s1/growerp/100/AdkAgentConfig/Check")
+  Future<AdkAgentCheckResult> checkAdkAgentConfig({
+    @Field() String? adkAgentConfigId,
+    @Field() String? instruction,
+    @Field() String? schedulePrompt,
+    @Field() String? llmProvider,
+    @Field() String? toolMode,
+    @Field() String? serviceAllowlist,
+    @Field() String? writePolicy,
+    @Field() bool? webSearch,
+    @Field() bool? scheduleEnabled,
+    @Field() String? scheduleExpression,
+    @Field() int? maxLlmCalls,
+  });
+
+  /// Start a test run in the background; poll [getAdkAgentTest].
+  @POST("rest/s1/growerp/100/AdkAgentTest")
+  Future<AdkAgentTestStart> startAdkAgentTest({
+    @Field() required String adkAgentConfigId,
+    @Field() String? prompt,
+    @Field() bool? dryRun,
+  });
+
+  @GET("rest/s1/growerp/100/AdkAgentTest")
+  Future<AdkAgentTestRun> getAdkAgentTest({
+    @Query('testRunId') required String testRunId,
   });
 
   @DELETE("rest/s1/growerp/100/AdkAgentConfig")

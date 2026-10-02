@@ -1895,6 +1895,11 @@ limitations under the License.
                     <service name="AdkServices100.promote#AgentToCatalog"/>
                 </method>
             </resource>
+            <resource name="Check">
+                <method type="post">
+                    <service name="AdkServices100.check#AdkAgentConfig"/>
+                </method>
+            </resource>
             <method type="get">
                 <service name="AdkServices100.get#AdkAgentConfig"/>
             </method>
@@ -1906,6 +1911,15 @@ limitations under the License.
             </method>
             <method type="delete">
                 <service name="AdkServices100.delete#AdkAgentConfig"/>
+            </method>
+        </resource>
+        <!-- agent test run: start in the background, then poll -->
+        <resource name="AdkAgentTest">
+            <method type="post">
+                <service name="AdkServices100.start#AdkAgentTest"/>
+            </method>
+            <method type="get">
+                <service name="AdkServices100.get#AdkAgentTest"/>
             </method>
         </resource>
         <!-- Phase 4: coordinator team membership -->

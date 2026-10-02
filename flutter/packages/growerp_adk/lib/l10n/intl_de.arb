@@ -136,5 +136,19 @@
   "adk_dashTokens": "Tokens",
   "adk_dashServers": "Server",
   "adk_dashDocs": "Dok.",
-  "adk_dashChunks": "Chunks"
+  "adk_dashChunks": "Chunks",
+  "adk_testButton": "Testen",
+  "adk_testAgentTitle": "{name} testen",
+  "adk_testPrompt": "Prompt",
+  "adk_testPromptHint": "Leer = Prompt für geplante Läufe; testet den gespeicherten Agenten",
+  "adk_testSimulateWrites": "Schreibvorgänge simulieren",
+  "adk_testSimulateOn": "Schreibvorgänge werden geprüft, aber nicht ausgeführt",
+  "adk_testSimulateOff": "Schreibvorgänge werden wirklich ausgeführt",
+  "adk_testCheckOnly": "Nur prüfen",
+  "adk_testRun": "Test starten",
+  "adk_testChecks": "Prüfungen",
+  "adk_testNoIssues": "Keine Probleme gefunden",
+  "adk_testStats": "{status} · {calls}/{max} KI-Aufrufe · {tokens} Tokens · {seconds}s",
+  "adk_testToolCalls": "Tool-Aufrufe ({count})",
+  "adk_testResponse": "Antwort"
 }

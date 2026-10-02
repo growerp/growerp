@@ -136,5 +136,19 @@
   "adk_dashTokens": "โทเค็น",
   "adk_dashServers": "เซิร์ฟเวอร์",
   "adk_dashDocs": "เอกสาร",
-  "adk_dashChunks": "ชิ้นส่วน"
+  "adk_dashChunks": "ชิ้นส่วน",
+  "adk_testButton": "ทดสอบ",
+  "adk_testAgentTitle": "ทดสอบ {name}",
+  "adk_testPrompt": "พรอมต์",
+  "adk_testPromptHint": "ว่าง = ใช้พรอมต์ของการรันตามกำหนด ทดสอบเอเจนต์ที่บันทึกไว้",
+  "adk_testSimulateWrites": "จำลองการเขียนข้อมูล",
+  "adk_testSimulateOn": "ตรวจสอบการเขียนข้อมูลแต่ไม่ดำเนินการจริง",
+  "adk_testSimulateOff": "การเขียนข้อมูลจะดำเนินการจริง",
+  "adk_testCheckOnly": "ตรวจสอบอย่างเดียว",
+  "adk_testRun": "เริ่มทดสอบ",
+  "adk_testChecks": "การตรวจสอบ",
+  "adk_testNoIssues": "ไม่พบปัญหา",
+  "adk_testStats": "{status} · เรียก AI {calls}/{max} ครั้ง · {tokens} โทเคน · {seconds} วินาที",
+  "adk_testToolCalls": "การเรียกเครื่องมือ ({count})",
+  "adk_testResponse": "คำตอบ"
 }

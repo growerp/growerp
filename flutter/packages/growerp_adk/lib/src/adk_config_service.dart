@@ -56,6 +56,9 @@ class AdkConfigService {
         orchestrationType: cfg.orchestrationType,
         loopMaxIterations: cfg.loopMaxIterations,
         teamName: cfg.teamName,
+        websiteChat: cfg.websiteChat,
+        webSearch: cfg.webSearch,
+        maxLlmCalls: cfg.maxLlmCalls,
       );
     }
     return _client.updateAdkAgentConfig(
@@ -78,8 +81,24 @@ class AdkConfigService {
       orchestrationType: cfg.orchestrationType,
       loopMaxIterations: cfg.loopMaxIterations,
       teamName: cfg.teamName,
+      websiteChat: cfg.websiteChat,
+      webSearch: cfg.webSearch,
+      maxLlmCalls: cfg.maxLlmCalls,
     );
   }
+
+  /// Rule checks on a saved agent (no AI call).
+  Future<List<AdkAgentCheckIssue>> check(String configId) async =>
+      (await _client.checkAdkAgentConfig(adkAgentConfigId: configId)).issues;
+
+  /// Start a test run; without a testRunId a check error stopped it.
+  Future<AdkAgentTestStart> startTest(String configId,
+          {String? prompt, bool dryRun = true}) =>
+      _client.startAdkAgentTest(
+          adkAgentConfigId: configId, prompt: prompt, dryRun: dryRun);
+
+  Future<AdkAgentTestRun> testRun(String testRunId) =>
+      _client.getAdkAgentTest(testRunId: testRunId);
 
   Future<void> delete(String configId) async {
     await _client.deleteAdkAgentConfig(adkAgentConfigId: configId);

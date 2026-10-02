@@ -87,8 +87,11 @@
             <parameter name="serviceName" required="true"/>
             <parameter name="parameters" type="Map"><default>[:]</default></parameter>
             <parameter name="adkSessionId"/>
+            <!-- agent test run: decide only, write no log/approval -->
+            <parameter name="dryRun" type="Boolean" default="false"/>
         </in-parameters>
         <out-parameters>
+            <parameter name="verbClass"/>
             <!-- allowed: caller may execute serviceName(parameters)
                  blocked: caller must NOT execute; surface message to the agent
                  pending: queued for approval; caller must NOT execute -->
@@ -216,6 +219,12 @@
                 argsJson = groovy.json.JsonOutput.toJson(pinned)
             ]]></script>
 
+            <if condition="dryRun">
+                <if condition="decision == 'pending'">
+                    <set field="message" value="DRY RUN (test): this action would be queued for human approval."/>
+                </if>
+                <return/>
+            </if>
             <!-- Audit log (always) -->
             <service-call name="create#moqui.adk.AdkActionLog" out-map="logOut"
                 in-map="[ownerPartyId: ownerPartyId, configId: configId, parentConfigId: parentConfigId,

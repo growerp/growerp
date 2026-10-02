@@ -116,6 +116,22 @@
             <if condition="!data.agents">
                 <return error="true" message="Team file is missing an agents list."/>
             </if>
+            <!-- 0. Rule checks first: never install an agent whose runs are certain to fail -->
+            <set field="uploadErrors" from="[]"/>
+            <iterate list="data.agents" entry="a">
+                <service-call name="AdkServices100.check#AdkAgentConfig" out-map="chk"
+                    in-map="[instruction: a.instruction, schedulePrompt: a.schedulePrompt,
+                             llmProvider: a.llmProvider, toolMode: a.toolMode,
+                             serviceAllowlist: a.serviceAllowlist, writePolicy: a.writePolicy,
+                             webSearch: a.webSearch ?: false, scheduleEnabled: a.scheduleEnabled ?: false,
+                             scheduleExpression: a.scheduleExpression, maxLlmCalls: a.maxLlmCalls]"/>
+                <iterate list="chk.issues.findAll { it.level == 'error' }" entry="issue">
+                    <script>uploadErrors.add("${a.agentName}: ${issue.message}".toString())</script>
+                </iterate>
+            </iterate>
+            <if condition="uploadErrors">
+                <return error="true" message="${uploadErrors.join(' ')}"/>
+            </if>
             <!-- 1. Upsert each agent into this tenant (no id given -> upserts by
                  (ownerPartyId, agentName), so re-importing the same file is safe), remapping
                  each old (source-tenant) id to the new id created here. -->

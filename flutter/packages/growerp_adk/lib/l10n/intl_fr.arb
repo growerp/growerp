@@ -136,5 +136,19 @@
   "adk_dashTokens": "jetons",
   "adk_dashServers": "serveurs",
   "adk_dashDocs": "docs",
-  "adk_dashChunks": "segments"
+  "adk_dashChunks": "segments",
+  "adk_testButton": "Tester",
+  "adk_testAgentTitle": "Tester {name}",
+  "adk_testPrompt": "Prompt",
+  "adk_testPromptHint": "Vide = prompt d'exécution planifiée ; teste l'agent enregistré",
+  "adk_testSimulateWrites": "Simuler les écritures",
+  "adk_testSimulateOn": "Les écritures sont vérifiées mais pas exécutées",
+  "adk_testSimulateOff": "Les écritures sont réellement exécutées",
+  "adk_testCheckOnly": "Vérifier seulement",
+  "adk_testRun": "Lancer le test",
+  "adk_testChecks": "Vérifications",
+  "adk_testNoIssues": "Aucun problème trouvé",
+  "adk_testStats": "{status} · {calls}/{max} appels IA · {tokens} jetons · {seconds}s",
+  "adk_testToolCalls": "Appels d'outils ({count})",
+  "adk_testResponse": "Réponse"
 }
