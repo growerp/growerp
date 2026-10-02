@@ -804,11 +804,17 @@
                 <return />
             </if>
 
-            <!-- Lookup or create prospect person -->
+            <!-- Lookup or create prospect person; the person the message was addressed to first -->
             <set field="partyId" from="null" />
+            <if condition="message.convertedPartyId">
+                <entity-find-one entity-name="mantle.party.Party" value-field="linkedParty">
+                    <field-map field-name="partyId" from="message.convertedPartyId" />
+                </entity-find-one>
+                <set field="partyId" from="linkedParty?.partyId" />
+            </if>
 
             <!-- 1. Try email lookup -->
-            <if condition="message.recipientEmail">
+            <if condition="!partyId &amp;&amp; message.recipientEmail">
                 <entity-find entity-name="mantle.party.contact.PartyContactMechInfo" list="emailPcmList">
                     <econdition field-name="infoString" from="message.recipientEmail" />
                     <econdition field-name="contactMechTypeEnumId" value="CmtEmailAddress" />
@@ -887,6 +893,11 @@
                 <description>Subject override; the campaign's emailSubject is used when empty</description>
             </parameter>
             <parameter name="status" default-value="PENDING" />
+            <parameter name="partyId">
+                <description>The person this message is addressed to, when already known (a lead):
+                    stored as convertedPartyId, so manual sends are logged on that person and a
+                    reply creates the opportunity for them</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="messageId" />
@@ -904,6 +915,7 @@
             <parameter name="sentDate" />
             <parameter name="responseDate" />
             <parameter name="errorMessage" />
+            <parameter name="partyId" />
             <parameter name="createdDate" />
         </out-parameters>
         <actions>
@@ -920,6 +932,15 @@
             <if condition="ownedCampaigns == 0">
                 <return error="true" message="Campaign not found: ${marketingCampaignId}" />
             </if>
+            <if condition="partyId">
+                <entity-find-count entity-name="mantle.party.Party" count-field="ownedParties">
+                    <econdition field-name="partyId" />
+                    <econdition field-name="ownerPartyId" />
+                </entity-find-count>
+                <if condition="ownedParties == 0">
+                    <return error="true" message="Party not found: ${partyId}" />
+                </if>
+            </if>
 
             <!-- Create message -->
             <service-call name="create#growerp.marketing.OutreachMessage" out-map="createOut"
@@ -935,6 +956,7 @@
                          emailSubject: emailSubject,
                          sentDate: status == 'SENT' ? ec.user.nowTimestamp : null,
                          status: status,
+                         convertedPartyId: partyId,
                          createdDate: ec.user.nowTimestamp]" />
 
             <service-call name="growerp.100.OutreachServices100.update#CampaignMetrics"
@@ -963,6 +985,7 @@
             <set field="responseDate"
                 from="message.responseDate ? ec.l10n.format(message.responseDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
             <set field="errorMessage" from="message.errorMessage" />
+            <set field="partyId" from="message.convertedPartyId" />
             <set field="createdDate"
                 from="message.createdDate ? ec.l10n.format(message.createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
         </actions>
@@ -1015,7 +1038,28 @@
                          sentDate: sentDate ?: (status == 'SENT' ? ec.user.nowTimestamp : null),
                          responseDate: responseDate ?: (status == 'RESPONDED' ? ec.user.nowTimestamp : null),
                          errorMessage: errorMessage,
-                         convertedPartyId: convertedPartyId]" />
+                         convertedPartyId: convertedPartyId ?: message.convertedPartyId]" />
+
+            <!-- A message sent by hand (LinkedIn send queue) goes into the person's
+                 communications; sent emails are logged by the EmailMessageSent EECA -->
+            <if condition="status == 'SENT' &amp;&amp; message.status != 'SENT'
+                    &amp;&amp; message.platform != 'EMAIL' &amp;&amp; message.convertedPartyId">
+                <entity-find-one entity-name="mantle.party.Party" value-field="recipientParty">
+                    <field-map field-name="partyId" from="message.convertedPartyId" />
+                </entity-find-one>
+                <entity-find-one entity-name="mantle.marketing.campaign.MarketingCampaign"
+                    value-field="sentCampaign">
+                    <field-map field-name="marketingCampaignId" from="message.marketingCampaignId" />
+                </entity-find-one>
+                <if condition="recipientParty">
+                    <service-call name="growerp.100.CommunicationServices100.create#CommunicationEvent"
+                        in-map="[communicationEvent: [partyPseudoId: recipientParty.pseudoId,
+                                 type: 'Message', direction: 'outgoing',
+                                 subject: message.platform + ' message: ' + (sentCampaign?.campaignName ?: ''),
+                                 body: message.messageContent,
+                                 note: 'Outreach message ' + messageId]]" />
+                </if>
+            </if>
 
             <!-- Update metrics if responded and has marketingCampaignId -->
             <if condition="status == 'RESPONDED' &amp;&amp; message.marketingCampaignId">

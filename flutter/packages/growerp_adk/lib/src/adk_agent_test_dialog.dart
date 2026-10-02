@@ -259,7 +259,10 @@ class _AdkAgentTestDialogState extends State<AdkAgentTestDialog> {
       tilePadding: EdgeInsets.zero,
       dense: true,
       leading: Icon(Icons.circle, size: 12, color: color),
-      title: Text(call.service ?? call.tool ?? ''),
+      // only moqui_execute_service runs the service; other tools just name it
+      title: Text(call.tool == 'moqui_execute_service'
+          ? call.service ?? ''
+          : [call.tool, call.service].whereType<String>().join(' ')),
       subtitle: Text(call.decision ?? '…'),
       children: [
         if (call.args != null) SelectableText(call.args!),

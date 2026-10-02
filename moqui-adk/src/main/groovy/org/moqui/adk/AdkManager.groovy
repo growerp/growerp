@@ -1133,12 +1133,15 @@ CRITICAL tool-use rules — follow exactly:
         c.parts().orElse([]).each { Part p ->
             p.functionCall().ifPresent { fc ->
                 Map args = fc.args().orElse([:]) as Map
-                run.toolCalls << [tool: fc.name().orElse(''), service: args.serviceName,
+                run.toolCalls << [callId: fc.id().orElse(null), tool: fc.name().orElse(''), service: args.serviceName,
                         args: groovy.json.JsonOutput.toJson(args.serviceName ? (args.parameters ?: [:]) : args).take(600)]
             }
             p.functionResponse().ifPresent { fr ->
+                // parallel calls answer out of order: pair by call id, else the oldest open call
+                String callId = fr.id().orElse(null)
                 String tool = fr.name().orElse('')
-                Map call = run.toolCalls.reverse().find { it.tool == tool && it.result == null }
+                Map call = (callId ? run.toolCalls.find { it.callId == callId } : null) ?:
+                        run.toolCalls.find { it.tool == tool && it.result == null }
                 if (call == null) return
                 String text = groovy.json.JsonOutput.toJson(fr.response().orElse([:]))
                 call.result = text.take(800)
