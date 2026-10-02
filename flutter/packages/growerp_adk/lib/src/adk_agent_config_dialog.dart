@@ -347,6 +347,29 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     }
   }
 
+  /// Catalog templates mark the parts a company fills in with [[...]]; the
+  /// backend keeps the agent inactive while any is left in the instruction or
+  /// the scheduled-run prompt. Lists them live as the user edits.
+  Widget _placeholderWarning() => ListenableBuilder(
+        listenable: Listenable.merge([_instructionCtrl, _schedulePromptCtrl]),
+        builder: (context, _) {
+          final open = RegExp(r'\[\[[^\[\]]+\]\]')
+              .allMatches('${_instructionCtrl.text} ${_schedulePromptCtrl.text}')
+              .map((m) => m.group(0)!)
+              .toSet();
+          if (open.isEmpty) return const SizedBox.shrink();
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              'Inactive until you replace every [[...]] fill-in in the '
+              'instruction and scheduled-run prompt: ${open.join(', ')}',
+              key: const Key('placeholderWarning'),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          );
+        },
+      );
+
   /// Catalog mode only: remove the agent from the shared catalog. Tenants
   /// that already loaded it keep their own copy.
   Future<void> _deleteFromCatalog() async {
@@ -774,6 +797,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                           ),
                         ),
                       SizedBox(height: 8),
+                      _placeholderWarning(),
                       TextFormField(
                         key: Key('instruction'),
                         controller: _instructionCtrl,

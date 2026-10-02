@@ -1,8 +1,8 @@
 # Marketing Agent Team User Guide
 
-The **marketing agent team** is a ready-made set of five AI agents that run GrowERP's
-marketing loop for you: personalising outreach, answering website visitors, triaging replies,
-producing weekly content, and mailing you a daily digest.
+The **marketing agent team** is a ready-made set of six AI agents that run your marketing
+loop: personalising outreach, answering website visitors, triaging replies, producing weekly
+content, mailing you a daily digest, and finding partners to recruit.
 
 You add the team from the **agent catalog** on the **Agent Control → AI Agents** screen
 (category *Marketing*). Companies created with marketing demo data get it automatically.
@@ -28,7 +28,7 @@ the SDR agent will honestly answer "I don't know" instead of making things up.
 
 1. Open **Agent Control → AI Agents**.
 2. Tap the **agent catalog** icon in the search bar (tooltip *Agent catalog*).
-3. Under **Marketing**, check the agents you want (or all five) and tap **Add selected**.
+3. Under **Marketing**, check the agents you want (or all six) and tap **Add selected**.
 
 What happens:
 
@@ -36,9 +36,10 @@ What happens:
 * All schedules start **disabled**, except **Marketing Ops Digest** (daily 9:00).
 * Agents you already have show checked and greyed out, so nothing is duplicated.
 
-You land back on the agent list with five new agents.
+You land back on the agent list with the new agents. The **Partner Scout** arrives
+**inactive** (marked in the list) until you fill in its `[[...]]` parts, see §3.
 
-## 3. The five agents
+## 3. The six agents
 
 ### Outreach Personalizer
 Fills in the body of every **PENDING** outreach message using the campaign template plus the
@@ -76,6 +77,13 @@ staggering them across Monday/Wednesday/Friday instead of bursting them all at o
 ### Marketing Ops Digest
 A 5–7 bullet daily digest: messages sent by channel, reply rate, pipeline by stage with
 weighted value, new and advancing opportunities, and anything stalled. Read-only.
+
+### Partner Scout
+Searches the web for implementation partners in one country you name, scores them, adds
+the good ones as leads with a research note and writes a pending outreach draft for each.
+It never sends anything. Its instruction has `[[...]]` fill-ins for your company, product,
+pitch and targets: the agent stays inactive until every one is replaced. Not scheduled by
+default. Details: [Partner Scout Agent User Guide](Partner_Scout_Agent_User_Guide.md).
 
 * Default schedule: daily 09:00 (`0 0 9 * * ?`) — **the only one enabled after install**
 

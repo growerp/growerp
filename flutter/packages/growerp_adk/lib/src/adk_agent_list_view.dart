@@ -445,10 +445,20 @@ class _AdkAgentListViewState extends State<AdkAgentListView> {
           cfg.scheduleExpression != null &&
           cfg.scheduleExpression!.isNotEmpty;
 
-      final avatar = CircleAvatar(
-        backgroundColor: cs.secondaryContainer,
-        child: Icon(Icons.smart_toy, color: cs.onSecondaryContainer),
-      );
+      // enabled=N: saved with unfilled [[...]] catalog fill-ins, so not running
+      final avatar = cfg.enabled
+          ? CircleAvatar(
+              backgroundColor: cs.secondaryContainer,
+              child: Icon(Icons.smart_toy, color: cs.onSecondaryContainer),
+            )
+          : Tooltip(
+              message: 'Inactive: fill in the [[...]] parts of its instruction',
+              child: CircleAvatar(
+                key: Key('inactiveAgent$i'),
+                backgroundColor: cs.errorContainer,
+                child: Icon(Icons.edit_note, color: cs.onErrorContainer),
+              ),
+            );
 
       final actions = Row(
         mainAxisSize: MainAxisSize.min,

@@ -709,6 +709,16 @@ The catalog replaces the former "Load agent demo" and "Enable marketing agent te
 Team when AppMarketing demo data is loaded. The retired "Operations Assistant" demo team is still
 excluded by name, in case its rows remain in an older database.
 
+**Fill-ins.** A template can mark company-specific parts of its instruction or scheduled-run
+prompt as `[[LABEL: hint]]` (e.g. the Partner Scout's `[[YOUR COMPANY: …]]`, `[[COUNTRY]]`).
+`AdkServices.update#AgentConfig` — the one save path for clone, import, dialog and promote —
+sets `enabled=N` while any `[[...]]` is left: no runtime is registered (`unloadConfig`) and
+`sync#AgentJob` creates no running job, even with scheduled runs on. The agent list marks it
+inactive, the dialog lists the open fill-ins, and `check#AdkAgentConfig` reports them as a
+warning (not an error, so support can still save and upload templates). The first save without
+fill-ins activates it. Single brackets such as `[country]` are left for the agent to fill at run
+time.
+
 Selecting a specialist alone still works: cloning auto-includes its team's coordinator if it is
 not already present, since a specialist is unreachable without one
 (`AdkDemoServices.clone#AgentTeam`, `adkAgentConfigIds` parameter).

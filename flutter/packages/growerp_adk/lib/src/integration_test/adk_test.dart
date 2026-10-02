@@ -362,25 +362,29 @@ class AdkTest {
     await CommonTest.tapByKey(tester, 'closeFunctionCatalog');
   }
 
-  /// Add one catalog agent (the Marketing Team's Sales Development Rep,
-  /// seeded by backend/data/GrowerpMarketingCatalogData.xml) through the
-  /// picker, then reopen the picker and confirm it now shows as already
-  /// enabled (checkbox disabled), so it cannot be added twice.
-  static Future<void> addCatalogAgent(WidgetTester tester) async {
+  /// Add two catalog agents through the picker: the Marketing Team's Sales
+  /// Development Rep (backend/data/GrowerpMarketingCatalogData.xml) and the
+  /// Partner Scout template (GrowerpPartnerScoutAgentData.xml). Both then show
+  /// as already enabled (checkbox disabled), so they cannot be added twice.
+  /// The Partner Scout still has [[...]] fill-ins, so it must arrive inactive:
+  /// marked in the agent list, and its dialog lists what is left to fill in.
+  static Future<void> addCatalogAgents(WidgetTester tester) async {
     await selectAgents(tester);
     await CommonTest.tapByKey(tester, 'openFunctionCatalog',
         seconds: CommonTest.waitTime);
-    // the picker list is lazy: scroll the Marketing category into view first
-    await tester.scrollUntilVisible(
-      find.byKey(const Key('function_MKT_SDR')),
-      200.0,
-      scrollable: find.descendant(
-        of: find.byKey(const Key('functionCatalogList')),
-        matching: find.byType(Scrollable),
-      ),
-      maxScrolls: 30,
-    );
-    await CommonTest.tapByKey(tester, 'function_MKT_SDR');
+    for (final id in ['PARTNER_SCOUT', 'MKT_SDR']) {
+      // the picker list is lazy: scroll the entry into view first
+      await tester.scrollUntilVisible(
+        find.byKey(Key('function_$id')),
+        200.0,
+        scrollable: find.descendant(
+          of: find.byKey(const Key('functionCatalogList')),
+          matching: find.byType(Scrollable),
+        ),
+        maxScrolls: 30,
+      );
+      await CommonTest.tapByKey(tester, 'function_$id');
+    }
     await CommonTest.tapByKey(tester, 'addSelectedFunctions',
         seconds: CommonTest.waitTime);
     final tile = tester.widget<CheckboxListTile>(
@@ -390,6 +394,18 @@ class AdkTest {
         reason: 'an agent the company already has cannot be added again');
     await CommonTest.tapByKey(tester, 'closeFunctionCatalog');
     expect(find.text('Sales Development Rep'), findsWidgets);
+
+    // the Partner Scout is inactive until its [[...]] fill-ins are replaced
+    expect(
+        find.byWidgetPredicate((w) =>
+            w.key is ValueKey<String> &&
+            (w.key as ValueKey<String>).value.startsWith('inactiveAgent')),
+        findsOneWidget,
+        reason: 'a catalog agent with unfilled [[...]] parts stays inactive');
+    await tester.tap(find.text('Partner Scout'));
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+    await CommonTest.checkWidgetKey(tester, 'placeholderWarning');
+    await CommonTest.tapByKey(tester, 'AdkAgentConfigCancel');
   }
 
   /// Whether an agent created by this test could actually reach an LLM: either

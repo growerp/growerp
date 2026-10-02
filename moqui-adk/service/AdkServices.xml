@@ -46,6 +46,10 @@
             <parameter name="adkAgentConfigId"/>
         </out-parameters>
         <actions>
+            <!-- [[...]] placeholders (catalog templates the company still has to fill in): the
+                 agent is saved but stays inactive — no runtime, no scheduled job — until a save
+                 without them -->
+            <set field="activeFlag" from="((instruction ?: '') + ' ' + (schedulePrompt ?: '')) =~ /\[\[[^\[\]]+\]\]/ ? 'N' : 'Y'"/>
             <!-- Edit (id given) updates that exact row — so renames don't create a duplicate.
                  Create (no id) upserts by (ownerPartyId, agentName). -->
             <if condition="adkAgentConfigId">
@@ -73,7 +77,7 @@
                 <set field="existing.instruction"        from="instruction"/>
                 <set field="existing.description"        from="description"/>
                 <set field="existing.ownerPartyId"       from="ownerPartyId"/>
-                <set field="existing.enabled"            value="Y"/>
+                <set field="existing.enabled"            from="activeFlag"/>
                 <set field="existing.scheduleExpression" from="scheduleExpression"/>
                 <set field="existing.scheduleEnabled"    from="scheduleEnabled"/>
                 <set field="existing.schedulePrompt"     from="schedulePrompt"/>
@@ -105,7 +109,7 @@
                     <set field="newCfg.llmProvider"        from="llmProvider  ?: 'gemini'"/>
                     <set field="newCfg.instruction"        from="instruction  ?: 'You are a helpful assistant for the GrowERP ERP system.'"/>
                     <set field="newCfg.description"        from="description  ?: 'ADK Agent'"/>
-                    <set field="newCfg.enabled"            value="Y"/>
+                    <set field="newCfg.enabled"            from="activeFlag"/>
                     <set field="newCfg.scheduleExpression" from="scheduleExpression"/>
                     <set field="newCfg.scheduleEnabled"    from="scheduleEnabled ?: 'N'"/>
                     <set field="newCfg.schedulePrompt"     from="schedulePrompt"/>
@@ -152,6 +156,10 @@
             </if>
 
             <script><![CDATA[
+                if (activeFlag == 'N') {
+                    org.moqui.adk.AdkManager.unloadConfig(adkAgentConfigId as String)
+                    return
+                }
                 org.moqui.adk.AdkManager.initSessionService(ec.factory)
                 org.moqui.adk.AdkManager.initConfig(
                     adkAgentConfigId,

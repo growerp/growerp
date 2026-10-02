@@ -8,7 +8,8 @@ message in an outreach campaign. It never sends anything: you review the message
 It was built for AntWebsystems to find local partners who implement GrowERP for small
 companies with the *revenue-first* method ("flip the ERP script, solve sales first", see
 [growerp.org/content/revenue-first](https://www.growerp.org/content/revenue-first)). Any
-company can use it for its own partner recruitment by changing the instruction.
+company can use it for its own partner recruitment: a general version is in the agent catalog
+(see §3).
 
 See also: [Agent Control Center User Guide](Agent_Control_Center_User_Guide.md) for the
 general agent screens.
@@ -43,18 +44,30 @@ it finds at most 5 new candidates per run. A run takes about 2–3 minutes.
 | A GrowERP version with agent web search (the release after 1.19.8) | — |
 | Your own Gemini API key | **System Setup → AI Settings** |
 | Optional: a Google Calendar booking page | **Booking page URL** in the Google Workspace settings |
-| The agent file `team-partner-recruitment.json` | [moqui-adk/data/agents](../moqui-adk/data/agents/team-partner-recruitment.json) |
 
 The free monthly AI allowance is too small for research agents: a run uses up to 40 AI calls.
 Without your own key the run stops with *Free monthly LLM allowance used*.
 
 ## 3. Installing the agent
 
-1. Open **Agent Control → AI Agents**.
-2. Tap the **upload icon** (tooltip *Upload team*) and choose `team-partner-recruitment.json`.
-3. The agent **GrowERP Partner Scout** appears under the team **Partner Recruitment**.
+**GrowERP company:** nothing to install. **GrowERP Partner Scout** comes with the seed data
+(`backend/data/GrowerpPartnerScoutAgentData.xml`), so after a database refresh it is under
+**Agent Control → AI Agents**, team **GrowERP Marketing Team**, at the first login.
 
-Uploading the file again updates the agent instead of creating a second one.
+**Any other company:** add the general version from the agent catalog.
+
+1. Open **Agent Control → AI Agents** and tap the **Agent catalog** icon.
+2. Under **Marketing**, check **Partner Scout** and tap **Add selected**. Companies that get
+   the marketing team with their demo data already have it, inactive.
+3. Open the new agent. Its instruction and scheduled-run prompt contain fill-ins in double
+   square brackets, for example `[[YOUR COMPANY: name, country and a one-line description]]`
+   and `[[COUNTRY]]`. Replace each one, brackets included, with your own text.
+4. Save. The agent dialog shows which fill-ins are left.
+
+While any `[[...]]` fill-in is left, the agent is saved but **inactive**: it does not answer in
+chat and its schedule does not run. It becomes active at the first save without them. Keep the
+single-bracket parts such as `[country]` and `[name]`: the agent fills those in itself during a
+run.
 
 ## 4. Running it
 

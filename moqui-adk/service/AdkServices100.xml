@@ -1563,6 +1563,12 @@
                             issues << [level: 'error', field: field, message: "{${key}} is read as a variable that does not exist, so the run fails. Write [${key}] instead."]
                     }
                 }
+                // [[...]] = a catalog template's fill-in; update#AgentConfig keeps the agent inactive
+                [instruction: instr, schedulePrompt: prompt].each { field, text ->
+                    def open = (text =~ /\[\[([^\[\]]+)\]\]/).collect { it[0] as String }.unique()
+                    if (open)
+                        issues << [level: 'warning', field: field, message: "Fill in ${open.join(', ')}: the agent stays inactive until every [[...]] placeholder is replaced."]
+                }
                 if (!instr.trim() && !prompt.trim())
                     issues << [level: 'error', field: 'instruction', message: 'Set an instruction or a scheduled-run prompt.']
                 if (mode == 'scoped') {

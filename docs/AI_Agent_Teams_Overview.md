@@ -4,13 +4,14 @@ GrowERP is an AI-native ERP: every install includes governed, auditable agent te
 
 ## 1. Marketing Agent Team
 
-Five specialist agents that run outbound marketing and top-of-funnel sales work with no human in the loop for routine tasks. There is no coordinator — each agent has a narrow job and is schedule-triggered or invoked directly.
+Six specialist agents that run outbound marketing and top-of-funnel sales work with no human in the loop for routine tasks. There is no coordinator — each agent has a narrow job and is schedule-triggered or invoked directly.
 
 - **Outreach Personalizer** — fills in empty outreach message bodies for the active campaign so every contact gets a tailored message.
 - **Sales Development Rep** — handles inbound website-chat visitors: explains your company (it adapts to whichever company loaded it), qualifies the lead, encourages the next step (trial, demo, or signup), and hands off hot leads to a human.
 - **Lead Triage** — ranks new replies and opportunities by priority and drafts suggested follow-ups for review.
 - **Content and Social** — produces a weekly content piece and adapts it to every enabled social platform.
 - **Marketing Ops Digest** — sends a daily summary of sends, replies, pipeline movement and won opportunities.
+- **Partner Scout** — finds implementation partners in a country, adds them as leads with a research note and an outreach draft; stays inactive until its `[[...]]` fill-ins (your company, product, pitch) are replaced.
 
 ## 2. GrowERP Operations Team
 
