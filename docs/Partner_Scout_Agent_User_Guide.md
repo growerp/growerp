@@ -2,8 +2,8 @@
 
 The **Partner Scout** is an AI agent that looks for ERP implementation freelancers in a
 country you choose and prepares a first contact with each of them. It searches the web,
-scores what it finds, stores every good candidate in your CRM, and writes a personal outreach
-draft. It never sends anything: you review the draft and decide.
+scores what it finds, stores every good candidate as a lead, and writes a personal outreach
+message in an outreach campaign. It never sends anything: you review the message and decide.
 
 It was built for AntWebsystems to find local partners who implement GrowERP for small
 companies with the *revenue-first* method ("flip the ERP script, solve sales first", see
@@ -24,14 +24,17 @@ general agent screens.
 2. Scores each candidate 1–10 on SME focus, proven implementations, independence, CRM and
    e-commerce experience, local presence and a public business contact. It keeps 6 or more.
 3. Skips anyone already in your CRM.
-4. For each new candidate it creates:
+4. Puts the outreach messages in the campaign **Partner Recruitment *country***. It creates
+   the campaign on the first run for a country, and never starts it.
+5. For each new candidate it creates:
    * a **Lead** (person plus company, with website or profile link and country);
-   * an **opportunity** *Partner: name (country)* at stage *Prospecting*. Its description
-     holds the score, why they fit, the evidence links and a **DRAFT MESSAGE** of at most
-     150 words;
-   * a **to-do** *Review and send partner outreach draft*.
+   * a **research note** in the lead's **Communications**: a *Comment* with the score, why
+     they fit and the evidence links;
+   * an **outreach message** of at most 150 words, status *Pending*: an *Email* when the
+     candidate lists a public address, otherwise *LinkedIn* (for the send queue).
 
-By default it finds at most 5 new candidates per run. A run takes about 2–3 minutes.
+It creates no opportunity: one is created automatically when the candidate answers. By default
+it finds at most 5 new candidates per run. A run takes about 2–3 minutes.
 
 ## 2. Before you start
 
@@ -68,22 +71,30 @@ One country per run works best. To cover several countries, change the scheduled
 week or upload the agent a second time under another name.
 
 Before scheduling, tap **Test** in the agent dialog and run it once with **Simulate writes**
-on. You see which candidates it finds and the leads and opportunities it would create,
+on. You see which candidates it finds and the leads, notes and messages it would create,
 without anything being stored. See
 [Testing an Agent](Agent_Control_Center_User_Guide.md#testing-an-agent).
 
 ## 5. Working with the results
 
-1. Open **CRM → Opportunities** and filter on *Partner:*.
-2. Open an opportunity. Read the score and evidence first: check that the person really is
-   independent and active.
-3. Copy the **DRAFT MESSAGE**, adjust it in your own words and send it through the channel
-   the candidate lists (website contact form, LinkedIn, e-mail).
-4. Mark the to-do done and move the opportunity to the next stage. Change it to
-   *Closed Lost* when someone is not interested, so the agent never proposes them again.
+1. **Check the person.** Open the lead in **CRM → Leads** and tap **Communications**. The
+   *Partner Scout research* note has the score and evidence links: check that the person
+   really is independent and active. Delete the lead and its message if not.
+2. **Edit the message.** Open **Outreach → Messages**, filter on the campaign *Partner
+   Recruitment country*, and rewrite each *Pending* message in your own words. Only pending
+   messages can be edited.
+3. **Send.**
+   * *Email:* start the campaign in **Outreach → Campaigns**. The automation sends pending
+     emails from your company's mail server, within the campaign's daily limit (10).
+   * *LinkedIn:* open the **LinkedIn send queue**, copy the text, send it from your own
+     account and mark it sent.
+4. **Follow the conversation.** Every sent message appears in the lead's **Communications**:
+   emails automatically, LinkedIn messages when you mark them sent.
+5. **When they answer**, set the message to *Responded*. GrowERP then creates an opportunity
+   for that same lead in **CRM → Opportunities**.
 
-The opportunities are assigned to the **AI Agent** user of your company. Reassign them to the
-person who follows up.
+A lead the agent found once is never proposed again, so delete a lead only when you want it
+to be found again.
 
 ## 6. The settings, and why they are set this way
 
@@ -91,9 +102,9 @@ person who follows up.
 |---|---|---|
 | Search the web | on | The agent needs Google Search to find people. Gemini only. |
 | Max AI calls per run | 40 | Every search, check and save is a call. The default of 10 is not enough for one candidate. |
-| Tool mode | scoped | It may only call the five services in the allow list. |
-| Allowed services | get#Companies, get#User, get#Opportunity, create#User, create#Opportunity | Read the CRM for duplicates, create leads and opportunities. Nothing else. |
-| Write policy | allow | Creating a lead or opportunity needs no approval, because nothing leaves your system. |
+| Tool mode | scoped | It may only call the seven services in the allow list. |
+| Allowed services | get#Companies, get#User, list#OutreachCampaigns, create#OutreachCampaign, create#User, create#CommunicationEvent, create#OutreachMessage | Check for duplicates, find or create the campaign, create the lead, its research note and its pending message. It cannot send, start a campaign or change a status. |
+| Write policy | allow | These writes need no approval, because nothing leaves your system until you start the campaign or send by hand. |
 
 The agent works as your company's **AI Agent** user: everything it creates belongs to your
 company and shows up in your CRM like any other record.
@@ -130,5 +141,7 @@ Three rules for the instruction text:
 | *Max number of llm calls limit of 10 exceeded* | **Max AI calls per run** is empty. Set it to 40. |
 | *Context variable not found: …* | Curly braces in the instruction. Replace `{x}` with `[x]`. |
 | *HTML not allowed including less-than* | `<` or `>` in the instruction or uploaded file. Remove them. |
-| Run finished but no new opportunities | Every candidate it found was already in your CRM, or scored below 6. Change the country or widen the TARGETS section. |
-| Opportunities exist but are not in your CRM list | Your server runs a version before agents worked as the company's AI Agent user. Update GrowERP. |
+| Run finished but no new messages | Every candidate it found was already in your CRM, or scored below 6. Change the country or widen the TARGETS section. |
+| Email messages go to *Failed* | No outgoing mail server for your company. Enter the SMTP settings in the company settings, then retry the failed messages. |
+| Pending emails are not sent | The campaign is not started. Start it in **Outreach → Campaigns**. |
+| Records exist but are not in your lists | Your server runs a version before agents worked as the company's AI Agent user. Update GrowERP. |

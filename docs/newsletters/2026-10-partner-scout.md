@@ -15,15 +15,17 @@ consultants already helping small businesses with Odoo, ERPNext or Dolibarr.
 
 You give it a country. It searches the web for independent ERP consultants and small
 implementation firms, scores each one from 1 to 10, and skips anyone already in your CRM.
-For every good candidate it stores a lead and an opportunity in your CRM. The opportunity
-holds the evidence links and a personal draft message of at most 150 words.
+For every good candidate it stores a lead with a research note in its communications log
+(the score and the evidence links), and a personal message of at most 150 words in an
+outreach campaign for that country. The opportunity only appears when the person answers.
 
 The first test run on Thailand took under two minutes and came back with two Odoo
 consultants. Both drafts opened with something specific from the person's own profile, and
 I would have sent either one after a small edit.
 
-It never sends anything itself. The instruction forbids it, and the agent has no tool that
-could. Writing to a person stays a human decision.
+It never sends anything itself. The messages wait in the campaign until you have edited them
+and started it; LinkedIn messages go to the send queue. Every message that does go out lands
+in the person's communications log, so the whole conversation stays in one place.
 
 The pitch is the [revenue-first sequence](https://www.growerp.org/content/revenue-first): start a small company with
 its website, leads and sales pipeline, and add accounting and stock once the system is
