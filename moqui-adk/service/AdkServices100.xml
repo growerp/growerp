@@ -38,9 +38,11 @@
                     writePolicy       : cfg.writePolicy ?: 'approve',
                     approvalChatRoomId: cfg.approvalChatRoomId,
                     agentPartyId      : cfg.agentPartyId,
+                    webSearch         : cfg.webSearch == 'Y',
                     agentRole         : cfg.agentRole ?: 'specialist',
                     orchestrationType : cfg.orchestrationType,
                     loopMaxIterations : cfg.loopMaxIterations,
+                    maxLlmCalls       : cfg.maxLlmCalls,
                     teamName          : cfg.teamName,
                     catalogNominated  : cfg.catalogNominated == 'Y',
                 ]"/>
@@ -66,9 +68,11 @@
             <parameter name="writePolicy"/>
             <parameter name="approvalChatRoomId"/>
             <parameter name="websiteChat" type="Boolean" default="false"/>
+            <parameter name="webSearch" type="Boolean" default="false"/>
             <parameter name="agentRole"/>
             <parameter name="orchestrationType"/>
             <parameter name="loopMaxIterations" type="Integer"/>
+            <parameter name="maxLlmCalls" type="Integer"/>
             <parameter name="teamName"/>
         </in-parameters>
         <out-parameters>
@@ -88,8 +92,9 @@
                           toolMode: toolMode, serviceAllowlist: serviceAllowlist,
                           writePolicy: writePolicy, approvalChatRoomId: approvalChatRoomId,
                           websiteChat: websiteChat ? 'Y' : 'N',
+                          webSearch: webSearch ? 'Y' : 'N',
                           agentRole: agentRole, orchestrationType: orchestrationType,
-                          loopMaxIterations: loopMaxIterations, teamName: teamName]"/>
+                          loopMaxIterations: loopMaxIterations, maxLlmCalls: maxLlmCalls, teamName: teamName]"/>
             <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
                 auto-field-map="[adkAgentConfigId: adkAgentConfigId]"/>
             <set field="adkAgentConfig" from="[
@@ -110,9 +115,11 @@
                 approvalChatRoomId: cfg.approvalChatRoomId,
                 agentPartyId      : cfg.agentPartyId,
                 websiteChat       : cfg.websiteChat == 'Y',
+                webSearch         : cfg.webSearch == 'Y',
                 agentRole         : cfg.agentRole ?: 'specialist',
                 orchestrationType : cfg.orchestrationType,
                 loopMaxIterations : cfg.loopMaxIterations,
+                maxLlmCalls       : cfg.maxLlmCalls,
                 teamName          : cfg.teamName,
             ]"/>
         </actions>
@@ -136,9 +143,11 @@
             <parameter name="writePolicy"/>
             <parameter name="approvalChatRoomId"/>
             <parameter name="websiteChat" type="Boolean" default="false"/>
+            <parameter name="webSearch" type="Boolean" default="false"/>
             <parameter name="agentRole"/>
             <parameter name="orchestrationType"/>
             <parameter name="loopMaxIterations" type="Integer"/>
+            <parameter name="maxLlmCalls" type="Integer"/>
             <parameter name="teamName"/>
         </in-parameters>
         <out-parameters>
@@ -164,8 +173,9 @@
                           toolMode: toolMode, serviceAllowlist: serviceAllowlist,
                           writePolicy: writePolicy, approvalChatRoomId: approvalChatRoomId,
                           websiteChat: websiteChat ? 'Y' : 'N',
+                          webSearch: webSearch ? 'Y' : 'N',
                           agentRole: agentRole, orchestrationType: orchestrationType,
-                          loopMaxIterations: loopMaxIterations, teamName: teamName]"/>
+                          loopMaxIterations: loopMaxIterations, maxLlmCalls: maxLlmCalls, teamName: teamName]"/>
             <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
                 auto-field-map="[adkAgentConfigId: adkAgentConfigId]"/>
             <set field="adkAgentConfig" from="[
@@ -186,9 +196,11 @@
                 approvalChatRoomId: cfg.approvalChatRoomId,
                 agentPartyId      : cfg.agentPartyId,
                 websiteChat       : cfg.websiteChat == 'Y',
+                webSearch         : cfg.webSearch == 'Y',
                 agentRole         : cfg.agentRole ?: 'specialist',
                 orchestrationType : cfg.orchestrationType,
                 loopMaxIterations : cfg.loopMaxIterations,
+                maxLlmCalls       : cfg.maxLlmCalls,
                 teamName          : cfg.teamName,
             ]"/>
         </actions>
@@ -292,8 +304,9 @@
                     schedulePrompt: src.schedulePrompt,
                     toolMode: src.toolMode, serviceAllowlist: src.serviceAllowlist,
                     writePolicy: src.writePolicy, websiteChat: src.websiteChat,
+                    webSearch: src.webSearch,
                     agentRole: src.agentRole, orchestrationType: src.orchestrationType,
-                    loopMaxIterations: src.loopMaxIterations, teamName: src.teamName]"/>
+                    loopMaxIterations: src.loopMaxIterations, maxLlmCalls: src.maxLlmCalls, teamName: src.teamName]"/>
             <!-- explicitly NOT copied: apiKey, agentPartyId, scheduleChatRoomId,
                  approvalChatRoomId, catalogNominated — all tenant-specific or must
                  self-reference at clone time per the existing template convention -->
@@ -1171,9 +1184,11 @@
                              serviceAllowlist: tmpl.serviceAllowlist,
                              writePolicy: tmpl.writePolicy,
                              websiteChat: tmpl.websiteChat,
+                             webSearch: tmpl.webSearch,
                              agentRole: tmpl.agentRole,
                              orchestrationType: tmpl.orchestrationType,
                              loopMaxIterations: tmpl.loopMaxIterations,
+                             maxLlmCalls: tmpl.maxLlmCalls,
                              teamName: tmpl.teamName]"/>
                 <service-call name="AdkSchedulerServices.sync#AgentJob" ignore-error="true"
                     in-map="[adkAgentConfigId: cfgOut.adkAgentConfigId]"/>

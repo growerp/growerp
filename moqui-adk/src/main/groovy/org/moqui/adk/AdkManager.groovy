@@ -317,7 +317,8 @@ pre-filled dialog. Order/shipment specifics still work: "enter a sales order" �
             LlmAgent agent
 
             // In-process FunctionTools (read-only set + writes when allowed), plus the MCP toolset.
-            List allTools = assembleFunctionTools(allowWrites)
+            List allTools = assembleFunctionTools(allowWrites,
+                    effectiveProvider == 'gemini' && lookupWebSearch(configId), modelArg)
             if (agentMcpToolset) allTools.add(agentMcpToolset)
             // External (tenant-registered) MCP servers attached to this agent — wrapped so a
             // tool name that collides with the internal server or an earlier external server
@@ -758,7 +759,10 @@ CRITICAL tool-use rules — follow exactly:
 
     // ── Agent execution ───────────────────────────────────────────────────────
 
-    static RunConfig defaultRunConfig() { RunConfig.builder().setMaxLlmCalls(10).build() }
+    /** Per-run LLM call cap: the agent's maxLlmCalls when set, else 10 (cost guard). */
+    static RunConfig defaultRunConfig(String configId = null) {
+        RunConfig.builder().setMaxLlmCalls(lookupMaxLlmCalls(configId) ?: 10).build()
+    }
 
     /**
      * Token allowance gate before an agent run: the reason the run is refused, or null to go
@@ -950,13 +954,14 @@ CRITICAL tool-use rules — follow exactly:
 
     static List<Map> runAgent(String userId, String sessionId, String text) {
         if (shuttingDown) return []
-        String blocked = allowanceBlock(sessionOwn[sessionId] ?: lookupConfigIdFromDb(sessionId), sessionId)
+        String runConfigId = sessionOwn[sessionId] ?: lookupConfigIdFromDb(sessionId)
+        String blocked = allowanceBlock(runConfigId, sessionId)
         if (blocked) return [blockedEvent(blocked)]
         Content userContent = buildUserContent(text)
         List<Map> events = []
         Set<String> delegateNames = new HashSet<>()
         Throwable[] err  = [null]
-        runnerForSession(sessionId).runAsync(userId, sessionId, userContent, defaultRunConfig())
+        runnerForSession(sessionId).runAsync(userId, sessionId, userContent, defaultRunConfig(runConfigId))
             .blockingSubscribe(
                 { Event e -> collectDelegateNames(e, delegateNames); events << eventToMap(e) },
                 { Throwable t -> err[0] = t; logger.error("ADK runAgent error (session={}): {}", sessionId, t.message, t) }
@@ -1029,7 +1034,7 @@ CRITICAL tool-use rules — follow exactly:
         List<Map> events = []
         Throwable[] err  = [null]
 
-        oneOff.runAsync(userId, session.id(), userContent, defaultRunConfig())
+        oneOff.runAsync(userId, session.id(), userContent, defaultRunConfig(cid))
               .blockingSubscribe(
                   { Event e -> events << eventToMap(e) },
                   { Throwable t -> err[0] = t; logger.error("ADK runOneOff error (config={}): {}", cid, t.message, t) }
@@ -1046,12 +1051,13 @@ CRITICAL tool-use rules — follow exactly:
     static void runAgentSse(String userId, String sessionId, String text,
                             Closure eventCallback, Closure doneCallback) {
         if (shuttingDown) { doneCallback(null); return }
-        String blocked = allowanceBlock(sessionOwn[sessionId] ?: lookupConfigIdFromDb(sessionId), sessionId)
+        String runConfigId = sessionOwn[sessionId] ?: lookupConfigIdFromDb(sessionId)
+        String blocked = allowanceBlock(runConfigId, sessionId)
         if (blocked) { eventCallback(blockedEvent(blocked)); doneCallback(null); return }
         Content userContent = buildUserContent(text)
         Set<String> delegateNames = java.util.concurrent.ConcurrentHashMap.newKeySet()
         List<Map> collectedEvents = Collections.synchronizedList(new ArrayList<>())
-        runnerForSession(sessionId).runAsync(userId, sessionId, userContent, defaultRunConfig())
+        runnerForSession(sessionId).runAsync(userId, sessionId, userContent, defaultRunConfig(runConfigId))
             .subscribe(
                 { Event e ->
                     def em = eventToMap(e)
@@ -1328,6 +1334,44 @@ CRITICAL tool-use rules — follow exactly:
         }
     }
 
+    /** The agent's persisted maxLlmCalls, or null when unset/unknown. */
+    private static Integer lookupMaxLlmCalls(String configId) {
+        if (!configId || configId == DEFAULT_CONFIG || sharedSessionService == null) return null
+        try {
+            def ec = sharedSessionService.ecf.getExecutionContext()
+            boolean wasDisabled = ec.artifactExecution.disableAuthz()
+            try {
+                def cfg = ec.entity.find('moqui.adk.AdkAgentConfig')
+                        .condition('adkAgentConfigId', configId).one()
+                return cfg?.maxLlmCalls as Integer
+            } finally {
+                if (!wasDisabled) ec.artifactExecution.enableAuthz()
+            }
+        } catch (Exception e) {
+            logger.warn("lookupMaxLlmCalls failed for ${configId}: ${e.message}")
+            return null
+        }
+    }
+
+    /** True when the agent's persisted config opts in to the Google Search tool (webSearch='Y'). */
+    private static boolean lookupWebSearch(String configId) {
+        if (!configId || configId == DEFAULT_CONFIG || sharedSessionService == null) return false
+        try {
+            def ec = sharedSessionService.ecf.getExecutionContext()
+            boolean wasDisabled = ec.artifactExecution.disableAuthz()
+            try {
+                def cfg = ec.entity.find('moqui.adk.AdkAgentConfig')
+                        .condition('adkAgentConfigId', configId).one()
+                return cfg?.webSearch == 'Y'
+            } finally {
+                if (!wasDisabled) ec.artifactExecution.enableAuthz()
+            }
+        } catch (Exception e) {
+            logger.warn("lookupWebSearch failed for ${configId}: ${e.message}")
+            return false
+        }
+    }
+
     // ── Phase 4: multi-agent orchestration ──────────────────────────────────────
 
     /** Read a config's orchestration role: [role, type, loopMax]. null for rows that don't
@@ -1412,7 +1456,7 @@ CRITICAL tool-use rules — follow exactly:
     /** Build a coordinator LlmAgent that delegates to its team members as AgentTools (router).
      *  sequential/parallel/loop orchestration is Phase 4b — for now it routes via AgentTool too. */
     /** The in-process FunctionTools every agent gets (read-only set, plus write tools when allowed). */
-    private static List assembleFunctionTools(boolean allowWrites) {
+    private static List assembleFunctionTools(boolean allowWrites, boolean webSearch = false, def modelArg = null) {
         List allTools = new ArrayList()
         // lets the agent pull saved artifacts (PDFs/images) into context only when needed
         allTools.add(com.google.adk.tools.LoadArtifactsTool.INSTANCE)
@@ -1439,6 +1483,14 @@ CRITICAL tool-use rules — follow exactly:
             allTools.addAll(com.google.adk.tools.FunctionTool.create(SubstackTool.class, 'publishSubstackArticle'))
             allTools.addAll(com.google.adk.tools.FunctionTool.create(SubstackTool.class, 'addSubstackSubscriber'))
         }
+        // Gemini Google Search, wrapped in its own sub-agent: the raw GoogleSearchTool can't be
+        // mixed with function tools in one request. modelArg is a model-id String when the key
+        // comes from the environment, so resolve it through the registry.
+        if (webSearch && modelArg != null) {
+            def searchModel = modelArg instanceof com.google.adk.models.BaseLlm ?
+                    modelArg : com.google.adk.models.LlmRegistry.getLlm(modelArg as String)
+            allTools.add(com.google.adk.tools.GoogleSearchAgentTool.create(searchModel))
+        }
         return allTools
     }
 
@@ -1458,7 +1510,8 @@ CRITICAL tool-use rules — follow exactly:
         } catch (Exception e) { logger.warn("buildMemberInstance(${memberConfigId}) load failed: ${e.message}"); return null }
         if (!cfg) return null
         boolean allowWrites = (cfg.toolMode ?: 'full') != 'readOnly'
-        List tools = assembleFunctionTools(allowWrites)
+        boolean webSearch = cfg.webSearch == 'Y' && (cfg.llmProvider ?: 'gemini') == 'gemini'
+        List tools = assembleFunctionTools(allowWrites, webSearch, modelArg)
         def ts = configMcpToolsets[memberConfigId]
         if (ts) tools.add(ts)
         return LlmAgent.builder()

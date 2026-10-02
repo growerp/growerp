@@ -418,4 +418,93 @@
         </actions>
     </service>
 
+    <!-- The tenant's agent user: MCP tool calls of an ADK agent run as this user (instead of
+         SystemSupport) so services that resolve the tenant from the logged-in user
+         (get#RelatedCompanyAndOwner) read and write inside the agent's own company.
+         Same party as AdkChatServices.ensure#AgentChatUser. The account has no password
+         (internal login only) and the least internal group, GROWERP_M_EMPLOYEE; which
+         services the agent may call is still decided by govern#AgentAction. -->
+    <service verb="ensure" noun="AgentUser" authenticate="anonymous-all">
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true"/>
+            <parameter name="adkAgentConfigId"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="agentUsername"/>
+        </out-parameters>
+        <actions>
+            <if condition="ownerPartyId == '_NA_'"><return/></if>
+            <if condition="adkAgentConfigId">
+                <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
+                    auto-field-map="[adkAgentConfigId: adkAgentConfigId]"/>
+            </if>
+            <set field="agentPartyId" from="cfg?.agentPartyId ?: ('AGENT_' + ownerPartyId)"/>
+            <entity-find-one entity-name="mantle.party.Party" value-field="agentParty"
+                auto-field-map="[partyId: agentPartyId]" for-update="true"/>
+            <if condition="!agentParty">
+                <service-call name="create#mantle.party.Party"
+                    in-map="[partyId: agentPartyId, partyTypeEnumId: 'PtyPerson', ownerPartyId: ownerPartyId]"/>
+                <service-call name="create#mantle.party.Person"
+                    in-map="[partyId: agentPartyId, firstName: 'AI', lastName: 'Agent']"/>
+                <else-if condition="!agentParty.ownerPartyId">
+                    <!-- party created earlier by ensure#AgentChatUser without an owner -->
+                    <set field="agentParty.ownerPartyId" from="ownerPartyId"/>
+                    <entity-update value-field="agentParty"/>
+                </else-if>
+                <else-if condition="agentParty.ownerPartyId != ownerPartyId">
+                    <return error="true" message="Agent party ${agentPartyId} belongs to another company."/>
+                </else-if>
+            </if>
+            <!-- employee of the tenant's main company -->
+            <entity-find entity-name="mantle.party.PartyDetailAndRole" list="companyList" limit="1">
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
+                <econdition field-name="partyTypeEnumId" value="PtyOrganization"/>
+                <econdition field-name="roleTypeId" value="OrgInternal"/>
+            </entity-find>
+            <if condition="companyList">
+                <entity-find entity-name="mantle.party.PartyRelationship" list="empRels" limit="1">
+                    <econdition field-name="fromPartyId" from="agentPartyId"/>
+                    <econdition field-name="toPartyId" from="companyList[0].partyId"/>
+                    <econdition field-name="relationshipTypeEnumId" value="PrtEmployee"/>
+                    <date-filter/>
+                </entity-find>
+                <if condition="!empRels">
+                    <service-call name="create#mantle.party.PartyRelationship"
+                        in-map="[fromPartyId: agentPartyId, fromRoleTypeId: 'Employee',
+                                 toPartyId: companyList[0].partyId, toRoleTypeId: 'OrgInternal',
+                                 relationshipTypeEnumId: 'PrtEmployee', fromDate: ec.user.nowTimestamp]"/>
+                </if>
+            </if>
+            <!-- enabled account without a password: only an internal login can use it -->
+            <entity-find entity-name="moqui.security.UserAccount" list="agentAccts" limit="1" for-update="true">
+                <econdition field-name="partyId" from="agentPartyId"/>
+            </entity-find>
+            <if condition="agentAccts">
+                <set field="agentAcct" from="agentAccts[0]"/>
+                <if condition="agentAcct.disabled == 'Y'">
+                    <set field="agentAcct.disabled" value="N"/>
+                    <entity-update value-field="agentAcct"/>
+                </if>
+                <set field="agentUserId" from="agentAcct.userId"/>
+                <set field="agentUsername" from="agentAcct.username"/>
+                <else>
+                    <set field="agentUsername" from="'agent-' + agentPartyId"/>
+                    <service-call name="create#moqui.security.UserAccount" out-map="newAcct"
+                        in-map="[partyId: agentPartyId, username: agentUsername,
+                                 userFullName: 'AI Agent', disabled: 'N', requirePasswordChange: 'N']"/>
+                    <set field="agentUserId" from="newAcct.userId"/>
+                </else>
+            </if>
+            <entity-find entity-name="moqui.security.UserGroupMember" list="groupMembers" limit="1">
+                <econdition field-name="userId" from="agentUserId"/>
+                <econdition field-name="userGroupId" value="GROWERP_M_EMPLOYEE"/>
+                <date-filter/>
+            </entity-find>
+            <if condition="!groupMembers">
+                <service-call name="create#moqui.security.UserGroupMember"
+                    in-map="[userGroupId: 'GROWERP_M_EMPLOYEE', userId: agentUserId, fromDate: ec.user.nowTimestamp]"/>
+            </if>
+        </actions>
+    </service>
+
 </services>

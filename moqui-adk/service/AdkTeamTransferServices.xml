@@ -61,9 +61,11 @@
                     serviceAllowlist  : cfg.serviceAllowlist,
                     writePolicy       : cfg.writePolicy ?: 'approve',
                     websiteChat       : cfg.websiteChat == 'Y',
+                    webSearch         : cfg.webSearch == 'Y',
                     agentRole         : cfg.agentRole ?: 'specialist',
                     orchestrationType : cfg.orchestrationType,
                     loopMaxIterations : cfg.loopMaxIterations,
+                    maxLlmCalls       : cfg.maxLlmCalls,
                 ])</script>
             </iterate>
             <entity-find entity-name="moqui.adk.AdkAgentTeamMember" list="tmList">
@@ -129,8 +131,9 @@
                              schedulePrompt: a.schedulePrompt,
                              toolMode: a.toolMode, serviceAllowlist: a.serviceAllowlist,
                              writePolicy: a.writePolicy, websiteChat: a.websiteChat ? 'Y' : 'N',
+                             webSearch: a.webSearch ? 'Y' : 'N',
                              agentRole: a.agentRole, orchestrationType: a.orchestrationType,
-                             loopMaxIterations: a.loopMaxIterations, teamName: importedTeamName]"/>
+                             loopMaxIterations: a.loopMaxIterations, maxLlmCalls: a.maxLlmCalls, teamName: importedTeamName]"/>
                 <script>idMap[a.adkAgentConfigId as String] = cfgOut.adkAgentConfigId</script>
                 <!-- scheduled agents need a chat room to report to; self-reference the new id
                      the same way AdkDemoServices.load#AgentDemo does for the built-in demo -->
@@ -145,8 +148,9 @@
                                  scheduleChatRoomId: cfgOut.adkAgentConfigId,
                                  toolMode: a.toolMode, serviceAllowlist: a.serviceAllowlist,
                                  writePolicy: a.writePolicy, websiteChat: a.websiteChat ? 'Y' : 'N',
+                                 webSearch: a.webSearch ? 'Y' : 'N',
                                  agentRole: a.agentRole, orchestrationType: a.orchestrationType,
-                                 loopMaxIterations: a.loopMaxIterations, teamName: importedTeamName]"/>
+                                 loopMaxIterations: a.loopMaxIterations, maxLlmCalls: a.maxLlmCalls, teamName: importedTeamName]"/>
                 </if>
             </iterate>
             <!-- 2. Recreate team membership with remapped coordinator/member ids -->

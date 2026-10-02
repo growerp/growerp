@@ -234,6 +234,22 @@
   "@adk_thisAgentRepliesTo": {
     "description": "Extracted string: This agent replies to the public website chat; one agent per company"
   },
+  "adk_webSearch": "Search the web",
+  "@adk_webSearch": {
+    "description": "Agent config: checkbox to give the agent the Google Search tool"
+  },
+  "adk_webSearchHint": "This agent can search the internet with Google Search (Gemini only)",
+  "@adk_webSearchHint": {
+    "description": "Agent config: subtitle of the web search checkbox"
+  },
+  "adk_maxLlmCalls": "Max AI calls per run",
+  "@adk_maxLlmCalls": {
+    "description": "Agent config: field for the per-run LLM call cap"
+  },
+  "adk_maxLlmCallsHint": "Cost cap per run; empty = 10. Raise for research agents",
+  "@adk_maxLlmCallsHint": {
+    "description": "Agent config: helper text of the per-run LLM call cap field"
+  },
   "adk_teamOrchestration": "Team / orchestration",
   "@adk_teamOrchestration": {
     "description": "Extracted string: Team / orchestration"

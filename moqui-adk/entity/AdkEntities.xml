@@ -32,6 +32,8 @@
         <field name="agentPartyId"     type="id"/>
         <!-- websiteChat: Y → this agent answers the tenant's public website chat -->
         <field name="websiteChat"      type="text-indicator"/>
+        <!-- webSearch: Y → agent gets the Gemini Google Search tool (GoogleSearchAgentTool) -->
+        <field name="webSearch"        type="text-indicator"/>
         <!-- Multi-agent orchestration (Phase 4) -->
         <!-- agentRole: specialist (default) | coordinator | workflow -->
         <field name="agentRole"          type="text-short"/>
@@ -39,6 +41,8 @@
         <field name="orchestrationType"  type="text-short"/>
         <!-- loop orchestration safety cap -->
         <field name="loopMaxIterations"  type="number-integer"/>
+        <!-- maxLlmCalls: LLM calls allowed per run (null = default 10) -->
+        <field name="maxLlmCalls"        type="number-integer"/>
         <!-- Free-form label, independent of agentRole/orchestrationType: agents sharing
              (ownerPartyId, teamName) are one team for Agent Control Center grouping and
              team download/upload. A flat set of specialists with no coordinator (e.g. the

@@ -589,8 +589,35 @@
                                 return
                             }
                         }
-                        def serviceResult = ec.service.sync().name(svcName).parameters(callArgs)
-                            .requireNewTransaction(true).call()
+                        // An ADK agent acts as its tenant's agent user, not as the SystemSupport
+                        // MCP login, so services resolving the company from the logged-in user
+                        // stay inside the agent's own tenant.
+                        def agentUsername = null
+                        def adkOwner = resolveAdkOwner()
+                        if (adkOwner && adkOwner != '_NA_' &&
+                                ec.service.isServiceDefined('AdkGovernanceServices.ensure#AgentUser')) {
+                            def au = ec.service.sync().name('AdkGovernanceServices.ensure#AgentUser')
+                                .parameters([ownerPartyId: adkOwner, adkAgentConfigId: resolveAdkConfigId()])
+                                .requireNewTransaction(true).disableAuthz().call()
+                            agentUsername = au?.agentUsername
+                            def auErr = errorResultIfFailed()
+                            if (auErr != null) { result = auErr; return }
+                        }
+                        boolean pushedAgent = agentUsername ? ec.user.internalLoginUser(agentUsername, false) : false
+                        if (agentUsername && !pushedAgent) {
+                            def msg = "Could not act as agent user ${agentUsername}: action not executed."
+                            ec.logger.warn("MCP: ${msg}")
+                            isError = true
+                            result = [content: [[type: "text", text: msg]], isError: true]
+                            return
+                        }
+                        def serviceResult
+                        try {
+                            serviceResult = ec.service.sync().name(svcName).parameters(callArgs)
+                                .requireNewTransaction(true).call()
+                        } finally {
+                            if (pushedAgent) ec.user.popUser()
+                        }
                         def callErr = errorResultIfFailed()
                         if (callErr != null) {
                             if (paramNote) callErr.content[0].text = callErr.content[0].text + paramNote

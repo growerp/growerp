@@ -52,6 +52,10 @@ class AdkAgentConfig {
   @JsonKey(defaultValue: false)
   final bool websiteChat;
 
+  /// Y → this agent gets the Google Search tool (Gemini only).
+  @JsonKey(defaultValue: false)
+  final bool webSearch;
+
   // Multi-agent orchestration (Phase 4).
   /// specialist | coordinator | workflow
   final String? agentRole;
@@ -59,6 +63,9 @@ class AdkAgentConfig {
   /// router | sequential | parallel | loop  (coordinator/workflow only)
   final String? orchestrationType;
   final int? loopMaxIterations;
+
+  /// LLM calls allowed per run; null = backend default (10).
+  final int? maxLlmCalls;
 
   /// Free-form label; agents sharing (ownerPartyId, teamName) are grouped as one team in
   /// the Agent Control Center UI and can be downloaded/uploaded together.
@@ -93,9 +100,11 @@ class AdkAgentConfig {
     this.approvalChatRoomId,
     this.agentPartyId,
     this.websiteChat = false,
+    this.webSearch = false,
     this.agentRole,
     this.orchestrationType,
     this.loopMaxIterations,
+    this.maxLlmCalls,
     this.teamName,
     this.catalogNominated = false,
     this.apiKey,
@@ -125,9 +134,11 @@ class AdkAgentConfig {
     String? approvalChatRoomId,
     String? agentPartyId,
     bool? websiteChat,
+    bool? webSearch,
     String? agentRole,
     String? orchestrationType,
     int? loopMaxIterations,
+    int? maxLlmCalls,
     String? teamName,
     bool? catalogNominated,
     String? apiKey,
@@ -151,9 +162,11 @@ class AdkAgentConfig {
         approvalChatRoomId: approvalChatRoomId ?? this.approvalChatRoomId,
         agentPartyId: agentPartyId ?? this.agentPartyId,
         websiteChat: websiteChat ?? this.websiteChat,
+        webSearch: webSearch ?? this.webSearch,
         agentRole: agentRole ?? this.agentRole,
         orchestrationType: orchestrationType ?? this.orchestrationType,
         loopMaxIterations: loopMaxIterations ?? this.loopMaxIterations,
+        maxLlmCalls: maxLlmCalls ?? this.maxLlmCalls,
         teamName: teamName ?? this.teamName,
         catalogNominated: catalogNominated ?? this.catalogNominated,
         apiKey: apiKey ?? this.apiKey,

@@ -52,6 +52,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   final _allowlistCtrl = TextEditingController();
   final _approvalRoomCtrl = TextEditingController();
   final _loopMaxCtrl = TextEditingController();
+  final _maxLlmCallsCtrl = TextEditingController();
   final _teamNameCtrl = TextEditingController();
 
   bool _scheduleEnabled = false;
@@ -60,6 +61,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   String _toolMode = 'readOnly'; // readOnly | scoped | full
   String _writePolicy = 'approve'; // block | approve | allow
   bool _websiteChat = false; // answers the public website chat
+  bool _webSearch = false; // gets the Google Search tool
   // Multi-agent orchestration (Phase 4).
   String _agentRole = 'specialist'; // specialist | coordinator
   String _orchestrationType = 'router'; // router | sequential | parallel | loop
@@ -102,11 +104,13 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       _toolMode = e.toolMode ?? 'readOnly';
       _writePolicy = e.writePolicy ?? 'approve';
       _websiteChat = e.websiteChat;
+      _webSearch = e.webSearch;
       _allowlistCtrl.text = e.serviceAllowlist ?? '';
       _approvalRoomCtrl.text = e.approvalChatRoomId ?? '';
       _agentRole = e.agentRole ?? 'specialist';
       _orchestrationType = e.orchestrationType ?? 'router';
       _loopMaxCtrl.text = e.loopMaxIterations?.toString() ?? '';
+      _maxLlmCallsCtrl.text = e.maxLlmCalls?.toString() ?? '';
       _teamNameCtrl.text = e.teamName ?? '';
       _nominated = e.catalogNominated;
       if (_agentRole != 'specialist' && e.adkAgentConfigId != null) _loadTeam();
@@ -285,6 +289,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     _allowlistCtrl.dispose();
     _approvalRoomCtrl.dispose();
     _loopMaxCtrl.dispose();
+    _maxLlmCallsCtrl.dispose();
     _teamNameCtrl.dispose();
     super.dispose();
   }
@@ -365,6 +370,8 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
             ? null
             : _approvalRoomCtrl.text.trim(),
         websiteChat: _websiteChat,
+        webSearch: _webSearch,
+        maxLlmCalls: int.tryParse(_maxLlmCallsCtrl.text.trim()),
         agentRole: _agentRole,
         orchestrationType: _agentRole == 'specialist' ? null : _orchestrationType,
         loopMaxIterations:
@@ -785,6 +792,28 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                         ),
                         onChanged: (v) =>
                             setState(() => _websiteChat = v ?? false),
+                      ),
+                      CheckboxListTile(
+                        key: Key('webSearch'),
+                        contentPadding: EdgeInsets.zero,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        value: _webSearch,
+                        title: Text(AdkLocalizations.of(context)!.adk_webSearch),
+                        subtitle: Text(AdkLocalizations.of(context)!.adk_webSearchHint,
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                        onChanged: (v) =>
+                            setState(() => _webSearch = v ?? false),
+                      ),
+                      TextFormField(
+                        key: Key('maxLlmCalls'),
+                        controller: _maxLlmCallsCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: AdkLocalizations.of(context)!.adk_maxLlmCalls,
+                          hintText: '10',
+                          helperText: AdkLocalizations.of(context)!.adk_maxLlmCallsHint,
+                        ),
                       ),
                       Divider(height: 24),
                       Text(AdkLocalizations.of(context)!.adk_teamOrchestration,

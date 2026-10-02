@@ -29,10 +29,13 @@
             <parameter name="agentPartyId"/>
             <!-- websiteChat: Y → this agent answers the tenant's public website chat -->
             <parameter name="websiteChat"/>
+            <!-- webSearch: Y → agent gets the Google Search tool -->
+            <parameter name="webSearch"/>
             <!-- Phase 4 orchestration -->
             <parameter name="agentRole"/>
             <parameter name="orchestrationType"/>
             <parameter name="loopMaxIterations" type="Integer"/>
+            <parameter name="maxLlmCalls" type="Integer"/>
             <!-- free-form grouping label; agents sharing (ownerPartyId, teamName) are one team -->
             <parameter name="teamName"/>
         </in-parameters>
@@ -78,9 +81,11 @@
                 <if condition="approvalChatRoomId != null"><set field="existing.approvalChatRoomId" from="approvalChatRoomId"/></if>
                 <if condition="agentPartyId != null"><set field="existing.agentPartyId" from="agentPartyId"/></if>
                 <if condition="websiteChat != null"><set field="existing.websiteChat" from="websiteChat"/></if>
+                <if condition="webSearch != null"><set field="existing.webSearch" from="webSearch"/></if>
                 <if condition="agentRole != null"><set field="existing.agentRole" from="agentRole"/></if>
                 <if condition="orchestrationType != null"><set field="existing.orchestrationType" from="orchestrationType"/></if>
                 <if condition="loopMaxIterations != null"><set field="existing.loopMaxIterations" from="loopMaxIterations"/></if>
+                <if condition="maxLlmCalls != null"><set field="existing.maxLlmCalls" from="maxLlmCalls"/></if>
                 <if condition="teamName != null"><set field="existing.teamName" from="teamName"/></if>
                 <entity-update value-field="existing"/>
                 <set field="adkAgentConfigId" from="existing.adkAgentConfigId"/>
@@ -107,9 +112,11 @@
                     <set field="newCfg.approvalChatRoomId" from="approvalChatRoomId ?: scheduleChatRoomId"/>
                     <set field="newCfg.agentPartyId"       from="agentPartyId"/>
                     <set field="newCfg.websiteChat"        from="websiteChat ?: 'N'"/>
+                    <set field="newCfg.webSearch"          from="webSearch ?: 'N'"/>
                     <set field="newCfg.agentRole"          from="agentRole ?: 'specialist'"/>
                     <set field="newCfg.orchestrationType"  from="orchestrationType"/>
                     <set field="newCfg.loopMaxIterations"  from="loopMaxIterations"/>
+                    <set field="newCfg.maxLlmCalls"        from="maxLlmCalls"/>
                     <set field="newCfg.teamName"           from="teamName"/>
                     <entity-sequenced-id-primary value-field="newCfg"/>
                     <entity-create value-field="newCfg"/>
