@@ -1,0 +1,129 @@
+# Partner Scout Agent User Guide
+
+The **Partner Scout** is an AI agent that looks for ERP implementation freelancers in a
+country you choose and prepares a first contact with each of them. It searches the web,
+scores what it finds, stores every good candidate in your CRM, and writes a personal outreach
+draft. It never sends anything: you review the draft and decide.
+
+It was built for AntWebsystems to find local partners who implement GrowERP for small
+companies with the *revenue-first* method ("flip the ERP script, solve sales first", see
+[growerp.org/content/revenue-first](https://www.growerp.org/content/revenue-first)). Any
+company can use it for its own partner recruitment by changing the instruction.
+
+See also: [Agent Control Center User Guide](Agent_Control_Center_User_Guide.md) for the
+general agent screens.
+
+---
+
+## 1. What one run does
+
+1. Searches the web for independent ERP consultants and small implementation firms (Odoo,
+   ERPNext, Dolibarr, SAP Business One, Business Central, Zoho, iDempiere and similar) in the
+   country of the run. It also considers bookkeepers and digital agencies that set up
+   business systems.
+2. Scores each candidate 1–10 on SME focus, proven implementations, independence, CRM and
+   e-commerce experience, local presence and a public business contact. It keeps 6 or more.
+3. Skips anyone already in your CRM.
+4. For each new candidate it creates:
+   * a **Lead** (person plus company, with website or profile link and country);
+   * an **opportunity** *Partner: name (country)* at stage *Prospecting*. Its description
+     holds the score, why they fit, the evidence links and a **DRAFT MESSAGE** of at most
+     150 words;
+   * a **to-do** *Review and send partner outreach draft*.
+
+By default it finds at most 5 new candidates per run. A run takes about 2–3 minutes.
+
+## 2. Before you start
+
+| Requirement | Where |
+|---|---|
+| A GrowERP version with agent web search (the release after 1.19.8) | — |
+| Your own Gemini API key | **System Setup → AI Settings** |
+| The agent file `team-partner-recruitment.json` | [moqui-adk/data/agents](../moqui-adk/data/agents/team-partner-recruitment.json) |
+
+The free monthly AI allowance is too small for research agents: a run uses up to 40 AI calls.
+Without your own key the run stops with *Free monthly LLM allowance used*.
+
+## 3. Installing the agent
+
+1. Open **Agent Control → AI Agents**.
+2. Tap the **upload icon** (tooltip *Upload team*) and choose `team-partner-recruitment.json`.
+3. The agent **GrowERP Partner Scout** appears under the team **Partner Recruitment**.
+
+Uploading the file again updates the agent instead of creating a second one.
+
+## 4. Running it
+
+The agent runs on its schedule. To set one up:
+
+1. Tap the **Edit** icon next to the agent.
+2. Tick **Enable scheduled runs** and enter a **Cron Expression**, for example
+   `0 0 8 ? * MON` (Mondays 08:00).
+3. Change **Prompt for each scheduled run** to the country and number you want, for example
+   *Find up to 5 new ERP implementation freelancer partners in Malaysia.*
+4. Optional: enter a **Chat Room ID for delivery** to get the agent's summary table in chat.
+5. Save. The run appears under **Agent Control → Jobs** with its last status.
+
+One country per run works best. To cover several countries, change the scheduled-run prompt each
+week or upload the agent a second time under another name.
+
+## 5. Working with the results
+
+1. Open **CRM → Opportunities** and filter on *Partner:*.
+2. Open an opportunity. Read the score and evidence first: check that the person really is
+   independent and active.
+3. Copy the **DRAFT MESSAGE**, adjust it in your own words and send it through the channel
+   the candidate lists (website contact form, LinkedIn, e-mail).
+4. Mark the to-do done and move the opportunity to the next stage. Change it to
+   *Closed Lost* when someone is not interested, so the agent never proposes them again.
+
+The opportunities are assigned to the **AI Agent** user of your company. Reassign them to the
+person who follows up.
+
+## 6. The settings, and why they are set this way
+
+| Setting | Value | Why |
+|---|---|---|
+| Search the web | on | The agent needs Google Search to find people. Gemini only. |
+| Max AI calls per run | 40 | Every search, check and save is a call. The default of 10 is not enough for one candidate. |
+| Tool mode | scoped | It may only call the five services in the allow list. |
+| Allowed services | get#Companies, get#User, get#Opportunity, create#User, create#Opportunity | Read the CRM for duplicates, create leads and opportunities. Nothing else. |
+| Write policy | allow | Creating a lead or opportunity needs no approval, because nothing leaves your system. |
+
+The agent works as your company's **AI Agent** user: everything it creates belongs to your
+company and shows up in your CRM like any other record.
+
+## 7. Safety
+
+* **It never sends anything.** The instruction forbids e-mail and messaging, and it has no
+  other way to reach people.
+* **Public business data only.** It never makes up names, e-mail addresses, phone numbers or
+  links; when something is unknown the field stays empty. Still check the evidence links
+  before you write to anyone.
+* **Privacy.** You are contacting people about a business proposal based on their public
+  business profile. Send one personal message, honour a "no", and do not add them to a
+  mailing list without consent.
+
+## 8. Changing what it looks for
+
+Open the agent and edit the **Instruction**. The sections are in capitals (METHOD, GROWERP
+ADVANTAGES, TARGETS, SCORE, PER CANDIDATE, RULES), so you can change, for example, the
+target ERP products or the scoring without touching the rest.
+
+Three rules for the instruction text:
+
+* No curly braces `{ }`: the agent reads `{word}` as a variable and the run fails with
+  *Context variable not found*. Use `[word]`.
+* No `<` or `>`: saving and uploading reject them.
+* At most about 4,000 characters.
+
+## 9. Troubleshooting
+
+| Symptom | Cause and fix |
+|---|---|
+| *Free monthly LLM allowance used* | Add your own Gemini key in **System Setup → AI Settings**. |
+| *Max number of llm calls limit of 10 exceeded* | **Max AI calls per run** is empty. Set it to 40. |
+| *Context variable not found: …* | Curly braces in the instruction. Replace `{x}` with `[x]`. |
+| *HTML not allowed including less-than* | `<` or `>` in the instruction or uploaded file. Remove them. |
+| Run finished but no new opportunities | Every candidate it found was already in your CRM, or scored below 6. Change the country or widen the TARGETS section. |
+| Opportunities exist but are not in your CRM list | Your server runs a version before agents worked as the company's AI Agent user. Update GrowERP. |

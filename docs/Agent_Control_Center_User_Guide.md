@@ -47,6 +47,11 @@ This section controls how much access the agent has to the GrowERP system and wh
   * `Require approval`: Any write action (create, update, delete) will generate an approval request.
   * `Allow (auto-run)`: The agent can perform write actions autonomously.
 * **Approval Chat Room ID**: If the write policy requires approval, enter the ID of the chat room where the approval requests will be sent to human operators.
+* **Answer website chat**: This agent replies to the public website chat (one agent per company).
+* **Search the web**: Gives the agent Google Search (Gemini only), for research agents such as the [Partner Scout](Partner_Scout_Agent_User_Guide.md).
+* **Max AI calls per run**: Cost cap per run; empty means 10. Raise it for agents that search and save many records.
+
+Whatever the tool access, an agent's actions run as your company's **AI Agent** user, so everything it reads and creates stays inside your company.
 
 ### 3. Team / Orchestration
 GrowERP agents can work together. An agent can either be a specialist doing the actual work, or a coordinator managing other agents.
