@@ -1364,5 +1364,7 @@
   "courseToReview": "Zu prüfen",
   "insActivePolicies": "Aktiv",
   "insRenewalsDue": "Verlängerungen fällig",
-  "insOpenClaims": "Offene Schäden"
+  "insOpenClaims": "Offene Schäden",
+  "mailUseOauth": "Mit Google OAuth2 anmelden",
+  "mailUseOauthHelp": "Verwendet die Google-Workspace-Zugangsdaten; das Refresh-Token benötigt den Scope https://mail.google.com/"
 }

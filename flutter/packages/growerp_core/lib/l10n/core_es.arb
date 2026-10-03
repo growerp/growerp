@@ -453,5 +453,7 @@
   "courseToReview": "Por revisar",
   "insActivePolicies": "Activas",
   "insRenewalsDue": "Renovaciones pendientes",
-  "insOpenClaims": "Siniestros abiertos"
+  "insOpenClaims": "Siniestros abiertos",
+  "mailUseOauth": "Iniciar sesión con Google OAuth2",
+  "mailUseOauthHelp": "Usa las credenciales de Google Workspace; el token de actualización necesita el scope https://mail.google.com/"
 }

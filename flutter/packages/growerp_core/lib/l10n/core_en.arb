@@ -1810,5 +1810,13 @@
   },
   "@courseToReview": {
     "description": "Exercise submissions waiting for instructor review, courses dashboard tile"
+  },
+  "mailUseOauth": "Sign in with Google OAuth2",
+  "@mailUseOauth": {
+    "description": "Email settings switch to sign in to the mail server with OAuth2"
+  },
+  "mailUseOauthHelp": "Uses the Google Workspace credentials; the refresh token needs scope https://mail.google.com/",
+  "@mailUseOauthHelp": {
+    "description": "Help text under the OAuth2 email switch"
   }
 }

@@ -1364,5 +1364,7 @@
   "courseToReview": "待审阅",
   "insActivePolicies": "有效",
   "insRenewalsDue": "待续保",
-  "insOpenClaims": "未结理赔"
+  "insOpenClaims": "未结理赔",
+  "mailUseOauth": "使用 Google OAuth2 登录",
+  "mailUseOauthHelp": "使用 Google Workspace 凭据；刷新令牌需要 scope https://mail.google.com/"
 }

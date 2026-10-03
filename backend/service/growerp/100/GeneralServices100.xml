@@ -2561,6 +2561,7 @@ limitations under the License.
             <parameter name="storeSkipSeen" default-value="Y"/>
             <parameter name="mailUsername"/>
             <parameter name="mailPassword"/>
+            <parameter name="mailUseOauth"/>
             <parameter name="githubToken"/>
             <parameter name="githubRepository"/>
             <parameter name="aiModelName"/>
@@ -2614,6 +2615,7 @@ limitations under the License.
             <if condition="storeMarkSeen != null"><set field="ss.storeMarkSeen" from="storeMarkSeen"/></if>
             <if condition="storeSkipSeen != null"><set field="ss.storeSkipSeen" from="storeSkipSeen"/></if>
             <if condition="mailUsername  != null"><set field="ss.mailUsername"  from="mailUsername"/></if>
+            <if condition="mailUseOauth  != null"><set field="ss.mailUseOauth"  from="mailUseOauth"/></if>
             <if condition="writingStyle  != null"><set field="ss.writingStyle"  from="writingStyle"/></if>
             <if condition="mailPassword &amp;&amp; mailPassword != '****'">
                 <set field="ss.mailPassword" from="mailPassword"/>
@@ -2737,6 +2739,20 @@ limitations under the License.
                 <set field="es.mailUsername" from="ss.mailUsername"/>
                 <if condition="mailPassword &amp;&amp; mailPassword != '****'">
                     <set field="es.mailPassword" from="mailPassword"/>
+                </if>
+                <!-- OAuth2 (XOAUTH2) sign in with the Google Workspace credentials; the
+                     refresh token needs scope https://mail.google.com/ -->
+                <if condition="ss.mailUseOauth == 'Y'">
+                    <then>
+                        <set field="es.oauthClientId"     from="ss.googleClientId"/>
+                        <set field="es.oauthClientSecret" from="ss.googleClientSecret"/>
+                        <set field="es.oauthRefreshToken" from="ss.googleRefreshToken"/>
+                    </then>
+                    <else>
+                        <set field="es.oauthClientId"     from="null"/>
+                        <set field="es.oauthClientSecret" from="null"/>
+                        <set field="es.oauthRefreshToken" from="null"/>
+                    </else>
                 </if>
                 <if condition="esNew"><then><script>es.create()</script></then>
                     <else><script>es.update()</script></else>
@@ -2994,7 +3010,7 @@ limitations under the License.
                         <field-map field-name="emailServerId" from="ownerPartyId"/>
                     </entity-find-one>
                     <if condition="ownServer != null &amp;&amp; ownServer.smtpHost &amp;&amp;
-                            ownServer.mailPassword">
+                            (ownServer.mailPassword || ownServer.oauthRefreshToken)">
                         <set field="emailServerId" from="ownServer.emailServerId"/>
                         <set field="emailConfigured" from="true"/>
                         <set field="fromAddress" from="ownServer.mailUsername?.contains('@')

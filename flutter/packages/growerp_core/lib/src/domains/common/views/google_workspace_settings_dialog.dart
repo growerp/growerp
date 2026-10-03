@@ -200,7 +200,8 @@ class _GoogleWorkspaceSettingsDialogState
                               'OAuth credentials (scopes: calendar.readonly, '
                               'drive.readonly) used to import Google Meet '
                               'bookings as lead activities and attach Gemini '
-                              'meeting notes.',
+                              'meeting notes. Add scope https://mail.google.com/ '
+                              'to also sign in to the mail server with OAuth2.',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Theme.of(context).colorScheme.outline,

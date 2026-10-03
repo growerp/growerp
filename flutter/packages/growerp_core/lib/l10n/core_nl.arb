@@ -1364,5 +1364,7 @@
   "courseToReview": "Te beoordelen",
   "insActivePolicies": "Actief",
   "insRenewalsDue": "Te verlengen",
-  "insOpenClaims": "Open schades"
+  "insOpenClaims": "Open schades",
+  "mailUseOauth": "Aanmelden met Google OAuth2",
+  "mailUseOauthHelp": "Gebruikt de Google Workspace-gegevens; het refresh token heeft scope https://mail.google.com/ nodig"
 }

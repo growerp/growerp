@@ -471,6 +471,9 @@ limitations under the License.
         <field name="storeSkipSeen" type="text-indicator"/>
         <field name="mailUsername"  type="text-medium" enable-audit-log="true"/>
         <field name="mailPassword"  type="text-medium" encrypt="true" enable-audit-log="true"/>
+        <field name="mailUseOauth"  type="text-indicator">
+            <description>Y: the mail server signs in with OAuth2 (XOAUTH2) using the Google Workspace
+                credentials below instead of mailPassword</description></field>
         <field name="githubToken"      type="text-long" encrypt="true" enable-audit-log="true"/>
         <field name="githubRepository" type="text-medium"/>
         <field name="aiModelName" type="text-short">

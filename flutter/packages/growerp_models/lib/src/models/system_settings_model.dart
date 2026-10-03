@@ -42,6 +42,8 @@ abstract class SystemSettings with _$SystemSettings {
     String? mailUsername,
     // write-only: backend returns '****' when set; never stored locally
     String? mailPassword,
+    // Y: sign in to the mail server with OAuth2 using the Google Workspace credentials
+    String? mailUseOauth,
     // GitHub
     String? githubToken,
     String? githubRepository,

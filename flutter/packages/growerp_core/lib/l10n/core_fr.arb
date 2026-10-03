@@ -1364,5 +1364,7 @@
   "courseToReview": "À corriger",
   "insActivePolicies": "Actifs",
   "insRenewalsDue": "Renouvellements dus",
-  "insOpenClaims": "Sinistres ouverts"
+  "insOpenClaims": "Sinistres ouverts",
+  "mailUseOauth": "Connexion avec Google OAuth2",
+  "mailUseOauthHelp": "Utilise les identifiants Google Workspace ; le jeton d'actualisation nécessite le scope https://mail.google.com/"
 }

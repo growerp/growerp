@@ -1364,5 +1364,7 @@
   "courseToReview": "รอตรวจ",
   "insActivePolicies": "ใช้งานอยู่",
   "insRenewalsDue": "ครบกำหนดต่ออายุ",
-  "insOpenClaims": "เคลมที่เปิดอยู่"
+  "insOpenClaims": "เคลมที่เปิดอยู่",
+  "mailUseOauth": "ลงชื่อเข้าใช้ด้วย Google OAuth2",
+  "mailUseOauthHelp": "ใช้ข้อมูลรับรอง Google Workspace; refresh token ต้องมี scope https://mail.google.com/"
 }

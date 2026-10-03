@@ -52,6 +52,7 @@ class _EmailSettingsDialogState extends State<EmailSettingsDialog> {
   final _mailPassCtrl = TextEditingController();
   bool _obscureMailPass = true;
   bool _mailPassSet = false;
+  bool _mailUseOauth = false;
 
   final _storeHostCtrl = TextEditingController();
   final _storePortCtrl = TextEditingController();
@@ -97,6 +98,7 @@ class _EmailSettingsDialogState extends State<EmailSettingsDialog> {
               : 'none';
       _mailUserCtrl.text = s.mailUsername ?? '';
       _mailPassSet = (s.mailPassword ?? '').isNotEmpty;
+      _mailUseOauth = s.mailUseOauth == 'Y';
       _mailPassCtrl.text = _mailPassSet ? '****' : '';
       _storeHostCtrl.text = s.storeHost ?? '';
       _storePortCtrl.text = s.storePort ?? '';
@@ -128,6 +130,7 @@ class _EmailSettingsDialogState extends State<EmailSettingsDialog> {
         'smtpSsl': _smtpSecurity == 'ssl' ? 'Y' : 'N',
         'mailUsername': _mailUserCtrl.text,
         if (pass.isNotEmpty && pass != '****') 'mailPassword': pass,
+        'mailUseOauth': _mailUseOauth ? 'Y' : 'N',
         'storeHost': _storeHostCtrl.text,
         'storePort': _storePortCtrl.text,
         'storeProtocol': _storeProtocol,
@@ -248,8 +251,20 @@ class _EmailSettingsDialogState extends State<EmailSettingsDialog> {
                                 prefixIcon: Icon(Icons.person_outline),
                               ),
                             ),
-                            SizedBox(height: 12),
-                            TextFormField(
+                            SwitchListTile(
+                              key: const Key('mailUseOauth'),
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(
+                                  CoreLocalizations.of(context)!.mailUseOauth),
+                              subtitle: Text(CoreLocalizations.of(context)!
+                                  .mailUseOauthHelp),
+                              value: _mailUseOauth,
+                              onChanged: (v) =>
+                                  setState(() => _mailUseOauth = v),
+                            ),
+                            if (!_mailUseOauth) SizedBox(height: 12),
+                            if (!_mailUseOauth)
+                              TextFormField(
                               key: const Key('mailPassword'),
                               controller: _mailPassCtrl,
                               obscureText: _obscureMailPass,
