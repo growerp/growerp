@@ -836,10 +836,6 @@ Service definitions for assessment management and completion
             </if>
 
             <!-- Send assessment results email with PDF -->
-            <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="emailExist">
-                <field-map field-name="emailServerId" value="SYSTEM" />
-            </entity-find-one>
-
             <!-- Calculate max score and percentage for email -->
             <set field="maxScore" type="BigDecimal" from="0" />
             <entity-find entity-name="growerp.assessment.AssessmentQuestionOption" list="allOptions">
@@ -878,26 +874,20 @@ Service definitions for assessment management and completion
                 </script>
             </iterate>
 
-            <!-- Send email if configured and not test email -->
-            <if
-                condition="emailExist &amp;&amp; emailExist.mailPassword != 'SMTP_PASSWORD' 
-                          &amp;&amp; !respondentEmail.contains('example.com')">
-
-
-
-                <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true">
+            <!-- Send through the owner's own email server; when it has none its admins get a
+                 notification -->
+            <if condition="!respondentEmail.contains('example.com')">
+                <service-call name="growerp.100.GeneralServices100.send#CheckedEmailTemplate">
                     <field-map field-name="emailTemplateId" value="ASSESSMENT_RESULTS" />
                     <field-map field-name="toAddresses" from="respondentEmail" />
+                    <field-map field-name="ownerPartyId" from="ownerPartyId" />
+                    <field-map field-name="sendDescription" value="assessment results" />
                     <field-map field-name="bodyParameters"
                         from="[respondentName: respondentName, assessmentName: assessmentName,
                                score: score, maxScore: maxScore, percentage: percentage,
                                leadStatus: leadStatus, assessmentResultId: assessmentResultId,
                                questionsWithAnswers: questionsWithAnswers, adviceDescription: adviceDescription]" />
                 </service-call>
-                <else>
-                    <log level="warn"
-                        message="====== Assessment results email not sent for ${respondentEmail}" />
-                </else>
             </if>
 
             <!-- Onboarding only: feed the GROWERP onboarding agent. Ingest a readable org profile

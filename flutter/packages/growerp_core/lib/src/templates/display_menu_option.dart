@@ -21,7 +21,6 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:universal_io/io.dart';
 import '../../growerp_core.dart';
 
-
 /// Lazily builds its child only when the tab at [index] is first activated.
 /// Until then it shows an empty box, preventing unnecessary network requests
 /// and skeleton animations for off-screen tabs.
@@ -372,8 +371,7 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
               isAdmin != _injectSrcIsAdmin) {
             _injectSrcConfig = rawConfig;
             _injectSrcIsAdmin = isAdmin;
-            _injectedConfig =
-                isAdmin ? injectAdminSetup(rawConfig) : rawConfig;
+            _injectedConfig = isAdmin ? injectAdminSetup(rawConfig) : rawConfig;
           }
           final effectiveConfig = _injectedConfig!;
 
@@ -816,8 +814,9 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
           final chatRoomId = note.message?['chatRoomId'] as String?;
           if (chatRoomId != null) {
             final chatBloc = context.read<ChatRoomBloc>();
-            if (!chatBloc.state.chatRooms
-                .any((r) => r.chatRoomId == chatRoomId)) {
+            if (!chatBloc.state.chatRooms.any(
+              (r) => r.chatRoomId == chatRoomId,
+            )) {
               chatBloc.add(const ChatRoomFetch(refresh: true));
             }
             chatBloc.add(ChatRoomUpdateLocal(addNotReadChatRoomId: chatRoomId));
@@ -826,7 +825,15 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
           // Show toast for any unhandled notification that has a message text
           final msg = '${note.message?['message'] ?? ''}';
           if (msg.isNotEmpty) {
-            HelperFunctions.showMessage(context, msg, Colors.green);
+            HelperFunctions.showMessage(
+              context,
+              msg,
+              note.type == 'warning'
+                  ? Colors.orange
+                  : note.type == 'danger'
+                  ? Colors.red
+                  : Colors.green,
+            );
           }
       }
     }

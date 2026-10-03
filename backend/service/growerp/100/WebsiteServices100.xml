@@ -1600,18 +1600,15 @@ limitations under the License.
                     value-field="landingPage" />
                 <set field="downloadUrl" from="landingPage?.ctaButtonLink" />
             </if>
-            <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="emailServer">
-                <field-map field-name="emailServerId" value="SYSTEM" />
-            </entity-find-one>
             <!-- send the form's delivery email (e.g. a playbook/guide attachment) to the
-                 submitter when configured and email is set up -->
-            <if condition="form.emailTemplateId &amp;&amp; emailServer &amp;&amp;
-                    emailServer.mailPassword != 'SMTP_PASSWORD' &amp;&amp;
-                    !email.contains('example.com')">
-                <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
-                    async="true" ignore-error="true"
+                 submitter through the owner company's own email server; when it has none
+                 its admins get a notification -->
+            <if condition="form.emailTemplateId &amp;&amp; !email.contains('example.com')">
+                <service-call name="growerp.100.GeneralServices100.send#CheckedEmailTemplate"
+                    ignore-error="true"
                     in-map="[emailTemplateId: form.emailTemplateId,
-                        toAddresses: email,
+                        toAddresses: email, ownerPartyId: ownerPartyId,
+                        sendDescription: 'website form delivery email',
                         bodyParameters: [firstName: visitorName, email: email]]" />
                 <!-- no template: mail the download link itself, through the owner company's
                      own SMTP settings (send#DirectEmail, never the SYSTEM server) -->
@@ -1636,20 +1633,19 @@ limitations under the License.
                             lastName: nameSpacePos > 0 ? visitorName.trim().substring(nameSpacePos + 1) : 'website']" />
                 </else-if>
             </if>
-            <!-- notify the company admin when email is configured -->
+            <!-- notify the company admin by email, through the owner's own email server -->
             <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany"
                 list="admins" limit="1">
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
                 <econdition field-name="userGroupId" value="GROWERP_M_ADMIN" />
                 <econdition field-name="emailAddress" operator="is-not-null" />
             </entity-find>
-            <if condition="emailServer &amp;&amp; emailServer.mailPassword != 'SMTP_PASSWORD'
-                    &amp;&amp; admins &amp;&amp;
-                    !admins[0].emailAddress.contains('example.com')">
-                <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
-                    async="true" ignore-error="true"
+            <if condition="admins &amp;&amp; !admins[0].emailAddress.contains('example.com')">
+                <service-call name="growerp.100.GeneralServices100.send#CheckedEmailTemplate"
+                    ignore-error="true"
                     in-map="[emailTemplateId: 'NOTIFICATION',
-                        toAddresses: admins[0].emailAddress,
+                        toAddresses: admins[0].emailAddress, ownerPartyId: ownerPartyId,
+                        sendDescription: 'website form submission email',
                         bodyParameters: [
                             title: 'New website form submission on form: ' +
                                 (form.formName ?: form.formId) + ' from: ' + email,

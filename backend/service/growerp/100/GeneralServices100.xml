@@ -2962,16 +2962,30 @@ limitations under the License.
             update#Owner) — the SYSTEM server is never a fallback for tenant sends.
             Without ownerPartyId (system-level sends): the SYSTEM server, whose
             placeholder seed credentials are replaced from the SMTP_USER/SMTP_PASSWORD
-            (and optional SMTP_HOST/SMTP_PORT) environment variables when present.</description>
+            (and optional SMTP_HOST/SMTP_PORT) environment variables when present.
+            GROWERP is the platform owner and sends with the SYSTEM server. A tenant without
+            a configured server gets a warning notification, see notify#EmailNotConfigured.</description>
         <in-parameters>
             <parameter name="ownerPartyId"/>
+            <parameter name="sendDescription" default-value="email">
+                <description>What is being sent, used in the not configured notification.</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="emailServerId"/>
             <parameter name="emailConfigured" type="Boolean"/>
+            <parameter name="fromAddress">
+                <description>The server's own account when it is an address: a tenant SMTP
+                    server rejects a foreign sender domain. Empty for the SYSTEM server.</description>
+            </parameter>
         </out-parameters>
         <actions>
             <set field="emailConfigured" from="false"/>
+            <!-- GROWERP sends with SYSTEM, but its admins are still warned when that is not set up -->
+            <set field="notifyOwnerPartyId" from="ownerPartyId"/>
+            <if condition="ownerPartyId == 'GROWERP'">
+                <set field="ownerPartyId" from="null"/>
+            </if>
             <if condition="ownerPartyId">
                 <then>
                     <!-- cache=false: cached EmailServer values are read-only -->
@@ -2983,6 +2997,12 @@ limitations under the License.
                             ownServer.mailPassword">
                         <set field="emailServerId" from="ownServer.emailServerId"/>
                         <set field="emailConfigured" from="true"/>
+                        <set field="fromAddress" from="ownServer.mailUsername?.contains('@')
+                                ? ownServer.mailUsername : null"/>
+                        <else>
+                            <service-call name="growerp.100.GeneralServices100.notify#EmailNotConfigured"
+                                in-map="[ownerPartyId: ownerPartyId, sendDescription: sendDescription]"/>
+                        </else>
                     </if>
                 </then>
                 <else>
@@ -2990,9 +3010,8 @@ limitations under the License.
                             value-field="sysServer" cache="false">
                         <field-map field-name="emailServerId" value="SYSTEM"/>
                     </entity-find-one>
-                    <if condition="sysServer == null"><return/></if>
-                    <if condition="sysServer.mailUsername == 'SMTP_USER' ||
-                            sysServer.mailPassword == 'SMTP_PASSWORD'">
+                    <if condition="sysServer != null &amp;&amp; (sysServer.mailUsername == 'SMTP_USER' ||
+                            sysServer.mailPassword == 'SMTP_PASSWORD')">
                         <script><![CDATA[
                             // seed ships placeholder credentials; take real ones from the environment
                             String envUser = System.getenv('SMTP_USER')
@@ -3008,14 +3027,60 @@ limitations under the License.
                             }
                         ]]></script>
                     </if>
-                    <if condition="sysServer.smtpHost &amp;&amp; sysServer.mailPassword &amp;&amp;
+                    <if condition="sysServer?.smtpHost &amp;&amp; sysServer.mailPassword &amp;&amp;
                             sysServer.mailPassword != 'SMTP_PASSWORD' &amp;&amp;
                             sysServer.mailPassword != 'EMAIL_CHANGEME'">
                         <set field="emailServerId" value="SYSTEM"/>
                         <set field="emailConfigured" from="true"/>
+                        <else-if condition="notifyOwnerPartyId == 'GROWERP'">
+                            <service-call name="growerp.100.GeneralServices100.notify#EmailNotConfigured"
+                                in-map="[ownerPartyId: 'GROWERP', sendDescription: sendDescription]"/>
+                        </else-if>
                     </if>
                 </else>
             </if>
+        </actions>
+    </service>
+
+    <service verb="notify" noun="EmailNotConfigured">
+        <description>Warn the admins of a tenant that an email could not be sent because the
+            company has no SMTP email server configured. Persisted notification, at most one per
+            admin per day so a busy website or assessment does not flood them.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true"/>
+            <parameter name="sendDescription" default-value="email"/>
+        </in-parameters>
+        <actions>
+            <script><![CDATA[
+                // own transaction: callers are public endpoints and async workers whose
+                // own transaction may roll back; never let a notification failure break a send
+                try {
+                    ec.transaction.runRequireNew(60, "Error sending email not configured notification", {
+                        def admins = ec.entity.find("growerp.party.OwnerPersonDetailAndCompany")
+                            .condition("ownerPartyId", ownerPartyId)
+                            .condition("userGroupId", "GROWERP_M_ADMIN")
+                            .condition("userId", org.moqui.entity.EntityCondition.ComparisonOperator.IS_NOT_NULL, null)
+                            .selectField("userId").distinct(true).disableAuthz().list()
+                        def since = new java.sql.Timestamp(ec.user.nowTimestamp.time - 24L * 60 * 60 * 1000)
+                        for (admin in admins) {
+                            long recent = ec.entity.find("moqui.security.user.NotificationMessageByUser")
+                                .condition("userId", admin.userId)
+                                .condition("topic", "EmailNotConfigured")
+                                .condition("sentDate", org.moqui.entity.EntityCondition.ComparisonOperator.GREATER_THAN_EQUAL_TO, since)
+                                .disableAuthz().count()
+                            if (recent) continue
+                            ec.makeNotificationMessage().userId((String) admin.userId)
+                                .topic('EmailNotConfigured')
+                                .title('Email not configured')
+                                .type('warning')
+                                .message([message: "No email server is configured, so the ${sendDescription} could not be sent. Please enter the SMTP settings in the company settings.".toString()])
+                                .send(true)
+                        }
+                    })
+                } catch (Throwable t) {
+                    ec.logger.warn("Email not configured notification for ${ownerPartyId} failed: ${t.message}")
+                }
+            ]]></script>
         </actions>
     </service>
 
@@ -3047,8 +3112,16 @@ limitations under the License.
             <parameter name="messageId"/>
         </out-parameters>
         <actions>
+            <!-- not into context: its fromAddress would overwrite the parameter -->
             <service-call name="growerp.100.GeneralServices100.get#ActiveEmailServer"
-                in-map="[ownerPartyId: ownerPartyId]" out-map="context"/>
+                in-map="[ownerPartyId: ownerPartyId, sendDescription: 'email to ' + toAddresses]"
+                out-map="serverOut"/>
+            <set field="emailServerId" from="serverOut.emailServerId"/>
+            <set field="emailConfigured" from="serverOut.emailConfigured"/>
+            <!-- a tenant SMTP server rejects the default growerp sender domain -->
+            <if condition="serverOut.fromAddress &amp;&amp; fromAddress == 'noreply@growerp.com'">
+                <set field="fromAddress" from="serverOut.fromAddress"/>
+            </if>
             <if condition="!emailConfigured">
                 <return error="true"
                     message="No SMTP email server configured for this company, please enter the SMTP settings in the company settings"/>
@@ -3114,14 +3187,22 @@ limitations under the License.
                 <return/>
             </if>
             <service-call name="growerp.100.GeneralServices100.get#ActiveEmailServer"
-                in-map="[ownerPartyId: ownerPartyId]" out-map="context"/>
+                in-map="[ownerPartyId: ownerPartyId, sendDescription: sendDescription]"
+                out-map="context"/>
             <if condition="!emailConfigured">
-                <message public="true" type="warning">No email server is configured, so the ${sendDescription} could not be sent to ${toAddresses}.</message>
+                <!-- a tenant send is often a public request: the tenant admins got a
+                     notification, the visitor must not see the configuration problem -->
+                <if condition="!ownerPartyId || ownerPartyId == 'GROWERP'">
+                    <message public="true" type="warning">No email server is configured, so the ${sendDescription} could not be sent to ${toAddresses}.</message>
+                </if>
                 <return/>
             </if>
+            <!-- the server is passed explicitly: a template names the SYSTEM server, a tenant
+                 send must go out over the tenant's own -->
             <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate" async="true"
                 in-map="[emailTemplateId: emailTemplateId, toAddresses: toAddresses,
-                    toUserId: toUserId, bodyParameters: bodyParameters]"/>
+                    toUserId: toUserId, bodyParameters: bodyParameters,
+                    emailServerId: emailServerId, fromAddress: fromAddress]"/>
             <set field="emailSent" from="true"/>
         </actions>
     </service>

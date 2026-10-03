@@ -2883,7 +2883,7 @@ limitations under the License.
                                 <set field="assetRental.assetId" from="availableAssetIds[index++]" />
                                 <entity-update value-field="assetRental" />
                             </iterate>
-                            <!-- confirm the stay to the guest (no-op without SMTP) -->
+                            <!-- confirm the stay to the guest (admins notified without SMTP) -->
                             <service-call
                                 name="growerp.100.HotelServices100.send#BookingConfirmation"
                                 async="true" ignore-error="true"

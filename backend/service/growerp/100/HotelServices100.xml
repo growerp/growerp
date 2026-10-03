@@ -630,8 +630,9 @@ limitations under the License.
          ============================================================ -->
 
     <service verb="send" noun="BookingConfirmation">
-        <description>Email a booking confirmation to the guest. Silently does nothing when no
-            SMTP server is configured or the guest has no usable email.</description>
+        <description>Email a booking confirmation to the guest through the hotel's own email
+            server. Does nothing when the guest has no usable email; when the hotel has no
+            email server its admins get a notification.</description>
         <in-parameters>
             <parameter name="orderId" required="true" />
             <parameter name="ownerPartyId" />
@@ -649,16 +650,12 @@ limitations under the License.
             <set field="toEmail"
                 from="ci.emailList ? ci.emailList[0].infoString : null" />
             <if condition="!toEmail || toEmail.contains('example.com')"><return /></if>
-            <entity-find-one entity-name="moqui.basic.email.EmailServer" value-field="emailServer"
-                disable-authz="true">
-                <field-map field-name="emailServerId" value="SYSTEM" />
-            </entity-find-one>
-            <if condition="!emailServer || emailServer.mailPassword == 'SMTP_PASSWORD'">
-                <return />
-            </if>
-            <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
-                async="true" ignore-error="true"
+            <!-- the hotel's own email server; when it has none its admins get a notification -->
+            <service-call name="growerp.100.GeneralServices100.send#CheckedEmailTemplate"
+                ignore-error="true"
                 in-map="[emailTemplateId: 'NOTIFICATION', toAddresses: toEmail,
+                    ownerPartyId: ownerPartyId,
+                    sendDescription: 'booking confirmation',
                     bodyParameters: [
                         title: 'Your reservation ' + (items[0].pseudoId ?: orderId) +
                             ' is confirmed',
