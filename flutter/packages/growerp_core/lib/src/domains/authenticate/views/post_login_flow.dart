@@ -55,7 +55,7 @@ class _PostLoginFlowState extends State<PostLoginFlow> {
     if (auth == null) return;
     // the welcome belongs to a new tenant: the GrowERP tenant itself and a user
     // who only registered into an existing company never start a trial
-    if (auth.company?.name?.toLowerCase() == 'growerp') return;
+    if (auth.ownerPartyId == 'GROWERP') return;
     if (auth.user?.appsUsed.isNotEmpty ?? true) return;
     _handled = true;
 

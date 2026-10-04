@@ -2164,19 +2164,17 @@ limitations under the License.
                 <if
                     condition="emailExist &amp;&amp; emailExist.mailPassword != 'SMTP_PASSWORD'
                                 &amp;&amp; !user.email.contains('example.com')">
-                    <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
-                        async="true">
-                        <field-map field-name="emailTemplateId" from="templateId" />
-                        <field-map field-name="toAddresses" from="user.email" />
-                        <!-- links the sent mail to the user's communications -->
-                        <field-map field-name="toUserId" from="userAccount.userId" />
-                        <!-- userLocale, not locale: sent async, so the sending thread's
-                             ec.user.locale is the system default, not the registrant's -->
-                        <field-map field-name="bodyParameters"
-                            from="[application: applicationId? applicationId.substring(3) : 'Admin',
-                                newPassword:password, firstName: user.firstName,
-                                lastName: user.lastName, userLocale: user.locale]" />
-                    </service-call>
+                    <!-- sent after commit: toUserId links the mail to the user's communications,
+                         and its EmailMessage (own transaction) cannot see an uncommitted UserAccount.
+                         userLocale, not locale: sent async, so the sending thread's
+                         ec.user.locale is the system default, not the registrant's -->
+                    <script>ec.service.special().name('org.moqui.impl.EmailServices.send#EmailTemplate')
+                        .parameters([emailTemplateId: templateId, toAddresses: user.email,
+                            toUserId: userAccount.userId,
+                            bodyParameters: [application: applicationId ? applicationId.substring(3) : 'Admin',
+                                newPassword: password, firstName: user.firstName,
+                                lastName: user.lastName, userLocale: user.locale]])
+                        .registerOnCommit()</script>
                     <else>
                         <!-- a self hosted install without a mail server has no other way to
                              learn this password, but a production log must never carry one -->
@@ -3227,16 +3225,14 @@ limitations under the License.
                     <field-map field-name="emailServerId" value="SYSTEM" />
                 </entity-find-one>
                 <if condition="emailExist &amp;&amp; emailExist.mailPassword != 'SMTP_PASSWORD'">
-                    <service-call name="org.moqui.impl.EmailServices.send#EmailTemplate"
-                        async="true">
-                        <field-map field-name="emailTemplateId" value="WELCOME" />
-                        <field-map field-name="toAddresses" from="user.email" />
-                        <field-map field-name="toUserId" from="userAccount.userId" />
-                        <field-map field-name="bodyParameters"
-                            from="[application: applicationId? applicationId.substring(3) : 'Admin',
-                                    newPassword:newPassword, firstName: user.firstName,
-                                    lastName: user.lastName, userLocale: locale]" />
-                    </service-call>
+                    <!-- after commit: the EmailMessage toUserId needs the committed UserAccount -->
+                    <script>ec.service.special().name('org.moqui.impl.EmailServices.send#EmailTemplate')
+                        .parameters([emailTemplateId: 'WELCOME', toAddresses: user.email,
+                            toUserId: userAccount.userId,
+                            bodyParameters: [application: applicationId ? applicationId.substring(3) : 'Admin',
+                                newPassword: newPassword, firstName: user.firstName,
+                                lastName: user.lastName, userLocale: locale]])
+                        .registerOnCommit()</script>
                     <else>
                         <service-call name="growerp.100.GeneralServices100.get#RuntimeMode"
                             out-map="context" />

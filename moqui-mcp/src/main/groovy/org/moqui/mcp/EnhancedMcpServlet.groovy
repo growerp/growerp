@@ -178,9 +178,13 @@ class EnhancedMcpServlet extends HttpServlet {
         }
 
         ExecutionContextImpl ec = ecfi.activeContext.get()
+        // no MoquiAuthFilter on /mcp: an EC created here must be destroyed here, or it stays on
+        // the pooled Jetty thread with its user and the next request on that thread inherits it
+        boolean ownsEc = false
         if (ec == null) {
             logger.warn("No ExecutionContext found from MoquiAuthFilter, creating new one")
             ec = ecfi.getEci()
+            ownsEc = true
         }
 
         try {
@@ -290,6 +294,8 @@ class EnhancedMcpServlet extends HttpServlet {
             response.setContentType("application/json")
             def errorMsg = t.message?.toString() ?: "Unknown error"
             response.writer.write("{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32603,\"message\":\"Internal error: ${errorMsg.replace("\"", "\\\"")}\"},\"id\":null}")
+        } finally {
+            if (ownsEc) ec.destroy()
         }
     }
 
