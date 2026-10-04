@@ -112,7 +112,7 @@ jobs:
           fi
 
           if [[ ${#apps[@]} -eq 0 ]]; then
-            echo "No app selected" >&2
+            echo "::error::at least one app is mandatory"
             exit 1
           fi
 

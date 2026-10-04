@@ -107,7 +107,7 @@ jobs:
             [[ "$APP_INSURANCE" == "true" ]] && APPS_INPUT="${APPS_INPUT}insurance,"
             APPS_INPUT="${APPS_INPUT%,}"
           fi
-          if [[ -z "$APPS_INPUT" ]]; then echo "No apps selected" >&2; exit 1; fi
+          if [[ -z "$APPS_INPUT" ]]; then echo "::error::at least one app is mandatory"; exit 1; fi
 
           # Central app list: storeApps in flutter/release/release_config.json
           VALID_APPS=$(jq -r '.storeApps | keys_unsorted | join(" ")' flutter/release/release_config.json)

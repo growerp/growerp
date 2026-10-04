@@ -90,7 +90,7 @@ jobs:
             [[ "$APP_INSURANCE" == "true" ]] && SERVICES="${SERVICES}insurance "
             SERVICES="${SERVICES% }"
           fi
-          if [[ -z "$SERVICES" ]]; then echo "No apps selected" >&2; exit 1; fi
+          if [[ -z "$SERVICES" ]]; then echo "::error::at least one app is mandatory"; exit 1; fi
           echo "services=$SERVICES" >> "$GITHUB_OUTPUT"
 
       - name: Sync staging to production on growerp.com

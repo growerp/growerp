@@ -122,7 +122,7 @@ jobs:
             [[ "$APP_INSURANCE" == "true" ]] && INPUT="${INPUT}insurance,"
             [[ "$APP_MOQUI" == "true" ]] && INPUT="${INPUT}growerp-moqui,"
             INPUT="${INPUT%,}"
-            if [[ -z "$INPUT" ]]; then echo "No apps selected" >&2; exit 1; fi
+            if [[ -z "$INPUT" ]]; then echo "::error::at least one app is mandatory"; exit 1; fi
           fi
           # Central app list: flutter/release/release_config.json defaultApps
           ALL_FLUTTER=$(jq -r '[.defaultApps[] | select(. != "growerp-moqui")] | join(" ")' flutter/release/release_config.json)

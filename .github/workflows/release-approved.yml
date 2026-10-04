@@ -168,8 +168,10 @@ jobs:
             STORES="${STORES%,}"
           fi
 
-          if [[ -z "$APPS" ]]; then echo "No apps selected" >&2; exit 1; fi
-          if [[ -z "$STORES" ]]; then echo "No stores selected" >&2; exit 1; fi
+          if [[ -z "$APPS" || -z "$STORES" ]]; then
+            echo "::error::at least one app and one store is mandatory"
+            exit 1
+          fi
 
           build_matrix() {
             local store_apps="$1"
