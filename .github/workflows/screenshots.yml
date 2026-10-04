@@ -234,7 +234,7 @@ jobs:
       - name: Build Moqui backend image
         run: |
           mkdir -p moqui/build
-          cd moqui && ./gradlew build getPostgresJdbc
+          cd moqui && ./gradlew -Dorg.gradle.jvmargs=-Xmx3g build getPostgresJdbc
           cd docker/simple && bash docker-build.sh ../.. growerp/growerp-moqui eclipse-temurin:21-jdk
 
       # ── Build Flutter test runner image (layer-cached) ────────────────────

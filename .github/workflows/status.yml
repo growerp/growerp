@@ -145,7 +145,7 @@ jobs:
           for url in "${MIRRORS[@]}"; do
             sed -i "s|^distributionUrl=.*|distributionUrl=$url|" "$WRAPPER"
             for attempt in 1 2 3; do
-              if ./gradlew -I ../ci/gradle-plugin-repos.init.gradle build; then ok=1; break; fi
+              if ./gradlew -Dorg.gradle.jvmargs=-Xmx3g -I ../ci/gradle-plugin-repos.init.gradle build; then ok=1; break; fi
               delay=${BACKOFF[$((attempt - 1))]}
               echo "gradlew attempt $attempt via $url failed; retrying in ${delay}s..."
               sleep "$delay"
@@ -242,7 +242,7 @@ jobs:
           for url in "${MIRRORS[@]}"; do
             sed -i "s|^distributionUrl=.*|distributionUrl=$url|" "$WRAPPER"
             for attempt in 1 2 3; do
-              if ./gradlew -I ../ci/gradle-plugin-repos.init.gradle build getPostgresJdbc; then ok=1; break; fi
+              if ./gradlew -Dorg.gradle.jvmargs=-Xmx3g -I ../ci/gradle-plugin-repos.init.gradle build getPostgresJdbc; then ok=1; break; fi
               delay=${BACKOFF[$((attempt - 1))]}
               echo "gradlew attempt $attempt via $url failed; retrying in ${delay}s..."
               sleep "$delay"
