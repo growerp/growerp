@@ -107,37 +107,40 @@ class SetupInProgressDialogState extends State<SetupInProgressDialog> {
           setState(() => _failed = true);
         }
       },
-      child: Padding(
-        key: const Key('setupInProgress'),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              localizations.settingUpYourCompany,
-              style: Theme.of(context).textTheme.titleLarge,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            if (!_failed) const LoadingIndicator(),
-            if (!_failed) const SizedBox(height: 20),
-            Text(
-              _failed
-                  ? localizations.demoDataFailed
-                  : _tookTooLong
-                  ? localizations.demoDataTakingLong
-                  : localizations.demoDataLoading,
-              textAlign: TextAlign.center,
-            ),
-            if (_failed || _tookTooLong) ...[
-              const SizedBox(height: 20),
-              OutlinedButton(
-                key: const Key('continueWithoutDemoData'),
-                onPressed: _continue,
-                child: Text(localizations.continueButton),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: Padding(
+          key: const Key('setupInProgress'),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                localizations.settingUpYourCompany,
+                style: Theme.of(context).textTheme.titleLarge,
+                textAlign: TextAlign.center,
               ),
+              const SizedBox(height: 20),
+              if (!_failed) const LoadingIndicator(),
+              if (!_failed) const SizedBox(height: 20),
+              Text(
+                _failed
+                    ? localizations.demoDataFailed
+                    : _tookTooLong
+                    ? localizations.demoDataTakingLong
+                    : localizations.demoDataLoading,
+                textAlign: TextAlign.center,
+              ),
+              if (_failed || _tookTooLong) ...[
+                const SizedBox(height: 20),
+                OutlinedButton(
+                  key: const Key('continueWithoutDemoData'),
+                  onPressed: _continue,
+                  child: Text(localizations.continueButton),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
