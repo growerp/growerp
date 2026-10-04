@@ -213,6 +213,7 @@ jobs:
   # downloaded by every store job, so code generation never runs twice.
   # ───────────────────────────────────────────────────────────────────────────
   bootstrap:
+    needs: [ resolve-matrix ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
