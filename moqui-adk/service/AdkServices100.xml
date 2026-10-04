@@ -1233,10 +1233,10 @@
             </if>
             <!-- the "_NA_" catalog templates (GrowerpMarketingCatalogData.xml), worded for any
                  company; only the daily digest is scheduled on a fresh clone -->
-            <entity-count entity-name="moqui.adk.AdkAgentConfig" count-field="enabledCount">
+            <entity-find-count entity-name="moqui.adk.AdkAgentConfig" count-field="enabledCount">
                 <econdition field-name="ownerPartyId" value="_NA_"/>
                 <econdition field-name="teamName" value="Marketing Team"/>
-            </entity-count>
+            </entity-find-count>
             <if condition="!enabledCount">
                 <return error="true" message="No marketing agent templates found"/>
             </if>
