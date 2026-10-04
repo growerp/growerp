@@ -1631,6 +1631,11 @@ limitations under the License.
                         in-map="[email: email,
                             firstName: nameSpacePos > 0 ? visitorName.trim().substring(0, nameSpacePos) : visitorName.trim(),
                             lastName: nameSpacePos > 0 ? visitorName.trim().substring(nameSpacePos + 1) : 'website']" />
+                    <!-- also subscribe to the form owner's own Substack publication;
+                         no-op when that owner has no enabled SUBSTACK configuration -->
+                    <service-call name="growerp.100.SubstackServices100.add#SubstackSubscriber"
+                        async="true" ignore-error="true"
+                        in-map="[emailAddress: email, ownerPartyId: ownerPartyId]" />
                 </else-if>
             </if>
             <!-- notify the company admin by email, through the owner's own email server -->

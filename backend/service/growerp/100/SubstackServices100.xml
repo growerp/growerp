@@ -198,6 +198,10 @@
             <parameter name="errorMessage"/>
         </out-parameters>
         <actions>
+            <!-- async callers run on a worker without a user: subscribe#EmailToSubstack needs one -->
+            <if condition="!ec.user.userId">
+                <script>ec.user.internalLoginUser('SystemSupport')</script>
+            </if>
             <set field="emailAddress" from="emailAddress.trim().toLowerCase()"/>
             <if condition="!emailAddress.contains('@') || emailAddress.contains('example.com')">
                 <set field="resultStatus" value="SKIPPED"/>

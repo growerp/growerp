@@ -3416,6 +3416,10 @@ limitations under the License.
                     <!-- Add to mailing list -->
                     <service-call name="growerp.100.BirdSendServices100.registerAdd#UserToGroup"
                         in-map="[email: email, firstName: firstName, lastName: lastName]" />
+                    <service-call name="growerp.100.SubstackServices100.add#SubstackSubscriber"
+                        async="true" ignore-error="true"
+                        in-map="[emailAddress: email, ownerPartyId: 'GROWERP',
+                            tenantPartyId: tenantResult.ownerPartyId]" />
 
                     <!-- Return with 'registered' status -->
                     <set field="authenticate"
