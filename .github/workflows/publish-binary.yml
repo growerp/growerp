@@ -1663,7 +1663,15 @@ jobs:
           SNAP_FILE=$(ls flutter/packages/${{ matrix.app }}/growerp-${{ matrix.app }}_*.snap 2>/dev/null \
             || ls flutter/packages/${{ matrix.app }}/*.snap | head -1)
           for i in {1..4}; do
-            if snapcraft upload "$SNAP_FILE" --release="$SNAP_CHANNEL"; then exit 0; fi
+            OUT=$(snapcraft upload "$SNAP_FILE" --release="$SNAP_CHANNEL" 2>&1); RC=$?
+            echo "$OUT"
+            if [ $RC -eq 0 ]; then exit 0; fi
+            # Previous revision stuck in manual store review: retrying only re-sends
+            # the same binary ("upload uniqueness" error), so warn instead of failing.
+            if grep -qE "Waiting for previous upload\(s\) to complete their review process|Error checking upload uniqueness" <<<"$OUT"; then
+              echo "::warning title=Snap review queue (growerp-${{ matrix.app }})::Upload queued behind a revision pending manual review. Approve/reject it at https://dashboard.snapcraft.io/ then release manually."
+              exit 0
+            fi
             echo "snapcraft upload failed (attempt $i), retrying..."
             sleep $((i * 30))
           done
@@ -1686,9 +1694,15 @@ jobs:
             sleep 15
           done
           SNAP_FILE=$(ls growerp_*.snap | head -1)
-          set +e
+          set +ex
           for i in {1..4}; do
-            if snapcraft upload "$SNAP_FILE" --release="$SNAP_CHANNEL"; then exit 0; fi
+            OUT=$(snapcraft upload "$SNAP_FILE" --release="$SNAP_CHANNEL" 2>&1); RC=$?
+            echo "$OUT"
+            if [ $RC -eq 0 ]; then exit 0; fi
+            if grep -qE "Waiting for previous upload\(s\) to complete their review process|Error checking upload uniqueness" <<<"$OUT"; then
+              echo "::warning title=Snap review queue (growerp)::Upload queued behind a revision pending manual review. Approve/reject it at https://dashboard.snapcraft.io/ then release manually."
+              exit 0
+            fi
             echo "snapcraft upload failed (attempt $i), retrying..."
             sleep $((i * 30))
           done
