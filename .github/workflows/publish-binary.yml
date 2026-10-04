@@ -1659,7 +1659,7 @@ jobs:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
           SNAP_CHANNEL: ${{ inputs.track == 'stable' && 'candidate' || inputs.track }}
         run: |
-          set -uo pipefail
+          set +e -uo pipefail
           SNAP_FILE=$(ls flutter/packages/${{ matrix.app }}/growerp-${{ matrix.app }}_*.snap 2>/dev/null \
             || ls flutter/packages/${{ matrix.app }}/*.snap | head -1)
           for i in {1..4}; do
