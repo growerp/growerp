@@ -141,7 +141,8 @@ RUN rm -rf .git && \
     find runtime/component -maxdepth 2 -name .git -exec rm -rf {} + 2>/dev/null || true
 
 # Build Moqui system (produces moqui-plus-runtime.war)
-RUN ./gradlew addRunTime
+# the default 512m daemon heap runs out in :framework:compileGroovy
+RUN ./gradlew -Dorg.gradle.jvmargs=-Xmx3g addRunTime
 
 # Resolve absolute symlinks to real copies so COPY --from works in the final stage
 RUN for link in runtime/component/growerp runtime/component/PopRestStore runtime/component/mantle-stripe \
