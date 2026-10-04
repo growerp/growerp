@@ -1409,6 +1409,8 @@ limitations under the License.
                             from="ec.ecfi.confXmlRoot.first('user-facade').first('password')"/>
                         <set field="userAccount.resetPassword"
                             from="ec.ecfi.getSimpleHash(resetPassword, userAccount.passwordSalt, userAccount.passwordHashType, 'Y'.equals(userAccount.passwordBase64))"/>
+                        <!-- update#Password treats a reset password without a set date as expired -->
+                        <set field="userAccount.resetPasswordSetDate" from="ec.user.nowTimestamp"/>
                         <set field="userAccount.requirePasswordChange"
                             from="(passwordNode.attribute('email-require-change') == 'true') ? 'Y' : 'N'"/>
                         <!-- the plaintext copy only exists so the integration tests can finish
