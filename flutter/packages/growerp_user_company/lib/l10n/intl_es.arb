@@ -59,6 +59,7 @@
   "firstName": "Nombre de pila",
   "firstNameError": "Por favor ingresa un nombre",
   "hostName": "Nombre de host",
+  "hostNameError": "Introduzca un nombre de host simple como shop.example.com",
   "id": "IDENTIFICACIÓN",
   "lastName": "Apellido",
   "lastNameError": "Por favor ingresa un apellido",

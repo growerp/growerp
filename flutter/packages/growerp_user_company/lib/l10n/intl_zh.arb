@@ -59,6 +59,7 @@
   "firstName": "名",
   "firstNameError": "请输入名",
   "hostName": "主机名",
+  "hostNameError": "请输入简单的主机名，例如 shop.example.com",
   "id": "ID",
   "lastName": "姓",
   "lastNameError": "请输入姓",

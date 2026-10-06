@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<eecas xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-eca-3.xsd">
+
+    <!-- PsstHostname selects the store for a request host (get#ProductStoreIdFromHostName)
+         and is spliced as text by update#Website, so only a plain host name with an optional
+         port is accepted. Hung on the entity so no write path (company, website, tenant
+         setup, import, REST) can store a malformed one. Only checked when the value is set:
+         expiring an old row with thruDate stays possible. Throws, as a message error does
+         not stop an entity write. -->
+    <eeca id="ProductStoreSettingHostnameCheck" entity="mantle.product.store.ProductStoreSetting"
+        on-create="true" on-update="true" run-before="true">
+        <condition>
+            <expression>settingTypeEnumId == 'PsstHostname' &amp;&amp; settingValue
+                &amp;&amp; (eecaOperation == 'create' || !(entityValue instanceof org.moqui.entity.EntityValue)
+                    || entityValue.isFieldModified('settingValue'))
+                &amp;&amp; !(settingValue ==~ /(?i)[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*(:\d+)?/)</expression>
+        </condition>
+        <actions>
+            <script>throw new org.moqui.BaseArtifactException("Host name '${settingValue}' is not valid, use a plain host name like shop.example.com")</script>
+        </actions>
+    </eeca>
+</eecas>

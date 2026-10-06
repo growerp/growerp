@@ -406,6 +406,12 @@ limitations under the License.
                             }
                             currentSetting = match ?: prodStoreSettings[0]
                         ]]></script>
+                        <!-- the rename splices the text after the first dot, which garbles a
+                             regex pattern into an invalid one that breaks every store lookup -->
+                        <if condition="currentSetting.settingValue?.find(/[()?*+|\[\]\\]/)">
+                            <return error="true"
+                                message="Host name ${currentSetting.settingValue} is not a plain host name, change it in the company settings" />
+                        </if>
                         <if condition="website.hostName.indexOf('.') &gt; 0">
                             <set field="newPart" from="website.hostName.split('.')[0]" />
                             <else>
