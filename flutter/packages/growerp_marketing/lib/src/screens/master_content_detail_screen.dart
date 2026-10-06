@@ -66,7 +66,7 @@ class MasterContentDetailScreenState
     'SUBSTACK_NOTE',
     'EMAIL',
   ];
-  final Set<String> _selectedPlatforms = {...allPlatforms};
+  final Set<String> _selectedPlatforms = {};
 
   static String _platformLabel(String p) =>
       p == 'SUBSTACK_NOTE' ? 'Substack Note' : p;

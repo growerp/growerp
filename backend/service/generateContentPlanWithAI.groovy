@@ -62,6 +62,14 @@ try {
     }
 
     def formatter = DateTimeFormatter.ISO_LOCAL_DATE
+
+    // Optional user direction; captured before 'theme' is overwritten with the AI result
+    def userDirection = theme?.toString()?.trim()
+    def directionSection = userDirection ? """USER DIRECTION (theme & strategy for this week):
+${userDirection}
+Build the week's theme and all three pieces around this direction.
+
+""" : ""
     
     // Step 5: Construct prompt for content plan generation
     def generationPrompt = """
@@ -76,13 +84,13 @@ Tone of Voice: ${persona.toneOfVoice}
 
 WEEK STARTING: ${weekStart.format(formatter)}
 
-CONTENT FORMULA (PNP):
+${directionSection}CONTENT FORMULA (PNP):
 - Monday: PAIN - Address a specific pain point or challenge the persona faces
 - Wednesday: NEWS - Share industry news, trends, or insights relevant to the persona
 - Friday: PRIZE - Offer value, solutions, or a call-to-action (e.g., free resource, consultation)
 
 REQUIREMENTS:
-1. Generate a theme for the week that ties all three pieces together
+1. Generate a one-sentence theme for the week that ties all three pieces together${userDirection ? ' and captures the user direction' : ''}
 2. For each day (Monday, Wednesday, Friday), create:
    - A compelling headline (10-15 words)
    - Content type (PAIN, NEWS, or PRIZE)

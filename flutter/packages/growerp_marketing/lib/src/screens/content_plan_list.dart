@@ -301,6 +301,7 @@ class GenerateContentPlanDialogState extends State<GenerateContentPlanDialog> {
   final _formKey = GlobalKey<FormState>();
   DateTime? _weekStartDate;
   Persona? _selectedPersona;
+  final _themeController = TextEditingController();
   late ContentPlanBloc _contentPlanBloc;
 
   @override
@@ -311,6 +312,12 @@ class GenerateContentPlanDialogState extends State<GenerateContentPlanDialog> {
     context.read<PersonaBloc>().add(
       const PersonaFetch(refresh: true, limit: 100),
     );
+  }
+
+  @override
+  void dispose() {
+    _themeController.dispose();
+    super.dispose();
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -342,6 +349,13 @@ class GenerateContentPlanDialogState extends State<GenerateContentPlanDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const Text(
+                  'AI creates three platform-neutral pieces for the week using '
+                  'the Pain-News-Prize formula: Pain (Monday), News (Wednesday) '
+                  'and Prize (Friday), written for the selected persona. '
+                  'Adapt them to social platforms afterwards.',
+                ),
+                const SizedBox(height: 16),
                 BlocBuilder<PersonaBloc, PersonaState>(
                   builder: (context, personaState) {
                     return DropdownButtonFormField<Persona>(
@@ -395,6 +409,25 @@ class GenerateContentPlanDialogState extends State<GenerateContentPlanDialog> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  key: const Key('theme'),
+                  controller: _themeController,
+                  maxLines: 3,
+                  // ContentPlan.theme is text-medium: VARCHAR(255) on most DBs
+                  maxLength: 255,
+                  decoration: const InputDecoration(
+                    labelText: 'Theme & strategy (optional)',
+                    hintText:
+                        'e.g. Launch of our spring collection: focus on time '
+                        'savings, push the free consultation',
+                    helperText:
+                        'The topic or campaign for the week and the goal or '
+                        'angle. Leave empty to let AI choose one from the '
+                        'persona.',
+                    helperMaxLines: 3,
+                  ),
+                ),
                 const SizedBox(height: 24),
                 BlocConsumer<ContentPlanBloc, ContentPlanState>(
                   listener: (context, state) {
@@ -422,6 +455,10 @@ class GenerateContentPlanDialogState extends State<GenerateContentPlanDialog> {
                                   ContentPlanGenerateWithAI(
                                     personaId: _selectedPersona!.personaId!,
                                     weekStartDate: _weekStartDate,
+                                    theme:
+                                        _themeController.text.trim().isEmpty
+                                        ? null
+                                        : _themeController.text.trim(),
                                   ),
                                 );
                               }

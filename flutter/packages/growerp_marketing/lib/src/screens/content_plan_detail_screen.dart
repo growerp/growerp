@@ -303,11 +303,20 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
                         child: TextFormField(
                           key: const Key('theme'),
                           decoration: const InputDecoration(
-                            labelText: 'Theme',
-                            hintText: 'Weekly content theme',
+                            labelText: 'Theme & strategy',
+                            hintText:
+                                'e.g. Launch of our spring collection: focus '
+                                'on time savings, push the free consultation',
+                            helperText:
+                                'The topic tying this week\'s Pain, News and '
+                                'Prize posts together, plus the goal or angle '
+                                '(e.g. drive sign-ups, build trust).',
+                            helperMaxLines: 3,
                           ),
                           controller: _themeController,
                           maxLines: 3,
+                          // ContentPlan.theme is text-medium: VARCHAR(255) on most DBs
+                          maxLength: 255,
                         ),
                       ),
                     ],

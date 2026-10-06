@@ -1661,6 +1661,7 @@ abstract class RestClient {
   Future<ContentPlan> generateContentPlanWithAI({
     @Field() required String personaId,
     @Field() int? weekStartDate,
+    @Field() String? theme,
   });
 
   // Social Post endpoints

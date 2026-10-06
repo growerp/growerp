@@ -382,6 +382,8 @@
         <in-parameters>
             <parameter name="personaId" required="true" />
             <parameter name="weekStartDate" type="Long" />
+            <parameter name="theme"><description>Optional user direction (theme and
+                strategy) for the week; the AI refines it into the stored theme.</description></parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="planId" />

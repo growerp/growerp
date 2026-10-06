@@ -62,13 +62,17 @@ class ContentPlanGenerateWithAI extends ContentPlanEvent {
   final String personaId;
   final DateTime? weekStartDate;
 
+  /// Optional theme & strategy direction for the AI
+  final String? theme;
+
   const ContentPlanGenerateWithAI({
     required this.personaId,
     this.weekStartDate,
+    this.theme,
   });
 
   @override
-  List<Object?> get props => [personaId, weekStartDate];
+  List<Object?> get props => [personaId, weekStartDate, theme];
 }
 
 /// Event to search content plans
