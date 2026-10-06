@@ -11,7 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  growerp_inventory: ^1.11.1
+  growerp_inventory: ^1.12.0
 
 
 dev_dependencies:

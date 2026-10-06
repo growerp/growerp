@@ -14,11 +14,11 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  growerp_core: ^1.11.1
-  growerp_models: ^1.12.2
-  growerp_adk: ^1.1.1
-  growerp_user_company: ^1.11.1
-  growerp_website: ^1.11.1
+  growerp_core: ^1.12.0
+  growerp_models: ^1.13.0
+  growerp_adk: ^1.2.0
+  growerp_user_company: ^1.12.0
+  growerp_website: ^1.12.0
   growerp_wiki: ^1.9.0
   global_configuration: ^2.0.0
   flutter_bloc: ^9.1.1

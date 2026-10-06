@@ -13,10 +13,10 @@ dependencies:
   flutter_bloc: ^9.1.1
   flutter_localizations:
     sdk: flutter
-  growerp_core: ^1.11.1
-  growerp_models: ^1.12.2
-  growerp_user_company: ^1.11.1
-  growerp_courses: ^1.10.1
+  growerp_core: ^1.12.0
+  growerp_models: ^1.13.0
+  growerp_user_company: ^1.12.0
+  growerp_courses: ^1.11.0
   universal_io: ^2.3.1
   global_configuration: ^2.0.0
   responsive_framework: ^1.5.1

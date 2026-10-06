@@ -13,9 +13,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  growerp_core: ^1.11.1
-  growerp_models: ^1.12.2
-  growerp_website: ^1.11.1
+  growerp_core: ^1.12.0
+  growerp_models: ^1.13.0
+  growerp_website: ^1.12.0
   package_info_plus: ^10.2.2
   flutter_localizations:
     sdk: flutter

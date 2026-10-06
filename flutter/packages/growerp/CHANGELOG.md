@@ -1,3 +1,19 @@
+## 1.13.0
+
+ - **REFACTOR**(website): move landing pages and assessments to growerp_website. ([34137ff9](https://github.com/growerp/growerp/commit/34137ff9a3aa840f558a4af6e29676497e791545))
+ - **FIX**(academy): register CoursesLocalizations delegate. ([c0586d82](https://github.com/growerp/growerp/commit/c0586d82b5cf0b29ed1f5de9f38cb8df1155a3a0))
+ - **FIX**(academy): drop donor l10n.yaml that broke the build. ([65564746](https://github.com/growerp/growerp/commit/65564746b42e86ba565019e259c7f237efb9020c))
+ - **FIX**(auth): make the first-login trial sequence work in every app. ([5c4ed9f4](https://github.com/growerp/growerp/commit/5c4ed9f49ee364ced46b62c749e03b3494187234))
+ - **FIX**: bump file_picker/package_info_plus off deprecated KGP plugin apply. ([9109e8e5](https://github.com/growerp/growerp/commit/9109e8e5301a9832262f376b8c77da3e3a36e319))
+ - **FIX**(core): stop leaking the post-logout authz denial to the user. ([a867dbde](https://github.com/growerp/growerp/commit/a867dbde28b28d6fb4b65d16035ea322d18e5d1f))
+ - **FIX**(core): keep startup from ending on a blank screen. ([4bf0c759](https://github.com/growerp/growerp/commit/4bf0c7598c6fd54d6d08f8ed3a1ff2e14fc0d752))
+ - **FIX**(accounting): ledger import, posting errors and email sending. ([073b8e15](https://github.com/growerp/growerp/commit/073b8e15251ae26004a7b0d4f13000a68ca7645f))
+ - **FEAT**(insurance): growerp_insurance block and insurance app. ([7ca4b3bb](https://github.com/growerp/growerp/commit/7ca4b3bb248e8718d5b5b0b4bfe3bc5f88c424a4))
+ - **FEAT**(academy): learner app for taking courses. ([443c6415](https://github.com/growerp/growerp/commit/443c6415dd648b0a20463db8a077e5b6e486e00f))
+ - **FEAT**(hr): add HR building block with onboarding, leave and self service. ([1eb3bdd6](https://github.com/growerp/growerp/commit/1eb3bdd6bf7cbb8fb3e02090e69a91c7bd28fc1e))
+ - **FEAT**(ai): default Gemini model 3.7-flash, resolved centrally. ([eb8bee43](https://github.com/growerp/growerp/commit/eb8bee432fe973c879326357f1fe0aa876b3746c))
+ - **FEAT**(core): optional companyPartyId at startup on every platform. ([c558bdf6](https://github.com/growerp/growerp/commit/c558bdf6fcf87271bf7b1ad2af399572c239b22f))
+
 ## 1.12.2
 
  - **FIX**: replace CC0 file-license headers with Apache-2.0 to match the package LICENSE; add example/README.md for pub.dev.

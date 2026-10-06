@@ -1,3 +1,20 @@
+## 1.12.0
+
+ - **PERF**: reduce Flutter app size across mobile, web and desktop. ([bb9ba9ad](https://github.com/growerp/growerp/commit/bb9ba9ad9926ed5d8b19bdae90f30a35ab539692))
+ - **FIX**(sales): reset persisted test state in the opportunity test. ([52fb293f](https://github.com/growerp/growerp/commit/52fb293f74c3b455b45e59542ce949a5138059b0))
+ - **FIX**(marketing): reorder the app menu, drop employees, complete System Setup. ([6847fdf5](https://github.com/growerp/growerp/commit/6847fdf51c85bc56c7a5d55d192251b646a56ffe))
+ - **FIX**: bump file_picker/package_info_plus off deprecated KGP plugin apply. ([9109e8e5](https://github.com/growerp/growerp/commit/9109e8e5301a9832262f376b8c77da3e3a36e319))
+ - **FIX**(flutter): wire up bloc success messages to actual translations. ([803d0857](https://github.com/growerp/growerp/commit/803d085790ccf6049e5223f377093fd19830e2fb))
+ - **FIX**(l10n): translate the dashboard tiles and empty states. ([8f2ccf68](https://github.com/growerp/growerp/commit/8f2ccf68ab7877e89cc2047f34b403e02d60482a))
+ - **FIX**(l10n): correct Spanish terms and add the backend es messages. ([525e74d1](https://github.com/growerp/growerp/commit/525e74d14d5971af2010eba59c3dcc0330596176))
+ - **FIX**(l10n): translate spanish files. ([d73c43ea](https://github.com/growerp/growerp/commit/d73c43eadb271fa9eabe7ba978e64b919ecc084c))
+ - **FIX**(l10n): translate all missing de/fr/nl/zh messages. ([19df4566](https://github.com/growerp/growerp/commit/19df4566f3aeb0998d6a17ce0e2955b07676de31))
+ - **FEAT**(dashboard): move opportunity stats to CRM, content stats to marketing. ([835a206b](https://github.com/growerp/growerp/commit/835a206beb500427711b3142b6003354cb367eec))
+ - **FEAT**(crm): collect weekly opportunity statistics. ([5962e5b1](https://github.com/growerp/growerp/commit/5962e5b14a5fbeb884cf9b39e9bd7990f1d0e0f4))
+ - **FEAT**(l10n): add Spanish language scaffolding. ([7e7cc80f](https://github.com/growerp/growerp/commit/7e7cc80f09c20e4ac7efa86e1b203045877419fe))
+ - **FEAT**(l10n): add Spanish language scaffolding. ([a2386537](https://github.com/growerp/growerp/commit/a2386537663750b6e18a17ab6265ba20485b22a6))
+ - **FEAT**(l10n): extract and localize hardcoded strings to Thai and English. ([424318a0](https://github.com/growerp/growerp/commit/424318a0273f6dfa0c6b43f3409e0ded353ae761))
+
 ## 1.11.1
 
  - **FIX**: relicense under Apache License 2.0 (LICENSE and file headers); fix pubspec description (was describing a different package) and lengthen it.

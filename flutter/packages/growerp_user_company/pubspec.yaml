@@ -1,7 +1,7 @@
 name: growerp_user_company
 resolution: workspace
 description: User, employee, and company/organization management building block for the GrowERP system, including roles and registration.
-version: 1.11.1
+version: 1.12.0
 homepage: https://www.growerp.com
 repository: https://github.com/growerp/growerp
 platforms:
@@ -21,9 +21,9 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  growerp_core: ^1.11.1
-  growerp_models: ^1.12.2
-  growerp_activity: ^1.11.1
+  growerp_core: ^1.12.0
+  growerp_models: ^1.13.0
+  growerp_activity: ^1.12.0
   decimal: ^3.2.6
   intl: ^0.20.3
   global_configuration: ^2.0.0

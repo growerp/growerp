@@ -1,3 +1,17 @@
+## 1.12.0
+
+ - **PERF**: reduce Flutter app size across mobile, web and desktop. ([bb9ba9ad](https://github.com/growerp/growerp/commit/bb9ba9ad9926ed5d8b19bdae90f30a35ab539692))
+ - **FIX**: bump file_picker/package_info_plus off deprecated KGP plugin apply. ([9109e8e5](https://github.com/growerp/growerp/commit/9109e8e5301a9832262f376b8c77da3e3a36e319))
+ - **FIX**(flutter): wire up bloc success messages to actual translations. ([803d0857](https://github.com/growerp/growerp/commit/803d085790ccf6049e5223f377093fd19830e2fb))
+ - **FIX**(l10n): translate the dashboard tiles and empty states. ([8f2ccf68](https://github.com/growerp/growerp/commit/8f2ccf68ab7877e89cc2047f34b403e02d60482a))
+ - **FIX**(l10n): translate spanish files. ([d73c43ea](https://github.com/growerp/growerp/commit/d73c43eadb271fa9eabe7ba978e64b919ecc084c))
+ - **FIX**(l10n): localize list search-field hints. ([da9d0423](https://github.com/growerp/growerp/commit/da9d042313905d0ab2c7595f7b923498e8ec9ba6))
+ - **FIX**(l10n): localize all table column headers. ([a9f07958](https://github.com/growerp/growerp/commit/a9f079580e284d036e3452699f1e4782ad706936))
+ - **FIX**(android): bump androidx.glance to 1.1.1, enable R8 shrink on marketing. ([e07ccd71](https://github.com/growerp/growerp/commit/e07ccd71300e15cb1f681320206e675598e47ad5))
+ - **FEAT**(l10n): add Spanish language scaffolding. ([7e7cc80f](https://github.com/growerp/growerp/commit/7e7cc80f09c20e4ac7efa86e1b203045877419fe))
+ - **FEAT**(l10n): add Spanish language scaffolding. ([a2386537](https://github.com/growerp/growerp/commit/a2386537663750b6e18a17ab6265ba20485b22a6))
+ - **FEAT**: localize hardcoded strings in multiple packages. ([7539f2c5](https://github.com/growerp/growerp/commit/7539f2c55412ea89fc417ed265d87ff6f1b53cca))
+
 ## 1.11.1
 
  - **FIX**: relicense under Apache License 2.0 (LICENSE and file headers).

@@ -1,3 +1,24 @@
+## 1.12.0
+
+ - **REFACTOR**(website): move landing pages and assessments to growerp_website. ([34137ff9](https://github.com/growerp/growerp/commit/34137ff9a3aa840f558a4af6e29676497e791545))
+ - **PERF**: reduce Flutter app size across mobile, web and desktop. ([bb9ba9ad](https://github.com/growerp/growerp/commit/bb9ba9ad9926ed5d8b19bdae90f30a35ab539692))
+ - **FIX**(website): make the light theme work, and default to it. ([252c3dd9](https://github.com/growerp/growerp/commit/252c3dd964b111e7aab37335d6e7cf8582aa4e3a))
+ - **FIX**: bump file_picker/package_info_plus off deprecated KGP plugin apply. ([9109e8e5](https://github.com/growerp/growerp/commit/9109e8e5301a9832262f376b8c77da3e3a36e319))
+ - **FIX**(flutter): wire up bloc success messages to actual translations. ([803d0857](https://github.com/growerp/growerp/commit/803d085790ccf6049e5223f377093fd19830e2fb))
+ - **FIX**(l10n): translate spanish files. ([d73c43ea](https://github.com/growerp/growerp/commit/d73c43eadb271fa9eabe7ba978e64b919ecc084c))
+ - **FIX**(l10n): localize list search-field hints. ([da9d0423](https://github.com/growerp/growerp/commit/da9d042313905d0ab2c7595f7b923498e8ec9ba6))
+ - **FIX**(l10n): localize all table column headers. ([a9f07958](https://github.com/growerp/growerp/commit/a9f079580e284d036e3452699f1e4782ad706936))
+ - **FIX**(l10n): translate all missing de/fr/nl/zh messages. ([19df4566](https://github.com/growerp/growerp/commit/19df4566f3aeb0998d6a17ce0e2955b07676de31))
+ - **FIX**(website): make the colour setting drive the whole generated site. ([8a59bce5](https://github.com/growerp/growerp/commit/8a59bce5ac78ce6eb4796eece8621bad59c4255b))
+ - **FEAT**(website): email list opens provider signup page in popup window. ([a2a2c1dc](https://github.com/growerp/growerp/commit/a2a2c1dcb463e326b2e9c3983f1657baf1c52db0))
+ - **FEAT**(website): email list signup overlay on homepage. ([93a3f58c](https://github.com/growerp/growerp/commit/93a3f58c0319eae3c3ea0a0ceff029cfe6b436af))
+ - **FEAT**(website): per-store home page and menu visibility for content pages. ([7824256a](https://github.com/growerp/growerp/commit/7824256aa0ec583646e2a6caccb46045e8f22522))
+ - **FEAT**(website,marketing): live HTML preview for raw content editors. ([87456e75](https://github.com/growerp/growerp/commit/87456e752e170113f5a64cb38769767131839543))
+ - **FEAT**(website): gate a landing page download behind a lead-capture form. ([7cd928cc](https://github.com/growerp/growerp/commit/7cd928cca00df9c5a6ede197e78a5d3853ec0593))
+ - **FEAT**(l10n): add Spanish language scaffolding. ([7e7cc80f](https://github.com/growerp/growerp/commit/7e7cc80f09c20e4ac7efa86e1b203045877419fe))
+ - **FEAT**(l10n): add Spanish language scaffolding. ([a2386537](https://github.com/growerp/growerp/commit/a2386537663750b6e18a17ab6265ba20485b22a6))
+ - **FEAT**(l10n): extract and localize hardcoded strings to Thai and English. ([424318a0](https://github.com/growerp/growerp/commit/424318a0273f6dfa0c6b43f3409e0ded353ae761))
+
 ## 1.11.1
 
  - **FIX**: relicense under Apache License 2.0 (LICENSE and file headers); lengthen pubspec description.
