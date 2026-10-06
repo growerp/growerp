@@ -21,6 +21,7 @@ dependencies:
 
   # State management & utilities
   flutter_bloc: ^9.1.1
+  intl: ^0.20.3
 
   # Markdown rendering (same version as growerp_core)
   markdown_widget: ^2.3.2+8
