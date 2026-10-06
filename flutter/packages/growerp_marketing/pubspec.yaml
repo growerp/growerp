@@ -29,14 +29,19 @@ dependencies:
 
   # State management & utilities
   flutter_bloc: ^9.1.1
+  bloc: ^9.2.1
+  stream_transform: ^2.1.2
+  responsive_framework: ^1.5.1
   equatable: ^2.1.0
   intl: ^0.20.3
 
   # Web support
 
-dev_dependencies:
+  # test helper classes in lib/src/*/integration_test are part of the public API
   flutter_test:
     sdk: flutter
+
+dev_dependencies:
 
   # Testing & analysis
   flutter_lints: ^6.0.0
