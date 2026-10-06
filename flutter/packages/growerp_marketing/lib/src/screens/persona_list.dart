@@ -260,6 +260,7 @@ class GeneratePersonaDialogState extends State<GeneratePersonaDialog> {
   final _businessController = TextEditingController();
   final _targetMarketController = TextEditingController();
   late PersonaBloc _personaBloc;
+  bool _submitted = false;
 
   @override
   void initState() {
@@ -314,33 +315,66 @@ class GeneratePersonaDialogState extends State<GeneratePersonaDialog> {
                 maxLines: 2,
               ),
               const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text(MarketingLocalizations.of(context)!.cancel),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton.icon(
-                    key: const Key('generateButton'),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _personaBloc.add(
-                          PersonaGenerateWithAI(
-                            businessDescription: _businessController.text,
-                            targetMarket: _targetMarketController.text.isEmpty
-                                ? null
-                                : _targetMarketController.text,
-                          ),
-                        );
-                        Navigator.of(context).pop();
-                      }
-                    },
-                    icon: const Icon(Icons.auto_awesome),
-                    label: Text(MarketingLocalizations.of(context)!.generate),
-                  ),
-                ],
+              BlocConsumer<PersonaBloc, PersonaState>(
+                listener: (context, state) {
+                  if (!_submitted) return;
+                  if (state.status == PersonaStatus.success) {
+                    Navigator.of(context).pop();
+                  }
+                  if (state.status == PersonaStatus.failure) {
+                    setState(() => _submitted = false);
+                  }
+                },
+                builder: (context, state) {
+                  final loading =
+                      _submitted && state.status == PersonaStatus.loading;
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: loading
+                            ? null
+                            : () => Navigator.of(context).pop(),
+                        child: Text(MarketingLocalizations.of(context)!.cancel),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton.icon(
+                        key: const Key('generateButton'),
+                        onPressed: loading
+                            ? null
+                            : () {
+                                if (_formKey.currentState!.validate()) {
+                                  setState(() => _submitted = true);
+                                  _personaBloc.add(
+                                    PersonaGenerateWithAI(
+                                      businessDescription:
+                                          _businessController.text,
+                                      targetMarket:
+                                          _targetMarketController.text.isEmpty
+                                          ? null
+                                          : _targetMarketController.text,
+                                    ),
+                                  );
+                                }
+                              },
+                        icon: loading
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.auto_awesome),
+                        label: Text(
+                          loading
+                              ? 'Generating...'
+                              : MarketingLocalizations.of(context)!.generate,
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ],
           ),
