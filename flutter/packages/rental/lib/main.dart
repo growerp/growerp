@@ -27,6 +27,7 @@ import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_activity/growerp_activity.dart';
 import 'package:growerp_sales/growerp_sales.dart';
 import 'package:growerp_marketing/growerp_marketing.dart';
+import 'package:growerp_outreach/growerp_outreach.dart';
 import 'package:growerp_website/growerp_website.dart';
 import 'package:growerp_rental/growerp_rental.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -195,6 +196,7 @@ List<LocalizationsDelegate> delegates = const [
   SalesLocalizations.delegate,
   WebsiteLocalizations.delegate,
   MarketingLocalizations.delegate,
+  OutreachLocalizations.delegate,
   RentalLocalizations.delegate,
   AdkLocalizations.delegate,
 ];
@@ -211,6 +213,7 @@ List<BlocProvider> getRentalBlocProviders(
     ...getActivityBlocProviders(restClient, applicationId),
     ...getSalesBlocProviders(restClient),
     ...getMarketingBlocProviders(restClient),
+    ...getOutreachBlocProviders(restClient),
     ...getWebsiteBlocProviders(restClient, applicationId),
   ];
 }
@@ -224,6 +227,7 @@ List<Map<String, GrowerpWidgetBuilder>> rentalWidgetRegistrations = [
   getActivityWidgets(),
   getSalesWidgets(),
   getMarketingWidgets(),
+  getOutreachWidgets(),
   getWebsiteWidgets(),
   getRentalWidgets(),
   // App-specific widgets
