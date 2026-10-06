@@ -1,8 +1,9 @@
 name: growerp_wiki
 resolution: workspace
-description: Wiki / OKF knowledge bundle browse and edit module for GrowERP
+description: GrowERP wiki building block - browse and edit the OKF knowledge bundle and company wiki pages from the Flutter frontend.
 version: 1.9.0
-publish_to: "none"
+homepage: https://www.growerp.com
+repository: https://github.com/growerp/growerp
 
 environment:
   sdk: ^3.10.0

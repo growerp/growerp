@@ -24,7 +24,7 @@ dependencies:
   growerp_inventory: ^1.12.0
   growerp_activity: ^1.12.0
   growerp_sales: ^1.12.0
-  growerp_marketing: ^1.9.0
+  growerp_marketing: ^2.0.0
   growerp_outreach: ^1.9.0
   growerp_website: ^1.12.0
   growerp_adk: ^1.2.0

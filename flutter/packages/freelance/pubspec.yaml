@@ -26,7 +26,7 @@ dependencies:
   growerp_order_accounting: ^1.12.0
   growerp_user_company: ^1.12.0
   growerp_activity: ^1.12.0
-  growerp_marketing: ^1.9.0
+  growerp_marketing: ^2.0.0
   growerp_outreach: ^1.9.0
   universal_io: ^2.3.1
   global_configuration: ^2.0.0

@@ -1,8 +1,9 @@
 name: growerp_outreach
 resolution: workspace
-description: Multi-platform outreach campaign management for GrowERP
+description: GrowERP outreach building block - multi-platform campaign management for email, LinkedIn and X with message tracking and automation.
 version: 1.9.0
-publish_to: "none"
+homepage: https://www.growerp.com
+repository: https://github.com/growerp/growerp
 
 environment:
   sdk: ^3.10.0
