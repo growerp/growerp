@@ -14,7 +14,7 @@ dependencies:
   flutter_web_plugins:
       sdk: flutter
   responsive_builder: ^0.7.1
-  url_launcher: ^6.0.9
+  url_launcher: ^6.3.3
   
 dev_dependencies:
   flutter_test:

@@ -13,22 +13,22 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  growerp_core: ^1.11.0
-  growerp_models: ^1.12.0
-  growerp_website: ^1.11.0
-  package_info_plus: ^10.2.1
+  growerp_core: ^1.11.1
+  growerp_models: ^1.12.2
+  growerp_website: ^1.11.1
+  package_info_plus: ^10.2.2
   flutter_localizations:
     sdk: flutter
-  universal_io: ^2.2.2
-  intl: ^0.20.2
-  url_launcher: ^6.1.14
-  cached_network_image: ^3.3.0
+  universal_io: ^2.3.1
+  intl: ^0.20.3
+  url_launcher: ^6.3.3
+  cached_network_image: ^3.4.1
   global_configuration: ^2.0.0
-  json_annotation: ^4.9.0
-  shared_preferences: ^2.3.2
+  json_annotation: ^4.12.0
+  shared_preferences: ^2.5.6
   flutter_bloc: ^9.1.1
-  http: ^1.1.0
-  dio: ^5.9.0
+  http: ^1.6.0
+  dio: ^5.11.1
   web: ^1.1.1
 
 dev_dependencies:

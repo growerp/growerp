@@ -20,25 +20,25 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  growerp_core: ^1.11.0
-  growerp_models: ^1.12.0
-  growerp_manufacturing: ^1.1.0
-  decimal: ^3.2.4
-  intl: ^0.20.2
+  growerp_core: ^1.11.1
+  growerp_models: ^1.12.2
+  growerp_manufacturing: ^1.1.1
+  decimal: ^3.2.6
+  intl: ^0.20.3
   global_configuration: ^2.0.0
-  equatable: ^2.0.5
+  equatable: ^2.1.0
   flutter_bloc: ^9.1.1
   bloc_concurrency: ^0.3.0
-  meta: ^1.3.0
-  responsive_framework: ^1.4.0
-  stream_transform: ^2.1.0
-  collection: ^1.16.0
-  dio: ^5.4.3
+  meta: ^1.19.0
+  responsive_framework: ^1.5.1
+  stream_transform: ^2.1.2
+  collection: ^1.19.1
+  dio: ^5.11.1
   freezed_annotation: ^3.1.0
-  freezed: ^3.2.0
-  flutter_form_builder: ^10.1.0
-  form_builder_validators: ^11.2.0
-  pdf: ^3.11.2
+  freezed: ^4.0.1
+  flutter_form_builder: ^10.3.0+2
+  form_builder_validators: ^11.3.0
+  pdf: ^3.12.0
   printing: ^5.14.3
   flutter_test:
     sdk: flutter
@@ -48,10 +48,10 @@ dev_dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
-  mockito: ^5.0.2
-  very_good_analysis: ^10.2.0
+  mockito: ^5.8.1
+  very_good_analysis: ^11.0.0
   bloc_test: ^10.0.0
-  json_serializable: ^6.10.0
+  json_serializable: ^6.14.1
   flutter_lints: ^6.0.0
 
 flutter:

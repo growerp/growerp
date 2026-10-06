@@ -378,7 +378,7 @@ class _AiCourseWizardViewState extends State<_AiCourseWizardView> {
       final accepted = <PlatformFile>[];
       final tooBig = <String>[];
       for (final f in picked) {
-        if (await f.length() > _maxFileBytes) {
+        if ((await f.length() ?? 0) > _maxFileBytes) {
           tooBig.add(f.name);
         } else {
           accepted.add(f);

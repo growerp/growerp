@@ -8,16 +8,16 @@ environment:
   flutter: '>=3.33.0'
 
 dependencies:
-  growerp_order_accounting: ^1.11.0
-  growerp_inventory: ^1.11.0
-  fl_chart: ^1.1.0
+  growerp_order_accounting: ^1.11.1
+  growerp_inventory: ^1.11.1
+  fl_chart: ^1.2.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   integration_test:
     sdk: flutter
-  patrol_finders: ^3.1.0
+  patrol_finders: ^3.6.0
 
 flutter:
   uses-material-design: true

@@ -14,16 +14,16 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  growerp_core: ^1.11.0
-  growerp_models: ^1.12.0
-  growerp_adk: ^1.1.0
-  growerp_user_company: ^1.11.0
-  growerp_website: ^1.11.0
+  growerp_core: ^1.11.1
+  growerp_models: ^1.12.2
+  growerp_adk: ^1.1.1
+  growerp_user_company: ^1.11.1
+  growerp_website: ^1.11.1
   growerp_wiki: ^1.9.0
-  global_configuration: ^2.0.0-nullsafety.1
+  global_configuration: ^2.0.0
   flutter_bloc: ^9.1.1
-  go_router: ^17.1.0
-  package_info_plus: ^10.2.1
+  go_router: ^17.5.0
+  package_info_plus: ^10.2.2
   flutter_test:
     sdk: flutter
   integration_test:
@@ -32,7 +32,7 @@ dependencies:
 dev_dependencies:
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
-  msix: ^3.16.12
+  msix: ^3.18.0
 
 flutter_launcher_icons:
   android: true

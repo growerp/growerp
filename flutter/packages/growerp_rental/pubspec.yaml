@@ -21,15 +21,15 @@ dependencies:
     sdk: flutter
   flutter:
     sdk: flutter
-  growerp_core: ^1.11.0
-  growerp_models: ^1.12.0
-  growerp_inventory: ^1.11.0
-  growerp_order_accounting: ^1.11.0
-  growerp_adk: ^1.1.0
+  growerp_core: ^1.11.1
+  growerp_models: ^1.12.2
+  growerp_inventory: ^1.11.1
+  growerp_order_accounting: ^1.11.1
+  growerp_adk: ^1.1.1
   flutter_bloc: ^9.1.1
-  horizontal_data_table: ^4.3.1
-  intl: ^0.20.2
-  decimal: ^3.2.4
+  horizontal_data_table: ^4.3.4
+  intl: ^0.20.3
+  decimal: ^3.2.6
 
 dev_dependencies:
   flutter_test:

@@ -54,7 +54,7 @@ workspace:
   - packages/support
   - packages/website
 dev_dependencies:
-  melos: ^7.4.0
+  melos: ^7.8.1
 
 melos:
   name: growerp

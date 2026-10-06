@@ -21,29 +21,29 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  intl: ^0.20.2
-  growerp_core: ^1.11.0
-  growerp_models: ^1.12.0
+  intl: ^0.20.3
+  growerp_core: ^1.11.1
+  growerp_models: ^1.12.2
   flutter_bloc: ^9.1.1
-  equatable: ^2.0.5
-  responsive_framework: ^1.4.0
+  equatable: ^2.1.0
+  responsive_framework: ^1.5.1
   archive: ^3.6.1
-  path_provider: ^2.0.11
+  path_provider: ^2.1.6
   reorderables: ^0.6.0
-  url_launcher: ^6.1.4
+  url_launcher: ^6.3.3
   flutter_colorpicker: ^1.1.0
-  flex_color_scheme: ^8.3.0
+  flex_color_scheme: ^8.4.0
   from_css_color: ^2.0.0
   bloc_concurrency: ^0.3.0
-  image_picker: ^1.0.4
+  image_picker: ^1.2.4
   global_configuration: ^2.0.0
-  file_picker: ^12.2.0
-  stream_transform: ^2.1.0
-  decimal: ^3.2.4
-  markdown_widget: ^2.3.1
-  dio: ^5.4.3
-  universal_io: ^2.2.2
-  web: ^1.0.0
+  file_picker: ^13.1.0
+  stream_transform: ^2.1.2
+  decimal: ^3.2.6
+  markdown_widget: ^2.3.2+8
+  dio: ^5.11.1
+  universal_io: ^2.3.1
+  web: ^1.1.1
   flutter_staggered_grid_view: ^0.7.0
   flutter_test:
     sdk: flutter
@@ -52,7 +52,7 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  test: ^1.16.0
+  test: ^1.31.1
 flutter:
   uses-material-design: true
   generate: true
