@@ -780,7 +780,7 @@
                             oauth_consumer_key    : consumerKey as String,
                             oauth_nonce           : UUID.randomUUID().toString().replace("-", ""),
                             oauth_signature_method: "HMAC-SHA1",
-                            oauth_timestamp       : (System.currentTimeMillis() / 1000L) as String,
+                            oauth_timestamp       : System.currentTimeMillis().intdiv(1000L) as String,
                             oauth_token           : accessToken as String,
                             oauth_version         : "1.0"
                         ]
