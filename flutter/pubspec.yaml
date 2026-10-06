@@ -118,8 +118,13 @@ melos:
       runPubGetInParallel: false
       hooks:
         post: bash setup-flutter.sh
+    version:
+      linkToCommits: true
 
   scripts:
+    upgrade:
+      description: Upgrade deps within current majors and raise lower bounds.
+      run: flutter pub upgrade --tighten && flutter pub outdated
     analyze:
       exec: dart --suppress-analytics analyze .
       description: Analyse all packages for possible problems.
