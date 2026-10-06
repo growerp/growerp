@@ -34,8 +34,10 @@ along with this software (see the LICENSE.md file). If not, see
                  never selects a store, so match on the host name only -->
             <set field="requestHostName" from="((String) requestHostName).replaceFirst(':\\d+$', '')"/>
             <iterate list="hostSettingList" entry="hostSetting">
-                <set field="hostPattern" from="hostSetting.settingValue?.replaceFirst(':\\d+$', '')"/>
-                <if condition="hostPattern != null &amp;&amp; ((String) requestHostName).matches((String) hostPattern)">
+                <!-- plain host names, compared as text: a regex match let one malformed
+                     value break the lookup for every store -->
+                <set field="settingHost" from="hostSetting.settingValue?.replaceFirst(':\\d+$', '')"/>
+                <if condition="((String) requestHostName).equalsIgnoreCase((String) settingHost)">
                     <set field="productStoreId" from="hostSetting.productStoreId"/></if>
             </iterate>
 

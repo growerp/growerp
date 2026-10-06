@@ -59,6 +59,7 @@
   "firstName": "Prénom",
   "firstNameError": "Veuillez saisir un prénom",
   "hostName": "Nom d'hôte",
+  "hostNameError": "Saisissez un nom d'hôte simple comme shop.example.com",
   "id": "ID",
   "lastName": "Nom de famille",
   "lastNameError": "Veuillez saisir un nom de famille",

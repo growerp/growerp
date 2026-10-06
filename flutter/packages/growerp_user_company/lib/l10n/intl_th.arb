@@ -59,6 +59,7 @@
   "firstName": "ชื่อจริง",
   "firstNameError": "กรุณากรอกชื่อจริง",
   "hostName": "ชื่อโฮสต์",
+  "hostNameError": "ป้อนชื่อโฮสต์แบบธรรมดา เช่น shop.example.com",
   "id": "รหัส",
   "lastName": "นามสกุล",
   "lastNameError": "กรุณากรอกนามสกุล",

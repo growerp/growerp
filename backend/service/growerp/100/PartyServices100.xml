@@ -969,21 +969,12 @@ limitations under the License.
                 <field-map field-name="organizationPartyId" from="companyPartyId" />
             </entity-find-one>
             <if condition="company.hostName">
-                <!-- Transform hostname to regex pattern: xxx.domain.com -> (xxx\.)?domain\.com -->
-                <set field="hostNamePattern" from="company.hostName" />
-                <if condition="company.hostName.contains('.')">
-                    <set field="firstDotIndex" from="company.hostName.indexOf('.')" />
-                    <set field="subdomain" from="company.hostName.substring(0, firstDotIndex)" />
-                    <set field="remainingDomain"
-                        from="company.hostName.substring(firstDotIndex + 1)" />
-                    <!-- Escape dots in the remaining domain for regex -->
-                    <set field="escapedDomain" from="remainingDomain.replace('.', '\\.')" />
-                    <set field="hostNamePattern" value="(${subdomain}\\.)?${escapedDomain}" />
-                </if>
+                <!-- plain host name like every other writer: update#Website and the
+                     uniqueness checks splice/compare it as text, not as a regex -->
                 <service-call name="create#mantle.product.store.ProductStoreSetting"
                     in-map="[productStoreId: productStore.productStoreId,
-                            settingTypeEnumId: PsstHostname,
-                            settingValue: hostNamePattern]" />
+                            settingTypeEnumId: 'PsstHostname',
+                            settingValue: company.hostName.trim().toLowerCase()]" />
             </if>
             <if condition="company.secondaryBackend">
                 <service-call name="create#mantle.product.store.ProductStoreSetting"
@@ -1437,21 +1428,12 @@ limitations under the License.
                     <service-call name="update#mantle.product.store.ProductStoreSetting"
                         in-map="settings[0] + [thruDate: nowDate]" />
                 </if>
-                <!-- Transform hostname to regex pattern: xxx.domain.com -> (xxx\.)?domain\.com -->
-                <set field="hostNamePattern" from="company.hostName" />
-                <if condition="company.hostName?.contains('.')">
-                    <set field="firstDotIndex" from="company.hostName.indexOf('.')" />
-                    <set field="subdomain" from="company.hostName.substring(0, firstDotIndex)" />
-                    <set field="remainingDomain"
-                        from="company.hostName.substring(firstDotIndex + 1)" />
-                    <!-- Escape dots in the remaining domain for regex -->
-                    <set field="escapedDomain" from="remainingDomain.replace('.', '\\.')" />
-                    <set field="hostNamePattern" value="(${subdomain}\\.)?${escapedDomain}" />
-                </if>
+                <!-- plain host name like every other writer: update#Website and the
+                     uniqueness checks splice/compare it as text, not as a regex -->
                 <service-call name="create#mantle.product.store.ProductStoreSetting"
                     in-map="[productStoreId: productStore.productStoreId,
                             settingTypeEnumId: 'PsstHostname',
-                            settingValue: hostNamePattern,
+                            settingValue: company.hostName?.trim()?.toLowerCase(),
                             fromDate: nowDate]" />
             </if>
             <if condition="company.secondaryBackend != oldValue.companies[0].secondaryBackend">
