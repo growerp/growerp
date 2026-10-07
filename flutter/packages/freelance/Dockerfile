@@ -21,6 +21,14 @@ FROM ghcr.io/cirruslabs/flutter:stable AS build-env
 ARG BRANCH=development # currently either master or development we need to add existing
 ARG DOCKER_TAG=1.0.0+1
 USER root
+# cirruslabs publishes no image newer than Flutter 3.44 (Dart 3.12), the packages need Dart 3.13
+ARG FLUTTER_VERSION=3.47.6
+ENV FLUTTER_VERSION=${FLUTTER_VERSION}
+RUN rm -rf /sdks/flutter && \
+    curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz \
+    | tar -xJ -C /sdks && \
+    git config --system --add safe.directory '*' && \
+    flutter --version
 # Install linux dependencies
 RUN apt-get update && \
     apt-get install -y software-properties-common && \
