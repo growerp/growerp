@@ -35,6 +35,7 @@ apps:
       - x11
       - opengl
       - audio-playback
+      - audio-record
       - gsettings
       - pulseaudio
       - home
@@ -58,6 +59,7 @@ parts:
     stage-packages:
       # GTK and desktop libraries
       - libgtk-3-0
+      - libpulse0
       - libglib2.0-0
       - libgdk-pixbuf-2.0-0
       - libgdk-pixbuf2.0-bin

@@ -1534,7 +1534,7 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y clang cmake ninja-build pkg-config \
-            libgtk-3-dev liblzma-dev libstdc++-12-dev
+            libgtk-3-dev liblzma-dev libstdc++-12-dev libpulse-dev unzip
 
       - name: Install snapcraft (with retry)
         shell: bash

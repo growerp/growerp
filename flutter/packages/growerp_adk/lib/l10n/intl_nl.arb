@@ -226,5 +226,6 @@
   "adk_guideStatusOpened": "Gemarkeerd als klaar",
   "adk_guideStatusNotOpened": "Nog niet geopend",
   "adk_guideFullTitle": "Volledige gids agentbeheer",
-  "adk_guideFullDesc": "Elke instelling in detail: identiteit, tooltoegang, goedkeuringen, kosten, planning, de takenlus, teams, koppelingen en audit."
+  "adk_guideFullDesc": "Elke instelling in detail: identiteit, tooltoegang, goedkeuringen, kosten, planning, de takenlus, teams, koppelingen en audit.",
+  "adk_loadingSpeechModel": "Spraakmodel downloaden…"
 }

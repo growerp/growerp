@@ -226,5 +226,6 @@
   "adk_guideStatusOpened": "已标记为完成",
   "adk_guideStatusNotOpened": "尚未打开",
   "adk_guideFullTitle": "完整的智能体控制指南",
-  "adk_guideFullDesc": "每项控制的详细说明：身份、工具访问、审批、成本、计划、任务循环、团队、集成和审计。"
+  "adk_guideFullDesc": "每项控制的详细说明：身份、工具访问、审批、成本、计划、任务循环、团队、集成和审计。",
+  "adk_loadingSpeechModel": "正在下载语音模型…"
 }

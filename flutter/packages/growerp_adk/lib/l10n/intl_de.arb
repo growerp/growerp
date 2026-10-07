@@ -226,5 +226,6 @@
   "adk_guideStatusOpened": "Als erledigt markiert",
   "adk_guideStatusNotOpened": "Noch nicht geöffnet",
   "adk_guideFullTitle": "Vollständiger Leitfaden Agentensteuerung",
-  "adk_guideFullDesc": "Jede Einstellung im Detail: Identität, Werkzeugzugriff, Freigaben, Kosten, Zeitpläne, Aufgabenschleife, Teams, Integrationen und Protokoll."
+  "adk_guideFullDesc": "Jede Einstellung im Detail: Identität, Werkzeugzugriff, Freigaben, Kosten, Zeitpläne, Aufgabenschleife, Teams, Integrationen und Protokoll.",
+  "adk_loadingSpeechModel": "Sprachmodell wird heruntergeladen…"
 }

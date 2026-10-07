@@ -40,7 +40,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     git zip gdb libstdc++6 fonts-noto nano sed curl \
     xvfb libgtk-3-dev ninja-build cmake clang lld llvm pkgconf liblzma-dev \
-    libglu1-mesa binutils \
+    libglu1-mesa binutils libpulse-dev unzip \
     libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 

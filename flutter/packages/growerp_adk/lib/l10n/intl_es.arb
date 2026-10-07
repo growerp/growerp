@@ -226,5 +226,6 @@
   "adk_guideStatusOpened": "Marcado como hecho",
   "adk_guideStatusNotOpened": "Aún no abierto",
   "adk_guideFullTitle": "Guía completa de control de agentes",
-  "adk_guideFullDesc": "Cada control en detalle: identidad, acceso a herramientas, aprobaciones, coste, programación, bucle de tareas, equipos, integraciones y auditoría."
+  "adk_guideFullDesc": "Cada control en detalle: identidad, acceso a herramientas, aprobaciones, coste, programación, bucle de tareas, equipos, integraciones y auditoría.",
+  "adk_loadingSpeechModel": "Descargando modelo de voz…"
 }

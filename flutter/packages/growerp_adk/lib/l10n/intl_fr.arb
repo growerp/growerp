@@ -226,5 +226,6 @@
   "adk_guideStatusOpened": "Marqué comme fait",
   "adk_guideStatusNotOpened": "Pas encore ouvert",
   "adk_guideFullTitle": "Guide complet de contrôle des agents",
-  "adk_guideFullDesc": "Chaque réglage en détail : identité, accès aux outils, approbations, coûts, planning, boucle de tâches, équipes, intégrations et audit."
+  "adk_guideFullDesc": "Chaque réglage en détail : identité, accès aux outils, approbations, coûts, planning, boucle de tâches, équipes, intégrations et audit.",
+  "adk_loadingSpeechModel": "Téléchargement du modèle vocal…"
 }

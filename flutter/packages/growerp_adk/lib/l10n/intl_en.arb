@@ -806,5 +806,7 @@
   "adk_guideFullTitle": "Full agent control guide",
   "@adk_guideFullTitle": {"description": "Agent control guide screen"},
   "adk_guideFullDesc": "Every control in detail: identity, tool access, approvals, cost, scheduling, the task loop, teams, integrations and audit.",
-  "@adk_guideFullDesc": {"description": "Agent control guide screen"}
+  "@adk_guideFullDesc": {"description": "Agent control guide screen"},
+  "adk_loadingSpeechModel": "Downloading speech model…",
+  "@adk_loadingSpeechModel": {"description": "AI chat voice input/output"}
 }
