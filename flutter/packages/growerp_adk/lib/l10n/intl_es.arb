@@ -174,5 +174,9 @@
   "adk_schedErrCrossesMidnight": "En la zona horaria del servidor estas ejecuciones cruzan la medianoche. Elija todos los días u otras horas.",
   "adk_schedErrMonthEnd": "En la zona horaria del servidor este día pasa del 28. Elija un día anterior.",
   "adk_schedErrPartialHour": "Su zona horaria no está a un número entero de horas de la del servidor. Use todos los días sin franja horaria o un cron personalizado.",
-  "adk_schedInvalid": "Programación no válida: {error}"
+  "adk_schedInvalid": "Programación no válida: {error}",
+  "adk_voiceInput": "Entrada de voz",
+  "adk_listening": "Escuchando…",
+  "adk_speakReplies": "Leer respuestas en voz alta",
+  "adk_speechErrorE": "Reconocimiento de voz no disponible: {error}"
 }

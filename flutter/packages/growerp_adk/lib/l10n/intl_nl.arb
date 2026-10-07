@@ -174,5 +174,9 @@
   "adk_schedErrCrossesMidnight": "In de tijdzone van de server gaan deze runs over middernacht. Kies elke dag of andere uren.",
   "adk_schedErrMonthEnd": "In de tijdzone van de server valt deze dag na de 28e. Kies een eerdere dag.",
   "adk_schedErrPartialHour": "Uw tijdzone ligt geen heel aantal uren van die van de server. Gebruik elke dag zonder uurvenster, of een eigen cron.",
-  "adk_schedInvalid": "Ongeldig schema: {error}"
+  "adk_schedInvalid": "Ongeldig schema: {error}",
+  "adk_voiceInput": "Spraakinvoer",
+  "adk_listening": "Luisteren…",
+  "adk_speakReplies": "Antwoorden voorlezen",
+  "adk_speechErrorE": "Spraakherkenning niet beschikbaar: {error}"
 }

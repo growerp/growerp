@@ -174,5 +174,9 @@
   "adk_schedErrCrossesMidnight": "Dans le fuseau du serveur, ces exécutions passent minuit. Choisissez tous les jours ou d’autres heures.",
   "adk_schedErrMonthEnd": "Dans le fuseau du serveur, ce jour dépasse le 28. Choisissez un jour plus tôt.",
   "adk_schedErrPartialHour": "Votre fuseau n'est pas à un nombre entier d'heures de celui du serveur. Utilisez tous les jours sans plage horaire, ou un cron personnalisé.",
-  "adk_schedInvalid": "Planification invalide : {error}"
+  "adk_schedInvalid": "Planification invalide : {error}",
+  "adk_voiceInput": "Saisie vocale",
+  "adk_listening": "Écoute…",
+  "adk_speakReplies": "Lire les réponses à voix haute",
+  "adk_speechErrorE": "Reconnaissance vocale indisponible : {error}"
 }

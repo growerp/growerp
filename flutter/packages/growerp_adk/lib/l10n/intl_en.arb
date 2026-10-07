@@ -702,5 +702,13 @@
   "adk_schedErrPartialHour": "Your time zone is not a whole number of hours from the server's. Use every day without an hour window, or a custom cron.",
   "@adk_schedErrPartialHour": {"description": "Agent schedule popup"},
   "adk_schedInvalid": "Invalid schedule: {error}",
-  "@adk_schedInvalid": {"description": "Agent schedule popup", "placeholders": {"error": {"type": "String"}}}
+  "@adk_schedInvalid": {"description": "Agent schedule popup", "placeholders": {"error": {"type": "String"}}},
+  "adk_voiceInput": "Voice input",
+  "@adk_voiceInput": {"description": "AI chat voice input/output"},
+  "adk_listening": "Listening…",
+  "@adk_listening": {"description": "AI chat voice input/output"},
+  "adk_speakReplies": "Read replies aloud",
+  "@adk_speakReplies": {"description": "AI chat voice input/output"},
+  "adk_speechErrorE": "Speech recognition unavailable: {error}",
+  "@adk_speechErrorE": {"description": "AI chat voice input/output", "placeholders": {"error": {"type": "String"}}}
 }

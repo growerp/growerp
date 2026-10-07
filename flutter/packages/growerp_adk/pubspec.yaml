@@ -28,6 +28,9 @@ dependencies:
   file_picker: ^13.1.0
   flutter_test:
     sdk: flutter
+  speech_to_text: ^7.5.0
+  flutter_tts: ^4.2.5
+  shared_preferences: ^2.5.6
 
 dev_dependencies:
   flutter_lints: ^6.0.0

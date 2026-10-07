@@ -174,5 +174,9 @@
   "adk_schedErrCrossesMidnight": "在服务器时区中这些运行跨越午夜。请选择每天或其他时段。",
   "adk_schedErrMonthEnd": "在服务器时区中这一天超过了 28 日。请选择更早的日期。",
   "adk_schedErrPartialHour": "您的时区与服务器时区相差的不是整数小时。请选择每天且不限时段，或使用自定义 cron。",
-  "adk_schedInvalid": "计划无效：{error}"
+  "adk_schedInvalid": "计划无效：{error}",
+  "adk_voiceInput": "语音输入",
+  "adk_listening": "正在聆听…",
+  "adk_speakReplies": "朗读回复",
+  "adk_speechErrorE": "语音识别不可用：{error}"
 }

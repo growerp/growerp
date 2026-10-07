@@ -174,5 +174,9 @@
   "adk_schedErrCrossesMidnight": "In der Zeitzone des Servers überschreiten diese Läufe Mitternacht. Wählen Sie jeden Tag oder andere Stunden.",
   "adk_schedErrMonthEnd": "In der Zeitzone des Servers fällt dieser Tag nach den 28. Wählen Sie einen früheren Tag.",
   "adk_schedErrPartialHour": "Ihre Zeitzone liegt keine ganze Zahl von Stunden von der des Servers entfernt. Nutzen Sie jeden Tag ohne Stundenfenster oder einen eigenen Cron.",
-  "adk_schedInvalid": "Ungültiger Zeitplan: {error}"
+  "adk_schedInvalid": "Ungültiger Zeitplan: {error}",
+  "adk_voiceInput": "Spracheingabe",
+  "adk_listening": "Höre zu…",
+  "adk_speakReplies": "Antworten vorlesen",
+  "adk_speechErrorE": "Spracherkennung nicht verfügbar: {error}"
 }
