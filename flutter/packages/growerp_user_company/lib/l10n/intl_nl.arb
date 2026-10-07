@@ -59,7 +59,6 @@
   "firstName": "Voornaam",
   "firstNameError": "Voer een voornaam in",
   "hostName": "Hostnaam",
-  "hostNameError": "Voer een gewone hostnaam in zoals shop.example.com",
   "id": "ID",
   "lastName": "Achternaam",
   "lastNameError": "Voer een achternaam in",

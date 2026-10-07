@@ -661,9 +661,12 @@ limitations under the License.
                                 from="productStore.productStoreId" />
                             <econdition field-name="settingTypeEnumId" value="PsstHostname" />
                             <date-filter />
+                            <order-by field-name="fromDate" />
                         </entity-find>
+                        <!-- a store can have several host names (own domain, www, growerp
+                             subdomains): show them all, read-only in the company dialog -->
                         <if condition="hosts">
-                            <set field="hostName" from="hosts[0].settingValue" />
+                            <set field="hostName" from="hosts*.settingValue.join(', ')" />
                         </if>
                         <entity-find entity-name="mantle.product.store.ProductStoreSetting"
                             list="backends">
@@ -1418,24 +1421,9 @@ limitations under the License.
                 <field-map field-name="organizationPartyId" from="companyPartyId" />
             </entity-find-one>
             <set field="nowDate" from="ec.user.nowTimestamp" />
-            <if condition="company.hostName != oldValue.companies[0].hostName">
-                <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="settings">
-                    <econdition field-name="productStoreId" from="productStore.productStoreId" />
-                    <econdition field-name="settingTypeEnumId" value="PsstHostname" />
-                    <date-filter />
-                </entity-find>
-                <if condition="settings"><!-- update/delete existing -->
-                    <service-call name="update#mantle.product.store.ProductStoreSetting"
-                        in-map="settings[0] + [thruDate: nowDate]" />
-                </if>
-                <!-- plain host name like every other writer: update#Website and the
-                     uniqueness checks splice/compare it as text, not as a regex -->
-                <service-call name="create#mantle.product.store.ProductStoreSetting"
-                    in-map="[productStoreId: productStore.productStoreId,
-                            settingTypeEnumId: 'PsstHostname',
-                            settingValue: company.hostName?.trim()?.toLowerCase(),
-                            fromDate: nowDate]" />
-            </if>
+            <!-- host names are not changed here: hostName is the read-only list of all the
+                 store's host names (get#Company), replacing one of them by it would drop a domain.
+                 They are set by registration, the website dialog and the website import. -->
             <if condition="company.secondaryBackend != oldValue.companies[0].secondaryBackend">
                 <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="settings">
                     <econdition field-name="productStoreId" from="productStore.productStoreId" />
