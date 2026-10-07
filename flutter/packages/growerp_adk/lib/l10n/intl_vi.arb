@@ -136,5 +136,6 @@
   "adk_voiceInput": "Nhập bằng giọng nói",
   "adk_listening": "Đang nghe…",
   "adk_speakReplies": "Đọc to câu trả lời",
-  "adk_speechErrorE": "Không nhận dạng được giọng nói: {error}"
+  "adk_speechErrorE": "Không nhận dạng được giọng nói: {error}",
+  "adk_loadingSpeechModel": "Đang tải mô hình giọng nói…"
 }

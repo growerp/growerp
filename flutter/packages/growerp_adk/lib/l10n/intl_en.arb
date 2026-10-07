@@ -663,5 +663,9 @@
         "type": "String"
       }
     }
+  },
+  "adk_loadingSpeechModel": "Downloading speech model…",
+  "@adk_loadingSpeechModel": {
+    "description": "AI chat voice input/output"
   }
 }

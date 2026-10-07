@@ -31,7 +31,7 @@ error()   { echo -e "${RED}[ERROR]${NC} $1"; }
 # against the system's GTK 3 development headers.
 #
 # Required system packages (Debian/Ubuntu):
-#   sudo apt-get install -y libgtk-3-dev libclang-dev
+#   sudo apt-get install -y libgtk-3-dev libclang-dev libpulse-dev unzip
 
 generate_gtk_bindings() {
   local GTK_PKG=""
@@ -59,7 +59,7 @@ generate_gtk_bindings() {
   # Check for required GTK headers
   if [ ! -f "/usr/include/gtk-3.0/gtk/gtk.h" ]; then
     error "GTK 3 development headers not found."
-    error "Install them with: sudo apt-get install -y libgtk-3-dev libclang-dev"
+    error "Install them with: sudo apt-get install -y libgtk-3-dev libclang-dev libpulse-dev unzip"
     exit 1
   fi
 

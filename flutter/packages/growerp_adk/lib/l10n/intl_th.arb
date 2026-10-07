@@ -136,5 +136,6 @@
   "adk_voiceInput": "ป้อนด้วยเสียง",
   "adk_listening": "กำลังฟัง…",
   "adk_speakReplies": "อ่านคำตอบออกเสียง",
-  "adk_speechErrorE": "ไม่สามารถใช้การรู้จำเสียงได้: {error}"
+  "adk_speechErrorE": "ไม่สามารถใช้การรู้จำเสียงได้: {error}",
+  "adk_loadingSpeechModel": "กำลังดาวน์โหลดโมเดลเสียง…"
 }

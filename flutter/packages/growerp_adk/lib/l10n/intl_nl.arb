@@ -136,5 +136,6 @@
   "adk_voiceInput": "Spraakinvoer",
   "adk_listening": "Luisteren…",
   "adk_speakReplies": "Antwoorden voorlezen",
-  "adk_speechErrorE": "Spraakherkenning niet beschikbaar: {error}"
+  "adk_speechErrorE": "Spraakherkenning niet beschikbaar: {error}",
+  "adk_loadingSpeechModel": "Spraakmodel downloaden…"
 }

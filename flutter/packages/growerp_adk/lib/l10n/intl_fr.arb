@@ -136,5 +136,6 @@
   "adk_voiceInput": "Saisie vocale",
   "adk_listening": "Écoute…",
   "adk_speakReplies": "Lire les réponses à voix haute",
-  "adk_speechErrorE": "Reconnaissance vocale indisponible : {error}"
+  "adk_speechErrorE": "Reconnaissance vocale indisponible : {error}",
+  "adk_loadingSpeechModel": "Téléchargement du modèle vocal…"
 }
