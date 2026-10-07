@@ -132,5 +132,9 @@
   "adk_dashTokens": "Tokens",
   "adk_dashServers": "Server",
   "adk_dashDocs": "Dok.",
-  "adk_dashChunks": "Chunks"
+  "adk_dashChunks": "Chunks",
+  "adk_voiceInput": "Spracheingabe",
+  "adk_listening": "Höre zu…",
+  "adk_speakReplies": "Antworten vorlesen",
+  "adk_speechErrorE": "Spracherkennung nicht verfügbar: {error}"
 }

@@ -132,5 +132,9 @@
   "adk_dashTokens": "jetons",
   "adk_dashServers": "serveurs",
   "adk_dashDocs": "docs",
-  "adk_dashChunks": "segments"
+  "adk_dashChunks": "segments",
+  "adk_voiceInput": "Saisie vocale",
+  "adk_listening": "Écoute…",
+  "adk_speakReplies": "Lire les réponses à voix haute",
+  "adk_speechErrorE": "Reconnaissance vocale indisponible : {error}"
 }

@@ -132,5 +132,9 @@
   "adk_dashTokens": "tokens",
   "adk_dashServers": "servers",
   "adk_dashDocs": "docs",
-  "adk_dashChunks": "chunks"
+  "adk_dashChunks": "chunks",
+  "adk_voiceInput": "Nhập bằng giọng nói",
+  "adk_listening": "Đang nghe…",
+  "adk_speakReplies": "Đọc to câu trả lời",
+  "adk_speechErrorE": "Không nhận dạng được giọng nói: {error}"
 }

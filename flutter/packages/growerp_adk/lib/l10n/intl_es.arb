@@ -132,5 +132,9 @@
   "adk_dashTokens": "tokens",
   "adk_dashServers": "servidores",
   "adk_dashDocs": "docs",
-  "adk_dashChunks": "fragmentos"
+  "adk_dashChunks": "fragmentos",
+  "adk_voiceInput": "Entrada de voz",
+  "adk_listening": "Escuchando…",
+  "adk_speakReplies": "Leer respuestas en voz alta",
+  "adk_speechErrorE": "Reconocimiento de voz no disponible: {error}"
 }

@@ -132,5 +132,9 @@
   "adk_dashTokens": "โทเค็น",
   "adk_dashServers": "เซิร์ฟเวอร์",
   "adk_dashDocs": "เอกสาร",
-  "adk_dashChunks": "ชิ้นส่วน"
+  "adk_dashChunks": "ชิ้นส่วน",
+  "adk_voiceInput": "ป้อนด้วยเสียง",
+  "adk_listening": "กำลังฟัง…",
+  "adk_speakReplies": "อ่านคำตอบออกเสียง",
+  "adk_speechErrorE": "ไม่สามารถใช้การรู้จำเสียงได้: {error}"
 }

@@ -132,5 +132,9 @@
   "adk_dashTokens": "令牌",
   "adk_dashServers": "服务器",
   "adk_dashDocs": "文档",
-  "adk_dashChunks": "分块"
+  "adk_dashChunks": "分块",
+  "adk_voiceInput": "语音输入",
+  "adk_listening": "正在聆听…",
+  "adk_speakReplies": "朗读回复",
+  "adk_speechErrorE": "语音识别不可用：{error}"
 }
