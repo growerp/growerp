@@ -49,6 +49,15 @@ const agentsMenuConfig = MenuConfiguration(
       isActive: true,
     ),
     MenuItem(
+      menuItemId: 'AGENTS_GUIDE',
+      title: 'Guide',
+      route: '/adk-guide',
+      iconName: 'checklist',
+      sequenceNum: 32,
+      widgetName: 'AgentControlGuideScreen',
+      isActive: true,
+    ),
+    MenuItem(
       menuItemId: 'AGENTS_MCPSERVERS',
       title: 'Tools & integrations',
       route: '/adk-mcp-servers',

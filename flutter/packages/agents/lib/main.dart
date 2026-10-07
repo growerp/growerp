@@ -193,6 +193,7 @@ class _AgentsAppState extends State<AgentsApp> {
             ),
             company: widget.company,
             widgetRegistrations: agentsWidgetRegistrations,
+            widgetMetadata: getAdkWidgetsWithMetadata(),
           );
         },
       ),

@@ -286,6 +286,7 @@ List<Map<String, GrowerpWidgetBuilder>> adminWidgetRegistrations = [
 /// Registered after [adminWidgetRegistrations] to enrich the screen catalog the
 /// ADK agent uses to emit navigation directives.
 List<WidgetMetadata> adminWidgetMetadata = [
+  ...getAdkWidgetsWithMetadata(),
   ...getUserCompanyWidgetsWithMetadata(),
   ...getCatalogWidgetsWithMetadata(),
   ...getInventoryWidgetsWithMetadata(),

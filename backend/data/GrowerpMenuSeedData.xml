@@ -289,6 +289,8 @@ limitations under the License.
         userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="50"/>
 
     <!-- ADMIN_AGENT_CONTROL children -->
+    <growerp.menu.MenuItem menuItemId="ADMIN_ADK_GUIDE" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_AGENT_CONTROL"
+        title="Guide" iconName="checklist" widgetName="AgentControlGuideScreen" sequenceNum="5"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ADK_AGENTS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_AGENT_CONTROL"
         title="AI Agents" iconName="smart_toy" widgetName="AdkAgentListView" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ADK_MCPSERVERS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_AGENT_CONTROL"
@@ -727,6 +729,8 @@ limitations under the License.
         title="Main" route="/" iconName="dashboard" widgetName="AgentsDashboard" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="AGENTS_AIAGENTS" menuConfigurationId="AGENTS_DEFAULT"
         title="AI Agents" route="/adk-agents" iconName="smart_toy" widgetName="AdkAgentListView" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="AGENTS_GUIDE" menuConfigurationId="AGENTS_DEFAULT"
+        title="Guide" route="/adk-guide" iconName="checklist" widgetName="AgentControlGuideScreen" sequenceNum="32"/>
     <growerp.menu.MenuItem menuItemId="AGENTS_MCPSERVERS" menuConfigurationId="AGENTS_DEFAULT"
         title="Tools &amp; Integrations" route="/adk-mcp-servers" iconName="dns" widgetName="AdkMcpServerListView" sequenceNum="35"/>
     <growerp.menu.MenuItem menuItemId="AGENTS_AIJOBS" menuConfigurationId="AGENTS_DEFAULT"
