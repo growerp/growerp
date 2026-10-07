@@ -1,7 +1,7 @@
 name: marketing
 resolution: workspace
 description: "Plan campaigns, reach leads and keep your website current."
-version: 1.19.12+22
+version: 1.19.13+22
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 publish_to: none
