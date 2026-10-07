@@ -1179,6 +1179,17 @@ abstract class RestClient {
   @PATCH("rest/s1/growerp/100/Activity")
   Future<Activity> updateActivity({@Field() required Activity activity});
 
+  @GET("rest/s1/growerp/100/ActivityNote")
+  Future<ActivityNotes> getActivityNotes({
+    @Query('activityId') required String activityId,
+  });
+
+  @POST("rest/s1/growerp/100/ActivityNote")
+  Future<ActivityNotes> createActivityNote({
+    @Field() required String activityId,
+    @Field() required String noteText,
+  });
+
   // communications of persons and companies
   @GET("rest/s1/growerp/100/CommunicationEvent")
   Future<CommunicationEvents> getCommunicationEvents({
@@ -2731,6 +2742,9 @@ abstract class RestClient {
     @Field() int? maxLlmCalls,
     @Field() int? loopMaxIterations,
     @Field() String? teamName,
+    @Field() bool? loopEnabled,
+    @Field() String? loopChatRoomId,
+    @Field() String? loopReportEmail,
   });
 
   @PATCH("rest/s1/growerp/100/AdkAgentConfig")
@@ -2757,6 +2771,9 @@ abstract class RestClient {
     @Field() int? maxLlmCalls,
     @Field() int? loopMaxIterations,
     @Field() String? teamName,
+    @Field() bool? loopEnabled,
+    @Field() String? loopChatRoomId,
+    @Field() String? loopReportEmail,
     @Field() bool? catalog,
     @Field() bool? catalogPublished,
     @Field() String? catalogCategory,

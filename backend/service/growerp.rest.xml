@@ -411,6 +411,14 @@ limitations under the License.
                 <service name="growerp.100.ActivityServices100.update#Activity" />
             </method>
         </resource>
+        <resource name="ActivityNote"><!-- comments on an activity (WorkEffortNote) -->
+            <method type="get">
+                <service name="growerp.100.ActivityServices100.get#ActivityNotes" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.ActivityServices100.create#ActivityNote" />
+            </method>
+        </resource>
         <resource name="CommunicationEvent"><!-- communications of persons and companies -->
             <method type="get">
                 <service name="growerp.100.CommunicationServices100.get#CommunicationEvent" />

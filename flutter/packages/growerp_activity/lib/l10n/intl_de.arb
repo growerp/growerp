@@ -67,5 +67,9 @@
   "activity_dashUnInvoiced": "nicht fakturiert",
   "activity_dashBarAll": "Alle",
   "activity_dashBarToDo": "Aufgaben",
-  "activity_dashBarEvents": "Termine"
+  "activity_dashBarEvents": "Termine",
+  "activity_comments": "Kommentare",
+  "activity_noComments": "Noch keine Kommentare",
+  "activity_addComment": "Kommentar hinzufügen",
+  "activity_aiAgent": "KI-Agent"
 }

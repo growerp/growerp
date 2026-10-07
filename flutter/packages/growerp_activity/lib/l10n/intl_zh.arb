@@ -67,5 +67,9 @@
   "activity_dashUnInvoiced": "未开票",
   "activity_dashBarAll": "全部",
   "activity_dashBarToDo": "待办",
-  "activity_dashBarEvents": "事件"
+  "activity_dashBarEvents": "事件",
+  "activity_comments": "评论",
+  "activity_noComments": "暂无评论",
+  "activity_addComment": "添加评论",
+  "activity_aiAgent": "AI 助手"
 }

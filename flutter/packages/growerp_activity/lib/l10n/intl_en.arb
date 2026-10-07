@@ -338,5 +338,21 @@
   "activity_dashBarEvents": "Events",
   "@activity_dashBarEvents": {
     "description": "Dashboard tile funnel stage label"
+  },
+  "activity_comments": "Comments",
+  "@activity_comments": {
+    "description": "Button and dialog title for the comments on an activity"
+  },
+  "activity_noComments": "No comments yet",
+  "@activity_noComments": {
+    "description": "Shown when an activity has no comments"
+  },
+  "activity_addComment": "Add a comment",
+  "@activity_addComment": {
+    "description": "Hint of the field to add a comment to an activity"
+  },
+  "activity_aiAgent": "AI agent",
+  "@activity_aiAgent": {
+    "description": "Author label of a comment written by the AI agent (task loop)"
   }
 }

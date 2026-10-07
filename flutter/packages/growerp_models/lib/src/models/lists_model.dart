@@ -307,6 +307,16 @@ abstract class Activities with _$Activities {
 }
 
 @freezed
+abstract class ActivityNotes with _$ActivityNotes {
+  factory ActivityNotes({@Default([]) List<ActivityNote> activityNotes}) =
+      _ActivityNotes;
+  ActivityNotes._();
+
+  factory ActivityNotes.fromJson(Map<String, dynamic> json) =>
+      _$ActivityNotesFromJson(json);
+}
+
+@freezed
 abstract class CommunicationEvents with _$CommunicationEvents {
   factory CommunicationEvents({
     @Default([]) List<CommunicationEvent> communicationEvents,

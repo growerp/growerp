@@ -41,6 +41,10 @@
             <!-- shared catalog ("_NA_") only -->
             <parameter name="catalogPublished"/>
             <parameter name="catalogCategory"/>
+            <!-- task loop (AdkLoopServices) -->
+            <parameter name="loopEnabled"/>
+            <parameter name="loopChatRoomId"/>
+            <parameter name="loopReportEmail"/>
         </in-parameters>
         <out-parameters>
             <parameter name="adkAgentConfigId"/>
@@ -96,6 +100,9 @@
                 <if condition="teamName != null"><set field="existing.teamName" from="teamName"/></if>
                 <if condition="catalogPublished != null"><set field="existing.catalogPublished" from="catalogPublished"/></if>
                 <if condition="catalogCategory != null"><set field="existing.catalogCategory" from="catalogCategory"/></if>
+                <if condition="loopEnabled != null"><set field="existing.loopEnabled" from="loopEnabled"/></if>
+                <if condition="loopChatRoomId != null"><set field="existing.loopChatRoomId" from="loopChatRoomId ?: null"/></if>
+                <if condition="loopReportEmail != null"><set field="existing.loopReportEmail" from="loopReportEmail ?: null"/></if>
                 <entity-update value-field="existing"/>
                 <set field="adkAgentConfigId" from="existing.adkAgentConfigId"/>
                 <else>
@@ -129,6 +136,9 @@
                     <set field="newCfg.teamName"           from="teamName"/>
                     <set field="newCfg.catalogPublished"   from="catalogPublished"/>
                     <set field="newCfg.catalogCategory"    from="catalogCategory"/>
+                    <set field="newCfg.loopEnabled"        from="loopEnabled ?: 'N'"/>
+                    <set field="newCfg.loopChatRoomId"     from="loopChatRoomId ?: null"/>
+                    <set field="newCfg.loopReportEmail"    from="loopReportEmail ?: null"/>
                     <entity-sequenced-id-primary value-field="newCfg"/>
                     <entity-create value-field="newCfg"/>
                     <set field="adkAgentConfigId" from="newCfg.adkAgentConfigId"/>

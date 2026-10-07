@@ -57,13 +57,19 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   final _apiKeyCtrl = TextEditingController();
   final _scheduleCronCtrl = TextEditingController();
   final _schedulePromptCtrl = TextEditingController();
-  final _chatRoomIdCtrl = TextEditingController();
   final _allowlistCtrl = TextEditingController();
-  final _approvalRoomCtrl = TextEditingController();
   final _loopMaxCtrl = TextEditingController();
   final _maxLlmCallsCtrl = TextEditingController();
   final _teamNameCtrl = TextEditingController();
   final _catalogCategoryCtrl = TextEditingController();
+  // Chat rooms for scheduled results, approval cards and the task inbox.
+  // '' = new room: the backend creates it the first time it is needed.
+  String _scheduleChatRoomId = '';
+  String _approvalChatRoomId = '';
+  String _loopChatRoomId = '';
+  List<ChatRoom> _chatRooms = [];
+  final _loopReportEmailCtrl = TextEditingController();
+  bool _loopEnabled = false; // works the task inbox on its schedule
   bool _catalogPublished = true;
   bool _deleting = false;
 
@@ -104,14 +110,14 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       _descriptionCtrl.text = e.description ?? '';
       _scheduleCronCtrl.text = e.scheduleExpression ?? '';
       _schedulePromptCtrl.text = e.schedulePrompt ?? '';
-      _chatRoomIdCtrl.text = e.scheduleChatRoomId ?? '';
+      _scheduleChatRoomId = e.scheduleChatRoomId ?? '';
       _scheduleEnabled = e.scheduleEnabled;
       _toolMode = e.toolMode ?? 'readOnly';
       _writePolicy = e.writePolicy ?? 'approve';
       _websiteChat = e.websiteChat;
       _webSearch = e.webSearch;
       _allowlistCtrl.text = e.serviceAllowlist ?? '';
-      _approvalRoomCtrl.text = e.approvalChatRoomId ?? '';
+      _approvalChatRoomId = e.approvalChatRoomId ?? '';
       _agentRole = e.agentRole ?? 'specialist';
       _orchestrationType = e.orchestrationType ?? 'router';
       _loopMaxCtrl.text = e.loopMaxIterations?.toString() ?? '';
@@ -120,6 +126,9 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       _nominated = e.catalogNominated;
       _catalogPublished = e.catalogPublished;
       _catalogCategoryCtrl.text = e.catalogCategory ?? '';
+      _loopEnabled = e.loopEnabled;
+      _loopChatRoomId = e.loopChatRoomId ?? '';
+      _loopReportEmailCtrl.text = e.loopReportEmail ?? '';
       if (!widget.catalog) {
         if (_agentRole != 'specialist' && e.adkAgentConfigId != null) {
           _loadTeam();
@@ -131,6 +140,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       _llmProviderCtrl.text = 'gemini';
     }
     _loadProvidersWithKey();
+    if (!widget.catalog) _loadChatRooms();
   }
 
   /// Which providers have an API key configured for this tenant. The backend
@@ -298,13 +308,12 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     _apiKeyCtrl.dispose();
     _scheduleCronCtrl.dispose();
     _schedulePromptCtrl.dispose();
-    _chatRoomIdCtrl.dispose();
     _allowlistCtrl.dispose();
-    _approvalRoomCtrl.dispose();
     _loopMaxCtrl.dispose();
     _maxLlmCallsCtrl.dispose();
     _teamNameCtrl.dispose();
     _catalogCategoryCtrl.dispose();
+    _loopReportEmailCtrl.dispose();
     super.dispose();
   }
 
@@ -407,9 +416,56 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     }
   }
 
+  /// One picker for every chat room an agent uses: the company's group rooms
+  /// by name, or a new room that the backend creates when first needed.
+  Widget _chatRoomPicker({
+    required String keyName,
+    required String label,
+    required String helper,
+    required String value,
+    required ValueChanged<String> onChanged,
+  }) {
+    return DropdownButtonFormField<String>(
+      key: Key(keyName),
+      initialValue: value,
+      isExpanded: true,
+      decoration: InputDecoration(
+        labelText: label,
+        helperText: helper,
+        helperMaxLines: 2,
+      ),
+      items: [
+        DropdownMenuItem(
+          value: '',
+          child: Text(AdkLocalizations.of(context)!.adk_newChatRoom),
+        ),
+        for (final room in _chatRooms)
+          DropdownMenuItem(
+            value: room.chatRoomId,
+            child: Text(room.chatRoomName ?? room.chatRoomId,
+                overflow: TextOverflow.ellipsis),
+          ),
+        // the agent's room when this user is not a member of it
+        if (value.isNotEmpty && !_chatRooms.any((r) => r.chatRoomId == value))
+          DropdownMenuItem(value: value, child: Text(value)),
+      ],
+      onChanged: (v) => setState(() => onChanged(v ?? '')),
+    );
+  }
+
+  Future<void> _loadChatRooms() async {
+    try {
+      final rooms = await (await AdkConfigService.create()).groupChatRooms();
+      if (mounted) setState(() => _chatRooms = rooms);
+    } catch (_) {
+      // no room list: the picker still offers a new task room
+    }
+  }
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     if (_scheduleEnabled &&
+        !_loopEnabled &&
         _instructionCtrl.text.trim().isEmpty &&
         _schedulePromptCtrl.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -438,17 +494,13 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
         schedulePrompt:
             _scheduleEnabled ? _schedulePromptCtrl.text.trim() : null,
         scheduleChatRoomId:
-            _chatRoomIdCtrl.text.trim().isEmpty
-                ? null
-                : _chatRoomIdCtrl.text.trim(),
+            _scheduleChatRoomId.isEmpty ? null : _scheduleChatRoomId,
         toolMode: _toolMode,
         serviceAllowlist: _toolMode == 'scoped'
             ? _allowlistCtrl.text.trim()
             : null,
         writePolicy: _writePolicy,
-        approvalChatRoomId: _approvalRoomCtrl.text.trim().isEmpty
-            ? null
-            : _approvalRoomCtrl.text.trim(),
+        approvalChatRoomId: _approvalChatRoomId,
         websiteChat: _websiteChat,
         webSearch: _webSearch,
         maxLlmCalls: int.tryParse(_maxLlmCallsCtrl.text.trim()),
@@ -463,6 +515,9 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
             : _teamNameCtrl.text.trim(),
         catalogPublished: _catalogPublished,
         catalogCategory: _catalogCategoryCtrl.text.trim(),
+        loopEnabled: _scheduleEnabled && _loopEnabled,
+        loopChatRoomId: _loopChatRoomId,
+        loopReportEmail: _loopReportEmailCtrl.text.trim(),
       );
       final apiKey = _apiKeyCtrl.text.trim();
       final saved = await svc.save(cfg,
@@ -880,13 +935,12 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                       ),
                       if (_writePolicy == 'approve') ...[
                         SizedBox(height: 8),
-                        TextFormField(
-                          key: Key('approvalChatRoomId'),
-                          controller: _approvalRoomCtrl,
-                          decoration: InputDecoration(
-                            labelText: 'Approval chat room ID (optional)',
-                            hintText: 'Where approval requests are posted',
-                          ),
+                        _chatRoomPicker(
+                          keyName: 'approvalChatRoomId',
+                          label: AdkLocalizations.of(context)!.adk_approvalChatRoom,
+                          helper: AdkLocalizations.of(context)!.adk_approvalChatRoomHint,
+                          value: _approvalChatRoomId,
+                          onChanged: (v) => _approvalChatRoomId = v,
                         ),
                       ],
                       SizedBox(height: 8),
@@ -1040,6 +1094,40 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                             child: Text(AdkLocalizations.of(context)!.adk_schedChange),
                           ),
                         ),
+                        SwitchListTile(
+                          key: Key('loopEnabled'),
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(AdkLocalizations.of(context)!.adk_loopEnabled),
+                          subtitle: Text(
+                              AdkLocalizations.of(context)!.adk_loopEnabledHint,
+                              style: TextStyle(fontSize: 12)),
+                          value: _loopEnabled,
+                          onChanged: (v) => setState(() {
+                            _loopEnabled = v;
+                            // a task loop checks its inbox every 10 minutes
+                            if (v) _scheduleCronCtrl.text = '0 */10 * * * ?';
+                          }),
+                        ),
+                        if (_loopEnabled) ...[
+                          _chatRoomPicker(
+                            keyName: 'loopChatRoomId',
+                            label: AdkLocalizations.of(context)!.adk_loopChatRoomId,
+                            helper: AdkLocalizations.of(context)!.adk_loopChatRoomIdHint,
+                            value: _loopChatRoomId,
+                            onChanged: (v) => _loopChatRoomId = v,
+                          ),
+                          SizedBox(height: 8),
+                          TextFormField(
+                            key: Key('loopReportEmail'),
+                            controller: _loopReportEmailCtrl,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: InputDecoration(
+                              labelText: AdkLocalizations.of(context)!.adk_loopReportEmail,
+                              hintText: AdkLocalizations.of(context)!.adk_loopReportEmailHint,
+                            ),
+                          ),
+                        ],
+                        if (!_loopEnabled) ...[
                         SizedBox(height: 8),
                         TextFormField(
                           key: Key('schedulePrompt'),
@@ -1050,14 +1138,14 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                           ),
                         ),
                         SizedBox(height: 8),
-                        TextFormField(
-                          key: Key('scheduleChatRoomId'),
-                          controller: _chatRoomIdCtrl,
-                          decoration: InputDecoration(
-                            labelText: 'Chat room ID for delivery (optional)',
-                            hintText: 'Leave blank to log only',
-                          ),
+                        _chatRoomPicker(
+                          keyName: 'scheduleChatRoomId',
+                          label: AdkLocalizations.of(context)!.adk_scheduleChatRoom,
+                          helper: AdkLocalizations.of(context)!.adk_scheduleChatRoomHint,
+                          value: _scheduleChatRoomId,
+                          onChanged: (v) => _scheduleChatRoomId = v,
                         ),
+                        ],
                       ],
                     ],
                   ),

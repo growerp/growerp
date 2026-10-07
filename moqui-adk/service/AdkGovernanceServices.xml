@@ -241,12 +241,15 @@
                              configId: configId, serviceName: serviceName, argsJson: argsJson,
                              status: 'pending', requestedByUserId: ec.user.userId,
                              requestTime: ec.user.nowTimestamp]"/>
-                <if condition="cfg?.approvalChatRoomId">
+                <service-call name="AdkGovernanceServices.ensure#AgentChatRoom" out-map="roomOut"
+                    in-map="[adkAgentConfigId: configId, roomField: 'approvalChatRoomId',
+                             roomName: 'Approvals: ' + (cfg?.agentName ?: 'AI agent')]"/>
+                <if condition="roomOut?.chatRoomId">
                     <set field="cardText" from="'🔔 Approval needed — agent &quot;' + (cfg.agentName ?: 'Agent') +
                         '&quot; wants to run ' + serviceName + '\n' + argsJson +
                         '\nApprove/Reject in ADK → Approvals (id ' + apprOut.adkApprovalId + ').'"/>
                     <service-call name="AdkGovernanceServices.post#AgentChatMessage"
-                        in-map="[chatRoomId: cfg.approvalChatRoomId, ownerPartyId: ownerPartyId,
+                        in-map="[chatRoomId: roomOut.chatRoomId, ownerPartyId: ownerPartyId,
                                  agentName: cfg.agentName, content: cardText]"/>
                 </if>
             </if>
@@ -323,6 +326,11 @@
                     auto-field-map="[adkActionLogId: appr.adkActionLogId]"/>
                 <if condition="lg"><set field="lg.decision" value="approved"/><entity-update value-field="lg"/></if>
             </if>
+            <!-- task-loop approval: put the task back in the loop's queue -->
+            <if condition="appr.workEffortId">
+                <service-call name="AdkLoopServices.requeue#LoopTask" in-map="[workEffortId: appr.workEffortId,
+                    noteText: 'Approved: ' + appr.serviceName + '\nResult: ' + resultSummary]"/>
+            </if>
         </actions>
     </service>
 
@@ -352,6 +360,65 @@
                 <entity-find-one entity-name="moqui.adk.AdkActionLog" value-field="lg" for-update="true"
                     auto-field-map="[adkActionLogId: appr.adkActionLogId]"/>
                 <if condition="lg"><set field="lg.decision" value="rejected"/><entity-update value-field="lg"/></if>
+            </if>
+            <if condition="appr.workEffortId">
+                <service-call name="AdkLoopServices.requeue#LoopTask" in-map="[workEffortId: appr.workEffortId,
+                    noteText: 'Rejected: ' + appr.serviceName + ' (not run). Do not retry it; choose another way or report back.']"/>
+            </if>
+        </actions>
+    </service>
+
+    <!-- ensure#AgentChatRoom — the chat room an agent uses for one purpose (scheduled results,
+         approval cards, task inbox). Users pick a room in the agent dialog or leave "new room":
+         an empty field gets a generated room id, saved on the agent. A missing room is created
+         with the company admin as member so it shows in their chat list. Only a room of the
+         agent's own company is ever used. -->
+    <service verb="ensure" noun="AgentChatRoom" authenticate="false">
+        <in-parameters>
+            <parameter name="adkAgentConfigId" required="true"/>
+            <!-- scheduleChatRoomId | approvalChatRoomId | loopChatRoomId -->
+            <parameter name="roomField" required="true"/>
+            <parameter name="roomName" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="chatRoomId"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"/>
+            <if condition="!cfg || !cfg.ownerPartyId || cfg.ownerPartyId == '_NA_'"><return/></if>
+            <set field="chatRoomId" from="cfg.get(roomField)"/>
+            <if condition="!chatRoomId">
+                <set field="chatRoomId" from="ec.entity.sequencedIdPrimary('growerp.general.ChatRoom', null, null)"/>
+                <service-call name="update#moqui.adk.AdkAgentConfig"
+                    in-map="[adkAgentConfigId: adkAgentConfigId, (roomField): chatRoomId]"/>
+            </if>
+            <entity-find-one entity-name="growerp.general.ChatRoom" value-field="room"
+                auto-field-map="[chatRoomId: chatRoomId]"/>
+            <if condition="room">
+                <if condition="room.ownerPartyId != cfg.ownerPartyId">
+                    <log level="warn" message="Agent ${adkAgentConfigId}: chat room ${chatRoomId} (${roomField}) belongs to another company, not used"/>
+                    <set field="chatRoomId" from="null"/>
+                </if>
+                <return/>
+            </if>
+            <service-call name="create#growerp.general.ChatRoom"
+                in-map="[chatRoomId: chatRoomId, chatRoomName: roomName, isPrivate: 'N', isActive: 'Y',
+                         ownerPartyId: cfg.ownerPartyId]"/>
+            <set field="agentPartyId" from="cfg.agentPartyId ?: ('AGENT_' + cfg.ownerPartyId)"/>
+            <entity-find entity-name="mantle.party.Party" list="ownerPersons" limit="1">
+                <econdition field-name="ownerPartyId" from="cfg.ownerPartyId"/>
+                <econdition field-name="partyTypeEnumId" value="PtyPerson"/>
+                <econdition field-name="partyId" operator="not-equals" from="agentPartyId"/>
+                <order-by field-name="partyId"/>
+            </entity-find>
+            <if condition="ownerPersons">
+                <entity-find entity-name="moqui.security.UserAccount" list="adminAccts" limit="1">
+                    <econdition field-name="partyId" from="ownerPersons[0].partyId"/>
+                </entity-find>
+                <if condition="adminAccts">
+                    <service-call name="create#growerp.general.ChatRoomMember"
+                        in-map="[chatRoomId: chatRoomId, userId: adminAccts[0].userId, isActive: 'Y', hasRead: 'Y']"/>
+                </if>
             </if>
         </actions>
     </service>

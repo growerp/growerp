@@ -168,6 +168,11 @@
                 <log level="warn" message="AdkSchedulerServices.run#ScheduledAgent: config ${adkAgentConfigId} not found"/>
                 <return/>
             </if>
+            <!-- Task-loop agent: the schedule works the task inbox instead of schedulePrompt -->
+            <if condition="cfg.loopEnabled == 'Y'">
+                <service-call name="AdkLoopServices.run#AgentLoop" in-map="[adkAgentConfigId: adkAgentConfigId]"/>
+                <return/>
+            </if>
 
             <!-- Notify Flutter jobs list that job has started/is now locked -->
             <entity-find entity-name="mantle.party.Party" list="startOwnerParties">
@@ -246,52 +251,14 @@
                 }
 
                 agentName = cfg.agentName ?: 'ADK Agent'
-                chatRoomId = cfg.scheduleChatRoomId as String
                 resultText = "[${agentName}] ${result}"
             ]]></script>
 
-            <!-- Post result to chat room if configured -->
-            <if condition="chatRoomId">
-                <entity-find-one entity-name="growerp.general.ChatRoom" value-field="chatRoom"
-                    auto-field-map="[chatRoomId: chatRoomId]" disable-authz="true"/>
-                <if condition="!chatRoom">
-                    <entity-make-value entity-name="growerp.general.ChatRoom" value-field="newRoom"/>
-                    <set field="newRoom.chatRoomId"   from="chatRoomId"/>
-                    <set field="newRoom.chatRoomName" value="ADK: ${cfg.agentName ?: 'Agent'}"/>
-                    <set field="newRoom.isPrivate"    value="N"/>
-                    <set field="newRoom.isActive"     value="Y"/>
-                    <set field="newRoom.ownerPartyId" from="cfg.ownerPartyId"/>
-                    <entity-create value-field="newRoom"/>
-                    <entity-find-one entity-name="moqui.security.UserAccount" value-field="sysAcct"
-                        auto-field-map="[username: 'SystemSupport']"/>
-                    <if condition="sysAcct">
-                        <entity-make-value entity-name="growerp.general.ChatRoomMember" value-field="sysMember"/>
-                        <set field="sysMember.chatRoomId" from="chatRoomId"/>
-                        <set field="sysMember.userId"     from="sysAcct.userId"/>
-                        <set field="sysMember.isActive"   value="Y"/>
-                        <set field="sysMember.hasRead"    value="Y"/>
-                        <entity-create value-field="sysMember"/>
-                    </if>
-                    <entity-find entity-name="mantle.party.Party" list="ownerPersons">
-                        <econdition field-name="ownerPartyId" from="cfg.ownerPartyId"/>
-                        <econdition field-name="partyTypeEnumId" value="PtyPerson"/>
-                        <limit>1</limit>
-                    </entity-find>
-                    <if condition="ownerPersons">
-                        <entity-find-one entity-name="moqui.security.UserAccount" value-field="ownerAcct"
-                            auto-field-map="[partyId: ownerPersons[0].partyId]"/>
-                        <if condition="ownerAcct &amp;&amp; ownerAcct.userId != sysAcct?.userId">
-                            <entity-make-value entity-name="growerp.general.ChatRoomMember" value-field="ownerMember"/>
-                            <set field="ownerMember.chatRoomId" from="chatRoomId"/>
-                            <set field="ownerMember.userId"     from="ownerAcct.userId"/>
-                            <set field="ownerMember.isActive"   value="Y"/>
-                            <set field="ownerMember.hasRead"    value="N"/>
-                            <entity-create value-field="ownerMember"/>
-                        </if>
-                    </if>
-                    <log level="info" message="AdkScheduler: created chatRoom '${chatRoomId}' for agent ${cfg.agentName}"/>
-                </if>
-            </if>
+            <!-- Deliver to the agent's results room; none chosen → one is created and saved -->
+            <service-call name="AdkGovernanceServices.ensure#AgentChatRoom" out-map="roomOut"
+                in-map="[adkAgentConfigId: cfg.adkAgentConfigId, roomField: 'scheduleChatRoomId',
+                         roomName: 'ADK: ' + (cfg.agentName ?: 'Agent')]"/>
+            <set field="chatRoomId" from="roomOut.chatRoomId"/>
             <if condition="chatRoomId">
                 <entity-find entity-name="moqui.security.UserAccount" list="sysUserList">
                     <econdition field-name="username" value="SystemSupport"/>

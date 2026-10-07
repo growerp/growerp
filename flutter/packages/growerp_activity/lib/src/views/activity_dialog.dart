@@ -430,6 +430,19 @@ class ActivityDialogState extends State<ActivityDialog> {
                       );
                     },
                   ),
+                if (widget.activity.activityId.isNotEmpty) ...[
+                  const SizedBox(width: 10),
+                  OutlinedButton(
+                    key: const Key('Comments'),
+                    child: Text(_localizations.activity_comments),
+                    onPressed: () => showDialog(
+                      barrierDismissible: true,
+                      context: context,
+                      builder: (BuildContext context) =>
+                          ActivityNotesDialog(widget.activity.activityId),
+                    ),
+                  ),
+                ],
                 const SizedBox(width: 10),
                 Expanded(
                   child: OutlinedButton(

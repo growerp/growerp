@@ -303,7 +303,10 @@ pre-filled dialog. Order/shipment specifics still work: "enter a sales order" �
             // Read this agent's scoping so the in-process FunctionTools (Email/GitHub) honour it
             // too — a read-only agent gets no write tools.
             String toolMode = lookupToolMode(configId)
-            boolean allowWrites = toolMode != 'readOnly'
+            // A task-loop agent gets no in-process write tools (email/GitHub/Substack): those
+            // bypass writePolicy, and the loop reports to the requester itself. Its writes all
+            // go through the governed moqui_execute_service tool.
+            boolean allowWrites = toolMode != 'readOnly' && !lookupLoopEnabled(configId)
 
             // Per-agent MCP toolset: identical to the shared one but tagged with this config's
             // id (and owner) so the MCP governance gate / searchKnowledge can resolve the
@@ -1453,6 +1456,24 @@ CRITICAL tool-use rules — follow exactly:
         } catch (Exception e) {
             logger.warn("lookupToolMode failed for ${configId}: ${e.message}")
             return 'readOnly'
+        }
+    }
+
+    /** True when the agent works the task loop (AdkLoopServices.run#AgentLoop). */
+    private static boolean lookupLoopEnabled(String configId) {
+        if (!configId || configId == DEFAULT_CONFIG || sharedSessionService == null) return false
+        try {
+            def ec = sharedSessionService.ecf.getExecutionContext()
+            boolean wasDisabled = ec.artifactExecution.disableAuthz()
+            try {
+                return ec.entity.find('moqui.adk.AdkAgentConfig')
+                        .condition('adkAgentConfigId', configId).one()?.loopEnabled == 'Y'
+            } finally {
+                if (!wasDisabled) ec.artifactExecution.enableAuthz()
+            }
+        } catch (Exception e) {
+            logger.warn("lookupLoopEnabled failed for ${configId}: ${e.message}")
+            return true
         }
     }
 

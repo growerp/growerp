@@ -85,6 +85,15 @@ class AdkAgentConfig {
   /// Shared catalog agents only: grouping label (Marketing, Operations, ...).
   final String? catalogCategory;
 
+  /// Task loop: the agent's schedule works its task inbox (new messages in
+  /// [loopChatRoomId] + todo activities assigned to the agent) instead of
+  /// running [schedulePrompt]. Reports go to [loopReportEmail], else to the
+  /// requester.
+  @JsonKey(defaultValue: false)
+  final bool loopEnabled;
+  final String? loopChatRoomId;
+  final String? loopReportEmail;
+
   /// Write-only: sent on create/update, never returned by GET.
   @JsonKey(includeFromJson: false)
   final String? apiKey;
@@ -117,6 +126,9 @@ class AdkAgentConfig {
     this.catalogNominated = false,
     this.catalogPublished = true,
     this.catalogCategory,
+    this.loopEnabled = false,
+    this.loopChatRoomId,
+    this.loopReportEmail,
     this.apiKey,
   });
 
@@ -153,6 +165,9 @@ class AdkAgentConfig {
     bool? catalogNominated,
     bool? catalogPublished,
     String? catalogCategory,
+    bool? loopEnabled,
+    String? loopChatRoomId,
+    String? loopReportEmail,
     String? apiKey,
   }) =>
       AdkAgentConfig(
@@ -183,6 +198,9 @@ class AdkAgentConfig {
         catalogNominated: catalogNominated ?? this.catalogNominated,
         catalogPublished: catalogPublished ?? this.catalogPublished,
         catalogCategory: catalogCategory ?? this.catalogCategory,
+        loopEnabled: loopEnabled ?? this.loopEnabled,
+        loopChatRoomId: loopChatRoomId ?? this.loopChatRoomId,
+        loopReportEmail: loopReportEmail ?? this.loopReportEmail,
         apiKey: apiKey ?? this.apiKey,
       );
 
