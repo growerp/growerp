@@ -141,8 +141,11 @@ RUN rm -rf .git && \
     find runtime/component -maxdepth 2 -name .git -exec rm -rf {} + 2>/dev/null || true
 
 # Build Moqui system (produces moqui-plus-runtime.war)
-# the default 512m daemon heap runs out in :framework:compileGroovy
-RUN ./gradlew -Dorg.gradle.jvmargs=-Xmx3g addRunTime
+# the default 512m daemon heap runs out in :framework:compileGroovy; Groovy compiles in a
+# separate worker JVM that does not get the daemon's -Xmx, so give that one its own heap
+RUN printf 'allprojects { tasks.withType(GroovyCompile).configureEach { groovyOptions.forkOptions.memoryMaximumSize = "2g" } }\n' \
+    > /tmp/groovy-heap.gradle && \
+    ./gradlew -I /tmp/groovy-heap.gradle -Dorg.gradle.jvmargs=-Xmx3g addRunTime
 
 # Resolve absolute symlinks to real copies so COPY --from works in the final stage
 RUN for link in runtime/component/growerp runtime/component/PopRestStore runtime/component/mantle-stripe \
