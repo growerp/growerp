@@ -175,18 +175,6 @@
   "@courses_contentGeneratedSuccessfully": {
     "description": "Extracted string: Content Generated Successfully!"
   },
-  "courses_noHelpContentAvailable": "No help content available for this screen.",
-  "@courses_noHelpContentAvailable": {
-    "description": "Extracted string: No help content available for this screen."
-  },
-  "courses_viewFullCourse": "View Full Course",
-  "@courses_viewFullCourse": {
-    "description": "Extracted string: View Full Course"
-  },
-  "courses_videoContent": "Video content",
-  "@courses_videoContent": {
-    "description": "Extracted string: Video content"
-  },
   "courses_keyPoints": "Key Points",
   "@courses_keyPoints": {
     "description": "Extracted string: Key Points"

@@ -28,4 +28,3 @@ final providers = getCoursesBlocProviders(restClient);
 - `CourseDialog` - Create/edit course dialog
 - `CourseViewer` - Full course player with progress tracking
 - `GenerateMediaDialog` - AI content generation interface
-- `HelpOverlay` - Contextual help for system operation support

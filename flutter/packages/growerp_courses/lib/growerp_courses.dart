@@ -52,9 +52,7 @@ export 'src/media/views/generate_media_dialog.dart';
 export 'src/media/views/media_preview.dart';
 
 export 'src/viewer/views/course_viewer.dart';
-export 'src/viewer/views/lesson_player.dart';
 export 'src/viewer/views/course_progress_bar.dart';
-export 'src/viewer/views/help_overlay.dart';
 
 // Provider and widget registration
 export 'src/get_courses_bloc_providers.dart';
