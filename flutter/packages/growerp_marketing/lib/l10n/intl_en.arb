@@ -2,7 +2,7 @@
   "@@locale": "en",
   "mktGuideTitle": "Marketing Setup Guide",
   "@mktGuideTitle": {"description": "Marketing Setup Guide"},
-  "mktGuideIntro": "Work through these steps to run the content machine end to end: set the AI key and the voice it writes in, describe who you are writing for, enable the channels it goes out on, plan the week, write and approve a master piece, adapt it per platform, and let the scheduler publish it. Approval is the gate: nothing publishes until you approve the master piece.",
+  "mktGuideIntro": "Work through these steps to run the content machine end to end: set the AI key and the voice it writes in, describe who you are writing for, enable the channels it goes out on, plan the week, hand in your own ideas, write and approve a master piece, adapt it per platform, let the scheduler publish it, and see who actually reads it. Approval is the gate: nothing publishes until you approve the master piece.",
   "@mktGuideIntro": {"description": "Work through these steps to run the content machine end to end: set the AI key a"},
   "mktGuideStep1Title": "AI and writing voice",
   "@mktGuideStep1Title": {"description": "AI and writing voice"},
@@ -22,7 +22,7 @@
   "@mktGuideStep4Desc": {"description": "Generate a Pain-News-Prize plan for a persona"},
   "mktGuideStep5Title": "Write and approve",
   "@mktGuideStep5Title": {"description": "Write and approve"},
-  "mktGuideStep5Desc": "Author one platform-neutral piece and approve it; nothing publishes before you do",
+  "mktGuideStep5Desc": "Author one platform-neutral piece, or write one from an idea, and approve it; nothing publishes before you do. Teaser mode posts a short teaser that links to the full article on your website",
   "@mktGuideStep5Desc": {"description": "Author one platform-neutral piece and approve it; nothing publishes before you d"},
   "mktGuideStep6Title": "Adapt per platform",
   "@mktGuideStep6Title": {"description": "Adapt per platform"},
@@ -89,6 +89,22 @@
   "deleteContentPlan": "Delete Content Plan",
   "@deleteContentPlan": {
     "description": "Delete Content Plan"
+  },
+  "mktGuideStepIdeasTitle": "Hand in ideas",
+  "@mktGuideStepIdeasTitle": {
+    "description": "Marketing setup guide step text"
+  },
+  "mktGuideStepIdeasDesc": "Paste text or notes, or give an article URL, in the Ideas strip on Content; Write article turns it into a ~500 word article for your website. Drag ideas into order: the weekly agent uses them first",
+  "@mktGuideStepIdeasDesc": {
+    "description": "Marketing setup guide step text"
+  },
+  "mktGuideStepReadsTitle": "See who reads",
+  "@mktGuideStepReadsTitle": {
+    "description": "Marketing setup guide step text"
+  },
+  "mktGuideStepReadsDesc": "The Reads column on Content shows per piece how many visitors landed on your website and really read it, per platform when you open the piece",
+  "@mktGuideStepReadsDesc": {
+    "description": "Marketing setup guide step text"
   },
   "cancel": "Cancel",
   "@cancel": {

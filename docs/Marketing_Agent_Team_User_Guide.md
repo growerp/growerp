@@ -62,8 +62,11 @@ chat room. It never sends anything to prospects.
 * Default schedule: `0 0,30 9-18 * * ?` — **starts disabled**
 
 ### Content and Social
-Weekly "Pain–News–Prize" content. It ensures a persona exists, generates the content plan,
-authors each piece **once** as platform-neutral master content, then adapts it to every
+Weekly "Pain–News–Prize" content. It ensures a persona exists and generates the content plan.
+It first uses the **ideas** people handed in (the Ideas strip under **Marketing → Content**),
+top of the list first: each becomes a ~500 word website article whose posts are teasers
+linking to it, and the idea is removed. Only for the slots left does it invent a subject.
+It authors each piece **once** as platform-neutral master content, then adapts it to every
 enabled platform (LinkedIn, X, Facebook, Medium, Substack, e-mail) as READY social posts,
 staggering them across Monday/Wednesday/Friday instead of bursting them all at once.
 

@@ -148,6 +148,17 @@ The content hub: author a piece of content **once**, then adapt it per platform
 - **Draft with AI:** from a headline, the draft service writes the full post text;
   review, humanise, and mark the platform variant *Scheduled* or *Published*.
 - Post statuses: *Draft → Scheduled → Published*.
+- **Ideas strip** (top of the screen): paste text or notes, or give an article URL, or
+  both. **Write article** turns an idea into a ~500 word article in your house style
+  and removes the idea; the article goes on your website (listed on its **Articles**
+  page) when you approve it. Long-press and drag to reorder: the weekly content agent
+  uses the ideas in that order. Tap **Ideas (n)** to collapse the strip.
+- **Teaser only:** with a Target URL set, every platform gets a short teaser that
+  links to the full article instead of the full text.
+- **Reads column:** website visitors who came in through the piece's links
+  (*read / landed*). A visit counts as read after 15 seconds on the page and scrolling
+  halfway, so bots and mail scanners are not counted. The per-platform breakdown is
+  in the piece's dialog under **Website reads**.
 
 ### 3.4 Email Sequences
 

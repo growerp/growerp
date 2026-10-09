@@ -189,9 +189,10 @@ and logs every call in **Agent Control → Agent Actions**.
    catalog icon) and set the chat room on each agent.
 3. **Content:**
    - Create one persona (or let *Content and Social* do it).
-   - Write or generate one master content piece with a Target URL on your website, and try
-     teaser mode.
-   - Approve it.
+   - Add an idea in the Ideas strip (a few lines of notes or an article URL) and tap
+     **Write article**: you get a ~500 word article in teaser mode. Or write a master
+     content piece yourself with a Target URL on your website and switch on teaser mode.
+   - Approve it: the article goes on your website and its teasers are scheduled.
 4. **Outreach:** create one outreach campaign with a few recipients and let the Personalizer
    fill the messages.
 5. **Monitor:** switch on the schedules one at a time, in this order: Digest, Lead Triage,
