@@ -18,6 +18,10 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 class MasterContentTest {
+  static bool _teaserSwitch(WidgetTester tester) => tester
+      .widget<SwitchListTile>(find.byKey(const Key('teaserMode')))
+      .value;
+
   static Future<void> selectMasterContent(WidgetTester tester) async {
     await CommonTest.selectOption(
       tester,
@@ -130,6 +134,17 @@ class MasterContentTest {
       if (mc.callToAction != null) {
         await CommonTest.enterText(tester, 'callToAction', mc.callToAction!);
       }
+      if (mc.targetUrl != null) {
+        await CommonTest.dragUntil(
+          tester,
+          key: 'teaserMode',
+          listViewName: 'masterContentDetailListView',
+        );
+        await CommonTest.enterText(tester, 'targetUrl', mc.targetUrl!);
+        if (_teaserSwitch(tester) != (mc.teaserMode == 'Y')) {
+          await CommonTest.tapByKey(tester, 'teaserMode');
+        }
+      }
 
       await CommonTest.dragUntil(
         tester,
@@ -215,6 +230,15 @@ class MasterContentTest {
 
       if (mc.title != null) {
         expect(CommonTest.getTextFormField('title'), equals(mc.title));
+      }
+      if (mc.targetUrl != null) {
+        await CommonTest.dragUntil(
+          tester,
+          key: 'teaserMode',
+          listViewName: 'masterContentDetailListView',
+        );
+        expect(CommonTest.getTextFormField('targetUrl'), equals(mc.targetUrl));
+        expect(_teaserSwitch(tester), equals(mc.teaserMode == 'Y'));
       }
 
       await CommonTest.tapByKey(tester, 'cancel');

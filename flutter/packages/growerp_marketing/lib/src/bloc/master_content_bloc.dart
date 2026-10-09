@@ -97,6 +97,7 @@ class MasterContentBloc
         body: event.masterContent.body,
         callToAction: event.masterContent.callToAction,
         targetUrl: event.masterContent.targetUrl,
+        teaserMode: event.masterContent.teaserMode,
         status: event.masterContent.status,
       );
       emit(state.copyWith(
@@ -130,6 +131,7 @@ class MasterContentBloc
         body: event.masterContent.body,
         callToAction: event.masterContent.callToAction,
         targetUrl: event.masterContent.targetUrl,
+        teaserMode: event.masterContent.teaserMode,
         status: event.masterContent.status,
       );
       emit(state.copyWith(

@@ -53,6 +53,7 @@ class MasterContentDetailScreenState
   String _selectedContentType = 'POSTING';
   String _selectedPnpType = 'OTHER';
   String _selectedStatus = 'DRAFT';
+  bool _teaserMode = false;
 
   late MasterContentBloc _bloc;
 
@@ -106,6 +107,7 @@ class MasterContentDetailScreenState
     _selectedContentType = widget.masterContent?.contentType ?? 'POSTING';
     _selectedPnpType = widget.masterContent?.pnpType ?? 'OTHER';
     _selectedStatus = widget.masterContent?.status ?? 'DRAFT';
+    _teaserMode = widget.masterContent?.teaserMode == 'Y';
 
     _bloc = context.read<MasterContentBloc>();
     _loadVariants();
@@ -329,6 +331,22 @@ class MasterContentDetailScreenState
                     ),
                     controller: _urlController,
                   ),
+                  // teaser only works with a link to the full article
+                  ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _urlController,
+                    builder: (context, url, _) => SwitchListTile(
+                      key: const Key('teaserMode'),
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Teaser only (link to full article)'),
+                      subtitle: const Text(
+                          'Posts get a short teaser; the full article on the '
+                          'Target URL is where reads are measured'),
+                      value: _teaserMode && url.text.isNotEmpty,
+                      onChanged: url.text.isEmpty
+                          ? null
+                          : (v) => setState(() => _teaserMode = v),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -370,6 +388,10 @@ class MasterContentDetailScreenState
                           targetUrl: _urlController.text.isEmpty
                               ? null
                               : _urlController.text,
+                          teaserMode:
+                              _teaserMode && _urlController.text.isNotEmpty
+                                  ? 'Y'
+                                  : 'N',
                           status: _selectedStatus,
                         );
                         if (widget.masterContent?.masterContentId == null) {

@@ -654,7 +654,17 @@ the subject is a separate field and must not appear in the body.
      */
     static String generateAdaptedContent(def ec, String title, String body, String platform,
             String contentType, String callToAction = null, String targetUrl = null,
-            String ownerPartyId = null) {
+            String ownerPartyId = null, Boolean teaser = false) {
+        // teaser mode: the full article lives on the website, the post only has to make
+        // people click through, so reads can be measured there instead of by open pixels
+        def teaserRules = teaser && targetUrl ? """
+
+TEASER MODE (overrides the length rules above):
+- Do NOT reproduce the full content. Write a short teaser: a strong hook and 2-4 sentences
+  that make the reader curious about the full article, keeping the platform's tone and format.
+- End with a clear "Read the full article" call-to-action followed by exactly this link: ${targetUrl}
+- Use the link exactly as given, do not shorten or change it.
+""" : ''
         def prompt = """
 Adapt the following platform-neutral marketing content for the ${platform} platform.
 Keep the core message and facts intact; rewrite tone, length and format to fit the platform.
@@ -662,7 +672,7 @@ Keep the core message and facts intact; rewrite tone, length and format to fit t
 TITLE: ${title ?: '(none)'}
 CONTENT TYPE: ${contentType}
 CALL TO ACTION: ${callToAction ?: '(none)'}
-LINK: ${targetUrl ?: '(none)'}
+LINK: ${targetUrl ? targetUrl + ' (use exactly as given, keep the query string)' : '(none)'}
 
 MASTER CONTENT:
 ${body}
@@ -671,7 +681,7 @@ HOUSE VOICE (how it must sound; wins over platform tone where they disagree):
 ${houseVoice(ec, ownerPartyId)}
 
 PLATFORM + FORMAT REQUIREMENTS:
-${getAdaptationRules(platform, contentType, targetUrl)}
+${getAdaptationRules(platform, contentType, targetUrl)}${teaserRules}
 
 Return ONLY the adapted content text, no explanations, no markdown code fences.
 """

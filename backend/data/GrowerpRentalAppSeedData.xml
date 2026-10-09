@@ -104,6 +104,8 @@ limitations under the License.
         title="Personas" iconName="people" widgetName="PersonaList" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="RENTAL_MKTG_ENGAGEMENT" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_MARKETING"
         title="Engagements" iconName="thumb_up" widgetName="SocialEngagementList" sequenceNum="38"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_MKTG_CONTENT_READS" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_MARKETING"
+        title="Content Reads" iconName="trending_up" widgetName="ContentReadStatsList" sequenceNum="39"/>
 
     <!-- ====================== Outreach children ====================== -->
     <growerp.menu.MenuItem menuItemId="RENTAL_OUT_GUIDE" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_OUTREACH"

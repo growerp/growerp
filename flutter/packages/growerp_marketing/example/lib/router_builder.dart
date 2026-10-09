@@ -95,6 +95,14 @@ const marketingMenuConfig = MenuConfiguration(
       sequenceNum: 80,
       widgetName: 'SocialEngagementList',
     ),
+    MenuItem(
+      itemKey: 'MKT_CONTENT_READS',
+      title: 'Content Reads',
+      route: '/contentReads',
+      iconName: 'trending_up',
+      sequenceNum: 85,
+      widgetName: 'ContentReadStatsList',
+    ),
   ],
 );
 
@@ -120,6 +128,7 @@ GoRouter createMarketingExampleRouter() {
       '/socialPosts' => const SocialPostList(),
       '/emailSequences' => const EmailSequenceList(),
       '/engagements' => const SocialEngagementList(),
+      '/contentReads' => const ContentReadStatsList(),
       _ => const MarketingDashboard(),
     },
   );

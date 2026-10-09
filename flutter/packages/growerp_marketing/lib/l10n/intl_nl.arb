@@ -101,6 +101,7 @@
   "dashToApprove": "goedkeuren",
   "dashPlans": "plannen",
   "dashEngagements": "reacties",
+  "dashContentReads": "gelezen (30d)",
   "dashPostDraft": "Concept",
   "dashPostScheduled": "Ingepland",
   "dashPostBacklog": "Wachtrij",

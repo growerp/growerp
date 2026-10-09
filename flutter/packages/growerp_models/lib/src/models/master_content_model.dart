@@ -40,6 +40,10 @@ class MasterContent {
   /// Optional link (withheld for LinkedIn/DM on adaptation)
   final String? targetUrl;
 
+  /// 'Y' = adapted posts are teasers that link to [targetUrl] for the full
+  /// article, so reads are measured on the website (see ContentReadStats)
+  final String? teaserMode;
+
   /// Status: DRAFT, APPROVED, ADAPTED
   @JsonKey(defaultValue: 'DRAFT')
   final String status;
@@ -67,6 +71,7 @@ class MasterContent {
     this.body,
     this.callToAction,
     this.targetUrl,
+    this.teaserMode,
     required this.status,
     this.approvedDate,
     this.createdDate,
@@ -83,6 +88,7 @@ class MasterContent {
     String? body,
     String? callToAction,
     String? targetUrl,
+    String? teaserMode,
     String? status,
     DateTime? approvedDate,
     DateTime? createdDate,
@@ -98,6 +104,7 @@ class MasterContent {
       body: body ?? this.body,
       callToAction: callToAction ?? this.callToAction,
       targetUrl: targetUrl ?? this.targetUrl,
+      teaserMode: teaserMode ?? this.teaserMode,
       status: status ?? this.status,
       approvedDate: approvedDate ?? this.approvedDate,
       createdDate: createdDate ?? this.createdDate,

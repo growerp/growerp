@@ -101,6 +101,7 @@
   "dashToApprove": "待审批",
   "dashPlans": "计划",
   "dashEngagements": "互动",
+  "dashContentReads": "阅读 (30天)",
   "dashPostDraft": "草稿",
   "dashPostScheduled": "已排程",
   "dashPostBacklog": "待排程",

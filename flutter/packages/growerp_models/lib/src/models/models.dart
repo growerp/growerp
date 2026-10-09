@@ -62,6 +62,7 @@ export 'website_translation_model.dart';
 export 'website_export_model.dart';
 export 'email_sequence_model.dart';
 export 'marketing_dashboard_model.dart';
+export 'content_read_stats_model.dart';
 export 'crm_dashboard_model.dart';
 export 'rest_usage_statistics_model.dart';
 export 'infra_metrics_model.dart';

@@ -1383,6 +1383,11 @@ abstract class RestClient {
   @GET("rest/s1/growerp/100/MarketingDashboard")
   Future<MarketingDashboard> getMarketingDashboard();
 
+  @GET("rest/s1/growerp/100/ContentReadStats")
+  Future<ContentReadStatsResult> getContentReadStats({
+    @Query('searchString') String? searchString,
+  });
+
   @GET("rest/s1/growerp/100/OutreachDashboard")
   Future<OutreachDashboard> getOutreachDashboard();
 
@@ -1751,6 +1756,7 @@ abstract class RestClient {
     @Field() String? body,
     @Field() String? callToAction,
     @Field() String? targetUrl,
+    @Field() String? teaserMode,
     @Field() String? status,
   });
 
@@ -1765,6 +1771,7 @@ abstract class RestClient {
     @Field() String? body,
     @Field() String? callToAction,
     @Field() String? targetUrl,
+    @Field() String? teaserMode,
     @Field() String? status,
   });
 

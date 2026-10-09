@@ -537,6 +537,10 @@ var storeInfo = ${storeInfoJson};
                 <render-mode>
                     <text type="html" location="component://PopRestStore/template/agentsWidget.html.ftl"/>
                 </render-mode>
+                <!-- read tracker for visits from tagged content links (utm_campaign) -->
+                <render-mode>
+                    <text type="html" location="component://PopRestStore/template/contentReadWidget.html.ftl"/>
+                </render-mode>
             </widgets>
         </section>
     </widgets>

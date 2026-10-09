@@ -172,6 +172,8 @@ List<MasterContent> masterContents = [
         'A small distributor was juggling six disconnected tools. Here is how '
         'moving to a single ERP cut re-keying, errors and cost.',
     callToAction: 'Read the story',
+    targetUrl: 'https://www.growerp.com/content/smb-story',
+    teaserMode: 'Y',
     status: 'DRAFT',
   ),
   const MasterContent(
@@ -205,6 +207,8 @@ List<MasterContent> updatedMasterContents = [
         'Updated: A small distributor was juggling six disconnected tools. '
         'Here is how a single ERP cut re-keying, errors and cost.',
     callToAction: 'Read the story',
+    targetUrl: 'https://www.growerp.com/content/smb-story',
+    teaserMode: 'N',
     status: 'APPROVED',
   ),
   const MasterContent(

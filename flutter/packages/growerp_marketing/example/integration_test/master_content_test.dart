@@ -22,6 +22,7 @@ import 'package:growerp_models/growerp_models.dart';
 
 import 'package:growerp_marketing/src/test_data.dart' as marketing_data;
 import 'package:growerp_marketing/src/master_content/integration_test/master_content_test.dart';
+import 'package:growerp_marketing/src/content_read/integration_test/content_read_test.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -59,6 +60,8 @@ void main() {
     );
     await MasterContentTest.checkMasterContent(tester);
     await MasterContentTest.deleteMasterContent(tester);
+    await ContentReadTest.selectContentReads(tester);
+    await ContentReadTest.checkNoContentReads(tester);
     await CommonTest.logout(tester);
   }, skip: false);
 }

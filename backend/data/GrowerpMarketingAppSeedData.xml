@@ -77,6 +77,8 @@ limitations under the License.
         title="Email Sequences" iconName="schedule_send" widgetName="EmailSequenceList" sequenceNum="35"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_MKTG_ENGAGEMENT" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_MARKETING"
         title="Engagements" iconName="thumb_up" widgetName="SocialEngagementList" sequenceNum="38"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_MKTG_CONTENT_READS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_MARKETING"
+        title="Content Reads" iconName="trending_up" widgetName="ContentReadStatsList" sequenceNum="39"/>
 
     <!-- ====================== Outreach children ====================== -->
     <growerp.menu.MenuItem menuItemId="MKTAPP_OUT_GUIDE" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_OUTREACH"

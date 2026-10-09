@@ -68,6 +68,9 @@
             <parameter name="body" />
             <parameter name="callToAction" />
             <parameter name="targetUrl" />
+            <parameter name="teaserMode" default-value="N">
+                <description>Y = adapted posts are teasers linking to targetUrl</description>
+            </parameter>
             <parameter name="status" default-value="DRAFT" />
         </in-parameters>
         <out-parameters>
@@ -80,6 +83,7 @@
             <parameter name="body" />
             <parameter name="callToAction" />
             <parameter name="targetUrl" />
+            <parameter name="teaserMode" />
             <parameter name="status" />
             <parameter name="approvedDate" type="Timestamp" />
             <parameter name="createdDate" type="Timestamp" />
@@ -90,6 +94,9 @@
                 out-map="context" />
             <if condition="!ownerPartyId">
                 <return error="true" message="User not authenticated or no party associated" />
+            </if>
+            <if condition="teaserMode == 'Y' &amp;&amp; !targetUrl">
+                <return error="true" message="Teaser mode needs a target URL: the link to the full article" />
             </if>
 
             <if condition="!pseudoId">
@@ -110,6 +117,7 @@
                     body: body,
                     callToAction: callToAction,
                     targetUrl: targetUrl,
+                    teaserMode: teaserMode == 'Y' ? 'Y' : 'N',
                     status: status,
                     createdDate: ec.user.nowTimestamp,
                     lastModifiedDate: ec.user.nowTimestamp
@@ -125,6 +133,7 @@
             <set field="body" from="mc.body" />
             <set field="callToAction" from="mc.callToAction" />
             <set field="targetUrl" from="mc.targetUrl" />
+            <set field="teaserMode" from="mc.teaserMode" />
             <set field="status" from="mc.status" />
             <set field="approvedDate" from="mc.approvedDate" />
             <set field="createdDate" from="mc.createdDate" />
@@ -143,6 +152,7 @@
             <parameter name="body" />
             <parameter name="callToAction" />
             <parameter name="targetUrl" />
+            <parameter name="teaserMode" />
             <parameter name="status" />
         </in-parameters>
         <out-parameters>
@@ -155,6 +165,7 @@
             <parameter name="body" />
             <parameter name="callToAction" />
             <parameter name="targetUrl" />
+            <parameter name="teaserMode" />
             <parameter name="status" />
             <parameter name="approvedDate" type="Timestamp" />
             <parameter name="createdDate" type="Timestamp" />
@@ -173,6 +184,9 @@
             <if condition="mc.ownerPartyId != ownerPartyId">
                 <return error="true" message="Access denied to this master content" />
             </if>
+            <if condition="(teaserMode ?: mc.teaserMode) == 'Y' &amp;&amp; !(targetUrl ?: mc.targetUrl)">
+                <return error="true" message="Teaser mode needs a target URL: the link to the full article" />
+            </if>
 
             <service-call name="update#growerp.marketing.MasterContent"
                 in-map="[
@@ -185,6 +199,7 @@
                     body: body ?: mc.body,
                     callToAction: callToAction ?: mc.callToAction,
                     targetUrl: targetUrl ?: mc.targetUrl,
+                    teaserMode: teaserMode ?: mc.teaserMode,
                     status: status ?: mc.status,
                     lastModifiedDate: ec.user.nowTimestamp
                 ]" />
@@ -200,6 +215,7 @@
             <set field="body" from="updated.body" />
             <set field="callToAction" from="updated.callToAction" />
             <set field="targetUrl" from="updated.targetUrl" />
+            <set field="teaserMode" from="updated.teaserMode" />
             <set field="status" from="updated.status" />
             <set field="approvedDate" from="updated.approvedDate" />
             <set field="createdDate" from="updated.createdDate" />
@@ -226,6 +242,7 @@
             <parameter name="body" />
             <parameter name="callToAction" />
             <parameter name="targetUrl" />
+            <parameter name="teaserMode" />
             <parameter name="status" />
             <parameter name="approvedDate" type="Timestamp" />
             <parameter name="createdDate" type="Timestamp" />
@@ -263,6 +280,7 @@
             <set field="body" from="updated.body" />
             <set field="callToAction" from="updated.callToAction" />
             <set field="targetUrl" from="updated.targetUrl" />
+            <set field="teaserMode" from="updated.teaserMode" />
             <set field="status" from="updated.status" />
             <set field="approvedDate" from="updated.approvedDate" />
             <set field="createdDate" from="updated.createdDate" />
@@ -339,6 +357,9 @@
             <parameter name="contentType" required="true" />
             <parameter name="callToAction" />
             <parameter name="targetUrl" />
+            <parameter name="teaser" type="Boolean" default="false">
+                <description>true = write a short teaser that links to targetUrl for the full text</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="adaptedContent" />
@@ -348,7 +369,7 @@
             <script>
                 def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
                 adaptedContent = GeminiAiUtil.generateAdaptedContent(ec, title, body,
-                    platform, contentType, callToAction, targetUrl, relInfo.ownerPartyId)
+                    platform, contentType, callToAction, targetUrl, relInfo.ownerPartyId, teaser)
             </script>
         </actions>
     </service>
@@ -395,6 +416,9 @@
             </if>
             <if condition="!mc.body">
                 <return error="true" message="Master content has no body to adapt" />
+            </if>
+            <if condition="mc.teaserMode == 'Y' &amp;&amp; !mc.targetUrl">
+                <return error="true" message="Teaser mode needs a target URL: the link to the full article" />
             </if>
 
             <!-- Default platform list = enabled PlatformConfiguration for this owner -->
@@ -483,6 +507,16 @@
             <iterate list="platforms" entry="platformRaw">
                 <set field="platform" from="platformRaw.toString().toUpperCase()" />
 
+                <!-- Broadcast posts get the link tagged per platform, so reads on the
+                     website (ContentRead) are counted per master piece and platform.
+                     1:1 messages keep the plain link. -->
+                <set field="platformUrl" from="mc.targetUrl" />
+                <if condition="mc.targetUrl &amp;&amp; mc.contentType != 'MESSAGE'">
+                    <set field="platformUrl" from="mc.targetUrl + (mc.targetUrl.contains('?') ? '&amp;' : '?') +
+                        'utm_source=' + platform.toLowerCase() +
+                        '&amp;utm_medium=' + (platform in ['EMAIL', 'SUBSTACK'] ? 'email' : 'social') +
+                        '&amp;utm_campaign=' + java.net.URLEncoder.encode(mc.pseudoId ?: mc.masterContentId, 'UTF-8')" />
+                </if>
                 <!-- AI-adapt the body for this platform; ignore-error so one
                      platform failing does not abort the rest of the loop -->
                 <set field="adaptedContent" from="null" />
@@ -490,7 +524,8 @@
                     name="growerp.100.MasterContentServices100.adapt#PlatformContent"
                     in-map="[title: mc.title, body: mc.body, platform: platform,
                              contentType: mc.contentType, callToAction: mc.callToAction,
-                             targetUrl: mc.targetUrl]" />
+                             targetUrl: platformUrl,
+                             teaser: mc.teaserMode == 'Y' &amp;&amp; mc.contentType != 'MESSAGE']" />
                 <if condition="!adaptedContent"><continue /></if>
 
                 <if condition="mc.contentType == 'MESSAGE' &amp;&amp; campaignId">

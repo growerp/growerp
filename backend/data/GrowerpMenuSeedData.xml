@@ -159,6 +159,8 @@ limitations under the License.
         title="Email Sequences" iconName="schedule_send" widgetName="EmailSequenceList" sequenceNum="35"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_MKTG_ENGAGEMENT" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MARKETING"
         title="Engagements" iconName="thumb_up" widgetName="SocialEngagementList" sequenceNum="38"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_MKTG_CONTENT_READS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_MARKETING"
+        title="Content Reads" iconName="trending_up" widgetName="ContentReadStatsList" sequenceNum="39"/>
 
     <!-- ADMIN_OUTREACH children -->
     <growerp.menu.MenuItem menuItemId="ADMIN_OUT_GUIDE" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_OUTREACH"

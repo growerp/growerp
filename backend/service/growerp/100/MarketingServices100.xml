@@ -719,6 +719,9 @@
             <parameter name="contentToApprove" type="Integer" />
             <parameter name="activePlans" type="Integer" />
             <parameter name="newEngagements" type="Integer" />
+            <parameter name="contentReads" type="Integer">
+                <description>website reads from tagged content links, last 30 days</description>
+            </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
@@ -785,6 +788,155 @@
                 <econdition field-name="ownerPartyId" />
                 <econdition field-name="status" value="NEW" />
             </entity-find-count>
+            <entity-find-count count-field="contentReads"
+                entity-name="growerp.marketing.ContentRead">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="readDate" operator="greater-equals"
+                    from="new java.sql.Timestamp(ec.user.nowTimestamp.time - 30L*24*60*60*1000)" />
+            </entity-find-count>
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!--  Content reads: visits from tagged content links on the   -->
+    <!--  tenant website (utm_campaign = MasterContent pseudoId)    -->
+    <!-- ========================================================= -->
+    <service verb="record" noun="ContentRead" authenticate="false">
+        <description>Public endpoint for the website read tracker (template/contentReadWidget.html.ftl).
+            event=land creates the visit row, event=read marks it as really read (visible dwell
+            and scroll reached). The tenant is resolved from the request host name, never from
+            the request body. Invalid or unknown input is ignored silently: this is a beacon.</description>
+        <in-parameters>
+            <parameter name="event" required="true"><description>land or read</description></parameter>
+            <parameter name="visitKey" required="true" />
+            <parameter name="pagePath" />
+            <parameter name="utmSource" />
+            <parameter name="utmMedium" />
+            <parameter name="utmCampaign" required="true" />
+            <parameter name="maxScrollPct" type="Integer" />
+            <parameter name="dwellSeconds" type="Integer" />
+        </in-parameters>
+        <actions>
+            <if condition="!(event in ['land', 'read']) || !(visitKey ==~ /[A-Za-z0-9]{8,40}/)">
+                <return />
+            </if>
+            <service-call name="popstore.StoreServices.get#ProductStoreIdFromHostName"
+                in-map="[requestHostName: ec.web?.getHostName(false)]" out-map="storeOut" />
+            <if condition="!storeOut.productStoreId">
+                <return />
+            </if>
+            <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="productStore">
+                <field-map field-name="productStoreId" from="storeOut.productStoreId" />
+            </entity-find-one>
+            <entity-find-one entity-name="mantle.party.Party" value-field="orgParty">
+                <field-map field-name="partyId" from="productStore?.organizationPartyId" />
+            </entity-find-one>
+            <set field="ownerPartyId" from="orgParty?.ownerPartyId" />
+            <if condition="!ownerPartyId">
+                <return />
+            </if>
+            <!-- one browser tab session reads a handful of pages at most -->
+            <entity-find-count entity-name="growerp.marketing.ContentRead" count-field="visitRows">
+                <econdition field-name="visitKey" />
+            </entity-find-count>
+            <set field="cut" from="{ String v, int n -> v ? v.take(n) : null }" />
+            <set field="utmCampaign" from="cut(utmCampaign, 60)" />
+            <set field="pagePath" from="cut(pagePath ?: '/', 250)" />
+            <entity-find entity-name="growerp.marketing.ContentRead" list="visitList" limit="1">
+                <econdition field-name="visitKey" />
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="utmCampaign" />
+                <econdition field-name="pagePath" />
+            </entity-find>
+            <set field="visit" from="visitList ? visitList[0] : null" />
+            <if condition="!visit">
+                <if condition="visitRows &gt;= 20">
+                    <return />
+                </if>
+                <service-call name="create#growerp.marketing.ContentRead" out-map="created"
+                    in-map="[ownerPartyId: ownerPartyId, productStoreId: storeOut.productStoreId,
+                        pagePath: pagePath, utmSource: cut(utmSource?.toLowerCase(), 30),
+                        utmMedium: cut(utmMedium?.toLowerCase(), 30), utmCampaign: utmCampaign,
+                        visitKey: visitKey, userAgent: cut(ec.web?.request?.getHeader('User-Agent'), 250),
+                        landedDate: ec.user.nowTimestamp]" />
+                <set field="readId" from="created.readId" />
+                <else>
+                    <set field="readId" from="visit.readId" />
+                </else>
+            </if>
+            <if condition="event == 'read' &amp;&amp; !visit?.readDate">
+                <service-call name="update#growerp.marketing.ContentRead"
+                    in-map="[readId: readId, readDate: ec.user.nowTimestamp,
+                        maxScrollPct: Math.min(Math.max(maxScrollPct ?: 0, 0), 100),
+                        dwellSeconds: Math.min(Math.max(dwellSeconds ?: 0, 0), 86400)]" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="ContentReadStats" authenticate="true">
+        <description>Website reads of tagged content links, per master content piece with a
+            per-platform breakdown, scoped to the owner company. landings counts every
+            visit from a tagged link (bots and link previews included), reads only the
+            visits that were really read.</description>
+        <in-parameters>
+            <parameter name="searchString" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="contentReadStats" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="growerp.marketing.ContentReadSummary" list="summaryList">
+                <econdition field-name="ownerPartyId" />
+                <select-field field-name="utmCampaign,utmSource,landings,uniqueVisitors,reads,avgDwellSeconds,lastLandedDate" />
+            </entity-find>
+            <!-- one row per master piece with its platforms nested; Groovy for the map
+                 arithmetic (set on a map path converts values to String) -->
+            <set field="byCampaign" from="new LinkedHashMap()" />
+            <iterate list="summaryList" entry="row">
+                <if condition="!byCampaign.containsKey(row.utmCampaign)">
+                    <entity-find entity-name="growerp.marketing.MasterContent" list="mcList" limit="1">
+                        <econdition field-name="ownerPartyId" />
+                        <econdition field-name="pseudoId" from="row.utmCampaign" />
+                    </entity-find>
+                    <script>
+                        byCampaign.put(row.utmCampaign, [campaign: row.utmCampaign,
+                            masterContentId: mcList ? mcList[0].masterContentId : null,
+                            title: mcList ? mcList[0].title : null,
+                            landings: 0L, uniqueVisitors: 0L, reads: 0L, dwellTotal: 0L,
+                            lastLandedDate: null, platforms: []])
+                    </script>
+                </if>
+            </iterate>
+            <script><![CDATA[
+                String searchLower = searchString?.toLowerCase()
+                for (row in summaryList) {
+                    Map c = byCampaign[row.utmCampaign]
+                    long landings = (row.landings ?: 0) as long
+                    long reads = (row.reads ?: 0) as long
+                    int avgDwell = (row.avgDwellSeconds ?: 0) as int
+                    c.platforms.add([platform: row.utmSource ?: '', landings: landings,
+                        uniqueVisitors: (row.uniqueVisitors ?: 0) as long, reads: reads,
+                        avgDwellSeconds: avgDwell])
+                    c.landings += landings
+                    c.uniqueVisitors += (row.uniqueVisitors ?: 0) as long
+                    c.reads += reads
+                    c.dwellTotal += avgDwell * reads
+                    if (row.lastLandedDate && (!c.lastLandedDate || row.lastLandedDate > c.lastLandedDate))
+                        c.lastLandedDate = row.lastLandedDate
+                }
+                contentReadStats = []
+                for (Map c in byCampaign.values()) {
+                    if (searchLower && !c.campaign.toLowerCase().contains(searchLower) &&
+                            !c.title?.toLowerCase()?.contains(searchLower)) continue
+                    c.readRate = c.landings ? Math.round(c.reads * 100.0d / c.landings) as int : 0
+                    c.avgDwellSeconds = c.reads ? (int) (c.dwellTotal / c.reads) : 0
+                    c.remove('dwellTotal')
+                    contentReadStats.add(c)
+                }
+                contentReadStats.sort { a, b -> b.lastLandedDate <=> a.lastLandedDate }
+            ]]></script>
         </actions>
     </service>
 

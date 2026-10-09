@@ -50,6 +50,7 @@ class MarketingDashboardChartMini extends StatelessWidget {
             (label: l.dashToApprove, value: dashboard.contentToApprove),
             (label: l.dashPlans, value: dashboard.activePlans),
             (label: l.dashEngagements, value: dashboard.newEngagements),
+            (label: l.dashContentReads, value: dashboard.contentReads),
           ],
         );
       },

@@ -115,6 +115,7 @@ when the organization's menu shows it a screen that drives that domain.
     <growerp.menu.WidgetDomain widgetName="PersonaList" artifactGroupId="GROWERP_MARKETING"/>
     <growerp.menu.WidgetDomain widgetName="PlatformConfigListScreen" artifactGroupId="GROWERP_MARKETING"/>
     <growerp.menu.WidgetDomain widgetName="SocialEngagementList" artifactGroupId="GROWERP_MARKETING"/>
+    <growerp.menu.WidgetDomain widgetName="ContentReadStatsList" artifactGroupId="GROWERP_MARKETING"/>
 
     <!-- GROWERP_WEBSITE -->
     <growerp.menu.WidgetDomain widgetName="WebsiteConversionList" artifactGroupId="GROWERP_WEBSITE"/>

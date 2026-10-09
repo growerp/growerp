@@ -97,6 +97,9 @@
         <field name="body" type="text-very-long" /> <!-- canonical platform-neutral copy -->
         <field name="callToAction" type="text-long" />
         <field name="targetUrl" type="text-medium" />
+        <!-- Y = adapted posts are short teasers linking to targetUrl (the full article on
+             the website), so reads are measured on the site, see ContentRead -->
+        <field name="teaserMode" type="text-indicator" />
         <field name="status" type="text-short" /> <!-- DRAFT, APPROVED, ADAPTED -->
         <field name="approvedDate" type="date-time" /> <!-- human approval gate: set = scheduler may auto-publish this piece's SocialPost variants -->
 
@@ -134,6 +137,49 @@
             <key-map field-name="postId" />
         </relationship>
     </entity>
+
+    <!-- ========================================================= -->
+    <!--  Content reads on the tenant website                      -->
+    <!-- ========================================================= -->
+    <entity entity-name="ContentRead" package="growerp.marketing">
+        <description>One visit to a website page arriving from a tagged content link
+            (utm_campaign = MasterContent pseudoId, utm_source = platform). A row is created
+            on landing; readDate is set once the visitor really read the page (visible dwell
+            and scroll), which bots, link previews and mail privacy proxies never do.</description>
+        <field name="readId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" />
+        <field name="productStoreId" type="id" />
+        <field name="pagePath" type="text-medium" />
+        <field name="utmSource" type="text-short" />
+        <field name="utmMedium" type="text-short" />
+        <field name="utmCampaign" type="text-medium" />
+        <field name="visitKey" type="text-short" /> <!-- random per browser tab session -->
+        <field name="userAgent" type="text-medium" />
+        <field name="landedDate" type="date-time" />
+        <field name="readDate" type="date-time" />
+        <field name="maxScrollPct" type="number-integer" />
+        <field name="dwellSeconds" type="number-integer" />
+        <index name="CONTENT_READ_VISIT" unique="false">
+            <index-field name="visitKey" />
+        </index>
+        <index name="CONTENT_READ_OWNER" unique="false">
+            <index-field name="ownerPartyId" />
+            <index-field name="utmCampaign" />
+        </index>
+    </entity>
+
+    <!-- per master piece (utm_campaign) and platform (utm_source) totals -->
+    <view-entity entity-name="ContentReadSummary" package="growerp.marketing">
+        <member-entity entity-alias="CR" entity-name="growerp.marketing.ContentRead" />
+        <alias entity-alias="CR" name="ownerPartyId" />
+        <alias entity-alias="CR" name="utmCampaign" />
+        <alias entity-alias="CR" name="utmSource" />
+        <alias entity-alias="CR" name="landings" field="readId" function="count" />
+        <alias entity-alias="CR" name="uniqueVisitors" field="visitKey" function="count-distinct" />
+        <alias entity-alias="CR" name="reads" field="readDate" function="count" type="number-integer" />
+        <alias entity-alias="CR" name="avgDwellSeconds" field="dwellSeconds" function="avg" />
+        <alias entity-alias="CR" name="lastLandedDate" field="landedDate" function="max" />
+    </view-entity>
 
     <!-- ========================================================= -->
     <!--  Substack subscriber sync tracking                        -->

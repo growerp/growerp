@@ -323,6 +323,10 @@
   "@dashEngagements": {
     "description": "Dashboard tile counter label"
   },
+  "dashContentReads": "reads (30d)",
+  "@dashContentReads": {
+    "description": "Dashboard tile counter label: website reads from content links, last 30 days"
+  },
   "dashPostDraft": "Draft",
   "@dashPostDraft": {
     "description": "Dashboard tile post funnel status label"
