@@ -31,7 +31,7 @@ does, where in the app its work shows up, and which steps stay with you.
          │                                  │                       To Do / Email Sequence
    readers click "read more"                ▼                             │
          ▼                                Replies (RESPONDED) ──────→ Opportunity → Pipeline → Won
-   Content Reads, Engagements ──convert──────────────────────────→ Lead
+   Reads, Engagements ──convert──────────────────────────────────→ Lead
                                                                          ▲
  Website chat (SDR agent), web forms, assessments ──────────────────────┘
 
@@ -82,12 +82,23 @@ No agent publishes a post or sends a message to a prospect by itself.
    check a piece and its platform variants, and tap **Approve**. From then on the scheduler
    publishes every variant at its own time. **Revoke** stops future publishing.
 
+**Your own ideas first (the Ideas strip at the top of Marketing → Content).** Paste an
+article, rough notes or a one-line idea, give the URL of an article, or both; both are used.
+Drag the ideas into the order you want (long-press, then drag), or collapse the strip.
+- **Write article** turns an idea into a ~500 word article in your house style and removes
+  the idea. The article shows up under **Marketing → Content**, in teaser mode, with its Target URL set to a page on your
+  website.
+- When you **approve** it, the article goes onto your website, and the **Articles** page
+  (one menu item) lists every article. Its platform posts are teasers that link to it.
+- The weekly **Content and Social** agent uses the ideas in that order first and only invents
+  subjects for the slots that are left.
+
 **Teaser mode (optional, per piece).** Switch on *Teaser only (link to full article)* in a
 master content piece and set its Target URL to the full article on your GrowERP website.
 Every platform then gets a short teaser with a "Read the full article" link, not the full
 text. Use it when you want to know who actually *reads* your content. Read on for why.
 
-### 3.2 Measure what is read (Marketing → Content Reads)
+### 3.2 Measure what is read (Marketing → Content)
 
 Open-rate pixels in e-mail newsletters no longer tell you much:
 
@@ -102,7 +113,7 @@ GrowERP measures on **your own website** instead:
 - A visit from such a link counts as **landed**.
 - It counts as **read** only when the visitor keeps the page visible for 15 seconds and
   scrolls at least halfway. Scanners, link previews and mail privacy proxies don't do that.
-- **Marketing → Content Reads** lists, per content piece:
+- **Marketing → Content** shows, per content piece:
   - landings, reads and the read percentage
   - a per-platform breakdown when you tap a row, so you can compare channels directly
 - The marketing dashboard tile shows the reads of the last 30 days.
@@ -184,7 +195,7 @@ and logs every call in **Agent Control → Agent Actions**.
 4. **Outreach:** create one outreach campaign with a few recipients and let the Personalizer
    fill the messages.
 5. **Monitor:** switch on the schedules one at a time, in this order: Digest, Lead Triage,
-   Personalizer, Content and Social. After a week, check **Content Reads** and the
+   Personalizer, Content and Social. After a week, check the **Reads** column under Content and the
    **Pipeline**.
 
 The *Guide* items under Marketing and Outreach walk you through the same steps in the app.
@@ -197,7 +208,7 @@ agent setting and the troubleshooting table.
 
 | Area | Flutter package | Backend services |
 |---|---|---|
-| Personas, plans, master content, posts, e-mail sequences, engagements, content reads | `growerp_marketing` | `MarketingServices100`, `MasterContentServices100`, `SocialPostPublishingServices100`, `NurtureServices100` |
+| Personas, plans, ideas, master content, posts, e-mail sequences, engagements, content reads | `growerp_marketing` | `MarketingServices100`, `MasterContentServices100`, `SocialPostPublishingServices100`, `NurtureServices100` |
 | Campaigns, platforms, messages, automation, send queue | `growerp_outreach` | `OutreachServices100`, `MCPAutomationServices100` |
 | Opportunities, pipeline | `growerp_sales` | `CrmServices100` |
 | To Do / activities | `growerp_activity` | `ActivityServices100` |

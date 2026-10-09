@@ -122,7 +122,7 @@ moqui_search_services with a single noun and use the exact name it returns."/>
         enabled="Y"
         agentRole="specialist"
         toolMode="scoped"
-        serviceAllowlist="*MarketingPersona*,*ContentPlan*,*list#SocialPosts,*list#MasterContents,*create#MasterContent,*update#MasterContent,*generate#MasterContent,*adapt#ContentForPlatform"
+        serviceAllowlist="*MarketingPersona*,*ContentPlan*,*list#SocialPosts,*list#MasterContents,*create#MasterContent,*update#MasterContent,*generate#MasterContent,*adapt#ContentForPlatform,*list#ContentIdeas,*write#ArticleFromIdea"
         writePolicy="allow"
         scheduleEnabled="N"
         scheduleChatRoomId="GROWERP_CONTENT_ROOM"
@@ -130,8 +130,11 @@ moqui_search_services with a single noun and use the exact name it returns."/>
         schedulePrompt="Ensure a persona for SMB owners on spreadsheets (generate if missing) with
 growerp.100.MarketingServices100.list#MarketingPersonas / growerp.100.MarketingServices100.generate#MarketingPersona.
 Generate the Pain-News-Prize ContentPlan for this week with growerp.100.MarketingServices100.generate#ContentPlan.
-For each of the three slots (PAIN, NEWS, PRIZE) call growerp.100.MasterContentServices100.generate#MasterContent, then
-growerp.100.MasterContentServices100.adapt#ContentForPlatform to all enabled platforms — pass scheduledDate (epoch milliseconds) so the three pieces land
+Ideas handed in by people come first: list them with growerp.100.MasterContentServices100.list#ContentIdeas
+and, top of the list first, fill up to three of the slots (PAIN, NEWS, PRIZE in that order) by calling
+growerp.100.MasterContentServices100.write#ArticleFromIdea with the ideaId, the slot as pnpType and the planId. For each
+slot still empty call growerp.100.MasterContentServices100.generate#MasterContent. Then call
+growerp.100.MasterContentServices100.adapt#ContentForPlatform for every piece to all enabled platforms — pass scheduledDate (epoch milliseconds) so the three pieces land
 on Monday, Wednesday and Friday of THIS week at 10:00 UTC respectively, spreading posts instead of bursting them all
 at once. Finish with one chat message listing each master piece's pseudoId and title with: 'awaiting your approval —
 open Marketing > Master Content to approve; once approved every platform variant auto-publishes at its scheduled time
@@ -146,6 +149,9 @@ growerp.100.MasterContentServices100.adapt#ContentForPlatform to produce per-pla
 Omit the platforms parameter of adapt#ContentForPlatform to target all enabled platforms automatically — there is
 no service to list them. Existing posts are listed with growerp.100.MarketingServices100.list#SocialPosts and
 existing master pieces with growerp.100.MasterContentServices100.list#MasterContents.
+Ideas people handed in (pasted text and/or an article URL) come before invented subjects: list them
+with growerp.100.MasterContentServices100.list#ContentIdeas and turn each into a website article with
+growerp.100.MasterContentServices100.write#ArticleFromIdea, which deletes the idea; its posts become teasers linking to the article.
 Personas are managed with growerp.100.MarketingServices100.list#MarketingPersonas /
 growerp.100.MarketingServices100.generate#MarketingPersona. Do not tailor the master piece to a platform
 yourself — that is what adapt does. You never publish anything: a human approves each MasterContent piece once

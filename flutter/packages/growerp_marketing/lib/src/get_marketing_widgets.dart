@@ -26,7 +26,6 @@ Map<String, GrowerpWidgetBuilder> getMarketingWidgets() {
     'PersonaList': (args) => const PersonaList(),
     'EmailSequenceList': (args) => const EmailSequenceList(),
     'SocialEngagementList': (args) => const SocialEngagementList(),
-    'ContentReadStatsList': (args) => const ContentReadStatsList(),
   };
 }
 
@@ -74,13 +73,6 @@ List<WidgetMetadata> getMarketingWidgetsWithMetadata() {
       iconName: 'person_outline',
       keywords: ['persona', 'target', 'audience', 'profile'],
       builder: (args) => const PersonaList(),
-    ),
-    WidgetMetadata(
-      widgetName: 'ContentReadStatsList',
-      description: 'Website reads of content links, per platform',
-      iconName: 'trending_up',
-      keywords: ['reads', 'statistics', 'newsletter', 'teaser', 'clicks', 'website'],
-      builder: (args) => const ContentReadStatsList(),
     ),
   ];
 }

@@ -1797,6 +1797,43 @@ abstract class RestClient {
     @Field() int? scheduledDate,
   });
 
+  // Content ideas: raw text and/or an article URL -> ~500 word website article
+  @GET("rest/s1/growerp/100/ContentIdeas")
+  Future<ContentIdeas> getContentIdeas({
+    @Query('searchString') String? searchString,
+    @Query('start') int? start,
+    @Query('limit') int? limit,
+  });
+
+  @POST("rest/s1/growerp/100/ContentIdea")
+  Future<ContentIdea> createContentIdea({
+    @Field() String? title,
+    @Field() String? rawText,
+    @Field() String? sourceUrl,
+  });
+
+  @PATCH("rest/s1/growerp/100/ContentIdea")
+  Future<ContentIdea> updateContentIdea({
+    @Field() required String ideaId,
+    @Field() String? title,
+    @Field() String? rawText,
+    @Field() String? sourceUrl,
+  });
+
+  /// Put the ideas in this order (first = next to use)
+  @POST("rest/s1/growerp/100/ContentIdea/reorder")
+  Future<void> reorderContentIdeas({@Field() required List<String> ideaIds});
+
+  @DELETE("rest/s1/growerp/100/ContentIdea")
+  Future<void> deleteContentIdea({@Field() required String ideaId});
+
+  /// Writes the article; returns masterContentId, pseudoId, title, targetUrl
+  @POST("rest/s1/growerp/100/ContentIdea/writeArticle")
+  Future<MasterContent> writeArticleFromIdea({
+    @Field() required String ideaId,
+    @Field() String? pnpType,
+  });
+
   @POST("rest/s1/growerp/100/MasterContent/approve")
   Future<MasterContent> approveMasterContent({
     @Field() required String masterContentId,

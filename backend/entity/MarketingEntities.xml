@@ -100,6 +100,9 @@
         <!-- Y = adapted posts are short teasers linking to targetUrl (the full article on
              the website), so reads are measured on the site, see ContentRead -->
         <field name="teaserMode" type="text-indicator" />
+        <!-- website page (under content/) holding the full article written from a ContentIdea;
+             written to the website when the piece is approved -->
+        <field name="articlePath" type="text-medium" />
         <field name="status" type="text-short" /> <!-- DRAFT, APPROVED, ADAPTED -->
         <field name="approvedDate" type="date-time" /> <!-- human approval gate: set = scheduler may auto-publish this piece's SocialPost variants -->
 
@@ -135,6 +138,28 @@
         <field name="createdDate" type="date-time" />
         <relationship type="one" related="growerp.marketing.SocialPost">
             <key-map field-name="postId" />
+        </relationship>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!--  Content ideas: raw material for website articles         -->
+    <!-- ========================================================= -->
+    <entity entity-name="ContentIdea" package="growerp.marketing">
+        <description>Raw material handed in by a person: pasted text, notes or a one-line idea,
+            and/or the URL of an article. write#ArticleFromIdea turns it into a ~500 word website
+            article (a MasterContent ARTICLE in teaser mode) and deletes the idea; the weekly
+            content agent uses the ideas in their order (sequenceNum) before inventing subjects.</description>
+        <field name="ideaId" type="id" is-pk="true" />
+        <field name="pseudoId" type="id" />
+        <field name="ownerPartyId" type="id" />
+        <field name="title" type="text-medium" />
+        <field name="rawText" type="text-very-long" />
+        <field name="sourceUrl" type="text-medium" />
+        <!-- the order people put the ideas in; the agent uses them top first -->
+        <field name="sequenceNum" type="number-integer" />
+        <field name="createdDate" type="date-time" />
+        <relationship type="one" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
         </relationship>
     </entity>
 

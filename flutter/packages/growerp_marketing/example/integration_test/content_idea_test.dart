@@ -20,8 +20,7 @@ import 'package:integration_test/integration_test.dart';
 
 import 'package:growerp_models/growerp_models.dart';
 
-import 'package:growerp_marketing/src/test_data.dart' as marketing_data;
-import 'package:growerp_marketing/src/master_content/integration_test/master_content_test.dart';
+import 'package:growerp_marketing/src/content_idea/integration_test/content_idea_test.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +29,7 @@ void main() {
     await GlobalConfiguration().loadFromAsset("app_settings");
   });
 
-  testWidgets('''GrowERP master content test''', (tester) async {
+  testWidgets('''GrowERP content idea test''', (tester) async {
     RestClient restClient = RestClient(await buildDioClient());
     await CommonTest.startTestApp(
       tester,
@@ -42,25 +41,26 @@ void main() {
         restClient,
         GlobalConfiguration().get("applicationId"),
       ),
-      title: 'GrowERP master content test',
+      title: 'GrowERP content idea test',
       clear: true,
     );
     await CommonTest.createCompanyAndAdmin(tester);
-    await MasterContentTest.selectMasterContent(tester);
-    await MasterContentTest.addMasterContent(
+    await ContentIdeaTest.selectContent(tester);
+    await ContentIdeaTest.addContentIdea(
       tester,
-      marketing_data.masterContents.sublist(0, 3),
+      title: 'Spreadsheets cost hours',
+      text: 'Our customers tell us re-keying orders costs them hours a week.',
+      url: 'https://www.growerp.com/content/about',
     );
-    await MasterContentTest.checkMasterContent(tester);
-    await MasterContentTest.approveMasterContent(tester);
-    await MasterContentTest.updateMasterContent(
-      tester,
-      marketing_data.updatedMasterContents.sublist(0, 3),
-    );
-    await MasterContentTest.checkMasterContent(tester);
-    await MasterContentTest.deleteMasterContent(tester);
-    // a new company has no website visits: the reads column shows '-'
-    expect(CommonTest.getTextField('reads0'), equals('-'));
+    await ContentIdeaTest.addContentIdea(tester, title: 'One system, six tools');
+    ContentIdeaTest.checkIdeas(['Spreadsheets cost hours', 'One system, six tools']);
+    await ContentIdeaTest.updateContentIdea(
+        tester, index: 0, newTitle: 'Re-keying costs hours');
+    ContentIdeaTest.checkIdeas(['Re-keying costs hours', 'One system, six tools']);
+    await ContentIdeaTest.toggleIdeas(tester, expectCollapsed: true);
+    await ContentIdeaTest.toggleIdeas(tester, expectCollapsed: false);
+    await ContentIdeaTest.deleteContentIdea(tester, index: 0);
+    ContentIdeaTest.checkIdeas(['One system, six tools']);
     await CommonTest.logout(tester);
   }, skip: false);
 }

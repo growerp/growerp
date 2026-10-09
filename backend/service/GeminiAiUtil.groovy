@@ -138,6 +138,19 @@ class GeminiAiUtil {
     }
 
     /**
+     * Whether callLlmApi will find an API key for this owner: the same model/provider and key
+     * choice it makes (own key for the tenant's provider, else the system default's provider).
+     * For preflight checks before a long run; the allowance is still checked per call.
+     */
+    static boolean hasApiKey(def ec, String ownerPartyId) {
+        Map modelConfig = resolveModelConfig(ec, ownerPartyId)
+        if (!hasOwnApiKey(ec, ownerPartyId, modelConfig.provider as String, null)) {
+            modelConfig = resolveModelConfig(ec, null)
+        }
+        return resolveApiKey(ec, ownerPartyId, modelConfig.provider as String) ? true : false
+    }
+
+    /**
      * Send a prompt to whichever LLM the tenant configured.
      *
      * @param ec ExecutionContext from Moqui

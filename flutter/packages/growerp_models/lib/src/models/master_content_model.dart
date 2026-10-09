@@ -44,6 +44,10 @@ class MasterContent {
   /// article, so reads are measured on the website (see ContentReadStats)
   final String? teaserMode;
 
+  /// Website page (under content/) of the full article written from a
+  /// ContentIdea; written to the website when the piece is approved
+  final String? articlePath;
+
   /// Status: DRAFT, APPROVED, ADAPTED
   @JsonKey(defaultValue: 'DRAFT')
   final String status;
@@ -72,6 +76,7 @@ class MasterContent {
     this.callToAction,
     this.targetUrl,
     this.teaserMode,
+    this.articlePath,
     required this.status,
     this.approvedDate,
     this.createdDate,
@@ -89,6 +94,7 @@ class MasterContent {
     String? callToAction,
     String? targetUrl,
     String? teaserMode,
+    String? articlePath,
     String? status,
     DateTime? approvedDate,
     DateTime? createdDate,
@@ -105,6 +111,7 @@ class MasterContent {
       callToAction: callToAction ?? this.callToAction,
       targetUrl: targetUrl ?? this.targetUrl,
       teaserMode: teaserMode ?? this.teaserMode,
+      articlePath: articlePath ?? this.articlePath,
       status: status ?? this.status,
       approvedDate: approvedDate ?? this.approvedDate,
       createdDate: createdDate ?? this.createdDate,

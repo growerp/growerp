@@ -84,6 +84,7 @@
             <parameter name="callToAction" />
             <parameter name="targetUrl" />
             <parameter name="teaserMode" />
+            <parameter name="articlePath" />
             <parameter name="status" />
             <parameter name="approvedDate" type="Timestamp" />
             <parameter name="createdDate" type="Timestamp" />
@@ -134,6 +135,7 @@
             <set field="callToAction" from="mc.callToAction" />
             <set field="targetUrl" from="mc.targetUrl" />
             <set field="teaserMode" from="mc.teaserMode" />
+            <set field="articlePath" from="mc.articlePath" />
             <set field="status" from="mc.status" />
             <set field="approvedDate" from="mc.approvedDate" />
             <set field="createdDate" from="mc.createdDate" />
@@ -166,6 +168,7 @@
             <parameter name="callToAction" />
             <parameter name="targetUrl" />
             <parameter name="teaserMode" />
+            <parameter name="articlePath" />
             <parameter name="status" />
             <parameter name="approvedDate" type="Timestamp" />
             <parameter name="createdDate" type="Timestamp" />
@@ -216,6 +219,7 @@
             <set field="callToAction" from="updated.callToAction" />
             <set field="targetUrl" from="updated.targetUrl" />
             <set field="teaserMode" from="updated.teaserMode" />
+            <set field="articlePath" from="updated.articlePath" />
             <set field="status" from="updated.status" />
             <set field="approvedDate" from="updated.approvedDate" />
             <set field="createdDate" from="updated.createdDate" />
@@ -243,6 +247,7 @@
             <parameter name="callToAction" />
             <parameter name="targetUrl" />
             <parameter name="teaserMode" />
+            <parameter name="articlePath" />
             <parameter name="status" />
             <parameter name="approvedDate" type="Timestamp" />
             <parameter name="createdDate" type="Timestamp" />
@@ -268,6 +273,13 @@
                     approvedDate: approve == 'Y' ? ec.user.nowTimestamp : null,
                     lastModifiedDate: ec.user.nowTimestamp
                 ]" />
+            <!-- an article written from an idea goes onto the website only now: nothing a
+                 human has not approved becomes public. Revoking keeps the page (the teasers
+                 that already went out still link to it). -->
+            <if condition="approve == 'Y' &amp;&amp; mc.articlePath">
+                <service-call name="growerp.100.MasterContentServices100.publish#ArticlePage"
+                    in-map="[masterContentId: masterContentId]" />
+            </if>
 
             <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="updated">
                 <field-map field-name="masterContentId" />
@@ -281,6 +293,7 @@
             <set field="callToAction" from="updated.callToAction" />
             <set field="targetUrl" from="updated.targetUrl" />
             <set field="teaserMode" from="updated.teaserMode" />
+            <set field="articlePath" from="updated.articlePath" />
             <set field="status" from="updated.status" />
             <set field="approvedDate" from="updated.approvedDate" />
             <set field="createdDate" from="updated.createdDate" />
@@ -363,13 +376,22 @@
         </in-parameters>
         <out-parameters>
             <parameter name="adaptedContent" />
+            <parameter name="aiError"><description>why the AI call failed, when it did</description></parameter>
         </out-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="relInfo" />
             <script>
                 def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
-                adaptedContent = GeminiAiUtil.generateAdaptedContent(ec, title, body,
-                    platform, contentType, callToAction, targetUrl, relInfo.ownerPartyId, teaser)
+                // a failed AI call is returned, not raised: raising marks the caller's
+                // transaction rollback-only and hides the reason (e.g. allowance used up)
+                try {
+                    adaptedContent = GeminiAiUtil.generateAdaptedContent(ec, title, body,
+                        platform, contentType, callToAction, targetUrl, relInfo.ownerPartyId, teaser)
+                } catch (Exception e) {
+                    ec.logger.warn("adapt#PlatformContent ${platform} failed: ${e.message}")
+                    adaptedContent = null
+                    aiError = e.message
+                }
             </script>
         </actions>
     </service>
@@ -483,21 +505,13 @@
                           .toEpochMilli()" type="Long" />
             </if>
 
-            <!-- Preflight: the AI key must be set (user preference, then GEMINI_API_KEY env,
-                 then GOOGLE_API_KEY env, then system property). -->
-            <set field="aiKey" from="ec.user.getPreference('GEMINI_API_KEY')" />
-            <if condition="!aiKey">
-                <set field="aiKey" from="System.getenv('GEMINI_API_KEY')" />
-            </if>
-            <if condition="!aiKey">
-                <set field="aiKey" from="System.getenv('GOOGLE_API_KEY')" />
-            </if>
-            <if condition="!aiKey">
-                <set field="aiKey" from="System.getProperty('GEMINI_API_KEY')" />
-            </if>
-            <if condition="!aiKey">
+            <!-- Preflight: an AI key must be found the way the AI call finds it (the tenant's
+                 own key in System Setup, else the system default provider's key) -->
+            <script>aiKeyFound = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
+                .hasApiKey(ec, ownerPartyId)</script>
+            <if condition="!aiKeyFound">
                 <return error="true"
-                    message="AI key not configured: set GEMINI_API_KEY (or GOOGLE_API_KEY) in the environment or in user preferences before adapting content." />
+                    message="AI key not configured: add one in System Setup -> AI Settings before adapting content." />
             </if>
 
             <set field="adaptedCount" from="0" type="Integer" />
@@ -520,13 +534,17 @@
                 <!-- AI-adapt the body for this platform; ignore-error so one
                      platform failing does not abort the rest of the loop -->
                 <set field="adaptedContent" from="null" />
+                <set field="aiError" from="null" />
                 <service-call out-map="context" ignore-error="true"
                     name="growerp.100.MasterContentServices100.adapt#PlatformContent"
                     in-map="[title: mc.title, body: mc.body, platform: platform,
                              contentType: mc.contentType, callToAction: mc.callToAction,
                              targetUrl: platformUrl,
                              teaser: mc.teaserMode == 'Y' &amp;&amp; mc.contentType != 'MESSAGE']" />
-                <if condition="!adaptedContent"><continue /></if>
+                <if condition="!adaptedContent">
+                    <set field="lastAiError" from="aiError ?: lastAiError" />
+                    <continue />
+                </if>
 
                 <if condition="mc.contentType == 'MESSAGE' &amp;&amp; campaignId">
                     <!-- 1:1 message: merge the adapted template into the campaign settings -->
@@ -567,7 +585,7 @@
             <!-- Nothing created and nothing skipped => every AI adaptation failed -->
             <if condition="adaptedCount == 0 &amp;&amp; skippedCount == 0">
                 <return error="true"
-                    message="No content was adapted — the AI call failed for every platform. Check the server log and the AI key." />
+                    message="No content was adapted, the AI call failed for every platform: ${lastAiError ?: 'see the server log'}" />
             </if>
 
             <!-- Mark the master piece adapted if anything succeeded -->
@@ -576,6 +594,233 @@
                     in-map="[masterContentId: masterContentId, status: 'ADAPTED',
                              lastModifiedDate: ec.user.nowTimestamp]" />
             </if>
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!--  Content ideas: raw text and/or an article URL handed in   -->
+    <!--  by a person, turned into a ~500 word website article      -->
+    <!-- ========================================================= -->
+    <service verb="list" noun="ContentIdeas" authenticate="true">
+        <description>List the owner's content ideas in their order (sequenceNum): the next one to use is on top.</description>
+        <in-parameters>
+            <parameter name="searchString" />
+            <parameter name="start" type="Integer" />
+            <parameter name="limit" type="Integer" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="contentIdeas" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <set field="searchString" from="searchString ?: ''" />
+            <entity-find entity-name="growerp.marketing.ContentIdea" list="contentIdeas"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" />
+                <econditions combine="or">
+                    <econdition field-name="pseudoId" operator="like" value="%${searchString}%"
+                        ignore-if-empty="true" ignore-case="true" />
+                    <econdition field-name="title" operator="like" value="%${searchString}%"
+                        ignore-if-empty="true" ignore-case="true" />
+                    <econdition field-name="sourceUrl" operator="like" value="%${searchString}%"
+                        ignore-if-empty="true" ignore-case="true" />
+                </econditions>
+                <order-by field-name="sequenceNum" />
+                <order-by field-name="createdDate" />
+            </entity-find>
+        </actions>
+    </service>
+
+    <service verb="create" noun="ContentIdea" authenticate="true">
+        <description>Hand in raw material for an article: pasted text or notes, the URL of an
+            article, or both (both are used).</description>
+        <in-parameters>
+            <parameter name="title" />
+            <parameter name="rawText" allow-html="any" />
+            <parameter name="sourceUrl" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="contentIdea" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <if condition="!ownerPartyId">
+                <return error="true" message="User not authenticated or no party associated" />
+            </if>
+            <if condition="!rawText?.trim() &amp;&amp; !sourceUrl?.trim() &amp;&amp; !title?.trim()">
+                <return error="true" message="Give an idea, some text, an article URL, or both" />
+            </if>
+            <if condition="sourceUrl &amp;&amp; !(sourceUrl ==~ /(?i)https?:\/\/.+/)">
+                <return error="true" message="The article URL must start with http:// or https://" />
+            </if>
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'ContentIdea']" out-map="seqOut" />
+            <!-- a new idea goes to the end of the list -->
+            <entity-find entity-name="growerp.marketing.ContentIdea" list="lastIdeas" limit="1">
+                <econdition field-name="ownerPartyId" />
+                <order-by field-name="-sequenceNum" />
+            </entity-find>
+            <service-call name="create#growerp.marketing.ContentIdea" out-map="created"
+                in-map="[ownerPartyId: ownerPartyId, pseudoId: seqOut.seqNum, title: title,
+                    sequenceNum: (lastIdeas ? (lastIdeas[0].sequenceNum ?: 0) : 0) + 1,
+                    rawText: rawText, sourceUrl: sourceUrl?.trim(),
+                    createdDate: ec.user.nowTimestamp]" />
+            <entity-find-one entity-name="growerp.marketing.ContentIdea" value-field="contentIdea">
+                <field-map field-name="ideaId" from="created.ideaId" />
+            </entity-find-one>
+        </actions>
+    </service>
+
+    <service verb="update" noun="ContentIdea" authenticate="true">
+        <in-parameters>
+            <parameter name="ideaId" required="true" />
+            <parameter name="title" />
+            <parameter name="rawText" allow-html="any" />
+            <parameter name="sourceUrl" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="contentIdea" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.marketing.ContentIdea" value-field="idea" />
+            <if condition="!idea || idea.ownerPartyId != ownerPartyId">
+                <return error="true" message="Content idea not found" />
+            </if>
+            <if condition="sourceUrl &amp;&amp; !(sourceUrl ==~ /(?i)https?:\/\/.+/)">
+                <return error="true" message="The article URL must start with http:// or https://" />
+            </if>
+            <service-call name="update#growerp.marketing.ContentIdea"
+                in-map="[ideaId: ideaId, title: title ?: idea.title,
+                    rawText: rawText != null ? rawText : idea.rawText,
+                    sourceUrl: sourceUrl != null ? sourceUrl.trim() : idea.sourceUrl]" />
+            <entity-find-one entity-name="growerp.marketing.ContentIdea" value-field="contentIdea" />
+        </actions>
+    </service>
+
+    <service verb="reorder" noun="ContentIdeas" authenticate="true">
+        <description>Put the owner's ideas in the given order (first = next to use). Ideas left
+            out keep their place after the given ones.</description>
+        <in-parameters>
+            <parameter name="ideaIds" type="List" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <set field="seq" from="0" type="Integer" />
+            <iterate list="ideaIds" entry="orderedId">
+                <entity-find-one entity-name="growerp.marketing.ContentIdea" value-field="idea"
+                    for-update="true">
+                    <field-map field-name="ideaId" from="orderedId" />
+                </entity-find-one>
+                <if condition="idea &amp;&amp; idea.ownerPartyId == ownerPartyId">
+                    <set field="seq" from="seq + 1" type="Integer" />
+                    <set field="idea.sequenceNum" from="seq" type="Integer" />
+                    <entity-update value-field="idea" />
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="delete" noun="ContentIdea" authenticate="true">
+        <in-parameters>
+            <parameter name="ideaId" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.marketing.ContentIdea" value-field="idea" />
+            <if condition="!idea || idea.ownerPartyId != ownerPartyId">
+                <return error="true" message="Content idea not found" />
+            </if>
+            <entity-delete value-field="idea" />
+        </actions>
+    </service>
+
+    <service verb="write" noun="ArticleFromIdea" authenticate="true" transaction-timeout="300">
+        <description>Turn one content idea into a ~500 word article in the house voice and delete
+            the idea: the pasted text and the fetched article URL are both used as material. Creates a DRAFT
+            MasterContent (contentType ARTICLE, teaser mode on) whose targetUrl is the website page
+            the article goes to; the page itself is written when the piece is approved
+            (approve#MasterContent), so nothing becomes public without a human. Adapting it per
+            platform afterwards gives teasers that link to the article.</description>
+        <in-parameters>
+            <parameter name="ideaId" required="true" />
+            <parameter name="pnpType" default-value="OTHER">
+                <description>PAIN, NEWS, PRIZE or OTHER</description>
+            </parameter>
+            <parameter name="planId" />
+            <parameter name="personaId"><description>default: the owner's first persona</description></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="masterContentId" />
+            <parameter name="pseudoId" />
+            <parameter name="title" />
+            <parameter name="targetUrl" />
+        </out-parameters>
+        <actions>
+            <script location="component://growerp/service/writeArticleFromIdeaWithAI.groovy" />
+        </actions>
+    </service>
+
+    <service verb="publish" noun="ArticlePage" authenticate="true">
+        <description>Write an approved article (MasterContent with articlePath) as a page of the
+            owner's website and refresh the 'articles' index page that lists all of them. Article
+            pages live under the hidden '_articles/' folder, so they do not each become a menu
+            item; the index page is the one menu entry.</description>
+        <in-parameters>
+            <parameter name="masterContentId" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc" />
+            <if condition="!mc || mc.ownerPartyId != ownerPartyId || !mc.articlePath">
+                <return error="true" message="No article to publish for ${masterContentId}" />
+            </if>
+            <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find>
+            <if condition="!stores">
+                <return error="true" message="The company has no website to publish the article on" />
+            </if>
+            <!-- page and index text are built in Groovy (string work); the pages are plain
+                 markdown, a ${...} in the text is shown as is -->
+            <entity-find entity-name="growerp.marketing.MasterContent" list="articles">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="articlePath" operator="is-not-null" />
+                <econdition field-name="approvedDate" operator="is-not-null" />
+                <order-by field-name="-approvedDate" />
+            </entity-find>
+            <script><![CDATA[
+                def summary = { String body ->
+                    String plain = (body ?: '').replaceAll(/[#*_`>\[\]]/, '').readLines()
+                        .collect { it.trim() }.find { it.length() > 40 } ?: ''
+                    if (plain.length() > 155) {
+                        int cut = plain.substring(0, 155).lastIndexOf(' ')
+                        plain = plain.substring(0, cut > 0 ? cut : 155) + '...'
+                    }
+                    return plain.replace('-->', '')
+                }
+                pageText = "<!-- description: ${summary(mc.body)} -->\n# ${mc.title}\n\n" +
+                    "${mc.body}\n\n" + (mc.callToAction ? "**${mc.callToAction}**\n" : '')
+                StringBuilder idx = new StringBuilder("<!-- description: All articles -->\n# Articles\n\n")
+                for (a in articles) {
+                    String date = a.approvedDate.toLocalDateTime().toLocalDate().toString()
+                    idx.append("### [${a.title}](/content/${a.articlePath})\n${date} - ${summary(a.body)}\n\n")
+                }
+                indexText = idx.toString()
+            ]]></script>
+            <service-call name="growerp.100.WebsiteTranslationServices100.store#TranslatedPage"
+                in-map="[productStoreId: stores[0].productStoreId, pagePath: mc.articlePath,
+                    text: pageText, contentType: 'md', sequenceNum: 900]" />
+            <service-call name="growerp.100.WebsiteTranslationServices100.store#TranslatedPage"
+                in-map="[productStoreId: stores[0].productStoreId, pagePath: 'articles',
+                    text: indexText, contentType: 'md', sequenceNum: 899]" />
+            <script>ec.cache.getCache('growerp.seo.index').clear()</script>
         </actions>
     </service>
 

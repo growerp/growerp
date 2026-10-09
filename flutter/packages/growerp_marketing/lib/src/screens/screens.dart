@@ -38,8 +38,11 @@ export 'email_sequence_dialog.dart';
 // Social engagement signals
 export 'social_engagement_list.dart';
 
-// Website reads from tagged content links
-export 'content_read_stats_list.dart';
+// Website reads of a piece (shown in the Content dialog)
+export 'content_reads_view.dart';
+
+// Ideas strip (raw text / article urls -> website articles) on the Content screen
+export 'content_ideas_panel.dart';
 
 // Setup guide
 export 'marketing_setup_guide_screen.dart';

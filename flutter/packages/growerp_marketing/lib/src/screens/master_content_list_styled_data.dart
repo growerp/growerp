@@ -29,6 +29,7 @@ List<StyledColumn> getMasterContentListColumns(BuildContext context) {
     return [
       StyledColumn(header: localizations.tableHdrId, flex: 1),
       StyledColumn(header: localizations.tableHdrInfo, flex: 4),
+      StyledColumn(header: 'Reads', flex: 1),
       StyledColumn(header: '', flex: 1), // Actions
     ];
   }
@@ -39,6 +40,7 @@ List<StyledColumn> getMasterContentListColumns(BuildContext context) {
     StyledColumn(header: localizations.tableHdrPnp, flex: 1),
     StyledColumn(header: localizations.tableHdrTitle, flex: 3),
     StyledColumn(header: localizations.tableHdrStatus, flex: 1),
+    StyledColumn(header: 'Reads', flex: 1),
     StyledColumn(header: '', flex: 1), // Actions
   ];
 }
@@ -62,6 +64,7 @@ List<Widget> getMasterContentListRow({
   required MasterContent content,
   required int index,
   required MasterContentBloc bloc,
+  ContentReadStats? reads,
 }) {
   bool isPhone = isAPhone(context);
 
@@ -207,6 +210,17 @@ List<Widget> getMasterContentListRow({
       ),
     );
   }
+
+  // website reads of the piece's links: reads, and how many landed
+  cells.add(
+    Tooltip(
+      message: 'Website: read / landed',
+      child: Text(
+        reads == null ? '-' : '${reads.reads} / ${reads.landings}',
+        key: Key('reads$index'),
+      ),
+    ),
+  );
 
   cells.add(
     IconButton(

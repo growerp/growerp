@@ -741,9 +741,32 @@ limitations under the License.
                     <service name="growerp.100.MasterContentServices100.approve#MasterContent" />
                 </method>
             </resource>
-            <resource name="uploadSeries">
+        </resource>
+
+        <!-- Content ideas: raw text / article urls turned into website articles -->
+        <resource name="ContentIdeas">
+            <method type="get">
+                <service name="growerp.100.MasterContentServices100.list#ContentIdeas" />
+            </method>
+        </resource>
+        <resource name="ContentIdea">
+            <method type="post">
+                <service name="growerp.100.MasterContentServices100.create#ContentIdea" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.MasterContentServices100.update#ContentIdea" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.MasterContentServices100.delete#ContentIdea" />
+            </method>
+            <resource name="writeArticle">
                 <method type="post">
-                    <service name="growerp.100.MasterContentServices100.upload#ContentSeries" />
+                    <service name="growerp.100.MasterContentServices100.write#ArticleFromIdea" />
+                </method>
+            </resource>
+            <resource name="reorder">
+                <method type="post">
+                    <service name="growerp.100.MasterContentServices100.reorder#ContentIdeas" />
                 </method>
             </resource>
         </resource>

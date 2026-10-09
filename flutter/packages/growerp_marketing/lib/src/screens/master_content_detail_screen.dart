@@ -24,12 +24,16 @@ import '../bloc/master_content_event.dart';
 import '../bloc/master_content_state.dart';
 import '../bloc/social_post_bloc.dart';
 import 'social_post_detail_screen.dart';
+import 'content_reads_view.dart';
 import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 class MasterContentDetailScreen extends StatefulWidget {
   final MasterContent? masterContent;
 
-  const MasterContentDetailScreen({super.key, this.masterContent});
+  /// website reads of this piece's links, when there are any
+  final ContentReadStats? reads;
+
+  const MasterContentDetailScreen({super.key, this.masterContent, this.reads});
 
   @override
   MasterContentDetailScreenState createState() =>
@@ -331,6 +335,19 @@ class MasterContentDetailScreenState
                     ),
                     controller: _urlController,
                   ),
+                  if ((masterContent?.articlePath ?? '').isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        masterContent?.approvedDate == null
+                            ? 'Website article written from an idea: it goes '
+                                'on the website at the Target URL when you '
+                                'approve this piece.'
+                            : 'Website article: published at the Target URL.',
+                        key: const Key('articleInfo'),
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ),
                   // teaser only works with a link to the full article
                   ValueListenableBuilder<TextEditingValue>(
                     valueListenable: _urlController,
@@ -412,6 +429,8 @@ class MasterContentDetailScreenState
             if (widget.masterContent?.masterContentId != null) ...[
               const SizedBox(height: 20),
               _buildApprovalSection(masterContent),
+              const SizedBox(height: 20),
+              ContentReadsView(stats: widget.reads),
               const SizedBox(height: 20),
               _buildAdaptSection(state),
             ],

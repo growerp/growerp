@@ -156,7 +156,7 @@ along with this software (see the LICENSE.md file). If not, see
                         pageText.eachLine {
                             if (it.startsWith('# ')) {
                                 if (first == false) {
-                                    storeInfo.menu1.add([path: extraPathNameList[0],
+                                    storeInfo.menu1.add([path: extraPathNameList.join('/'),
                                                         title: title, items: items,
                                                         anchor: titleAnchor]);
                                     items = [];
@@ -173,7 +173,7 @@ along with this software (see the LICENSE.md file). If not, see
                                 items.add(item);
                             }
                         }
-                        if (first == false) storeInfo.menu1.add([path: extraPathNameList[0],
+                        if (first == false) storeInfo.menu1.add([path: extraPathNameList.join('/'),
                             title: title, items: items, anchor: titleAnchor]);
                     }
                 </script>
