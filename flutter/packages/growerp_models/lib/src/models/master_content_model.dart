@@ -48,6 +48,10 @@ class MasterContent {
   /// ContentIdea; written to the website when the piece is approved
   final String? articlePath;
 
+  /// Link of the call to action at the bottom of the article page, e.g. the
+  /// landing page [targetUrl] pointed to before the article got its own page
+  final String? ctaUrl;
+
   /// Status: DRAFT, APPROVED, ADAPTED
   @JsonKey(defaultValue: 'DRAFT')
   final String status;
@@ -77,6 +81,7 @@ class MasterContent {
     this.targetUrl,
     this.teaserMode,
     this.articlePath,
+    this.ctaUrl,
     required this.status,
     this.approvedDate,
     this.createdDate,
@@ -95,6 +100,7 @@ class MasterContent {
     String? targetUrl,
     String? teaserMode,
     String? articlePath,
+    String? ctaUrl,
     String? status,
     DateTime? approvedDate,
     DateTime? createdDate,
@@ -112,6 +118,7 @@ class MasterContent {
       targetUrl: targetUrl ?? this.targetUrl,
       teaserMode: teaserMode ?? this.teaserMode,
       articlePath: articlePath ?? this.articlePath,
+      ctaUrl: ctaUrl ?? this.ctaUrl,
       status: status ?? this.status,
       approvedDate: approvedDate ?? this.approvedDate,
       createdDate: createdDate ?? this.createdDate,

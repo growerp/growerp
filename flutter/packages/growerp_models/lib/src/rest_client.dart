@@ -1772,6 +1772,7 @@ abstract class RestClient {
     @Field() String? callToAction,
     @Field() String? targetUrl,
     @Field() String? teaserMode,
+    @Field() String? ctaUrl,
     @Field() String? status,
   });
 

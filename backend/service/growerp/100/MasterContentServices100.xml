@@ -85,6 +85,7 @@
             <parameter name="targetUrl" />
             <parameter name="teaserMode" />
             <parameter name="articlePath" />
+            <parameter name="ctaUrl" />
             <parameter name="status" />
             <parameter name="approvedDate" type="Timestamp" />
             <parameter name="createdDate" type="Timestamp" />
@@ -136,6 +137,7 @@
             <set field="targetUrl" from="mc.targetUrl" />
             <set field="teaserMode" from="mc.teaserMode" />
             <set field="articlePath" from="mc.articlePath" />
+            <set field="ctaUrl" from="mc.ctaUrl" />
             <set field="status" from="mc.status" />
             <set field="approvedDate" from="mc.approvedDate" />
             <set field="createdDate" from="mc.createdDate" />
@@ -155,6 +157,7 @@
             <parameter name="callToAction" />
             <parameter name="targetUrl" />
             <parameter name="teaserMode" />
+            <parameter name="ctaUrl" />
             <parameter name="status" />
         </in-parameters>
         <out-parameters>
@@ -169,6 +172,7 @@
             <parameter name="targetUrl" />
             <parameter name="teaserMode" />
             <parameter name="articlePath" />
+            <parameter name="ctaUrl" />
             <parameter name="status" />
             <parameter name="approvedDate" type="Timestamp" />
             <parameter name="createdDate" type="Timestamp" />
@@ -203,6 +207,7 @@
                     callToAction: callToAction ?: mc.callToAction,
                     targetUrl: targetUrl ?: mc.targetUrl,
                     teaserMode: teaserMode ?: mc.teaserMode,
+                    ctaUrl: ctaUrl ?: mc.ctaUrl,
                     status: status ?: mc.status,
                     lastModifiedDate: ec.user.nowTimestamp
                 ]" />
@@ -220,6 +225,7 @@
             <set field="targetUrl" from="updated.targetUrl" />
             <set field="teaserMode" from="updated.teaserMode" />
             <set field="articlePath" from="updated.articlePath" />
+            <set field="ctaUrl" from="updated.ctaUrl" />
             <set field="status" from="updated.status" />
             <set field="approvedDate" from="updated.approvedDate" />
             <set field="createdDate" from="updated.createdDate" />
@@ -248,6 +254,7 @@
             <parameter name="targetUrl" />
             <parameter name="teaserMode" />
             <parameter name="articlePath" />
+            <parameter name="ctaUrl" />
             <parameter name="status" />
             <parameter name="approvedDate" type="Timestamp" />
             <parameter name="createdDate" type="Timestamp" />
@@ -294,6 +301,7 @@
             <set field="targetUrl" from="updated.targetUrl" />
             <set field="teaserMode" from="updated.teaserMode" />
             <set field="articlePath" from="updated.articlePath" />
+            <set field="ctaUrl" from="updated.ctaUrl" />
             <set field="status" from="updated.status" />
             <set field="approvedDate" from="updated.approvedDate" />
             <set field="createdDate" from="updated.createdDate" />
@@ -438,6 +446,16 @@
             </if>
             <if condition="!mc.body">
                 <return error="true" message="Master content has no body to adapt" />
+            </if>
+            <!-- a teaser says "read the full article": an article without its own page
+                 (seeded or written by hand) gets one, else the teasers would link to
+                 whatever targetUrl is, e.g. a landing page -->
+            <if condition="mc.teaserMode == 'Y' &amp;&amp; mc.contentType == 'ARTICLE' &amp;&amp; !mc.articlePath">
+                <service-call name="growerp.100.MasterContentServices100.assign#ArticlePage"
+                    in-map="[masterContentId: masterContentId]" />
+                <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc">
+                    <field-map field-name="masterContentId" />
+                </entity-find-one>
             </if>
             <if condition="mc.teaserMode == 'Y' &amp;&amp; !mc.targetUrl">
                 <return error="true" message="Teaser mode needs a target URL: the link to the full article" />
@@ -766,6 +784,75 @@
         </actions>
     </service>
 
+    <service verb="assign" noun="ArticlePage" authenticate="true">
+        <description>Give a piece its own article page under the hidden '_articles/' folder of
+            the owner's website and turn teaser mode on: targetUrl becomes the page, so teasers
+            that say "read the full article" link to the article. The previous targetUrl (e.g.
+            a landing page) is kept as ctaUrl, the call-to-action link at the bottom of the
+            page. The page is written on approval (publish#ArticlePage), right away when the
+            piece is already approved. Does nothing when the piece has a page already.</description>
+        <in-parameters>
+            <parameter name="masterContentId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="articlePath" />
+            <parameter name="targetUrl" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc" />
+            <if condition="!mc || mc.ownerPartyId != ownerPartyId">
+                <return error="true" message="Master content not found: ${masterContentId}" />
+            </if>
+            <if condition="mc.articlePath">
+                <set field="articlePath" from="mc.articlePath" />
+                <set field="targetUrl" from="mc.targetUrl" />
+                <return />
+            </if>
+            <service-call name="growerp.100.WebsiteServices100.get#Website" out-map="siteOut" />
+            <set field="hostName" from="siteOut.website?.hostName" />
+            <if condition="!hostName || hostName == '????'">
+                <return error="true" message="The company has no website address to publish the article on" />
+            </if>
+
+            <!-- page path from the title, unique for the owner -->
+            <set field="slug" from="(mc.title ?: '').toLowerCase().replaceAll(/[^a-z0-9]+/, '-')
+                .replaceAll(/^-+|-+$/, '')" />
+            <if condition="slug.length() &gt; 60">
+                <set field="slug" from="slug.substring(0, 60).replaceAll(/-+$/, '')" />
+            </if>
+            <set field="slug" from="slug ?: 'article'" />
+            <set field="articlePath" value="_articles/${slug}" />
+            <set field="suffix" from="2" type="Integer" />
+            <set field="pathTaken" from="true" type="Boolean" />
+            <while condition="pathTaken">
+                <entity-find-count entity-name="growerp.marketing.MasterContent" count-field="pathCount">
+                    <econdition field-name="ownerPartyId" />
+                    <econdition field-name="articlePath" />
+                </entity-find-count>
+                <if condition="pathCount == 0">
+                    <set field="pathTaken" from="false" type="Boolean" />
+                    <else>
+                        <set field="articlePath" value="_articles/${slug}-${suffix}" />
+                        <set field="suffix" from="suffix + 1" type="Integer" />
+                    </else>
+                </if>
+            </while>
+            <set field="targetUrl" from="(hostName.contains('localhost') ? 'http' : 'https') +
+                '://' + hostName + '/content/' + articlePath" />
+
+            <service-call name="update#growerp.marketing.MasterContent"
+                in-map="[masterContentId: masterContentId, articlePath: articlePath,
+                    targetUrl: targetUrl, ctaUrl: mc.ctaUrl ?: mc.targetUrl, teaserMode: 'Y',
+                    lastModifiedDate: ec.user.nowTimestamp]" />
+            <if condition="mc.approvedDate">
+                <service-call name="growerp.100.MasterContentServices100.publish#ArticlePage"
+                    in-map="[masterContentId: masterContentId]" />
+            </if>
+        </actions>
+    </service>
+
     <service verb="publish" noun="ArticlePage" authenticate="true">
         <description>Write an approved article (MasterContent with articlePath) as a page of the
             owner's website and refresh the 'articles' index page that lists all of them. Article
@@ -806,7 +893,8 @@
                     return plain.replace('-->', '')
                 }
                 pageText = "<!-- description: ${summary(mc.body)} -->\n# ${mc.title}\n\n" +
-                    "${mc.body}\n\n" + (mc.callToAction ? "**${mc.callToAction}**\n" : '')
+                    "${mc.body}\n\n" + (mc.callToAction ? (mc.ctaUrl ? "**[${mc.callToAction}](${mc.ctaUrl})**\n"
+                        : "**${mc.callToAction}**\n") : '')
                 StringBuilder idx = new StringBuilder("<!-- description: All articles -->\n# Articles\n\n")
                 for (a in articles) {
                     String date = a.approvedDate.toLocalDateTime().toLocalDate().toString()

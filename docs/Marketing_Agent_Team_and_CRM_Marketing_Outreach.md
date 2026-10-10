@@ -96,7 +96,9 @@ Drag the ideas into the order you want (long-press, then drag), or collapse the 
 **Teaser mode (optional, per piece).** Switch on *Teaser only (link to full article)* in a
 master content piece and set its Target URL to the full article on your GrowERP website.
 Every platform then gets a short teaser with a "Read the full article" link, not the full
-text. Use it when you want to know who actually *reads* your content. Read on for why.
+text. An ARTICLE piece that has no website page yet gets one when it is adapted: its
+Target URL becomes the new page, and the previous Target URL (say a landing page) is kept
+as the call-to-action link at the bottom of the article, so readers still get there. Use it when you want to know who actually *reads* your content. Read on for why.
 
 ### 3.2 Measure what is read (Marketing → Content)
 
@@ -190,8 +192,9 @@ and logs every call in **Agent Control → Agent Actions**.
 3. **Content:**
    - Create one persona (or let *Content and Social* do it).
    - Add an idea in the Ideas strip (a few lines of notes or an article URL) and tap
-     **Write article**: you get a ~500 word article in teaser mode. Or write a master
-     content piece yourself with a Target URL on your website and switch on teaser mode.
+     **Write article**: you get a ~500 word article in teaser mode. Or write an ARTICLE
+     master content piece yourself, set a Target URL (e.g. your landing page) and switch on
+     teaser mode: adapting it gives it a page on your website.
    - Approve it: the article goes on your website and its teasers are scheduled.
 4. **Outreach:** create one outreach campaign with a few recipients and let the Personalizer
    fill the messages.

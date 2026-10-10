@@ -132,6 +132,7 @@ class MasterContentBloc
         callToAction: event.masterContent.callToAction,
         targetUrl: event.masterContent.targetUrl,
         teaserMode: event.masterContent.teaserMode,
+        ctaUrl: event.masterContent.ctaUrl,
         status: event.masterContent.status,
       );
       emit(state.copyWith(

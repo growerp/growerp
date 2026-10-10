@@ -103,6 +103,9 @@
         <!-- website page (under content/) holding the full article written from a ContentIdea;
              written to the website when the piece is approved -->
         <field name="articlePath" type="text-medium" />
+        <!-- link of the call to action at the bottom of the article page, e.g. the landing
+             page targetUrl pointed to before the piece got its own article page -->
+        <field name="ctaUrl" type="text-medium" />
         <field name="status" type="text-short" /> <!-- DRAFT, APPROVED, ADAPTED -->
         <field name="approvedDate" type="date-time" /> <!-- human approval gate: set = scheduler may auto-publish this piece's SocialPost variants -->
 

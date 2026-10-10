@@ -53,6 +53,7 @@ class MasterContentDetailScreenState
   late TextEditingController _bodyController;
   late TextEditingController _ctaController;
   late TextEditingController _urlController;
+  late TextEditingController _ctaUrlController;
 
   String _selectedContentType = 'POSTING';
   String _selectedPnpType = 'OTHER';
@@ -107,6 +108,8 @@ class MasterContentDetailScreenState
         TextEditingController(text: widget.masterContent?.callToAction ?? '');
     _urlController =
         TextEditingController(text: widget.masterContent?.targetUrl ?? '');
+    _ctaUrlController =
+        TextEditingController(text: widget.masterContent?.ctaUrl ?? '');
 
     _selectedContentType = widget.masterContent?.contentType ?? 'POSTING';
     _selectedPnpType = widget.masterContent?.pnpType ?? 'OTHER';
@@ -137,6 +140,7 @@ class MasterContentDetailScreenState
     _bodyController.dispose();
     _ctaController.dispose();
     _urlController.dispose();
+    _ctaUrlController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -344,19 +348,29 @@ class MasterContentDetailScreenState
                     ),
                     controller: _urlController,
                   ),
-                  if ((masterContent?.articlePath ?? '').isNotEmpty)
+                  if ((masterContent?.articlePath ?? '').isNotEmpty) ...[
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
                       child: Text(
                         masterContent?.approvedDate == null
-                            ? 'Website article written from an idea: it goes '
-                                'on the website at the Target URL when you '
-                                'approve this piece.'
+                            ? 'Website article: it goes on the website at the '
+                                'Target URL when you approve this piece.'
                             : 'Website article: published at the Target URL.',
                         key: const Key('articleInfo'),
                         style: const TextStyle(fontSize: 12),
                       ),
                     ),
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      key: const Key('ctaUrl'),
+                      decoration: const InputDecoration(
+                        labelText: 'Call to action link',
+                        hintText: 'Where the call to action at the bottom '
+                            'of the article links to',
+                      ),
+                      controller: _ctaUrlController,
+                    ),
+                  ],
                   // teaser only works with a link to the full article
                   ValueListenableBuilder<TextEditingValue>(
                     valueListenable: _urlController,
@@ -414,6 +428,9 @@ class MasterContentDetailScreenState
                           targetUrl: _urlController.text.isEmpty
                               ? null
                               : _urlController.text,
+                          ctaUrl: _ctaUrlController.text.isEmpty
+                              ? null
+                              : _ctaUrlController.text,
                           teaserMode:
                               _teaserMode && _urlController.text.isNotEmpty
                                   ? 'Y'

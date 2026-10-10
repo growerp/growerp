@@ -154,7 +154,10 @@ The content hub: author a piece of content **once**, then adapt it per platform
   page) when you approve it. Long-press and drag to reorder: the weekly content agent
   uses the ideas in that order. Tap **Ideas (n)** to collapse the strip.
 - **Teaser only:** with a Target URL set, every platform gets a short teaser that
-  links to the full article instead of the full text.
+  links to the full article instead of the full text. An article (content type
+  ARTICLE) that is not on your website yet gets its own page when it is adapted: the
+  Target URL becomes that page, and the old Target URL (for example a landing page)
+  becomes the **Call to action link** at the bottom of the article.
 - **Reads column:** website visitors who came in through the piece's links
   (*read / landed*). A visit counts as read after 15 seconds on the page and scrolling
   halfway, so bots and mail scanners are not counted. The per-platform breakdown is

@@ -116,33 +116,17 @@ data.title = data.title.toString().replaceAll(/<[^>]*>/, '').trim()
 data.body = data.body.toString().replaceAll(/<[^>]*>/, '')
 data.callToAction = data.callToAction?.toString()?.replaceAll(/<[^>]*>/, '')
 
-// ---- the website page the article will live on (written on approval)
-String slug = data.title.toString().toLowerCase().replaceAll(/[^a-z0-9]+/, '-')
-    .replaceAll(/^-+|-+$/, '')
-if (slug.length() > 60) slug = slug.substring(0, 60).replaceAll(/-+$/, '')
-if (!slug) slug = 'article'
-String articlePath = "_articles/${slug}"
-int n = 2
-while (ec.entity.find("growerp.marketing.MasterContent").condition("ownerPartyId", ownerPartyId)
-        .condition("articlePath", articlePath).count() > 0) {
-    articlePath = "_articles/${slug}-${n++}"
-}
-def website = ec.service.sync().name("growerp.100.WebsiteServices100.get#Website").call()?.website
-String hostName = website?.hostName
-if (!hostName || hostName == '????') { ec.message.addError("The company has no website address to publish the article on"); return }
-String scheme = hostName.contains('localhost') ? 'http' : 'https'
-targetUrl = "${scheme}://${hostName}/content/${articlePath}".toString()
-
 def created = ec.service.sync().name("growerp.100.MasterContentServices100.create#MasterContent")
     .parameters([planId: planId, contentType: 'ARTICLE', pnpType: thePnp, title: data.title,
-                 body: data.body, callToAction: data.callToAction, targetUrl: targetUrl,
-                 teaserMode: 'Y', status: 'DRAFT']).call()
+                 body: data.body, callToAction: data.callToAction, status: 'DRAFT']).call()
 if (ec.message.hasError()) return
 masterContentId = created.masterContentId
 pseudoId = created.pseudoId
 title = created.title
-ec.service.sync().name("update#growerp.marketing.MasterContent")
-    .parameters([masterContentId: masterContentId, articlePath: articlePath]).call()
+// the website page the article will live on (written on approval), teaser mode on
+targetUrl = ec.service.sync().name("growerp.100.MasterContentServices100.assign#ArticlePage")
+    .parameters([masterContentId: masterContentId]).call()?.targetUrl
+if (ec.message.hasError()) return
 // the idea is used up: the article is what remains
 idea.delete()
 ec.message.addMessage("Article '${title}' written; approve it to put it on the website")
