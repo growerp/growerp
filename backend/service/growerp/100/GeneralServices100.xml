@@ -2903,7 +2903,7 @@ limitations under the License.
 
     <service verb="migrate" noun="StaleLlmModelNames">
         <description>One-time idempotent migration for rows still naming a retired Gemini model
-            (2.0/2.5/3.5 flash). Agent rows and tenant settings are cleared so they follow the
+            (2.0/2.5/3.5/3.7 flash). Agent rows and tenant settings are cleared so they follow the
             central default again (SystemDefault -> env -> built-in); the SystemDefault row itself
             is pointed at the current built-in default. Rows naming a current or non-Gemini model
             are left untouched. Run from /apps/tools/Service/ServiceRun/runJson.</description>
@@ -2914,7 +2914,8 @@ limitations under the License.
         </out-parameters>
         <actions>
             <set field="retired" from="['gemini-2.0-flash', 'gemini-2.5-flash',
-                'gemini-2.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.5-flash-lite']"/>
+                'gemini-2.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.5-flash-lite',
+                'gemini-3.7-flash']"/>
             <set field="agentsCleared" from="0"/>
             <set field="tenantsCleared" from="0"/>
 

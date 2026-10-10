@@ -77,8 +77,8 @@ one.
 
 | Subsystem | Config field | Precedence | Default |
 |---|---|---|---|
-| ADK | `AdkAgentConfig.modelName` + `llmProvider` (per-agent) | explicit value on the agent row → `AdkManager.defaultModelFor(provider)`: `SystemDefault.aiModelName` (when its `aiProvider` matches) → env `GEMINI_MODEL` / `ANTHROPIC_MODEL` → system property → `DEFAULT_GEMINI_MODEL` / `DEFAULT_ANTHROPIC_MODEL` | `gemini-3.7-flash`, `claude-sonnet-5` |
-| Content-gen | `SystemSettings.aiModelName` + `aiProvider` (per-tenant), `SystemDefault.aiModelName` + `aiProvider` (GrowERP wide) | explicit override → tenant `SystemSettings` → `SystemDefault` (`defaultId='SYSTEM'`) → per-user Moqui preference (`GEMINI_MODEL`) → env var → system property → `DEFAULT_MODEL` | `gemini-3.7-flash` |
+| ADK | `AdkAgentConfig.modelName` + `llmProvider` (per-agent) | explicit value on the agent row → `AdkManager.defaultModelFor(provider)`: `SystemDefault.aiModelName` (when its `aiProvider` matches) → env `GEMINI_MODEL` / `ANTHROPIC_MODEL` → system property → `DEFAULT_GEMINI_MODEL` / `DEFAULT_ANTHROPIC_MODEL` | `gemini-3.8-flash`, `claude-sonnet-5` |
+| Content-gen | `SystemSettings.aiModelName` + `aiProvider` (per-tenant), `SystemDefault.aiModelName` + `aiProvider` (GrowERP wide) | explicit override → tenant `SystemSettings` → `SystemDefault` (`defaultId='SYSTEM'`) → per-user Moqui preference (`GEMINI_MODEL`) → env var → system property → `DEFAULT_MODEL` | `gemini-3.8-flash` |
 
 Both subsystems share one authority: the `SystemDefault` row (`defaultId='SYSTEM'`,
 edited in Support app → System Defaults). Change the GrowERP wide model there — no

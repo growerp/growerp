@@ -85,7 +85,7 @@ class AdkManager {
 
     /** Built-in fallbacks, used only when neither the SystemDefault row nor the environment
      *  names a model. Gemini value mirrors GeminiAiUtil.DEFAULT_MODEL on the backend. */
-    static final String DEFAULT_GEMINI_MODEL    = 'gemini-3.7-flash'
+    static final String DEFAULT_GEMINI_MODEL    = 'gemini-3.8-flash'
     static final String DEFAULT_ANTHROPIC_MODEL = 'claude-sonnet-5'
 
     /** Model used when an agent row names no model: the GrowERP wide SystemDefault row

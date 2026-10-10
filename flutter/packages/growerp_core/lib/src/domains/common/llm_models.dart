@@ -37,7 +37,7 @@ const List<String> adkRoutedProviders = ['gemini', 'anthropic'];
 /// from SystemSettings, then SystemDefault, then the environment (see
 /// GeminiAiUtil.resolveModelConfig / AdkManager.defaultModelFor), so this only has
 /// to match the built-in fallback there (GeminiAiUtil.DEFAULT_MODEL).
-const LlmModel defaultLlmModel = LlmModel('gemini', 'gemini-3.7-flash');
+const LlmModel defaultLlmModel = LlmModel('gemini', 'gemini-3.8-flash');
 
 /// The models offered in the System Setup, System Defaults and ADK agent
 /// screens. A model not listed here can still be used by picking "Other model"
