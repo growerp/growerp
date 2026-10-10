@@ -18,38 +18,42 @@
 # Or via docker-compose from the docker/ directory
 
 # ===== Stage 1: Build Flutter web applications =====
-FROM ghcr.io/cirruslabs/flutter:stable AS build-flutter
+FROM debian:trixie-slim AS build-flutter
 
 ARG BRANCH=master
 ARG DOCKER_TAG=NOTSET1
-USER root
-# cirruslabs publishes no image newer than Flutter 3.44 (Dart 3.12), the packages need Dart 3.13
+# Flutter is installed from the official tarball (cirruslabs publishes no image newer
+# than Flutter 3.44, the packages need Dart 3.13) and run as a non-root user, as the
+# flutter tool recommends.
 ARG FLUTTER_VERSION=3.47.6
 ENV FLUTTER_VERSION=${FLUTTER_VERSION}
-RUN rm -rf /sdks/flutter && \
-    curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz \
-    | tar -xJ -C /sdks && \
-    git config --system --add safe.directory '*' && \
-    flutter --version
 
 # Install linux dependencies
 RUN apt-get update && \
-    apt-get install -y git zip gdb libstdc++6 \
+    apt-get install -y curl git unzip xz-utils zip libstdc++6 \
     fonts-droid-fallback nano sed && \
-    apt-get clean
+    apt-get clean && \
+    useradd -m builder
+
+USER builder
+WORKDIR /home/builder
+RUN curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz \
+    | tar -xJ
+ENV PATH="/home/builder/flutter/bin:/home/builder/.pub-cache/bin:$PATH"
 
 # git security
-RUN git config --system --add safe.directory '*'
+RUN git config --global --add safe.directory '*' && \
+    flutter --version && \
+    flutter precache --web
 
 # activate melos
 RUN dart pub global activate melos
-ENV PATH="$PATH:/root/.pub-cache/bin"
 
 # Clone growerp repo (shallow — submodules not needed for Flutter build)
-WORKDIR /root
+WORKDIR /home/builder
 RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
 
-WORKDIR /root/growerp/flutter
+WORKDIR /home/builder/growerp/flutter
 # The clone is at the last committed version; the release bump is only committed
 # after this build succeeds. Stamp the release version (DOCKER_TAG) into the
 # embedded web apps so their internal version matches the image tag.
@@ -71,19 +75,19 @@ RUN melos build --no-select
 # iframe) and need no offline support. The default service worker only caused stale-bundle
 # problems after redeploys because version.json is not bumped, so browsers kept serving the
 # previous build. Disabling it (plus the unregister snippet injected below) keeps deploys fresh.
-WORKDIR /root/growerp/flutter/packages/admin
+WORKDIR /home/builder/growerp/flutter/packages/admin
 RUN flutter build web --release --wasm --pwa-strategy=none
-WORKDIR /root/growerp/flutter/packages/assessment
+WORKDIR /home/builder/growerp/flutter/packages/assessment
 RUN flutter build web --release --wasm --pwa-strategy=none
-WORKDIR /root/growerp/flutter/packages/freelance
+WORKDIR /home/builder/growerp/flutter/packages/freelance
 RUN flutter build web --release --wasm --pwa-strategy=none
 
 # The engine ships a .symbols map next to every CanvasKit/skwasm variant (~7.6MB
 # per app). They are only read by the offline stack-trace symboliser, never by
 # the browser, so drop them rather than bake them into the image three times.
-RUN find /root/growerp/flutter/packages/admin/build/web \
-         /root/growerp/flutter/packages/assessment/build/web \
-         /root/growerp/flutter/packages/freelance/build/web \
+RUN find /home/builder/growerp/flutter/packages/admin/build/web \
+         /home/builder/growerp/flutter/packages/assessment/build/web \
+         /home/builder/growerp/flutter/packages/freelance/build/web \
          -name '*.symbols' -delete
 
 # ===== Stage 2: Build Moqui 4 backend =====
@@ -117,11 +121,11 @@ RUN if [ "$DOCKER_TAG" != "NOTSET1" ]; then \
 
 # Copy Flutter web build artifacts from stage 1 into PopRestStore
 # (write to pop-rest-store directly, which is sym-linked as PopRestStore)
-COPY --from=build-flutter /root/growerp/flutter/packages/admin/build/web \
+COPY --from=build-flutter /home/builder/growerp/flutter/packages/admin/build/web \
     /root/growerp/pop-rest-store/screen/store/admin
-COPY --from=build-flutter /root/growerp/flutter/packages/assessment/build/web \
+COPY --from=build-flutter /home/builder/growerp/flutter/packages/assessment/build/web \
     /root/growerp/pop-rest-store/screen/store/assessment
-COPY --from=build-flutter /root/growerp/flutter/packages/freelance/build/web \
+COPY --from=build-flutter /home/builder/growerp/flutter/packages/freelance/build/web \
     /root/growerp/pop-rest-store/screen/store/freelance
 
 # Fix the base href in index.html to work with sub-paths
@@ -168,11 +172,12 @@ WORKDIR /opt/moqui
 RUN unzip -q /root/growerp/moqui/moqui-plus-runtime.war
 
 # ===== Stage 3: Create runtime image =====
-FROM eclipse-temurin:21-jdk
+FROM eclipse-temurin:21-jre-alpine
 ARG DOCKER_TAG=NOTSET1
 
+# bash: initstart.sh; curl: healthcheck
 # ffmpeg + fonts: narrated course videos (slides drawn with Java2D, joined by ffmpeg)
-RUN apt-get update && apt-get install -y apt-transport-https nano curl ffmpeg fontconfig fonts-dejavu-core && apt-get clean
+RUN apk add --no-cache bash nano curl ffmpeg fontconfig ttf-dejavu
 
 COPY --from=build-env /opt/moqui /opt/moqui
 # The war already contains a partial runtime copy; remove it so the full source

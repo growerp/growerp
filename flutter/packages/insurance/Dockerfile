@@ -16,39 +16,39 @@
 # with: docker build --build-arg DOCKER_TAG=1.3.0 -f packages/insurance/Dockerfile -t growerp/insurance . --progress=plain
 #
 #Stage 1 - Install dependencies and build the app
-FROM ghcr.io/cirruslabs/flutter:stable AS build-env
+FROM debian:trixie-slim AS build-env
 
 ARG BRANCH=development # currently either master or development we need to add existing
 ARG DOCKER_TAG=1.0.0+1
-USER root
-# cirruslabs publishes no image newer than Flutter 3.44 (Dart 3.12), the packages need Dart 3.13
+# Flutter is installed from the official tarball (cirruslabs publishes no image newer
+# than Flutter 3.44, the packages need Dart 3.13) and run as a non-root user, as the
+# flutter tool recommends.
 ARG FLUTTER_VERSION=3.47.6
 ENV FLUTTER_VERSION=${FLUTTER_VERSION}
-RUN rm -rf /sdks/flutter && \
-    curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz \
-    | tar -xJ -C /sdks && \
-    git config --system --add safe.directory '*' && \
-    flutter --version
 # Install linux dependencies
 RUN apt-get update && \
-    apt-get install -y software-properties-common && \
-    add-apt-repository universe && \
-    apt-get update && \
-    apt-get install -y git zip gdb libstdc++6 \
-    fonts-noto nano sed && \
-    apt-get clean
+  apt-get install -y curl git unzip xz-utils zip libstdc++6 \
+  fonts-noto nano sed && \
+  apt-get clean && \
+  useradd -m builder
+
+USER builder
+RUN mkdir /home/builder/sdk
+RUN curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz \
+    | tar -xJ -C /home/builder/sdk
+ENV PATH="/home/builder/sdk/flutter/bin:/home/builder/.pub-cache/bin:$PATH"
 
 # git security
-RUN git config --system --add safe.directory '*'
+RUN git config --global --add safe.directory '*' && \
+    flutter precache --web
 
 # activate melos
 RUN dart pub global activate melos
-ENV PATH="$PATH:/root/.pub-cache/bin"
 
 # get growerp repos
 # RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
-COPY . /root/flutter
-WORKDIR /root/flutter
+COPY --chown=builder:builder . /home/builder/flutter
+WORKDIR /home/builder/flutter
 RUN echo "pwd: $PWD"
 RUN sed -i 's\//webactivate \\' packages/insurance/lib/main.dart
 RUN flutter --version
@@ -61,7 +61,7 @@ RUN melos l10n --no-select
 # build
 RUN melos build --no-select
 # build flutter app
-WORKDIR /root/flutter/packages/insurance
+WORKDIR /home/builder/flutter/packages/insurance
 RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
 RUN flutter build web --release
 # Drop the engine .symbols maps: offline symboliser input only, never fetched
@@ -69,6 +69,6 @@ RUN flutter build web --release
 RUN find build/web -name '*.symbols' -delete
 
 # Stage 2 - Create the run-time image
-FROM nginx
-COPY --from=build-env /root/flutter/packages/insurance/build/web /usr/share/nginx/html
+FROM nginx:alpine
+COPY --from=build-env /home/builder/flutter/packages/insurance/build/web /usr/share/nginx/html
 EXPOSE 80
