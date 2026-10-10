@@ -11,8 +11,8 @@
          Channel rules (Outreach Personalizer): LINKEDIN DM ≤400 chars, ends on a
          question, NO URL until reply; EMAIL ≤120 words, assessment link + sign-off.
          Campaigns load as MKTG_CAMP_PLANNED / isActive=N — a human activates them.
-         Newsletter SUBSTACK post loads as DRAFT — approve (set READY) to let the
-         15-min publish job send it; EMAIL post is READY for the assisted send-queue.
+         The week-1 newsletter loads as a DRAFT master piece without platform variants:
+         adapt it per platform and approve it, like any other piece.
          ════════════════════════════════════════════════════════════════════════ -->
 
     <!-- ══════════════ 1 ── Marketing personas (target avatars) ══════════════ -->
@@ -100,11 +100,12 @@
     </mantle.marketing.campaign.MarketingCampaign>
 
     <!-- ══════════════ 3 ── Week-1 newsletter (PAIN theme) ══════════════
-         Edition #1 seeded so the weekly newsletter starts now; later editions come
-         from the Content Studio agent's Monday run. -->
+         Edition #1 seeded as a DRAFT master piece so the weekly newsletter can start
+         now: adapt it to the enabled platforms and approve it under Marketing > Content.
+         Later editions come from the Content and Social agent's Monday run. -->
 
     <growerp.marketing.MasterContent masterContentId="GROWERP_NL_W1" pseudoId="newsletter-w1-pain"
-        ownerPartyId="GROWERP" contentType="ARTICLE" pnpType="PAIN" status="APPROVED"
+        ownerPartyId="GROWERP" contentType="ARTICLE" pnpType="PAIN" status="DRAFT"
         title="Your spreadsheet is a single point of failure"
         callToAction="Take the free 2-minute assessment: 5 Signs You've Outgrown Spreadsheets"
         targetUrl="https://growerp.com/landing/erp-landing-page">
@@ -124,58 +125,5 @@ The alternative isn't a two-year ERP project. GrowERP is an open-source ERP buil
 
 Not sure whether you're there yet? That's exactly what the assessment is for: five questions, two minutes, and an honest score of whether the spreadsheet still fits your business — or whether it's quietly running it.]]></body>
     </growerp.marketing.MasterContent>
-
-    <!-- SUBSTACK variant — DRAFT: approve (set READY) and the 15-min publish job sends it. -->
-    <growerp.marketing.SocialPost postId="GROWERP_NL_W1_SUB" pseudoId="newsletter-w1-substack"
-        ownerPartyId="GROWERP" masterContentId="GROWERP_NL_W1" type="PAIN" platform="SUBSTACK"
-        status="DRAFT" headline="Your spreadsheet is a single point of failure">
-        <draftContent><![CDATA[Welcome to the first GrowERP weekly — short, practical notes on running a small business without drowning in admin. This week: the spreadsheet everything depends on.
-
-Somewhere in your business there is a spreadsheet that everything depends on. Orders go into it, stock counts come out of it, and someone copies its numbers into the accounting package at month-end.
-
-That spreadsheet is a single point of failure — three ways at once:
-
-**One broken formula.** A sort applied to half the columns, a deleted row, a =SUM that silently stopped one row short in March. Nobody notices until a customer, or the tax office, does.
-
-**One laptop.** The file lives where the file lives. When that machine is off, lost, or on holiday with its owner, so is the business.
-
-**One person.** Every serious spreadsheet has exactly one person who knows why column Q is special. The day they leave, you don't have a system — you have an artifact.
-
-The usual "fix" makes it worse: add an accounting package for the money and email for the coordination, and now the same order is typed three times into three tools that don't talk. Double entry isn't just wasted hours — it's where the errors breed.
-
-The alternative isn't a two-year ERP project. GrowERP is an open-source ERP built for 5–50 person businesses: orders, stock, invoices and accounting in one system. Live in a day, free two-week trial, no card.
-
-Wondering if you're there yet? Take the 2-minute check: https://growerp.com/landing/erp-landing-page
-
-If this landed in your inbox from a friend — subscribe to get one of these every week.
-
-Until next week,
-Hans, GrowERP]]></draftContent>
-    </growerp.marketing.SocialPost>
-
-    <!-- EMAIL variant — READY for the assisted send-queue (never auto-sent). -->
-    <growerp.marketing.SocialPost postId="GROWERP_NL_W1_EMAIL" pseudoId="newsletter-w1-email"
-        ownerPartyId="GROWERP" masterContentId="GROWERP_NL_W1" type="PAIN" platform="EMAIL"
-        status="READY" headline="Your spreadsheet is a single point of failure">
-        <draftContent><![CDATA[Hi there,
-
-First edition of the GrowERP weekly — one practical note per week on running a small business without drowning in admin.
-
-Somewhere in your business there's a spreadsheet everything depends on. It's a single point of failure three ways at once:
-
-1. One broken formula — a bad sort, a deleted row, a =SUM one row short — and nobody notices until a customer or the tax office does.
-2. One laptop — when the machine holding the file is off, lost, or on holiday, so is the business.
-3. One person — the only one who knows why column Q is special. When they leave, you have an artifact, not a system.
-
-The usual fix makes it worse: bolt on an accounting package and email threads, and the same order gets typed three times into tools that don't talk. Double entry is where the errors breed.
-
-The alternative isn't a two-year ERP project. GrowERP puts orders, stock, invoices and accounting in one open-source system — live in a day, free 2-week trial, no card.
-
-Is your business there yet? Find out in 2 minutes:
-https://growerp.com/landing/erp-landing-page
-
-Until next week,
-Hans, GrowERP]]></draftContent>
-    </growerp.marketing.SocialPost>
 
 </entity-facade-xml>

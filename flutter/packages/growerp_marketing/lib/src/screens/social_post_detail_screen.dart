@@ -70,8 +70,10 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
     'TWITTER',
     'FACEBOOK',
     'INSTAGRAM',
+    'MEDIUM',
     'SUBSTACK',
     'SUBSTACK_NOTE',
+    'EMAIL',
   ];
 
   @override
@@ -318,7 +320,12 @@ class SocialPostDetailScreenState extends State<SocialPostDetailScreen> {
                               value: null,
                               child: Text(MarketingLocalizations.of(context)!.none),
                             ),
-                            ...platforms.map((platform) {
+                            // a stored platform missing from the list still
+                            // shows, instead of failing the dropdown assertion
+                            ...{
+                              ...platforms,
+                              ?_selectedPlatform,
+                            }.map((platform) {
                               return DropdownMenuItem<String>(
                                 value: platform,
                                 child: Text(platform),
