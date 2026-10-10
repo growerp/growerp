@@ -362,5 +362,21 @@
   "dashPostFailed": "Failed",
   "@dashPostFailed": {
     "description": "Dashboard tile post funnel status label"
+  },
+  "masterContentFiles": "Master content files",
+  "@masterContentFiles": {
+    "description": "Title of the master content files (ZIP up/download) dialog and tooltip of its button"
+  },
+  "masterContentFilesInfo": "Download all master content with images as a ZIP file, or upload such a file. Pieces with an existing ID are updated, others are added as draft.",
+  "@masterContentFilesInfo": {
+    "description": "Explanation in the master content files dialog"
+  },
+  "uploadZip": "Upload ZIP",
+  "@uploadZip": {
+    "description": "Button: upload a master content ZIP file"
+  },
+  "downloadZip": "Download ZIP",
+  "@downloadZip": {
+    "description": "Button: download all master content as a ZIP file"
   }
 }

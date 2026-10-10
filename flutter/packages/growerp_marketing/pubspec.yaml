@@ -35,6 +35,11 @@ dependencies:
   equatable: ^2.1.0
   intl: ^0.20.3
 
+  # related image and ZIP up/download
+  image_picker: ^1.2.4
+  file_picker: ^13.1.0
+  cross_file: ^0.3.5+5
+
   # Web support
 
   # test helper classes in lib/src/*/integration_test are part of the public API

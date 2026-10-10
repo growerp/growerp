@@ -110,5 +110,9 @@
   "dashPostScheduled": "Geplant",
   "dashPostBacklog": "Backlog",
   "dashPostPublished": "Veröffentlicht",
-  "dashPostFailed": "Fehler"
+  "dashPostFailed": "Fehler",
+  "masterContentFiles": "Master-Content-Dateien",
+  "masterContentFilesInfo": "Laden Sie alle Master-Inhalte mit Bildern als ZIP-Datei herunter oder laden Sie eine solche Datei hoch. Beiträge mit vorhandener ID werden aktualisiert, andere als Entwurf hinzugefügt.",
+  "uploadZip": "ZIP hochladen",
+  "downloadZip": "ZIP herunterladen"
 }

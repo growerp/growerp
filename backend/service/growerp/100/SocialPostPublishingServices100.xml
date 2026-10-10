@@ -317,6 +317,12 @@
             <parameter name="errorMessage"/>
         </out-parameters>
         <actions>
+            <!-- the related image of the master piece this post was adapted from -->
+            <set field="masterImage" from="[:]"/>
+            <if condition="post.masterContentId">
+                <service-call name="growerp.100.MasterContentServices100.get#MasterContentImage"
+                    in-map="[masterContentId: post.masterContentId]" out-map="masterImage"/>
+            </if>
             <script><![CDATA[
                 import groovy.json.JsonOutput
                 import groovy.json.JsonSlurper
@@ -356,6 +362,10 @@
                     if (!paragraphs) {
                         paragraphs = [[type: "paragraph", content: [[type: "text", text: post.finalContent as String]]]]
                     }
+
+                    if (masterImage.publicUrl) paragraphs.add(0, [type: "captionedImage",
+                        content: [[type: "image2", attrs: [src: masterImage.publicUrl,
+                            fullscreen: false, imageSize: "normal"]]]])
 
                     def prosemirrorDoc = [type: "doc", content: paragraphs]
 
@@ -457,6 +467,12 @@
             <parameter name="errorMessage"/>
         </out-parameters>
         <actions>
+            <!-- the related image of the master piece this post was adapted from -->
+            <set field="masterImage" from="[:]"/>
+            <if condition="post.masterContentId">
+                <service-call name="growerp.100.MasterContentServices100.get#MasterContentImage"
+                    in-map="[masterContentId: post.masterContentId]" out-map="masterImage"/>
+            </if>
             <script><![CDATA[
                 import groovy.json.JsonOutput
                 import groovy.json.JsonSlurper
@@ -487,16 +503,17 @@
                     if (post.headline) postText.append(post.headline).append("\n\n")
                     postText.append(post.finalContent ?: "")
 
+                    def shareContent = [
+                        shareCommentary: [
+                            text: postText.toString()
+                        ],
+                        shareMediaCategory: "NONE"
+                    ]
                     def requestBody = [
                         author: personUrn,
                         lifecycleState: "PUBLISHED",
                         specificContent: [
-                            "com.linkedin.ugc.ShareContent": [
-                                shareCommentary: [
-                                    text: postText.toString()
-                                ],
-                                shareMediaCategory: "NONE"
-                            ]
+                            "com.linkedin.ugc.ShareContent": shareContent
                         ],
                         visibility: [
                             "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
@@ -506,6 +523,46 @@
                     def httpClient = HttpClient.newBuilder()
                         .connectTimeout(Duration.ofSeconds(15))
                         .build()
+
+                    // related image: register an upload, put the bytes, attach the asset
+                    if (masterImage.imageBase64) {
+                        def register = [registerUploadRequest: [
+                            recipes: ["urn:li:digitalmediaRecipe:feedshare-image"],
+                            owner: personUrn,
+                            serviceRelationships: [[relationshipType: "OWNER",
+                                identifier: "urn:li:userGeneratedContent"]]]]
+                        def regResponse = httpClient.send(HttpRequest.newBuilder()
+                            .uri(URI.create("https://api.linkedin.com/v2/assets?action=registerUpload"))
+                            .header("Authorization", "Bearer ${accessToken}")
+                            .header("Content-Type", "application/json")
+                            .header("X-Restli-Protocol-Version", "2.0.0")
+                            .POST(HttpRequest.BodyPublishers.ofString(JsonOutput.toJson(register)))
+                            .timeout(Duration.ofSeconds(30)).build(), HttpResponse.BodyHandlers.ofString())
+                        if (regResponse.statusCode() != 200) {
+                            errorMessage = "LinkedIn image register error ${regResponse.statusCode()}: ${regResponse.body()?.take(300)}"
+                            return
+                        }
+                        def reg = new JsonSlurper().parseText(regResponse.body())?.value
+                        def uploadUrl = reg?.uploadMechanism?.get(
+                            "com.linkedin.digitalmedia.uploadMechanism.MediaUploadHttpRequest")?.uploadUrl
+                        if (!uploadUrl || !reg?.asset) {
+                            errorMessage = "LinkedIn image register gave no upload URL: ${regResponse.body()?.take(300)}"
+                            return
+                        }
+                        def putResponse = httpClient.send(HttpRequest.newBuilder()
+                            .uri(URI.create(uploadUrl as String))
+                            .header("Authorization", "Bearer ${accessToken}")
+                            .PUT(HttpRequest.BodyPublishers.ofByteArray(
+                                Base64.getMimeDecoder().decode(masterImage.imageBase64 as String)))
+                            .timeout(Duration.ofSeconds(60)).build(), HttpResponse.BodyHandlers.ofString())
+                        if (!(putResponse.statusCode() in [200, 201])) {
+                            errorMessage = "LinkedIn image upload error ${putResponse.statusCode()}: ${putResponse.body()?.take(300)}"
+                            return
+                        }
+                        shareContent.shareMediaCategory = "IMAGE"
+                        shareContent.media = [[status: "READY", media: reg.asset,
+                            title: [text: post.headline ?: ""]]]
+                    }
 
                     def request = HttpRequest.newBuilder()
                         .uri(URI.create("https://api.linkedin.com/v2/ugcPosts"))
@@ -563,6 +620,12 @@
             <parameter name="errorMessage"/>
         </out-parameters>
         <actions>
+            <!-- the related image of the master piece this post was adapted from -->
+            <set field="masterImage" from="[:]"/>
+            <if condition="post.masterContentId">
+                <service-call name="growerp.100.MasterContentServices100.get#MasterContentImage"
+                    in-map="[masterContentId: post.masterContentId]" out-map="masterImage"/>
+            </if>
             <script><![CDATA[
                 import groovy.json.JsonSlurper
                 import java.net.http.HttpClient
@@ -570,6 +633,8 @@
                 import java.net.http.HttpResponse
                 import java.time.Duration
                 import java.net.URLEncoder
+                import java.util.Base64
+                import java.util.UUID
 
                 success = false
                 publishedUrl = null
@@ -586,16 +651,49 @@
                     if (post.headline) message.append(post.headline).append("\n\n")
                     message.append(post.finalContent ?: "")
 
-                    def form = "message=" + URLEncoder.encode(message.toString(), "UTF-8") +
-                               "&access_token=" + URLEncoder.encode(accessToken as String, "UTF-8")
-
                     def httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15)).build()
-                    def request = HttpRequest.newBuilder()
-                        .uri(URI.create("https://graph.facebook.com/v19.0/${pageId}/feed"))
-                        .header("Content-Type", "application/x-www-form-urlencoded")
-                        .POST(HttpRequest.BodyPublishers.ofString(form))
-                        .timeout(Duration.ofSeconds(30))
-                        .build()
+                    def request
+                    if (masterImage.publicUrl) {
+                        // with the related image: a photo post, the message as its caption
+                        def form = "url=" + URLEncoder.encode(masterImage.publicUrl as String, "UTF-8") +
+                                   "&caption=" + URLEncoder.encode(message.toString(), "UTF-8") +
+                                   "&access_token=" + URLEncoder.encode(accessToken as String, "UTF-8")
+                        request = HttpRequest.newBuilder()
+                            .uri(URI.create("https://graph.facebook.com/v19.0/${pageId}/photos"))
+                            .header("Content-Type", "application/x-www-form-urlencoded")
+                            .POST(HttpRequest.BodyPublishers.ofString(form))
+                            .timeout(Duration.ofSeconds(60))
+                            .build()
+                    } else if (masterImage.imageBase64) {
+                        // no public website copy: upload the image bytes themselves
+                        def boundary = "growerp" + UUID.randomUUID().toString().replace("-", "")
+                        def out = new ByteArrayOutputStream()
+                        def textPart = { String name, String value ->
+                            out.write(("--${boundary}\r\nContent-Disposition: form-data; name=\"${name}\"\r\n\r\n" +
+                                "${value}\r\n").getBytes("UTF-8"))
+                        }
+                        textPart("caption", message.toString())
+                        textPart("access_token", accessToken as String)
+                        out.write(("--${boundary}\r\nContent-Disposition: form-data; name=\"source\"; " +
+                            "filename=\"image\"\r\nContent-Type: application/octet-stream\r\n\r\n").getBytes("UTF-8"))
+                        out.write(Base64.getMimeDecoder().decode(masterImage.imageBase64 as String))
+                        out.write("\r\n--${boundary}--\r\n".getBytes("UTF-8"))
+                        request = HttpRequest.newBuilder()
+                            .uri(URI.create("https://graph.facebook.com/v19.0/${pageId}/photos"))
+                            .header("Content-Type", "multipart/form-data; boundary=${boundary}")
+                            .POST(HttpRequest.BodyPublishers.ofByteArray(out.toByteArray()))
+                            .timeout(Duration.ofSeconds(60))
+                            .build()
+                    } else {
+                        def form = "message=" + URLEncoder.encode(message.toString(), "UTF-8") +
+                                   "&access_token=" + URLEncoder.encode(accessToken as String, "UTF-8")
+                        request = HttpRequest.newBuilder()
+                            .uri(URI.create("https://graph.facebook.com/v19.0/${pageId}/feed"))
+                            .header("Content-Type", "application/x-www-form-urlencoded")
+                            .POST(HttpRequest.BodyPublishers.ofString(form))
+                            .timeout(Duration.ofSeconds(30))
+                            .build()
+                    }
 
                     def response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
                     def responseBody = response.body()
@@ -603,7 +701,7 @@
 
                     if (response.statusCode() == 200) {
                         def parsed = new JsonSlurper().parseText(responseBody)
-                        def id = parsed?.id
+                        def id = parsed?.post_id ?: parsed?.id   // /photos returns post_id
                         publishedUrl = id ? "https://www.facebook.com/${id}" : "https://www.facebook.com/${pageId}"
                         success = true
                     } else {
@@ -636,6 +734,12 @@
             <parameter name="errorMessage"/>
         </out-parameters>
         <actions>
+            <!-- the related image of the master piece this post was adapted from -->
+            <set field="masterImage" from="[:]"/>
+            <if condition="post.masterContentId">
+                <service-call name="growerp.100.MasterContentServices100.get#MasterContentImage"
+                    in-map="[masterContentId: post.masterContentId]" out-map="masterImage"/>
+            </if>
             <script><![CDATA[
                 import groovy.json.JsonOutput
                 import groovy.json.JsonSlurper
@@ -658,7 +762,9 @@
                     def requestBody = [
                         title:         post.headline ?: "Untitled",
                         contentFormat: "markdown",
-                        content:       post.finalContent ?: "",
+                        content:       (masterImage.publicUrl ?
+                            "![${post.headline ?: ''}](${masterImage.publicUrl})\n\n" : "") +
+                            (post.finalContent ?: ""),
                         publishStatus: "draft"
                     ]
 
@@ -720,6 +826,12 @@
             <parameter name="errorMessage"/>
         </out-parameters>
         <actions>
+            <!-- the related image of the master piece this post was adapted from -->
+            <set field="masterImage" from="[:]"/>
+            <if condition="post.masterContentId">
+                <service-call name="growerp.100.MasterContentServices100.get#MasterContentImage"
+                    in-map="[masterContentId: post.masterContentId]" out-map="masterImage"/>
+            </if>
             <script><![CDATA[
                 import groovy.json.JsonOutput
                 import groovy.json.JsonSlurper
@@ -799,10 +911,43 @@
                     def httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15)).build()
                     def previousTweetId = null
 
+                    // related image: upload it (multipart, the body is not signed) and
+                    // attach it to the first tweet of the thread
+                    def mediaId = null
+                    if (masterImage.imageBase64) {
+                        def mediaUrl = "${baseUrl}/2/media/upload"
+                        def boundary = "growerp" + UUID.randomUUID().toString().replace("-", "")
+                        def out = new ByteArrayOutputStream()
+                        out.write(("--${boundary}\r\nContent-Disposition: form-data; name=\"media_category\"\r\n\r\n" +
+                            "tweet_image\r\n").getBytes("UTF-8"))
+                        out.write(("--${boundary}\r\nContent-Disposition: form-data; name=\"media\"; " +
+                            "filename=\"image\"\r\nContent-Type: application/octet-stream\r\n\r\n").getBytes("UTF-8"))
+                        out.write(Base64.getMimeDecoder().decode(masterImage.imageBase64 as String))
+                        out.write("\r\n--${boundary}--\r\n".getBytes("UTF-8"))
+                        def mediaResponse = httpClient.send(HttpRequest.newBuilder()
+                            .uri(URI.create(mediaUrl))
+                            .header("Authorization", authHeaderFor(mediaUrl))
+                            .header("Content-Type", "multipart/form-data; boundary=${boundary}")
+                            .POST(HttpRequest.BodyPublishers.ofByteArray(out.toByteArray()))
+                            .timeout(Duration.ofSeconds(60)).build(), HttpResponse.BodyHandlers.ofString())
+                        ec.logger.info("X media upload response [${mediaResponse.statusCode()}]: ${mediaResponse.body()?.take(300)}")
+                        if (!(mediaResponse.statusCode() in [200, 201])) {
+                            errorMessage = "X image upload error ${mediaResponse.statusCode()}: ${mediaResponse.body()?.take(300)}"
+                            return
+                        }
+                        def media = new JsonSlurper().parseText(mediaResponse.body())
+                        mediaId = (media?.data?.id ?: media?.media_id_string) as String
+                        if (!mediaId) {
+                            errorMessage = "X image upload gave no media id: ${mediaResponse.body()?.take(300)}"
+                            return
+                        }
+                    }
+
                     segments.eachWithIndex { segment, idx ->
                         if (errorMessage) return                     // a previous tweet failed
                         def body = [text: segment]
                         if (previousTweetId) body.reply = [in_reply_to_tweet_id: previousTweetId]
+                        if (idx == 0 && mediaId) body.media = [media_ids: [mediaId]]
 
                         def request = HttpRequest.newBuilder()
                             .uri(URI.create(apiUrl))

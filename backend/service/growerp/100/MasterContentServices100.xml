@@ -50,6 +50,18 @@
                 </econditions>
                 <order-by field-name="-lastModifiedDate" />
             </entity-find>
+            <!-- rows as maps carrying the small image (base64) for the list/dialog -->
+            <set field="rows" from="[]" />
+            <iterate list="masterContents" entry="m">
+                <set field="row" from="new HashMap(m.getMap())" />
+                <if condition="m.imageLocation">
+                    <service-call name="growerp.100.ImageServices100.download#Image"
+                        in-map="[contentLocation: m.imageLocation + 'small']" out-map="img" />
+                    <set field="row.image" from="img.imageFile ?: null" />
+                </if>
+                <script>rows.add(row)</script>
+            </iterate>
+            <set field="masterContents" from="rows" />
         </actions>
     </service>
 
@@ -71,7 +83,9 @@
             <parameter name="teaserMode" default-value="N">
                 <description>Y = adapted posts are teasers linking to targetUrl</description>
             </parameter>
+            <parameter name="ctaUrl" />
             <parameter name="status" default-value="DRAFT" />
+            <parameter name="image"><description>optional related image, base64</description></parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="masterContentId" />
@@ -90,6 +104,7 @@
             <parameter name="approvedDate" type="Timestamp" />
             <parameter name="createdDate" type="Timestamp" />
             <parameter name="lastModifiedDate" type="Timestamp" />
+            <parameter name="image" />
         </out-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
@@ -120,10 +135,15 @@
                     callToAction: callToAction,
                     targetUrl: targetUrl,
                     teaserMode: teaserMode == 'Y' ? 'Y' : 'N',
+                    ctaUrl: ctaUrl,
                     status: status,
                     createdDate: ec.user.nowTimestamp,
                     lastModifiedDate: ec.user.nowTimestamp
                 ]" />
+            <if condition="image">
+                <service-call name="growerp.100.MasterContentServices100.save#MasterContentImage"
+                    in-map="[masterContentId: masterContentId, image: image]" />
+            </if>
 
             <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc">
                 <field-map field-name="masterContentId" />
@@ -142,6 +162,12 @@
             <set field="approvedDate" from="mc.approvedDate" />
             <set field="createdDate" from="mc.createdDate" />
             <set field="lastModifiedDate" from="mc.lastModifiedDate" />
+            <set field="image" from="null" />
+            <if condition="mc.imageLocation">
+                <service-call name="growerp.100.ImageServices100.download#Image"
+                    in-map="[contentLocation: mc.imageLocation + 'small']" out-map="img" />
+                <set field="image" from="img.imageFile ?: null" />
+            </if>
         </actions>
     </service>
 
@@ -159,6 +185,7 @@
             <parameter name="teaserMode" />
             <parameter name="ctaUrl" />
             <parameter name="status" />
+            <parameter name="image"><description>base64; empty string removes the image, omitted keeps it</description></parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="masterContentId" />
@@ -177,6 +204,7 @@
             <parameter name="approvedDate" type="Timestamp" />
             <parameter name="createdDate" type="Timestamp" />
             <parameter name="lastModifiedDate" type="Timestamp" />
+            <parameter name="image" />
         </out-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
@@ -211,6 +239,10 @@
                     status: status ?: mc.status,
                     lastModifiedDate: ec.user.nowTimestamp
                 ]" />
+            <if condition="image != null">
+                <service-call name="growerp.100.MasterContentServices100.save#MasterContentImage"
+                    in-map="[masterContentId: masterContentId, image: image]" />
+            </if>
 
             <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="updated">
                 <field-map field-name="masterContentId" />
@@ -230,6 +262,12 @@
             <set field="approvedDate" from="updated.approvedDate" />
             <set field="createdDate" from="updated.createdDate" />
             <set field="lastModifiedDate" from="updated.lastModifiedDate" />
+            <set field="image" from="null" />
+            <if condition="updated.imageLocation">
+                <service-call name="growerp.100.ImageServices100.download#Image"
+                    in-map="[contentLocation: updated.imageLocation + 'small']" out-map="img" />
+                <set field="image" from="img.imageFile ?: null" />
+            </if>
         </actions>
     </service>
 
@@ -325,8 +363,231 @@
             <if condition="mc.ownerPartyId != ownerPartyId">
                 <return error="true" message="Access denied to this master content" />
             </if>
+            <if condition="mc.imageLocation">
+                <service-call name="growerp.100.MasterContentServices100.save#MasterContentImage"
+                    in-map="[masterContentId: masterContentId, image: '']" />
+            </if>
             <service-call name="delete#growerp.marketing.MasterContent"
                 in-map="[masterContentId: masterContentId]" />
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!--  Related image: stored by upload#Image under              -->
+    <!--  images/masterContent/<id>/ (large/medium/small); a public -->
+    <!--  copy is registered as website image                       -->
+    <!--  /getImage/articles/<id>.jpg for the article hero and the  -->
+    <!--  platforms that fetch an image by URL.                     -->
+    <!-- ========================================================= -->
+    <service verb="save" noun="MasterContentImage" authenticate="true">
+        <description>Store (base64) or remove (empty) the related image of a master piece.</description>
+        <in-parameters>
+            <parameter name="masterContentId" required="true" />
+            <parameter name="image"><description>base64 image; empty removes it</description></parameter>
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc"
+                for-update="true" />
+            <if condition="!mc || mc.ownerPartyId != ownerPartyId">
+                <return error="true" message="Master content not found: ${masterContentId}" />
+            </if>
+            <set field="publicName" value="articles/${masterContentId}.jpg" />
+            <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find>
+            <iterate list="stores" entry="store">
+                <entity-delete-by-condition entity-name="growerp.store.ProductStoreContent">
+                    <econdition field-name="productStoreId" from="store.productStoreId" />
+                    <econdition field-name="description" from="publicName" />
+                </entity-delete-by-condition>
+            </iterate>
+            <if condition="image">
+                <service-call name="growerp.100.ImageServices100.upload#Image"
+                    in-map="[type: 'masterContent', id: masterContentId, base64: image]" />
+                <set field="mc.imageLocation"
+                    value="dbresource://C${companyPartyId}/images/masterContent/${masterContentId}/" />
+                <iterate list="stores" entry="store">
+                    <service-call name="create#growerp.store.ProductStoreContent"
+                        in-map="[productStoreId: store.productStoreId, description: publicName,
+                            contentTypeEnumId: 'PrstImageLarge',
+                            contentLocation: mc.imageLocation + 'large']" />
+                </iterate>
+                <else>
+                    <if condition="mc.imageLocation">
+                        <service-call name="growerp.100.ImageServices100.delete#Image"
+                            in-map="[type: 'masterContent', id: masterContentId]" />
+                    </if>
+                    <set field="mc.imageLocation" from="null" />
+                </else>
+            </if>
+            <set field="mc.lastModifiedDate" from="ec.user.nowTimestamp" />
+            <entity-update value-field="mc" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="MasterContentImage" authenticate="true">
+        <description>The related image of a master piece for publishing: the large image as
+            base64 and its public website URL (empty when the company has no website).
+            imageBase64 is empty when the piece has no image.</description>
+        <in-parameters>
+            <parameter name="masterContentId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="imageBase64" />
+            <parameter name="publicPath"><description>/getImage/articles/&lt;id&gt;.jpg</description></parameter>
+            <parameter name="publicUrl" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc" />
+            <if condition="!mc?.imageLocation">
+                <return />
+            </if>
+            <service-call name="growerp.100.ImageServices100.download#Image"
+                in-map="[contentLocation: mc.imageLocation + 'large']" out-map="img" />
+            <set field="imageBase64" from="img.imageFile ?: null" />
+            <set field="publicName" value="articles/${masterContentId}.jpg" />
+            <entity-find entity-name="growerp.store.ProductStoreContent" list="publicRows" limit="1">
+                <econdition field-name="description" from="publicName" />
+            </entity-find>
+            <if condition="publicRows">
+                <set field="publicPath" value="/getImage/${publicName}" />
+                <!-- host from the store itself: the scheduler runs as SystemSupport, so
+                     get#Website (logged-in user's company) would give the wrong site -->
+                <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                    list="hostNames" limit="1">
+                    <econdition field-name="productStoreId" from="publicRows[0].productStoreId" />
+                    <econdition field-name="settingTypeEnumId" value="PsstHostname" />
+                    <date-filter />
+                    <order-by field-name="fromDate" />
+                </entity-find>
+                <set field="hostName" from="hostNames ? hostNames[0].settingValue : null" />
+                <if condition="hostName">
+                    <set field="publicUrl" from="(hostName.contains('localhost') ? 'http' : 'https') +
+                        '://' + hostName + publicPath" />
+                </if>
+            </if>
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!--  ZIP up/download: masterContents.json + images/<pseudoId>  -->
+    <!--  (the large image). Groovy only for the zip and JSON work. -->
+    <!-- ========================================================= -->
+    <service verb="export" noun="MasterContents" authenticate="true">
+        <description>All master content pieces of the owner with their images as a ZIP.</description>
+        <out-parameters>
+            <parameter name="zip"><description>base64 zip file</description></parameter>
+            <parameter name="fileName" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find entity-name="growerp.marketing.MasterContent" list="pieces">
+                <econdition field-name="ownerPartyId" />
+                <order-by field-name="pseudoId" />
+            </entity-find>
+            <script><![CDATA[
+                import groovy.json.JsonOutput
+                import java.util.zip.ZipEntry
+                import java.util.zip.ZipOutputStream
+
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream()
+                ZipOutputStream zipOut = new ZipOutputStream(bytes)
+                List rows = []
+                for (mc in pieces) {
+                    Map row = [pseudoId: mc.pseudoId, contentType: mc.contentType,
+                        pnpType: mc.pnpType, title: mc.title, body: mc.body,
+                        callToAction: mc.callToAction, targetUrl: mc.targetUrl,
+                        teaserMode: mc.teaserMode, ctaUrl: mc.ctaUrl, status: mc.status]
+                    def ref = mc.imageLocation ? ec.resource.getLocationReference(mc.imageLocation + 'large') : null
+                    if (ref?.getExists()) {
+                        byte[] img = ref.openStream().withCloseable { it.bytes }
+                        String ext = (img.length > 3 && (img[0] & 0xff) == 0x89 && img[1] == 0x50) ? 'png' :
+                            (img.length > 3 && img[0] == 0x47 && img[1] == 0x49) ? 'gif' : 'jpg'
+                        row.image = "images/${mc.pseudoId}.${ext}".toString()
+                        zipOut.putNextEntry(new ZipEntry(row.image))
+                        zipOut.write(img)
+                        zipOut.closeEntry()
+                    }
+                    rows.add(row)
+                }
+                zipOut.putNextEntry(new ZipEntry('masterContents.json'))
+                zipOut.write(JsonOutput.prettyPrint(JsonOutput.toJson([masterContents: rows])).getBytes('UTF-8'))
+                zipOut.closeEntry()
+                zipOut.close()
+                zip = Base64.getEncoder().encodeToString(bytes.toByteArray())
+                fileName = "master-content-${ec.user.nowTimestamp.toLocalDateTime().toLocalDate()}.zip"
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="import" noun="MasterContents" authenticate="true">
+        <description>Load master content pieces from a ZIP made by export#MasterContents. A
+            piece with a pseudoId the owner already has updates that piece, any other is
+            created as DRAFT. Imported pieces are never approved and get no website article
+            page, so nothing is published until a human approves them here.</description>
+        <in-parameters>
+            <parameter name="zip" required="true"><description>base64 zip file</description></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="createdCount" type="Integer" />
+            <parameter name="updatedCount" type="Integer" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <script><![CDATA[
+                import groovy.json.JsonSlurper
+                import java.util.zip.ZipInputStream
+
+                pieces = []
+                Map files = [:]
+                new ZipInputStream(new ByteArrayInputStream(Base64.getMimeDecoder().decode(zip))).withCloseable { zin ->
+                    def entry
+                    while ((entry = zin.getNextEntry()) != null) {
+                        if (!entry.isDirectory()) files[entry.getName()] = zin.readAllBytes()
+                    }
+                }
+                byte[] json = files['masterContents.json']
+                if (!json) {
+                    ec.message.addError("No masterContents.json in the ZIP file")
+                    return
+                }
+                pieces = (new JsonSlurper().parseText(new String(json, 'UTF-8'))?.masterContents ?: [])
+                    .findAll { it instanceof Map && it.title }
+                for (Map piece in pieces) {
+                    byte[] img = piece.image ? files[piece.image] : null
+                    piece.image = img ? Base64.getEncoder().encodeToString(img) : null
+                }
+            ]]></script>
+            <set field="createdCount" from="0" type="Integer" />
+            <set field="updatedCount" from="0" type="Integer" />
+            <iterate list="pieces" entry="piece">
+                <set field="existing" from="null" />
+                <if condition="piece.pseudoId">
+                    <entity-find entity-name="growerp.marketing.MasterContent" list="found" limit="1">
+                        <econdition field-name="ownerPartyId" />
+                        <econdition field-name="pseudoId" from="piece.pseudoId" />
+                    </entity-find>
+                    <set field="existing" from="found ? found[0] : null" />
+                </if>
+                <set field="fields" from="[contentType: piece.contentType, pnpType: piece.pnpType,
+                    title: piece.title, body: piece.body, callToAction: piece.callToAction,
+                    targetUrl: piece.targetUrl, teaserMode: piece.teaserMode, ctaUrl: piece.ctaUrl,
+                    image: piece.image]" />
+                <if condition="existing">
+                    <service-call name="growerp.100.MasterContentServices100.update#MasterContent"
+                        in-map="fields + [masterContentId: existing.masterContentId]" />
+                    <set field="updatedCount" from="updatedCount + 1" />
+                    <else>
+                        <service-call name="growerp.100.MasterContentServices100.create#MasterContent"
+                            in-map="fields + [pseudoId: piece.pseudoId, status: 'DRAFT']" />
+                        <set field="createdCount" from="createdCount + 1" />
+                    </else>
+                </if>
+            </iterate>
         </actions>
     </service>
 
@@ -874,6 +1135,9 @@
             <if condition="!stores">
                 <return error="true" message="The company has no website to publish the article on" />
             </if>
+            <service-call name="growerp.100.MasterContentServices100.get#MasterContentImage"
+                in-map="[masterContentId: masterContentId]" out-map="heroOut" />
+            <set field="heroPath" from="heroOut.publicPath" />
             <!-- page and index text are built in Groovy (string work); the pages are plain
                  markdown, a ${...} in the text is shown as is -->
             <entity-find entity-name="growerp.marketing.MasterContent" list="articles">
@@ -893,6 +1157,7 @@
                     return plain.replace('-->', '')
                 }
                 pageText = "<!-- description: ${summary(mc.body)} -->\n# ${mc.title}\n\n" +
+                    (heroPath ? "![${mc.title}](${heroPath})\n\n" : '') +
                     "${mc.body}\n\n" + (mc.callToAction ? (mc.ctaUrl ? "**[${mc.callToAction}](${mc.ctaUrl})**\n"
                         : "**${mc.callToAction}**\n") : '')
                 StringBuilder idx = new StringBuilder("<!-- description: All articles -->\n# Articles\n\n")

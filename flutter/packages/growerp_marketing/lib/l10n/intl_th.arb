@@ -110,5 +110,9 @@
   "dashPostScheduled": "ตั้งเวลา",
   "dashPostBacklog": "รอคิว",
   "dashPostPublished": "เผยแพร่แล้ว",
-  "dashPostFailed": "ล้มเหลว"
+  "dashPostFailed": "ล้มเหลว",
+  "masterContentFiles": "ไฟล์เนื้อหาหลัก",
+  "masterContentFilesInfo": "ดาวน์โหลดเนื้อหาหลักทั้งหมดพร้อมรูปภาพเป็นไฟล์ ZIP หรืออัปโหลดไฟล์ดังกล่าว ชิ้นที่มี ID อยู่แล้วจะถูกอัปเดต ชิ้นอื่นจะถูกเพิ่มเป็นฉบับร่าง",
+  "uploadZip": "อัปโหลด ZIP",
+  "downloadZip": "ดาวน์โหลด ZIP"
 }

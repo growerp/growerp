@@ -21,6 +21,7 @@ import '../bloc/master_content_bloc.dart';
 import '../bloc/master_content_event.dart';
 import '../bloc/master_content_state.dart';
 import 'master_content_detail_screen.dart';
+import 'master_content_files_dialog.dart';
 import 'master_content_list_styled_data.dart';
 import 'content_ideas_panel.dart';
 import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
@@ -188,6 +189,25 @@ class MasterContentListState extends State<MasterContentList> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
+                          FloatingActionButton(
+                            key: const Key('upDownload'),
+                            heroTag: 'masterContentFiles',
+                            onPressed: () async {
+                              await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) =>
+                                    BlocProvider.value(
+                                  value: _masterContentBloc,
+                                  child: const MasterContentFilesDialog(),
+                                ),
+                              );
+                              if (mounted) _searchFocusNode.requestFocus();
+                            },
+                            tooltip: localizations.masterContentFiles,
+                            child: const Icon(Icons.file_copy),
+                          ),
+                          const SizedBox(height: 10),
                           FloatingActionButton(
                             key: const Key('addNewMasterContent'),
                             heroTag: 'masterContentBtn1',

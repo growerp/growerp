@@ -110,5 +110,9 @@
   "dashPostScheduled": "Ingepland",
   "dashPostBacklog": "Wachtrij",
   "dashPostPublished": "Gepubliceerd",
-  "dashPostFailed": "Mislukt"
+  "dashPostFailed": "Mislukt",
+  "masterContentFiles": "Mastercontent-bestanden",
+  "masterContentFilesInfo": "Download alle mastercontent met afbeeldingen als ZIP-bestand, of upload zo'n bestand. Stukken met een bestaand ID worden bijgewerkt, andere worden als concept toegevoegd.",
+  "uploadZip": "ZIP uploaden",
+  "downloadZip": "ZIP downloaden"
 }

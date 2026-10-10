@@ -110,5 +110,9 @@
   "dashPostScheduled": "已排程",
   "dashPostBacklog": "待排程",
   "dashPostPublished": "已发布",
-  "dashPostFailed": "失败"
+  "dashPostFailed": "失败",
+  "masterContentFiles": "主内容文件",
+  "masterContentFilesInfo": "将所有主内容及图片下载为 ZIP 文件，或上传此类文件。已有 ID 的内容会被更新，其他内容以草稿形式添加。",
+  "uploadZip": "上传 ZIP",
+  "downloadZip": "下载 ZIP"
 }

@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -52,6 +53,12 @@ class MasterContent {
   /// landing page [targetUrl] pointed to before the article got its own page
   final String? ctaUrl;
 
+  /// Optional related image: hero of the website article and attached to the
+  /// adapted social posts. Fetched as the small version; on save an empty
+  /// list removes it and null leaves it unchanged.
+  @Uint8ListConverter()
+  final Uint8List? image;
+
   /// Status: DRAFT, APPROVED, ADAPTED
   @JsonKey(defaultValue: 'DRAFT')
   final String status;
@@ -82,6 +89,7 @@ class MasterContent {
     this.teaserMode,
     this.articlePath,
     this.ctaUrl,
+    this.image,
     required this.status,
     this.approvedDate,
     this.createdDate,
@@ -101,6 +109,7 @@ class MasterContent {
     String? teaserMode,
     String? articlePath,
     String? ctaUrl,
+    Uint8List? image,
     String? status,
     DateTime? approvedDate,
     DateTime? createdDate,
@@ -119,6 +128,7 @@ class MasterContent {
       teaserMode: teaserMode ?? this.teaserMode,
       articlePath: articlePath ?? this.articlePath,
       ctaUrl: ctaUrl ?? this.ctaUrl,
+      image: image ?? this.image,
       status: status ?? this.status,
       approvedDate: approvedDate ?? this.approvedDate,
       createdDate: createdDate ?? this.createdDate,

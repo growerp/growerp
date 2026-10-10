@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -34,6 +35,8 @@ class MasterContentBloc
     on<MasterContentGenerateWithAI>(_onGenerateWithAI);
     on<MasterContentAdaptForPlatform>(_onAdaptForPlatform);
     on<MasterContentApprove>(_onApprove);
+    on<MasterContentExport>(_onExport);
+    on<MasterContentImport>(_onImport);
     on<MasterContentSearchRequested>(
       _onSearchRequested,
       transformer: masterContentSearchDebounce(),
@@ -98,7 +101,9 @@ class MasterContentBloc
         callToAction: event.masterContent.callToAction,
         targetUrl: event.masterContent.targetUrl,
         teaserMode: event.masterContent.teaserMode,
+        ctaUrl: event.masterContent.ctaUrl,
         status: event.masterContent.status,
+        image: _imageField(event.masterContent.image),
       );
       emit(state.copyWith(
         status: MasterContentStatus.success,
@@ -134,6 +139,7 @@ class MasterContentBloc
         teaserMode: event.masterContent.teaserMode,
         ctaUrl: event.masterContent.ctaUrl,
         status: event.masterContent.status,
+        image: _imageField(event.masterContent.image),
       );
       emit(state.copyWith(
         status: MasterContentStatus.success,
@@ -253,13 +259,65 @@ class MasterContentBloc
       emit(state.copyWith(
         status: MasterContentStatus.success,
         masterContents: state.masterContents
-            .map((m) =>
-                m.masterContentId == updated.masterContentId ? updated : m)
+            .map((m) => m.masterContentId == updated.masterContentId
+                ? updated.copyWith(image: m.image)
+                : m)
             .toList(),
         message: event.approve
             ? 'Master content approved — variants will auto-publish at their scheduled time'
             : 'Master content approval revoked',
       ));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: MasterContentStatus.failure, message: await getDioError(e)));
+    } catch (e) {
+      emit(state.copyWith(
+          status: MasterContentStatus.failure, message: e.toString()));
+    }
+  }
+
+  Future<void> _onExport(
+    MasterContentExport event,
+    Emitter<MasterContentState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: MasterContentStatus.loading));
+      final raw = await restClient.exportMasterContents();
+      // dio may return the body as a raw JSON String; decode defensively
+      final result =
+          (raw is String ? jsonDecode(raw) : raw) as Map<String, dynamic>;
+      emit(state.copyWith(
+        status: MasterContentStatus.success,
+        exportFile: (
+          name: result['fileName'] as String,
+          bytes: base64Decode(result['zip'] as String),
+        ),
+      ));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: MasterContentStatus.failure, message: await getDioError(e)));
+    } catch (e) {
+      emit(state.copyWith(
+          status: MasterContentStatus.failure, message: e.toString()));
+    }
+  }
+
+  Future<void> _onImport(
+    MasterContentImport event,
+    Emitter<MasterContentState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: MasterContentStatus.loading));
+      final raw = await restClient.importMasterContents(
+          zip: base64Encode(event.zipFile));
+      final result =
+          (raw is String ? jsonDecode(raw) : raw) as Map<String, dynamic>;
+      emit(state.copyWith(
+        status: MasterContentStatus.success,
+        message: 'Imported: ${result['createdCount'] ?? 0} new, '
+            '${result['updatedCount'] ?? 0} changed',
+      ));
+      add(const MasterContentFetch(refresh: true));
     } on DioException catch (e) {
       emit(state.copyWith(
           status: MasterContentStatus.failure, message: await getDioError(e)));
@@ -279,3 +337,8 @@ class MasterContentBloc
     );
   }
 }
+
+/// The image as sent to the backend: null keeps the stored one, an empty
+/// list removes it ('' to the backend), bytes replace it.
+String? _imageField(Uint8List? image) =>
+    image == null ? null : (image.isEmpty ? '' : base64Encode(image));

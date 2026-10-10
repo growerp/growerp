@@ -113,15 +113,19 @@ List<Widget> getMasterContentListRow({
             key: Key('contentType$index'),
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
-          Text(
-            (content.title ?? 'No title').truncate(40),
-            key: Key('title$index'),
-            style: TextStyle(
-              fontSize: 12,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+          _withThumbnail(
+            content,
+            index,
+            Text(
+              (content.title ?? 'No title').truncate(40),
+              key: Key('title$index'),
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
           Row(
             children: [
@@ -171,11 +175,15 @@ List<Widget> getMasterContentListRow({
     );
     cells.add(Text(content.pnpType, key: Key('pnpType$index')));
     cells.add(
-      Text(
-        (content.title ?? 'No title').truncate(40),
-        key: Key('title$index'),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+      _withThumbnail(
+        content,
+        index,
+        Text(
+          (content.title ?? 'No title').truncate(40),
+          key: Key('title$index'),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
     );
     cells.add(
@@ -234,4 +242,26 @@ List<Widget> getMasterContentListRow({
   );
 
   return cells;
+}
+
+/// [title] preceded by a small thumbnail of the related image, when there is one
+Widget _withThumbnail(MasterContent content, int index, Widget title) {
+  final image = content.image;
+  if (image == null || image.isEmpty) return title;
+  return Row(
+    children: [
+      ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: Image.memory(
+          image,
+          key: Key('thumbnail$index'),
+          width: 24,
+          height: 24,
+          fit: BoxFit.cover,
+        ),
+      ),
+      const SizedBox(width: 6),
+      Flexible(child: title),
+    ],
+  );
 }

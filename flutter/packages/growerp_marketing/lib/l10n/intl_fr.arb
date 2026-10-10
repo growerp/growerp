@@ -110,5 +110,9 @@
   "dashPostScheduled": "Planifié",
   "dashPostBacklog": "En attente",
   "dashPostPublished": "Publié",
-  "dashPostFailed": "Échec"
+  "dashPostFailed": "Échec",
+  "masterContentFiles": "Fichiers du contenu maître",
+  "masterContentFilesInfo": "Téléchargez tout le contenu maître avec ses images en fichier ZIP, ou importez un tel fichier. Les pièces dont l'ID existe sont mises à jour, les autres sont ajoutées en brouillon.",
+  "uploadZip": "Importer un ZIP",
+  "downloadZip": "Télécharger le ZIP"
 }

@@ -12,11 +12,15 @@
  * limitations under the License.
  */
 
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import '../bloc/master_content_bloc.dart';
@@ -59,6 +63,10 @@ class MasterContentDetailScreenState
   String _selectedPnpType = 'OTHER';
   String _selectedStatus = 'DRAFT';
   bool _teaserMode = false;
+
+  /// related image: a newly picked file, or the stored one removed
+  XFile? _imageFile;
+  bool _deleteImage = false;
 
   late MasterContentBloc _bloc;
 
@@ -292,6 +300,34 @@ class MasterContentDetailScreenState
               ),
             ),
             const SizedBox(height: 20),
+            StyledImageUpload(
+              key: const Key('masterContentImage'),
+              label: 'Related image',
+              subtitle: 'Optional. Article hero and attached to the posts',
+              image: _imageFile != null
+                  ? (kIsWeb
+                      ? NetworkImage(_imageFile!.path)
+                      : FileImage(File(_imageFile!.path)))
+                  : null,
+              imageBytes: _imageFile == null && !_deleteImage
+                  ? masterContent?.image
+                  : null,
+              fallbackText: 'I',
+              onUploadTap: () async {
+                final pickedFile = await HelperFunctions.pickImage();
+                if (pickedFile != null) {
+                  setState(() => _imageFile = pickedFile);
+                }
+              },
+              onRemove: (_imageFile != null ||
+                      (!_deleteImage && masterContent?.image != null))
+                  ? () => setState(() {
+                        _imageFile = null;
+                        _deleteImage = true;
+                      })
+                  : null,
+            ),
+            const SizedBox(height: 20),
             GroupingDecorator(
               labelText: 'Platform-neutral content',
               child: Column(
@@ -405,8 +441,16 @@ class MasterContentDetailScreenState
                 Expanded(
                   child: ElevatedButton(
                     key: const Key('masterContentDetailSave'),
-                    onPressed: () {
+                    onPressed: () async {
                       if (_formKey.currentState!.validate()) {
+                        // null keeps the stored image, empty removes it
+                        final Uint8List? image = _imageFile != null
+                            ? await HelperFunctions.getResizedImage(
+                                _imageFile!.path,
+                                height: 1200)
+                            : _deleteImage
+                                ? Uint8List(0)
+                                : null;
                         final mc = MasterContent(
                           masterContentId:
                               widget.masterContent?.masterContentId,
@@ -435,6 +479,7 @@ class MasterContentDetailScreenState
                               _teaserMode && _urlController.text.isNotEmpty
                                   ? 'Y'
                                   : 'N',
+                          image: image,
                           status: _selectedStatus,
                         );
                         if (widget.masterContent?.masterContentId == null) {

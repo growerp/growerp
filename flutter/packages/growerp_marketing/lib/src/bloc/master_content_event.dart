@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -126,4 +127,19 @@ class MasterContentSearchRequested extends MasterContentEvent {
 
   @override
   List<Object> get props => [searchString];
+}
+
+/// Download all master content with images as a ZIP file
+class MasterContentExport extends MasterContentEvent {
+  const MasterContentExport();
+}
+
+/// Load master content from a ZIP made by [MasterContentExport]
+class MasterContentImport extends MasterContentEvent {
+  final Uint8List zipFile;
+
+  const MasterContentImport(this.zipFile);
+
+  @override
+  List<Object?> get props => [zipFile];
 }

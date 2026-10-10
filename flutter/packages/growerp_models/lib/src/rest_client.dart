@@ -1757,7 +1757,9 @@ abstract class RestClient {
     @Field() String? callToAction,
     @Field() String? targetUrl,
     @Field() String? teaserMode,
+    @Field() String? ctaUrl,
     @Field() String? status,
+    @Field() String? image,
   });
 
   @PATCH("rest/s1/growerp/100/MasterContent")
@@ -1774,10 +1776,21 @@ abstract class RestClient {
     @Field() String? teaserMode,
     @Field() String? ctaUrl,
     @Field() String? status,
+
+    /// base64; '' removes the image, null keeps it
+    @Field() String? image,
   });
 
   @DELETE("rest/s1/growerp/100/MasterContent")
   Future<void> deleteMasterContent({@Field() required String masterContentId});
+
+  /// All master content with images as a ZIP: returns {zip (base64), fileName}
+  @GET("rest/s1/growerp/100/MasterContent/Export")
+  Future<dynamic> exportMasterContents();
+
+  /// Load a ZIP made by [exportMasterContents]: returns {createdCount, updatedCount}
+  @POST("rest/s1/growerp/100/MasterContent/Import")
+  Future<dynamic> importMasterContents({@Field() required String zip});
 
   @POST("rest/s1/growerp/100/MasterContent/generateWithAI")
   Future<MasterContent> generateMasterContentWithAI({

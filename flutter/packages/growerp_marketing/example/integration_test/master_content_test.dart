@@ -58,6 +58,7 @@ void main() {
       marketing_data.updatedMasterContents.sublist(0, 3),
     );
     await MasterContentTest.checkMasterContent(tester);
+    await MasterContentTest.downloadDeleteUploadMasterContent(tester);
     await MasterContentTest.deleteMasterContent(tester);
     // a new company has no website visits: the reads column shows '-'
     expect(CommonTest.getTextField('reads0'), equals('-'));

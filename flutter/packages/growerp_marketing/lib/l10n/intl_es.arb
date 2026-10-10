@@ -110,5 +110,9 @@
   "dashPostScheduled": "Programado",
   "dashPostBacklog": "Pendiente",
   "dashPostPublished": "Publicado",
-  "dashPostFailed": "Fallido"
+  "dashPostFailed": "Fallido",
+  "masterContentFiles": "Archivos de contenido maestro",
+  "masterContentFilesInfo": "Descargue todo el contenido maestro con imágenes como archivo ZIP, o suba un archivo así. Las piezas con un ID existente se actualizan, las demás se añaden como borrador.",
+  "uploadZip": "Subir ZIP",
+  "downloadZip": "Descargar ZIP"
 }
