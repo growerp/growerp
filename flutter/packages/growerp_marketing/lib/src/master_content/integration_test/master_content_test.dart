@@ -124,12 +124,13 @@ class MasterContentTest {
         await CommonTest.enterText(tester, 'title', mc.title!);
       }
       if (mc.body != null) {
+        // the source field 'body' only exists after switching modes
         await CommonTest.dragUntil(
           tester,
-          key: 'body',
+          key: 'markdownModeSource',
           listViewName: 'masterContentDetailListView',
         );
-        await CommonTest.enterText(tester, 'body', mc.body!);
+        await CommonTest.enterMarkdown(tester, 'body', mc.body!);
       }
       if (mc.callToAction != null) {
         await CommonTest.enterText(tester, 'callToAction', mc.callToAction!);

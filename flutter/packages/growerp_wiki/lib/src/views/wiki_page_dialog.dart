@@ -35,6 +35,8 @@ class WikiPageDialog extends StatefulWidget {
 class WikiPageDialogState extends State<WikiPageDialog> {
   final TextEditingController _pathController = TextEditingController();
   final TextEditingController _textController = TextEditingController();
+  // yaml frontmatter is kept apart: the visual markdown editor would mangle it
+  final TextEditingController _frontmatterController = TextEditingController();
   bool get _isNew => widget.pagePath == null;
   bool _editing = false;
   bool _loading = true;
@@ -56,6 +58,7 @@ class WikiPageDialogState extends State<WikiPageDialog> {
   void dispose() {
     _pathController.dispose();
     _textController.dispose();
+    _frontmatterController.dispose();
     super.dispose();
   }
 
@@ -65,7 +68,14 @@ class WikiPageDialogState extends State<WikiPageDialog> {
         wikiSpaceId: widget.wikiSpaceId,
         pagePath: widget.pagePath,
       );
-      if (mounted) setState(() => _textController.text = page.pageText ?? '');
+      if (mounted) {
+        final text = page.pageText ?? '';
+        final match = RegExp(r'^---\r?\n[\s\S]*?\r?\n---\r?\n').firstMatch(text);
+        setState(() {
+          _frontmatterController.text = match?[0] ?? '';
+          _textController.text = text.substring(match?.end ?? 0);
+        });
+      }
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
     } finally {
@@ -83,7 +93,7 @@ class WikiPageDialogState extends State<WikiPageDialog> {
       await context.read<RestClient>().updateWikiPage(
         wikiSpaceId: widget.wikiSpaceId,
         pagePath: path,
-        pageText: _textController.text,
+        pageText: _frontmatterController.text + _textController.text,
       );
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
@@ -148,17 +158,26 @@ class WikiPageDialogState extends State<WikiPageDialog> {
         const SizedBox(height: 10),
         Expanded(
           child: _editing
-              ? TextFormField(
-                  key: const Key('pageText'),
-                  controller: _textController,
-                  maxLines: null,
-                  expands: true,
-                  textAlignVertical: TextAlignVertical.top,
-                  style: const TextStyle(fontFamily: 'monospace'),
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: WikiLocalizations.of(context)!.markdownTextYamlFrontmatterAllowed,
-                  ),
+              ? Column(
+                  children: [
+                    if (_frontmatterController.text.isNotEmpty)
+                      TextFormField(
+                        key: const Key('pageFrontmatter'),
+                        controller: _frontmatterController,
+                        maxLines: 4,
+                        minLines: 1,
+                        style: const TextStyle(fontFamily: 'monospace'),
+                        decoration: const InputDecoration(
+                          labelText: 'Frontmatter',
+                        ),
+                      ),
+                    Expanded(
+                      child: MarkdownEditor(
+                        controller: _textController,
+                        inputKey: const Key('pageText'),
+                      ),
+                    ),
+                  ],
                 )
               : MarkdownWidget(
                   key: const Key('pagePreview'),

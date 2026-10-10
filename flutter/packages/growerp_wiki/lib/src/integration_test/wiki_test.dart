@@ -32,23 +32,25 @@ class WikiTest {
     await CommonTest.tapByKey(tester, 'addNew');
     await CommonTest.checkWidgetKey(tester, 'WikiPageDialog');
     await CommonTest.enterText(tester, 'pagePath', pagePath);
-    await CommonTest.enterText(tester, 'pageText', text1);
+    await CommonTest.enterMarkdown(tester, 'pageText', text1);
     await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
 
     // re-open via search and check content
     await openPage(tester, pagePath);
+    await CommonTest.showMarkdownSource(tester, 'pageText');
     expect(
       CommonTest.getTextFormField('pageText'),
       contains('first version'),
     );
 
     // update
-    await CommonTest.enterText(tester, 'pageText', text2);
+    await CommonTest.enterMarkdown(tester, 'pageText', text2);
     await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
 
     await openPage(tester, pagePath);
+    await CommonTest.showMarkdownSource(tester, 'pageText');
     expect(
       CommonTest.getTextFormField('pageText'),
       contains('second version'),

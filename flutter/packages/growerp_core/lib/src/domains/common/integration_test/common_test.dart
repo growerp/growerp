@@ -1232,6 +1232,24 @@ class CommonTest {
     return pin(tester.any(visible) ? visible : finder);
   }
 
+  /// A MarkdownEditor has its text field [key] only in Source mode:
+  /// switch to it when the editor shows the visual view.
+  static Future<void> showMarkdownSource(WidgetTester tester, String key) async {
+    await tester.pumpAndSettle();
+    if (tester.any(find.byKey(Key(key)))) return;
+    await tapByKey(tester, 'markdownModeSource');
+  }
+
+  /// enter [value] as markdown source in the MarkdownEditor with [key]
+  static Future<void> enterMarkdown(
+    WidgetTester tester,
+    String key,
+    String value,
+  ) async {
+    await showMarkdownSource(tester, key);
+    await enterText(tester, key, value);
+  }
+
   static Future<void> enterText(
     WidgetTester tester,
     String key,

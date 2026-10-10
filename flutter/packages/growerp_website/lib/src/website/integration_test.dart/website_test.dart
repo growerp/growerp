@@ -138,7 +138,7 @@ class WebsiteTest {
       );
     }
     await CommonTest.tapByKey(tester, 'addText');
-    await CommonTest.enterText(tester, 'mdInput', '# Testingtext');
+    await CommonTest.enterMarkdown(tester, 'mdInput', '# Testingtext');
     await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
     expect(CommonTest.getTextField("Testingtext"), equals('Testingtext'));
     await CommonTest.tapByKey(
@@ -146,7 +146,7 @@ class WebsiteTest {
       'Testingtext',
       seconds: CommonTest.waitTime,
     );
-    await CommonTest.enterText(tester, 'mdInput', '# TestingtextNew');
+    await CommonTest.enterMarkdown(tester, 'mdInput', '# TestingtextNew');
     await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
     expect(CommonTest.getTextField("TestingtextNew"), equals('TestingtextNew'));
   }
@@ -248,7 +248,7 @@ class WebsiteTest {
     RestClient restClient,
   ) async {
     await CommonTest.tapByKey(tester, 'addText');
-    await CommonTest.enterText(tester, 'mdInput', '# Testinghome');
+    await CommonTest.enterMarkdown(tester, 'mdInput', '# Testinghome');
     await CommonTest.tapByKey(tester, 'update', seconds: CommonTest.waitTime);
     expect(CommonTest.getTextField('Testinghome'), equals('Testinghome'));
 

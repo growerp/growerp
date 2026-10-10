@@ -304,19 +304,28 @@ class MasterContentDetailScreenState
                         : null,
                   ),
                   const SizedBox(height: 10),
-                  TextFormField(
-                    key: const Key('body'),
-                    decoration: const InputDecoration(
-                      labelText: 'Body *',
-                      hintText:
-                          'Canonical content — no hashtags/platform styling',
-                      alignLabelWithHint: true,
-                    ),
-                    controller: _bodyController,
-                    maxLines: 8,
-                    validator: (value) => (value == null || value.isEmpty)
+                  FormField<String>(
+                    validator: (_) => _bodyController.text.isEmpty
                         ? 'Body is required'
                         : null,
+                    builder: (field) => Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        MarkdownEditor(
+                          controller: _bodyController,
+                          inputKey: const Key('body'),
+                          label: 'Body *',
+                          height: 400,
+                        ),
+                        if (field.hasError)
+                          Text(
+                            field.errorText!,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 10),
                   TextFormField(
