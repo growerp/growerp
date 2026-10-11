@@ -875,10 +875,12 @@
                         .collect { it.trim() }.findAll { it }
                     if (!segments) { errorMessage = "No content to tweet"; return }
 
-                    def tooLong = segments.findIndexOf { it.length() > 280 }
+                    // X counts every link as 23 characters (t.co), whatever its length
+                    def xLength = { String s -> s.replaceAll(/https?:\/\/\S+/, 'x' * 23).length() }
+                    def tooLong = segments.findIndexOf { xLength(it) > 280 }
                     if (tooLong >= 0) {
                         errorMessage = "Tweet ${tooLong + 1} of ${segments.size()} is " +
-                            "${segments[tooLong].length()} chars (max 280)"
+                            "${xLength(segments[tooLong])} chars (max 280)"
                         return
                     }
 

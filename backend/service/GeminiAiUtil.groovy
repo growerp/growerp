@@ -716,7 +716,7 @@ Return ONLY the adapted content text, no explanations, no markdown code fences.
                 }
                 return "- Professional post, up to ~1300 characters\n- Short paragraphs, 1-2 relevant emojis\n- 3-5 topical hashtags at the end\n- ${hasUrl ? 'Include the link near the end' : 'No link needed'}\n- End with an engaging question"
             case 'TWITTER':
-                return "- Thread of tweets, each MAX 280 characters, separated by a blank line\n- Hook in the first tweet\n- 1-2 hashtags total\n- ${hasUrl ? 'Put the link in the last tweet' : 'No link needed'}"
+                return "- Thread of tweets, each MAX 280 characters, separated by a blank line\n- Hook in the first tweet\n- 1-2 hashtags total\n- ${hasUrl ? 'Put the link in the last tweet; X counts any link as 23 characters, so count it as 23' : 'No link needed'}"
             case 'FACEBOOK':
                 return "- Conversational, community tone\n- ~400 characters plus a link preview\n- Minimal hashtags\n- ${hasUrl ? 'End with the link (it renders a preview)' : 'No link needed'}"
             case 'MEDIUM':

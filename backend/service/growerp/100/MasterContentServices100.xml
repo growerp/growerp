@@ -934,6 +934,15 @@ symbols anywhere in the image; screens and documents show only simple shapes."""
                     <continue />
                 </if>
 
+                <!-- the AI does not always copy the tagged link exactly (it cut the
+                     utm_campaign off to fit X's 280 characters, so reads went uncounted):
+                     put the full tagged link back wherever the target url shows up -->
+                <if condition="platformUrl != mc.targetUrl">
+                    <set field="adaptedContent" from="adaptedContent.replaceAll(
+                        java.util.regex.Pattern.quote(mc.targetUrl) + '[^\\s)\\]&gt;&quot;]*',
+                        java.util.regex.Matcher.quoteReplacement(platformUrl))" />
+                </if>
+
                 <if condition="mc.contentType == 'MESSAGE' &amp;&amp; campaignId">
                     <!-- 1:1 message: merge the adapted template into the campaign settings -->
                     <service-call
