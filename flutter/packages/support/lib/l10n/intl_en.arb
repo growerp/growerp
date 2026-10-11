@@ -399,5 +399,17 @@
         "description": "Number of signups."
       }
     }
+  },
+  "signupRangeWeek": "Last 7 days",
+  "signupRangeMonth": "Last 30 days",
+  "signupRangeQuarter": "Last quarter",
+  "@signupRangeWeek": {
+    "description": "Signup chart range: last 7 days, one bar per day"
+  },
+  "@signupRangeMonth": {
+    "description": "Signup chart range: last 30 days, one bar per day"
+  },
+  "@signupRangeQuarter": {
+    "description": "Signup chart range: last 13 weeks, one bar per week"
   }
 }

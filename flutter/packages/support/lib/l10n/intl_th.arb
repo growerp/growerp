@@ -75,5 +75,8 @@
   "dashWeek": "สัปดาห์",
   "dashMonth": "เดือน",
   "dashQuarter": "ไตรมาส",
-  "signupsCount": "ผู้สมัคร {count} ราย"
+  "signupsCount": "ผู้สมัคร {count} ราย",
+  "signupRangeWeek": "7 วันล่าสุด",
+  "signupRangeMonth": "30 วันล่าสุด",
+  "signupRangeQuarter": "ไตรมาสล่าสุด"
 }

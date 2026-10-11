@@ -18,6 +18,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../l10n/generated/support_localizations.dart';
+import 'signup_chart.dart';
 
 /// New tenant signups that logged in at least once: which app they registered
 /// with, on how many days their users logged in and how many REST calls they
@@ -37,6 +38,8 @@ class _SignupStatisticsViewState extends State<SignupStatisticsView> {
   String? _error;
   int _periodDays = 90;
   String _search = '';
+  List<SignupDayCount> _chartCounts = [];
+  SignupRange _chartRange = SignupRange.month;
 
   /// Without a bloc there is no restartable() to cancel a superseded search,
   /// and the search field fires twice per keystroke, so only the newest
@@ -48,6 +51,25 @@ class _SignupStatisticsViewState extends State<SignupStatisticsView> {
     super.initState();
     _restClient = context.read<RestClient>();
     _fetch();
+    _fetchChart();
+  }
+
+  /// Signups per day for the last quarter over all apps, independent of the
+  /// search and period filter of the list.
+  Future<void> _fetchChart() async {
+    try {
+      final now = DateTime.now();
+      final stats = await _restClient.getSignupStatistics(
+        startDateTime:
+            '${_isoDate(now.subtract(const Duration(days: 91)))} 00:00:00',
+        endDateTime: '${_isoDate(now)} 23:59:59',
+        limit: 1,
+      );
+      if (!mounted) return;
+      setState(() => _chartCounts = stats.dailyCounts);
+    } catch (_) {
+      // the list shows the error
+    }
   }
 
   Future<void> _fetch() async {
@@ -103,17 +125,28 @@ class _SignupStatisticsViewState extends State<SignupStatisticsView> {
                 _detailRow(localizations.signupColApp, signup.applicationId),
                 _detailRow(localizations.signupAdmin, signup.adminName),
                 _detailRow(localizations.signupAdminEmail, signup.adminEmail),
-                _detailRow(localizations.signupFirstLogin, signup.firstLoginDate),
-                _detailRow(localizations.signupColLastLogin, signup.lastLoginDate),
                 _detailRow(
-                    localizations.signupColDays, '${signup.daysLoggedIn}'),
+                  localizations.signupFirstLogin,
+                  signup.firstLoginDate,
+                ),
                 _detailRow(
-                    localizations.signupColLogins, '${signup.loginCount}'),
+                  localizations.signupColLastLogin,
+                  signup.lastLoginDate,
+                ),
                 _detailRow(
-                    localizations.signupColCalls, '${signup.restCalls}'),
+                  localizations.signupColDays,
+                  '${signup.daysLoggedIn}',
+                ),
+                _detailRow(
+                  localizations.signupColLogins,
+                  '${signup.loginCount}',
+                ),
+                _detailRow(localizations.signupColCalls, '${signup.restCalls}'),
                 _detailRow(localizations.signupUsers, '${signup.userCount}'),
                 _detailRow(
-                    localizations.signupAppsUsed, signup.appsUsed.join(', ')),
+                  localizations.signupAppsUsed,
+                  signup.appsUsed.join(', '),
+                ),
               ],
             ),
           ),
@@ -123,21 +156,23 @@ class _SignupStatisticsViewState extends State<SignupStatisticsView> {
   }
 
   Widget _detailRow(String label, String value) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              width: 120,
-              child: Text(label,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      )),
-            ),
-            Expanded(child: Text(value)),
-          ],
+    padding: const EdgeInsets.symmetric(vertical: 6),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 120,
+          child: Text(
+            label,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
         ),
-      );
+        Expanded(child: Text(value)),
+      ],
+    ),
+  );
 
   List<StyledColumn> _columns(bool isPhone) {
     final localizations = SupportLocalizations.of(context)!;
@@ -150,28 +185,33 @@ class _SignupStatisticsViewState extends State<SignupStatisticsView> {
       // the numeric columns come last: a right aligned column followed by a
       // left aligned one would have its text touch the next column
       StyledColumn(
-          header: localizations.signupColDays,
-          flex: 1,
-          alignment: TextAlign.right),
+        header: localizations.signupColDays,
+        flex: 1,
+        alignment: TextAlign.right,
+      ),
       if (!isPhone)
         StyledColumn(
-            header: localizations.signupColLogins,
-            flex: 1,
-            alignment: TextAlign.right),
+          header: localizations.signupColLogins,
+          flex: 1,
+          alignment: TextAlign.right,
+        ),
       StyledColumn(
-          header: localizations.signupColCalls,
-          flex: 2,
-          alignment: TextAlign.right),
+        header: localizations.signupColCalls,
+        flex: 2,
+        alignment: TextAlign.right,
+      ),
     ];
   }
 
   List<Widget> _row(int index, Signup signup, bool isPhone) {
     Widget cell(String text, {TextAlign align = TextAlign.left, Key? key}) =>
-        Text(text,
-            key: key,
-            textAlign: align,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis);
+        Text(
+          text,
+          key: key,
+          textAlign: align,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        );
     return [
       cell(signup.signupDate, key: Key('item$index')),
       cell(signup.companyName),
@@ -207,11 +247,17 @@ class _SignupStatisticsViewState extends State<SignupStatisticsView> {
                 value: _periodDays,
                 items: [
                   DropdownMenuItem(
-                      value: 30, child: Text(localizations.thirtyDays)),
+                    value: 30,
+                    child: Text(localizations.thirtyDays),
+                  ),
                   DropdownMenuItem(
-                      value: 60, child: Text(localizations.sixtyDays)),
+                    value: 60,
+                    child: Text(localizations.sixtyDays),
+                  ),
                   DropdownMenuItem(
-                      value: 90, child: Text(localizations.ninetyDays)),
+                    value: 90,
+                    child: Text(localizations.ninetyDays),
+                  ),
                 ],
                 onChanged: (value) {
                   if (value == null) return;
@@ -230,6 +276,13 @@ class _SignupStatisticsViewState extends State<SignupStatisticsView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    SignupChart(
+                      dailyCounts: _chartCounts,
+                      range: _chartRange,
+                      onRangeChanged: (range) =>
+                          setState(() => _chartRange = range),
+                    ),
+                    const SizedBox(height: 10),
                     Text(
                       '${localizations.signupsTitle} '
                       '${_stats?.fromDate ?? ''} — ${_stats?.thruDate ?? ''}   '

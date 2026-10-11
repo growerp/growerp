@@ -1881,6 +1881,13 @@ limitations under the License.
                     <parameter name="appsUsed" type="List"/>
                 </parameter>
             </parameter>
+            <!-- signups per day for all matching rows, ignoring search and paging -->
+            <parameter name="dailyCounts" type="List">
+                <parameter name="dailyCount" type="Map">
+                    <parameter name="date"/><!-- yyyy-MM-dd -->
+                    <parameter name="count" type="Integer"/>
+                </parameter>
+            </parameter>
         </out-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.check#SupportUser"/>
@@ -1906,6 +1913,7 @@ limitations under the License.
             <!-- no signups in the period: return the empty result, not an error -->
             <if condition="!ownerIds">
                 <set field="signups" from="[]"/>
+                <set field="dailyCounts" from="[]"/>
                 <set field="signupCount" value="0" type="Integer"/>
                 <return/>
             </if>
@@ -2035,6 +2043,9 @@ limitations under the License.
                         userCount: owner.userIds.size(),
                         appsUsed: (appsPerOwner[ownerId] ?: []) as List])
                 }
+                dailyCounts = rows.countBy { it.signupDate }
+                    .collect { date, count -> [date: date, count: count as Integer] }
+                    .sort { it.date }
                 if (search) {
                     def term = search.toLowerCase()
                     rows = rows.findAll {

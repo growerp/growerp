@@ -27,6 +27,7 @@ dependencies:
   file_picker: ^13.1.0
   cupertino_icons: ^1.0.9
   flutter_bloc: ^9.1.1
+  fl_chart: ^1.2.0
   dio: ^5.11.1
   http: ^1.6.0
   bloc_concurrency: ^0.3.0
