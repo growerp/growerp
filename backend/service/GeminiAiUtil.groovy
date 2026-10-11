@@ -33,6 +33,8 @@ import groovy.json.JsonOutput
 class GeminiAiUtil {
     
     static final String DEFAULT_MODEL = "gemini-3.8-flash"
+    // the text model returns no image: images need an image model
+    static final String DEFAULT_IMAGE_MODEL = "gemini-3.1-flash-image"
     static final String API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
     static final String ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
     static final String ANTHROPIC_VERSION = "2023-06-01"
@@ -244,7 +246,7 @@ class GeminiAiUtil {
 
     /**
      * Make an image with Gemini, on a Gemini key like [callGeminiTts]. Model: GEMINI_IMAGE_MODEL
-     * (preference or environment variable), else DEFAULT_MODEL.
+     * (preference or environment variable), else DEFAULT_IMAGE_MODEL.
      *
      * @return the image bytes (png or jpeg, see the model)
      */
@@ -261,7 +263,7 @@ class GeminiAiUtil {
             checkMonthlyAllowance(ec, ownerPartyId, options.purpose as String)
         }
         String model = ec.user.getPreference("GEMINI_IMAGE_MODEL") ?: System.getenv("GEMINI_IMAGE_MODEL") ?:
-            DEFAULT_MODEL
+            DEFAULT_IMAGE_MODEL
         def requestMap = [
             contents: [[parts: [[text: prompt]]]],
             generationConfig: [responseModalities: ["IMAGE"]]
