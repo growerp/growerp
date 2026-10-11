@@ -648,6 +648,38 @@ class MasterContentDetailScreenState
     );
   }
 
+  /// Deletes one platform variant, so adapting to that platform makes it anew.
+  Future<void> _deleteVariant(SocialPost post) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete variant?'),
+        content: Text('Delete the ${post.platform} variant? Adapt to '
+            '${post.platform} again to make a new one.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(MarketingLocalizations.of(context)!.cancel),
+          ),
+          TextButton(
+            key: const Key('deleteVariantConfirm'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || post.postId == null) return;
+    try {
+      await _bloc.restClient.deleteSocialPost(postId: post.postId!);
+    } catch (e) {
+      if (mounted) {
+        HelperFunctions.showMessage(context, e.toString(), Colors.red);
+      }
+    }
+    _loadVariants();
+  }
+
   /// Lists the adapted per-platform SocialPost children. Tap a variant to
   /// edit/publish it via the existing Social Post dialog.
   Widget _buildVariants() {
@@ -685,8 +717,19 @@ class MasterContentDetailScreenState
                       style: const TextStyle(fontSize: 11),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis),
-              trailing: Text(post.status,
-                  style: const TextStyle(fontWeight: FontWeight.w500)),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(post.status,
+                      style: const TextStyle(fontWeight: FontWeight.w500)),
+                  IconButton(
+                    key: Key('deleteVariant${post.platform}'),
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    tooltip: 'Delete this variant (adapt again to remake it)',
+                    onPressed: () => _deleteVariant(post),
+                  ),
+                ],
+              ),
               onTap: () async {
                 await showDialog(
                   barrierDismissible: true,
