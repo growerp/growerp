@@ -121,6 +121,9 @@ def created = ec.service.sync().name("growerp.100.MasterContentServices100.creat
                  body: data.body, callToAction: data.callToAction, status: 'DRAFT']).call()
 if (ec.message.hasError()) return
 masterContentId = created.masterContentId
+// the related image is made in the background once this article is committed
+ec.service.special().name("growerp.100.MasterContentServices100.generate#MasterContentImages")
+    .parameters([masterContentIds: [masterContentId], username: ec.user.username]).registerOnCommit()
 pseudoId = created.pseudoId
 title = created.title
 // the website page the article will live on (written on approval), teaser mode on

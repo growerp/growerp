@@ -424,6 +424,11 @@
             </if>
             <set field="mc.lastModifiedDate" from="ec.user.nowTimestamp" />
             <entity-update value-field="mc" />
+            <!-- an article already on the website gets the new (or no) hero right away -->
+            <if condition="mc.approvedDate &amp;&amp; mc.articlePath">
+                <service-call name="growerp.100.MasterContentServices100.publish#ArticlePage"
+                    in-map="[masterContentId: masterContentId]" />
+            </if>
         </actions>
     </service>
 
@@ -468,6 +473,86 @@
                         '://' + hostName + publicPath" />
                 </if>
             </if>
+        </actions>
+    </service>
+
+    <service verb="generate" noun="MasterContentImage" authenticate="true" transaction-timeout="180">
+        <description>AI-make the related image of a master piece from its title and body and
+            store it (replaces an existing one). A failed AI call is returned in imageError, not
+            raised, so a caller creating the piece in the same transaction is not rolled back.
+            In test mode (GROWERP_TEST_MODE) a plain placeholder image is stored instead.</description>
+        <in-parameters>
+            <parameter name="masterContentId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="image"><description>the new image, small version, base64</description></parameter>
+            <parameter name="imageError" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc" />
+            <if condition="!mc || mc.ownerPartyId != ownerPartyId">
+                <return error="true" message="Master content not found: ${masterContentId}" />
+            </if>
+            <script><![CDATA[
+                import java.awt.Color
+                import java.awt.image.BufferedImage
+                import javax.imageio.ImageIO
+
+                imageBase64 = null
+                try {
+                    byte[] bytes
+                    if ('true'.equals(System.getenv('GROWERP_TEST_MODE'))) {
+                        BufferedImage img = new BufferedImage(640, 360, BufferedImage.TYPE_INT_RGB)
+                        img.createGraphics().with { setColor(new Color(0x3F51B5)); fillRect(0, 0, 640, 360); dispose() }
+                        ByteArrayOutputStream out = new ByteArrayOutputStream()
+                        ImageIO.write(img, 'png', out)
+                        bytes = out.toByteArray()
+                    } else {
+                        String about = (mc.body ?: '').replaceAll(/[#*_`>\[\]()]/, ' ').replaceAll(/\s+/, ' ').trim()
+                        if (about.length() > 800) about = about.substring(0, 800)
+                        def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
+                        bytes = GeminiAiUtil.callGeminiImage(ec, """Create a wide 16:9 illustration to go with
+a social media post and website article. Title: ${mc.title ?: ''}. About: ${about}
+Style: modern, clean, professional illustration with a clear focal subject and calm colors.
+Do not put any text, letters or logos in the image.""", [ownerPartyId: ownerPartyId, purpose: 'marketing image'])
+                    }
+                    imageBase64 = Base64.encoder.encodeToString(bytes)
+                } catch (Exception e) {
+                    ec.logger.warn("generate#MasterContentImage ${masterContentId} failed: ${e.message}")
+                    imageError = e.message ?: e.toString()
+                }
+            ]]></script>
+            <if condition="imageBase64">
+                <service-call name="growerp.100.MasterContentServices100.save#MasterContentImage"
+                    in-map="[masterContentId: masterContentId, image: imageBase64]" />
+                <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc" />
+                <service-call name="growerp.100.ImageServices100.download#Image"
+                    in-map="[contentLocation: mc.imageLocation + 'small']" out-map="img" />
+                <set field="image" from="img.imageFile ?: null" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="generate" noun="MasterContentImages" authenticate="anonymous" transaction="ignore">
+        <description>Background worker: AI-make the related image of each piece, each in its own
+            transaction; one failing does not stop the others. Queued after the commit of the
+            AI generators (registerOnCommit), so it runs on a thread without a user: it logs in
+            as the user who generated the content.</description>
+        <in-parameters>
+            <parameter name="masterContentIds" type="List" required="true" />
+            <parameter name="username" required="true" />
+        </in-parameters>
+        <actions>
+            <if condition="!ec.user.userId">
+                <script>ec.user.internalLoginUser(username)</script>
+            </if>
+            <iterate list="masterContentIds" entry="id">
+                <service-call name="growerp.100.MasterContentServices100.generate#MasterContentImage"
+                    in-map="[masterContentId: id]" out-map="genOut"
+                    transaction="force-new" ignore-error="true" />
+            </iterate>
         </actions>
     </service>
 

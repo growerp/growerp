@@ -209,6 +209,9 @@ Generate the content plan now.
     createdDate = ec.user.nowTimestamp
     lastModifiedDate = ec.user.nowTimestamp
     masterContents = createdContents
+    // the related images are made in the background once the plan is committed
+    if (createdContents) ec.service.special().name("growerp.100.MasterContentServices100.generate#MasterContentImages")
+            .parameters([masterContentIds: createdContents.collect { it.masterContentId }, username: ec.user.username]).registerOnCommit()
 
     ec.message.addMessage("Content plan for week of ${weekStart.format(formatter)} generated successfully with ${createdContents.size()} content pieces!")
     

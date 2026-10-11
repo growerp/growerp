@@ -129,6 +129,16 @@ class MasterContentSearchRequested extends MasterContentEvent {
   List<Object> get props => [searchString];
 }
 
+/// AI-make (or replace) the related image of a saved piece
+class MasterContentGenerateImage extends MasterContentEvent {
+  final String masterContentId;
+
+  const MasterContentGenerateImage(this.masterContentId);
+
+  @override
+  List<Object?> get props => [masterContentId];
+}
+
 /// Download all master content with images as a ZIP file
 class MasterContentExport extends MasterContentEvent {
   const MasterContentExport();

@@ -35,6 +35,7 @@ class MasterContentBloc
     on<MasterContentGenerateWithAI>(_onGenerateWithAI);
     on<MasterContentAdaptForPlatform>(_onAdaptForPlatform);
     on<MasterContentApprove>(_onApprove);
+    on<MasterContentGenerateImage>(_onGenerateImage);
     on<MasterContentExport>(_onExport);
     on<MasterContentImport>(_onImport);
     on<MasterContentSearchRequested>(
@@ -266,6 +267,44 @@ class MasterContentBloc
         message: event.approve
             ? 'Master content approved — variants will auto-publish at their scheduled time'
             : 'Master content approval revoked',
+      ));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+          status: MasterContentStatus.failure, message: await getDioError(e)));
+    } catch (e) {
+      emit(state.copyWith(
+          status: MasterContentStatus.failure, message: e.toString()));
+    }
+  }
+
+  Future<void> _onGenerateImage(
+    MasterContentGenerateImage event,
+    Emitter<MasterContentState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: MasterContentStatus.loading));
+      final raw = await restClient.generateMasterContentImage(
+          masterContentId: event.masterContentId);
+      // dio may return the body as a raw JSON String; decode defensively
+      final result =
+          (raw is String ? jsonDecode(raw) : raw) as Map<String, dynamic>;
+      final image = result['image'] as String?;
+      if (image == null || image.isEmpty) {
+        emit(state.copyWith(
+          status: MasterContentStatus.failure,
+          message: 'No image generated: ${result['imageError'] ?? 'unknown error'}',
+        ));
+        return;
+      }
+      final bytes = base64Decode(image);
+      emit(state.copyWith(
+        status: MasterContentStatus.success,
+        masterContents: state.masterContents
+            .map((m) => m.masterContentId == event.masterContentId
+                ? m.copyWith(image: bytes)
+                : m)
+            .toList(),
+        message: 'Image generated',
       ));
     } on DioException catch (e) {
       emit(state.copyWith(

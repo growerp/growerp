@@ -327,6 +327,24 @@ class MasterContentDetailScreenState
                       })
                   : null,
             ),
+            if (widget.masterContent?.masterContentId != null)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  key: const Key('generateImage'),
+                  icon: const Icon(Icons.auto_awesome),
+                  label: const Text('Generate image with AI'),
+                  onPressed: () {
+                    // the generated image replaces any picked or removed one
+                    setState(() {
+                      _imageFile = null;
+                      _deleteImage = false;
+                    });
+                    _bloc.add(MasterContentGenerateImage(
+                        widget.masterContent!.masterContentId!));
+                  },
+                ),
+              ),
             const SizedBox(height: 20),
             GroupingDecorator(
               labelText: 'Platform-neutral content',

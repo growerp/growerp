@@ -116,6 +116,9 @@ Write the content now.
         ]).call()
 
     masterContentId = createResult.masterContentId
+    // the related image is made in the background once this piece is committed
+    ec.service.special().name("growerp.100.MasterContentServices100.generate#MasterContentImages")
+        .parameters([masterContentIds: [masterContentId], username: ec.user.username]).registerOnCommit()
     pseudoId = pseudoIdResult.seqNum
     title = data.title
     body = data.body
