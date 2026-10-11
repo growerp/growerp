@@ -12,6 +12,7 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -313,6 +314,7 @@ class MasterContentDetailScreenState
                   ? masterContent?.image
                   : null,
               fallbackText: 'I',
+              onImageTap: () => _showLargeImage(masterContent),
               onUploadTap: () async {
                 final pickedFile = await HelperFunctions.pickImage();
                 if (pickedFile != null) {
@@ -528,6 +530,36 @@ class MasterContentDetailScreenState
         ),
       ),
     );
+  }
+
+  /// The image enlarged: a just picked file as is, a stored one loaded in
+  /// full size (the piece itself only carries the small version).
+  Future<void> _showLargeImage(MasterContent? masterContent) async {
+    if (_imageFile != null) {
+      await StyledImageUpload.showLarge(context,
+          image: kIsWeb
+              ? NetworkImage(_imageFile!.path)
+              : FileImage(File(_imageFile!.path)),
+          title: 'Related image');
+      return;
+    }
+    Uint8List? bytes = masterContent?.image;
+    final id = masterContent?.masterContentId;
+    if (id != null) {
+      try {
+        final raw = await _bloc.restClient.getMasterContentImage(
+            masterContentId: id);
+        // dio may return the body as a raw JSON String; decode defensively
+        final large = ((raw is String ? jsonDecode(raw) : raw)
+            as Map<String, dynamic>)['image'] as String?;
+        if (large != null && large.isNotEmpty) bytes = base64Decode(large);
+      } catch (_) {
+        // fall back to the small version
+      }
+    }
+    if (bytes == null || !mounted) return;
+    await StyledImageUpload.showLarge(context,
+        imageBytes: bytes, title: 'Related image');
   }
 
   Widget _buildApprovalSection(MasterContent? masterContent) {

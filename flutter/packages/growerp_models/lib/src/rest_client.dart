@@ -1784,6 +1784,12 @@ abstract class RestClient {
   @DELETE("rest/s1/growerp/100/MasterContent")
   Future<void> deleteMasterContent({@Field() required String masterContentId});
 
+  /// The related image in full size: returns {image (base64)}
+  @GET("rest/s1/growerp/100/MasterContent/image")
+  Future<dynamic> getMasterContentImage({
+    @Query('masterContentId') required String masterContentId,
+  });
+
   /// AI-make the related image: returns {image (small, base64), imageError}
   @POST("rest/s1/growerp/100/MasterContent/generateImage")
   Future<dynamic> generateMasterContentImage({

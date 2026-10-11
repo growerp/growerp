@@ -14,6 +14,7 @@
 
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'popup.dart';
 
 /// A styled detail card widget following the Stitch design system.
 /// Used for displaying grouped information in user/company detail views.
@@ -752,6 +753,11 @@ class StyledImageUpload extends StatelessWidget {
   /// Size of the avatar circle
   final double avatarSize;
 
+  /// Callback when the image itself is tapped, e.g. to show a larger version
+  /// loaded from the backend; when null the image shown here is enlarged in
+  /// a dialog. Without an image a tap uploads like [onUploadTap].
+  final VoidCallback? onImageTap;
+
   const StyledImageUpload({
     super.key,
     this.imageBytes,
@@ -762,7 +768,40 @@ class StyledImageUpload extends StatelessWidget {
     this.onRemove,
     this.fallbackText,
     this.avatarSize = 56,
+    this.onImageTap,
   });
+
+  /// Show [image] (or [imageBytes]) as large as fits in a dialog
+  static Future<void> showLarge(
+    BuildContext context, {
+    ImageProvider? image,
+    Uint8List? imageBytes,
+    String title = '',
+  }) {
+    return showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => Dialog(
+        key: const Key('imageLargeDialog'),
+        insetPadding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: popUp(
+          context: context,
+          title: title,
+          width: 900,
+          height: 700,
+          child: InteractiveViewer(
+            child: Center(
+              child: Image(
+                image: image ?? MemoryImage(imageBytes!),
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -787,7 +826,15 @@ class StyledImageUpload extends StatelessWidget {
         children: [
           // Avatar/Image preview
           GestureDetector(
-            onTap: onUploadTap,
+            onTap: hasImage
+                ? onImageTap ??
+                    () => showLarge(
+                          context,
+                          image: image,
+                          imageBytes: imageBytes,
+                          title: label,
+                        )
+                : onUploadTap,
             child: Container(
               width: avatarSize,
               height: avatarSize,
@@ -867,6 +914,25 @@ class StyledImageUpload extends StatelessWidget {
               child: const Text(
                 'Remove',
                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+              ),
+            ),
+          if (onUploadTap != null)
+            TextButton(
+              key: const Key('imageUpload'),
+              onPressed: onUploadTap,
+              style: TextButton.styleFrom(
+                foregroundColor: colorScheme.primary,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+              ),
+              child: Text(
+                hasImage ? 'Update' : 'Add',
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
         ],

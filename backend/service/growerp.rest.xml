@@ -741,6 +741,11 @@ limitations under the License.
                     <service name="growerp.100.MasterContentServices100.approve#MasterContent" />
                 </method>
             </resource>
+            <resource name="image">
+                <method type="get">
+                    <service name="growerp.100.MasterContentServices100.download#MasterContentImage" />
+                </method>
+            </resource>
             <resource name="generateImage">
                 <method type="post">
                     <service name="growerp.100.MasterContentServices100.generate#MasterContentImage" />

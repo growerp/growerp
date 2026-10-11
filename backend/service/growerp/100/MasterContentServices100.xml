@@ -476,6 +476,29 @@
         </actions>
     </service>
 
+    <service verb="download" noun="MasterContentImage" authenticate="true">
+        <description>The large related image of an own master piece, for viewing it full size.</description>
+        <in-parameters>
+            <parameter name="masterContentId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="image"><description>base64, empty when there is none</description></parameter>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc" />
+            <if condition="!mc || mc.ownerPartyId != ownerPartyId">
+                <return error="true" message="Master content not found: ${masterContentId}" />
+            </if>
+            <if condition="mc.imageLocation">
+                <service-call name="growerp.100.ImageServices100.download#Image"
+                    in-map="[contentLocation: mc.imageLocation + 'large']" out-map="img" />
+                <set field="image" from="img.imageFile" />
+            </if>
+        </actions>
+    </service>
+
     <service verb="generate" noun="MasterContentImage" authenticate="true" transaction-timeout="180">
         <description>AI-make the related image of a master piece from its title and body and
             store it (replaces an existing one). A failed AI call is returned in imageError, not
