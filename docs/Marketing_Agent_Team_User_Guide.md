@@ -69,6 +69,9 @@ linking to it, and the idea is removed. Only for the slots left does it invent a
 It authors each piece **once** as platform-neutral master content, then adapts it to every
 enabled platform (LinkedIn, X, Facebook, Medium, Substack, e-mail) as READY social posts,
 staggering them across Monday/Wednesday/Friday instead of bursting them all at once.
+Every piece also gets an AI-made **related image**, made in the background right after the
+run. It becomes the article hero on the website and is attached to the LinkedIn, X and
+Facebook posts.
 
 * Default schedule: Mondays 08:00 (`0 0 8 ? * MON`) — **starts disabled**
 * Write policy: **allow** — generating and adapting content runs immediately, no approval

@@ -74,7 +74,8 @@ No agent publishes a post or sends a message to a prospect by itself.
 2. It generates this week's **content plan** (Marketing → Content Plans), with three slots:
    *Pain*, *News* and *Prize*.
 3. For each slot it writes one **master content** piece (Marketing → Content). The piece is
-   platform-neutral text with a title, body, call to action and optional **Target URL**.
+   platform-neutral text with a title, body, call to action and optional **Target URL**,
+   plus an AI-made **related image**, made in the background right after the run.
 4. It **adapts** each piece to every enabled platform (LinkedIn, X, Facebook, Medium,
    Substack, Substack note, e-mail). This creates one READY post per platform, spread over
    Monday, Wednesday and Friday.
@@ -92,6 +93,17 @@ Drag the ideas into the order you want (long-press, then drag), or collapse the 
   (one menu item) lists every article. Its platform posts are teasers that link to it.
 - The weekly **Content and Social** agent uses the ideas in that order first and only invents
   subjects for the slots that are left.
+
+**Related image (optional, per piece).** Every AI-written piece gets one automatically; in
+the piece's dialog you can also pick your own (**Add** / **Update**), remove it, or press
+**Generate image with AI**. Tap the image to see it full size. The image is the hero at the
+top of the article page and is attached to the LinkedIn, X and Facebook posts. Medium and
+Substack drafts show it through its link on your website. Substack notes and e-mail go
+without it.
+
+**Download / upload (ZIP).** The files button on **Marketing → Content** downloads every
+piece with its image as one ZIP, or uploads such a ZIP. A piece whose ID exists is updated;
+others are added as drafts, never approved, so nothing publishes until you approve it.
 
 **Teaser mode (optional, per piece).** Switch on *Teaser only (link to full article)* in a
 master content piece and set its Target URL to the full article on your GrowERP website.

@@ -137,7 +137,8 @@ A weekly content schedule per persona, based on the *Pain–News–Prize* formul
 (address a pain, share news, offer value).
 
 - **Generate:** press **+**, pick a persona, and the AI proposes a themed weekly
-  plan of post headlines.
+  plan of post headlines. Each content piece of the plan also gets an AI-made image;
+  the images are made in the background and show up shortly after.
 - Open a plan to see its posts and their schedule.
 
 ### 3.3 Content
@@ -158,6 +159,23 @@ The content hub: author a piece of content **once**, then adapt it per platform
   ARTICLE) that is not on your website yet gets its own page when it is adapted: the
   Target URL becomes that page, and the old Target URL (for example a landing page)
   becomes the **Call to action link** at the bottom of the article.
+- **Related image (optional):** a piece can carry one image. In the piece's dialog use
+  **Add** / **Update** to pick one, **Remove** to drop it, and tap the image to see it full
+  size. **Generate image with AI** makes one from the title and body (saved pieces
+  only, takes about 20 seconds). Pieces written by AI (Generate with AI, Write article,
+  the weekly plan) get an image automatically, made in the background just after the
+  piece is saved; refresh the list to see the thumbnail. The image is used:
+  - at the top of the article page on your website;
+  - in the LinkedIn, X and Facebook posts adapted from the piece;
+  - in Medium and Substack drafts, through its link on your website (only when your
+    company has a website).
+
+  Substack notes and e-mail variants go out without the image.
+- **Download / upload (ZIP):** the files button on the Content list. **Download ZIP**
+  saves every piece with its image in one ZIP file, as a backup or to move content to
+  another company. **Upload ZIP** loads such a file: a piece whose ID already exists is
+  updated, any other is added as a *Draft*. Uploaded pieces are never approved and get no
+  website page, so nothing is published until you approve them.
 - **Reads column:** website visitors who came in through the piece's links
   (*read / landed*). A visit counts as read after 15 seconds on the page and scrolling
   halfway, so bots and mail scanners are not counted. The per-platform breakdown is
@@ -369,6 +387,7 @@ Review each agent's configuration before enabling its schedule.
 |---|---|
 | Sequence e-mails not arriving | No outgoing e-mail server configured (System Setup), or the sequence is *Paused*. Enrollment state still advances; configure mail and future steps will send. |
 | Form doesn't appear on website page | The `data-growerp-form` div is missing or has the wrong form ID; check the ID on the Web Forms screen. |
+| "No image generated" on a content piece | No AI key set (System Setup → AI Settings) or the AI allowance is used up. A system-wide `GEMINI_IMAGE_MODEL` setting must name an image model (the default is `gemini-3.1-flash-image`); a text model such as `gemini-3.8-flash` returns no image. |
 | Campaign not sending on a platform | Platform disabled or daily limit reached — check Outreach → Platforms. |
 | Lead exists but no follow-up task visible | Refresh the CRM → My To Do list; tasks created by conversions/next-steps are set to *In Progress*. |
 | Expected leads missing from list | Use the search bar — the list is paged; also check the Customers tab if the person was already promoted. |

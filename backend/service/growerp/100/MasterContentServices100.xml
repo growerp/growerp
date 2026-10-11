@@ -539,7 +539,8 @@
                         bytes = GeminiAiUtil.callGeminiImage(ec, """Create a wide 16:9 illustration to go with
 a social media post and website article. Title: ${mc.title ?: ''}. About: ${about}
 Style: modern, clean, professional illustration with a clear focal subject and calm colors.
-Do not put any text, letters or logos in the image.""", [ownerPartyId: ownerPartyId, purpose: 'marketing image'])
+Strictly no text, no words, no letters, no numbers, no brand logos, no social media icons or
+symbols anywhere in the image; screens and documents show only simple shapes.""", [ownerPartyId: ownerPartyId, purpose: 'marketing image'])
                     }
                     imageBase64 = Base64.encoder.encodeToString(bytes)
                 } catch (Exception e) {
