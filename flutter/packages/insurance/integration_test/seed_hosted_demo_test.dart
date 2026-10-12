@@ -20,6 +20,7 @@
 //     --dart-define=BACKEND_URL=https://tasco-backend.growerp.net
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -68,6 +69,18 @@ void main() {
       await CommonTest.logout(tester);
     }
     await CommonTest.createCompanyAndAdmin(tester, demoData: true);
+    // a realistic agency name in the customer's messages and pages
+    final company = tester
+        .element(find.byType(Navigator).first)
+        .read<AuthBloc>()
+        .state
+        .authenticate
+        ?.company;
+    if (company != null) {
+      await restClient.updateCompany(
+        company: company.copyWith(name: 'Saigon Auto Insurance'),
+      );
+    }
     final admin = (await PersistFunctions.getTest()).admin!;
     final motor = (await restClient.getPolicies(
       search: '51K-238',
