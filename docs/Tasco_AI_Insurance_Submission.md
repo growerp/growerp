@@ -59,7 +59,7 @@ These targets are hypotheses until the baselines are in.
 
 - **Hosted demo:** https://tasco.growerp.net: a short landing page; **Open the demo** starts the staff app
   (Renewals → Cockpit and Telesales), already loaded in the background while you read.
-  - Agency login: test150296@example.com / qqqqqq9!
+  - Agency login: in the solution deck, or on request.
   - Customer pages open from the cockpit: a reminder's **Open preview**, **Renewal page** and
     **AI call** (allow the microphone, Chrome).
 - **Demo video (renewal):** https://youtu.be/Dc9yygkDWfs. Earlier claims video:

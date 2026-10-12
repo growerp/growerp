@@ -67,8 +67,8 @@
     <div class="two">
       <div class="card">
         <h3>Log in as the agency</h3>
-        <p>User <span class="login">test150296@example.com</span><br>
-          Password <span class="login">qqqqqq9!</span></p>
+        <p>The agency login is in the submission documents sent to Tasco, or ask
+          <a href="mailto:h.bakker@antwebsystems.com">h.bakker@antwebsystems.com</a>.</p>
         <p style="margin-top:10px">A synthetic book of 60 TNDS customers due in the next 60 days.</p>
       </div>
       <div class="card">
