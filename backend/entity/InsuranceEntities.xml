@@ -35,6 +35,7 @@
         <field name="plainSummary" type="text-very-long"><description>AI plain-language explanation of the coverage, cleared when the policy changes</description></field>
         <field name="plainSummaryLocale" type="text-short" />
         <field name="renewalRequestedDate" type="date-time"><description>the client asked for the renewal in the portal</description></field>
+        <field name="renewalToken" type="id"><description>random token of the private renewal link sent in reminders (/renew/{token})</description></field>
         <field name="createdDate" type="date-time" />
         <relationship type="one" title="Owner" related="mantle.party.Party">
             <key-map field-name="ownerPartyId" related="partyId" />
@@ -66,6 +67,9 @@
         </index>
         <index name="PolicyVerifyIdx" unique="true">
             <index-field name="verificationToken" />
+        </index>
+        <index name="PolicyRenewIdx" unique="true">
+            <index-field name="renewalToken" />
         </index>
     </entity>
 
@@ -125,6 +129,56 @@
         <field name="createdDate" type="date-time" />
         <relationship type="one" related="growerp.insurance.Claim">
             <key-map field-name="claimId" />
+        </relationship>
+    </entity>
+
+    <!-- ====================== renewal engine ====================== -->
+    <entity entity-name="RenewalTouch" package="growerp.insurance">
+        <description>One contact moment in the renewal journey of a policy: a reminder sent on a
+            channel, the customer opening or acting on it, an AI voice call, a telesales call and
+            its outcome. The funnel and the lead score are computed from these.</description>
+        <field name="touchId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" />
+        <field name="policyId" type="id" />
+        <field name="channelEnumId" type="id" />
+        <field name="eventEnumId" type="id" />
+        <field name="outcomeEnumId" type="id"><description>telesales / voice call outcome code</description></field>
+        <field name="touchDate" type="date-time" />
+        <field name="messageText" type="text-very-long"><description>the reminder as sent (Zalo/VETC/SMS/email)</description></field>
+        <field name="summary" type="text-long"><description>AI summary of a voice call or chat, for the telesales colleague</description></field>
+        <field name="transcript" type="text-very-long" />
+        <field name="byPartyId" type="id"><description>staff member, or empty for the system / AI</description></field>
+        <relationship type="one" related="growerp.insurance.Policy">
+            <key-map field-name="policyId" />
+        </relationship>
+        <relationship type="one" title="InsTouchChannel" related="moqui.basic.Enumeration">
+            <key-map field-name="channelEnumId" related="enumId" />
+        </relationship>
+        <relationship type="one" title="InsTouchEvent" related="moqui.basic.Enumeration">
+            <key-map field-name="eventEnumId" related="enumId" />
+        </relationship>
+        <relationship type="one" title="InsCallOutcome" related="moqui.basic.Enumeration">
+            <key-map field-name="outcomeEnumId" related="enumId" />
+        </relationship>
+        <index name="RenewalTouchPolicyIdx">
+            <index-field name="policyId" />
+            <index-field name="touchDate" />
+        </index>
+    </entity>
+
+    <entity entity-name="CustomerConsent" package="growerp.insurance">
+        <description>Permission of a customer to be contacted on a channel (Decree 13/2023): when,
+            how it was given, and withdrawn consent (granted N).</description>
+        <field name="partyId" type="id" is-pk="true" />
+        <field name="channelEnumId" type="id" is-pk="true" />
+        <field name="granted" type="text-indicator" />
+        <field name="consentDate" type="date-time" />
+        <field name="source" type="text-medium"><description>e.g. dealer contract, VETC app, renewal page, voice call</description></field>
+        <relationship type="one" related="mantle.party.Party">
+            <key-map field-name="partyId" />
+        </relationship>
+        <relationship type="one" title="InsTouchChannel" related="moqui.basic.Enumeration">
+            <key-map field-name="channelEnumId" related="enumId" />
         </relationship>
     </entity>
 </entities>

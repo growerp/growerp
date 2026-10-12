@@ -216,6 +216,55 @@ var storeInfo = ${storeInfoJson};
         <default-response type="none"/>
     </transition>
 
+    <!-- insurance renewal engine (GrowERP insurance vertical): the private renewal page behind
+         a reminder link, the phone preview of a reminder, and the AI renewal call; on any host -->
+    <transition name="renew" read-only="true">
+        <actions>
+            <set field="lang" from="ec.web.requestParameters.lang == 'en' ? 'en' : 'vi'"/>
+            <set field="renewalToken" from="sri.screenUrlInfo.extraPathNameList?.getAt(0)"/>
+            <service-call name="growerp.100.InsuranceRenewalServices100.get#RenewalPage"
+                    in-map="[renewalToken: renewalToken, t: ec.web.requestParameters.t]" out-map="renewal"/>
+            <script>
+                ec.web.response.setHeader("Cache-Control", "no-store")
+                ec.web.response.setHeader("X-Robots-Tag", "noindex")
+                ec.web.sendTextResponse(ec.resource.template(
+                        "component://PopRestStore/template/insurance/renew.html.ftl", (String) null),
+                        "text/html; charset=utf-8", null)
+            </script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+    <transition name="message" read-only="true">
+        <actions>
+            <service-call name="growerp.100.InsuranceRenewalServices100.get#RenewalMessagePreview"
+                    in-map="[touchId: sri.screenUrlInfo.extraPathNameList?.getAt(0)]" out-map="msg"/>
+            <script>
+                ec.web.response.setHeader("Cache-Control", "no-store")
+                ec.web.response.setHeader("X-Robots-Tag", "noindex")
+                ec.web.sendTextResponse(ec.resource.template(
+                        "component://PopRestStore/template/insurance/message.html.ftl", (String) null),
+                        "text/html; charset=utf-8", null)
+            </script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+    <transition name="voicecall" read-only="true">
+        <actions>
+            <set field="lang" from="ec.web.requestParameters.lang == 'en' ? 'en' : 'vi'"/>
+            <set field="renewalToken" from="sri.screenUrlInfo.extraPathNameList?.getAt(0)"/>
+            <service-call name="growerp.100.InsuranceRenewalServices100.get#RenewalPage"
+                    in-map="[renewalToken: renewalToken]" out-map="renewal"/>
+            <script>
+                ec.web.response.setHeader("Cache-Control", "no-store")
+                ec.web.response.setHeader("X-Robots-Tag", "noindex")
+                ec.web.sendTextResponse(ec.resource.template(
+                        "component://PopRestStore/template/insurance/voicecall.html.ftl", (String) null),
+                        "text/html; charset=utf-8", null)
+            </script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
     <transition name="robots.txt" read-only="true">
         <actions>
             <service-call name="popstore.SeoServices.get#RobotsTxt" out-map="robotsOut"

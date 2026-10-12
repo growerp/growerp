@@ -206,8 +206,8 @@ class GeminiAiUtil {
         } else {
             checkMonthlyAllowance(ec, ownerPartyId, options.purpose as String)
         }
-        String model = ec.user.getPreference("GEMINI_TTS_MODEL") ?: System.getenv("GEMINI_TTS_MODEL") ?:
-            DEFAULT_MODEL
+        String model = options.model ?: ec.user.getPreference("GEMINI_TTS_MODEL") ?:
+            System.getenv("GEMINI_TTS_MODEL") ?: DEFAULT_MODEL
         String voice = options.voice ?: ec.user.getPreference("GEMINI_TTS_VOICE") ?:
             System.getenv("GEMINI_TTS_VOICE") ?: "Kore"
         def requestMap = [

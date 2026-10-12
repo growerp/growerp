@@ -1462,6 +1462,9 @@ Client question: ${question}"""
                             amountPaid: demoClaim.amountPaid]]" />
                 </if>
             </iterate>
+            <!-- synthetic renewal book for the renewal engine: scores, reminders, funnel -->
+            <service-call name="growerp.100.InsuranceRenewalServices100.load#RenewalDemoData"
+                in-map="[ownerPartyId: ownerPartyId, carrierIds: carrierIds]" />
         </actions>
     </service>
 </services>

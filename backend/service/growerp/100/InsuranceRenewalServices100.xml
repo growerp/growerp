@@ -1,0 +1,822 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- Renewal engine of the insurance vertical (Tasco challenge tracks A-D): explainable lead
+         scores and next best channel per policy, AI-drafted reminders on Zalo / VETC / SMS /
+         email, a public renewal page per policy, an AI voice call, a telesales queue with call
+         outcome codes and the funnel. Every touch of the journey is a RenewalTouch. -->
+
+    <!-- ===================== staff: candidates and scores ===================== -->
+
+    <service verb="get" noun="RenewalCandidates">
+        <description>Policies to renew: expiring within withinDays or lapsed less than
+            lapsedDays ago, with lead score, band, reasons, next best channel, action and time,
+            profile completeness and journey stage. Staff only.</description>
+        <in-parameters>
+            <parameter name="withinDays" type="Integer" default="60" />
+            <parameter name="lapsedDays" type="Integer" default="30" />
+            <parameter name="policyId" />
+            <parameter name="band" />
+            <parameter name="search" />
+            <parameter name="start" type="Integer" default="0" />
+            <parameter name="limit" type="Integer" default="100" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="candidates" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.InsuranceServices100.check#InsuranceAccess"
+                out-map="context" />
+            <if condition="!isStaff">
+                <return error="true" message="Only agency staff can see renewal candidates" />
+            </if>
+            <set field="now" from="ec.user.nowTimestamp" />
+            <set field="day" from="24L * 3600L * 1000L" />
+            <entity-find entity-name="growerp.insurance.Policy" list="policyList">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="policyId" ignore-if-empty="true" />
+                <econdition field-name="statusId" operator="in"
+                    value="InpsActive,InpsRenewalDue,InpsLapsed,InpsRenewed" />
+                <econdition field-name="expirationDate" operator="less-equals"
+                    from="new java.sql.Timestamp(now.time + withinDays * day)" />
+                <econdition field-name="expirationDate" operator="greater-equals"
+                    from="new java.sql.Timestamp(now.time - lapsedDays * day)" />
+                <order-by field-name="expirationDate" />
+            </entity-find>
+            <script><![CDATA[
+                String like = search ? search.toLowerCase() : null
+                def policyIds = policyList*.policyId
+                def touchesByPolicy = policyIds ? ec.entity.find('growerp.insurance.RenewalTouch')
+                        .condition('policyId', 'in', policyIds).orderBy('touchDate').list()
+                        .groupBy { it.policyId } : [:]
+                def partyIds = policyList*.insuredPartyId.unique()
+                def consentsByParty = partyIds ? ec.entity.find('growerp.insurance.CustomerConsent')
+                        .condition('partyId', 'in', partyIds).list()
+                        .groupBy { it.partyId } : [:]
+                def pcms = partyIds ? ec.entity.find('mantle.party.contact.PartyContactMech')
+                        .condition('partyId', 'in', partyIds)
+                        .condition('contactMechPurposeId', 'in', ['EmailPrimary', 'PhonePrimary'])
+                        .conditionDate('fromDate', 'thruDate', now).list() : []
+                def accounts = partyIds ? ec.entity.find('moqui.security.UserAccount')
+                        .condition('partyId', 'in', partyIds).list() : []
+                candidates = []
+                for (policy in policyList) {
+                    def name = ec.service.sync().name('growerp.100.InsuranceServices100.get#PartyName')
+                            .parameters([partyId: policy.insuredPartyId]).call().name
+                    if (like && !(name?.toLowerCase()?.contains(like) ||
+                            policy.vehiclePlate?.toLowerCase()?.contains(like) ||
+                            policy.policyNumber?.toLowerCase()?.contains(like))) continue
+                    def touches = touchesByPolicy[policy.policyId] ?: []
+                    def consents = (consentsByParty[policy.insuredPartyId] ?: [])
+                            .collectEntries { [(it.channelEnumId): it.granted] }
+                    def contact = [
+                        hasPhone: pcms.any { it.partyId == policy.insuredPartyId && it.contactMechPurposeId == 'PhonePrimary' },
+                        hasEmail: pcms.any { it.partyId == policy.insuredPartyId && it.contactMechPurposeId == 'EmailPrimary' } ||
+                                  accounts.any { it.partyId == policy.insuredPartyId && it.emailAddress }]
+                    ec.context.putAll([policy: policy, touches: touches, consents: consents,
+                                       contact: contact, now: now])
+                    Map s = ec.resource.script('component://growerp/service/insurance/scoreRenewal.groovy', null) as Map
+                    if (band && s.band != band) continue
+                    def last = touches ? touches[-1] : null
+                    candidates.add([policyId: policy.policyId, pseudoId: policy.pseudoId,
+                        policyNumber: policy.policyNumber, insuredPartyId: policy.insuredPartyId,
+                        insuredName: name, vehiclePlate: policy.vehiclePlate,
+                        vehicleDescription: policy.vehicleDescription,
+                        policyTypeEnumId: policy.policyTypeEnumId, statusId: policy.statusId,
+                        expirationDate: ec.l10n.format(policy.expirationDate, 'yyyy-MM-dd HH:mm:ssZ'),
+                        daysToExpiry: s.daysToExpiry, score: s.score, band: s.band,
+                        reasons: s.reasons, nextChannelEnumId: s.nextChannelEnumId,
+                        nextAction: s.nextAction, nextTime: s.nextTime,
+                        completeness: s.completeness, missing: s.missing, stage: s.stage,
+                        consentChannels: consents.findAll { it.value == 'Y' }.collect { it.key },
+                        lastEventEnumId: last?.eventEnumId, lastChannelEnumId: last?.channelEnumId,
+                        lastTouchDate: last ? ec.l10n.format(last.touchDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
+                        touchCount: touches.size()])
+                }
+                // best first; done and stopped last
+                def rank = [High: 0, Medium: 1, Low: 2, Done: 3, Stop: 4]
+                candidates.sort { a, b -> (rank[a.band] <=> rank[b.band]) ?: (b.score <=> a.score) ?:
+                        (a.daysToExpiry <=> b.daysToExpiry) }
+                candidates = candidates.drop(start).take(limit)
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="get" noun="RenewalTouches">
+        <description>The renewal journey of one policy, newest first. Staff only.</description>
+        <in-parameters>
+            <parameter name="policyId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="touches" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.InsuranceServices100.check#InsuranceAccess"
+                out-map="context" />
+            <if condition="!isStaff">
+                <return error="true" message="Only agency staff can see the renewal journey" />
+            </if>
+            <entity-find entity-name="growerp.insurance.RenewalTouch" list="items">
+                <econdition field-name="policyId" />
+                <econdition field-name="ownerPartyId" />
+                <order-by field-name="-touchDate" />
+            </entity-find>
+            <set field="touches" from="items.collect { [touchId: it.touchId,
+                channelEnumId: it.channelEnumId, eventEnumId: it.eventEnumId,
+                outcomeEnumId: it.outcomeEnumId,
+                touchDate: ec.l10n.format(it.touchDate, 'yyyy-MM-dd HH:mm:ssZ'),
+                messageText: it.messageText, summary: it.summary, transcript: it.transcript] }" />
+        </actions>
+    </service>
+
+    <!-- ===================== reminders ===================== -->
+
+    <service verb="ensure" noun="RenewalToken" allow-remote="false"><!-- internal -->
+        <in-parameters>
+            <parameter name="policyId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="renewalToken" />
+            <parameter name="renewalUrl" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.insurance.Policy" value-field="policy" for-update="true" />
+            <if condition="!policy.renewalToken">
+                <set field="policy.renewalToken" from="java.util.UUID.randomUUID().toString().replace('-', '')" />
+                <entity-update value-field="policy" />
+            </if>
+            <set field="renewalToken" from="policy.renewalToken" />
+            <set field="renewalUrl" from="(ec.web ? ec.web.getWebappRootUrl(true, null) : '') + '/renew/' + renewalToken" />
+        </actions>
+    </service>
+
+    <service verb="compose" noun="RenewalMessage">
+        <description>An AI-written renewal reminder for one policy and channel, in the customer's
+            language (Vietnamese by default): facts only, a clear next step, no urgency, no
+            discounts or offers, how to stop reminders. {link} marks the renewal link.
+            Falls back to a fixed template without AI.</description>
+        <in-parameters>
+            <parameter name="policyId" required="true" />
+            <parameter name="channelEnumId" default-value="InchZalo" />
+            <parameter name="language" default-value="vi" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="messageText" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.InsuranceServices100.check#InsuranceAccess"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.insurance.Policy" value-field="policy" />
+            <if condition="!policy || policy.ownerPartyId != ownerPartyId">
+                <return error="true" message="Policy ${policyId} not found!" />
+            </if>
+            <service-call name="growerp.100.InsuranceServices100.get#PartyName"
+                in-map="[partyId: policy.insuredPartyId]" out-map="insured" />
+            <service-call name="growerp.100.InsuranceServices100.get#PartyName"
+                in-map="[partyId: policy.carrierPartyId]" out-map="carrier" />
+            <service-call name="growerp.100.InsuranceServices100.get#PartyName"
+                in-map="[partyId: ownerPartyId]" out-map="agency" />
+            <script><![CDATA[
+                String expires = ec.l10n.format(policy.expirationDate, 'dd/MM/yyyy')
+                String firstName = (insured.name ?: '').tokenize(' ').with { it ? it[-1] : '' }
+                String plate = policy.vehiclePlate ?: ''
+                // the fixed template: also what test mode and a failing AI send
+                messageText = language == 'vi'
+                    ? "Chào ${firstName}, bảo hiểm TNDS xe ${plate} của bạn hết hạn ngày ${expires}. " +
+                      "Gia hạn chỉ với một chạm: {link} . Cần hỗ trợ? Chọn 'Gọi cho tôi' trên trang. " +
+                      "Trả lời DUNG để không nhận nhắc nhở. – ${agency.name}"
+                    : "Hi ${firstName}, the compulsory insurance of ${plate} ends on ${expires}. " +
+                      "Renew in one tap: {link} . Need help? Choose 'Call me' on the page. " +
+                      "Reply STOP to receive no more reminders. – ${agency.name}"
+                if (!'true'.equals(System.getenv('GROWERP_TEST_MODE'))) {
+                    Map limits = [InchSms: 'at most 300 characters, plain text, no emoji',
+                                  InchZalo: 'at most 450 characters, friendly, at most one emoji',
+                                  InchVetc: 'at most 200 characters, a push notification title line and one sentence',
+                                  InchEmail: 'at most 700 characters, two short paragraphs']
+                    String prompt = """Write a renewal reminder for compulsory motor liability insurance (TNDS)
+in ${new Locale(language).getDisplayLanguage(Locale.ENGLISH)}, for the ${channelEnumId - 'Inch'} channel, ${limits[channelEnumId] ?: 'short'}.
+Facts (use only these): customer first name ${firstName}; licence plate ${plate}; vehicle ${policy.vehicleDescription ?: '-'};
+insurer ${carrier.name}; cover ends ${expires}; sent by the agency ${agency.name}.
+Rules: polite and calm; no urgency words, no countdowns, no threats about fines; no discounts, cashback,
+gifts or prices; one clear next step: renew with one tap at the link written exactly as {link};
+mention that the customer can ask for a call on that page; end with how to stop reminders
+(reply ${language == 'vi' ? 'DUNG' : 'STOP'}). Return only the message text."""
+                    try {
+                        def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
+                        String text = GeminiAiUtil.callLlmApi(ec, prompt, [ownerPartyId: ownerPartyId,
+                            temperature: 0.4, maxOutputTokens: 512, purpose: 'insurance renewal reminder'])?.trim()
+                        if (text && text.contains('{link}')) messageText = text
+                    } catch (Throwable t) {
+                        ec.logger.warn("Renewal reminder AI draft failed, template used: ${t.message}")
+                        ec.message.clearErrors()
+                    }
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="send" noun="RenewalReminders">
+        <description>Sends a renewal reminder per policy on its next best channel (or the given
+            one), only where the customer consented to that channel. Email is really sent; Zalo,
+            VETC and SMS are recorded with a preview page until their gateways are connected.
+            messages: optional [policyId: text] with staff-edited texts.</description>
+        <in-parameters>
+            <parameter name="policyIds" type="List" required="true" />
+            <parameter name="channelEnumId" />
+            <parameter name="messages" type="Map" />
+            <parameter name="language" default-value="vi" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="sentCount" type="Integer" />
+            <parameter name="skipped" type="List" />
+            <parameter name="sent" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.InsuranceServices100.check#InsuranceAccess"
+                out-map="context" />
+            <if condition="!isStaff">
+                <return error="true" message="Only agency staff can send reminders" />
+            </if>
+            <set field="skipped" from="[]" />
+            <set field="sent" from="[]" />
+            <set field="sentCount" from="0" />
+            <set field="root" from="ec.web ? ec.web.getWebappRootUrl(true, null) : ''" />
+            <iterate list="policyIds" entry="policyId">
+                <entity-find-one entity-name="growerp.insurance.Policy" value-field="policy" />
+                <if condition="!policy || policy.ownerPartyId != ownerPartyId">
+                    <script>skipped.add([policyId: policyId, reason: 'not found'])</script>
+                    <continue />
+                </if>
+                <set field="channel" from="channelEnumId" />
+                <if condition="!channel">
+                    <service-call name="growerp.100.InsuranceRenewalServices100.get#RenewalCandidates"
+                        in-map="[policyId: policyId]" out-map="cand" />
+                    <set field="channel" from="cand.candidates ? cand.candidates[0].nextChannelEnumId : null" />
+                </if>
+                <if condition="!(channel in ['InchZalo', 'InchVetc', 'InchSms', 'InchEmail'])">
+                    <script>skipped.add([policyId: policyId, reason: channel ? 'next step is a call' : 'no channel'])</script>
+                    <continue />
+                </if>
+                <entity-find-one entity-name="growerp.insurance.CustomerConsent" value-field="consent">
+                    <field-map field-name="partyId" from="policy.insuredPartyId" />
+                    <field-map field-name="channelEnumId" from="channel" />
+                </entity-find-one>
+                <if condition="consent?.granted != 'Y'">
+                    <script>skipped.add([policyId: policyId, reason: 'no consent for ' + channel])</script>
+                    <continue />
+                </if>
+                <service-call name="growerp.100.InsuranceRenewalServices100.ensure#RenewalToken"
+                    in-map="[policyId: policyId]" out-map="tok" />
+                <set field="text" from="messages?.get(policyId)" />
+                <if condition="!text">
+                    <service-call name="growerp.100.InsuranceRenewalServices100.compose#RenewalMessage"
+                        in-map="[policyId: policyId, channelEnumId: channel, language: language]" out-map="composed" />
+                    <set field="text" from="composed.messageText" />
+                </if>
+                <service-call name="create#growerp.insurance.RenewalTouch" out-map="touch"
+                    in-map="[ownerPartyId: ownerPartyId, policyId: policyId, channelEnumId: channel,
+                        eventEnumId: 'InevSent', touchDate: ec.user.nowTimestamp, byPartyId: userPartyId]" />
+                <set field="link" from="tok.renewalUrl + '?t=' + touch.touchId" />
+                <set field="finalText" from="text.replace('{link}', link)" />
+                <entity-find-one entity-name="growerp.insurance.RenewalTouch" value-field="touchValue" for-update="true">
+                    <field-map field-name="touchId" from="touch.touchId" />
+                </entity-find-one>
+                <set field="touchValue.messageText" from="finalText" />
+                <entity-update value-field="touchValue" />
+                <if condition="channel == 'InchEmail'">
+                    <entity-find entity-name="moqui.security.UserAccount" list="accounts" limit="1">
+                        <econdition field-name="partyId" from="policy.insuredPartyId" />
+                    </entity-find>
+                    <if condition="accounts &amp;&amp; accounts[0].emailAddress">
+                        <service-call name="growerp.100.InsuranceServices100.send#InsuranceEmail"
+                            in-map="[ownerPartyId: ownerPartyId, toAddresses: accounts[0].emailAddress,
+                                subject: 'Bảo hiểm xe ' + (policy.vehiclePlate ?: ''),
+                                bodyHtml: '&lt;p&gt;' + groovy.xml.XmlUtil.escapeXml(finalText) + '&lt;/p&gt;']" />
+                    </if>
+                </if>
+                <script>sent.add([policyId: policyId, channelEnumId: channel, touchId: touch.touchId,
+                    previewUrl: root + '/message/' + touch.touchId, renewalUrl: link, messageText: finalText])</script>
+                <set field="sentCount" from="sentCount + 1" />
+            </iterate>
+        </actions>
+    </service>
+
+    <!-- ===================== public: renewal page and message preview ===================== -->
+
+    <service verb="get" noun="RenewalPage" authenticate="false">
+        <description>What the private renewal link shows the policy holder: insurer, cover end,
+            masked plate until the customer confirms it, the agency and its services. Records the
+            visit (and the reminder as opened when t = its touchId).</description>
+        <in-parameters>
+            <parameter name="renewalToken" required="true" />
+            <parameter name="t"><description>touchId of the reminder that brought the customer here</description></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="found" type="Boolean" />
+            <parameter name="page" type="Map" />
+        </out-parameters>
+        <actions>
+            <set field="found" from="false" />
+            <if condition="!renewalToken || renewalToken.length() &lt; 20"><return /></if>
+            <entity-find entity-name="growerp.insurance.Policy" list="items" limit="1">
+                <econdition field-name="renewalToken" />
+            </entity-find>
+            <if condition="!items"><return /></if>
+            <set field="policy" from="items[0]" />
+            <set field="found" from="true" />
+            <service-call name="growerp.100.InsuranceRenewalServices100.record#PublicTouch"
+                in-map="[policy: policy, t: t, eventEnumId: 'InevVisited']" />
+            <service-call name="growerp.100.InsuranceServices100.get#PartyName"
+                in-map="[partyId: policy.insuredPartyId]" out-map="insured" />
+            <service-call name="growerp.100.InsuranceServices100.get#PartyName"
+                in-map="[partyId: policy.carrierPartyId]" out-map="carrier" />
+            <service-call name="growerp.100.InsuranceServices100.get#PartyName"
+                in-map="[partyId: policy.ownerPartyId]" out-map="agency" />
+            <entity-find-one entity-name="moqui.basic.Enumeration" value-field="typeEnum" cache="true">
+                <field-map field-name="enumId" from="policy.policyTypeEnumId" />
+            </entity-find-one>
+            <entity-find entity-name="growerp.insurance.RenewalTouch" list="done">
+                <econdition field-name="policyId" from="policy.policyId" />
+                <econdition field-name="eventEnumId" operator="in"
+                    value="InevRenewRequested,InevCallback,InevOptOut,InevRenewed" />
+                <order-by field-name="-touchDate" />
+            </entity-find>
+            <set field="plate" from="policy.vehiclePlate ?: ''" />
+            <set field="page" from="[firstName: (insured.name ?: '').tokenize(' ').with { it ? it[-1] : '' },
+                policyType: typeEnum?.description, policyNumber: policy.policyNumber ?: policy.pseudoId,
+                carrierName: carrier.name, agencyName: agency.name,
+                expirationDate: policy.expirationDate, statusId: policy.statusId,
+                plateMasked: plate.length() &gt; 3 ? plate.substring(0, 3) + plate.substring(3, plate.length() - 2).replaceAll('[A-Za-z0-9]', '*') + plate.substring(plate.length() - 2) : plate,
+                vehicleDescription: policy.vehicleDescription,
+                lastAction: done ? done[0].eventEnumId : null,
+                lastActionDate: done ? done[0].touchDate : null]" />
+        </actions>
+    </service>
+
+    <service verb="record" noun="PublicTouch" authenticate="false" allow-remote="false"><!-- internal -->
+        <description>Records a journey event from the customer's side, once per day per event;
+            with t, the reminder that brought them is marked opened first.</description>
+        <in-parameters>
+            <parameter name="policy" type="Map" required="true" />
+            <parameter name="t" />
+            <parameter name="eventEnumId" required="true" />
+            <parameter name="channelEnumId" default-value="InchWeb" />
+            <parameter name="outcomeEnumId" />
+            <parameter name="summary" />
+            <parameter name="transcript" />
+        </in-parameters>
+        <actions>
+            <set field="now" from="ec.user.nowTimestamp" />
+            <set field="sinceDay" from="new java.sql.Timestamp(now.time - 24L * 3600L * 1000L)" />
+            <if condition="t">
+                <entity-find-one entity-name="growerp.insurance.RenewalTouch" value-field="sentTouch">
+                    <field-map field-name="touchId" from="t" />
+                </entity-find-one>
+                <if condition="sentTouch &amp;&amp; sentTouch.policyId == policy.policyId">
+                    <entity-find entity-name="growerp.insurance.RenewalTouch" list="opened" limit="1">
+                        <econdition field-name="policyId" from="policy.policyId" />
+                        <econdition field-name="eventEnumId" value="InevOpened" />
+                        <econdition field-name="touchDate" operator="greater-equals" from="sentTouch.touchDate" />
+                    </entity-find>
+                    <if condition="!opened">
+                        <service-call name="create#growerp.insurance.RenewalTouch"
+                            in-map="[ownerPartyId: policy.ownerPartyId, policyId: policy.policyId,
+                                channelEnumId: sentTouch.channelEnumId, eventEnumId: 'InevOpened', touchDate: now]" />
+                    </if>
+                </if>
+            </if>
+            <entity-find entity-name="growerp.insurance.RenewalTouch" list="recent" limit="1">
+                <econdition field-name="policyId" from="policy.policyId" />
+                <econdition field-name="eventEnumId" />
+                <econdition field-name="touchDate" operator="greater-equals" from="sinceDay" />
+            </entity-find>
+            <if condition="recent &amp;&amp; eventEnumId in ['InevVisited', 'InevConfirmed'] &amp;&amp; !summary"><return /></if>
+            <service-call name="create#growerp.insurance.RenewalTouch"
+                in-map="[ownerPartyId: policy.ownerPartyId, policyId: policy.policyId,
+                    channelEnumId: channelEnumId, eventEnumId: eventEnumId, outcomeEnumId: outcomeEnumId,
+                    summary: summary, transcript: transcript, touchDate: now]" />
+        </actions>
+    </service>
+
+    <service verb="submit" noun="RenewalAction" authenticate="false">
+        <description>The customer's choice on the renewal page. confirm: the last 3 characters of
+            the plate prove it is their vehicle; renew and callback need that confirmation;
+            optout and sold stop all reminders. Staff are told by email.</description>
+        <in-parameters>
+            <parameter name="renewalToken" required="true" />
+            <parameter name="action" required="true" /><!-- confirm | renew | callback | optout | sold -->
+            <parameter name="plateEnd" />
+            <parameter name="preferredTime" />
+            <parameter name="t" />
+            <parameter name="channelEnumId" default-value="InchWeb" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="ok" type="Boolean" />
+            <parameter name="message" />
+            <parameter name="vehiclePlate" />
+        </out-parameters>
+        <actions>
+            <set field="ok" from="false" />
+            <entity-find entity-name="growerp.insurance.Policy" list="items" limit="1" for-update="true">
+                <econdition field-name="renewalToken" />
+            </entity-find>
+            <if condition="!renewalToken || !items">
+                <set field="message" value="Link not valid" />
+                <return />
+            </if>
+            <set field="policy" from="items[0]" />
+            <set field="plateClean" from="(policy.vehiclePlate ?: '').replaceAll('[^A-Za-z0-9]', '').toUpperCase()" />
+            <set field="confirmed" from="plateEnd &amp;&amp; plateClean &amp;&amp;
+                plateClean.endsWith(plateEnd.replaceAll('[^A-Za-z0-9]', '').toUpperCase()) &amp;&amp;
+                plateEnd.replaceAll('[^A-Za-z0-9]', '').length() &gt;= 3" />
+            <if condition="action in ['confirm', 'renew', 'callback'] &amp;&amp; !confirmed">
+                <set field="message" value="plateMismatch" />
+                <return />
+            </if>
+            <set field="vehiclePlate" from="policy.vehiclePlate" />
+            <set field="eventByAction" from="[confirm: 'InevConfirmed', renew: 'InevRenewRequested',
+                callback: 'InevCallback', optout: 'InevOptOut', sold: 'InevOptOut']" />
+            <if condition="!eventByAction[action]">
+                <set field="message" value="unknownAction" />
+                <return />
+            </if>
+            <if condition="action == 'confirm'">
+                <service-call name="growerp.100.InsuranceRenewalServices100.record#PublicTouch"
+                    in-map="[policy: policy, t: t, eventEnumId: 'InevConfirmed', channelEnumId: channelEnumId]" />
+                <set field="ok" from="true" />
+                <return />
+            </if>
+            <if condition="action == 'renew'">
+                <set field="policy.renewalRequestedDate" from="ec.user.nowTimestamp" />
+                <entity-update value-field="policy" />
+            </if>
+            <if condition="action == 'callback'">
+                <service-call name="store#growerp.insurance.CustomerConsent"
+                    in-map="[partyId: policy.insuredPartyId, channelEnumId: 'InchCall', granted: 'Y',
+                        consentDate: ec.user.nowTimestamp, source: 'renewal page: asked for a call']" />
+            </if>
+            <if condition="action in ['optout', 'sold']">
+                <entity-find entity-name="growerp.insurance.CustomerConsent" list="consents" for-update="true">
+                    <econdition field-name="partyId" from="policy.insuredPartyId" />
+                </entity-find>
+                <iterate list="consents" entry="consent">
+                    <set field="consent.granted" value="N" />
+                    <set field="consent.consentDate" from="ec.user.nowTimestamp" />
+                    <set field="consent.source" value="renewal page: stop" />
+                    <entity-update value-field="consent" />
+                </iterate>
+            </if>
+            <service-call name="growerp.100.InsuranceRenewalServices100.record#PublicTouch"
+                in-map="[policy: policy, t: t, eventEnumId: eventByAction[action], channelEnumId: channelEnumId,
+                    outcomeEnumId: action == 'sold' ? 'InocSoldVehicle' : null,
+                    summary: preferredTime ? 'Preferred time: ' + preferredTime : null]" />
+            <!-- tell the producer: a renewal to issue or a customer to call -->
+            <if condition="action in ['renew', 'callback']">
+                <entity-find entity-name="moqui.security.UserAccount" list="producers" limit="1">
+                    <econdition field-name="partyId" from="policy.producerPartyId" />
+                </entity-find>
+                <if condition="producers &amp;&amp; producers[0].emailAddress">
+                    <service-call name="growerp.100.InsuranceServices100.send#InsuranceEmail"
+                        in-map="[ownerPartyId: policy.ownerPartyId, toAddresses: producers[0].emailAddress,
+                            subject: (action == 'renew' ? 'Renewal requested: ' : 'Call requested: ') + (policy.vehiclePlate ?: policy.pseudoId),
+                            bodyHtml: '&lt;p&gt;' + (action == 'renew' ? 'Renew policy ' : 'Call the customer of policy ') +
+                                (policy.policyNumber ?: policy.pseudoId) + (preferredTime ? ', preferred time ' + groovy.xml.XmlUtil.escapeXml(preferredTime) : '') + '.&lt;/p&gt;']" />
+                </if>
+            </if>
+            <set field="ok" from="true" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="RenewalMessagePreview" authenticate="false">
+        <description>A sent Zalo / VETC / SMS reminder as the customer would see it on the phone,
+            until the real gateways are connected.</description>
+        <in-parameters>
+            <parameter name="touchId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="found" type="Boolean" />
+            <parameter name="preview" type="Map" />
+        </out-parameters>
+        <actions>
+            <set field="found" from="false" />
+            <entity-find-one entity-name="growerp.insurance.RenewalTouch" value-field="touch" />
+            <if condition="!touch || touch.eventEnumId != 'InevSent' || !touch.messageText"><return /></if>
+            <set field="found" from="true" />
+            <service-call name="growerp.100.InsuranceServices100.get#PartyName"
+                in-map="[partyId: touch.ownerPartyId]" out-map="agency" />
+            <set field="preview" from="[channelEnumId: touch.channelEnumId, messageText: touch.messageText,
+                touchDate: touch.touchDate, agencyName: agency.name]" />
+        </actions>
+    </service>
+
+    <!-- ===================== telesales ===================== -->
+
+    <service verb="get" noun="TelesalesQueue">
+        <description>Customers for a telesales colleague: asked for a call, handed over by the AI
+            voice call, or advised for a call by the score; with the AI summary. Staff only.</description>
+        <out-parameters>
+            <parameter name="queue" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.InsuranceRenewalServices100.get#RenewalCandidates"
+                in-map="[limit: 500]" out-map="cand" />
+            <set field="queue" from="[]" />
+            <iterate list="cand.candidates" entry="c">
+                <if condition="!(c.nextAction in ['Telesales call', 'Issue the renewal'])"><continue /></if>
+                <entity-find entity-name="growerp.insurance.RenewalTouch" list="handover" limit="1">
+                    <econdition field-name="policyId" from="c.policyId" />
+                    <econdition field-name="eventEnumId" operator="in" value="InevCallback,InevCalled,InevRenewRequested" />
+                    <order-by field-name="-touchDate" />
+                </entity-find>
+                <entity-find entity-name="growerp.insurance.RenewalTouch" list="ai" limit="1">
+                    <econdition field-name="policyId" from="c.policyId" />
+                    <econdition field-name="summary" operator="is-not-null" />
+                    <order-by field-name="-touchDate" />
+                </entity-find>
+                <script>queue.add(c + [reason: handover ? handover[0].eventEnumId : 'InevNone',
+                    requestedDate: handover ? ec.l10n.format(handover[0].touchDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
+                    aiSummary: ai ? ai[0].summary : null,
+                    aiChannelEnumId: ai ? ai[0].channelEnumId : null])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="record" noun="CallOutcome">
+        <description>A telesales colleague records how a call went, with a CRM outcome code;
+            Renewed renews the policy (next term, new digital certificate).</description>
+        <in-parameters>
+            <parameter name="policyId" required="true" />
+            <parameter name="outcomeEnumId" required="true" />
+            <parameter name="notes" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="newPolicyId" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.InsuranceServices100.check#InsuranceAccess"
+                out-map="context" />
+            <if condition="!isStaff">
+                <return error="true" message="Only agency staff can record calls" />
+            </if>
+            <entity-find-one entity-name="growerp.insurance.Policy" value-field="policy" />
+            <if condition="!policy || policy.ownerPartyId != ownerPartyId">
+                <return error="true" message="Policy ${policyId} not found!" />
+            </if>
+            <service-call name="create#growerp.insurance.RenewalTouch"
+                in-map="[ownerPartyId: ownerPartyId, policyId: policyId, channelEnumId: 'InchCall',
+                    eventEnumId: 'InevCalled', outcomeEnumId: outcomeEnumId, summary: notes,
+                    touchDate: ec.user.nowTimestamp, byPartyId: userPartyId]" />
+            <if condition="outcomeEnumId == 'InocRenewed' &amp;&amp; policy.statusId != 'InpsRenewed'">
+                <service-call name="growerp.100.InsuranceServices100.renew#Policy"
+                    in-map="[policy: [policyId: policyId]]" out-map="renewed" />
+                <set field="newPolicyId" from="renewed.policy.policyId" />
+                <service-call name="create#growerp.insurance.RenewalTouch"
+                    in-map="[ownerPartyId: ownerPartyId, policyId: policyId, channelEnumId: 'InchCall',
+                        eventEnumId: 'InevRenewed', touchDate: ec.user.nowTimestamp, byPartyId: userPartyId]" />
+                <service-call name="create#growerp.insurance.RenewalTouch"
+                    in-map="[ownerPartyId: ownerPartyId, policyId: policyId, channelEnumId: 'InchCall',
+                        eventEnumId: 'InevIssued', touchDate: ec.user.nowTimestamp, byPartyId: userPartyId]" />
+            </if>
+            <if condition="outcomeEnumId in ['InocOptOut', 'InocSoldVehicle']">
+                <entity-find entity-name="growerp.insurance.CustomerConsent" list="consents" for-update="true">
+                    <econdition field-name="partyId" from="policy.insuredPartyId" />
+                </entity-find>
+                <iterate list="consents" entry="consent">
+                    <set field="consent.granted" value="N" />
+                    <set field="consent.consentDate" from="ec.user.nowTimestamp" />
+                    <set field="consent.source" value="telesales call" />
+                    <entity-update value-field="consent" />
+                </iterate>
+            </if>
+        </actions>
+    </service>
+
+    <!-- ===================== AI voice call (track A) ===================== -->
+
+    <service verb="converse" noun="VoiceBot" authenticate="false">
+        <description>One turn of the AI renewal call for the policy behind renewalToken: what the
+            customer said (empty to start) in, the assistant's reply as text and as speech (wav,
+            base64; Gemini TTS) out, with the call state to send back next turn. The call path
+            and the hand-over are in service/insurance/voiceBot.groovy.</description>
+        <in-parameters>
+            <parameter name="renewalToken" required="true" />
+            <parameter name="text" />
+            <parameter name="stateJson" />
+            <parameter name="language" default-value="vi" />
+            <parameter name="speak" type="Boolean" default="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="reply" />
+            <parameter name="audio"><description>wav, base64; empty when speech is off or failed</description></parameter>
+            <parameter name="stateJson" />
+            <parameter name="done" type="Boolean" />
+            <parameter name="outcomeEnumId" />
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="growerp.insurance.Policy" list="items" limit="1">
+                <econdition field-name="renewalToken" />
+            </entity-find>
+            <if condition="!renewalToken || !items">
+                <return error="true" message="Link not valid" />
+            </if>
+            <script><![CDATA[
+                import groovy.json.JsonOutput
+                import groovy.json.JsonSlurper
+                Map state = stateJson ? (new JsonSlurper().parseText(stateJson) as Map) : [:]
+                if (state.stage == 'end') { done = true; reply = ''; return }
+                ec.context.putAll([policy: items[0], text: text, state: state, language: language])
+                Map turn = ec.resource.script('component://growerp/service/insurance/voiceBot.groovy', null) as Map
+                reply = turn.reply
+                done = turn.done
+                outcomeEnumId = turn.outcomeEnumId
+                stateJson = JsonOutput.toJson(turn.state)
+                audio = null
+                if (speak && reply && !'true'.equals(System.getenv('GROWERP_TEST_MODE'))) {
+                    try {
+                        def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
+                        byte[] pcm = GeminiAiUtil.callGeminiTts(ec,
+                                (language == 'en' ? 'Say warmly and clearly: ' : 'Nói bằng giọng ấm áp, rõ ràng: ') + reply,
+                                [ownerPartyId: items[0].ownerPartyId, purpose: 'insurance voice call',
+                                 model: System.getenv('GEMINI_TTS_MODEL') ?: 'gemini-2.5-flash-preview-tts'])
+                        // 16 bit little endian PCM, 24 kHz, mono -> wav
+                        def out = new ByteArrayOutputStream()
+                        def le = { int v, int n -> (0..<n).each { out.write((v >> (8 * it)) & 0xff) } }
+                        out.write('RIFF'.bytes); le(36 + pcm.length, 4); out.write('WAVEfmt '.bytes)
+                        le(16, 4); le(1, 2); le(1, 2); le(24000, 4); le(48000, 4); le(2, 2); le(16, 2)
+                        out.write('data'.bytes); le(pcm.length, 4); out.write(pcm)
+                        audio = out.toByteArray().encodeBase64().toString()
+                    } catch (Throwable t) {
+                        ec.logger.warn("Voice call speech failed, text only: ${t.message}")
+                        ec.message.clearErrors()
+                    }
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- ===================== synthetic renewal book ===================== -->
+
+    <service verb="load" noun="RenewalDemoData" allow-remote="false">
+        <description>A synthetic TNDS renewal book for the demo, clearly fake data: individual
+            drivers with Vietnamese names, plates, phone and email (example.com, never mailed),
+            channel consents, policies ending from 10 days ago to 60 days ahead (some renewed
+            with us before) and a reminder history so the scores and the funnel have something
+            to show. Run with the tenant admin logged in (from load#InsuranceDemoData).</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="carrierIds" type="List" required="true" />
+            <parameter name="count" type="Integer" default="60" />
+        </in-parameters>
+        <actions>
+            <script><![CDATA[
+                def rnd = new Random(20261015)
+                long day = 24L * 3600L * 1000L
+                def now = ec.user.nowTimestamp
+                def noon = java.sql.Timestamp.valueOf(java.time.LocalDate.now(java.time.ZoneOffset.UTC).atTime(12, 0))
+                def at = { int days -> new java.sql.Timestamp(noon.time + days * day) }
+                def pick = { List l -> l[rnd.nextInt(l.size())] }
+                List lastNames = ['Nguyễn', 'Trần', 'Lê', 'Phạm', 'Hoàng', 'Huỳnh', 'Phan', 'Vũ', 'Võ', 'Đặng', 'Bùi', 'Đỗ']
+                List middle = ['Văn', 'Thị', 'Minh', 'Quốc', 'Thanh', 'Ngọc', 'Hữu', 'Đức']
+                List firstNames = ['An', 'Bình', 'Chi', 'Dũng', 'Giang', 'Hà', 'Hải', 'Hạnh', 'Hùng', 'Huy', 'Khoa',
+                                   'Lan', 'Linh', 'Long', 'Mai', 'Minh', 'Nam', 'Ngọc', 'Phúc', 'Quân', 'Sơn', 'Thảo',
+                                   'Trang', 'Trung', 'Tuấn', 'Vy']
+                List prefixes = ['51K', '51H', '30A', '30G', '29H', '43A', '92A', '65A']
+                List vehicles = ['Toyota Vios', 'Hyundai Accent', 'Kia Morning', 'Mazda CX-5', 'VinFast VF 5',
+                                 'Geely Coolray', 'Honda City', 'Ford Ranger', 'Toyota Corolla Cross', 'Mitsubishi Xpander']
+                List colours = ['white', 'silver', 'black', 'red', 'grey', 'blue']
+                def create = { String name, Map params -> ec.service.sync().name(name).parameters(params).call() }
+                for (int i = 0; i < count; i++) {
+                    String first = pick(firstNames), last = pick(lastNames)
+                    def party = create('create#mantle.party.Party', [partyTypeEnumId: 'PtyPerson', ownerPartyId: ownerPartyId,
+                            pseudoId: 'SYN' + String.format('%03d', i + 1)])
+                    String partyId = party.partyId
+                    create('create#mantle.party.Person', [partyId: partyId, firstName: first,
+                            lastName: last + ' ' + pick(middle)])
+                    create('create#mantle.party.PartyRole', [partyId: partyId, roleTypeId: 'Customer'])
+                    if (rnd.nextInt(100) < 90) create('mantle.party.ContactServices.create#TelecomNumber',
+                            [partyId: partyId, contactMechPurposeId: 'PhonePrimary', countryCode: '84',
+                             contactNumber: '9' + String.format('%08d', rnd.nextInt(100000000))])
+                    if (rnd.nextInt(100) < 60) create('mantle.party.ContactServices.create#EmailAddress',
+                            [partyId: partyId, contactMechPurposeId: 'EmailPrimary',
+                             emailAddress: "synthetic${i + 1}@example.com"])
+                    // channel consents, as collected at the dealer or in the VETC app
+                    Map consents = [InchZalo: 72, InchVetc: 55, InchSms: 60, InchEmail: 40, InchCall: 45]
+                            .findAll { rnd.nextInt(100) < it.value }
+                    if (rnd.nextInt(100) < 8) consents = [:]
+                    consents.each { ch, pct -> create('create#growerp.insurance.CustomerConsent', [partyId: partyId,
+                            channelEnumId: ch, granted: 'Y', consentDate: at(-300 - rnd.nextInt(200)),
+                            source: ch == 'InchVetc' ? 'VETC app' : 'dealer contract'])}
+                    int ends = -10 + rnd.nextInt(71)
+                    String plate = pick(prefixes) + '-' + String.format('%03d', rnd.nextInt(1000)) + '.' + String.format('%02d', rnd.nextInt(100))
+                    String vehicle = pick(vehicles) + ' ' + (2016 + rnd.nextInt(9)) + ', ' + pick(colours)
+                    Map policyMap = [insuredPartyId: partyId, carrierPartyId: pick(carrierIds),
+                            policyTypeEnumId: 'InptMotorCompulsory', premiumAmount: 40,
+                            premiumFrequencyEnumId: 'InpfAnnual', commissionRate: 5,
+                            vehiclePlate: plate, vehicleDescription: vehicle,
+                            policyNumber: 'TNDS-' + (60300 + i),
+                            description: 'Synthetic demo customer',
+                            coverages: [[coverageName: 'Third party bodily injury, per person', limitAmount: 6000, deductibleAmount: 0],
+                                        [coverageName: 'Third party property damage, per accident', limitAmount: 4000, deductibleAmount: 0]]]
+                    String previousId = null
+                    if (rnd.nextInt(100) < 45) { // with us last year as well
+                        def prev = create('growerp.100.InsuranceServices100.create#Policy', [policy: policyMap +
+                                [effectiveDate: at(ends - 730), expirationDate: at(ends - 365), statusId: 'InpsRenewed']])
+                        previousId = prev.policy.policyId
+                    }
+                    def created = create('growerp.100.InsuranceServices100.create#Policy', [policy: policyMap +
+                            [effectiveDate: at(ends - 365), expirationDate: at(ends),
+                             statusId: ends < 0 ? 'InpsLapsed' : ends <= 30 ? 'InpsRenewalDue' : 'InpsActive']])
+                    String policyId = created.policy.policyId
+                    if (previousId) {
+                        def p = ec.entity.find('growerp.insurance.Policy').condition('policyId', policyId).one()
+                        p.renewedFromPolicyId = previousId; p.update()
+                    }
+                    // reminder history for those due within 45 days
+                    List chans = consents.keySet().findAll { it in ['InchZalo', 'InchVetc', 'InchSms', 'InchEmail'] } as List
+                    if (ends > 45 || !chans || rnd.nextInt(100) >= 75) continue
+                    def touch = { String ev, String ch, int daysAgo, int hour, Map extra = [:] ->
+                        create('create#growerp.insurance.RenewalTouch', [ownerPartyId: ownerPartyId, policyId: policyId,
+                                channelEnumId: ch, eventEnumId: ev, touchDate: new java.sql.Timestamp(noon.time -
+                                daysAgo * day + (hour - 19) * 3600000L)] + extra) }
+                    String ch = pick(chans)
+                    int sentAgo = 3 + rnd.nextInt(8)
+                    int hour = pick([7, 12, 19, 20, 21])
+                    touch('InevSent', ch, sentAgo, 9, [messageText: 'Synthetic reminder'])
+                    if (rnd.nextInt(100) < 30) touch('InevSent', ch, Math.max(0, sentAgo - 3), 9, [messageText: 'Synthetic reminder'])
+                    if (rnd.nextInt(100) >= 58) continue
+                    touch('InevOpened', ch, sentAgo, hour)
+                    if (rnd.nextInt(100) < 6) { touch('InevOptOut', 'InchWeb', sentAgo, hour); continue }
+                    if (rnd.nextInt(100) >= 55) continue
+                    touch('InevVisited', 'InchWeb', sentAgo, hour)
+                    if (rnd.nextInt(100) < 15) { touch('InevCallback', 'InchWeb', sentAgo, hour); continue }
+                    if (rnd.nextInt(100) >= 70) continue
+                    touch('InevConfirmed', 'InchWeb', sentAgo, hour)
+                    if (rnd.nextInt(100) >= 65) continue
+                    touch('InevRenewRequested', 'InchWeb', sentAgo, hour)
+                    if (rnd.nextInt(100) < 60) {
+                        touch('InevRenewed', 'InchCall', Math.max(0, sentAgo - 1), 10)
+                        touch('InevIssued', 'InchCall', Math.max(0, sentAgo - 1), 10)
+                    }
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- ===================== funnel ===================== -->
+
+    <service verb="get" noun="RenewalFunnel">
+        <description>How far the customers due for renewal got: per stage (reached at least that
+            step), per channel of the reminder sent and per score band, with conversion. Staff.</description>
+        <in-parameters>
+            <parameter name="withinDays" type="Integer" default="60" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="funnel" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.InsuranceRenewalServices100.get#RenewalCandidates"
+                in-map="[withinDays: withinDays, limit: 5000]" out-map="cand" />
+            <script><![CDATA[
+                def all = cand.candidates
+                def ids = all*.policyId
+                def touches = ids ? ec.entity.find('growerp.insurance.RenewalTouch')
+                        .condition('policyId', 'in', ids).list() : []
+                def byPolicy = touches.groupBy { it.policyId }
+                List steps = ['InevSent', 'InevOpened', 'InevVisited', 'InevConfirmed', 'InevRenewRequested', 'InevRenewed']
+                def reached = { List evs, String step ->
+                    // renewed by a call also counts as every step before it
+                    if (step == 'InevRenewed') return 'InevRenewed' in evs
+                    int idx = steps.indexOf(step)
+                    return evs.any { steps.indexOf(it) >= idx } || ('InevRenewed' in evs)
+                }
+                Map stages = [total: all.size()]
+                for (s in steps) stages[s] = all.count { reached((byPolicy[it.policyId] ?: [])*.eventEnumId, s) }
+                stages.InevCallback = all.count { 'InevCallback' in (byPolicy[it.policyId] ?: [])*.eventEnumId }
+                stages.InevOptOut = all.count { it.band == 'Stop' }
+                Map channels = [:]
+                for (ch in ['InchZalo', 'InchVetc', 'InchSms', 'InchEmail', 'InchVoiceBot', 'InchCall']) {
+                    def withCh = all.findAll { p -> (byPolicy[p.policyId] ?: []).any { it.channelEnumId == ch &&
+                            it.eventEnumId in ['InevSent', 'InevCalled'] || (ch == 'InchVoiceBot' && it.channelEnumId == ch) } }
+                    channels[ch] = [contacted: withCh.size(),
+                                    renewed: withCh.count { p -> reached((byPolicy[p.policyId] ?: [])*.eventEnumId, 'InevRenewRequested') }]
+                }
+                Map bands = ['High', 'Medium', 'Low', 'Done', 'Stop'].collectEntries { b -> [(b): all.count { it.band == b }] }
+                funnel = [stages: stages, channels: channels, bands: bands]
+            ]]></script>
+        </actions>
+    </service>
+</services>

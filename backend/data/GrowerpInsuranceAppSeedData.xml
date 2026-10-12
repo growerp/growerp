@@ -68,6 +68,39 @@ limitations under the License.
     <moqui.basic.Enumeration enumId="InitGlass" enumTypeId="InsIncidentType" description="Broken glass" sequenceNum="7" />
     <moqui.basic.Enumeration enumId="InitOther" enumTypeId="InsIncidentType" description="Something else" sequenceNum="99" />
 
+    <!-- ====================== renewal engine: channels, events, call outcomes ====================== -->
+    <moqui.basic.EnumerationType enumTypeId="InsTouchChannel" description="Insurance Renewal Contact Channel" />
+    <moqui.basic.Enumeration enumId="InchZalo" enumTypeId="InsTouchChannel" description="Zalo" sequenceNum="1" />
+    <moqui.basic.Enumeration enumId="InchVetc" enumTypeId="InsTouchChannel" description="VETC app" sequenceNum="2" />
+    <moqui.basic.Enumeration enumId="InchSms" enumTypeId="InsTouchChannel" description="SMS" sequenceNum="3" />
+    <moqui.basic.Enumeration enumId="InchEmail" enumTypeId="InsTouchChannel" description="Email" sequenceNum="4" />
+    <moqui.basic.Enumeration enumId="InchVoiceBot" enumTypeId="InsTouchChannel" description="AI voice call" sequenceNum="5" />
+    <moqui.basic.Enumeration enumId="InchCall" enumTypeId="InsTouchChannel" description="Telesales call" sequenceNum="6" />
+    <moqui.basic.Enumeration enumId="InchWeb" enumTypeId="InsTouchChannel" description="Renewal page" sequenceNum="7" />
+
+    <moqui.basic.EnumerationType enumTypeId="InsTouchEvent" description="Insurance Renewal Journey Event" />
+    <moqui.basic.Enumeration enumId="InevSent" enumTypeId="InsTouchEvent" description="Reminder sent" sequenceNum="1" />
+    <moqui.basic.Enumeration enumId="InevOpened" enumTypeId="InsTouchEvent" description="Reminder opened" sequenceNum="2" />
+    <moqui.basic.Enumeration enumId="InevVisited" enumTypeId="InsTouchEvent" description="Renewal page visited" sequenceNum="3" />
+    <moqui.basic.Enumeration enumId="InevConfirmed" enumTypeId="InsTouchEvent" description="Vehicle confirmed" sequenceNum="4" />
+    <moqui.basic.Enumeration enumId="InevRenewRequested" enumTypeId="InsTouchEvent" description="Renewal requested" sequenceNum="5" />
+    <moqui.basic.Enumeration enumId="InevCallback" enumTypeId="InsTouchEvent" description="Asked for a call" sequenceNum="6" />
+    <moqui.basic.Enumeration enumId="InevCalled" enumTypeId="InsTouchEvent" description="Call made" sequenceNum="7" />
+    <moqui.basic.Enumeration enumId="InevOptOut" enumTypeId="InsTouchEvent" description="No more reminders" sequenceNum="8" />
+    <moqui.basic.Enumeration enumId="InevRenewed" enumTypeId="InsTouchEvent" description="Renewed" sequenceNum="9" />
+    <moqui.basic.Enumeration enumId="InevIssued" enumTypeId="InsTouchEvent" description="Digital certificate issued" sequenceNum="10" />
+
+    <moqui.basic.EnumerationType enumTypeId="InsCallOutcome" description="Insurance Telesales Call Outcome" />
+    <moqui.basic.Enumeration enumId="InocRenewed" enumTypeId="InsCallOutcome" description="Renewed" sequenceNum="1" />
+    <moqui.basic.Enumeration enumId="InocInterested" enumTypeId="InsCallOutcome" description="Interested, needs a call" sequenceNum="2" />
+    <moqui.basic.Enumeration enumId="InocCallLater" enumTypeId="InsCallOutcome" description="Call back later" sequenceNum="3" />
+    <moqui.basic.Enumeration enumId="InocNotInterested" enumTypeId="InsCallOutcome" description="Not interested" sequenceNum="4" />
+    <moqui.basic.Enumeration enumId="InocSoldVehicle" enumTypeId="InsCallOutcome" description="Vehicle sold" sequenceNum="5" />
+    <moqui.basic.Enumeration enumId="InocInsuredElsewhere" enumTypeId="InsCallOutcome" description="Insured elsewhere" sequenceNum="6" />
+    <moqui.basic.Enumeration enumId="InocWrongNumber" enumTypeId="InsCallOutcome" description="Wrong number" sequenceNum="7" />
+    <moqui.basic.Enumeration enumId="InocNoAnswer" enumTypeId="InsCallOutcome" description="No answer" sequenceNum="8" />
+    <moqui.basic.Enumeration enumId="InocOptOut" enumTypeId="InsCallOutcome" description="Do not contact" sequenceNum="9" />
+
     <!-- ====================== commission income ====================== -->
     <!-- sales invoice line to the carrier, booked as other revenue. Its GL mapping
          (DefaultSettings, 41900) is in ZaaGlAccountsInstallData.xml: in this seed file it
