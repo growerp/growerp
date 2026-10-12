@@ -56,6 +56,10 @@ void main() {
     // a fresh server: the first registration claimed the GROWERP system company,
     // finish its setup (as CI's registration_scenarios_test scenario A does)
     if (_growerpAdmin.isNotEmpty) {
+      for (var i = 0; i < 300; i++) {
+        if (tester.any(find.byKey(const Key('loginButton')))) break;
+        await tester.pump(const Duration(milliseconds: 100));
+      }
       await CommonTest.pressLoginButton(tester);
       await CommonTest.enterText(tester, 'username', _growerpAdmin);
       await CommonTest.enterText(tester, 'password', 'qqqqqq9!');

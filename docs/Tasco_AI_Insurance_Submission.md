@@ -58,7 +58,7 @@ These targets are hypotheses until the baselines are in.
 ## 6. Try it
 
 - **Hosted demo:** https://tasco.growerp.net (staff app: Renewals → Cockpit and Telesales).
-  - Agency login: [agent login] / qqqqqq9!
+  - Agency login: test150296@example.com / qqqqqq9!
   - Customer pages open from the cockpit: a reminder's **Open preview**, **Renewal page** and
     **AI call** (allow the microphone, Chrome).
 - **Demo video (renewal):** [link]. Earlier claims video:
