@@ -61,7 +61,7 @@ These targets are hypotheses until the baselines are in.
   - Agency login: test150296@example.com / qqqqqq9!
   - Customer pages open from the cockpit: a reminder's **Open preview**, **Renewal page** and
     **AI call** (allow the microphone, Chrome).
-- **Demo video (renewal):** [link]. Earlier claims video:
+- **Demo video (renewal):** https://youtu.be/Dc9yygkDWfs. Earlier claims video:
   https://www.youtube.com/watch?v=3j92jqFwI_Y
 - **Source:** https://github.com/growerp/growerp (branch `tasco`), Apache 2.0.
 - **Contact:** Hans Bakker · h.bakker@antwebsystems.com · +66-81-7523157
