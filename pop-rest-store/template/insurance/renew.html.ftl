@@ -36,7 +36,7 @@
   .links a { color:var(--muted); }
   .msg { font-size:15px; padding:12px; border-radius:12px; background:var(--bg); }
   .err { color:var(--warn); font-size:14px; min-height:18px; }
-  .hidden { display:none; }
+  .hidden { display:none !important; }
   .svc { display:grid; grid-template-columns:1fr; gap:10px; }
   .svc div { display:flex; gap:10px; align-items:flex-start; font-size:15px; }
   .svc i { font-style:normal; font-size:20px; }

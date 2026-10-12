@@ -721,7 +721,7 @@ mention that the customer can ask for a call on that page; end with how to stop 
                 List prefixes = ['51K', '51H', '30A', '30G', '29H', '43A', '92A', '65A']
                 List vehicles = ['Toyota Vios', 'Hyundai Accent', 'Kia Morning', 'Mazda CX-5', 'VinFast VF 5',
                                  'Geely Coolray', 'Honda City', 'Ford Ranger', 'Toyota Corolla Cross', 'Mitsubishi Xpander']
-                List colours = ['white', 'silver', 'black', 'red', 'grey', 'blue']
+                List colours = ['trắng', 'bạc', 'đen', 'đỏ', 'xám', 'xanh']
                 def create = { String name, Map params -> ec.service.sync().name(name).parameters(params).call() }
                 for (int i = 0; i < count; i++) {
                     String first = pick(firstNames), last = pick(lastNames)
