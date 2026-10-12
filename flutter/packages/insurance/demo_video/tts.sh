@@ -1,18 +1,21 @@
 #!/bin/bash
-# Voiceover per scene with Gemini TTS -> out/<id>.wav and out/durations.json (ms per scene).
+# Voiceover per scene with Gemini TTS -> $OUT/<id>.wav and $OUT/durations.json (ms per scene).
+# NARRATION (default narration.json) and OUT (default out) select another video.
 # Needs GEMINI_API_KEY. Voice/model like GeminiAiUtil.callGeminiTts: GEMINI_TTS_VOICE (Kore).
 set -euo pipefail
 cd "$(dirname "$0")"
 MODEL="${GEMINI_TTS_MODEL:-gemini-2.5-flash-preview-tts}"
 VOICE="${GEMINI_TTS_VOICE:-Kore}"
-mkdir -p out
-python3 - "$MODEL" "$VOICE" <<'PY'
+NARRATION="${NARRATION:-narration.json}"
+OUT="${OUT:-out}"
+mkdir -p "$OUT"
+python3 - "$MODEL" "$VOICE" "$NARRATION" "$OUT" <<'PY'
 import base64, json, os, subprocess, sys, urllib.request
-model, voice = sys.argv[1], sys.argv[2]
+model, voice, narration, out = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
 key = os.environ["GEMINI_API_KEY"]
 durations = {}
-for scene in json.load(open("narration.json")):
-    wav = f"out/{scene['id']}.wav"
+for scene in json.load(open(narration)):
+    wav = f"{out}/{scene['id']}.wav"
     if not os.path.exists(wav):
         body = {"contents": [{"parts": [{"text": "Say in a calm, warm, professional product-demo voice: " + scene["text"]}]}],
                 "generationConfig": {"responseModalities": ["AUDIO"],
@@ -24,10 +27,10 @@ for scene in json.load(open("narration.json")):
         pcm = base64.b64decode(next(p for p in resp["candidates"][0]["content"]["parts"] if "inlineData" in p)["inlineData"]["data"])
         subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "s16le", "-ar", "24000", "-ac", "1",
                         "-i", "-", wav], input=pcm, check=True)
-    out = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", wav],
-                         capture_output=True, text=True, check=True).stdout
-    durations[scene["id"]] = int(float(out) * 1000)
+    probe = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", wav],
+                           capture_output=True, text=True, check=True).stdout
+    durations[scene["id"]] = int(float(probe) * 1000)
     print(scene["id"], durations[scene["id"]], "ms")
-json.dump(durations, open("out/durations.json", "w"), indent=2)
+json.dump(durations, open(f"{out}/durations.json", "w"), indent=2)
 print("total", sum(durations.values()) // 1000, "s")
 PY

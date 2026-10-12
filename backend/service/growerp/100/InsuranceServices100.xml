@@ -66,7 +66,7 @@ limitations under the License.
         </out-parameters>
         <actions>
             <if condition="!ownerPartyId"><return /></if>
-            <entity-find entity-name="mantle.party.PartyDetailAndRole" list="companyList" cache="true" limit="1">
+            <entity-find entity-name="mantle.party.PartyDetailAndRole" list="companyList" limit="1">
                 <econdition field-name="ownerPartyId" />
                 <econdition field-name="partyTypeEnumId" value="PtyOrganization" />
                 <econdition field-name="roleTypeId" value="OrgInternal" />

@@ -74,9 +74,8 @@ class _RenewalCandidateDialogState extends State<RenewalCandidateDialog> {
       var result = await context.read<RestClient>().composeRenewalMessage(
         policyId: widget.candidate.policyId,
         channelEnumId: _channel,
-        language: Localizations.localeOf(context).languageCode == 'en'
-            ? 'en'
-            : 'vi',
+        // the customer's language, not the staff member's
+        language: 'vi',
       );
       if (result is String) result = jsonDecode(result);
       _message.text = result['messageText'] ?? '';
