@@ -181,6 +181,7 @@ class _InsuranceAppState extends State<InsuranceApp> {
               widget.restClient,
               widget.applicationId,
             ),
+            company: widget.company,
             widgetRegistrations: insuranceWidgetRegistrations,
             forceUpdateInfo: widget.forceUpdateInfo,
           );
