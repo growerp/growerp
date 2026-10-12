@@ -116,7 +116,7 @@ for line in open(os.path.join(OUT, "markers.txt")):
     elif len(p) >= 3 and p[0] in ("SCENE_START", "SCENE_END"):
         (starts if p[0] == "SCENE_START" else ends)[p[1]] = int(p[2])
 
-order = ["title", "problem", "cockpit", "dialog", "zalo", "renew", "voiceintro", "voice", "telesales", "impact", "close"]
+order = ["title", "problem", "cockpit", "dialog", "zalo", "renew", "voiceintro", "voice", "telesales", "impact", "platform", "apps", "close"]
 clips = []
 for i, sid in enumerate(order):
     clip = os.path.join(OUT, f"clip_{i:02}_{sid}.mp4")
@@ -162,7 +162,7 @@ for i, sid in enumerate(order):
     voice = os.path.join(OUT, f"{sid}.wav")
     length = durations[sid] / 1000 + 0.7
     speed = 1.0
-    if sid in ("title", "problem", "voiceintro", "close"):
+    if sid in ("title", "problem", "voiceintro", "platform", "apps", "close"):
         video = ["-loop", "1", "-t", f"{length:.3f}", "-i", os.path.join(OUT, f"card_{sid}.png")]
         vf = f"[0:v]fps={FPS},scale={W}:{H}"
     elif sid in ("zalo", "renew"):

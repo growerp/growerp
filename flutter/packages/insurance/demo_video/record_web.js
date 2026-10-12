@@ -7,6 +7,7 @@
 const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright');
+const overview = require('./overview_cards');
 
 const out = path.resolve(process.argv[2] || path.join(__dirname, 'out_renewal'));
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -55,6 +56,7 @@ async function phoneVideo(browser, name, url, actions) {
   const browser = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] });
 
   for (const id of Object.keys(cards)) await card(browser, id);
+  await overview.render(browser, out);
 
   await phoneVideo(browser, 'zalo', links.previewUrl, async page => {
     await sleep(4000);
