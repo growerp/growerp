@@ -33,7 +33,8 @@ if (text) history.add([role: 'customer', text: text])
 def nameOf = { partyId -> ec.service.sync().name('growerp.100.InsuranceServices100.get#PartyName')
         .parameters([partyId: partyId]).call().name ?: '' }
 String firstName = nameOf(policy.insuredPartyId).tokenize(' ').with { it ? it[-1] : '' }
-String agency = nameOf(policy.ownerPartyId)
+String agency = ec.service.sync().name('growerp.100.InsuranceServices100.get#AgencyName')
+        .parameters([ownerPartyId: policy.ownerPartyId]).call().name ?: ''
 String carrier = nameOf(policy.carrierPartyId)
 String expires = ec.l10n.format(policy.expirationDate, 'dd/MM/yyyy')
 String plate = policy.vehiclePlate ?: ''
@@ -64,7 +65,7 @@ Spoken numbers count as digits (for example "bốn sáu" is 46)."""
     try {
         def parsed = GeminiAiUtil.parseJsonResponse(GeminiAiUtil.callLlmApi(ec, prompt,
                 [ownerPartyId: policy.ownerPartyId, jsonMode: true, temperature: 0.0,
-                 maxOutputTokens: 200, purpose: 'insurance voice call']))
+                 maxOutputTokens: 2048, purpose: 'insurance voice call']))
         if (parsed?.intent) nlu.intent = parsed.intent
         if (parsed?.plateEnd != null) nlu.plateEnd = parsed.plateEnd.toString().toUpperCase()
     } catch (Throwable t) {
@@ -76,6 +77,7 @@ Spoken numbers count as digits (for example "bốn sáu" is 46)."""
 def answerQuestion = { String q ->
     def coverages = ec.entity.find('growerp.insurance.PolicyCoverage').condition('policyId', policy.policyId).list()
     String facts = "insurer ${carrier}; agency ${agency}; cover ends ${expires}; plate ${plate}; " +
+            "currency ${policy.currencyUomId ?: 'not stated'}; " +
             "coverages: " + coverages.collect { "${it.coverageName} limit ${it.limitAmount ?: '-'}" }.join('; ')
     if (testMode) return vi ? "Bảo hiểm của xe do ${carrier} cung cấp và hết hạn ngày ${expires}." :
             "The cover is with ${carrier} and ends on ${expires}."
@@ -85,7 +87,7 @@ Never quote or estimate prices, never promise payments or discounts. If the fact
 say a colleague will explain. Question: "${q}"."""
     try {
         return GeminiAiUtil.callLlmApi(ec, prompt, [ownerPartyId: policy.ownerPartyId,
-                temperature: 0.3, maxOutputTokens: 200, purpose: 'insurance voice call'])?.trim()
+                temperature: 0.3, maxOutputTokens: 2048, purpose: 'insurance voice call'])?.trim()
     } catch (Throwable t) {
         ec.message.clearErrors()
         return vi ? 'Câu hỏi này đồng nghiệp của em sẽ giải thích rõ hơn.' : 'A colleague will explain that.'
@@ -182,7 +184,7 @@ if (done) {
         try {
             summary = GeminiAiUtil.callLlmApi(ec, """Summarise this insurance renewal call for the telesales colleague who
 continues it, in Vietnamese, in at most 2 sentences: what the customer wants and anything to know. Transcript:
-${transcript}""", [ownerPartyId: policy.ownerPartyId, temperature: 0.2, maxOutputTokens: 200,
+${transcript}""", [ownerPartyId: policy.ownerPartyId, temperature: 0.2, maxOutputTokens: 2048,
                    purpose: 'insurance voice call'])?.trim() ?: summary
         } catch (Throwable t) { ec.message.clearErrors() }
     }

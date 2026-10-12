@@ -188,8 +188,8 @@ limitations under the License.
                 in-map="[partyId: policy.insuredPartyId]" out-map="insured" />
             <service-call name="growerp.100.InsuranceServices100.get#PartyName"
                 in-map="[partyId: policy.carrierPartyId]" out-map="carrier" />
-            <service-call name="growerp.100.InsuranceServices100.get#PartyName"
-                in-map="[partyId: ownerPartyId]" out-map="agency" />
+            <service-call name="growerp.100.InsuranceServices100.get#AgencyName"
+                in-map="[ownerPartyId: ownerPartyId]" out-map="agency" />
             <script><![CDATA[
                 String expires = ec.l10n.format(policy.expirationDate, 'dd/MM/yyyy')
                 String firstName = (insured.name ?: '').tokenize(' ').with { it ? it[-1] : '' }
@@ -218,7 +218,7 @@ mention that the customer can ask for a call on that page; end with how to stop 
                     try {
                         def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
                         String text = GeminiAiUtil.callLlmApi(ec, prompt, [ownerPartyId: ownerPartyId,
-                            temperature: 0.4, maxOutputTokens: 512, purpose: 'insurance renewal reminder'])?.trim()
+                            temperature: 0.4, maxOutputTokens: 4096, purpose: 'insurance renewal reminder'])?.trim()
                         if (text && text.contains('{link}')) messageText = text
                     } catch (Throwable t) {
                         ec.logger.warn("Renewal reminder AI draft failed, template used: ${t.message}")
@@ -344,8 +344,8 @@ mention that the customer can ask for a call on that page; end with how to stop 
                 in-map="[partyId: policy.insuredPartyId]" out-map="insured" />
             <service-call name="growerp.100.InsuranceServices100.get#PartyName"
                 in-map="[partyId: policy.carrierPartyId]" out-map="carrier" />
-            <service-call name="growerp.100.InsuranceServices100.get#PartyName"
-                in-map="[partyId: policy.ownerPartyId]" out-map="agency" />
+            <service-call name="growerp.100.InsuranceServices100.get#AgencyName"
+                in-map="[ownerPartyId: policy.ownerPartyId]" out-map="agency" />
             <entity-find-one entity-name="moqui.basic.Enumeration" value-field="typeEnum" cache="true">
                 <field-map field-name="enumId" from="policy.policyTypeEnumId" />
             </entity-find-one>
@@ -516,8 +516,8 @@ mention that the customer can ask for a call on that page; end with how to stop 
             <entity-find-one entity-name="growerp.insurance.RenewalTouch" value-field="touch" />
             <if condition="!touch || touch.eventEnumId != 'InevSent' || !touch.messageText"><return /></if>
             <set field="found" from="true" />
-            <service-call name="growerp.100.InsuranceServices100.get#PartyName"
-                in-map="[partyId: touch.ownerPartyId]" out-map="agency" />
+            <service-call name="growerp.100.InsuranceServices100.get#AgencyName"
+                in-map="[ownerPartyId: touch.ownerPartyId]" out-map="agency" />
             <set field="preview" from="[channelEnumId: touch.channelEnumId, messageText: touch.messageText,
                 touchDate: touch.touchDate, agencyName: agency.name]" />
         </actions>
@@ -704,8 +704,10 @@ mention that the customer can ask for a call on that page; end with how to stop 
                     def party = create('create#mantle.party.Party', [partyTypeEnumId: 'PtyPerson', ownerPartyId: ownerPartyId,
                             pseudoId: 'SYN' + String.format('%03d', i + 1)])
                     String partyId = party.partyId
-                    create('create#mantle.party.Person', [partyId: partyId, firstName: first,
-                            lastName: last + ' ' + pick(middle)])
+                    // Vietnamese order: family and middle name first, the given name last (and
+                    // the given name is how the customer is addressed)
+                    create('create#mantle.party.Person', [partyId: partyId,
+                            firstName: last + ' ' + pick(middle), lastName: first])
                     create('create#mantle.party.PartyRole', [partyId: partyId, roleTypeId: 'Customer'])
                     if (rnd.nextInt(100) < 90) create('mantle.party.ContactServices.create#TelecomNumber',
                             [partyId: partyId, contactMechPurposeId: 'PhonePrimary', countryCode: '84',
@@ -724,13 +726,14 @@ mention that the customer can ask for a call on that page; end with how to stop 
                     String plate = pick(prefixes) + '-' + String.format('%03d', rnd.nextInt(1000)) + '.' + String.format('%02d', rnd.nextInt(100))
                     String vehicle = pick(vehicles) + ' ' + (2016 + rnd.nextInt(9)) + ', ' + pick(colours)
                     Map policyMap = [insuredPartyId: partyId, carrierPartyId: pick(carrierIds),
-                            policyTypeEnumId: 'InptMotorCompulsory', premiumAmount: 40,
+                            policyTypeEnumId: 'InptMotorCompulsory', premiumAmount: 480700, currencyUomId: 'VND',
                             premiumFrequencyEnumId: 'InpfAnnual', commissionRate: 5,
                             vehiclePlate: plate, vehicleDescription: vehicle,
                             policyNumber: 'TNDS-' + (60300 + i),
                             description: 'Synthetic demo customer',
-                            coverages: [[coverageName: 'Third party bodily injury, per person', limitAmount: 6000, deductibleAmount: 0],
-                                        [coverageName: 'Third party property damage, per accident', limitAmount: 4000, deductibleAmount: 0]]]
+                            // the limits of Decree 67/2023 for cars, in VND
+                            coverages: [[coverageName: 'Third party bodily injury, per person', limitAmount: 150000000, deductibleAmount: 0],
+                                        [coverageName: 'Third party property damage, per accident', limitAmount: 100000000, deductibleAmount: 0]]]
                     String previousId = null
                     if (rnd.nextInt(100) < 45) { // with us last year as well
                         def prev = create('growerp.100.InsuranceServices100.create#Policy', [policy: policyMap +

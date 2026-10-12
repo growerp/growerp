@@ -55,6 +55,26 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="get" noun="AgencyName" authenticate="false" allow-remote="false"><!-- internal -->
+        <description>The name of the agency (the owner's company, role OrgInternal) for
+            customer-facing texts and pages; the owner party itself has no name.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="name" />
+        </out-parameters>
+        <actions>
+            <if condition="!ownerPartyId"><return /></if>
+            <entity-find entity-name="mantle.party.PartyDetailAndRole" list="companyList" cache="true" limit="1">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="partyTypeEnumId" value="PtyOrganization" />
+                <econdition field-name="roleTypeId" value="OrgInternal" />
+            </entity-find>
+            <set field="name" from="companyList ? companyList[0].organizationName : null" />
+        </actions>
+    </service>
+
     <!-- ===================== policies ===================== -->
 
     <service verb="get" noun="Policies">
@@ -241,8 +261,8 @@ limitations under the License.
             <set field="vehicleDescription" from="policy.vehicleDescription" />
             <service-call name="growerp.100.InsuranceServices100.get#PartyName"
                 in-map="[partyId: policy.carrierPartyId]" out-map="carrier" />
-            <service-call name="growerp.100.InsuranceServices100.get#PartyName"
-                in-map="[partyId: policy.ownerPartyId]" out-map="agency" />
+            <service-call name="growerp.100.InsuranceServices100.get#AgencyName"
+                in-map="[ownerPartyId: policy.ownerPartyId]" out-map="agency" />
             <set field="carrierName" from="carrier.name" />
             <set field="agencyName" from="agency.name" />
             <set field="effectiveDate" from="policy.effectiveDate" />
@@ -578,7 +598,7 @@ Notes from the agency: ${policy.description ?: '-'}"""
                 } else {
                     def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
                     plainSummary = GeminiAiUtil.callLlmApi(ec, prompt, [ownerPartyId: policy.ownerPartyId,
-                        temperature: 0.3, maxOutputTokens: 1024, purpose: "insurance policy explanation"])?.trim()
+                        temperature: 0.3, maxOutputTokens: 4096, purpose: "insurance policy explanation"])?.trim()
                 }
             ]]></script>
             <set field="policy.plainSummary" from="plainSummary" />
@@ -897,7 +917,7 @@ Client question: ${question}"""
                 } else {
                     def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
                     String text = GeminiAiUtil.callLlmApi(ec, prompt, [ownerPartyId: ownerPartyId,
-                        jsonMode: true, temperature: 0.3, maxOutputTokens: 1024,
+                        jsonMode: true, temperature: 0.3, maxOutputTokens: 4096,
                         purpose: "insurance client assistant"])
                     try { reply = GeminiAiUtil.parseJsonResponse(text) }
                     catch (Throwable t) { reply = [answer: text, escalate: false] }

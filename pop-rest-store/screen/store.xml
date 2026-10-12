@@ -222,8 +222,11 @@ var storeInfo = ${storeInfoJson};
         <actions>
             <set field="lang" from="ec.web.requestParameters.lang == 'en' ? 'en' : 'vi'"/>
             <set field="renewalToken" from="sri.screenUrlInfo.extraPathNameList?.getAt(0)"/>
+            <!-- an anonymous visitor: recording the visit (a RenewalTouch) needs authz off here -->
+            <script>ec.artifactExecution.disableAuthz()</script>
             <service-call name="growerp.100.InsuranceRenewalServices100.get#RenewalPage"
                     in-map="[renewalToken: renewalToken, t: ec.web.requestParameters.t]" out-map="renewal"/>
+            <script>ec.artifactExecution.enableAuthz()</script>
             <script>
                 ec.web.response.setHeader("Cache-Control", "no-store")
                 ec.web.response.setHeader("X-Robots-Tag", "noindex")
@@ -252,8 +255,11 @@ var storeInfo = ${storeInfoJson};
         <actions>
             <set field="lang" from="ec.web.requestParameters.lang == 'en' ? 'en' : 'vi'"/>
             <set field="renewalToken" from="sri.screenUrlInfo.extraPathNameList?.getAt(0)"/>
+            <!-- an anonymous visitor: recording the visit (a RenewalTouch) needs authz off here -->
+            <script>ec.artifactExecution.disableAuthz()</script>
             <service-call name="growerp.100.InsuranceRenewalServices100.get#RenewalPage"
                     in-map="[renewalToken: renewalToken]" out-map="renewal"/>
+            <script>ec.artifactExecution.enableAuthz()</script>
             <script>
                 ec.web.response.setHeader("Cache-Control", "no-store")
                 ec.web.response.setHeader("X-Robots-Tag", "noindex")

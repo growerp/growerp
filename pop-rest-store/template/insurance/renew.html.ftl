@@ -51,7 +51,7 @@
     <p><@t "Vui lòng liên hệ đại lý bảo hiểm của bạn." "Please contact your insurance agency."/></p></div>
 <#else>
   <div class="brand"><span>${(p.agencyName!"")?html}</span><a href="?lang=${vi?then('en','vi')}">${vi?then('English','Tiếng Việt')}</a></div>
-  <h1><@t "Chào ${(p.firstName!"")?html}, gia hạn bảo hiểm xe chỉ với một chạm" "Hi ${(p.firstName!"")?html}, renew your car insurance in one tap"/></h1>
+  <h1><@t "Chào ${(p.firstName!'')?html}, gia hạn bảo hiểm xe chỉ với một chạm" "Hi ${(p.firstName!'')?html}, renew your car insurance in one tap"/></h1>
 
   <div class="card">
     <div class="row"><span><@t "Biển số" "Plate"/></span><b class="plate" id="plate">${(p.plateMasked!"")?html}</b></div>
@@ -63,10 +63,10 @@
 
   <div class="card stack" id="done" <#if !p.lastAction?has_content>style="display:none"</#if>>
     <div class="msg" id="doneText">
-      <#if p.lastAction! == "InevRenewRequested"><@t "Bạn đã yêu cầu gia hạn. Đại lý sẽ phát hành giấy chứng nhận điện tử và gửi cho bạn." "You asked to renew. The agency will issue your digital certificate and send it to you."/>
-      <#elseif p.lastAction! == "InevCallback"><@t "Bạn đã yêu cầu được gọi lại. Nhân viên sẽ liên hệ sớm." "You asked for a call. A colleague will contact you soon."/>
-      <#elseif p.lastAction! == "InevOptOut"><@t "Bạn sẽ không nhận thêm nhắc nhở." "You will receive no more reminders."/>
-      <#elseif p.lastAction! == "InevRenewed"><@t "Bảo hiểm của bạn đã được gia hạn." "Your insurance has been renewed."/></#if>
+      <#if (p.lastAction!"") == "InevRenewRequested"><@t "Bạn đã yêu cầu gia hạn. Đại lý sẽ phát hành giấy chứng nhận điện tử và gửi cho bạn." "You asked to renew. The agency will issue your digital certificate and send it to you."/>
+      <#elseif (p.lastAction!"") == "InevCallback"><@t "Bạn đã yêu cầu được gọi lại. Nhân viên sẽ liên hệ sớm." "You asked for a call. A colleague will contact you soon."/>
+      <#elseif (p.lastAction!"") == "InevOptOut"><@t "Bạn sẽ không nhận thêm nhắc nhở." "You will receive no more reminders."/>
+      <#elseif (p.lastAction!"") == "InevRenewed"><@t "Bảo hiểm của bạn đã được gia hạn." "Your insurance has been renewed."/></#if>
     </div>
   </div>
 
