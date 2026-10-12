@@ -135,6 +135,13 @@ limitations under the License.
     <growerp.menu.MenuItem menuItemId="INSURANCE_POLICIES" menuConfigurationId="INSURANCE_DEFAULT"
         title="Policies" route="/policies" iconName="shield" widgetName="PolicyList"
         userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN","GROWERP_M_EMPLOYEE"]' sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_RENEWAL" menuConfigurationId="INSURANCE_DEFAULT"
+        title="Renewals" route="/renewalCockpit" iconName="autorenew" widgetName="RenewalCockpit"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN","GROWERP_M_EMPLOYEE"]' sequenceNum="25"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_RENEWAL_COCKPIT" menuConfigurationId="INSURANCE_DEFAULT" parentMenuItemId="INSURANCE_RENEWAL"
+        title="Cockpit" iconName="insights" widgetName="RenewalCockpit" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_RENEWAL_TELESALES" menuConfigurationId="INSURANCE_DEFAULT" parentMenuItemId="INSURANCE_RENEWAL"
+        title="Telesales" iconName="phone" widgetName="TelesalesQueue" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="INSURANCE_CLAIMS" menuConfigurationId="INSURANCE_DEFAULT"
         title="Claims" route="/claims" iconName="report" widgetName="ClaimList"
         userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN","GROWERP_M_EMPLOYEE"]' sequenceNum="30"/>

@@ -164,6 +164,30 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="get" noun="RenewalLink">
+        <description>The private renewal page and AI call links of a policy, for staff to open
+            or demonstrate (created on first use).</description>
+        <in-parameters>
+            <parameter name="policyId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="renewalUrl" />
+            <parameter name="voiceCallUrl" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.InsuranceServices100.check#InsuranceAccess"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.insurance.Policy" value-field="policy" />
+            <if condition="!isStaff || !policy || policy.ownerPartyId != ownerPartyId">
+                <return error="true" message="Policy ${policyId} not found!" />
+            </if>
+            <service-call name="growerp.100.InsuranceRenewalServices100.ensure#RenewalToken"
+                in-map="[policyId: policyId]" out-map="tok" />
+            <set field="renewalUrl" from="tok.renewalUrl" />
+            <set field="voiceCallUrl" from="tok.renewalUrl.replace('/renew/', '/voicecall/')" />
+        </actions>
+    </service>
+
     <service verb="compose" noun="RenewalMessage">
         <description>An AI-written renewal reminder for one policy and channel, in the customer's
             language (Vietnamese by default): facts only, a clear next step, no urgency, no

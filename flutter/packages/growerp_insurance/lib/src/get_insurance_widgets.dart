@@ -24,6 +24,8 @@ Map<String, GrowerpWidgetBuilder> getInsuranceWidgets() {
     'CommissionList': (args) => const CommissionList(),
     'ClaimList': (args) => const ClaimList(),
     'MyPoliciesView': (args) => const MyPoliciesView(),
+    'RenewalCockpit': (args) => const RenewalCockpit(),
+    'TelesalesQueue': (args) => const TelesalesQueue(),
   };
 }
 
@@ -74,6 +76,25 @@ List<WidgetMetadata> getInsuranceWidgetsWithMetadata() {
       iconName: 'shield',
       keywords: ['my policies', 'my claims', 'client portal'],
       builder: (args) => const MyPoliciesView(),
+    ),
+    WidgetMetadata(
+      widgetName: 'RenewalCockpit',
+      description:
+          'Renewal cockpit: customers due for renewal with an explainable '
+          'lead score, the next best channel and time, AI-drafted reminders '
+          'on Zalo, VETC, SMS or email, the AI voice call and the funnel',
+      iconName: 'insights',
+      keywords: ['renewal', 'lead score', 'reminder', 'funnel', 'zalo'],
+      builder: (args) => const RenewalCockpit(),
+    ),
+    WidgetMetadata(
+      widgetName: 'TelesalesQueue',
+      description:
+          'Telesales queue: customers who asked for a call or were handed '
+          'over by the AI call, with the AI summary; record the call outcome',
+      iconName: 'phone',
+      keywords: ['telesales', 'call', 'outcome', 'handover'],
+      builder: (args) => const TelesalesQueue(),
     ),
   ];
 }

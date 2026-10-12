@@ -943,6 +943,49 @@ abstract class RestClient {
   @POST("rest/s1/growerp/100/PolicyRenew")
   Future<Policy> renewPolicy({@Field() required Policy policy});
 
+  // insurance renewal engine
+  @GET("rest/s1/growerp/100/RenewalCandidates")
+  Future<RenewalCandidates> getRenewalCandidates({
+    @Query('band') String? band,
+    @Query('search') String? search,
+    @Query('limit') int? limit,
+  });
+
+  @GET("rest/s1/growerp/100/RenewalTouches")
+  Future<RenewalTouches> getRenewalTouches({
+    @Query('policyId') required String policyId,
+  });
+
+  @POST("rest/s1/growerp/100/RenewalMessage")
+  Future<dynamic> composeRenewalMessage({
+    @Field() required String policyId,
+    @Field() String? channelEnumId,
+    @Field() String? language,
+  });
+
+  @POST("rest/s1/growerp/100/RenewalReminders")
+  Future<dynamic> sendRenewalReminders({
+    @Field() required List<String> policyIds,
+    @Field() String? channelEnumId,
+    @Field() Map<String, String>? messages,
+  });
+
+  @GET("rest/s1/growerp/100/RenewalFunnel")
+  Future<dynamic> getRenewalFunnel();
+
+  @GET("rest/s1/growerp/100/RenewalLink")
+  Future<dynamic> getRenewalLink({@Query('policyId') required String policyId});
+
+  @GET("rest/s1/growerp/100/TelesalesQueue")
+  Future<RenewalCandidates> getTelesalesQueue();
+
+  @POST("rest/s1/growerp/100/CallOutcome")
+  Future<dynamic> recordCallOutcome({
+    @Field() required String policyId,
+    @Field() required String outcomeEnumId,
+    @Field() String? notes,
+  });
+
   /// client assistant: answers about the caller's own policies and claims;
   /// history is a list of {role: user|assistant, text}
   @POST("rest/s1/growerp/100/InsuranceAssistant")

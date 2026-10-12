@@ -1851,6 +1851,11 @@ limitations under the License.
                 <service name="growerp.100.InsuranceRenewalServices100.get#RenewalTouches" />
             </method>
         </resource>
+        <resource name="RenewalLink">
+            <method type="get">
+                <service name="growerp.100.InsuranceRenewalServices100.get#RenewalLink" />
+            </method>
+        </resource>
         <resource name="RenewalMessage">
             <method type="post">
                 <service name="growerp.100.InsuranceRenewalServices100.compose#RenewalMessage" />

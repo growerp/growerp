@@ -77,6 +77,8 @@ final Map<String, Icon> iconRegistry = {
   'message': const Icon(Icons.message),
   'settings_input_component': const Icon(Icons.settings_input_component),
   'autorenew': const Icon(Icons.autorenew),
+  'insights': const Icon(Icons.insights),
+  'phone': const Icon(Icons.phone),
   'schedule_send': const Icon(Icons.schedule_send),
   'connect_without_contact': const Icon(Icons.connect_without_contact),
   'hub': const Icon(Icons.hub),

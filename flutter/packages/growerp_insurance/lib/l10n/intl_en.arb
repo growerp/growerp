@@ -456,5 +456,353 @@
         "type": "String"
       }
     }
+  },
+  "renewalCockpit": "Renewal cockpit",
+  "@renewalCockpit": {
+    "description": "insurance label: Renewal cockpit"
+  },
+  "funnelDue": "Due",
+  "@funnelDue": {
+    "description": "insurance label: Due"
+  },
+  "funnelSent": "Reminded",
+  "@funnelSent": {
+    "description": "insurance label: Reminded"
+  },
+  "funnelOpened": "Opened",
+  "@funnelOpened": {
+    "description": "insurance label: Opened"
+  },
+  "funnelVisited": "Visited page",
+  "@funnelVisited": {
+    "description": "insurance label: Visited page"
+  },
+  "funnelConfirmed": "Confirmed",
+  "@funnelConfirmed": {
+    "description": "insurance label: Confirmed"
+  },
+  "funnelRequested": "Asked to renew",
+  "@funnelRequested": {
+    "description": "insurance label: Asked to renew"
+  },
+  "funnelRenewed": "Renewed",
+  "@funnelRenewed": {
+    "description": "insurance label: Renewed"
+  },
+  "sendDue": "Send due reminders",
+  "@sendDue": {
+    "description": "insurance label: Send due reminders"
+  },
+  "sentResult": "{sent} sent, {skipped} skipped",
+  "@sentResult": {
+    "description": "insurance label: {sent} sent, {skipped} skipped",
+    "placeholders": {
+      "sent": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "colCustomer": "Customer",
+  "@colCustomer": {
+    "description": "insurance label: Customer"
+  },
+  "colEnds": "Ends",
+  "@colEnds": {
+    "description": "insurance label: Ends"
+  },
+  "colScore": "Score",
+  "@colScore": {
+    "description": "insurance label: Score"
+  },
+  "colNext": "Next step",
+  "@colNext": {
+    "description": "insurance label: Next step"
+  },
+  "colStage": "Stage",
+  "@colStage": {
+    "description": "insurance label: Stage"
+  },
+  "daysLeft": "{days} d",
+  "@daysLeft": {
+    "description": "insurance label: {days} d",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "bandAll": "All",
+  "@bandAll": {
+    "description": "insurance label: All"
+  },
+  "bandHigh": "High",
+  "@bandHigh": {
+    "description": "insurance label: High"
+  },
+  "bandMedium": "Medium",
+  "@bandMedium": {
+    "description": "insurance label: Medium"
+  },
+  "bandLow": "Low",
+  "@bandLow": {
+    "description": "insurance label: Low"
+  },
+  "bandDone": "Renewed",
+  "@bandDone": {
+    "description": "insurance label: Renewed"
+  },
+  "bandStop": "Stop",
+  "@bandStop": {
+    "description": "insurance label: Stop"
+  },
+  "whyScore": "Why this score",
+  "@whyScore": {
+    "description": "insurance label: Why this score"
+  },
+  "profileComplete": "Profile {pct}% complete",
+  "@profileComplete": {
+    "description": "insurance label: Profile {pct}% complete",
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "missingFields": "Missing: {fields}",
+  "@missingFields": {
+    "description": "insurance label: Missing: {fields}",
+    "placeholders": {
+      "fields": {
+        "type": "String"
+      }
+    }
+  },
+  "consents": "Consent to contact",
+  "@consents": {
+    "description": "insurance label: Consent to contact"
+  },
+  "noConsent": "No consent",
+  "@noConsent": {
+    "description": "insurance label: No consent"
+  },
+  "aroundTime": "around {time}",
+  "@aroundTime": {
+    "description": "insurance label: around {time}",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "reminder": "Reminder",
+  "@reminder": {
+    "description": "insurance label: Reminder"
+  },
+  "channel": "Channel",
+  "@channel": {
+    "description": "insurance label: Channel"
+  },
+  "aiDraft": "Draft with AI",
+  "@aiDraft": {
+    "description": "insurance label: Draft with AI"
+  },
+  "send": "Send",
+  "@send": {
+    "description": "insurance label: Send"
+  },
+  "openPreview": "Open preview",
+  "@openPreview": {
+    "description": "insurance label: Open preview"
+  },
+  "openRenewalPage": "Renewal page",
+  "@openRenewalPage": {
+    "description": "insurance label: Renewal page"
+  },
+  "aiCall": "AI call",
+  "@aiCall": {
+    "description": "insurance label: AI call"
+  },
+  "journey": "Journey",
+  "@journey": {
+    "description": "insurance label: Journey"
+  },
+  "reminderSent": "Reminder sent",
+  "@reminderSent": {
+    "description": "insurance label: Reminder sent"
+  },
+  "telesales": "Telesales",
+  "@telesales": {
+    "description": "insurance label: Telesales"
+  },
+  "aiSummary": "AI summary",
+  "@aiSummary": {
+    "description": "insurance label: AI summary"
+  },
+  "transcript": "Transcript",
+  "@transcript": {
+    "description": "insurance label: Transcript"
+  },
+  "callOutcome": "Call outcome",
+  "@callOutcome": {
+    "description": "insurance label: Call outcome"
+  },
+  "notes": "Notes",
+  "@notes": {
+    "description": "insurance label: Notes"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "insurance label: Save"
+  },
+  "queueEmpty": "Nobody to call right now",
+  "@queueEmpty": {
+    "description": "insurance label: Nobody to call right now"
+  },
+  "outcomeSaved": "Call recorded",
+  "@outcomeSaved": {
+    "description": "insurance label: Call recorded"
+  },
+  "actSendReminder": "Send reminder",
+  "@actSendReminder": {
+    "description": "insurance label: Send reminder"
+  },
+  "actTelesales": "Telesales call",
+  "@actTelesales": {
+    "description": "insurance label: Telesales call"
+  },
+  "actAiCall": "AI voice call",
+  "@actAiCall": {
+    "description": "insurance label: AI voice call"
+  },
+  "actIssue": "Issue the renewal",
+  "@actIssue": {
+    "description": "insurance label: Issue the renewal"
+  },
+  "actWait": "Wait, reminded recently",
+  "@actWait": {
+    "description": "insurance label: Wait, reminded recently"
+  },
+  "actConsent": "Ask consent at next visit",
+  "@actConsent": {
+    "description": "insurance label: Ask consent at next visit"
+  },
+  "actNone": "None",
+  "@actNone": {
+    "description": "insurance label: None"
+  },
+  "actStop": "Do not contact",
+  "@actStop": {
+    "description": "insurance label: Do not contact"
+  },
+  "chZalo": "Zalo",
+  "@chZalo": {
+    "description": "insurance label: Zalo"
+  },
+  "chVetc": "VETC app",
+  "@chVetc": {
+    "description": "insurance label: VETC app"
+  },
+  "chSms": "SMS",
+  "@chSms": {
+    "description": "insurance label: SMS"
+  },
+  "chEmail": "Email",
+  "@chEmail": {
+    "description": "insurance label: Email"
+  },
+  "chVoiceBot": "AI call",
+  "@chVoiceBot": {
+    "description": "insurance label: AI call"
+  },
+  "chCall": "Telesales",
+  "@chCall": {
+    "description": "insurance label: Telesales"
+  },
+  "chWeb": "Renewal page",
+  "@chWeb": {
+    "description": "insurance label: Renewal page"
+  },
+  "evSent": "Reminder sent",
+  "@evSent": {
+    "description": "insurance label: Reminder sent"
+  },
+  "evOpened": "Opened",
+  "@evOpened": {
+    "description": "insurance label: Opened"
+  },
+  "evVisited": "Visited page",
+  "@evVisited": {
+    "description": "insurance label: Visited page"
+  },
+  "evConfirmed": "Confirmed vehicle",
+  "@evConfirmed": {
+    "description": "insurance label: Confirmed vehicle"
+  },
+  "evRenewRequested": "Asked to renew",
+  "@evRenewRequested": {
+    "description": "insurance label: Asked to renew"
+  },
+  "evCallback": "Asked for a call",
+  "@evCallback": {
+    "description": "insurance label: Asked for a call"
+  },
+  "evCalled": "Call",
+  "@evCalled": {
+    "description": "insurance label: Call"
+  },
+  "evOptOut": "Stop",
+  "@evOptOut": {
+    "description": "insurance label: Stop"
+  },
+  "evRenewed": "Renewed",
+  "@evRenewed": {
+    "description": "insurance label: Renewed"
+  },
+  "evIssued": "Certificate issued",
+  "@evIssued": {
+    "description": "insurance label: Certificate issued"
+  },
+  "evNone": "Not contacted",
+  "@evNone": {
+    "description": "insurance label: Not contacted"
+  },
+  "ocRenewed": "Renewed",
+  "@ocRenewed": {
+    "description": "insurance label: Renewed"
+  },
+  "ocInterested": "Interested",
+  "@ocInterested": {
+    "description": "insurance label: Interested"
+  },
+  "ocCallLater": "Call later",
+  "@ocCallLater": {
+    "description": "insurance label: Call later"
+  },
+  "ocNotInterested": "Not interested",
+  "@ocNotInterested": {
+    "description": "insurance label: Not interested"
+  },
+  "ocSoldVehicle": "Vehicle sold",
+  "@ocSoldVehicle": {
+    "description": "insurance label: Vehicle sold"
+  },
+  "ocInsuredElsewhere": "Insured elsewhere",
+  "@ocInsuredElsewhere": {
+    "description": "insurance label: Insured elsewhere"
+  },
+  "ocWrongNumber": "Wrong number",
+  "@ocWrongNumber": {
+    "description": "insurance label: Wrong number"
+  },
+  "ocNoAnswer": "No answer",
+  "@ocNoAnswer": {
+    "description": "insurance label: No answer"
+  },
+  "ocOptOut": "Do not contact",
+  "@ocOptOut": {
+    "description": "insurance label: Do not contact"
   }
 }

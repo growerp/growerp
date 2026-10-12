@@ -16,6 +16,7 @@ export 'package:growerp_insurance/l10n/generated/insurance_localizations.dart';
 export 'src/policy/policy.dart';
 export 'src/claim/claim.dart';
 export 'src/portal/portal.dart';
+export 'src/renewal/renewal.dart';
 export 'src/insurance_date.dart';
 export 'src/get_insurance_bloc_providers.dart';
 export 'src/get_insurance_widgets.dart';

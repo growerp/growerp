@@ -52,6 +52,22 @@ const insuranceMenuConfig = MenuConfiguration(
       widgetName: 'PolicyRenewalList',
     ),
     MenuItem(
+      itemKey: 'INSURANCE_RENEWAL_COCKPIT',
+      title: 'Cockpit',
+      route: '/renewalCockpit',
+      iconName: 'insights',
+      sequenceNum: 32,
+      widgetName: 'RenewalCockpit',
+    ),
+    MenuItem(
+      itemKey: 'INSURANCE_TELESALES',
+      title: 'Telesales',
+      route: '/telesales',
+      iconName: 'phone',
+      sequenceNum: 34,
+      widgetName: 'TelesalesQueue',
+    ),
+    MenuItem(
       itemKey: 'INSURANCE_CLAIMS',
       title: 'Claims',
       route: '/claims',
@@ -86,6 +102,8 @@ GoRouter createInsuranceExampleRouter() {
     widgetBuilder: (route) => switch (route) {
       '/policies' => const PolicyList(),
       '/renewals' => const PolicyRenewalList(),
+      '/renewalCockpit' => const RenewalCockpit(),
+      '/telesales' => const TelesalesQueue(),
       '/claims' => const ClaimList(),
       '/commissions' => const CommissionList(),
       '/myPolicies' => const MyPoliciesView(),
