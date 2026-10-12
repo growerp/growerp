@@ -92,7 +92,7 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || _pendingRegisterHandled) return;
       if (_authBloc.state.pendingRegistrationEmail != null &&
-          !_noRegistrationApps.contains(applicationId)) {
+          _registrationAllowed) {
         _pendingRegisterHandled = true;
         _showAuthDialog(RegisterUserDialog(company == null));
       }
@@ -104,6 +104,14 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
   /// Apps without registration: support staff are set up internally, academy
   /// learners register on the website or are added in the admin app.
   static const _noRegistrationApps = {'AppSupport', 'AppAcademy'};
+  // no registration either once the company is known (from the host): the
+  // agency creates its clients' logins itself
+  static const _noRegistrationWithCompanyApps = {'AppInsurance'};
+
+  bool get _registrationAllowed =>
+      !_noRegistrationApps.contains(applicationId) &&
+      !(company != null &&
+          _noRegistrationWithCompanyApps.contains(applicationId));
 
   /// Auth dialogs (login/register) show their own progress indicator, so while
   /// one is open this form must not swap to [AppLoadingScreen] underneath it:
@@ -383,14 +391,11 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
                                   // With a startup company the registration
                                   // joins that company as a new user, the
                                   // backend ignores the admin flag then.
-                                  if (!_noRegistrationApps.contains(
-                                        applicationId,
-                                      ) &&
+                                  if (_registrationAllowed &&
                                       !(kReleaseMode &&
                                           GlobalConfiguration().get("test") ==
                                               true &&
-                                          (Platform.isIOS ||
-                                              Platform.isMacOS)))
+                                          (Platform.isIOS || Platform.isMacOS)))
                                     _buildPremiumButton(
                                       context: context,
                                       key: const Key('newUserButton'),
