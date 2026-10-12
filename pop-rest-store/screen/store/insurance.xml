@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+GrowERP Insurance Flutter Web App Screen
+Serves the Flutter insurance app at /insurance/; the Tasco demo landing page (tasco.xml)
+pre-boots it in a hidden iframe so it opens warm
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    standalone="true" require-authentication="anonymous-view" allow-extra-path="true">
+
+    <pre-actions>
+        <!-- Moqui defaults to frame-ancestors 'none'; allow same-origin framing for the preload -->
+        <script>ec.web.response.setHeader("Content-Security-Policy", "frame-ancestors 'self'; form-action 'self';")</script>
+        <!-- no store for this host is fine here (store.xml sets 404 then) -->
+        <script>ec.web.response.setStatus(200)</script>
+    </pre-actions>
+
+    <widgets>
+        <render-mode>
+            <text type="html" location="component://PopRestStore/screen/store/insurance/index.html"/>
+        </render-mode>
+    </widgets>
+</screen>

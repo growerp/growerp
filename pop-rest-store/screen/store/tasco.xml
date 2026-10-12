@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Tasco "AI for Insurance" challenge demo landing page: the home page of the tasco hosts (see the
+conditional default in store.xml), also at /tasco. Text to read while the insurance app at
+/insurance/ boots in a hidden iframe, so "Open the demo" starts warm.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    standalone="true" require-authentication="anonymous-view">
+
+    <pre-actions>
+        <!-- no store for this host is fine here (store.xml sets 404 then) -->
+        <script>ec.web.response.setStatus(200)</script>
+    </pre-actions>
+
+    <widgets>
+        <render-mode>
+            <text type="html" location="component://PopRestStore/template/insurance/tasco.html.ftl"/>
+        </render-mode>
+    </widgets>
+</screen>

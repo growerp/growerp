@@ -322,7 +322,11 @@ var storeInfo = ${storeInfoJson};
         <default-response type="none"/>
     </transition>
 
-    <subscreens default-item="home" always-use-full-path="true"/>
+    <subscreens default-item="home" always-use-full-path="true">
+        <!-- the Tasco challenge demo hosts (tasco.growerp.net, tasco-backend.growerp.net) open on
+             the demo landing page instead of a store website -->
+        <conditional-default condition="ec.web.getHostName(false)?.startsWith('tasco')" item="tasco"/>
+    </subscreens>
 
     <pre-actions>
         <set field="home" value="/"/>
