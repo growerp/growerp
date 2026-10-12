@@ -57,7 +57,8 @@ These targets are hypotheses until the baselines are in.
 
 ## 6. Try it
 
-- **Hosted demo:** https://tasco.growerp.net (staff app: Renewals → Cockpit and Telesales).
+- **Hosted demo:** https://tasco.growerp.net: a short landing page; **Open the demo** starts the staff app
+  (Renewals → Cockpit and Telesales), already loaded in the background while you read.
   - Agency login: test150296@example.com / qqqqqq9!
   - Customer pages open from the cockpit: a reminder's **Open preview**, **Renewal page** and
     **AI call** (allow the microphone, Chrome).

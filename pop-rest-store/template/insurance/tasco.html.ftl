@@ -130,7 +130,8 @@
 <#noparse>
 <script>
   // Boot the insurance app off-screen while the visitor reads, so "Open the demo" starts warm.
-  // A real size, not display:none: the Flutter engine needs a layout to finish starting.
+  // In the viewport at a real size, but transparent and behind the page: Chrome throttles
+  // rendering of display:none and off-screen iframes, and the Flutter engine then never starts.
   (function () {
     if (navigator.connection && navigator.connection.saveData) return;
     var state = document.getElementById('appState'), text = document.getElementById('appStateText');
@@ -141,7 +142,7 @@
         frame.title = 'demo app preload';
         frame.setAttribute('aria-hidden', 'true');
         frame.tabIndex = -1;
-        frame.style.cssText = 'position:fixed;left:-10000px;top:0;width:1280px;height:800px;border:0;visibility:hidden;pointer-events:none';
+        frame.style.cssText = 'position:fixed;left:0;top:0;width:100vw;height:100vh;border:0;opacity:0;pointer-events:none;z-index:-1';
         document.body.appendChild(frame);
         state.hidden = false;
         var tries = 0, poll = setInterval(function () {
