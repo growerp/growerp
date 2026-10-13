@@ -197,6 +197,7 @@ List<LocalizationsDelegate> delegates = const [
   OrderAccountingLocalizations.delegate,
   ActivityLocalizations.delegate,
   InsuranceLocalizations.delegate,
+  AdkLocalizations.delegate,
 ];
 
 List<BlocProvider> getInsuranceAppBlocProviders(
