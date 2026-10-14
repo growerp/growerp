@@ -112,7 +112,14 @@ Future<Company?> getStartupCompany(
       return null;
     }
     debugPrint('=== startup company: ${company.name}[${company.partyId}]');
-    return unlessFirstTenant(company);
+    final startup = unlessFirstTenant(company);
+    if (startup == null) {
+      // never remember the ignored first tenant: the next start falls back
+      // to the company of the host again
+      await prefs.remove(_prefKey);
+      GlobalConfiguration().updateValue('singleCompany', '');
+    }
+    return startup;
   } catch (e) {
     debugPrint('=== getting company: $companyPartyId error: $e');
     return null;
