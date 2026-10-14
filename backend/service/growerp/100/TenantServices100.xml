@@ -47,12 +47,28 @@ limitations under the License.
             </entity-find-one>
 
             <if condition="growerpParty">
-                <!-- GROWERP exists from seed data - check if it has any users -->
-                <entity-find entity-name="mantle.party.Party" list="growerpUsers">
+                <!-- GROWERP exists from seed data - check if it has an admin user. Only admins
+                     count: a seeded GROWERP AI agent that ran before the first registration
+                     already owns an employee user (AGENT_GROWERP, ensure#AgentUser), which
+                     must not turn the first registration into an additional tenant. -->
+                <entity-find entity-name="mantle.party.Party" list="growerpParties">
                     <econdition field-name="ownerPartyId" value="GROWERP"/>
                     <econdition field-name="partyTypeEnumId" operator="not-equals" value="PtyOwner"/>
                 </entity-find>
-                
+                <set field="growerpUsers" from="[]"/>
+                <if condition="growerpParties">
+                    <entity-find entity-name="moqui.security.UserAccount" list="growerpAccounts">
+                        <econdition field-name="partyId" operator="in" from="growerpParties*.partyId"/>
+                    </entity-find>
+                    <if condition="growerpAccounts">
+                        <entity-find entity-name="moqui.security.UserGroupMember" list="growerpUsers" limit="1">
+                            <econdition field-name="userId" operator="in" from="growerpAccounts*.userId"/>
+                            <econdition field-name="userGroupId" value="GROWERP_M_ADMIN"/>
+                            <date-filter/>
+                        </entity-find>
+                    </if>
+                </if>
+
                 <if condition="!growerpUsers">
                     <!-- GROWERP exists but has no users - this is the first registration -->
                     <log message="First registration: Using existing GROWERP party from seed data"/>
