@@ -133,13 +133,22 @@ posts, landing pages) is written *for* the selected persona.
 
 ### 3.2 Content Plans
 
-A weekly content schedule per persona, based on the *Pain–News–Prize* formula
-(address a pain, share news, offer value).
+A content plan covers one or more weeks for a persona. It is an outline: for every piece a
+headline, a short brief and the day it goes out. The text itself is written week by week,
+so news stays current and you can still change next week's brief.
 
-- **Generate:** press **+**, pick a persona, and the AI proposes a themed weekly
-  plan of post headlines. Each content piece of the plan also gets an AI-made image;
-  the images are made in the background and show up shortly after.
-- Open a plan to see its posts and their schedule.
+- **Generate:** press **+**, pick a persona, the number of **Weeks** (default 4) and a
+  **Format**:
+  - *Pain-News-Prize*: three pieces a week, Pain on Monday, News on Wednesday, Prize on
+    Friday (address a pain, share news, offer value).
+  - *Single posting*: one piece a week, on Monday.
+  The pieces appear with status *PLANNED*: a title and a brief, no text yet.
+- Open a plan to see its pieces grouped by week. Tap **Write now** on a planned piece (or
+  in the piece's dialog) and the AI writes its text from the title and brief; the piece
+  becomes *DRAFT* and gets an AI-made image in the background. The weekly content agent
+  does this for you every Monday for that week's pieces.
+- A planned piece cannot be approved or adapted until it is written. Adapting it
+  schedules the platform posts on the day the plan gave it.
 
 ### 3.3 Content
 
@@ -148,6 +157,10 @@ The content hub: author a piece of content **once**, then adapt it per platform
 
 - **Draft with AI:** from a headline, the draft service writes the full post text;
   review, humanise, and mark the platform variant *Scheduled* or *Published*.
+- **Markdown:** the text of a piece is Markdown (short paragraphs, `##` subheadings,
+  lists, **bold**). Your website article and Medium keep the formatting; LinkedIn, X,
+  Facebook, Substack and e-mail variants get plain text with the same paragraphs, as
+  those platforms show Markdown symbols as typed.
 - Post statuses: *Draft → Scheduled → Published*.
 - **Ideas strip** (top of the screen): paste text or notes, or give an article URL, or
   both. **Write article** turns an idea into a ~500 word article in your house style

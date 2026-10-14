@@ -56,6 +56,7 @@ class MasterContentDetailScreenState
   late TextEditingController _pseudoIdController;
   late TextEditingController _titleController;
   late TextEditingController _bodyController;
+  late TextEditingController _briefController;
   late TextEditingController _ctaController;
   late TextEditingController _urlController;
   late TextEditingController _ctaUrlController;
@@ -113,6 +114,8 @@ class MasterContentDetailScreenState
         TextEditingController(text: widget.masterContent?.title ?? '');
     _bodyController =
         TextEditingController(text: widget.masterContent?.body ?? '');
+    _briefController =
+        TextEditingController(text: widget.masterContent?.brief ?? '');
     _ctaController =
         TextEditingController(text: widget.masterContent?.callToAction ?? '');
     _urlController =
@@ -147,6 +150,7 @@ class MasterContentDetailScreenState
     _pseudoIdController.dispose();
     _titleController.dispose();
     _bodyController.dispose();
+    _briefController.dispose();
     _ctaController.dispose();
     _urlController.dispose();
     _ctaUrlController.dispose();
@@ -287,7 +291,10 @@ class MasterContentDetailScreenState
                           decoration:
                               const InputDecoration(labelText: 'Status'),
                           initialValue: _selectedStatus,
-                          items: statuses
+                          items: [
+                            if (_selectedStatus == 'PLANNED') 'PLANNED',
+                            ...statuses,
+                          ]
                               .map((t) => DropdownMenuItem<String>(
                                   value: t, child: Text(t)))
                               .toList(),
@@ -363,9 +370,26 @@ class MasterContentDetailScreenState
                         ? 'Title is required'
                         : null,
                   ),
+                  if (_selectedStatus == 'PLANNED' ||
+                      _briefController.text.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      key: const Key('brief'),
+                      decoration: const InputDecoration(
+                        labelText: 'Brief',
+                        helperText:
+                            'What the text should say: the body is written '
+                            'from the title and this brief',
+                      ),
+                      controller: _briefController,
+                      maxLines: 4,
+                    ),
+                  ],
                   const SizedBox(height: 10),
                   FormField<String>(
-                    validator: (_) => _bodyController.text.isEmpty
+                    // a planned piece gets its body when it is written
+                    validator: (_) => _bodyController.text.isEmpty &&
+                            _selectedStatus != 'PLANNED'
                         ? 'Body is required'
                         : null,
                     builder: (field) => Column(
@@ -501,6 +525,9 @@ class MasterContentDetailScreenState
                                   : 'N',
                           image: image,
                           status: _selectedStatus,
+                          brief: _briefController.text.isEmpty
+                              ? null
+                              : _briefController.text,
                         );
                         if (widget.masterContent?.masterContentId == null) {
                           _bloc.add(MasterContentCreate(mc));
@@ -517,7 +544,11 @@ class MasterContentDetailScreenState
                 ),
               ],
             ),
-            if (widget.masterContent?.masterContentId != null) ...[
+            if (widget.masterContent?.masterContentId != null &&
+                masterContent?.status == 'PLANNED') ...[
+              const SizedBox(height: 20),
+              _buildWriteNowSection(),
+            ] else if (widget.masterContent?.masterContentId != null) ...[
               const SizedBox(height: 20),
               _buildApprovalSection(masterContent),
               const SizedBox(height: 20),
@@ -560,6 +591,33 @@ class MasterContentDetailScreenState
     if (bytes == null || !mounted) return;
     await StyledImageUpload.showLarge(context,
         imageBytes: bytes, title: 'Related image');
+  }
+
+  /// A planned piece of a content plan: only an outline, written on request.
+  Widget _buildWriteNowSection() {
+    return GroupingDecorator(
+      labelText: 'Planned piece',
+      child: Row(
+        children: [
+          const Expanded(
+            child: Text('Not written yet: AI writes the text from the title '
+                'and brief. Approve and adapt it afterwards.'),
+          ),
+          const SizedBox(width: 8),
+          ElevatedButton.icon(
+            key: const Key('writeNow'),
+            icon: const Icon(Icons.edit_note),
+            label: const Text('Write now'),
+            onPressed: () {
+              _bloc.add(MasterContentGenerateWithAI(
+                masterContentId: widget.masterContent!.masterContentId,
+              ));
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildApprovalSection(MasterContent? masterContent) {

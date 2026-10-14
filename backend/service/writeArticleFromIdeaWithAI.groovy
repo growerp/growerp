@@ -63,6 +63,16 @@ if (idea.sourceUrl) {
 if (!material && idea.title?.trim()) material.add("IDEA FROM THE USER:\n" + idea.title.trim())
 if (!material) { ec.message.addError("The idea has no text and no article URL"); return }
 
+// ---- a planned piece of a content plan the article takes the place of
+def planned = null
+if (plannedContentId) {
+    planned = ec.entity.find("growerp.marketing.MasterContent").condition("masterContentId", plannedContentId)
+        .condition("ownerPartyId", ownerPartyId).condition("status", "PLANNED").one()
+    if (!planned) { ec.message.addError("Planned piece not found or already written"); return }
+    planId = planned.planId
+    pnpType = planned.pnpType
+}
+
 // ---- persona: the given one, else the owner's first
 def persona = personaId ? ec.entity.find("growerp.marketing.MarketingPersona")
         .condition("personaId", personaId).condition("ownerPartyId", ownerPartyId).one() :
@@ -121,6 +131,12 @@ def created = ec.service.sync().name("growerp.100.MasterContentServices100.creat
                  body: data.body, callToAction: data.callToAction, status: 'DRAFT']).call()
 if (ec.message.hasError()) return
 masterContentId = created.masterContentId
+// the article takes over the planned slot: its day, and the outline is no longer needed
+if (planned) {
+    ec.service.sync().name("update#growerp.marketing.MasterContent")
+        .parameters([masterContentId: masterContentId, plannedDate: planned.plannedDate]).call()
+    planned.delete()
+}
 // the related image is made in the background once this article is committed
 ec.service.special().name("growerp.100.MasterContentServices100.generate#MasterContentImages")
     .parameters([masterContentIds: [masterContentId], username: ec.user.username]).registerOnCommit()

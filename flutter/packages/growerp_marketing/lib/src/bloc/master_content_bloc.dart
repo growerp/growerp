@@ -140,6 +140,7 @@ class MasterContentBloc
         teaserMode: event.masterContent.teaserMode,
         ctaUrl: event.masterContent.ctaUrl,
         status: event.masterContent.status,
+        brief: event.masterContent.brief,
         image: _imageField(event.masterContent.image),
       );
       emit(state.copyWith(
@@ -192,6 +193,7 @@ class MasterContentBloc
     try {
       emit(state.copyWith(status: MasterContentStatus.loading));
       final created = await restClient.generateMasterContentWithAI(
+        masterContentId: event.masterContentId,
         personaId: event.personaId,
         planId: event.planId,
         contentType: event.contentType,
@@ -202,8 +204,19 @@ class MasterContentBloc
       );
       emit(state.copyWith(
         status: MasterContentStatus.success,
-        masterContents: List<MasterContent>.from(state.masterContents)
-          ..insert(0, created),
+        // a written planned piece replaces its outline row
+        masterContents: event.masterContentId != null
+            ? state.masterContents
+                .map((m) => m.masterContentId == event.masterContentId
+                    ? m.copyWith(
+                        title: created.title,
+                        body: created.body,
+                        callToAction: created.callToAction,
+                        status: 'DRAFT')
+                    : m)
+                .toList()
+            : (List<MasterContent>.from(state.masterContents)
+              ..insert(0, created)),
         message: 'Master content generated successfully',
       ));
     } on DioException catch (e) {

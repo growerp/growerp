@@ -151,9 +151,22 @@ List<Widget> getContentPlanListRow({
       ),
     );
 
-    // Week Start
+    // Week Start, with the plan's length and format below it
     cells.add(
-      Text(_formatDate(plan.weekStartDate), key: Key('weekStartDate$index')),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(_formatDate(plan.weekStartDate),
+              key: Key('weekStartDate$index')),
+          if (plan.weeks != null)
+            Text(
+              '${plan.weeks} wk · '
+              '${plan.planFormat == 'SINGLE' ? 'Single' : 'PNP'}',
+              key: Key('planFormat$index'),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+        ],
+      ),
     );
 
     // Persona ID

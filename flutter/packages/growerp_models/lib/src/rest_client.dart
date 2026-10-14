@@ -1677,6 +1677,8 @@ abstract class RestClient {
   Future<ContentPlan> generateContentPlanWithAI({
     @Field() required String personaId,
     @Field() int? weekStartDate,
+    @Field() int? weeks,
+    @Field() String? planFormat,
     @Field() String? theme,
   });
 
@@ -1776,6 +1778,7 @@ abstract class RestClient {
     @Field() String? teaserMode,
     @Field() String? ctaUrl,
     @Field() String? status,
+    @Field() String? brief,
 
     /// base64; '' removes the image, null keeps it
     @Field() String? image,
@@ -1806,6 +1809,8 @@ abstract class RestClient {
 
   @POST("rest/s1/growerp/100/MasterContent/generateWithAI")
   Future<MasterContent> generateMasterContentWithAI({
+    /// a PLANNED piece of a content plan: written in place from its brief
+    @Field() String? masterContentId,
     @Field() String? personaId,
     @Field() String? planId,
     @Field() String? contentType,

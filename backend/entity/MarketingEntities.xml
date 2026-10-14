@@ -28,7 +28,8 @@
     <!--  Content Plan (Weekly PNP Schedule)                       -->
     <!-- ========================================================= -->
     <entity entity-name="ContentPlan" package="growerp.marketing">
-        <description>Represents a weekly content plan based on the Pain-News-Prize formula.</description>
+        <description>A content plan over one or more weeks: an outline of PLANNED MasterContent
+            pieces (Pain-News-Prize or a single posting per week) written week by week.</description>
         <field name="planId" type="id" is-pk="true" />
         <field name="pseudoId" type="id" />
         <field name="ownerPartyId" type="id" />
@@ -36,6 +37,8 @@
         <field name="weekStartDate" type="date-time" />
         <field name="theme" type="text-medium" />
         <field name="status" type="text-short" /> <!-- DRAFT, ACTIVE, COMPLETED -->
+        <field name="weeks" type="number-integer" /> <!-- number of weeks from weekStartDate -->
+        <field name="planFormat" type="text-short" /> <!-- PNP (Pain/News/Prize Mon/Wed/Fri) or SINGLE (one posting on Monday); empty = PNP -->
 
         <field name="createdDate" type="date-time" />
         <field name="lastModifiedDate" type="date-time" />
@@ -109,7 +112,10 @@
         <!-- optional related image: dbresource folder holding large/medium/small (upload#Image),
              shown as article hero and attached to the adapted social posts -->
         <field name="imageLocation" type="text-medium" />
-        <field name="status" type="text-short" /> <!-- DRAFT, APPROVED, ADAPTED -->
+        <field name="status" type="text-short" /> <!-- PLANNED (outline only, no body yet), DRAFT, APPROVED, ADAPTED -->
+        <!-- outline from a ContentPlan: what to write and when; the body is written in that week -->
+        <field name="brief" type="text-long" />
+        <field name="plannedDate" type="date-time" />
         <field name="approvedDate" type="date-time" /> <!-- human approval gate: set = scheduler may auto-publish this piece's SocialPost variants -->
 
         <field name="createdDate" type="date-time" />

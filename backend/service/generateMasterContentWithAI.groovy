@@ -29,6 +29,29 @@ try {
         return
     }
 
+    // A PLANNED piece of a content plan is written in place: its outline gives the input
+    def planned = null
+    if (masterContentId) {
+        planned = ec.entity.find("growerp.marketing.MasterContent")
+            .condition("masterContentId", masterContentId).condition("ownerPartyId", ownerPartyId).one()
+        if (!planned) {
+            ec.message.addError("Master content not found or access denied")
+            return
+        }
+        if (planned.status != 'PLANNED') {
+            ec.message.addError("Master content ${planned.pseudoId} is already written")
+            return
+        }
+        planId = planned.planId
+        contentType = planned.contentType ?: contentType
+        pnpType = planned.pnpType ?: pnpType
+        title = title ?: planned.title
+        brief = brief ?: planned.brief
+        targetUrl = targetUrl ?: planned.targetUrl
+        if (!personaId && planId) personaId = ec.entity.find("growerp.marketing.ContentPlan")
+            .condition("planId", planId).one()?.personaId
+    }
+
     // Step 2: Persona (optional but recommended for tone)
     def persona = null
     if (personaId) {
@@ -68,7 +91,7 @@ adapted per platform later. Write ${typeGuide}.
 ${personaBlock}
 
 ANGLE (Pain-News-Prize): ${thePnp} — ${pnpGuide}
-BRIEF / OUTLINE: ${brief ?: title ?: '(none, choose a strong angle for the persona)'}
+${title && brief ? "HEADLINE: ${title}\n" : ''}BRIEF / OUTLINE: ${brief ?: title ?: '(none, choose a strong angle for the persona)'}
 
 HOUSE VOICE (how it must sound; wins over the persona tone where they disagree):
 ${GeminiAiUtil.houseVoice(ec, ownerPartyId)}
@@ -76,12 +99,14 @@ ${GeminiAiUtil.houseVoice(ec, ownerPartyId)}
 REQUIREMENTS:
 - Speak directly to the persona in their tone of voice.
 - Neutral formatting: no hashtags, no @mentions, no platform-specific styling (those are added on adaptation).
+- The body is Markdown: short paragraphs of 1-3 sentences separated by a blank line${theType == 'ARTICLE' ? ", 2-4 '## ' subheadings" : ''},
+  bullet lists and **bold** where they help. No '# ' heading (the title is separate), no tables, no HTML.
 - Include a clear call-to-action.
 
 RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this exact structure:
 {
   "title": "A short title/headline",
-  "body": "The full platform-neutral content",
+  "body": "The full platform-neutral content in Markdown",
   "callToAction": "One-line call to action"
 }
 
@@ -94,6 +119,21 @@ Write the content now.
         [ownerPartyId: ownerPartyId, temperature: 0.85, maxOutputTokens: 4096])
     generatedText = generatedText.replaceAll(/```json\s*/, '').replaceAll(/```\s*$/, '').replaceAll(/^```\s*/, '').trim()
     def data = jsonSlurper.parseText(generatedText)
+
+    if (planned) {
+        ec.service.sync().name("update#growerp.marketing.MasterContent")
+            .parameters([masterContentId: masterContentId, contentType: theType, title: data.title,
+                body: data.body, callToAction: data.callToAction ?: planned.callToAction,
+                status: 'DRAFT', lastModifiedDate: ec.user.nowTimestamp]).call()
+        ec.service.special().name("growerp.100.MasterContentServices100.generate#MasterContentImages")
+            .parameters([masterContentIds: [masterContentId], username: ec.user.username]).registerOnCommit()
+        pseudoId = planned.pseudoId
+        title = data.title
+        body = data.body
+        callToAction = data.callToAction ?: planned.callToAction
+        ec.message.addMessage("Planned piece ${pseudoId} written")
+        return
+    }
 
     // Step 6: Create the MasterContent entity
     def pseudoIdResult = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")

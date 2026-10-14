@@ -19,6 +19,8 @@
             <parameter name="planId" />
             <parameter name="contentType" />
             <parameter name="status" />
+            <parameter name="plannedThisWeek"><description>Y: only pieces whose plannedDate is
+                in the current week (Monday to Monday, UTC)</description></parameter>
             <parameter name="start" type="Integer" />
             <parameter name="limit" type="Integer" />
         </in-parameters>
@@ -32,6 +34,14 @@
             <!-- normalize null (param omitted) to '' so the LIKE conditions below become
                  the benign '%%' wildcard instead of the literal string '%null%' -->
             <set field="searchString" from="searchString ?: ''" />
+            <if condition="plannedThisWeek == 'Y'">
+                <set field="weekMonday" from="java.time.LocalDate.now(java.time.ZoneOffset.UTC)
+                    .with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))" />
+                <set field="plannedFrom" from="java.sql.Timestamp.from(weekMonday
+                    .atStartOfDay(java.time.ZoneOffset.UTC).toInstant())" />
+                <set field="plannedThru" from="java.sql.Timestamp.from(weekMonday.plusWeeks(1)
+                    .atStartOfDay(java.time.ZoneOffset.UTC).toInstant())" />
+            </if>
 
             <entity-find entity-name="growerp.marketing.MasterContent" list="masterContents"
                 offset="start" limit="limit">
@@ -40,6 +50,10 @@
                 <econdition field-name="planId" from="planId" ignore-if-empty="true" />
                 <econdition field-name="contentType" from="contentType" ignore-if-empty="true" />
                 <econdition field-name="status" from="status" ignore-if-empty="true" />
+                <econdition field-name="plannedDate" operator="greater-equals" from="plannedFrom"
+                    ignore-if-empty="true" />
+                <econdition field-name="plannedDate" operator="less" from="plannedThru"
+                    ignore-if-empty="true" />
                 <econditions combine="or">
                     <econdition field-name="pseudoId" operator="like" value="%${searchString}%"
                         ignore-if-empty="true" ignore-case="true" />
@@ -101,6 +115,8 @@
             <parameter name="articlePath" />
             <parameter name="ctaUrl" />
             <parameter name="status" />
+            <parameter name="brief" />
+            <parameter name="plannedDate" type="Timestamp" />
             <parameter name="approvedDate" type="Timestamp" />
             <parameter name="createdDate" type="Timestamp" />
             <parameter name="lastModifiedDate" type="Timestamp" />
@@ -185,6 +201,7 @@
             <parameter name="teaserMode" />
             <parameter name="ctaUrl" />
             <parameter name="status" />
+            <parameter name="brief" />
             <parameter name="image"><description>base64; empty string removes the image, omitted keeps it</description></parameter>
         </in-parameters>
         <out-parameters>
@@ -201,6 +218,8 @@
             <parameter name="articlePath" />
             <parameter name="ctaUrl" />
             <parameter name="status" />
+            <parameter name="brief" />
+            <parameter name="plannedDate" type="Timestamp" />
             <parameter name="approvedDate" type="Timestamp" />
             <parameter name="createdDate" type="Timestamp" />
             <parameter name="lastModifiedDate" type="Timestamp" />
@@ -236,7 +255,9 @@
                     targetUrl: targetUrl ?: mc.targetUrl,
                     teaserMode: teaserMode ?: mc.teaserMode,
                     ctaUrl: ctaUrl ?: mc.ctaUrl,
-                    status: status ?: mc.status,
+                    brief: brief ?: mc.brief,
+                    status: (status ?: mc.status) == 'PLANNED' &amp;&amp; (body ?: mc.body)
+                        ? 'DRAFT' : (status ?: mc.status),
                     lastModifiedDate: ec.user.nowTimestamp
                 ]" />
             <if condition="image != null">
@@ -259,6 +280,8 @@
             <set field="articlePath" from="updated.articlePath" />
             <set field="ctaUrl" from="updated.ctaUrl" />
             <set field="status" from="updated.status" />
+            <set field="brief" from="updated.brief" />
+            <set field="plannedDate" from="updated.plannedDate" />
             <set field="approvedDate" from="updated.approvedDate" />
             <set field="createdDate" from="updated.createdDate" />
             <set field="lastModifiedDate" from="updated.lastModifiedDate" />
@@ -294,6 +317,8 @@
             <parameter name="articlePath" />
             <parameter name="ctaUrl" />
             <parameter name="status" />
+            <parameter name="brief" />
+            <parameter name="plannedDate" type="Timestamp" />
             <parameter name="approvedDate" type="Timestamp" />
             <parameter name="createdDate" type="Timestamp" />
             <parameter name="lastModifiedDate" type="Timestamp" />
@@ -310,6 +335,9 @@
             </if>
             <if condition="mc.ownerPartyId != ownerPartyId">
                 <return error="true" message="Access denied to this master content" />
+            </if>
+            <if condition="approve == 'Y' &amp;&amp; mc.status == 'PLANNED'">
+                <return error="true" message="Planned piece ${mc.pseudoId} has no text yet: write it first" />
             </if>
 
             <service-call name="update#growerp.marketing.MasterContent"
@@ -341,6 +369,8 @@
             <set field="articlePath" from="updated.articlePath" />
             <set field="ctaUrl" from="updated.ctaUrl" />
             <set field="status" from="updated.status" />
+            <set field="brief" from="updated.brief" />
+            <set field="plannedDate" from="updated.plannedDate" />
             <set field="approvedDate" from="updated.approvedDate" />
             <set field="createdDate" from="updated.createdDate" />
             <set field="lastModifiedDate" from="updated.lastModifiedDate" />
@@ -701,8 +731,11 @@ symbols anywhere in the image; screens and documents show only simple shapes."""
     </service>
 
     <service verb="generate" noun="MasterContent" authenticate="true">
-        <description>AI-write one platform-neutral master content piece for a persona and PNP angle.</description>
+        <description>AI-write one platform-neutral master content piece for a persona and PNP angle.
+            With the masterContentId of a PLANNED piece (from a content plan) that piece is written
+            in place from its title and brief, and becomes DRAFT.</description>
         <in-parameters>
+            <parameter name="masterContentId" />
             <parameter name="personaId" />
             <parameter name="planId" />
             <parameter name="contentType" default-value="POSTING">
@@ -765,6 +798,9 @@ symbols anywhere in the image; screens and documents show only simple shapes."""
                 try {
                     adaptedContent = GeminiAiUtil.generateAdaptedContent(ec, title, body,
                         platform, contentType, callToAction, targetUrl, relInfo.ownerPartyId, teaser)
+                    // only Medium renders markdown; elsewhere leftover syntax shows as typed
+                    if (adaptedContent &amp;&amp; platform.toUpperCase() != 'MEDIUM')
+                        adaptedContent = GeminiAiUtil.markdownToPlainText(adaptedContent)
                 } catch (Exception e) {
                     ec.logger.warn("adapt#PlatformContent ${platform} failed: ${e.message}")
                     adaptedContent = null
@@ -856,6 +892,10 @@ symbols anywhere in the image; screens and documents show only simple shapes."""
                  appears on the content calendar. All platform variants of one piece share
                  the slot: cross-posting the same piece at once is wanted, it is separate
                  pieces landing together that is not. -->
+            <!-- a piece from a content plan keeps the day the plan gave it -->
+            <if condition="!scheduledDate &amp;&amp; mc.plannedDate">
+                <set field="scheduledDate" from="mc.plannedDate.time" type="Long" />
+            </if>
             <if condition="!scheduledDate">
                 <!-- 10:00 UTC: the hour the weekly content agent's prompt already uses, so
                      hand-adapted and agent-adapted pieces land at the same time of day -->
@@ -1150,6 +1190,8 @@ symbols anywhere in the image; screens and documents show only simple shapes."""
                 <description>PAIN, NEWS, PRIZE or OTHER</description>
             </parameter>
             <parameter name="planId" />
+            <parameter name="plannedContentId"><description>a PLANNED piece of a content plan: the
+                article takes its slot (plan, angle and day) and the planned piece is removed</description></parameter>
             <parameter name="personaId"><description>default: the owner's first persona</description></parameter>
         </in-parameters>
         <out-parameters>

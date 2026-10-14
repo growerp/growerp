@@ -53,6 +53,8 @@ Color _getStatusColor(String status) {
       return Colors.blue;
     case 'DRAFT':
       return Colors.orange;
+    case 'PLANNED':
+      return Colors.purple;
     default:
       return Colors.grey;
   }

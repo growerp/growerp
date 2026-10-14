@@ -212,6 +212,8 @@
             <parameter name="pseudoId" />
             <parameter name="personaId" />
             <parameter name="weekStartDate" type="Long" />
+            <parameter name="weeks" type="Integer" />
+            <parameter name="planFormat" />
             <parameter name="theme" />
         </in-parameters>
         <out-parameters>
@@ -219,6 +221,8 @@
             <parameter name="pseudoId" />
             <parameter name="personaId" />
             <parameter name="weekStartDate" type="Timestamp" />
+            <parameter name="weeks" type="Integer" />
+            <parameter name="planFormat" />
             <parameter name="theme" />
             <parameter name="createdDate" type="Timestamp" />
             <parameter name="lastModifiedDate" type="Timestamp" />
@@ -249,6 +253,8 @@
                     ownerPartyId: ownerPartyId,
                     personaId: personaId,
                     weekStartDate: weekStartDate,
+                    weeks: weeks,
+                    planFormat: planFormat,
                     theme: theme,
                     createdDate: ec.user.nowTimestamp,
                     lastModifiedDate: ec.user.nowTimestamp
@@ -261,6 +267,8 @@
 
             <set field="personaId" from="plan.personaId" />
             <set field="weekStartDate" from="plan.weekStartDate" />
+            <set field="weeks" from="plan.weeks" />
+            <set field="planFormat" from="plan.planFormat" />
             <set field="theme" from="plan.theme" />
             <set field="createdDate" from="plan.createdDate" />
             <set field="lastModifiedDate" from="plan.lastModifiedDate" />
@@ -273,6 +281,8 @@
             <parameter name="pseudoId" />
             <parameter name="personaId" />
             <parameter name="weekStartDate" type="Long" />
+            <parameter name="weeks" type="Integer" />
+            <parameter name="planFormat" />
             <parameter name="theme" />
         </in-parameters>
         <out-parameters>
@@ -280,6 +290,8 @@
             <parameter name="pseudoId" />
             <parameter name="personaId" />
             <parameter name="weekStartDate" type="Timestamp" />
+            <parameter name="weeks" type="Integer" />
+            <parameter name="planFormat" />
             <parameter name="theme" />
             <parameter name="createdDate" type="Timestamp" />
             <parameter name="lastModifiedDate" type="Timestamp" />
@@ -311,6 +323,8 @@
             <set field="pseudoId" from="plan.pseudoId" />
             <set field="personaId" from="plan.personaId" />
             <set field="weekStartDate" from="plan.weekStartDate" />
+            <set field="weeks" from="plan.weeks" />
+            <set field="planFormat" from="plan.planFormat" />
             <set field="theme" from="plan.theme" />
             <set field="createdDate" from="plan.createdDate" />
             <set field="lastModifiedDate" from="plan.lastModifiedDate" />
@@ -332,6 +346,11 @@
                 <return error="true" message="Content plan not found or access denied" />
             </if>
 
+            <!-- the outline pieces not written yet belong to the plan only -->
+            <entity-delete-by-condition entity-name="growerp.marketing.MasterContent">
+                <econdition field-name="planId" />
+                <econdition field-name="status" value="PLANNED" />
+            </entity-delete-by-condition>
             <!-- Delete associated social posts first -->
             <entity-delete-by-condition entity-name="growerp.marketing.SocialPost">
                 <econdition field-name="planId" />
@@ -365,7 +384,7 @@
                         ignore-if-empty="true" ignore-case="true" />
                 </econditions>
                 <select-field
-                    field-name="planId,pseudoId,personaId,weekStartDate,theme,createdDate,lastModifiedDate" />
+                    field-name="planId,pseudoId,personaId,weekStartDate,weeks,planFormat,theme,createdDate,lastModifiedDate" />
                 <order-by field-name="-lastModifiedDate" />
             </entity-find>
         </actions>
@@ -376,14 +395,20 @@
     <!-- ============================================ -->
 
     <service verb="generate" noun="ContentPlan" authenticate="true">
-        <description>Generate a weekly content plan (PNP) for a persona. Creates one
-            MasterContent piece per PNP angle; social posts are created later by
-            adapt#ContentForPlatform.</description>
+        <description>Generate a content plan of one or more weeks for a persona: an outline of
+            PLANNED MasterContent pieces (title, brief, angle, plannedDate) without body. The body
+            is written in its week by generate#MasterContent with the masterContentId; social
+            posts are created later by adapt#ContentForPlatform.</description>
         <in-parameters>
             <parameter name="personaId" required="true" />
             <parameter name="weekStartDate" type="Long" />
+            <parameter name="weeks" type="Integer" default-value="4" />
+            <parameter name="planFormat" default-value="PNP">
+                <description>PNP: Pain, News and Prize pieces on Monday, Wednesday and Friday;
+                    SINGLE: one posting on Monday</description>
+            </parameter>
             <parameter name="theme"><description>Optional user direction (theme and
-                strategy) for the week; the AI refines it into the stored theme.</description></parameter>
+                strategy) for the plan; the AI refines it into the stored theme.</description></parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="planId" />
@@ -391,6 +416,8 @@
             <parameter name="personaId" />
             <parameter name="theme" />
             <parameter name="weekStartDate" type="Timestamp" />
+            <parameter name="weeks" type="Integer" />
+            <parameter name="planFormat" />
             <parameter name="createdDate" type="Timestamp" />
             <parameter name="lastModifiedDate" type="Timestamp" />
             <parameter name="masterContents" type="List" />

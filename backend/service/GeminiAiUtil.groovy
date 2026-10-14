@@ -541,6 +541,32 @@ class GeminiAiUtil {
     }
     
     /**
+     * Turn a markdown text into plain text for platforms that show markdown as typed
+     * (LinkedIn, X, Facebook, Substack, email), keeping its line breaks and blank lines.
+     * A text that still is one solid block of more than three sentences is split into
+     * paragraphs of two sentences, so a post never reads as a single wall of text.
+     */
+    static String markdownToPlainText(String text) {
+        if (!text) return text
+        String out = text.replace('\r\n', '\n')
+            .replaceAll(/(?m)^#{1,6}\s+/, '')                 // heading: keep its text on its own line
+            .replaceAll(/(?m)^(\s*)[*+]\s+/, '$1- ')          // bullets as dashes
+            .replaceAll(/\*\*(.+?)\*\*/, '$1')
+            .replaceAll(/__(.+?)__/, '$1')
+            .replaceAll(/(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])/, '$1')
+            .replaceAll(/`([^`]*)`/, '$1')
+            .replaceAll(/!\[[^\]]*\]\(([^)\s]+)\)/, '$1')     // image: keep the url
+            .replaceAll(/\[([^\]]+)\]\(([^)\s]+)\)/) { all, label, url -> label == url ? url : "${label} ${url}" }
+            .replaceAll(/\n{3,}/, '\n\n')
+            .trim()
+        if (!out.contains('\n')) {
+            def sentences = out.split(/(?<=[.!?])\s+(?=["'(\p{Lu}\d])/) as List
+            if (sentences.size() > 3) out = sentences.collate(2).collect { it.join(' ') }.join('\n\n')
+        }
+        return out
+    }
+
+    /**
      * Parse JSON from AI response safely.
      */
     static def parseJsonResponse(String text) {
@@ -689,7 +715,7 @@ CONTENT TYPE: ${contentType}
 CALL TO ACTION: ${callToAction ?: '(none)'}
 LINK: ${targetUrl ? targetUrl + ' (use exactly as given, keep the query string)' : '(none)'}
 
-MASTER CONTENT:
+MASTER CONTENT (Markdown):
 ${body}
 
 HOUSE VOICE (how it must sound; wins over platform tone where they disagree):
@@ -709,7 +735,18 @@ Return ONLY the adapted content text, no explanations, no markdown code fences.
      */
     private static String getAdaptationRules(String platform, String contentType, String targetUrl) {
         def hasUrl = targetUrl != null && !targetUrl.trim().isEmpty()
-        switch (platform.toUpperCase()) {
+        def upper = platform.toUpperCase()
+        return (upper == 'MEDIUM'
+            ? "- Markdown, as in the master content: '## ' sub-headings, lists, **bold**\n"
+            : "- Plain text only: no markdown syntax (no #, **, *, backticks or [text](url)); " +
+              "write links as bare URLs\n" +
+              "- Keep a clear structure: short paragraphs of 1-3 sentences separated by a blank " +
+              "line, never one solid block; list items on separate lines starting with a dash\n") +
+            platformRules(upper, contentType, hasUrl)
+    }
+
+    private static String platformRules(String platform, String contentType, boolean hasUrl) {
+        switch (platform) {
             case 'LINKEDIN':
                 if (contentType == 'MESSAGE') {
                     return "- 1:1 DM tone: short, human, specific\n- Under ~400 characters\n- End on a question\n- Include NO URL (we share the link only after they reply)"
