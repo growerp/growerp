@@ -23,12 +23,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_configuration/global_configuration.dart';
+import 'package:go_router/go_router.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:insurance/main.dart';
+import 'package:insurance/views/insurance_db_form.dart';
 import 'package:integration_test/integration_test.dart';
 
-import 'demo_video_test.dart' show createDemoRouter, demoMenuConfig;
+const demoMenuConfig = MenuConfiguration(
+  menuConfigurationId: 'INSURANCE_DEFAULT',
+  appId: 'insurance',
+  name: 'Insurance',
+  menuItems: [],
+);
+
+GoRouter createDemoRouter() {
+  WidgetRegistry.clear();
+  for (final reg in insuranceWidgetRegistrations) {
+    WidgetRegistry.register(reg);
+  }
+  return createDynamicAppRouter(
+    [demoMenuConfig],
+    config: DynamicRouterConfig(
+      mainConfigId: 'INSURANCE_DEFAULT',
+      dashboardBuilder: () => const InsuranceDbForm(),
+      widgetLoader: WidgetRegistry.getWidget,
+      appTitle: 'GrowERP Insurance',
+    ),
+  );
+}
 
 /// email of the first account on a fresh server, whose GROWERP setup is unfinished
 const _growerpAdmin = String.fromEnvironment('GROWERP_ADMIN');
