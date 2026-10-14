@@ -345,6 +345,8 @@ class GenerateContentPlanDialogState extends State<GenerateContentPlanDialog> {
       child: popUp(
         context: context,
         title: 'Generate Content Plan with AI',
+        // room for every field and the Generate button without scrolling
+        height: 570,
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
