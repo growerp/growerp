@@ -19,7 +19,7 @@
         parentResourceId="growerp_content_dir">
         <file mimeType="text/html" versionName="02" rootVersionName="01">
             <fileData><![CDATA[<#-- title: Home -->
-<#-- description: Open source AI powered ERP for small and medium businesses: accounting, inventory, orders, CRM and marketing in one platform. -->
+<#-- description: Your whole business, one simple app: sales, stock, invoices, accounting and marketing for small and medium businesses. Open source and free to start. -->
 <!-- ==================== Marketing landing (GrowERP) ==================== -->
 <main class="pt-24 pb-16 relative">
     <!-- Ambient background glows -->
@@ -36,15 +36,15 @@
             <div class="lg:col-span-5 flex flex-col z-10">
                 <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container border border-outline-variant/50 w-fit mb-6">
                     <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                    <span class="font-label text-xs text-on-surface-variant">v2.0 Open Source Released</span>
+                    <span class="font-label text-xs text-on-surface-variant">Free to start &bull; Open source</span>
                 </div>
                 <h1 class="font-display text-4xl md:text-5xl font-bold tracking-tight leading-tight text-on-surface">
-                    Feeling overwhelmed by your ERP?<br>
-                    <span class="l-gradient-text">You're not alone.</span>
+                    Your whole business,<br>
+                    <span class="l-gradient-text">one simple app.</span>
                 </h1>
                 <p class="text-lg text-on-surface-variant mt-6 max-w-xl leading-relaxed">
-                    The open-source, AI-powered ERP that scales with you. Eliminate data silos, automate workflows, and
-                    gain intelligent insights across your entire organization with unparalleled clarity.
+                    Sales, stock, invoices and the books in one place, on every device. No more retyping between
+                    systems, no month-end panic, no licence fees.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 mt-8">
                     <a href="/admin/" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-8 py-4 rounded-lg l-glow transition-all active:scale-95 text-center">
@@ -56,6 +56,7 @@
                     </a>
                 </div>
                 <p class="text-sm text-on-surface-variant/70 mt-4">No credit card required &bull; 2 weeks free</p>
+                <p class="text-sm text-on-surface-variant/70 mt-1">Built by ERP specialists serving small and medium businesses in North America, Europe and Asia.</p>
             </div>
 
             <!-- Dashboard Mockup -->
@@ -77,8 +78,8 @@
     <!-- Benefits Bento Grid -->
     <section id="benefits" class="max-w-container mx-auto px-4 md:px-12 py-24 relative">
         <div class="text-center mb-16 max-w-2xl mx-auto">
-            <h2 class="font-display text-3xl font-semibold tracking-tight text-on-surface mb-4">Intelligence Engineered for Scale</h2>
-            <p class="text-on-surface-variant">Built on modern architecture to provide unprecedented visibility and control over every facet of your enterprise.</p>
+            <h2 class="font-display text-3xl font-semibold tracking-tight text-on-surface mb-4">Stop juggling tools. Start growing.</h2>
+            <p class="text-on-surface-variant">Spend less time on admin and more time with your customers.</p>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
@@ -86,32 +87,32 @@
                 <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-primary mb-2">
                     <span class="material-symbols-outlined icon-fill text-[24px]">sync</span>
                 </div>
-                <h3 class="font-display text-xl font-semibold text-on-surface">All-in-One</h3>
-                <p class="text-on-surface-variant leading-relaxed">Your whole business in sync. Connect sales, operations, and finance in a single unified workflow ecosystem.</p>
+                <h3 class="font-display text-xl font-semibold text-on-surface">Type it once</h3>
+                <p class="text-on-surface-variant leading-relaxed">Enter an order once and your stock, invoice and books update themselves. No copying between spreadsheets.</p>
             </div>
             <div class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-tertiary/5 rounded-full blur-[40px] group-hover:bg-tertiary/10 transition-all"></div>
                 <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-tertiary mb-2">
                     <span class="material-symbols-outlined icon-fill text-[24px]">psychology</span>
                 </div>
-                <h3 class="font-display text-xl font-semibold text-on-surface">AI-Powered</h3>
-                <p class="text-on-surface-variant leading-relaxed">Intelligent insights at your fingertips. Predictive analytics and automated reporting out-of-the-box.</p>
+                <h3 class="font-display text-xl font-semibold text-on-surface">AI that does the busywork</h3>
+                <p class="text-on-surface-variant leading-relaxed">AI agents chase unpaid invoices, draft your posts and flag low stock, while you approve what matters.</p>
             </div>
             <div class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-full blur-[40px] group-hover:bg-secondary/10 transition-all"></div>
                 <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-secondary mb-2">
                     <span class="material-symbols-outlined icon-fill text-[24px]">code</span>
                 </div>
-                <h3 class="font-display text-xl font-semibold text-on-surface">Open Source</h3>
-                <p class="text-on-surface-variant leading-relaxed">Full control and transparency. Inspect the code, customize modules, and truly own your infrastructure.</p>
+                <h3 class="font-display text-xl font-semibold text-on-surface">No licence fees, ever</h3>
+                <p class="text-on-surface-variant leading-relaxed">It is open source. You own the code and your data, and nobody can lock you in.</p>
             </div>
             <div class="l-glass p-8 rounded-2xl flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors group relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[40px] group-hover:bg-primary/10 transition-all"></div>
                 <div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant/30 text-primary mb-2">
                     <span class="material-symbols-outlined icon-fill text-[24px]">cloud_done</span>
                 </div>
-                <h3 class="font-display text-xl font-semibold text-on-surface">Run Anywhere</h3>
-                <p class="text-on-surface-variant leading-relaxed">Cloud or on-premise flexibility. Deploy on our secure managed cloud or your own private servers instantly.</p>
+                <h3 class="font-display text-xl font-semibold text-on-surface">Works where you work</h3>
+                <p class="text-on-surface-variant leading-relaxed">On your phone, in the browser or on your desktop. Use our cloud or run it on your own server.</p>
             </div>
         </div>
     </section>
@@ -124,7 +125,7 @@
             <div class="flex-1 text-center md:text-left">
                 <span class="font-label text-xs uppercase tracking-wider text-primary">Free guide</span>
                 <h3 class="font-display text-2xl font-semibold text-on-surface mt-2 mb-2">From Spreadsheet Chaos to Automated Clarity</h3>
-                <p class="text-on-surface-variant leading-relaxed">The small business guide to cloud ERP: spot the bottlenecks, compare cloud against on-premise, and run a six-phase implementation that stays on budget. Sent straight to your inbox.</p>
+                <p class="text-on-surface-variant leading-relaxed">Find what is slowing your business down, choose between cloud and on-premise, and switch in six steps that stay on budget. Sent straight to your inbox.</p>
             </div>
             <a href="/landing/cloud-erp-guide" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-8 py-4 rounded-lg l-glow transition-all active:scale-95 text-center shrink-0">
                 Get the Free Guide
@@ -140,7 +141,7 @@
             <div class="flex-1 text-center md:text-left">
                 <span class="font-label text-xs uppercase tracking-wider text-primary">Free assessment</span>
                 <h3 class="font-display text-2xl font-semibold text-on-surface mt-2 mb-2">How ready is your business for ERP?</h3>
-                <p class="text-on-surface-variant leading-relaxed">A two-minute check on how you run orders, stock and the books today. You get a personalized report on where the process gaps are and which modules close them, mailed straight to your inbox.</p>
+                <p class="text-on-surface-variant leading-relaxed">Answer a few questions about your orders, stock and books, in two minutes. You get a personal report showing where you lose time and what fixes it.</p>
             </div>
             <a href="/landing/erp-landing-page" class="bg-primary hover:bg-primary/90 text-on-primary font-label text-sm font-medium px-8 py-4 rounded-lg l-glow transition-all active:scale-95 text-center shrink-0">
                 Start the Assessment
@@ -148,11 +149,23 @@
         </div>
     </section>
 
+    <!-- Social proof -->
+    <section class="max-w-container mx-auto px-4 md:px-12 py-12 relative">
+        <div class="l-glass rounded-2xl p-8 text-center">
+            <span class="font-label text-xs uppercase tracking-wider text-primary">Why you can trust GrowERP</span>
+            <p class="text-lg text-on-surface mt-3 max-w-3xl mx-auto leading-relaxed">
+                Years of building and extending enterprise-grade ERP and CRM systems, as top contributors and committers
+                to major open source frameworks and a provider to small and medium-sized businesses.
+            </p>
+            <p class="text-sm text-on-surface-variant mt-3">So your business runs on experience, not experiments.</p>
+        </div>
+    </section>
+
     <!-- Platform Downloads -->
     <section class="max-w-container mx-auto px-4 md:px-12 pb-8 relative">
         <div class="l-glass rounded-2xl p-8 text-center">
-            <h3 class="font-display text-xl font-semibold text-on-surface mb-2">Get GrowERP on every platform</h3>
-            <p class="text-sm text-on-surface-variant mb-6">One codebase, every device &mdash; your data syncs seamlessly.</p>
+            <h3 class="font-display text-xl font-semibold text-on-surface mb-2">Get GrowERP on every device you use</h3>
+            <p class="text-sm text-on-surface-variant mb-6">Start on your laptop, check orders on your phone &mdash; your data is always the same.</p>
             <div class="flex flex-wrap justify-center gap-3">
                 <a href="/admin/" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface font-label text-sm px-5 py-2.5 rounded-full transition-colors">
                     <span class="material-symbols-outlined text-[18px]">language</span>Web Browser
@@ -189,7 +202,7 @@
         parentResourceId="growerp_content_dir">
         <file mimeType="text/html" versionName="02" rootVersionName="01">
             <fileData><![CDATA[<#-- title: Verticals -->
-<#-- description: The GrowERP apps per industry: admin, hotel, freelance, support, marketing, rental, agents, academy and insurance, all built from the same building blocks. -->
+<#-- description: Pick the GrowERP app built for your kind of business: admin, hotel, rental, freelance, marketing, agents, academy and insurance. -->
 <!-- Background Ambient Glow -->
 <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
     <div class="absolute top-[15%] left-[-10%] w-[45%] h-[45%] rounded-full bg-primary/5 blur-[120px]"></div>
@@ -198,9 +211,9 @@
 
 <main class="pt-28 pb-16 overflow-x-hidden">
     <section class="max-w-container mx-auto px-4 md:px-12 text-center mb-16 relative">
-        <h1 class="font-display text-4xl md:text-5xl font-bold tracking-tight text-on-surface mb-6">Tailored Verticals</h1>
+        <h1 class="font-display text-4xl md:text-5xl font-bold tracking-tight text-on-surface mb-6">An App for Your Kind of Business</h1>
         <p class="text-lg text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
-            Specialized applications designed for specific industries. Choose the one that perfectly fits your business model.
+            Pick the app built for your trade. Each one is your whole business in one simple app, with only the screens you need.
         </p>
     </section>
 
@@ -213,7 +226,7 @@
                     <span class="material-symbols-outlined icon-fill text-[24px]">admin_panel_settings</span>
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Admin</h3>
-                <p class="text-on-surface-variant leading-relaxed">The core comprehensive ERP for medium to large enterprises. Full control over all modules, accounting, and organization settings.</p>
+                <p class="text-on-surface-variant leading-relaxed">Everything in one app: sales, stock, accounting, marketing and your website. The right start if you want it all.</p>
                 <a href="https://admin.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-primary font-label text-sm font-medium">
                     admin.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
@@ -243,7 +256,7 @@
                     <span class="material-symbols-outlined icon-fill text-[24px]">hotel</span>
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Hotel</h3>
-                <p class="text-on-surface-variant leading-relaxed">Designed for hotels, bed &amp; breakfasts, and resorts. Manage reservations, room inventory, and guest experiences seamlessly.</p>
+                <p class="text-on-surface-variant leading-relaxed">Fill more rooms and never double-book. For hotels, bed &amp; breakfasts and resorts: bookings, rooms and guest bills in one view.</p>
                 <a href="https://hotel.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-secondary font-label text-sm font-medium">
                     hotel.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
@@ -273,7 +286,7 @@
                     <span class="material-symbols-outlined icon-fill text-[24px]">car_rental</span>
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Rental</h3>
-                <p class="text-on-surface-variant leading-relaxed">Perfect for equipment, vehicle, or property rental businesses. Track asset availability, maintenance, and recurring billing.</p>
+                <p class="text-on-surface-variant leading-relaxed">Know what is out, what is due back and what is owed. For equipment, vehicle and property rental, with billing that runs itself.</p>
                 <a href="https://rental.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-tertiary font-label text-sm font-medium">
                     rental.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
@@ -303,7 +316,7 @@
                     <span class="material-symbols-outlined icon-fill text-[24px]">person</span>
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Freelance</h3>
-                <p class="text-on-surface-variant leading-relaxed">Tailored for independent professionals and solopreneurs. Simplified invoicing, task tracking, and client management.</p>
+                <p class="text-on-surface-variant leading-relaxed">Track your hours, send the invoice, get paid. Built for freelancers and solo professionals who would rather work than do admin.</p>
                 <a href="https://freelance.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-primary font-label text-sm font-medium">
                     freelance.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
@@ -333,7 +346,7 @@
                     <span class="material-symbols-outlined icon-fill text-[24px]">campaign</span>
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Marketing</h3>
-                <p class="text-on-surface-variant leading-relaxed">Built for any company to improve marketing and sales: create campaigns, conduct outreach, nurture leads, and automate content marketing.</p>
+                <p class="text-on-surface-variant leading-relaxed">Get more leads without more hours. Plan campaigns, reach out, follow up with leads and let AI help write your content.</p>
                 <a href="https://marketing.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-secondary font-label text-sm font-medium">
                     marketing.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
@@ -363,7 +376,7 @@
                     <span class="material-symbols-outlined icon-fill text-[24px]">support_agent</span>
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Agents</h3>
-                <p class="text-on-surface-variant leading-relaxed">Empower your AI agents and customer support teams. Manage knowledge bases, automate responses, and oversee agent actions.</p>
+                <p class="text-on-surface-variant leading-relaxed">Let AI agents take the repetitive work off your plate, while you stay in control of what they do and approve what matters.</p>
                 <a href="https://agents.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-tertiary font-label text-sm font-medium">
                     agents.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
@@ -393,7 +406,7 @@
                     <span class="material-symbols-outlined icon-fill text-[24px]">school</span>
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Academy</h3>
-                <p class="text-on-surface-variant leading-relaxed">For training companies, coaches and schools. Sell courses on your website, let learners study lessons, quizzes and exercises with an AI tutor, and hand out certificates.</p>
+                <p class="text-on-surface-variant leading-relaxed">Turn what you know into income. Sell courses on your website, give learners an AI tutor, and hand out certificates. For trainers, coaches and schools.</p>
                 <a href="https://academy.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-secondary font-label text-sm font-medium">
                     academy.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
@@ -423,7 +436,7 @@
                     <span class="material-symbols-outlined icon-fill text-[24px]">shield</span>
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Insurance</h3>
-                <p class="text-on-surface-variant leading-relaxed">For insurance agencies and brokers. Keep every client policy in one place, renew before policies lapse, follow claims with the carrier, track commissions, and give clients their own portal.</p>
+                <p class="text-on-surface-variant leading-relaxed">Renew every policy before it lapses. For agencies and brokers: all client policies, claims and commissions in one place, plus a portal for your clients.</p>
                 <a href="https://insurance.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-primary font-label text-sm font-medium">
                     insurance.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
@@ -452,7 +465,7 @@
             <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/10 rounded-full blur-[80px] pointer-events-none"></div>
             <h2 class="font-display text-3xl md:text-4xl font-bold tracking-tight text-on-surface mb-4 relative">How about your vertical?</h2>
             <p class="text-lg text-on-surface-variant max-w-2xl mx-auto leading-relaxed mb-8 relative">
-                Tell us what you need &mdash; we can deliver your app within one week.
+                Tell us what you need &mdash; you can have your own app within one week.
             </p>
             <a href="https://calendar.app.google/KQBVyUZEGyPPM4HK9" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-primary text-on-primary font-label text-sm font-semibold px-6 py-3 rounded-full hover:bg-primary/90 transition-colors relative">
                 Book a call <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
@@ -478,7 +491,7 @@
             <fileData><![CDATA[<!-- description: How to start with GrowERP: create a company, load demo data and run the app on web, Android, iOS, Linux or Windows. -->
 # Getting Started
 
-Get up and running with GrowERP in minutes. No credit card required.
+You can be running in 5 minutes. No credit card required.
 
 Stuck or have questions? Jump to [Need Help?](#need-help)
 
@@ -558,7 +571,7 @@ You can delete your account and company data from any GrowERP application (GrowE
         parentResourceId="growerp_content_dir">
         <file mimeType="text/html" versionName="01" rootVersionName="01">
             <fileData><![CDATA[<#-- title: Benefits -->
-<#-- description: Why companies choose GrowERP: one system for every device, open source, no vendor lock-in and AI assistance built into the daily work. -->
+<#-- description: Why owners switch to GrowERP: one simple app instead of five tools, no licence fees, live in days and AI help you stay in control of. -->
 <!-- Background Ambient Glow -->
 <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
     <div class="absolute top-[15%] left-[-10%] w-[45%] h-[45%] rounded-full bg-primary/5 blur-[120px]"></div>
@@ -570,13 +583,13 @@ You can delete your account and company data from any GrowERP application (GrowE
     <section class="max-w-container mx-auto px-4 md:px-12 text-center mb-24 relative">
         <div class="inline-flex items-center gap-2 bg-surface-container-high px-4 py-1.5 rounded-full border border-white/5 mb-8">
             <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-            <span class="font-label text-xs text-on-surface-variant uppercase tracking-widest">Enterprise Intelligence</span>
+            <span class="font-label text-xs text-on-surface-variant uppercase tracking-widest">Less admin, more business</span>
         </div>
         <h1 class="font-display text-4xl md:text-5xl font-bold tracking-tight mb-6 max-w-4xl mx-auto leading-tight text-on-surface">
-            Why Choose <span class="l-gradient-text">GrowERP?</span>
+            Why owners switch to <span class="l-gradient-text">GrowERP</span>
         </h1>
         <p class="text-lg text-on-surface-variant max-w-2xl mx-auto">
-            The intelligence and flexibility your enterprise needs to scale without limits.
+            Spend less time on admin and more time with your customers.
         </p>
     </section>
 
@@ -591,9 +604,9 @@ You can delete your account and company data from any GrowERP application (GrowE
                     <span class="material-symbols-outlined icon-fill text-primary">apps</span>
                 </div>
                 <div>
-                    <h3 class="font-display text-xl font-semibold text-primary mb-3">Full ERP Scope: One System, Every Module</h3>
+                    <h3 class="font-display text-xl font-semibold text-primary mb-3">One System Instead of Five</h3>
                     <p class="text-on-surface-variant">
-                        Accounting, CRM, inventory, e-commerce, HR, manufacturing and POS in a single connected suite. No stitching together point solutions.
+                        Accounting, customers, stock, webshop, HR, manufacturing and the till in one app. You stop paying for, and copying between, separate tools.
                     </p>
                 </div>
                 <ul class="space-y-3 font-label text-sm text-on-surface">
@@ -616,15 +629,15 @@ You can delete your account and company data from any GrowERP application (GrowE
                     <span class="material-symbols-outlined icon-fill text-primary">code</span>
                 </div>
                 <div>
-                    <h3 class="font-display text-xl font-semibold text-primary mb-3">Free &amp; Open Source</h3>
+                    <h3 class="font-display text-xl font-semibold text-primary mb-3">No Licence Fees, Ever</h3>
                     <p class="text-on-surface-variant leading-relaxed">
-                        No license fees, full source access. Inspect the code, modify the logic, and host wherever you choose. Zero vendor lock-in.
+                        The full source is open. You can change it, host it where you like, and take your data with you any time.
                     </p>
                 </div>
             </div>
             <div class="mt-8 pt-8 border-t border-white/5">
                 <div class="flex items-center justify-between text-on-surface-variant font-label text-xs">
-                    <span>CC-BY-4.0 License</span>
+                    <span>Apache 2.0 License</span>
                     <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-primary"></span> Security Audited</span>
                 </div>
             </div>
@@ -637,9 +650,9 @@ You can delete your account and company data from any GrowERP application (GrowE
                     <span class="material-symbols-outlined icon-fill text-primary">cloud_done</span>
                 </div>
                 <div>
-                    <h3 class="font-display text-xl font-semibold text-primary mb-3">Mature, Battle-Tested Backend</h3>
+                    <h3 class="font-display text-xl font-semibold text-primary mb-3">Built on a Proven Engine</h3>
                     <p class="text-on-surface-variant">
-                        Built on Moqui, a proven enterprise framework, exposed entirely through REST APIs for reliable, predictable integration.
+                        Your data runs on Moqui, a proven open source enterprise framework, and connects to other systems through standard REST APIs.
                     </p>
                 </div>
                 <div class="mt-auto pt-6">
@@ -665,9 +678,9 @@ You can delete your account and company data from any GrowERP application (GrowE
                     <span class="material-symbols-outlined icon-fill text-primary">domain</span>
                 </div>
                 <div>
-                    <h3 class="font-display text-xl font-semibold text-primary mb-3">Multi-Company &amp; Multi-Tenant</h3>
+                    <h3 class="font-display text-xl font-semibold text-primary mb-3">All Your Companies, One Login</h3>
                     <p class="text-on-surface-variant">
-                        Run many separate businesses from a single install, each with its own data, users and configuration.
+                        Run several businesses from one place, each with its own books, users and settings kept apart.
                     </p>
                 </div>
             </div>
@@ -681,9 +694,9 @@ You can delete your account and company data from any GrowERP application (GrowE
                     <span class="material-symbols-outlined icon-fill text-primary">devices</span>
                 </div>
                 <div>
-                    <h3 class="font-display text-xl font-semibold text-primary mb-3">Runs Everywhere: True Multi-Platform</h3>
+                    <h3 class="font-display text-xl font-semibold text-primary mb-3">Your Business in Your Pocket</h3>
                     <p class="text-on-surface-variant">
-                        One Flutter codebase, every device. Android, iOS, Web, Linux and Windows, all built and maintained together.
+                        The same app on your phone, tablet, browser and desktop: Android, iOS, Web, Linux and Windows. Check orders wherever you are.
                     </p>
                 </div>
                 <ul class="space-y-3 font-label text-sm text-on-surface">
@@ -713,9 +726,9 @@ You can delete your account and company data from any GrowERP application (GrowE
                     <span class="material-symbols-outlined icon-fill text-primary">widgets</span>
                 </div>
                 <div>
-                    <h3 class="font-display text-xl font-semibold text-primary mb-3">Modular Building Blocks</h3>
+                    <h3 class="font-display text-xl font-semibold text-primary mb-3">An App Shaped to Your Trade</h3>
                     <p class="text-on-surface-variant leading-relaxed">
-                        Reusable growerp_* packages compose custom apps fast, no rebuilding from scratch for every new use case.
+                        Ready-made building blocks are combined into an app for your kind of business, so you only see the screens you need.
                     </p>
                 </div>
             </div>
@@ -734,9 +747,9 @@ You can delete your account and company data from any GrowERP application (GrowE
                     <span class="material-symbols-outlined icon-fill text-primary">extension</span>
                 </div>
                 <div>
-                    <h3 class="font-display text-xl font-semibold text-primary mb-3">Extensible Without Forking</h3>
+                    <h3 class="font-display text-xl font-semibold text-primary mb-3">Grow Without Starting Over</h3>
                     <p class="text-on-surface-variant">
-                        Add custom apps and screens on top of the core, no need to fork or rewrite the underlying system.
+                        Add your own screens and functions on top, and still get every update of the core system.
                     </p>
                 </div>
                 <div class="mt-auto pt-6">
@@ -762,9 +775,9 @@ You can delete your account and company data from any GrowERP application (GrowE
                     <span class="material-symbols-outlined icon-fill text-primary">bolt</span>
                 </div>
                 <div>
-                    <h3 class="font-display text-xl font-semibold text-primary mb-3">Fast, Low-Cost Deployment</h3>
+                    <h3 class="font-display text-xl font-semibold text-primary mb-3">Live in Days, Not Months</h3>
                     <p class="text-on-surface-variant">
-                        Get a small business running quickly, at a fraction of the cost and time of SAP or Oracle implementations.
+                        You are up and running quickly, at a fraction of the cost and time of an SAP or Oracle project.
                     </p>
                 </div>
                 <a href="/content/getting-started" class="flex items-center gap-2 text-primary font-label text-sm font-medium group-hover:gap-4 transition-all">
@@ -795,9 +808,9 @@ You can delete your account and company data from any GrowERP application (GrowE
                     <span class="material-symbols-outlined icon-fill text-primary">smart_toy</span>
                 </div>
                 <div>
-                    <h3 class="font-display text-xl font-semibold text-primary mb-3">AI Agent Control Center</h3>
+                    <h3 class="font-display text-xl font-semibold text-primary mb-3">AI Help You Stay in Control Of</h3>
                     <p class="text-on-surface-variant">
-                        Configure and supervise autonomous AI agents from one dashboard, agents that monitor, act, and report across every module.
+                        AI agents watch your business, do the routine work and report back. You decide what they may do, from one screen.
                     </p>
                 </div>
                 <ul class="space-y-3 font-label text-sm text-on-surface">
@@ -825,9 +838,13 @@ You can delete your account and company data from any GrowERP application (GrowE
     <section class="max-w-container mx-auto px-4 md:px-12 mt-24">
         <div class="l-glass rounded-2xl p-12 text-center !border-primary/20 relative overflow-hidden">
             <div class="absolute inset-0 bg-primary/5 -z-10"></div>
-            <h2 class="font-display text-3xl font-semibold tracking-tight mb-6 text-on-surface">Ready to redefine your operations?</h2>
-            <p class="text-on-surface-variant text-lg max-w-xl mx-auto mb-10">
-                Join the global businesses leveraging the power of GrowERP's intelligent ecosystem.
+            <h2 class="font-display text-3xl font-semibold tracking-tight mb-6 text-on-surface">Your whole business, one simple app.</h2>
+            <p class="text-on-surface-variant text-lg max-w-xl mx-auto mb-4">
+                Try it free for two weeks. No credit card.
+            </p>
+            <p class="text-on-surface-variant text-sm max-w-2xl mx-auto mb-10">
+                Built from years of building and extending enterprise-grade ERP and CRM systems, as top contributors and
+                committers to major open source frameworks and a provider to small and medium-sized businesses.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                 <a href="/admin/" class="bg-primary hover:bg-primary/90 text-on-primary px-8 py-4 rounded-lg font-label text-sm font-semibold l-glow transition-all active:scale-95">Start Free Trial</a>
@@ -864,7 +881,7 @@ You can delete your account and company data from any GrowERP application (GrowE
     <div class="text-center max-w-3xl mx-auto mb-16 pt-8">
         <h1 class="font-display text-4xl md:text-5xl font-bold tracking-tight text-on-surface mb-4">Simple, Transparent Pricing</h1>
         <p class="text-lg text-on-surface-variant">
-            Choose the plan that best fits your workflow. Start free, upgrade when you're ready.
+            Pick how much help you want. Every plan starts with two weeks free.
         </p>
     </div>
 
@@ -879,7 +896,7 @@ You can delete your account and company data from any GrowERP application (GrowE
                     <span class="font-display text-4xl font-bold text-on-surface">$49.99</span>
                     <span class="text-sm text-on-surface-variant">/mo</span>
                 </div>
-                <p class="text-sm text-on-surface-variant">For self-starters who want full control over their deployment.</p>
+                <p class="text-sm text-on-surface-variant">You set it up yourself, we answer your questions.</p>
             </div>
             <ul class="space-y-4 mb-8 flex-grow">
                 <li class="flex items-start gap-3">
@@ -913,7 +930,7 @@ You can delete your account and company data from any GrowERP application (GrowE
                     <span class="font-display text-4xl font-bold text-primary">$499</span>
                     <span class="text-sm text-on-surface-variant">/mo</span>
                 </div>
-                <p class="text-sm text-on-surface-variant">Guided implementation with our expert team alongside you.</p>
+                <p class="text-sm text-on-surface-variant">We set it up with you, step by step.</p>
             </div>
             <ul class="space-y-4 mb-8 flex-grow relative z-10">
                 <li class="flex items-start gap-3">
@@ -950,7 +967,7 @@ You can delete your account and company data from any GrowERP application (GrowE
                     <span class="font-display text-4xl font-bold text-on-surface">$999</span>
                     <span class="text-sm text-on-surface-variant">/mo</span>
                 </div>
-                <p class="text-sm text-on-surface-variant">Turnkey solution. We handle everything from setup to launch.</p>
+                <p class="text-sm text-on-surface-variant">We do it all, you just start using it.</p>
             </div>
             <ul class="space-y-4 mb-8 flex-grow">
                 <li class="flex items-start gap-3">
@@ -986,7 +1003,7 @@ You can delete your account and company data from any GrowERP application (GrowE
                 <div class="flex items-baseline gap-1 mb-4 h-[56px]">
                     <span class="font-display text-4xl font-bold text-on-surface">Custom</span>
                 </div>
-                <p class="text-sm text-on-surface-variant">Tailored architecture for large scale operations and complex requirements.</p>
+                <p class="text-sm text-on-surface-variant">For larger operations that need their own setup and guarantees.</p>
             </div>
             <ul class="space-y-4 mb-8 flex-grow">
                 <li class="flex items-start gap-3">
@@ -1079,10 +1096,10 @@ You can delete your account and company data from any GrowERP application (GrowE
     <moqui.resource.DbResource filename="ai-agents.md.ftl" isFile="Y" resourceId="growerp_ai_agents"
         parentResourceId="growerp_content_dir">
         <file mimeType="text/markdown" versionName="01" rootVersionName="01">
-            <fileData><![CDATA[<!-- description: The GrowERP AI agent catalog: ready-to-run, governed agents built on Google's Agent Development Kit (ADK) that any GrowERP company can load in one click. Request a new agent or contribute your own. -->
+            <fileData><![CDATA[<!-- description: Let GrowERP AI agents do the repetitive work while you approve what matters. Load ready-made agents in one click, request a new one or contribute your own. -->
 # AI Agents
 
-GrowERP is an AI-native ERP: every company can run governed, auditable AI agents built on Google's **Agent Development Kit (ADK)**, managed from the Agent Control Center in the GrowERP Agents app.
+Let AI agents handle the repetitive work, such as chasing payments, posting content and checking stock, while you approve what matters. They are built on Google's **Agent Development Kit (ADK)** and you manage them from the Agent Control Center in the GrowERP Agents app.
 
 The agents below are in the shared **agent catalog**. Any GrowERP company can add them from the Agent Control Center (**Agent catalog**), next to uploading its own agent team file. All agents are open source and can be adjusted after loading.
 
@@ -1124,25 +1141,23 @@ Built a useful agent in your own GrowERP company? Download its team file in the 
     <moqui.resource.DbResource filename="about.md.ftl" isFile="Y" resourceId="growerp_about"
         parentResourceId="growerp_content_dir">
         <file mimeType="text/markdown" versionName="01" rootVersionName="01">
-            <fileData><![CDATA[<!-- description: GrowERP is built by AntWebsystems Co., Ltd, a registered software company in Thailand under European management, supporting installations worldwide. -->
+            <fileData><![CDATA[<!-- description: GrowERP is built by AntWebsystems Co., Ltd: years of ERP and CRM experience for small and medium businesses, with installations supported worldwide. -->
 # About Us
 
-GrowERP is brought to you by **AntWebsystems Co., Ltd**, an officially registered software development company in Thailand under European management.
+You get an ERP built by people who have spent years making business software work for companies like yours. GrowERP is brought to you by **AntWebsystems Co., Ltd**, an officially registered software development company in Thailand under European management.
 
-## Our Expertise
+## Why You Can Trust Us
 
-With years of experience developing and extending business applications, we have deep expertise in building enterprise-grade ERP and CRM systems. We are currently supporting installations in North America, Europe, and Asia.
+Years of building and extending enterprise-grade ERP and CRM systems, as top contributors and committers to major open-source frameworks and a provider to small and medium-sized businesses. You benefit from that experience in installations we support in North America, Europe, and Asia.
 
-Our extensive background as top contributors and committers to major open-source frameworks has shaped our approach: we build highly capable, modular systems designed for scale and flexibility. GrowERP is the culmination of our mission to bring advanced, AI-powered business management to everyone.
+That background shapes the product: modular, built to grow with you, and with AI help built in. Your business gets the tools large companies use, without the large-company price.
 
-## How We Work
+## What Working With Us Looks Like for You
 
-We believe in transparency and rapid iteration. We utilize agile software development methodologies (like Scrum) to ensure our partners and customers can see progress on a daily basis. 
-
-When you work with us for customization or support, you benefit from:
-- Clear, time-boxed delivery cycles (1-4 weeks)
-- Daily visibility into the development process
-- Flexible requirement changes with minimal impact on implementation
+When you need customization or support, you can see progress every day. You get:
+- Clear, time-boxed delivery rounds (1-4 weeks)
+- Daily visibility into the work
+- Freedom to change your requirements without derailing the project
 - Quality support at competitive rates
 
 ## Open Source Philosophy
@@ -1155,7 +1170,7 @@ GrowERP is released under the **Apache License 2.0**. This means:
 
 ## Contact & Support
 
-Whether you need requirements gathering, implementation, custom interfacing, or managed production systems, we are ready to help.
+Whether you need help working out your requirements, setting up the system, connecting it to your other tools, or having it run for you, you can count on us.
 
 - **Company Website:** [www.antwebsystems.com](https://www.antwebsystems.com)
 - **Email Support:** support@growerp.com / support@antwebsystems.com
@@ -1163,7 +1178,7 @@ Whether you need requirements gathering, implementation, custom interfacing, or 
 - **LinkedIn:** [GrowERP Group](https://www.linkedin.com/groups/4576897/)
 - **Twitter/X:** [@grow_erp](https://x.com/grow_erp)
 
-**[Let us know how we can help you within 24 hours.](mailto:support@antwebsystems.com)**
+**[Tell us what you need. You will hear back within 24 hours.](mailto:support@antwebsystems.com)**
 ]]></fileData>
             <histories versionName="01" versionDate="1485028800000" isDiff="N" />
         </file>
