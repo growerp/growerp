@@ -147,9 +147,7 @@ melos:
         dependsOn: build_runner
     l10n:
       description: Generates l10n for all app packages.
-      exec: flutter gen-l10n --suppress-analytics
-      packageFilters:
-        fileExists: "l10n.yaml"
+      run: melos exec --concurrency 1 --file-exists "l10n.yaml" -- "flutter gen-l10n --suppress-analytics"
     test_package:
       description: run all integration tests. Set BACKEND_PORT env var to override default 8080.
       exec:
