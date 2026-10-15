@@ -1853,10 +1853,11 @@
     </service>
 
     <service verb="render" noun="OutreachEmailBody">
-        <description>Wrap a plain-text outreach message in the HTML email layout: readable
-            column, paragraphs and line breaks kept, muted footer with the unsubscribe link.
-            Styles are inline because mail clients drop stylesheets. The text is escaped
-            first, so an angle bracket in the copy cannot break the layout.</description>
+        <description>Render an outreach message (markdown; plain text is valid markdown)
+            in the HTML email layout: readable column, paragraphs, a single newline is a
+            line break, bare URLs are clickable, muted footer with the unsubscribe link.
+            Styles are inline because mail clients drop stylesheets. Raw HTML in the copy
+            is escaped, so an angle bracket cannot break the layout.</description>
         <in-parameters>
             <!-- allow-html: the copy may contain &lt; &gt; &amp;, they are escaped below -->
             <parameter name="bodyText" required="true" allow-html="any" />
@@ -1867,31 +1868,28 @@
         </out-parameters>
         <actions>
             <script><![CDATA[
-                // escape first: this is human/AI copy, never markup
-                def escaped = bodyText.replace('&', '&amp;')
-                        .replace('<', '&lt;').replace('>', '&gt;')
-                // A bare URL is the call to action of most outreach mails, so make it
-                // clickable. Runs on escaped text and stops at '<', which keeps the <br />
-                // inserted below out of the href. Trailing sentence punctuation is not
-                // part of the link.
-                def autoLink = { String block ->
-                    block.replaceAll(/https?:\/\/[^\s<]+/) { String url ->
-                        def trail = ''
-                        while (url && url[-1] in ['.', ',', ';', ':', ')']) {
-                            trail = url[-1] + trail
-                            url = url[0..-2]
-                        }
-                        '<a href="' + url + '" style="color:#0b6bcb;">' + url + '</a>' + trail
+                // A bare URL is the call to action of most outreach mails: make it a
+                // markdown autolink. URLs already in a markdown link or autolink are kept.
+                // Trailing sentence punctuation is not part of the link.
+                def text = bodyText.replaceAll(/(?<![(<\[])https?:\/\/[^\s<>()\[\]]+/) { String url ->
+                    def trail = ''
+                    while (url && url[-1] in ['.', ',', ';', ':']) {
+                        trail = url[-1] + trail
+                        url = url[0..-2]
                     }
+                    '<' + url + '>' + trail
                 }
 
-                // blank line starts a paragraph, a single newline is a line break
-                def paragraphs = escaped.split(/\r?\n\s*\r?\n/)
-                        .findAll { it.trim() }
-                        .collect { block ->
-                            '<p style="margin:0 0 16px 0;">' +
-                                autoLink(block.trim().replace('\n', '<br />')) + '</p>'
-                        }.join('\n        ')
+                // this is human/AI copy, never markup: escape raw html
+                def options = new com.vladsch.flexmark.util.data.MutableDataSet()
+                        .set(com.vladsch.flexmark.html.HtmlRenderer.ESCAPE_HTML, true)
+                        .set(com.vladsch.flexmark.html.HtmlRenderer.SOFT_BREAK, '<br />\n')
+                def document = com.vladsch.flexmark.parser.Parser.builder(options).build().parse(text)
+                def paragraphs = com.vladsch.flexmark.html.HtmlRenderer.builder(options).build()
+                        .render(document)
+                        .replace('<p>', '<p style="margin:0 0 16px 0;">')
+                        .replace('<a href=', '<a style="color:#0b6bcb;" href=')
+                        .trim()
 
                 def footer = ''
                 if (unsubscribeUrl) {

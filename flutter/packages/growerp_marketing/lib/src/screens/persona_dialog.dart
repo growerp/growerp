@@ -113,44 +113,36 @@ class PersonaDialogState extends State<PersonaDialog> {
                   },
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  key: const Key('demographics'),
+                MarkdownEditor(
                   controller: _demographicsController,
-                  decoration: const InputDecoration(
-                    labelText: 'Demographics',
-                    hintText: 'Age, occupation, location, etc.',
-                  ),
-                  maxLines: 2,
+                  inputKey: const Key('demographics'),
+                  label: 'Demographics',
+                  hint: 'Age, occupation, location, etc.',
+                  height: 160,
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  key: const Key('painPoints'),
+                MarkdownEditor(
                   controller: _painPointsController,
-                  decoration: const InputDecoration(
-                    labelText: 'Pain Points',
-                    hintText: 'What challenges does this persona face?',
-                  ),
-                  maxLines: 3,
+                  inputKey: const Key('painPoints'),
+                  label: 'Pain Points',
+                  hint: 'What challenges does this persona face?',
+                  height: 200,
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  key: const Key('goals'),
+                MarkdownEditor(
                   controller: _goalsController,
-                  decoration: const InputDecoration(
-                    labelText: 'Goals',
-                    hintText: 'What does this persona want to achieve?',
-                  ),
-                  maxLines: 3,
+                  inputKey: const Key('goals'),
+                  label: 'Goals',
+                  hint: 'What does this persona want to achieve?',
+                  height: 200,
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  key: const Key('toneOfVoice'),
+                MarkdownEditor(
                   controller: _toneOfVoiceController,
-                  decoration: const InputDecoration(
-                    labelText: 'Tone of Voice',
-                    hintText: 'e.g., Professional yet approachable',
-                  ),
-                  maxLines: 2,
+                  inputKey: const Key('toneOfVoice'),
+                  label: 'Tone of Voice',
+                  hint: 'e.g., Professional yet approachable',
+                  height: 160,
                 ),
                 const SizedBox(height: 24),
                 Row(

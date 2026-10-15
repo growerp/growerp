@@ -317,11 +317,14 @@
             <parameter name="errorMessage"/>
         </out-parameters>
         <actions>
-            <!-- the related image of the master piece this post was adapted from -->
-            <set field="masterImage" from="[:]"/>
-            <if condition="post.masterContentId">
-                <service-call name="growerp.100.MasterContentServices100.get#MasterContentImage"
-                    in-map="[masterContentId: post.masterContentId]" out-map="masterImage"/>
+            <!-- the related image of the master piece this post was adapted from,
+                 hosted on Substack -->
+            <if condition="post.masterContentId &amp;&amp; platformConfig.apiKey &amp;&amp; platformConfig.username">
+                <service-call name="growerp.100.SubstackServices100.upload#SubstackImage"
+                    in-map="[masterContentId: post.masterContentId,
+                        baseUrl: platformConfig.username, sessionToken: platformConfig.apiKey]"
+                    out-map="imageOut"/>
+                <set field="imageUrl" from="imageOut.imageUrl"/>
             </if>
             <script><![CDATA[
                 import groovy.json.JsonOutput
@@ -363,8 +366,8 @@
                         paragraphs = [[type: "paragraph", content: [[type: "text", text: post.finalContent as String]]]]
                     }
 
-                    if (masterImage.publicUrl) paragraphs.add(0, [type: "captionedImage",
-                        content: [[type: "image2", attrs: [src: masterImage.publicUrl,
+                    if (imageUrl) paragraphs.add(0, [type: "captionedImage",
+                        content: [[type: "image2", attrs: [src: imageUrl,
                             fullscreen: false, imageSize: "normal"]]]])
 
                     def prosemirrorDoc = [type: "doc", content: paragraphs]

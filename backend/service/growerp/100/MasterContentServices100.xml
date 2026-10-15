@@ -62,6 +62,9 @@
                     <econdition field-name="pnpType" operator="like" value="%${searchString}%"
                         ignore-if-empty="true" ignore-case="true" />
                 </econditions>
+                <!-- unplanned pieces (drafts, articles) first, then the plan weeks newest
+                     first so the pieces of one week stay together -->
+                <order-by field-name="-plannedDate NULLS FIRST" />
                 <order-by field-name="-lastModifiedDate" />
             </entity-find>
             <!-- rows as maps carrying the small image (base64) for the list/dialog -->
@@ -128,10 +131,6 @@
             <if condition="!ownerPartyId">
                 <return error="true" message="User not authenticated or no party associated" />
             </if>
-            <if condition="teaserMode == 'Y' &amp;&amp; !targetUrl">
-                <return error="true" message="Teaser mode needs a target URL: the link to the full article" />
-            </if>
-
             <if condition="!pseudoId">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                     in-map="[ownerPartyId: ownerPartyId, seqName: 'MasterContent']"
@@ -159,6 +158,11 @@
             <if condition="image">
                 <service-call name="growerp.100.MasterContentServices100.save#MasterContentImage"
                     in-map="[masterContentId: masterContentId, image: image]" />
+            </if>
+            <!-- a teaser without a link to the full text: the piece gets its own page -->
+            <if condition="teaserMode == 'Y' &amp;&amp; !targetUrl">
+                <service-call name="growerp.100.MasterContentServices100.assign#ArticlePage"
+                    in-map="[masterContentId: masterContentId]" />
             </if>
 
             <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc">
@@ -238,10 +242,6 @@
             <if condition="mc.ownerPartyId != ownerPartyId">
                 <return error="true" message="Access denied to this master content" />
             </if>
-            <if condition="(teaserMode ?: mc.teaserMode) == 'Y' &amp;&amp; !(targetUrl ?: mc.targetUrl)">
-                <return error="true" message="Teaser mode needs a target URL: the link to the full article" />
-            </if>
-
             <service-call name="update#growerp.marketing.MasterContent"
                 in-map="[
                     masterContentId: masterContentId,
@@ -263,6 +263,11 @@
             <if condition="image != null">
                 <service-call name="growerp.100.MasterContentServices100.save#MasterContentImage"
                     in-map="[masterContentId: masterContentId, image: image]" />
+            </if>
+            <!-- a teaser without a link to the full text: the piece gets its own page -->
+            <if condition="(teaserMode ?: mc.teaserMode) == 'Y' &amp;&amp; !(targetUrl ?: mc.targetUrl)">
+                <service-call name="growerp.100.MasterContentServices100.assign#ArticlePage"
+                    in-map="[masterContentId: masterContentId]" />
             </if>
 
             <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="updated">
@@ -464,7 +469,8 @@
 
     <service verb="get" noun="MasterContentImage" authenticate="true">
         <description>The related image of a master piece for publishing: the large image as
-            base64 and its public website URL (empty when the company has no website).
+            base64 and its public website URL (empty when the company has no website address
+            reachable from outside: a localhost one is never used, platforms cannot fetch it).
             imageBase64 is empty when the piece has no image.</description>
         <in-parameters>
             <parameter name="masterContentId" required="true" />
@@ -491,13 +497,13 @@
                 <!-- host from the store itself: the scheduler runs as SystemSupport, so
                      get#Website (logged-in user's company) would give the wrong site -->
                 <entity-find entity-name="mantle.product.store.ProductStoreSetting"
-                    list="hostNames" limit="1">
+                    list="hostNames">
                     <econdition field-name="productStoreId" from="publicRows[0].productStoreId" />
                     <econdition field-name="settingTypeEnumId" value="PsstHostname" />
                     <date-filter />
                     <order-by field-name="fromDate" />
                 </entity-find>
-                <set field="hostName" from="hostNames ? hostNames[0].settingValue : null" />
+                <set field="hostName" from="hostNames.find { !it.settingValue?.contains('localhost') }?.settingValue" />
                 <if condition="hostName">
                     <set field="publicUrl" from="(hostName.contains('localhost') ? 'http' : 'https') +
                         '://' + hostName + publicPath" />
@@ -855,8 +861,10 @@ symbols anywhere in the image; screens and documents show only simple shapes."""
             </if>
             <!-- a teaser says "read the full article": an article without its own page
                  (seeded or written by hand) gets one, else the teasers would link to
-                 whatever targetUrl is, e.g. a landing page -->
-            <if condition="mc.teaserMode == 'Y' &amp;&amp; mc.contentType == 'ARTICLE' &amp;&amp; !mc.articlePath">
+                 whatever targetUrl is, e.g. a landing page; any other piece gets one
+                 when it has no link at all -->
+            <if condition="mc.teaserMode == 'Y' &amp;&amp; !mc.articlePath &amp;&amp;
+                    (mc.contentType == 'ARTICLE' || !mc.targetUrl)">
                 <service-call name="growerp.100.MasterContentServices100.assign#ArticlePage"
                     in-map="[masterContentId: masterContentId]" />
                 <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc">

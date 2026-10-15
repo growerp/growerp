@@ -311,16 +311,11 @@ class _SubmissionReviewDialogState extends State<SubmissionReviewDialog> {
                 },
               ),
               const SizedBox(height: 12),
-              TextFormField(
-                key: const Key('instructorFeedbackField'),
+              MarkdownEditor(
                 controller: _feedback,
-                minLines: 3,
-                maxLines: 8,
-                decoration: InputDecoration(
-                  labelText: l10n.courses_instructorFeedback,
-                  alignLabelWithHint: true,
-                  border: const OutlineInputBorder(),
-                ),
+                inputKey: const Key('instructorFeedbackField'),
+                label: l10n.courses_instructorFeedback,
+                height: 200,
               ),
               const SizedBox(height: 16),
               Row(

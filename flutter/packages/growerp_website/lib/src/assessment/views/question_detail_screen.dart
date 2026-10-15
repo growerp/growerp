@@ -227,13 +227,11 @@ class QuestionDetailScreenState extends State<QuestionDetailScreen> {
                     const SizedBox(height: 16),
 
                     // Question Description
-                    TextFormField(
-                      key: const Key('questionDescription'),
+                    MarkdownEditor(
                       controller: _questionDescriptionController,
-                      decoration: const InputDecoration(
-                        labelText: 'Description (optional)',
-                      ),
-                      maxLines: 2,
+                      inputKey: const Key('questionDescription'),
+                      label: 'Description (optional)',
+                      height: 160,
                     ),
                     const SizedBox(height: 16),
 

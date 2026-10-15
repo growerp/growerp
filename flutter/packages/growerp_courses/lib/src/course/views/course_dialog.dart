@@ -289,41 +289,32 @@ class _CourseDialogState extends State<CourseDialog> {
   }
 
   Widget _buildDescriptionField() {
-    return TextFormField(
-      key: const Key('courseDescription'),
+    return MarkdownEditor(
       controller: _descriptionController,
-      decoration: InputDecoration(
-        labelText: CoursesLocalizations.of(context)!.courses_description,
-        hintText: CoursesLocalizations.of(context)!.courses_descriptionHint,
-        border: OutlineInputBorder(),
-      ),
-      maxLines: 3,
+      inputKey: const Key('courseDescription'),
+      label: CoursesLocalizations.of(context)!.courses_description,
+      hint: CoursesLocalizations.of(context)!.courses_descriptionHint,
+      height: 200,
     );
   }
 
   Widget _buildObjectivesField() {
-    return TextFormField(
-      key: const Key('courseObjectives'),
+    return MarkdownEditor(
       controller: _objectivesController,
-      decoration: InputDecoration(
-        labelText: CoursesLocalizations.of(context)!.courses_learningObjectives,
-        hintText: CoursesLocalizations.of(context)!.courses_objectivesHint,
-        border: OutlineInputBorder(),
-      ),
-      maxLines: 3,
+      inputKey: const Key('courseObjectives'),
+      label: CoursesLocalizations.of(context)!.courses_learningObjectives,
+      hint: CoursesLocalizations.of(context)!.courses_objectivesHint,
+      height: 200,
     );
   }
 
   Widget _buildAudienceField() {
-    return TextFormField(
-      key: const Key('courseAudience'),
+    return MarkdownEditor(
       controller: _audienceController,
-      decoration: InputDecoration(
-        labelText: CoursesLocalizations.of(context)!.courses_audience,
-        hintText: CoursesLocalizations.of(context)!.courses_audienceHint,
-        border: OutlineInputBorder(),
-      ),
-      maxLines: 2,
+      inputKey: const Key('courseAudience'),
+      label: CoursesLocalizations.of(context)!.courses_audience,
+      hint: CoursesLocalizations.of(context)!.courses_audienceHint,
+      height: 160,
     );
   }
 
@@ -1517,16 +1508,13 @@ class _CourseDialogState extends State<CourseDialog> {
               ),
             ),
             const SizedBox(height: 16),
-            TextField(
-              key: const Key('moduleDescription'),
+            MarkdownEditor(
               controller: descController,
-              decoration: InputDecoration(
-                labelText: CoursesLocalizations.of(
+              inputKey: const Key('moduleDescription'),
+              label: CoursesLocalizations.of(
                   context,
                 )!.courses_description,
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 2,
+              height: 200,
             ),
           ],
         ),
@@ -1586,16 +1574,13 @@ class _CourseDialogState extends State<CourseDialog> {
               ),
             ),
             const SizedBox(height: 16),
-            TextField(
-              key: const Key('lessonContent'),
+            MarkdownEditor(
               controller: contentController,
-              decoration: InputDecoration(
-                labelText: CoursesLocalizations.of(
+              inputKey: const Key('lessonContent'),
+              label: CoursesLocalizations.of(
                   context,
                 )!.courses_contentMarkdown,
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 4,
+              height: 400,
             ),
           ],
         ),

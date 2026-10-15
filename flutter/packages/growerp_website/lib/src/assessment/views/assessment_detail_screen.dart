@@ -328,12 +328,11 @@ class AssessmentDetailScreenState extends State<AssessmentDetailScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: TextFormField(
-                          key: const Key('description'),
-                          decoration:
-                              const InputDecoration(labelText: 'Description'),
+                        child: MarkdownEditor(
                           controller: _descriptionController,
-                          maxLines: 3,
+                          inputKey: const Key('description'),
+                          label: 'Description',
+                          height: 200,
                         ),
                       ),
                     ],

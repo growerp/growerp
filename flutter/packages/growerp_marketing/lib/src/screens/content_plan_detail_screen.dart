@@ -300,23 +300,15 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: TextFormField(
-                          key: const Key('theme'),
-                          decoration: const InputDecoration(
-                            labelText: 'Theme & strategy',
-                            hintText:
-                                'e.g. Launch of our spring collection: focus '
+                        child: MarkdownEditor(
+                          controller: _themeController,
+                          inputKey: const Key('theme'),
+                          hint: 'e.g. Launch of our spring collection: focus '
                                 'on time savings, push the free consultation',
-                            helperText:
-                                'The topic tying the plan\'s posts together, '
+                          helper: 'The topic tying the plan\'s posts together, '
                                 'plus the goal or angle '
                                 '(e.g. drive sign-ups, build trust).',
-                            helperMaxLines: 3,
-                          ),
-                          controller: _themeController,
-                          maxLines: 3,
-                          // ContentPlan.theme is text-medium: VARCHAR(255) on most DBs
-                          maxLength: 255,
+                          height: 200,
                         ),
                       ),
                     ],
@@ -353,7 +345,7 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
 
   Widget _buildContentSection() {
     return BlocConsumer<MasterContentBloc, MasterContentState>(
-      // e.g. Write now without an AI key
+      // e.g. AI write now without an AI key
       listenWhen: (previous, current) =>
           current.status == MasterContentStatus.failure,
       listener: (context, contentState) => HelperFunctions.showMessage(
@@ -486,7 +478,7 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
                           if (content.status == 'PLANNED')
                             IconButton(
                               key: Key('writeNow$i'),
-                              tooltip: 'Write now',
+                              tooltip: 'AI write now',
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
                               icon: const Icon(Icons.edit_note, size: 18),

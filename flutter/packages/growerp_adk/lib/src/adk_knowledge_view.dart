@@ -100,17 +100,10 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
               ),
               const SizedBox(height: 10),
               Expanded(
-                child: TextFormField(
-                  key: const Key('knowledgeText'),
+                child: MarkdownEditor(
                   controller: textCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Content (policy, note, document…)',
-                    alignLabelWithHint: true,
-                    border: OutlineInputBorder(),
-                  ),
-                  textAlignVertical: TextAlignVertical.top,
-                  expands: true,
-                  maxLines: null,
+                  inputKey: const Key('knowledgeText'),
+                  label: 'Content (policy, note, document…)',
                 ),
               ),
               const SizedBox(height: 10),

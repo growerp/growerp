@@ -302,7 +302,7 @@ class _CourseViewerContentState extends State<CourseViewerContent> {
               if (course.description != null)
                 Expanded(
                   child: Text(
-                    course.description!,
+                    MarkdownEditor.toPlainText(course.description!),
                     style: Theme.of(context).textTheme.bodySmall,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,

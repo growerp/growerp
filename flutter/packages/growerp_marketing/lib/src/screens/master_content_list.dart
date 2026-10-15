@@ -143,7 +143,7 @@ class MasterContentListState extends State<MasterContentList> {
               message: 'Could not load master content!');
         }
 
-        masterContents = state.masterContents;
+        masterContents = sortByPlanWeek(state.masterContents);
         if (masterContents.isNotEmpty && _scrollController.hasClients) {
           Future.delayed(const Duration(milliseconds: 100), () {
             WidgetsBinding.instance.addPostFrameCallback((_) {

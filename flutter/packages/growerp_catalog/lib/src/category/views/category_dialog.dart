@@ -289,13 +289,11 @@ class CategoryDialogState extends State<CategoryDialog> {
                     : null;
               },
             ),
-            TextFormField(
-              key: const Key('description'),
-              decoration: InputDecoration(
-                labelText: _localizations!.description,
-              ),
+            MarkdownEditor(
               controller: _descrController,
-              maxLines: 3,
+              inputKey: const Key('description'),
+              label: _localizations!.description,
+              height: 200,
               validator: (value) {
                 if (value!.isEmpty) {
                   return _localizations!.enterCategoryDescription;

@@ -289,14 +289,12 @@ class GeneratePersonaDialogState extends State<GeneratePersonaDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextFormField(
-                key: const Key('businessDescription'),
+              MarkdownEditor(
                 controller: _businessController,
-                decoration: const InputDecoration(
-                  labelText: 'Business Description *',
-                  hintText: 'Describe your business...',
-                ),
-                maxLines: 3,
+                inputKey: const Key('businessDescription'),
+                label: 'Business Description *',
+                hint: 'Describe your business...',
+                height: 200,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a business description';
@@ -305,14 +303,12 @@ class GeneratePersonaDialogState extends State<GeneratePersonaDialog> {
                 },
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                key: const Key('targetMarket'),
+              MarkdownEditor(
                 controller: _targetMarketController,
-                decoration: const InputDecoration(
-                  labelText: 'Target Market (Optional)',
-                  hintText: 'Who is your target customer?',
-                ),
-                maxLines: 2,
+                inputKey: const Key('targetMarket'),
+                label: 'Target Market (Optional)',
+                hint: 'Who is your target customer?',
+                height: 160,
               ),
               const SizedBox(height: 24),
               BlocConsumer<PersonaBloc, PersonaState>(

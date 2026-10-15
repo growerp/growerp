@@ -113,12 +113,11 @@ class RoutingDialogState extends State<RoutingDialog> {
             },
           ),
           const SizedBox(height: 20),
-          TextFormField(
-            key: const Key('description'),
-            decoration:
-                const InputDecoration(labelText: 'Description (optional)'),
+          MarkdownEditor(
             controller: _descriptionController,
-            maxLines: 2,
+            inputKey: const Key('description'),
+            label: 'Description (optional)',
+            height: 160,
           ),
           const SizedBox(height: 20),
           // Routing tasks (existing routings only)

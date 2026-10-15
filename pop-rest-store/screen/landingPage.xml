@@ -54,6 +54,9 @@ along with this software (see the LICENSE.md file). If not, see
         <set field="landingPage" from="landingPageResult.landingPage"/>
         <set field="sections" from="landingPage?.sections ?: []"/>
         <set field="credibility" from="landingPage?.credibility ?: [:]"/>
+        <!-- descriptions and bio are markdown, see md() in landingPage.ftl -->
+        <set field="mdParser" from="org.moqui.impl.context.renderer.MarkdownTemplateRenderer.PARSER"/>
+        <set field="mdRenderer" from="org.moqui.impl.context.renderer.MarkdownTemplateRenderer.RENDERER"/>
 
         <!-- Determine CTA behavior -->
         <set field="ctaActionType" from="landingPage?.ctaActionType"/>

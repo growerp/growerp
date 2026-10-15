@@ -426,18 +426,13 @@ class _SystemSetupAiViewState extends State<SystemSetupAiView> {
             ),
           ),
           const SizedBox(height: 16),
-          TextFormField(
-            key: const Key('writingStyle'),
+          MarkdownEditor(
             controller: _writingStyleCtrl,
-            minLines: 6,
-            maxLines: 14,
-            decoration: const InputDecoration(
-              labelText: 'House writing voice',
-              helperText:
-                  'Injected into every content prompt: articles, posts, notes '
+            inputKey: const Key('writingStyle'),
+            label: 'House writing voice',
+            helper: 'Injected into every content prompt: articles, posts, notes '
                   'and outreach messages.',
-              alignLabelWithHint: true,
-            ),
+            height: 250,
           ),
           const SizedBox(height: 12),
           Wrap(

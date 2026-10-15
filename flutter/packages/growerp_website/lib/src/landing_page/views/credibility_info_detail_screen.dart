@@ -228,13 +228,11 @@ class CredibilityInfoDetailScreenState
                         ),
                       ),
                       const SizedBox(height: 12),
-                      TextFormField(
-                        key: const Key('creatorBio'),
+                      MarkdownEditor(
                         controller: _bioController,
-                        decoration: const InputDecoration(
-                          labelText: 'Creator Bio *',
-                        ),
-                        maxLines: 3,
+                        inputKey: const Key('creatorBio'),
+                        label: 'Creator Bio *',
+                        height: 200,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter creator bio';
@@ -243,13 +241,11 @@ class CredibilityInfoDetailScreenState
                         },
                       ),
                       const SizedBox(height: 16),
-                      TextFormField(
-                        key: const Key('backgroundText'),
+                      MarkdownEditor(
                         controller: _backgroundController,
-                        decoration: const InputDecoration(
-                          labelText: 'Background/Experience',
-                        ),
-                        maxLines: 3,
+                        inputKey: const Key('backgroundText'),
+                        label: 'Background/Experience',
+                        height: 200,
                       ),
                       const SizedBox(height: 16),
                       TextFormField(

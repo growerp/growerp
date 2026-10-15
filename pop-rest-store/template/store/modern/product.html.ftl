@@ -93,6 +93,7 @@
 
             <#-- a course: what it covers; lesson content is studied in the academy app -->
             <#if course??>
+                <#function md text><#return mdRenderer.render(mdParser.parse(text))></#function>
                 <#function duration minutes><#if !(minutes??) || minutes == 0><#return ''></#if>
                     <#if minutes lt 60><#return minutes + ' min'></#if>
                     <#return (minutes / 60)?floor + ' h' + (minutes % 60 gt 0)?then(' ' + minutes % 60 + ' min', '')></#function>
@@ -105,7 +106,7 @@
                     <#if course.objectives?has_content>
                         <div class="l-glass rounded-2xl p-5 mb-6">
                             <h2 class="font-display font-semibold text-on-surface mb-2">What you will achieve</h2>
-                            <p class="text-on-surface-variant">${course.objectives}</p>
+                            <div class="text-on-surface-variant">${md(course.objectives)}</div>
                         </div>
                     </#if>
                     <h2 class="font-display text-xl font-semibold text-on-surface mb-4">Course outline</h2>
@@ -113,7 +114,7 @@
                         <#list course.modules as module>
                             <li class="l-glass rounded-2xl p-5">
                                 <h3 class="font-display font-semibold text-on-surface">${module?index + 1}. ${module.title}</h3>
-                                <#if module.description?has_content><p class="text-sm text-on-surface-variant mt-1">${module.description}</p></#if>
+                                <#if module.description?has_content><div class="text-sm text-on-surface-variant mt-1">${md(module.description)}</div></#if>
                                 <#if module.lessons?has_content>
                                     <ul class="mt-3 space-y-1">
                                         <#list module.lessons as lesson>

@@ -35,7 +35,7 @@
         <field name="ownerPartyId" type="id" />
         <field name="personaId" type="id" />
         <field name="weekStartDate" type="date-time" />
-        <field name="theme" type="text-medium" />
+        <field name="theme" type="text-long" />
         <field name="status" type="text-short" /> <!-- DRAFT, ACTIVE, COMPLETED -->
         <field name="weeks" type="number-integer" /> <!-- number of weeks from weekStartDate -->
         <field name="planFormat" type="text-short" /> <!-- PNP (Pain/News/Prize Mon/Wed/Fri) or SINGLE (one posting on Monday); empty = PNP -->

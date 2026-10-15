@@ -146,7 +146,8 @@ class ContentIdeasPanelState extends State<ContentIdeasPanel> {
                         label: Text(
                           ((idea.title?.isNotEmpty ?? false)
                                   ? idea.title!
-                                  : (idea.rawText ?? idea.sourceUrl ?? ''))
+                                  : MarkdownEditor.toPlainText(
+                                      idea.rawText ?? idea.sourceUrl ?? ''))
                               .truncate(30),
                           key: Key('ideaTitle$index'),
                         ),
@@ -302,15 +303,11 @@ class _ContentIdeaDialogState extends State<ContentIdeaDialog> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      TextFormField(
-                        key: const Key('ideaRawText'),
+                      MarkdownEditor(
                         controller: _textController,
-                        minLines: 6,
-                        maxLines: 12,
-                        decoration: const InputDecoration(
-                          labelText: 'Text, notes or article',
-                          alignLabelWithHint: true,
-                        ),
+                        inputKey: const Key('ideaRawText'),
+                        label: 'Text, notes or article',
+                        height: 300,
                         validator: (_) => _textController.text.trim().isEmpty &&
                                 _urlController.text.trim().isEmpty &&
                                 _titleController.text.trim().isEmpty

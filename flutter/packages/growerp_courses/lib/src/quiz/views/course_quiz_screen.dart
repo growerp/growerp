@@ -334,10 +334,7 @@ class _CourseQuizView extends StatelessWidget {
                 outcome!.explanation!.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 4, left: 16),
-                child: Text(
-                  outcome.explanation!,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                child: MarkdownText(outcome.explanation!),
               ),
           ],
         ),

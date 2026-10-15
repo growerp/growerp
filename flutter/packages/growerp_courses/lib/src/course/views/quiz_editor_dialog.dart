@@ -248,16 +248,13 @@ class _QuestionDialogState extends State<_QuestionDialog> {
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(height: 12),
-                TextFormField(
-                  key: const Key('questionExplanation'),
+                MarkdownEditor(
                   controller: _explanation,
-                  decoration: InputDecoration(
-                    labelText: CoursesLocalizations.of(
+                  inputKey: const Key('questionExplanation'),
+                  label: CoursesLocalizations.of(
                       context,
                     )!.courses_explanationShown,
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 2,
+                  height: 200,
                 ),
               ],
             ),

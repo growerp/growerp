@@ -107,14 +107,11 @@ class _ActivityNotesState extends State<_ActivityNotes> {
             Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    key: const Key('activityNoteText'),
+                  child: MarkdownEditor(
                     controller: _noteController,
-                    minLines: 1,
-                    maxLines: 4,
-                    decoration: InputDecoration(
-                      hintText: localizations.activity_addComment,
-                    ),
+                    inputKey: const Key('activityNoteText'),
+                    hint: localizations.activity_addComment,
+                    height: 160,
                   ),
                 ),
                 IconButton(
@@ -156,7 +153,7 @@ class _ActivityNotesState extends State<_ActivityNotes> {
         '${note.isAgent ? localizations.activity_aiAgent : note.userFullName ?? ''}  $when',
         style: Theme.of(context).textTheme.labelSmall,
       ),
-      subtitle: Text(note.noteText ?? ''),
+      subtitle: MarkdownText(note.noteText ?? ''),
     );
   }
 }

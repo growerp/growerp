@@ -168,7 +168,7 @@ List<Widget> getAssessmentListRow({
     // Description
     cells.add(
       Text(
-        assessment.description ?? 'N/A',
+        MarkdownEditor.toPlainText(assessment.description ?? 'N/A'),
         key: Key('description$index'),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,

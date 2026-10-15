@@ -113,6 +113,7 @@
 
             <#-- a course: what it covers; lesson content is studied in the academy app -->
             <#if course??>
+                <#function md text><#return mdRenderer.render(mdParser.parse(text))></#function>
                 <#function duration minutes><#if !(minutes??) || minutes == 0><#return ''></#if>
                     <#if minutes lt 60><#return minutes + ' min'></#if>
                     <#return (minutes / 60)?floor + ' h' + (minutes % 60 gt 0)?then(' ' + minutes % 60 + ' min', '')></#function>
@@ -125,14 +126,14 @@
                     <#if course.objectives?has_content>
                         <div class="card mb-3"><div class="card-body">
                             <h5>What you will achieve</h5>
-                            <p class="mb-0" style="color: var(--neutral-600);">${course.objectives}</p>
+                            <div class="mb-0" style="color: var(--neutral-600);">${md(course.objectives)}</div>
                         </div></div>
                     </#if>
                     <h4 class="mb-3">Course outline</h4>
                     <#list course.modules as module>
                         <div class="card mb-2"><div class="card-body">
                             <h6>${module?index + 1}. ${module.title}</h6>
-                            <#if module.description?has_content><p class="small mb-2" style="color: var(--neutral-600);">${module.description}</p></#if>
+                            <#if module.description?has_content><div class="small mb-2" style="color: var(--neutral-600);">${md(module.description)}</div></#if>
                             <#list module.lessons![] as lesson>
                                 <div class="d-flex justify-content-between small" style="color: var(--neutral-600);">
                                     <span><i class="fas fa-lock mr-2" style="color: var(--neutral-400);"></i>${lesson.title}</span>

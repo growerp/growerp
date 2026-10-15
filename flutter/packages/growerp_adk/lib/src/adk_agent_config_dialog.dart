@@ -847,14 +847,12 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                         ),
                       SizedBox(height: 8),
                       _placeholderWarning(),
-                      TextFormField(
-                        key: Key('instruction'),
+                      MarkdownEditor(
                         controller: _instructionCtrl,
-                        decoration: InputDecoration(
-                          labelText: 'Instruction (system prompt)',
-                          hintText: 'You are a helpful assistant…',
-                        ),
-                        maxLines: 3,
+                        inputKey: const Key('instruction'),
+                        label: 'Instruction (system prompt)',
+                        hint: 'You are a helpful assistant…',
+                        height: 400,
                       ),
                       SizedBox(height: 8),
                       TextFormField(

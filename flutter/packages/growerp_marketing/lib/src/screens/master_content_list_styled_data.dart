@@ -13,12 +13,45 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../bloc/master_content_bloc.dart';
 import '../bloc/master_content_event.dart';
 import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
+
+/// Monday (local, date only) of the week a piece is planned in
+DateTime _weekMonday(DateTime planned) {
+  final day = planned.toLocal();
+  return DateTime(day.year, day.month, day.day - (day.weekday - 1));
+}
+
+/// 'Wk 43 · 20 Oct': the plan week of a piece, '' when not planned
+String weekLabel(DateTime? planned) {
+  if (planned == null) return '';
+  final monday = _weekMonday(planned);
+  // ISO week: the week holding the Thursday of this week
+  final thursday = monday.add(const Duration(days: 3));
+  final week =
+      (thursday.difference(DateTime(thursday.year, 1, 1)).inDays ~/ 7) + 1;
+  return 'Wk $week · ${DateFormat('d MMM').format(monday)}';
+}
+
+/// The pieces of one plan week together: unplanned pieces first as they
+/// come, then the weeks newest first, inside a week by planned date
+/// (Pain, News, Prize).
+List<MasterContent> sortByPlanWeek(List<MasterContent> contents) {
+  final unplanned = contents.where((c) => c.plannedDate == null).toList();
+  final planned = contents.where((c) => c.plannedDate != null).toList()
+    ..sort((a, b) {
+      final week = _weekMonday(
+        b.plannedDate!,
+      ).compareTo(_weekMonday(a.plannedDate!));
+      return week != 0 ? week : a.plannedDate!.compareTo(b.plannedDate!);
+    });
+  return [...unplanned, ...planned];
+}
 
 /// Returns column definitions for master content list based on device type
 List<StyledColumn> getMasterContentListColumns(BuildContext context) {
@@ -36,6 +69,7 @@ List<StyledColumn> getMasterContentListColumns(BuildContext context) {
 
   return [
     StyledColumn(header: localizations.tableHdrId, flex: 1),
+    StyledColumn(header: 'Week', flex: 1),
     StyledColumn(header: localizations.tableHdrType, flex: 1),
     StyledColumn(header: localizations.tableHdrPnp, flex: 1),
     StyledColumn(header: localizations.tableHdrTitle, flex: 3),
@@ -111,7 +145,12 @@ List<Widget> getMasterContentListRow({
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            '${content.contentType} · ${content.pnpType}',
+            [
+              content.contentType,
+              content.pnpType,
+              if (content.plannedDate != null)
+                weekLabel(content.plannedDate).split(' · ').first,
+            ].join(' · '),
             key: Key('contentType$index'),
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
@@ -168,6 +207,7 @@ List<Widget> getMasterContentListRow({
     cells.add(
       Text(content.pseudoId ?? '', key: const Key('masterContentItem')),
     );
+    cells.add(Text(weekLabel(content.plannedDate), key: Key('week$index')));
     cells.add(
       Text(
         content.contentType,

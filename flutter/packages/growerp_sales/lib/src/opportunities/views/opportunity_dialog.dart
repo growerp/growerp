@@ -146,11 +146,11 @@ class OpportunityDialogState extends State<OpportunityDialog> {
           return value!.isEmpty ? _localizations.enterOppName : null;
         },
       ),
-      TextFormField(
-        key: const Key('description'),
-        maxLines: 3,
-        decoration: InputDecoration(labelText: _localizations.description),
+      MarkdownEditor(
         controller: _descriptionController,
+        inputKey: const Key('description'),
+        label: _localizations.description,
+        height: 200,
       ),
       TextFormField(
         key: const Key('estAmount'),

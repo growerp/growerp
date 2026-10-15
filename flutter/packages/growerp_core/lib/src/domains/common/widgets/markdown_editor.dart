@@ -15,6 +15,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
 import 'package:markdown/markdown.dart' as md;
@@ -26,14 +27,19 @@ import 'package:markdown_quill/markdown_quill.dart';
 ///
 /// Text with formatting the visual editor cannot keep (raw html, tables..)
 /// opens in Source mode so nothing is lost silently.
-/// [inputKey] is put on the Source text field (used by integration tests,
-/// tap Key('markdownModeSource') first).
+/// [inputKey] is put on the Source text field, in Visual mode on the visual
+/// editor (integration tests: CommonTest.enterText switches to Source).
 /// Without [height] the editor fills its parent, which must be bounded.
+/// With [validator] the editor takes part in the surrounding [Form].
 class MarkdownEditor extends StatefulWidget {
   final TextEditingController controller;
   final Key? inputKey;
   final String? label;
   final double? height;
+  final FormFieldValidator<String>? validator;
+  final String? hint;
+  final String? helper;
+  final bool enabled;
 
   const MarkdownEditor({
     super.key,
@@ -41,7 +47,22 @@ class MarkdownEditor extends StatefulWidget {
     this.inputKey,
     this.label,
     this.height,
+    this.validator,
+    this.hint,
+    this.helper,
+    this.enabled = true,
   });
+
+  /// [markdown] as one line of plain text, for list cells and chips.
+  static String toPlainText(String markdown) => _html(markdown)
+      .replaceAll(RegExp(r'<[^>]*>'), ' ')
+      .replaceAll('&lt;', '<')
+      .replaceAll('&gt;', '>')
+      .replaceAll('&quot;', '"')
+      .replaceAll('&#39;', "'")
+      .replaceAll('&amp;', '&')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
 
   /// true when [markdown] survives a markdown -> rich text -> markdown trip
   /// unchanged in meaning (compared as rendered html).
@@ -110,6 +131,8 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
   late bool _visualSafe;
   QuillController? _quill;
   StreamSubscription? _changes;
+  // the markdown the visual editor last wrote into the controller
+  String? _written;
 
   @override
   void initState() {
@@ -117,26 +140,53 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
     _visualSafe = MarkdownEditor.roundTrips(widget.controller.text);
     _source = !_visualSafe;
     if (!_source) _loadVisual();
+    widget.controller.addListener(_onControllerChanged);
+  }
+
+  @override
+  void didUpdateWidget(MarkdownEditor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(_onControllerChanged);
+      widget.controller.addListener(_onControllerChanged);
+      _onControllerChanged();
+    }
   }
 
   @override
   void dispose() {
+    widget.controller.removeListener(_onControllerChanged);
     _disposeVisual();
     super.dispose();
   }
 
+  /// text set from outside (data loaded, AI generated): show it
+  void _onControllerChanged() {
+    if (_source || widget.controller.text == _written) return;
+    setState(() {
+      _visualSafe = MarkdownEditor.roundTrips(widget.controller.text);
+      _source = !_visualSafe;
+      if (_source) {
+        _disposeVisual();
+      } else {
+        _loadVisual();
+      }
+    });
+  }
+
   void _loadVisual() {
     _disposeVisual();
+    _written = widget.controller.text;
     final delta = MarkdownEditor._mdToDelta.convert(widget.controller.text);
     final quill = QuillController(
       document: delta.isEmpty ? Document() : Document.fromDelta(delta),
       selection: const TextSelection.collapsed(offset: 0),
+      readOnly: !widget.enabled,
     );
-    _changes = quill.document.changes.listen(
-      (_) => widget.controller.text = MarkdownEditor._toMarkdown(
-        quill.document.toDelta(),
-      ),
-    );
+    _changes = quill.document.changes.listen((_) {
+      _written = MarkdownEditor._toMarkdown(quill.document.toDelta());
+      widget.controller.text = _written!;
+    });
     _quill = quill;
   }
 
@@ -206,9 +256,10 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
         ? TextFormField(
             key: widget.inputKey,
             controller: widget.controller,
+            enabled: widget.enabled,
             style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
-            decoration: const InputDecoration(
-              hintText: 'Markdown',
+            decoration: InputDecoration(
+              hintText: widget.hint ?? 'Markdown',
               alignLabelWithHint: true,
             ),
             expands: true,
@@ -219,36 +270,41 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
         : Localizations.override(
             context: context,
             delegates: const [FlutterQuillLocalizations.delegate],
+            // the key in both modes so tests can find (scroll to) the editor
             child: Container(
+              key: widget.inputKey,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: theme.colorScheme.outline),
               ),
               child: Column(
                 children: [
-                  QuillSimpleToolbar(
-                    controller: _quill!,
-                    config: const QuillSimpleToolbarConfig(
-                      multiRowsDisplay: false,
-                      showFontFamily: false,
-                      showFontSize: false,
-                      showUnderLineButton: false,
-                      showColorButton: false,
-                      showBackgroundColorButton: false,
-                      showListCheck: false,
-                      showIndent: false,
-                      showSearchButton: false,
-                      showSubscript: false,
-                      showSuperscript: false,
+                  if (widget.enabled) ...[
+                    QuillSimpleToolbar(
+                      controller: _quill!,
+                      config: const QuillSimpleToolbarConfig(
+                        multiRowsDisplay: false,
+                        showFontFamily: false,
+                        showFontSize: false,
+                        showUnderLineButton: false,
+                        showColorButton: false,
+                        showBackgroundColorButton: false,
+                        showListCheck: false,
+                        showIndent: false,
+                        showSearchButton: false,
+                        showSubscript: false,
+                        showSuperscript: false,
+                      ),
                     ),
-                  ),
-                  const Divider(height: 1),
+                    const Divider(height: 1),
+                  ],
                   Expanded(
                     child: QuillEditor.basic(
                       key: const Key('markdownVisualEditor'),
                       controller: _quill!,
                       config: QuillEditorConfig(
                         padding: const EdgeInsets.all(10),
+                        placeholder: widget.hint,
                         // markdown paragraphs are blocks: show the gap
                         customStyles: DefaultStyles(
                           paragraph: DefaultStyles.getInstance(context)
@@ -272,8 +328,72 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
         Expanded(child: body),
       ],
     );
-    return widget.height == null
-        ? editor
-        : SizedBox(height: widget.height, child: editor);
+    final sized = _IntrinsicSafe(
+      height: widget.height,
+      child: widget.height == null
+          ? editor
+          : SizedBox(height: widget.height, child: editor),
+    );
+    if (widget.validator == null && widget.helper == null) return sized;
+    Widget withNote(String? error) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        widget.height == null ? Expanded(child: sized) : sized,
+        if (error != null || widget.helper != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4, left: 12),
+            child: Text(
+              error ?? widget.helper!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: error != null
+                    ? theme.colorScheme.error
+                    : theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+      ],
+    );
+    if (widget.validator == null) return withNote(null);
+    return FormField<String>(
+      validator: (_) => widget.validator!(widget.controller.text),
+      builder: (field) => withNote(field.errorText),
+    );
   }
+}
+
+/// The visual editor scrolls, and a scroll view cannot report intrinsic
+/// sizes, which an AlertDialog asks for: answer with fixed ones instead.
+class _IntrinsicSafe extends SingleChildRenderObjectWidget {
+  final double? height;
+
+  const _IntrinsicSafe({required this.height, required super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderIntrinsicSafe(height ?? 0);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderIntrinsicSafe renderObject,
+  ) => renderObject.height = height ?? 0;
+}
+
+class _RenderIntrinsicSafe extends RenderProxyBox {
+  double height;
+
+  _RenderIntrinsicSafe(this.height);
+
+  @override
+  double computeMinIntrinsicWidth(double height) => 0;
+
+  @override
+  double computeMaxIntrinsicWidth(double height) => 400;
+
+  @override
+  double computeMinIntrinsicHeight(double width) => height;
+
+  @override
+  double computeMaxIntrinsicHeight(double width) => height;
 }

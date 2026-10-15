@@ -1559,13 +1559,13 @@ class _EmailTabState extends State<_EmailTab> {
             ),
           ),
           const SizedBox(height: 12),
-          TextField(
+          // sent as html rendered from markdown
+          MarkdownEditor(
             controller: _messageController,
-            decoration: const InputDecoration(
-              labelText: 'Message Body',
-              hintText: 'Use {name} for personalization',
-            ),
-            maxLines: 5,
+            inputKey: const Key('emailMessageBody'),
+            label: 'Message Body',
+            hint: 'Use {name} for personalization',
+            height: 250,
           ),
           if (_statusMessage != null || _errorMessage != null)
             Padding(

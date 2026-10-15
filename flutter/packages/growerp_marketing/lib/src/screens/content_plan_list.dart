@@ -356,7 +356,7 @@ class GenerateContentPlanDialogState extends State<GenerateContentPlanDialog> {
                 const Text(
                   'AI plans the coming weeks for the selected persona: a '
                   'headline and a short brief for every piece. Each piece is '
-                  'written in its own week (Write now, or by the weekly '
+                  'written in its own week (AI write now, or by the weekly '
                   'content agent), then adapted to social platforms.',
                 ),
                 const SizedBox(height: 16),
@@ -456,23 +456,16 @@ class GenerateContentPlanDialogState extends State<GenerateContentPlanDialog> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  key: const Key('theme'),
+                MarkdownEditor(
                   controller: _themeController,
-                  maxLines: 3,
-                  // ContentPlan.theme is text-medium: VARCHAR(255) on most DBs
-                  maxLength: 255,
-                  decoration: const InputDecoration(
-                    labelText: 'Theme & strategy (optional)',
-                    hintText:
-                        'e.g. Launch of our spring collection: focus on time '
+                  inputKey: const Key('theme'),
+                  label: 'Theme & strategy (optional)',
+                  hint: 'e.g. Launch of our spring collection: focus on time '
                         'savings, push the free consultation',
-                    helperText:
-                        'The topic or campaign for the plan and the goal or '
+                  helper: 'The topic or campaign for the plan and the goal or '
                         'angle. Leave empty to let AI choose one from the '
                         'persona.',
-                    helperMaxLines: 3,
-                  ),
+                  height: 200,
                 ),
                 const SizedBox(height: 24),
                 BlocConsumer<ContentPlanBloc, ContentPlanState>(

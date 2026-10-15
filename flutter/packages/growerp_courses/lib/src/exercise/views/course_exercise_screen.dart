@@ -163,18 +163,27 @@ class _CourseExerciseScreenState extends State<CourseExerciseScreen> {
               const SizedBox(height: 16),
               MarkdownBody(data: exercise.prompt ?? '', selectable: true),
               const SizedBox(height: 24),
-              TextField(
-                key: const Key('exerciseAnswer'),
-                controller: _answer,
-                minLines: 6,
-                maxLines: 20,
-                style: isCode ? const TextStyle(fontFamily: 'monospace') : null,
-                decoration: InputDecoration(
-                  labelText: l10n.courses_yourAnswer,
-                  alignLabelWithHint: true,
-                  border: const OutlineInputBorder(),
+              // code is not markdown: the visual editor would escape it
+              if (isCode)
+                TextField(
+                  key: const Key('exerciseAnswer'),
+                  controller: _answer,
+                  minLines: 6,
+                  maxLines: 20,
+                  style: const TextStyle(fontFamily: 'monospace'),
+                  decoration: InputDecoration(
+                    labelText: l10n.courses_yourAnswer,
+                    alignLabelWithHint: true,
+                    border: const OutlineInputBorder(),
+                  ),
+                )
+              else
+                MarkdownEditor(
+                  controller: _answer,
+                  inputKey: const Key('exerciseAnswer'),
+                  label: l10n.courses_yourAnswer,
+                  height: 250,
                 ),
-              ),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
@@ -295,7 +304,7 @@ class _FeedbackCard extends StatelessWidget {
                 l10n.courses_instructorFeedback,
                 style: Theme.of(context).textTheme.labelLarge,
               ),
-              Text(
+              MarkdownText(
                 submission.instructorFeedback!,
                 key: const Key('instructorFeedback'),
               ),

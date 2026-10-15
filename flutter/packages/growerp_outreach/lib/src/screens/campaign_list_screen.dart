@@ -298,15 +298,13 @@ class GenerateCampaignDialogState extends State<GenerateCampaignDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                TextFormField(
-                  key: const Key('campaignGoal'),
+                MarkdownEditor(
                   controller: _goalController,
-                  maxLines: 4,
-                  decoration: const InputDecoration(
-                    labelText: 'Campaign goal *',
-                    hintText: 'What should this campaign achieve, and for whom? '
+                  inputKey: const Key('campaignGoal'),
+                  label: 'Campaign goal *',
+                  hint: 'What should this campaign achieve, and for whom? '
                         'e.g. book demos for our warehouse app with wholesalers',
-                  ),
+                  height: 200,
                   validator: (value) => value == null || value.isEmpty
                       ? 'Please describe the campaign goal'
                       : null,

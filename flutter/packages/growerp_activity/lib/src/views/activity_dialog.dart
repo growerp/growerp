@@ -249,13 +249,11 @@ class ActivityDialogState extends State<ActivityDialog> {
               },
             ),
             const SizedBox(height: 10),
-            TextFormField(
-              key: const Key('description'),
-              maxLines: 3,
-              decoration: InputDecoration(
-                labelText: _localizations.activity_description,
-              ),
+            MarkdownEditor(
               controller: _descriptionController,
+              inputKey: const Key('description'),
+              label: _localizations.activity_description,
+              height: 200,
             ),
             if (widget.activity.activityType == ActivityType.todo &&
                 _authBloc.state.authenticate?.user?.userGroup ==

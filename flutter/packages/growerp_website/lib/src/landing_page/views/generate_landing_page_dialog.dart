@@ -42,6 +42,13 @@ class _GenerateLandingPageDialogState extends State<GenerateLandingPageDialog> {
   int _selectedSections = 5;
 
   @override
+  void initState() {
+    super.initState();
+    // the generate button depends on the description length
+    _descriptionController.addListener(() => setState(() {}));
+  }
+
+  @override
   Widget build(BuildContext context) {
     // Get RestClient from context before building the dialog
     final restClient = context.read<RestClient>();
@@ -148,28 +155,26 @@ class _GenerateLandingPageDialogState extends State<GenerateLandingPageDialog> {
             ],
 
             // Business Description
-            TextField(
+            MarkdownEditor(
               controller: _descriptionController,
-              maxLines: 4,
-              maxLength: 500,
-              onChanged: (_) => setState(() {}),
-              decoration: const InputDecoration(
-                labelText: 'Business Description*',
-                hintText:
-                    'E.g., I run a digital marketing agency helping small businesses with social media strategy...',
-                helperText: 'Min 20 characters, Max 500 characters',
-              ),
+              inputKey: const Key('businessDescription'),
+              label: 'Business Description*',
+              hint:
+                  'E.g., I run a digital marketing agency helping small businesses with social media strategy...',
+              helper:
+                  'Min 20 characters, Max 500 characters '
+                  '(${_descriptionController.text.length})',
+              height: 220,
             ),
             const SizedBox(height: 16),
 
             // Target Audience
-            TextField(
+            MarkdownEditor(
               controller: _audienceController,
-              maxLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'Target Audience (optional)',
-                hintText: 'E.g., Small business owners with 1-10 employees...',
-              ),
+              inputKey: const Key('targetAudience'),
+              label: 'Target Audience (optional)',
+              hint: 'E.g., Small business owners with 1-10 employees...',
+              height: 160,
             ),
             const SizedBox(height: 16),
 
@@ -188,14 +193,12 @@ class _GenerateLandingPageDialogState extends State<GenerateLandingPageDialog> {
             ),
             if (_downloadUrlController.text.isNotEmpty) ...[
               const SizedBox(height: 16),
-              TextField(
-                key: const Key('downloadDescription'),
+              MarkdownEditor(
                 controller: _downloadDescriptionController,
-                maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: "What's in the download (optional)",
-                  hintText: 'E.g., a 12-page checklist for migrating off spreadsheets...',
-                ),
+                inputKey: const Key('downloadDescription'),
+                label: "What's in the download (optional)",
+                hint: 'E.g., a 12-page checklist for migrating off spreadsheets...',
+                height: 160,
               ),
             ],
             const SizedBox(height: 16),
@@ -253,7 +256,8 @@ class _GenerateLandingPageDialogState extends State<GenerateLandingPageDialog> {
                 ),
                 const SizedBox(width: 12),
                 ElevatedButton(
-                  onPressed: _descriptionController.text.length >= 20
+                  onPressed: _descriptionController.text.length >= 20 &&
+                          _descriptionController.text.length <= 500
                       ? () => _generateLandingPage(context)
                       : null,
                   child: Text(WebsiteLocalizations.of(context)!.generate),

@@ -66,7 +66,8 @@ List<Widget> getContentPlanListRow({
       builder: (dialogContext) => AlertDialog(
         title: Text(MarketingLocalizations.of(context)!.deleteContentPlan),
         content: Text(
-          'Are you sure you want to delete plan "${plan.theme ?? plan.pseudoId}"?',
+          'Are you sure you want to delete plan '
+          '"${plan.theme != null ? MarkdownEditor.toPlainText(plan.theme!) : plan.pseudoId}"?',
         ),
         actions: [
           TextButton(
@@ -105,7 +106,7 @@ List<Widget> getContentPlanListRow({
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            (plan.theme ?? 'No theme').truncate(25),
+            MarkdownEditor.toPlainText(plan.theme ?? 'No theme').truncate(25),
             key: Key('theme$index'),
             style: const TextStyle(fontWeight: FontWeight.w600),
             maxLines: 1,
@@ -143,7 +144,7 @@ List<Widget> getContentPlanListRow({
     // Theme
     cells.add(
       Text(
-        plan.theme ?? 'No theme',
+        MarkdownEditor.toPlainText(plan.theme ?? 'No theme'),
         key: Key('theme$index'),
         style: const TextStyle(fontWeight: FontWeight.w500),
         maxLines: 1,

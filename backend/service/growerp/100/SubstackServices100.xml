@@ -16,6 +16,66 @@
     <!--  one helper service.                                      -->
     <!-- ========================================================= -->
 
+    <service verb="upload" noun="SubstackImage">
+        <description>The related image of a master piece as a Substack-hosted URL: the image is
+            uploaded to Substack's image endpoint, so a post never links to our own server
+            (which Substack cannot reach from a local or private system). When the upload
+            fails the public website URL is used, but never a localhost one: then no image.
+            imageUrl is empty when the piece has no image.</description>
+        <in-parameters>
+            <parameter name="masterContentId" required="true" />
+            <parameter name="baseUrl" required="true"><description>publication URL for posts,
+                https://substack.com for notes</description></parameter>
+            <parameter name="sessionToken" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="imageUrl" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.MasterContentServices100.get#MasterContentImage"
+                in-map="[masterContentId: masterContentId]" out-map="masterImage" />
+            <if condition="!masterImage.imageBase64">
+                <return />
+            </if>
+            <script><![CDATA[
+                import groovy.json.JsonOutput
+                import groovy.json.JsonSlurper
+                import java.net.http.HttpClient
+                import java.net.http.HttpRequest
+                import java.net.http.HttpResponse
+                import java.time.Duration
+
+                String base64 = masterImage.imageBase64
+                // PNG starts with 0x89 'PNG' (base64 'iVBOR'), else stored as jpeg
+                String mime = base64.startsWith('iVBOR') ? 'image/png' : 'image/jpeg'
+                String root = (baseUrl as String).replaceAll('/+$', '')
+                try {
+                    def request = HttpRequest.newBuilder()
+                        .uri(URI.create("${root}/api/v1/image"))
+                        .header("Content-Type", "application/json")
+                        .header("Cookie", "substack.sid=${sessionToken}; connect.sid=${sessionToken}")
+                        .header("Referer", root)
+                        .header("Origin", root)
+                        .POST(HttpRequest.BodyPublishers.ofString(
+                            JsonOutput.toJson([image: "data:${mime};base64,${base64}".toString()])))
+                        .timeout(Duration.ofSeconds(60))
+                        .build()
+                    def response = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15)).build()
+                        .send(request, HttpResponse.BodyHandlers.ofString())
+                    if (response.statusCode() in [200, 201]) {
+                        imageUrl = new JsonSlurper().parseText(response.body())?.url
+                    } else {
+                        ec.logger.warn("Substack image upload ${response.statusCode()}: ${response.body()?.take(300)}")
+                    }
+                } catch (Exception e) {
+                    ec.logger.warn("Substack image upload failed: ${e.message}")
+                }
+                if (!imageUrl && masterImage.publicUrl && !masterImage.publicUrl.contains('localhost'))
+                    imageUrl = masterImage.publicUrl
+            ]]></script>
+        </actions>
+    </service>
+
     <service verb="publish" noun="SubstackNote">
         <description>Post a Substack Note (short-form) via the private API.
             Notes are account-level: they go to https://substack.com, not the
@@ -32,6 +92,14 @@
             <parameter name="errorMessage"/>
         </out-parameters>
         <actions>
+            <!-- the related image of the master piece, hosted on Substack -->
+            <if condition="post.masterContentId &amp;&amp; platformConfig.apiKey">
+                <service-call name="growerp.100.SubstackServices100.upload#SubstackImage"
+                    in-map="[masterContentId: post.masterContentId, sessionToken: platformConfig.apiKey,
+                        baseUrl: System.getProperty('growerp.substack.notesBaseUrl') ?: 'https://substack.com']"
+                    out-map="imageOut" />
+                <set field="imageUrl" from="imageOut.imageUrl" />
+            </if>
             <script><![CDATA[
                 import groovy.json.JsonOutput
                 import groovy.json.JsonSlurper
@@ -87,6 +155,31 @@
                     def httpClient = HttpClient.newBuilder()
                         .connectTimeout(Duration.ofSeconds(15))
                         .build()
+
+                    // the image goes with the note as an attachment; without one the
+                    // note is still posted
+                    if (imageUrl) {
+                        try {
+                            def attachRequest = HttpRequest.newBuilder()
+                                .uri(URI.create("${notesBaseUrl}/api/v1/comment/attachment"))
+                                .header("Content-Type", "application/json")
+                                .header("Cookie", "substack.sid=${sessionToken}; connect.sid=${sessionToken}")
+                                .header("Referer", notesBaseUrl)
+                                .header("Origin", notesBaseUrl)
+                                .POST(HttpRequest.BodyPublishers.ofString(
+                                    JsonOutput.toJson([url: imageUrl, type: "image"])))
+                                .timeout(Duration.ofSeconds(30))
+                                .build()
+                            def attachResponse = httpClient.send(attachRequest, HttpResponse.BodyHandlers.ofString())
+                            def attachmentId = attachResponse.statusCode() in [200, 201] ?
+                                new JsonSlurper().parseText(attachResponse.body())?.id : null
+                            if (attachmentId) requestBody.attachmentIds = [attachmentId]
+                            else ec.logger.warn("Substack note image not attached " +
+                                "[${attachResponse.statusCode()}]: ${attachResponse.body()?.take(300)}")
+                        } catch (Exception e) {
+                            ec.logger.warn("Substack note image not attached: ${e.message}")
+                        }
+                    }
 
                     def request = HttpRequest.newBuilder()
                         .uri(URI.create("${notesBaseUrl}/api/v1/comment/feed"))

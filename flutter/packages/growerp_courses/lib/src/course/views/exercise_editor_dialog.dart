@@ -264,33 +264,22 @@ class _ExerciseDialogState extends State<_ExerciseDialog> {
                   ),
                 ],
                 const SizedBox(height: 12),
-                TextFormField(
-                  key: const Key('exercisePrompt'),
+                MarkdownEditor(
                   controller: _prompt,
-                  decoration: InputDecoration(
-                    labelText: l10n.courses_exerciseTask,
-                    alignLabelWithHint: true,
-                    border: const OutlineInputBorder(),
-                  ),
-                  minLines: 4,
-                  maxLines: 10,
+                  inputKey: const Key('exercisePrompt'),
+                  label: l10n.courses_exerciseTask,
+                  height: 250,
                   validator: (v) => (v == null || v.trim().isEmpty)
                       ? l10n.courses_enterTheTask
                       : null,
                 ),
                 const SizedBox(height: 12),
-                TextFormField(
-                  key: const Key('exerciseRubric'),
+                MarkdownEditor(
                   controller: _rubric,
-                  decoration: InputDecoration(
-                    labelText: l10n.courses_exerciseRubric,
-                    helperText: l10n.courses_exerciseRubricHelp,
-                    helperMaxLines: 2,
-                    alignLabelWithHint: true,
-                    border: const OutlineInputBorder(),
-                  ),
-                  minLines: 3,
-                  maxLines: 8,
+                  inputKey: const Key('exerciseRubric'),
+                  label: l10n.courses_exerciseRubric,
+                  helper: l10n.courses_exerciseRubricHelp,
+                  height: 200,
                 ),
               ],
             ),

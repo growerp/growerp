@@ -140,7 +140,7 @@ List<Widget> getCourseListRow({
     // Description
     cells.add(
       Text(
-        course.description ?? '',
+        MarkdownEditor.toPlainText(course.description ?? ''),
         key: Key('desc$index'),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,

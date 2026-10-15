@@ -1232,12 +1232,53 @@ class CommonTest {
     return pin(tester.any(visible) ? visible : finder);
   }
 
+  /// the MarkdownEditor with text field [key] (also in Visual mode)
+  static Finder _markdownEditor(String key) => find.byWidgetPredicate(
+    (w) => w is MarkdownEditor && w.inputKey == Key(key),
+  );
+
+  /// The MarkdownEditor whose visual (not text) editor has [key]: the one a
+  /// tap on [key] reaches when several are in the tree. Null if none.
+  static Finder? _visualMarkdownEditor(WidgetTester tester, String key) {
+    final keyed = find.byKey(Key(key));
+    final visible = keyed.hitTestable();
+    for (final element in (tester.any(visible) ? visible : keyed).evaluate()) {
+      if (element.widget is TextFormField || element.widget is TextField) {
+        continue;
+      }
+      final editor = find.ancestor(
+        of: find.byElementPredicate((e) => e == element),
+        matching: _markdownEditor(key),
+      );
+      if (tester.any(editor)) return editor.first;
+    }
+    return null;
+  }
+
+  static bool _isVisualMarkdown(WidgetTester tester, String key) =>
+      _visualMarkdownEditor(tester, key) != null;
+
   /// A MarkdownEditor has its text field [key] only in Source mode:
   /// switch to it when the editor shows the visual view.
   static Future<void> showMarkdownSource(WidgetTester tester, String key) async {
     await tester.pumpAndSettle();
-    if (tester.any(find.byKey(Key(key)))) return;
-    await tapByKey(tester, 'markdownModeSource');
+    final editor = _visualMarkdownEditor(tester, key);
+    if (editor == null) {
+      if (!tester.any(find.byKey(Key(key)))) {
+        await tapByKey(tester, 'markdownModeSource');
+      }
+      return;
+    }
+    // select Source on the toggle of this editor (several can be on a
+    // screen); called directly as floating buttons may cover the toggle
+    final toggle = tester.widget<SegmentedButton<bool>>(
+      find.descendant(
+        of: editor,
+        matching: find.byType(SegmentedButton<bool>),
+      ),
+    );
+    toggle.onSelectionChanged!({true});
+    await tester.pumpAndSettle();
   }
 
   /// enter [value] as markdown source in the MarkdownEditor with [key]
@@ -1266,6 +1307,8 @@ class CommonTest {
         throw StateError('Widget with key "$key" not found');
       }
     }
+    // a MarkdownEditor in Visual mode shows its text field in Source mode
+    if (_isVisualMarkdown(tester, key)) await showMarkdownSource(tester, key);
     final target = await readyTarget(tester, finder);
     // Tap to focus, clear existing content, then enter new text
     await tester.tap(target);
@@ -1452,11 +1495,34 @@ class CommonTest {
         .single
         .widget;
     if (widget is StatusChip) return widget.label;
+    if (widget is MarkdownText) return widget.data;
     return (widget as Text).data!;
   }
 
   /// get the content of a TextFormField providing the key
   static String getTextFormField(String key) {
+    final editors = _markdownEditor(key);
+    if (editors.evaluate().isNotEmpty) {
+      // several editors in the tree: the one holding the visible keyed widget
+      final keyed = find.byKey(Key(key));
+      final visible = keyed.hitTestable();
+      final target = (visible.evaluate().isNotEmpty ? visible : keyed)
+          .evaluate()
+          .firstOrNull;
+      final editor = target == null
+          ? editors
+          : find.ancestor(
+              of: find.byElementPredicate((e) => e == target),
+              matching: editors,
+            );
+      return ((editor.evaluate().isNotEmpty ? editor : editors)
+                  .evaluate()
+                  .first
+                  .widget
+              as MarkdownEditor)
+          .controller
+          .text;
+    }
     TextFormField tff =
         find.byKey(Key(key)).evaluate().single.widget as TextFormField;
     return tff.controller!.text;

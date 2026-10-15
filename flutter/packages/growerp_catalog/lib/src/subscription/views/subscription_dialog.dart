@@ -38,10 +38,20 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
   late SubscriptionBloc _subscriptionBloc;
   late DataFetchBloc<CompaniesUsers> _companyUserBloc;
   late DataFetchBloc<Products> _productBloc;
+  late final TextEditingController _descriptionController;
+
+  @override
+  void dispose() {
+    _descriptionController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
+    _descriptionController = TextEditingController(
+      text: widget.subscription.description ?? '',
+    );
     _subscriptionBloc = context.read<SubscriptionBloc>();
     _selectedProduct = widget.subscription.product;
     _selectedSubscriber = widget.subscription.subscriber;
@@ -112,7 +122,6 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
       key: _formKey,
       initialValue: {
         'pseudoId': widget.subscription.pseudoId ?? '',
-        'description': widget.subscription.description ?? '',
         'subscriber': _selectedSubscriber,
         'product': _selectedProduct,
       },
@@ -202,13 +211,11 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                   ],
                 ),
               ),
-            FormBuilderTextField(
-              name: 'description',
-              key: const Key('description'),
-              maxLines: 2,
-              decoration: InputDecoration(
-                labelText: catalogLocalizations.description,
-              ),
+            MarkdownEditor(
+              controller: _descriptionController,
+              inputKey: const Key('description'),
+              label: catalogLocalizations.description,
+              height: 200,
             ),
             Row(
               children: [
@@ -307,7 +314,7 @@ class SubscriptionDialogState extends State<SubscriptionDialog> {
                               subscriptionId:
                                   widget.subscription.subscriptionId,
                               pseudoId: formData['pseudoId'] ?? '',
-                              description: formData['description'] ?? '',
+                              description: _descriptionController.text,
                               // Convert dates to UTC for server storage
                               fromDate: fromDate?.noon().toServerTime(),
                               thruDate: thruDate?.noon().toServerTime(),

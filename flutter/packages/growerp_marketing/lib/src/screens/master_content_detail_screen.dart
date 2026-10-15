@@ -191,6 +191,17 @@ class MasterContentDetailScreenState
                           state.message!.contains('deleted')) {
                         Navigator.of(context).pop();
                       } else {
+                        // a planned piece just written: show its text here
+                        final written = _currentMasterContent(state);
+                        if (state.message!.contains('generated') &&
+                            written != null) {
+                          setState(() {
+                            _titleController.text = written.title ?? '';
+                            _bodyController.text = written.body ?? '';
+                            _ctaController.text = written.callToAction ?? '';
+                            _selectedStatus = written.status;
+                          });
+                        }
                         HelperFunctions.showMessage(
                             context, state.message!, Colors.green);
                         // an adapt run just finished — reload the variants list
@@ -373,43 +384,35 @@ class MasterContentDetailScreenState
                   if (_selectedStatus == 'PLANNED' ||
                       _briefController.text.isNotEmpty) ...[
                     const SizedBox(height: 10),
-                    TextFormField(
-                      key: const Key('brief'),
-                      decoration: const InputDecoration(
-                        labelText: 'Brief',
-                        helperText:
-                            'What the text should say: the body is written '
-                            'from the title and this brief',
-                      ),
+                    MarkdownEditor(
                       controller: _briefController,
-                      maxLines: 4,
+                      inputKey: const Key('brief'),
+                      label: 'Brief',
+                      height: 200,
+                    ),
+                    Text(
+                      'What the text should say: the body is written '
+                      'from the title and this brief',
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
+                  // a planned piece has no body yet: offer to write it here
+                  if (widget.masterContent?.masterContentId != null &&
+                      masterContent?.status == 'PLANNED') ...[
+                    const SizedBox(height: 10),
+                    _buildWriteNowSection(),
+                  ],
                   const SizedBox(height: 10),
-                  FormField<String>(
+                  MarkdownEditor(
+                    controller: _bodyController,
+                    inputKey: const Key('body'),
+                    label: 'Body *',
+                    height: 400,
                     // a planned piece gets its body when it is written
                     validator: (_) => _bodyController.text.isEmpty &&
                             _selectedStatus != 'PLANNED'
                         ? 'Body is required'
                         : null,
-                    builder: (field) => Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        MarkdownEditor(
-                          controller: _bodyController,
-                          inputKey: const Key('body'),
-                          label: 'Body *',
-                          height: 400,
-                        ),
-                        if (field.hasError)
-                          Text(
-                            field.errorText!,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.error,
-                            ),
-                          ),
-                      ],
-                    ),
                   ),
                   const SizedBox(height: 10),
                   TextFormField(
@@ -451,20 +454,22 @@ class MasterContentDetailScreenState
                       controller: _ctaUrlController,
                     ),
                   ],
-                  // teaser only works with a link to the full article
+                  // without a Target URL the full text gets its own article
+                  // page on the website when saved
                   ValueListenableBuilder<TextEditingValue>(
                     valueListenable: _urlController,
                     builder: (context, url, _) => SwitchListTile(
                       key: const Key('teaserMode'),
                       contentPadding: EdgeInsets.zero,
                       title: const Text('Teaser only (link to full article)'),
-                      subtitle: const Text(
-                          'Posts get a short teaser; the full article on the '
-                          'Target URL is where reads are measured'),
-                      value: _teaserMode && url.text.isNotEmpty,
-                      onChanged: url.text.isEmpty
-                          ? null
-                          : (v) => setState(() => _teaserMode = v),
+                      subtitle: Text(url.text.isEmpty
+                          ? 'Posts get a short teaser linking to the full text '
+                              'on its own page of your website, where reads '
+                              'are measured'
+                          : 'Posts get a short teaser; the full article on the '
+                              'Target URL is where reads are measured'),
+                      value: _teaserMode,
+                      onChanged: (v) => setState(() => _teaserMode = v),
                     ),
                   ),
                 ],
@@ -519,10 +524,7 @@ class MasterContentDetailScreenState
                           ctaUrl: _ctaUrlController.text.isEmpty
                               ? null
                               : _ctaUrlController.text,
-                          teaserMode:
-                              _teaserMode && _urlController.text.isNotEmpty
-                                  ? 'Y'
-                                  : 'N',
+                          teaserMode: _teaserMode ? 'Y' : 'N',
                           image: image,
                           status: _selectedStatus,
                           brief: _briefController.text.isEmpty
@@ -545,10 +547,7 @@ class MasterContentDetailScreenState
               ],
             ),
             if (widget.masterContent?.masterContentId != null &&
-                masterContent?.status == 'PLANNED') ...[
-              const SizedBox(height: 20),
-              _buildWriteNowSection(),
-            ] else if (widget.masterContent?.masterContentId != null) ...[
+                masterContent?.status != 'PLANNED') ...[
               const SizedBox(height: 20),
               _buildApprovalSection(masterContent),
               const SizedBox(height: 20),
@@ -600,19 +599,19 @@ class MasterContentDetailScreenState
       child: Row(
         children: [
           const Expanded(
-            child: Text('Not written yet: AI writes the text from the title '
+            child: Text('Not written yet: AI writes the body from the title '
                 'and brief. Approve and adapt it afterwards.'),
           ),
           const SizedBox(width: 8),
           ElevatedButton.icon(
             key: const Key('writeNow'),
             icon: const Icon(Icons.edit_note),
-            label: const Text('Write now'),
+            label: const Text('AI write now'),
             onPressed: () {
+              // stays open: busy while writing, then shows the text
               _bloc.add(MasterContentGenerateWithAI(
                 masterContentId: widget.masterContent!.masterContentId,
               ));
-              Navigator.of(context).pop();
             },
           ),
         ],

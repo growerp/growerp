@@ -145,7 +145,7 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
             if (widget.course.description != null) ...[
               const SizedBox(height: 4),
               Text(
-                widget.course.description!,
+                MarkdownEditor.toPlainText(widget.course.description!),
                 style: Theme.of(context).textTheme.bodySmall,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,

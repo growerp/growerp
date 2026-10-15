@@ -138,15 +138,12 @@ class _AdkSuggestFunctionPanelState extends State<AdkSuggestFunctionPanel> {
             ),
             const SizedBox(height: 12),
           ],
-          TextField(
-            key: const Key('suggestFunctionDescription'),
+          MarkdownEditor(
             controller: _descCtrl,
-            maxLines: 3,
-            decoration: const InputDecoration(
-              labelText: 'Describe the function',
-              hintText:
-                  'e.g. "remind customers about overdue invoices"',
-            ),
+            inputKey: const Key('suggestFunctionDescription'),
+            label: 'Describe the function',
+            hint: 'e.g. "remind customers about overdue invoices"',
+            height: 200,
           ),
           const SizedBox(height: 12),
           FilledButton(

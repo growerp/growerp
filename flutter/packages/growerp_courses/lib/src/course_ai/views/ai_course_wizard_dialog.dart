@@ -175,19 +175,16 @@ class _AiCourseWizardViewState extends State<_AiCourseWizardView> {
                         : null,
                   ),
                   const SizedBox(height: 16),
-                  TextFormField(
-                    key: const Key('aiCourseAudience'),
+                  MarkdownEditor(
                     controller: _audienceController,
-                    decoration: InputDecoration(
-                      labelText: CoursesLocalizations.of(
+                    inputKey: const Key('aiCourseAudience'),
+                    label: CoursesLocalizations.of(
                         context,
                       )!.courses_audience,
-                      hintText: CoursesLocalizations.of(
+                    hint: CoursesLocalizations.of(
                         context,
                       )!.courses_wizardAudienceHint,
-                      border: OutlineInputBorder(),
-                    ),
-                    maxLines: 2,
+                    height: 160,
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<CourseDifficulty>(
@@ -226,20 +223,16 @@ class _AiCourseWizardViewState extends State<_AiCourseWizardView> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  TextFormField(
-                    key: const Key('aiCourseCurriculum'),
+                  MarkdownEditor(
                     controller: _curriculumController,
-                    decoration: InputDecoration(
-                      labelText: CoursesLocalizations.of(
+                    inputKey: const Key('aiCourseCurriculum'),
+                    label: CoursesLocalizations.of(
                         context,
                       )!.courses_curriculum,
-                      hintText: CoursesLocalizations.of(
+                    hint: CoursesLocalizations.of(
                         context,
                       )!.courses_curriculumHint,
-                      border: OutlineInputBorder(),
-                      alignLabelWithHint: true,
-                    ),
-                    maxLines: 6,
+                    height: 250,
                   ),
                   const SizedBox(height: 24),
                   Text(
@@ -249,20 +242,16 @@ class _AiCourseWizardViewState extends State<_AiCourseWizardView> {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
-                  TextFormField(
-                    key: const Key('aiCourseNotes'),
+                  MarkdownEditor(
                     controller: _notesController,
-                    decoration: InputDecoration(
-                      labelText: CoursesLocalizations.of(
+                    inputKey: const Key('aiCourseNotes'),
+                    label: CoursesLocalizations.of(
                         context,
                       )!.courses_notes,
-                      hintText: CoursesLocalizations.of(
+                    hint: CoursesLocalizations.of(
                         context,
                       )!.courses_notesHint,
-                      border: OutlineInputBorder(),
-                      alignLabelWithHint: true,
-                    ),
-                    maxLines: 4,
+                    height: 200,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
