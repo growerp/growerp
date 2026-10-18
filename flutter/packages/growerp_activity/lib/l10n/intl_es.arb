@@ -67,5 +67,9 @@
   "activity_dashUnInvoiced": "sin facturar",
   "activity_dashBarAll": "Todas",
   "activity_dashBarToDo": "Por hacer",
-  "activity_dashBarEvents": "Eventos"
+  "activity_dashBarEvents": "Eventos",
+  "activity_comments": "Comentarios",
+  "activity_noComments": "Aún no hay comentarios",
+  "activity_addComment": "Añadir un comentario",
+  "activity_aiAgent": "Agente de IA"
 }

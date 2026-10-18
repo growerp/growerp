@@ -1,3 +1,27 @@
+## 1.12.0
+
+ - **PERF**: reduce Flutter app size across mobile, web and desktop. ([bb9ba9ad](https://github.com/growerp/growerp/commit/bb9ba9ad9926ed5d8b19bdae90f30a35ab539692))
+ - **FIX**: bump file_picker/package_info_plus off deprecated KGP plugin apply. ([9109e8e5](https://github.com/growerp/growerp/commit/9109e8e5301a9832262f376b8c77da3e3a36e319))
+ - **FIX**(core): apply AutocompleteLabel initialValue after the first build. ([ce84ca9c](https://github.com/growerp/growerp/commit/ce84ca9c77703fd19962b6b4beddc6fe2c9830ba))
+ - **FIX**(l10n): correct Spanish terms and add the backend es messages. ([525e74d1](https://github.com/growerp/growerp/commit/525e74d14d5971af2010eba59c3dcc0330596176))
+ - **FIX**(l10n): translate spanish files. ([d73c43ea](https://github.com/growerp/growerp/commit/d73c43eadb271fa9eabe7ba978e64b919ecc084c))
+ - **FIX**(l10n): localize list search-field hints. ([da9d0423](https://github.com/growerp/growerp/commit/da9d042313905d0ab2c7595f7b923498e8ec9ba6))
+ - **FIX**(l10n): localize all table column headers. ([a9f07958](https://github.com/growerp/growerp/commit/a9f079580e284d036e3452699f1e4782ad706936))
+ - **FIX**(l10n): translate all missing de/fr/nl/zh messages. ([19df4566](https://github.com/growerp/growerp/commit/19df4566f3aeb0998d6a17ce0e2955b07676de31))
+ - **FIX**(user): make the login enable/disable toggle work and look like one. ([562642ca](https://github.com/growerp/growerp/commit/562642ca935c39b28c34d20619aa68046738c68d))
+ - **FEAT**: Google Meet bookings as video call communications, {meetingUrl}. ([e771f51f](https://github.com/growerp/growerp/commit/e771f51f54e3f51cdd24ad248431abd63c30a40d))
+ - **FEAT**: communications log for persons and companies. ([6af6dd29](https://github.com/growerp/growerp/commit/6af6dd294671d7410abb01a8a3f8f25b03bb18c1))
+ - **FEAT**(core): tab System Setup into AI, Email and Guides. ([0e606769](https://github.com/growerp/growerp/commit/0e6067692dad054151a0ae3f270fa7768abef505))
+ - **FEAT**(core): menu-driven screen access per user group. ([da269fb4](https://github.com/growerp/growerp/commit/da269fb4af26a599409d2fa9653bfb0e7778f555))
+ - **FEAT**(crm): filter the lead list by lead status. ([7245538c](https://github.com/growerp/growerp/commit/7245538ca9b9f955b0da02561a715640d3a5a052))
+ - **FEAT**(party): lead status field backed by Party.customerStatusId. ([f897e85e](https://github.com/growerp/growerp/commit/f897e85e44560736e79bc2697a9434bd82f3819a))
+ - **FEAT**(support): per-owner AI token usage and limit in the owner list. ([606481f6](https://github.com/growerp/growerp/commit/606481f6624b2b9e59e3d793926c0ff7fa867005))
+ - **FEAT**(marketing): hide ledger fields in marketing and agents apps. ([e469a829](https://github.com/growerp/growerp/commit/e469a829501f620e9dc80b6f03ac1e8aa39d057a))
+ - **FEAT**(accounting): let the accounting year start at any quarter. ([8a49aa38](https://github.com/growerp/growerp/commit/8a49aa383e757b15912e8181190694e6acd7b945))
+ - **FEAT**(l10n): add Spanish language scaffolding. ([7e7cc80f](https://github.com/growerp/growerp/commit/7e7cc80f09c20e4ac7efa86e1b203045877419fe))
+ - **FEAT**(l10n): add Spanish language scaffolding. ([a2386537](https://github.com/growerp/growerp/commit/a2386537663750b6e18a17ab6265ba20485b22a6))
+ - **FEAT**(l10n): extract and localize hardcoded strings to Thai and English. ([424318a0](https://github.com/growerp/growerp/commit/424318a0273f6dfa0c6b43f3409e0ded353ae761))
+
 ## 1.11.1
 
  - **FIX**: relicense under Apache License 2.0 (LICENSE and file headers); lengthen pubspec description.

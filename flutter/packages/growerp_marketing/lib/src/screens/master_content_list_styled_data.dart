@@ -13,12 +13,45 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../bloc/master_content_bloc.dart';
 import '../bloc/master_content_event.dart';
 import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
+
+/// Monday (local, date only) of the week a piece is planned in
+DateTime _weekMonday(DateTime planned) {
+  final day = planned.toLocal();
+  return DateTime(day.year, day.month, day.day - (day.weekday - 1));
+}
+
+/// 'Wk 43 · 20 Oct': the plan week of a piece, '' when not planned
+String weekLabel(DateTime? planned) {
+  if (planned == null) return '';
+  final monday = _weekMonday(planned);
+  // ISO week: the week holding the Thursday of this week
+  final thursday = monday.add(const Duration(days: 3));
+  final week =
+      (thursday.difference(DateTime(thursday.year, 1, 1)).inDays ~/ 7) + 1;
+  return 'Wk $week · ${DateFormat('d MMM').format(monday)}';
+}
+
+/// The pieces of one plan week together: unplanned pieces first as they
+/// come, then the weeks newest first, inside a week by planned date
+/// (Pain, News, Prize).
+List<MasterContent> sortByPlanWeek(List<MasterContent> contents) {
+  final unplanned = contents.where((c) => c.plannedDate == null).toList();
+  final planned = contents.where((c) => c.plannedDate != null).toList()
+    ..sort((a, b) {
+      final week = _weekMonday(
+        b.plannedDate!,
+      ).compareTo(_weekMonday(a.plannedDate!));
+      return week != 0 ? week : a.plannedDate!.compareTo(b.plannedDate!);
+    });
+  return [...unplanned, ...planned];
+}
 
 /// Returns column definitions for master content list based on device type
 List<StyledColumn> getMasterContentListColumns(BuildContext context) {
@@ -29,16 +62,19 @@ List<StyledColumn> getMasterContentListColumns(BuildContext context) {
     return [
       StyledColumn(header: localizations.tableHdrId, flex: 1),
       StyledColumn(header: localizations.tableHdrInfo, flex: 4),
+      StyledColumn(header: 'Reads', flex: 1),
       StyledColumn(header: '', flex: 1), // Actions
     ];
   }
 
   return [
     StyledColumn(header: localizations.tableHdrId, flex: 1),
+    StyledColumn(header: 'Week', flex: 1),
     StyledColumn(header: localizations.tableHdrType, flex: 1),
     StyledColumn(header: localizations.tableHdrPnp, flex: 1),
     StyledColumn(header: localizations.tableHdrTitle, flex: 3),
     StyledColumn(header: localizations.tableHdrStatus, flex: 1),
+    StyledColumn(header: 'Reads', flex: 1),
     StyledColumn(header: '', flex: 1), // Actions
   ];
 }
@@ -51,6 +87,8 @@ Color _getStatusColor(String status) {
       return Colors.blue;
     case 'DRAFT':
       return Colors.orange;
+    case 'PLANNED':
+      return Colors.purple;
     default:
       return Colors.grey;
   }
@@ -62,6 +100,7 @@ List<Widget> getMasterContentListRow({
   required MasterContent content,
   required int index,
   required MasterContentBloc bloc,
+  ContentReadStats? reads,
 }) {
   bool isPhone = isAPhone(context);
 
@@ -106,19 +145,28 @@ List<Widget> getMasterContentListRow({
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            '${content.contentType} · ${content.pnpType}',
+            [
+              content.contentType,
+              content.pnpType,
+              if (content.plannedDate != null)
+                weekLabel(content.plannedDate).split(' · ').first,
+            ].join(' · '),
             key: Key('contentType$index'),
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
-          Text(
-            (content.title ?? 'No title').truncate(40),
-            key: Key('title$index'),
-            style: TextStyle(
-              fontSize: 12,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+          _withThumbnail(
+            content,
+            index,
+            Text(
+              (content.title ?? 'No title').truncate(40),
+              key: Key('title$index'),
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
           Row(
             children: [
@@ -159,6 +207,7 @@ List<Widget> getMasterContentListRow({
     cells.add(
       Text(content.pseudoId ?? '', key: const Key('masterContentItem')),
     );
+    cells.add(Text(weekLabel(content.plannedDate), key: Key('week$index')));
     cells.add(
       Text(
         content.contentType,
@@ -168,11 +217,15 @@ List<Widget> getMasterContentListRow({
     );
     cells.add(Text(content.pnpType, key: Key('pnpType$index')));
     cells.add(
-      Text(
-        (content.title ?? 'No title').truncate(40),
-        key: Key('title$index'),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+      _withThumbnail(
+        content,
+        index,
+        Text(
+          (content.title ?? 'No title').truncate(40),
+          key: Key('title$index'),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
     );
     cells.add(
@@ -208,6 +261,17 @@ List<Widget> getMasterContentListRow({
     );
   }
 
+  // website reads of the piece's links: reads, and how many landed
+  cells.add(
+    Tooltip(
+      message: 'Website: read / landed',
+      child: Text(
+        reads == null ? '-' : '${reads.reads} / ${reads.landings}',
+        key: Key('reads$index'),
+      ),
+    ),
+  );
+
   cells.add(
     IconButton(
       key: Key('delete$index'),
@@ -220,4 +284,26 @@ List<Widget> getMasterContentListRow({
   );
 
   return cells;
+}
+
+/// [title] preceded by a small thumbnail of the related image, when there is one
+Widget _withThumbnail(MasterContent content, int index, Widget title) {
+  final image = content.image;
+  if (image == null || image.isEmpty) return title;
+  return Row(
+    children: [
+      ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: Image.memory(
+          image,
+          key: Key('thumbnail$index'),
+          width: 24,
+          height: 24,
+          fit: BoxFit.cover,
+        ),
+      ),
+      const SizedBox(width: 6),
+      Flexible(child: title),
+    ],
+  );
 }

@@ -260,6 +260,7 @@ class GeneratePersonaDialogState extends State<GeneratePersonaDialog> {
   final _businessController = TextEditingController();
   final _targetMarketController = TextEditingController();
   late PersonaBloc _personaBloc;
+  bool _submitted = false;
 
   @override
   void initState() {
@@ -288,14 +289,12 @@ class GeneratePersonaDialogState extends State<GeneratePersonaDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextFormField(
-                key: const Key('businessDescription'),
+              MarkdownEditor(
                 controller: _businessController,
-                decoration: const InputDecoration(
-                  labelText: 'Business Description *',
-                  hintText: 'Describe your business...',
-                ),
-                maxLines: 3,
+                inputKey: const Key('businessDescription'),
+                label: 'Business Description *',
+                hint: 'Describe your business...',
+                height: 200,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a business description';
@@ -304,43 +303,74 @@ class GeneratePersonaDialogState extends State<GeneratePersonaDialog> {
                 },
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                key: const Key('targetMarket'),
+              MarkdownEditor(
                 controller: _targetMarketController,
-                decoration: const InputDecoration(
-                  labelText: 'Target Market (Optional)',
-                  hintText: 'Who is your target customer?',
-                ),
-                maxLines: 2,
+                inputKey: const Key('targetMarket'),
+                label: 'Target Market (Optional)',
+                hint: 'Who is your target customer?',
+                height: 160,
               ),
               const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text(MarketingLocalizations.of(context)!.cancel),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton.icon(
-                    key: const Key('generateButton'),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _personaBloc.add(
-                          PersonaGenerateWithAI(
-                            businessDescription: _businessController.text,
-                            targetMarket: _targetMarketController.text.isEmpty
-                                ? null
-                                : _targetMarketController.text,
-                          ),
-                        );
-                        Navigator.of(context).pop();
-                      }
-                    },
-                    icon: const Icon(Icons.auto_awesome),
-                    label: Text(MarketingLocalizations.of(context)!.generate),
-                  ),
-                ],
+              BlocConsumer<PersonaBloc, PersonaState>(
+                listener: (context, state) {
+                  if (!_submitted) return;
+                  if (state.status == PersonaStatus.success) {
+                    Navigator.of(context).pop();
+                  }
+                  if (state.status == PersonaStatus.failure) {
+                    setState(() => _submitted = false);
+                  }
+                },
+                builder: (context, state) {
+                  final loading =
+                      _submitted && state.status == PersonaStatus.loading;
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: loading
+                            ? null
+                            : () => Navigator.of(context).pop(),
+                        child: Text(MarketingLocalizations.of(context)!.cancel),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton.icon(
+                        key: const Key('generateButton'),
+                        onPressed: loading
+                            ? null
+                            : () {
+                                if (_formKey.currentState!.validate()) {
+                                  setState(() => _submitted = true);
+                                  _personaBloc.add(
+                                    PersonaGenerateWithAI(
+                                      businessDescription:
+                                          _businessController.text,
+                                      targetMarket:
+                                          _targetMarketController.text.isEmpty
+                                          ? null
+                                          : _targetMarketController.text,
+                                    ),
+                                  );
+                                }
+                              },
+                        icon: loading
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.auto_awesome),
+                        label: Text(
+                          loading
+                              ? 'Generating...'
+                              : MarketingLocalizations.of(context)!.generate,
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ],
           ),

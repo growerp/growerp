@@ -491,6 +491,29 @@ class _PlatformConfigDetailScreenState
     return null;
   }
 
+  PlatformConfiguration _configFromForm() {
+    // email sends via the company SMTP server, no credentials here
+    final isEmail = widget.platform == OutreachPlatform.email;
+    return PlatformConfiguration(
+      configId: widget.config?.configId,
+      platform: widget.platform.name,
+      isEnabled: _isEnabled,
+      dailyLimit: int.parse(_dailyLimitController.text),
+      apiKey: isEmail || _apiKeyController.text.isEmpty
+          ? null
+          : _apiKeyController.text,
+      apiSecret: isEmail || _apiSecretController.text.isEmpty
+          ? null
+          : _apiSecretController.text,
+      username: isEmail || _usernameController.text.isEmpty
+          ? null
+          : _usernameController.text,
+      password: isEmail || _passwordController.text.isEmpty
+          ? null
+          : _passwordController.text,
+    );
+  }
+
   Widget _buildTestConnection() {
     return BlocBuilder<PlatformConfigBloc, PlatformConfigState>(
       builder: (context, state) {
@@ -506,9 +529,16 @@ class _PlatformConfigDetailScreenState
               label: Text(OutreachLocalizations.of(context)!.testConnection),
               onPressed: state.status == PlatformConfigStatus.loading
                   ? null
-                  : () => context.read<PlatformConfigBloc>().add(
-                        PlatformConfigVerify(widget.config!.configId!),
-                      ),
+                  : () {
+                      // test what is on screen: save it first
+                      if (!_formKey.currentState!.validate()) return;
+                      context.read<PlatformConfigBloc>().add(
+                            PlatformConfigVerify(
+                              widget.config!.configId!,
+                              config: _configFromForm(),
+                            ),
+                          );
+                    },
             ),
             if (checked != null) ...[
               const SizedBox(height: 6),
@@ -576,27 +606,7 @@ class _PlatformConfigDetailScreenState
             key: Key(widget.config == null ? 'Create' : 'Update'),
             onPressed: () {
               if (_formKey.currentState!.validate()) {
-                // email sends via the company SMTP server, no credentials here
-                final isEmail = widget.platform == OutreachPlatform.email;
-                final config = PlatformConfiguration(
-                  configId: widget.config?.configId,
-                  platform: widget.platform.name,
-                  isEnabled: _isEnabled,
-                  dailyLimit: int.parse(_dailyLimitController.text),
-                  apiKey: isEmail || _apiKeyController.text.isEmpty
-                      ? null
-                      : _apiKeyController.text,
-                  apiSecret: isEmail || _apiSecretController.text.isEmpty
-                      ? null
-                      : _apiSecretController.text,
-                  username: isEmail || _usernameController.text.isEmpty
-                      ? null
-                      : _usernameController.text,
-                  password: isEmail || _passwordController.text.isEmpty
-                      ? null
-                      : _passwordController.text,
-                );
-
+                final config = _configFromForm();
                 if (widget.config == null) {
                   context
                       .read<PlatformConfigBloc>()

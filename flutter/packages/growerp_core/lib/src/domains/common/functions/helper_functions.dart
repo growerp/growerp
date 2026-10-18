@@ -130,7 +130,12 @@ class HelperFunctions {
     }
   }
 
-  static Future<Uint8List?> getResizedImage(String? imagePath) async {
+  /// Image bytes at [imagePath], scaled down to [height] pixels high (JPEG)
+  /// when over 200KB.
+  static Future<Uint8List?> getResizedImage(
+    String? imagePath, {
+    int height = 200,
+  }) async {
     if (imagePath != null) {
       const LoadingIndicator();
       Uint8List imageData;
@@ -142,7 +147,7 @@ class HelperFunctions {
       }
       if (imageData.length > 200000) {
         image.Image img = image.decodeImage(imageData)!;
-        image.Image resized = image.copyResize(img, width: -1, height: 200);
+        image.Image resized = image.copyResize(img, width: -1, height: height);
         imageData = image.encodeJpg(resized);
       }
       return imageData;

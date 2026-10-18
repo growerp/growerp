@@ -21,7 +21,9 @@ import '../bloc/master_content_bloc.dart';
 import '../bloc/master_content_event.dart';
 import '../bloc/master_content_state.dart';
 import 'master_content_detail_screen.dart';
+import 'master_content_files_dialog.dart';
 import 'master_content_list_styled_data.dart';
+import 'content_ideas_panel.dart';
 import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 /// List screen for platform-neutral Master Content
@@ -44,6 +46,8 @@ class MasterContentListState extends State<MasterContentList> {
   double currentScroll = 0;
   String searchString = '';
   bool _isLoading = true;
+  // website reads per piece, keyed by pseudoId (the utm_campaign of its links)
+  Map<String, ContentReadStats> _reads = const {};
 
   @override
   void initState() {
@@ -51,10 +55,24 @@ class MasterContentListState extends State<MasterContentList> {
     _scrollController.addListener(_onScroll);
     _masterContentBloc = context.read<MasterContentBloc>()
       ..add(const MasterContentFetch(refresh: true));
+    _loadReads();
     bottom = 50;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _searchFocusNode.requestFocus();
     });
+  }
+
+  Future<void> _loadReads() async {
+    try {
+      final result = await context.read<RestClient>().getContentReadStats();
+      if (mounted) {
+        setState(() => _reads = {
+              for (final s in result.contentReadStats) s.campaign: s,
+            });
+      }
+    } catch (_) {
+      // reads are extra information: the list works without them
+    }
   }
 
   @override
@@ -71,6 +89,7 @@ class MasterContentListState extends State<MasterContentList> {
           content: content,
           index: index,
           bloc: _masterContentBloc,
+          reads: _reads[content.pseudoId],
         );
       }).toList();
 
@@ -91,7 +110,8 @@ class MasterContentListState extends State<MasterContentList> {
                 child: BlocProvider.value(
                   value: _masterContentBloc,
                   child: MasterContentDetailScreen(
-                      masterContent: masterContents[index]),
+                      masterContent: masterContents[index],
+                      reads: _reads[masterContents[index].pseudoId]),
                 ),
               );
             },
@@ -123,7 +143,7 @@ class MasterContentListState extends State<MasterContentList> {
               message: 'Could not load master content!');
         }
 
-        masterContents = state.masterContents;
+        masterContents = sortByPlanWeek(state.masterContents);
         if (masterContents.isNotEmpty && _scrollController.hasClients) {
           Future.delayed(const Duration(milliseconds: 100), () {
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -148,6 +168,10 @@ class MasterContentListState extends State<MasterContentList> {
                 );
               },
             ),
+            ContentIdeasPanel(
+              onArticleWritten: () => _masterContentBloc
+                  .add(const MasterContentFetch(refresh: true)),
+            ),
             Expanded(
               child: Stack(
                 children: [
@@ -165,6 +189,25 @@ class MasterContentListState extends State<MasterContentList> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
+                          FloatingActionButton(
+                            key: const Key('upDownload'),
+                            heroTag: 'masterContentFiles',
+                            onPressed: () async {
+                              await showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) =>
+                                    BlocProvider.value(
+                                  value: _masterContentBloc,
+                                  child: const MasterContentFilesDialog(),
+                                ),
+                              );
+                              if (mounted) _searchFocusNode.requestFocus();
+                            },
+                            tooltip: localizations.masterContentFiles,
+                            child: const Icon(Icons.file_copy),
+                          ),
+                          const SizedBox(height: 10),
                           FloatingActionButton(
                             key: const Key('addNewMasterContent'),
                             heroTag: 'masterContentBtn1',

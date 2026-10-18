@@ -57,6 +57,9 @@
                     loopMaxIterations : cfg.loopMaxIterations,
                     maxLlmCalls       : cfg.maxLlmCalls,
                     teamName          : cfg.teamName,
+                    loopEnabled       : cfg.loopEnabled == 'Y',
+                    loopChatRoomId    : cfg.loopChatRoomId,
+                    loopReportEmail   : cfg.loopReportEmail,
                     catalogNominated  : cfg.catalogNominated == 'Y',
                     catalogPublished  : cfg.catalogPublished != 'N',
                     catalogCategory   : cfg.catalogCategory,
@@ -89,6 +92,10 @@
             <parameter name="loopMaxIterations" type="Integer"/>
             <parameter name="maxLlmCalls" type="Integer"/>
             <parameter name="teamName"/>
+            <!-- no default: a save without it keeps the stored value -->
+            <parameter name="loopEnabled" type="Boolean"/>
+            <parameter name="loopChatRoomId"/>
+            <parameter name="loopReportEmail"/>
         </in-parameters>
         <out-parameters>
             <parameter name="adkAgentConfig" type="Map"/>
@@ -116,7 +123,9 @@
                           websiteChat: websiteChat ? 'Y' : 'N',
                           webSearch: webSearch ? 'Y' : 'N',
                           agentRole: agentRole, orchestrationType: orchestrationType,
-                          loopMaxIterations: loopMaxIterations, maxLlmCalls: maxLlmCalls, teamName: teamName]"/>
+                          loopMaxIterations: loopMaxIterations, maxLlmCalls: maxLlmCalls, teamName: teamName,
+                          loopEnabled: loopEnabled == null ? null : (loopEnabled ? 'Y' : 'N'), loopChatRoomId: loopChatRoomId,
+                          loopReportEmail: loopReportEmail]"/>
             <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
                 auto-field-map="[adkAgentConfigId: adkAgentConfigId]"/>
             <set field="adkAgentConfig" from="[
@@ -143,6 +152,9 @@
                 loopMaxIterations : cfg.loopMaxIterations,
                 maxLlmCalls       : cfg.maxLlmCalls,
                 teamName          : cfg.teamName,
+                loopEnabled       : cfg.loopEnabled == 'Y',
+                loopChatRoomId    : cfg.loopChatRoomId,
+                loopReportEmail   : cfg.loopReportEmail,
             ]"/>
         </actions>
     </service>
@@ -171,6 +183,10 @@
             <parameter name="loopMaxIterations" type="Integer"/>
             <parameter name="maxLlmCalls" type="Integer"/>
             <parameter name="teamName"/>
+            <!-- no default: a save without it keeps the stored value -->
+            <parameter name="loopEnabled" type="Boolean"/>
+            <parameter name="loopChatRoomId"/>
+            <parameter name="loopReportEmail"/>
             <parameter name="catalog" type="Boolean" default="false"/>
             <parameter name="catalogPublished" type="Boolean"/>
             <parameter name="catalogCategory"/>
@@ -218,6 +234,8 @@
                           webSearch: webSearch ? 'Y' : 'N',
                           agentRole: agentRole, orchestrationType: orchestrationType,
                           loopMaxIterations: loopMaxIterations, maxLlmCalls: maxLlmCalls, teamName: teamName,
+                          loopEnabled: loopEnabled == null ? null : (loopEnabled ? 'Y' : 'N'), loopChatRoomId: loopChatRoomId,
+                          loopReportEmail: loopReportEmail,
                           catalogPublished: (catalog &amp;&amp; catalogPublished != null) ? (catalogPublished ? 'Y' : 'N') : null,
                           catalogCategory: catalog ? catalogCategory : null]"/>
             <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
@@ -246,6 +264,9 @@
                 loopMaxIterations : cfg.loopMaxIterations,
                 maxLlmCalls       : cfg.maxLlmCalls,
                 teamName          : cfg.teamName,
+                loopEnabled       : cfg.loopEnabled == 'Y',
+                loopChatRoomId    : cfg.loopChatRoomId,
+                loopReportEmail   : cfg.loopReportEmail,
                 catalogPublished  : cfg.catalogPublished != 'N',
                 catalogCategory   : cfg.catalogCategory,
             ]"/>

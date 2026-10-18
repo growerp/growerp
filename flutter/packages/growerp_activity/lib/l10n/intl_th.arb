@@ -67,5 +67,9 @@
   "activity_dashUnInvoiced": "ยังไม่วางบิล",
   "activity_dashBarAll": "ทั้งหมด",
   "activity_dashBarToDo": "สิ่งที่ต้องทำ",
-  "activity_dashBarEvents": "กิจกรรม"
+  "activity_dashBarEvents": "กิจกรรม",
+  "activity_comments": "ความคิดเห็น",
+  "activity_noComments": "ยังไม่มีความคิดเห็น",
+  "activity_addComment": "เพิ่มความคิดเห็น",
+  "activity_aiAgent": "เอเจนต์ AI"
 }

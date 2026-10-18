@@ -159,7 +159,7 @@ class PageSectionListState extends State<PageSectionList> {
                               ),
                               if ((section.sectionDescription ?? '').isNotEmpty)
                                 Text(
-                                  section.sectionDescription!,
+                                  MarkdownEditor.toPlainText(section.sectionDescription!),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: Theme.of(context).textTheme.bodySmall,

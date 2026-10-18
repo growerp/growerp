@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -40,9 +41,35 @@ class MasterContent {
   /// Optional link (withheld for LinkedIn/DM on adaptation)
   final String? targetUrl;
 
-  /// Status: DRAFT, APPROVED, ADAPTED
+  /// 'Y' = adapted posts are teasers that link to [targetUrl] for the full
+  /// article, so reads are measured on the website (see ContentReadStats)
+  final String? teaserMode;
+
+  /// Website page (under content/) of the full article written from a
+  /// ContentIdea; written to the website when the piece is approved
+  final String? articlePath;
+
+  /// Link of the call to action at the bottom of the article page, e.g. the
+  /// landing page [targetUrl] pointed to before the article got its own page
+  final String? ctaUrl;
+
+  /// Optional related image: hero of the website article and attached to the
+  /// adapted social posts. Fetched as the small version; on save an empty
+  /// list removes it and null leaves it unchanged.
+  @Uint8ListConverter()
+  final Uint8List? image;
+
+  /// Status: PLANNED (outline from a content plan, no body yet), DRAFT,
+  /// APPROVED, ADAPTED
   @JsonKey(defaultValue: 'DRAFT')
   final String status;
+
+  /// Outline of a planned piece: what the text should say
+  final String? brief;
+
+  /// Day the content plan gave this piece; adapted posts are scheduled on it
+  @NullableTimestampConverter()
+  final DateTime? plannedDate;
 
   /// Human approval gate: when set, the scheduler auto-publishes every
   /// SocialPost adapted from this piece at its scheduledDate.
@@ -67,7 +94,13 @@ class MasterContent {
     this.body,
     this.callToAction,
     this.targetUrl,
+    this.teaserMode,
+    this.articlePath,
+    this.ctaUrl,
+    this.image,
     required this.status,
+    this.brief,
+    this.plannedDate,
     this.approvedDate,
     this.createdDate,
     this.lastModifiedDate,
@@ -83,7 +116,13 @@ class MasterContent {
     String? body,
     String? callToAction,
     String? targetUrl,
+    String? teaserMode,
+    String? articlePath,
+    String? ctaUrl,
+    Uint8List? image,
     String? status,
+    String? brief,
+    DateTime? plannedDate,
     DateTime? approvedDate,
     DateTime? createdDate,
     DateTime? lastModifiedDate,
@@ -98,7 +137,13 @@ class MasterContent {
       body: body ?? this.body,
       callToAction: callToAction ?? this.callToAction,
       targetUrl: targetUrl ?? this.targetUrl,
+      teaserMode: teaserMode ?? this.teaserMode,
+      articlePath: articlePath ?? this.articlePath,
+      ctaUrl: ctaUrl ?? this.ctaUrl,
+      image: image ?? this.image,
       status: status ?? this.status,
+      brief: brief ?? this.brief,
+      plannedDate: plannedDate ?? this.plannedDate,
       approvedDate: approvedDate ?? this.approvedDate,
       createdDate: createdDate ?? this.createdDate,
       lastModifiedDate: lastModifiedDate ?? this.lastModifiedDate,

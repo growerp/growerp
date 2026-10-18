@@ -15,11 +15,15 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_core/growerp_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
 import 'adk_config_service.dart';
 import 'package:growerp_adk/l10n/generated/adk_localizations.dart';
@@ -140,6 +144,30 @@ class _AdkChatViewState extends State<AdkChatView> {
   bool _ready = false;
   bool _busy = false;
   String? _sessionId;
+  // Voice: speech-to-text fills the input field, text-to-speech reads replies.
+  // Linux: speech_to_text_linux (offline Vosk) downloads a language model on
+  // first initialize, so it is deferred to the first mic tap; flutter_tts has
+  // no Linux implementation, so replies are not spoken there.
+  static final _isLinux =
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.linux;
+  static const _speakPrefKey = 'growerp.adk.speakReplies';
+  // Vosk small models per app language; others fall back to English.
+  static const _voskModels = {
+    'en': 'vosk-model-small-en-us-0.15',
+    'de': 'vosk-model-small-de-0.15',
+    'es': 'vosk-model-small-es-0.42',
+    'fr': 'vosk-model-small-fr-0.22',
+    'nl': 'vosk-model-small-nl-0.22',
+    'zh': 'vosk-model-small-cn-0.22',
+  };
+  final _stt = SpeechToText();
+  final _tts = FlutterTts();
+  bool _sttAvailable = _isLinux;
+  bool _sttReady = false;
+  bool _sttLoading = false;
+  bool _listening = false;
+  String? _sttLocaleId;
+  bool _speak = false;
   // Active LLM provider/model for the tenant — used to tailor quota/limit errors
   // (e.g. local-AI wording). Best-effort: stays null when the config can't be read.
   String? _activeProvider;
@@ -165,15 +193,164 @@ class _AdkChatViewState extends State<AdkChatView> {
       if (mounted) _addMsg(_Msg.error(message));
     };
     _connect();
+    if (!_isLinux) {
+      _loadSpeakPref();
+      _initStt();
+    }
   }
 
   @override
   void dispose() {
     AsyncRecordDialog.messageSink = null;
+    if (_sttReady) _stt.cancel();
+    if (!_isLinux) _tts.stop();
     _inputController.dispose();
     _inputFocus.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  // ── Voice ─────────────────────────────────────────────────────────────────
+
+  Future<void> _loadSpeakPref() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final speak = prefs.getBool(_speakPrefKey) ?? false;
+      if (mounted) setState(() => _speak = speak);
+    } catch (_) {}
+  }
+
+  List<SpeechConfigOption> _voskOptions() {
+    final name =
+        _voskModels[Localizations.localeOf(context).languageCode] ??
+        _voskModels['en']!;
+    return [
+      SpeechConfigOption('linux', 'modelName', name),
+      SpeechConfigOption(
+        'linux',
+        'modelUrl',
+        'https://alphacephei.com/vosk/models/$name.zip',
+      ),
+    ];
+  }
+
+  /// Initialize speech recognition; true when the mic can be used.
+  Future<bool> _initStt() async {
+    try {
+      final available = await _stt.initialize(
+        options: _isLinux ? _voskOptions() : null,
+        onStatus: (status) {
+          if (mounted && status != SpeechToText.listeningStatus) {
+            setState(() => _listening = false);
+          }
+        },
+        onError: (error) {
+          if (!mounted) return;
+          setState(() => _listening = false);
+          // Silence/no-match just ends the session; only report real failures.
+          if (error.permanent && error.errorMsg != 'error_no_match' &&
+              error.errorMsg != 'error_speech_timeout') {
+            _showSpeechError(error.errorMsg);
+          }
+        },
+      );
+      if (!available || !mounted) {
+        if (mounted) setState(() => _sttAvailable = false);
+        return false;
+      }
+      // Match the recognizer locale to the app language when it is installed.
+      final lang = Localizations.localeOf(context).languageCode;
+      final locales = await _stt.locales();
+      final match = locales.where(
+        (l) => l.localeId.toLowerCase().startsWith(lang),
+      );
+      if (!mounted) return false;
+      setState(() {
+        _sttAvailable = true;
+        _sttReady = true;
+        _sttLocaleId = match.isEmpty ? null : match.first.localeId;
+      });
+      return true;
+    } catch (e) {
+      // No speech recognition on this device/browser: hide the mic. On Linux
+      // the user tapped it (model download/engine failure), so say why.
+      if (mounted) {
+        setState(() => _sttAvailable = false);
+        if (_isLinux) _showSpeechError(e.toString());
+      }
+      return false;
+    }
+  }
+
+  void _showSpeechError(String error) => HelperFunctions.showMessage(
+    context,
+    AdkLocalizations.of(context)!.adk_speechErrorE(error),
+    Colors.red,
+  );
+
+  Future<void> _toggleListen() async {
+    if (_listening) {
+      await _stt.stop();
+      if (mounted) setState(() => _listening = false);
+      return;
+    }
+    if (!_sttReady) {
+      setState(() => _sttLoading = true);
+      final ok = await _initStt();
+      if (mounted) setState(() => _sttLoading = false);
+      if (!ok || !mounted) return;
+    }
+    if (!_isLinux) await _tts.stop();
+    try {
+      await _stt.listen(
+        onResult: (result) {
+          if (!mounted) return;
+          _inputController.value = TextEditingValue(
+            text: result.recognizedWords,
+            selection: TextSelection.collapsed(
+              offset: result.recognizedWords.length,
+            ),
+          );
+        },
+        listenOptions: SpeechListenOptions(
+          partialResults: true,
+          localeId: _sttLocaleId,
+        ),
+      );
+      if (mounted) setState(() => _listening = true);
+    } catch (e) {
+      if (mounted) _showSpeechError(e.toString());
+    }
+  }
+
+  Future<void> _toggleSpeak() async {
+    setState(() => _speak = !_speak);
+    if (!_speak) await _tts.stop();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_speakPrefKey, _speak);
+    } catch (_) {}
+  }
+
+  /// Read the latest agent reply aloud, without markdown noise.
+  Future<void> _speakLastReply() async {
+    final reply = _messages.lastWhere(
+      (m) => m.kind == _MsgKind.adk,
+      orElse: () => const _Msg.system(''),
+    );
+    if (reply.kind != _MsgKind.adk || reply.text.startsWith('[')) return;
+    final text = reply.text
+        .split('\n')
+        .where((line) => !line.startsWith('_↳ via'))
+        .join('\n')
+        .replaceAllMapped(RegExp(r'\[([^\]]*)\]\([^)]*\)'), (m) => m[1]!)
+        .replaceAll(RegExp(r'[*_#`>|]'), '')
+        .trim();
+    if (text.isEmpty) return;
+    try {
+      await _tts.setLanguage(Localizations.localeOf(context).toLanguageTag());
+      await _tts.speak(text);
+    } catch (_) {}
   }
 
   // ── Connection / Session ──────────────────────────────────────────────────
@@ -311,6 +488,10 @@ class _AdkChatViewState extends State<AdkChatView> {
     final text = _inputController.text.trim();
     if (text.isEmpty || !_ready || _busy) return;
 
+    if (_listening) {
+      await _stt.stop();
+      if (mounted) setState(() => _listening = false);
+    }
     _inputController.clear();
     _addMsg(_Msg.user(text));
 
@@ -337,6 +518,7 @@ class _AdkChatViewState extends State<AdkChatView> {
     // The reply may have opened a dialog and popped this chat overlay, disposing
     // the State — guard the async-tail setState.
     if (mounted) setState(() => _busy = false);
+    if (mounted && _speak && !_isLinux) _speakLastReply();
   }
 
   /// Send message via SSE streaming endpoint /adk/run_sse.
@@ -857,6 +1039,11 @@ class _AdkChatViewState extends State<AdkChatView> {
           focusNode: _inputFocus,
           enabled: _ready && !_busy,
           onSend: _send,
+          listening: _listening,
+          onMic: _sttAvailable ? _toggleListen : null,
+          micLoading: _sttLoading,
+          speak: _speak,
+          onSpeak: _isLinux ? null : _toggleSpeak,
         ),
       ],
     );
@@ -1012,20 +1199,40 @@ class _InputBar extends StatelessWidget {
     required this.focusNode,
     required this.enabled,
     required this.onSend,
+    required this.listening,
+    required this.onMic,
+    required this.micLoading,
+    required this.speak,
+    required this.onSpeak,
   });
 
   final TextEditingController controller;
   final FocusNode focusNode;
   final bool enabled;
   final VoidCallback onSend;
+  final bool listening;
+  final VoidCallback? onMic; // null = speech recognition unavailable
+  final bool micLoading; // speech model is being downloaded/initialized
+  final bool speak;
+  final VoidCallback? onSpeak; // null = text-to-speech unavailable
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AdkLocalizations.of(context)!;
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
         child: Row(
           children: [
+            if (onSpeak != null)
+              IconButton(
+                key: const Key('chatSpeak'),
+                tooltip: l10n.adk_speakReplies,
+                isSelected: speak,
+                onPressed: onSpeak,
+                icon: const Icon(Icons.volume_off),
+                selectedIcon: const Icon(Icons.volume_up),
+              ),
             Expanded(
               child: TextField(
                 key: const Key('chatInput'),
@@ -1036,7 +1243,11 @@ class _InputBar extends StatelessWidget {
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => onSend(),
                 decoration: InputDecoration(
-                  hintText: enabled
+                  hintText: micLoading
+                      ? l10n.adk_loadingSpeechModel
+                      : listening
+                      ? l10n.adk_listening
+                      : enabled
                       ? 'Ask the AI agent anything…'
                       : 'Connecting…',
                   border: OutlineInputBorder(
@@ -1050,6 +1261,14 @@ class _InputBar extends StatelessWidget {
                 ),
               ),
             ),
+            if (onMic != null)
+              IconButton(
+                key: const Key('chatMic'),
+                tooltip: l10n.adk_voiceInput,
+                onPressed: enabled && !micLoading ? onMic : null,
+                color: listening ? Colors.red : null,
+                icon: Icon(listening ? Icons.stop_circle : Icons.mic),
+              ),
             const SizedBox(width: 8),
             IconButton.filled(
               key: const Key('chatSend'),

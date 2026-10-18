@@ -280,10 +280,6 @@
   "@hostName": {
     "description": "The hostname of a server"
   },
-  "hostNameError": "Enter a plain host name like shop.example.com",
-  "@hostNameError": {
-    "description": "Error message for an invalid host name"
-  },
   "id": "ID",
   "@id": {
     "description": "Identifier"

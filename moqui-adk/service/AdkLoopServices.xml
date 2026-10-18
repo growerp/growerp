@@ -1,0 +1,509 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Task loop ("loop engineering"): an agent that works an inbox of tasks on its schedule.
+
+  inbox   new messages in AdkAgentConfig.loopChatRoomId + open todo Activities assigned
+          to the agent party
+  claim   by id (AdkLoopInbox per chat message, AdkLoopTask per Activity), never by date
+          or read state
+  record  the Activity (WorkEffort) is written before work starts; its WorkEffortNotes
+          hold replies and the agent's technical output
+  work    one AdkManager.runOneOff per task; memory across runs comes from the notes
+  report  plain-English email + a short chat message, in the same run
+  wait    a question or a held write puts the task on hold (waiting) and the loop moves
+          on; a user note, a chat reply "#<taskId> ..." or an approval decision re-queues it
+
+run#ScheduledAgent hands off to run#AgentLoop when loopEnabled=Y, so the agent's normal
+schedule (ServiceJob with run lock) is the trigger and a check never overlaps a run.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <service verb="run" noun="AgentLoop" authenticate="anonymous-all">
+        <description>One loop check: claim new inbox items, then work up to 3 queued tasks.</description>
+        <in-parameters>
+            <parameter name="adkAgentConfigId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="tasksWorked" type="Integer"/>
+        </out-parameters>
+        <actions>
+            <set field="tasksWorked" from="0" type="Integer"/>
+            <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"/>
+            <if condition="!cfg || cfg.loopEnabled != 'Y' || cfg.enabled == 'N' || cfg.ownerPartyId == '_NA_'">
+                <return/>
+            </if>
+            <!-- headless job run: send#DirectEmail and the entity-auto services need a user -->
+            <if condition="!ec.user.userId">
+                <script>ec.user.internalLoginUser('SystemSupport')</script>
+            </if>
+
+            <service-call name="AdkLoopServices.claim#LoopInbox" transaction="force-new"
+                in-map="[adkAgentConfigId: adkAgentConfigId]"/>
+
+            <!-- the 3-task cap keeps one check short and stops tasks stepping on each other -->
+            <entity-find entity-name="moqui.adk.AdkLoopTask" list="queuedTasks" limit="3">
+                <econdition field-name="adkAgentConfigId"/>
+                <econdition field-name="loopStatusId" value="queued"/>
+                <order-by field-name="lastRunDate"/>
+            </entity-find>
+            <iterate list="queuedTasks" entry="queuedTask">
+                <service-call name="AdkLoopServices.work#LoopTask" transaction="force-new" ignore-error="true"
+                    in-map="[workEffortId: queuedTask.workEffortId]"/>
+                <set field="tasksWorked" from="tasksWorked + 1"/>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="claim" noun="LoopInbox" authenticate="anonymous-all">
+        <description>Turn new chat messages and newly assigned Activities into queued loop tasks,
+            and re-queue tasks that got a reply. Writes the claim before anything else.</description>
+        <in-parameters>
+            <parameter name="adkAgentConfigId" required="true"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"/>
+            <set field="ownerPartyId" from="cfg.ownerPartyId"/>
+            <service-call name="AdkGovernanceServices.ensure#AgentUser" out-map="agentOut"
+                in-map="[ownerPartyId: ownerPartyId, adkAgentConfigId: adkAgentConfigId]"/>
+            <set field="agentPartyId" from="cfg.agentPartyId ?: ('AGENT_' + ownerPartyId)"/>
+            <entity-find-one entity-name="moqui.security.UserAccount" value-field="agentAcct"
+                auto-field-map="[username: agentOut.agentUsername]"/>
+            <entity-find-one entity-name="moqui.security.UserAccount" value-field="sysAcct"
+                auto-field-map="[username: 'SystemSupport']"/>
+            <!-- messages from the agent or the system (results, approval cards) are never tasks -->
+            <set field="botUserIds" from="[agentAcct?.userId, sysAcct?.userId].findAll { it }"/>
+
+            <!-- 1. chat inbox (none chosen → a "Tasks" room is created and saved on the agent) -->
+            <service-call name="AdkGovernanceServices.ensure#AgentChatRoom" out-map="roomOut"
+                in-map="[adkAgentConfigId: adkAgentConfigId, roomField: 'loopChatRoomId',
+                         roomName: 'Tasks: ' + (cfg.agentName ?: 'AI agent')]"/>
+            <set field="inboxRoomId" from="roomOut.chatRoomId"/>
+            <if condition="inboxRoomId">
+                <entity-find entity-name="growerp.general.ChatMessage" list="roomMessages" limit="200">
+                    <econdition field-name="chatRoomId" from="inboxRoomId"/>
+                    <econdition field-name="fromUserId" operator="not-in" from="botUserIds"/>
+                    <order-by field-name="lastUpdatedStamp"/>
+                </entity-find>
+                <!-- first check of a room: what is already there is history, not new work.
+                     A marker row (chatMessageId BASELINE_..., workEffortId = room) records
+                     that this room's history was taken, so an empty room is baselined too. -->
+                <entity-find-count entity-name="moqui.adk.AdkLoopInbox" count-field="baselineCount">
+                    <econdition field-name="adkAgentConfigId"/>
+                    <econdition field-name="workEffortId" from="inboxRoomId"/>
+                    <econdition field-name="chatMessageId" operator="like" value="BASELINE_%"/>
+                </entity-find-count>
+                <iterate list="roomMessages" entry="msg">
+                    <entity-find-one entity-name="moqui.adk.AdkLoopInbox" value-field="claimed"
+                        auto-field-map="[chatMessageId: msg.chatMessageId]"/>
+                    <if condition="claimed"><continue/></if>
+                    <service-call name="create#moqui.adk.AdkLoopInbox"
+                        in-map="[chatMessageId: msg.chatMessageId, adkAgentConfigId: adkAgentConfigId,
+                                 claimedDate: ec.user.nowTimestamp]"/>
+                    <if condition="baselineCount == 0"><continue/></if>
+                    <service-call name="AdkLoopServices.route#ChatMessage" out-map="routeOut"
+                        in-map="[cfg: cfg, msg: msg, agentPartyId: agentPartyId]"/>
+                    <service-call name="update#moqui.adk.AdkLoopInbox"
+                        in-map="[chatMessageId: msg.chatMessageId, workEffortId: routeOut.workEffortId]"/>
+                </iterate>
+                <if condition="baselineCount == 0">
+                    <service-call name="create#moqui.adk.AdkLoopInbox"
+                        in-map="[chatMessageId: 'BASELINE_' + ec.entity.sequencedIdPrimary('moqui.adk.AdkLoopInbox', null, null),
+                                 adkAgentConfigId: adkAgentConfigId, workEffortId: inboxRoomId,
+                                 claimedDate: ec.user.nowTimestamp]"/>
+                </if>
+            </if>
+
+            <!-- 2. todos assigned to the agent from the Activity screen -->
+            <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="assigned">
+                <econdition field-name="partyId" from="agentPartyId"/>
+                <econdition field-name="roleTypeId" value="Assignee"/>
+                <date-filter/>
+            </entity-find>
+            <iterate list="assigned" entry="wep">
+                <entity-find-one entity-name="moqui.adk.AdkLoopTask" value-field="known"
+                    auto-field-map="[workEffortId: wep.workEffortId]"/>
+                <if condition="known"><continue/></if>
+                <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="we"
+                    auto-field-map="[workEffortId: wep.workEffortId]"/>
+                <if condition="we?.ownerPartyId == ownerPartyId &amp;&amp; we.workEffortTypeEnumId == 'WetTask'
+                        &amp;&amp; we.statusId in ['WeInPlanning', 'WeApproved', 'WeInProgress']">
+                    <service-call name="create#moqui.adk.AdkLoopTask"
+                        in-map="[workEffortId: we.workEffortId, adkAgentConfigId: adkAgentConfigId,
+                                 ownerPartyId: ownerPartyId, loopStatusId: 'queued', runCount: 0]"/>
+                </if>
+            </iterate>
+
+            <!-- 3. a reply (a note by someone other than the agent) on a waiting or finished task -->
+            <entity-find entity-name="moqui.adk.AdkLoopTask" list="parkedTasks" for-update="true">
+                <econdition field-name="adkAgentConfigId"/>
+                <econdition field-name="loopStatusId" operator="in" value="waiting,done,failed"/>
+            </entity-find>
+            <iterate list="parkedTasks" entry="parked">
+                <entity-find entity-name="mantle.work.effort.WorkEffortNote" list="newNotes" limit="1">
+                    <econdition field-name="workEffortId" from="parked.workEffortId"/>
+                    <econdition field-name="noteDate" operator="greater" from="parked.lastSeenNoteDate" ignore-if-empty="true"/>
+                    <econdition field-name="userId" operator="not-in" from="botUserIds"/>
+                </entity-find>
+                <if condition="newNotes">
+                    <service-call name="AdkLoopServices.requeue#LoopTask" in-map="[workEffortId: parked.workEffortId]"/>
+                </if>
+            </iterate>
+
+            <!-- 4. a run that died half way (server restart) must not stay 'working' forever -->
+            <entity-find entity-name="moqui.adk.AdkLoopTask" list="stuckTasks" for-update="true">
+                <econdition field-name="adkAgentConfigId"/>
+                <econdition field-name="loopStatusId" value="working"/>
+                <econdition field-name="lastRunDate" operator="less"
+                    from="new java.sql.Timestamp(ec.user.nowTimestamp.time - 20 * 60000L)"/>
+            </entity-find>
+            <iterate list="stuckTasks" entry="stuck">
+                <set field="stuck.loopStatusId" value="waiting"/>
+                <set field="stuck.waitingReason" value="error"/>
+                <entity-update value-field="stuck"/>
+                <service-call name="create#mantle.work.effort.WorkEffortNote"
+                    in-map="[workEffortId: stuck.workEffortId, userId: agentAcct?.userId, internalNote: 'Y',
+                             noteText: 'The last run did not finish (server restart or timeout). Add a comment to try again.']"/>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="route" noun="ChatMessage" authenticate="anonymous-all">
+        <description>A new inbox chat message is a reply to an existing task ("#taskId ..." or the
+            sender's only waiting task) or a new task (a todo Activity assigned to the agent).</description>
+        <in-parameters>
+            <parameter name="cfg" type="Map" required="true"/>
+            <parameter name="msg" type="Map" required="true"/>
+            <parameter name="agentPartyId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="workEffortId"/>
+        </out-parameters>
+        <actions>
+            <set field="ownerPartyId" from="cfg.ownerPartyId"/>
+            <entity-find-one entity-name="moqui.security.UserAccount" value-field="sender"
+                auto-field-map="[userId: msg.fromUserId]"/>
+            <set field="content" from="(msg.content ?: '').trim()"/>
+            <if condition="!content"><return/></if>
+
+            <!-- explicit reference: "#123 use EUR" -->
+            <set field="refPseudoId" from="(content =~ /#([A-Za-z0-9_-]+)/).with { it.find() ? it.group(1) : null }"/>
+            <if condition="refPseudoId">
+                <entity-find entity-name="mantle.work.effort.WorkEffort" list="refList" limit="1">
+                    <econdition field-name="workEffortPseudoId" from="refPseudoId"/>
+                    <econdition field-name="ownerPartyId"/>
+                </entity-find>
+                <if condition="refList">
+                    <entity-find-one entity-name="moqui.adk.AdkLoopTask" value-field="refTask"
+                        auto-field-map="[workEffortId: refList[0].workEffortId]"/>
+                    <if condition="refTask?.adkAgentConfigId == cfg.adkAgentConfigId">
+                        <set field="workEffortId" from="refTask.workEffortId"/>
+                    </if>
+                </if>
+            </if>
+            <!-- no reference: the answer to the one question the agent is waiting on from the sender
+                 (a task held for approval or an error is not waiting for a chat answer) -->
+            <if condition="!workEffortId &amp;&amp; sender?.partyId">
+                <entity-find entity-name="moqui.adk.AdkLoopTask" list="waitingTasks">
+                    <econdition field-name="adkAgentConfigId" from="cfg.adkAgentConfigId"/>
+                    <econdition field-name="loopStatusId" value="waiting"/>
+                    <econdition field-name="waitingReason" value="question"/>
+                </entity-find>
+                <set field="sendersWaiting" from="[]"/>
+                <iterate list="waitingTasks" entry="waitingTask">
+                    <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="origList" limit="1">
+                        <econdition field-name="workEffortId" from="waitingTask.workEffortId"/>
+                        <econdition field-name="partyId" from="sender.partyId"/>
+                        <econdition field-name="roleTypeId" value="Originator"/>
+                    </entity-find>
+                    <if condition="origList"><script>sendersWaiting.add(waitingTask.workEffortId)</script></if>
+                </iterate>
+                <if condition="sendersWaiting.size() == 1">
+                    <set field="workEffortId" from="sendersWaiting[0]"/>
+                </if>
+            </if>
+            <if condition="workEffortId">
+                <service-call name="create#mantle.work.effort.WorkEffortNote"
+                    in-map="[workEffortId: workEffortId, noteText: content, userId: msg.fromUserId]"/>
+                <service-call name="AdkLoopServices.requeue#LoopTask" in-map="[workEffortId: workEffortId]"/>
+                <return/>
+            </if>
+
+            <!-- new task: write the ticket before any work -->
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId" out-map="seqOut"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'activity.activityType']"/>
+            <set field="firstLine" from="content.readLines().find { it.trim() }?.trim() ?: content"/>
+            <service-call name="create#mantle.work.effort.WorkEffort" out-map="weOut"
+                in-map="[workEffortPseudoId: seqOut.seqNum, workEffortTypeEnumId: 'WetTask',
+                         workEffortName: firstLine.take(60), description: content,
+                         statusId: 'WeInPlanning', ownerPartyId: ownerPartyId]"/>
+            <set field="workEffortId" from="weOut.workEffortId"/>
+            <service-call name="create#mantle.work.effort.WorkEffortParty"
+                in-map="[workEffortId: workEffortId, partyId: sender?.partyId ?: agentPartyId,
+                         roleTypeId: 'Originator', statusId: 'WeptAssigned', fromDate: ec.user.nowTimestamp]"/>
+            <service-call name="create#mantle.work.effort.WorkEffortParty"
+                in-map="[workEffortId: workEffortId, partyId: agentPartyId,
+                         roleTypeId: 'Assignee', statusId: 'WeptAssigned', fromDate: ec.user.nowTimestamp]"/>
+            <service-call name="create#moqui.adk.AdkLoopTask"
+                in-map="[workEffortId: workEffortId, adkAgentConfigId: cfg.adkAgentConfigId,
+                         ownerPartyId: ownerPartyId, loopStatusId: 'queued', runCount: 0]"/>
+        </actions>
+    </service>
+
+    <service verb="requeue" noun="LoopTask" authenticate="anonymous-all">
+        <description>Put a loop task back in the queue, optionally recording why as a note
+            (an approval decision). The Activity goes back to In Progress.</description>
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="noteText"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.adk.AdkLoopTask" value-field="loopTask" for-update="true"/>
+            <if condition="!loopTask"><return/></if>
+            <if condition="noteText">
+                <service-call name="create#mantle.work.effort.WorkEffortNote"
+                    in-map="[workEffortId: workEffortId, noteText: noteText, internalNote: 'Y']"/>
+            </if>
+            <set field="loopTask.loopStatusId" value="queued"/>
+            <set field="loopTask.waitingReason" from="null"/>
+            <entity-update value-field="loopTask"/>
+            <!-- direct update: a status-flow check would refuse e.g. Complete back to In Progress -->
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="we" for-update="true"/>
+            <if condition="we &amp;&amp; we.statusId != 'WeInProgress'">
+                <set field="we.statusId" value="WeInProgress"/>
+                <entity-update value-field="we"/>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="work" noun="LoopTask" authenticate="anonymous-all" transaction-timeout="600">
+        <description>Run the agent once on one queued task, record the outcome on the Activity
+            and report it to the requester.</description>
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+        </in-parameters>
+        <actions>
+            <!-- no row locks here: mark#LoopTaskWorking updates these rows in its own transaction -->
+            <entity-find-one entity-name="moqui.adk.AdkLoopTask" value-field="loopTask"/>
+            <if condition="loopTask?.loopStatusId != 'queued'"><return/></if>
+            <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
+                auto-field-map="[adkAgentConfigId: loopTask.adkAgentConfigId]"/>
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="we"/>
+            <set field="agentPartyId" from="cfg.agentPartyId ?: ('AGENT_' + cfg.ownerPartyId)"/>
+            <entity-find entity-name="moqui.security.UserAccount" list="agentAccts" limit="1">
+                <econdition field-name="partyId" from="agentPartyId"/>
+            </entity-find>
+            <set field="agentUserId" from="agentAccts ? agentAccts[0].userId : null"/>
+
+            <!-- mark working and commit, so a crash leaves a 'working' row the next check sweeps -->
+            <set field="runStart" from="ec.user.nowTimestamp"/>
+            <service-call name="AdkLoopServices.mark#LoopTaskWorking" transaction="force-new"
+                in-map="[workEffortId: workEffortId, runStart: runStart]"/>
+
+            <!-- requester (Originator) and the conversation so far -->
+            <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="origList" limit="1">
+                <econdition field-name="workEffortId"/>
+                <econdition field-name="roleTypeId" value="Originator"/>
+            </entity-find>
+            <if condition="origList">
+                <entity-find entity-name="moqui.security.UserAccount" list="reqAccts" limit="1">
+                    <econdition field-name="partyId" from="origList[0].partyId"/>
+                </entity-find>
+            </if>
+            <set field="requester" from="reqAccts ? reqAccts[0] : null"/>
+            <entity-find entity-name="mantle.work.effort.WorkEffortNote" list="notes">
+                <econdition field-name="workEffortId"/>
+                <order-by field-name="noteDate"/>
+            </entity-find>
+
+            <script><![CDATA[
+                import org.moqui.adk.AdkManager
+
+                StringBuilder history = new StringBuilder()
+                notes.each { n ->
+                    String who = n.userId == agentUserId ? 'You (agent)' :
+                            (ec.entity.find('moqui.security.UserAccount').condition('userId', n.userId)
+                                    .disableAuthz().one()?.userFullName ?: 'User')
+                    history.append("--- ${who}, ${n.noteDate}:\n").append((n.noteText ?: '').take(3000)).append('\n')
+                }
+                String historyText = history.toString()
+                if (historyText.length() > 20000) historyText = '[earlier notes left out]\n' + historyText.substring(historyText.length() - 20000)
+
+                String prompt = """You are working one task from your task inbox. The task is a GrowERP
+activity (id ${we.workEffortPseudoId}) requested by ${requester?.userFullName ?: 'a user'}.
+
+TASK: ${we.workEffortName}
+REQUEST (verbatim):
+${we.description ?: we.workEffortName}
+
+CONVERSATION AND EARLIER WORK ON THIS TASK (oldest first):
+${historyText ?: '(none yet - this is the first run)'}
+
+RULES:
+- Work toward the outcome asked for; choose the steps yourself.
+- Do all reversible work yourself (look things up, draft, prepare, create drafts).
+- Deleting data, publishing, posting, emailing anyone, spending money or touching passwords,
+  keys or tokens: do not do it. Ask instead (status "question") or let the approval gate hold it.
+- If a decision is needed from the requester, do not guess: ask one clear question with a
+  sensible default, and stop.
+- A write that comes back "queued for approval" is fine: stop and report it.
+- Never invent results. Mention proof: ids, names or numbers of what you created or found.
+
+END your reply with exactly one JSON object on its own, as the last thing you write:
+{"status": "done" | "question" | "failed", "summary": "2-4 plain-English sentences for the requester, no code or ids lists", "question": "only with status question", "defaultAnswer": "what you will do if they agree", "proof": "ids/names of what was created or found"}"""
+
+                if (!AdkManager.isInitialized()) AdkManager.lazyInit(ec.factory)
+                Map sessionCtx = [userId: 'scheduler', username: 'scheduler', userFullName: 'Task loop',
+                                  organizationName: '', companyPseudoId: '',
+                                  tenantId: cfg.ownerPartyId as String, timeZone: 'UTC', locale: 'en_US']
+                String output = ''
+                String runError = null
+                try {
+                    List events = AdkManager.runOneOff(cfg.adkAgentConfigId as String, 'scheduler', prompt, sessionCtx)
+                    StringBuilder sb = new StringBuilder()
+                    events.each { e ->
+                        if (e.author != 'scheduler' && e.partial != true) e.content?.parts?.each { p -> if (p.text) sb.append(p.text) }
+                    }
+                    output = sb.toString().trim()
+                } catch (Throwable t) {
+                    runError = t.message ?: t.class.simpleName
+                    ec.logger.warn("Task loop run failed for ${workEffortId}: ${runError}")
+                }
+
+                // outcome trailer: the last parsable JSON object holding a status
+                Map outcome = null
+                int end = output.lastIndexOf('}')
+                for (int start = output.lastIndexOf('{'); start >= 0 && end > start && outcome == null;
+                        start = output.lastIndexOf('{', start - 1)) {
+                    try {
+                        def parsed = new groovy.json.JsonSlurper().parseText(output.substring(start, end + 1))
+                        if (parsed instanceof Map && parsed.status) outcome = parsed
+                    } catch (Exception ignored) { }
+                }
+                if (runError) outcome = [status: 'failed', summary: "The agent could not run: ${runError}"]
+                else if (!outcome) outcome = [status: 'failed',
+                        summary: output ? 'The agent finished without a clear result; see the task notes.' : 'The agent gave no answer.']
+                context.output = output
+                context.outcome = outcome
+            ]]></script>
+
+            <!-- technical detail goes on the ticket -->
+            <service-call name="create#mantle.work.effort.WorkEffortNote"
+                in-map="[workEffortId: workEffortId, userId: agentUserId, internalNote: 'Y',
+                         noteDate: ec.user.nowTimestamp, noteText: output ?: outcome.summary]"/>
+
+            <!-- writes the gate held during this run belong to this task -->
+            <entity-find entity-name="moqui.adk.AdkApproval" list="heldWrites" for-update="true">
+                <econdition field-name="configId" from="cfg.adkAgentConfigId"/>
+                <econdition field-name="status" value="pending"/>
+                <econdition field-name="requestTime" operator="greater-equals" from="runStart"/>
+                <econdition field-name="workEffortId" from="null"/>
+            </entity-find>
+            <iterate list="heldWrites" entry="held">
+                <set field="held.workEffortId" from="workEffortId"/>
+                <entity-update value-field="held"/>
+            </iterate>
+
+            <set field="status" from="outcome.status"/>
+            <if condition="heldWrites"><set field="status" value="approval"/></if>
+            <set field="loopStatus" from="[done: 'done', question: 'waiting', approval: 'waiting'][status] ?: 'waiting'"/>
+            <set field="waitingReason" from="status == 'done' ? null : ([question: 'question', approval: 'approval'][status] ?: 'error')"/>
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="we" for-update="true"/>
+            <set field="we.statusId" from="status == 'done' ? 'WeComplete' : 'WeOnHold'"/>
+            <entity-update value-field="we"/>
+            <entity-find-one entity-name="moqui.adk.AdkLoopTask" value-field="loopTask" for-update="true"/>
+            <set field="loopTask.loopStatusId" from="loopStatus"/>
+            <set field="loopTask.waitingReason" from="waitingReason"/>
+            <!-- notes added while the agent worked are newer than runStart: they re-queue the task -->
+            <set field="loopTask.lastSeenNoteDate" from="runStart"/>
+            <entity-update value-field="loopTask"/>
+
+            <!-- own transaction: a failed report must not undo the recorded outcome -->
+            <service-call name="AdkLoopServices.report#LoopTask" ignore-error="true" transaction="force-new"
+                in-map="[cfg: cfg, we: we, requester: requester, outcome: outcome, status: status,
+                         heldServices: heldWrites*.serviceName]"/>
+        </actions>
+    </service>
+
+    <service verb="mark" noun="LoopTaskWorking" authenticate="anonymous-all">
+        <in-parameters>
+            <parameter name="workEffortId" required="true"/>
+            <parameter name="runStart" type="Timestamp" required="true"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.adk.AdkLoopTask" value-field="loopTask" for-update="true"/>
+            <set field="loopTask.loopStatusId" value="working"/>
+            <set field="loopTask.lastRunDate" from="runStart"/>
+            <set field="loopTask.runCount" from="(loopTask.runCount ?: 0) + 1"/>
+            <entity-update value-field="loopTask"/>
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="we" for-update="true"/>
+            <if condition="we.statusId != 'WeInProgress'">
+                <set field="we.statusId" value="WeInProgress"/>
+                <entity-update value-field="we"/>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="report" noun="LoopTask" authenticate="anonymous-all">
+        <description>Tell the requester what happened: a short chat message in the inbox room and a
+            plain-English email. Detail stays on the Activity.</description>
+        <in-parameters>
+            <parameter name="cfg" type="Map" required="true"/>
+            <parameter name="we" type="Map" required="true"/>
+            <parameter name="requester" type="Map"/>
+            <parameter name="outcome" type="Map" required="true"/>
+            <parameter name="status" required="true"/>
+            <parameter name="heldServices" type="List"/>
+        </in-parameters>
+        <actions>
+            <script><![CDATA[
+                String esc(String s) { (s ?: '').replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('\n', '<br/>') }
+                String ref = "#${we.workEffortPseudoId}"
+                String headline = [done: 'Done', question: 'Question', approval: 'Needs your approval'][status] ?: 'Problem'
+                StringBuilder chat = new StringBuilder("${ref} ${headline}: ${we.workEffortName}\n${outcome.summary ?: ''}")
+                StringBuilder html = new StringBuilder("<p>${esc(outcome.summary as String)}</p>")
+                if (status == 'question' && outcome.question) {
+                    chat.append("\nQuestion: ${outcome.question}")
+                    html.append("<p><b>Question:</b> ${esc(outcome.question as String)}</p>")
+                    if (outcome.defaultAnswer) {
+                        chat.append("\nIf you agree: ${outcome.defaultAnswer}")
+                        html.append("<p><b>If you agree:</b> ${esc(outcome.defaultAnswer as String)}</p>")
+                    }
+                }
+                if (status == 'approval') {
+                    String held = (heldServices ?: []).join(', ')
+                    chat.append("\nWaiting for approval of: ${held} (AI Agents > Approvals)")
+                    html.append("<p><b>Waiting for your approval of:</b> ${esc(held)}<br/>Approve or reject it under AI Agents &gt; Approvals.</p>")
+                }
+                if (outcome.proof) html.append("<p><b>Proof:</b> ${esc(outcome.proof as String)}</p>")
+                if (status != 'done') chat.append("\nReply here starting with ${ref}, or comment on the activity.")
+                html.append("<p style=\"color:#888\">Activity ${ref} &middot; reply in the task chat starting with ${ref}, " +
+                        "or add a comment to the activity.</p>")
+                context.chatText = chat.toString()
+                context.bodyHtml = html.toString()
+                context.subject = "${ref} ${headline}: ${we.workEffortName}".toString()
+            ]]></script>
+            <service-call name="AdkGovernanceServices.ensure#AgentChatRoom" out-map="roomOut"
+                in-map="[adkAgentConfigId: cfg.adkAgentConfigId, roomField: 'loopChatRoomId',
+                         roomName: 'Tasks: ' + (cfg.agentName ?: 'AI agent')]"/>
+            <if condition="roomOut.chatRoomId">
+                <service-call name="AdkGovernanceServices.post#AgentChatMessage" ignore-error="true"
+                    in-map="[chatRoomId: roomOut.chatRoomId, ownerPartyId: cfg.ownerPartyId,
+                             agentName: cfg.agentName, content: chatText]"/>
+            </if>
+            <set field="toAddress" from="cfg.loopReportEmail ?: requester?.emailAddress"/>
+            <!-- no mail server: the company admin gets the usual "email not configured" notice;
+                 the report still reached the chat room and the task notes -->
+            <if condition="toAddress">
+                <service-call name="growerp.100.GeneralServices100.get#ActiveEmailServer" out-map="mailOut"
+                    in-map="[ownerPartyId: cfg.ownerPartyId, sendDescription: 'task loop report']"/>
+            </if>
+            <if condition="toAddress &amp;&amp; mailOut?.emailConfigured">
+                <service-call name="growerp.100.GeneralServices100.send#DirectEmail" ignore-error="true"
+                    in-map="[ownerPartyId: cfg.ownerPartyId, toAddresses: toAddress, subject: subject,
+                             bodyHtml: bodyHtml, fromName: cfg.agentName ?: 'GrowERP AI agent',
+                             toUserId: cfg.loopReportEmail ? null : requester?.userId]"/>
+            </if>
+        </actions>
+    </service>
+</services>

@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_website/growerp_website.dart';
 
 class PublicLandingPageScreen extends StatefulWidget {
@@ -214,10 +215,7 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
           const SizedBox(height: 8),
           if (section.sectionDescription != null &&
               section.sectionDescription!.isNotEmpty)
-            Text(
-              section.sectionDescription!,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
+            MarkdownText(section.sectionDescription!),
           if (section.sectionImageUrl != null &&
               section.sectionImageUrl!.isNotEmpty) ...[
             const SizedBox(height: 16),
@@ -305,20 +303,11 @@ class _PublicLandingPageScreenState extends State<PublicLandingPageScreen> {
                   children: [
                     if (credibility.creatorBio != null &&
                         credibility.creatorBio!.isNotEmpty)
-                      Text(
-                        credibility.creatorBio!,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
+                      MarkdownText(credibility.creatorBio!),
                     if (credibility.backgroundText != null &&
                         credibility.backgroundText!.isNotEmpty) ...[
                       const SizedBox(height: 8),
-                      Text(
-                        credibility.backgroundText!,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontStyle: FontStyle.italic,
-                              color: Colors.grey[600],
-                            ),
-                      ),
+                      MarkdownText(credibility.backgroundText!),
                     ],
                   ],
                 ),

@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -20,12 +21,17 @@ class MasterContentState extends Equatable {
   /// (platform -> outcome string).
   final Map<String, dynamic>? adaptResults;
 
+  /// The ZIP from the last export, to be saved by the files dialog; only set
+  /// on the state the export emits.
+  final ({String name, Uint8List bytes})? exportFile;
+
   const MasterContentState({
     this.status = MasterContentStatus.initial,
     this.masterContents = const [],
     this.message,
     this.hasReachedMax = false,
     this.adaptResults,
+    this.exportFile,
   });
 
   MasterContentState copyWith({
@@ -34,6 +40,7 @@ class MasterContentState extends Equatable {
     String? message,
     bool? hasReachedMax,
     Map<String, dynamic>? adaptResults,
+    ({String name, Uint8List bytes})? exportFile,
   }) {
     return MasterContentState(
       status: status ?? this.status,
@@ -41,12 +48,13 @@ class MasterContentState extends Equatable {
       message: message,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       adaptResults: adaptResults ?? this.adaptResults,
+      exportFile: exportFile,
     );
   }
 
   @override
   List<Object?> get props =>
-      [status, masterContents, message, hasReachedMax, adaptResults];
+      [status, masterContents, message, hasReachedMax, adaptResults, exportFile];
 
   @override
   String toString() {

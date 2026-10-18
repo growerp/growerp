@@ -161,7 +161,7 @@ class CredibilityInfoListScreenState extends State<CredibilityInfoListScreen> {
                               ),
                               if ((credibility.creatorBio ?? '').isNotEmpty)
                                 Text(
-                                  credibility.creatorBio!,
+                                  MarkdownEditor.toPlainText(credibility.creatorBio!),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: Theme.of(context).textTheme.bodySmall,

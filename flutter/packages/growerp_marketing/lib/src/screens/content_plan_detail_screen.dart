@@ -300,14 +300,15 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: TextFormField(
-                          key: const Key('theme'),
-                          decoration: const InputDecoration(
-                            labelText: 'Theme',
-                            hintText: 'Weekly content theme',
-                          ),
+                        child: MarkdownEditor(
                           controller: _themeController,
-                          maxLines: 3,
+                          inputKey: const Key('theme'),
+                          hint: 'e.g. Launch of our spring collection: focus '
+                                'on time savings, push the free consultation',
+                          helper: 'The topic tying the plan\'s posts together, '
+                                'plus the goal or angle '
+                                '(e.g. drive sign-ups, build trust).',
+                          height: 200,
                         ),
                       ),
                     ],
@@ -335,15 +336,29 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
         return Colors.blue;
       case 'DRAFT':
         return Colors.orange;
+      case 'PLANNED':
+        return Colors.purple;
       default:
         return Colors.grey;
     }
   }
 
   Widget _buildContentSection() {
-    return BlocBuilder<MasterContentBloc, MasterContentState>(
+    return BlocConsumer<MasterContentBloc, MasterContentState>(
+      // e.g. AI write now without an AI key
+      listenWhen: (previous, current) =>
+          current.status == MasterContentStatus.failure,
+      listener: (context, contentState) => HelperFunctions.showMessage(
+          context, contentState.message ?? 'Error', Colors.red),
       builder: (context, contentState) {
-        final contents = contentState.masterContents;
+        // in plan order: by the day the plan gave each piece
+        final contents = [...contentState.masterContents]..sort((a, b) =>
+            (a.plannedDate ?? DateTime(9999))
+                .compareTo(b.plannedDate ?? DateTime(9999)));
+        DateTime? weekOf(MasterContent m) => m.plannedDate == null
+            ? null
+            : DateUtils.dateOnly(m.plannedDate!.toLocal()).subtract(
+                Duration(days: m.plannedDate!.toLocal().weekday - 1));
         return GroupingDecorator(
           labelText: 'Content',
           child: Column(
@@ -368,7 +383,10 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
                 ...contents.asMap().entries.map((entry) {
                   final i = entry.key;
                   final content = entry.value;
-                  return InkWell(
+                  final week = weekOf(content);
+                  final newWeek =
+                      week != null && (i == 0 || weekOf(contents[i - 1]) != week);
+                  final row = InkWell(
                     key: Key('contentRow$i'),
                     onTap: () async {
                       final masterContentBloc =
@@ -415,6 +433,15 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
                               ),
                             ),
                           ),
+                          if (content.plannedDate != null) ...[
+                            const SizedBox(width: 8),
+                            Text(
+                              DateFormat('EEE d')
+                                  .format(content.plannedDate!.toLocal()),
+                              key: Key('contentPlannedDate$i'),
+                              style: const TextStyle(fontSize: 11),
+                            ),
+                          ],
                           const SizedBox(width: 8),
                           // Title
                           Expanded(
@@ -447,6 +474,21 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
                             ),
                           ),
                           const SizedBox(width: 4),
+                          // a planned piece has no text yet: write it first
+                          if (content.status == 'PLANNED')
+                            IconButton(
+                              key: Key('writeNow$i'),
+                              tooltip: 'AI write now',
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              icon: const Icon(Icons.edit_note, size: 18),
+                              onPressed: () => context
+                                  .read<MasterContentBloc>()
+                                  .add(MasterContentGenerateWithAI(
+                                    masterContentId: content.masterContentId,
+                                  )),
+                            )
+                          else
                           // Approve/revoke toggle — the auto-publish gate
                           IconButton(
                             key: Key('approveContent${content.pseudoId}'),
@@ -477,6 +519,21 @@ class ContentPlanDetailScreenState extends State<ContentPlanDetailScreen> {
                         ],
                       ),
                     ),
+                  );
+                  if (!newWeek) return row;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          'Week of ${DateFormat('MMM d').format(week)}',
+                          key: Key('contentWeek$i'),
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                      ),
+                      row,
+                    ],
                   );
                 }),
               // Add content button

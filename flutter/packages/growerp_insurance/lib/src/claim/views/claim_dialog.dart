@@ -158,14 +158,14 @@ class ClaimDialogState extends State<ClaimDialog> {
             onChanged: (value) => _incidentDate = value,
           ),
           const SizedBox(height: 10),
-          TextFormField(
-            key: const Key('description'),
-            decoration: InputDecoration(labelText: localizations.whatHappened),
+          MarkdownEditor(
             controller: _descriptionController,
-            enabled: canEditReport,
-            maxLines: 3,
+            inputKey: const Key('description'),
+            label: localizations.whatHappened,
+            height: 200,
             validator: (value) =>
                 (value ?? '').isEmpty ? localizations.fieldRequired : null,
+            enabled: canEditReport,
           ),
           const SizedBox(height: 10),
           TextFormField(
@@ -202,11 +202,11 @@ class ClaimDialogState extends State<ClaimDialog> {
               ),
             ),
             const SizedBox(height: 10),
-            TextFormField(
-              key: const Key('comments'),
-              decoration: InputDecoration(labelText: localizations.comments),
+            MarkdownEditor(
               controller: _commentsController,
-              maxLines: 2,
+              inputKey: const Key('comments'),
+              label: localizations.comments,
+              height: 160,
             ),
           ],
           if (!isNew && !isStaff) ...[

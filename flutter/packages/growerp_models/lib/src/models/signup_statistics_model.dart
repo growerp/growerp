@@ -41,6 +41,19 @@ abstract class Signup with _$Signup {
   factory Signup.fromJson(Map<String, dynamic> json) => _$SignupFromJson(json);
 }
 
+/// Number of signups on one day.
+@freezed
+abstract class SignupDayCount with _$SignupDayCount {
+  SignupDayCount._();
+  factory SignupDayCount({
+    @Default("") String date, // yyyy-MM-dd
+    @Default(0) int count,
+  }) = _SignupDayCount;
+
+  factory SignupDayCount.fromJson(Map<String, dynamic> json) =>
+      _$SignupDayCountFromJson(json);
+}
+
 @freezed
 abstract class SignupStatistics with _$SignupStatistics {
   SignupStatistics._();
@@ -49,6 +62,8 @@ abstract class SignupStatistics with _$SignupStatistics {
     @Default("") String thruDate, // yyyy-MM-dd
     @Default(0) int signupCount, // matching rows before paging
     @Default([]) List<Signup> signups,
+    // per day for all matching rows, ignoring search and paging
+    @Default([]) List<SignupDayCount> dailyCounts,
   }) = _SignupStatistics;
 
   factory SignupStatistics.fromJson(Map<String, dynamic> json) =>

@@ -252,13 +252,11 @@ class PageSectionDetailScreenState extends State<PageSectionDetailScreen> {
                         },
                       ),
                       const SizedBox(height: 16),
-                      TextFormField(
-                        key: const Key('sectionDescription'),
+                      MarkdownEditor(
                         controller: _descriptionController,
-                        decoration: const InputDecoration(
-                          labelText: 'Description',
-                        ),
-                        maxLines: 4,
+                        inputKey: const Key('sectionDescription'),
+                        label: 'Description',
+                        height: 200,
                       ),
                       const SizedBox(height: 16),
                       TextFormField(

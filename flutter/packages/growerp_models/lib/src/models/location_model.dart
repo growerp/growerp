@@ -22,10 +22,10 @@ part 'location_model.g.dart';
 abstract class Location with _$Location {
   Location._();
   factory Location({
-    final String? locationId,
-    final String? pseudoId,
-    final String? locationName,
-    @Default([]) final List<Asset> assets,
+    String? locationId,
+    String? pseudoId,
+    String? locationName,
+    @Default([]) List<Asset> assets,
   }) = _Location;
 
   factory Location.fromJson(Map<String, dynamic> json) =>

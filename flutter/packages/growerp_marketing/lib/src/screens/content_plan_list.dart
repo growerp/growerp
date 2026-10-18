@@ -301,6 +301,9 @@ class GenerateContentPlanDialogState extends State<GenerateContentPlanDialog> {
   final _formKey = GlobalKey<FormState>();
   DateTime? _weekStartDate;
   Persona? _selectedPersona;
+  int _weeks = 4;
+  String _planFormat = 'PNP';
+  final _themeController = TextEditingController();
   late ContentPlanBloc _contentPlanBloc;
 
   @override
@@ -311,6 +314,12 @@ class GenerateContentPlanDialogState extends State<GenerateContentPlanDialog> {
     context.read<PersonaBloc>().add(
       const PersonaFetch(refresh: true, limit: 100),
     );
+  }
+
+  @override
+  void dispose() {
+    _themeController.dispose();
+    super.dispose();
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -336,12 +345,21 @@ class GenerateContentPlanDialogState extends State<GenerateContentPlanDialog> {
       child: popUp(
         context: context,
         title: 'Generate Content Plan with AI',
+        // room for every field and the Generate button without scrolling
+        height: 570,
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const Text(
+                  'AI plans the coming weeks for the selected persona: a '
+                  'headline and a short brief for every piece. Each piece is '
+                  'written in its own week (AI write now, or by the weekly '
+                  'content agent), then adapted to social platforms.',
+                ),
+                const SizedBox(height: 16),
                 BlocBuilder<PersonaBloc, PersonaState>(
                   builder: (context, personaState) {
                     return DropdownButtonFormField<Persona>(
@@ -380,7 +398,7 @@ class GenerateContentPlanDialogState extends State<GenerateContentPlanDialog> {
                   onTap: () => _selectDate(context),
                   child: InputDecorator(
                     decoration: const InputDecoration(
-                      labelText: 'Week Start Date (Optional)',
+                      labelText: 'First week (optional, default this week)',
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -394,6 +412,60 @@ class GenerateContentPlanDialogState extends State<GenerateContentPlanDialog> {
                       ],
                     ),
                   ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<int>(
+                        key: const Key('weeks'),
+                        decoration: const InputDecoration(labelText: 'Weeks'),
+                        initialValue: _weeks,
+                        items: [1, 2, 3, 4, 6, 8, 12]
+                            .map((w) => DropdownMenuItem<int>(
+                                  value: w,
+                                  child: Text('$w'),
+                                ))
+                            .toList(),
+                        onChanged: (value) =>
+                            setState(() => _weeks = value ?? 4),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      flex: 2,
+                      child: DropdownButtonFormField<String>(
+                        key: const Key('planFormat'),
+                        decoration: const InputDecoration(labelText: 'Format'),
+                        initialValue: _planFormat,
+                        isExpanded: true,
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'PNP',
+                            child: Text('Pain-News-Prize (3 a week)'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'SINGLE',
+                            child: Text('Single posting (1 a week)'),
+                          ),
+                        ],
+                        onChanged: (value) =>
+                            setState(() => _planFormat = value ?? 'PNP'),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                MarkdownEditor(
+                  controller: _themeController,
+                  inputKey: const Key('theme'),
+                  label: 'Theme & strategy (optional)',
+                  hint: 'e.g. Launch of our spring collection: focus on time '
+                        'savings, push the free consultation',
+                  helper: 'The topic or campaign for the plan and the goal or '
+                        'angle. Leave empty to let AI choose one from the '
+                        'persona.',
+                  height: 200,
                 ),
                 const SizedBox(height: 24),
                 BlocConsumer<ContentPlanBloc, ContentPlanState>(
@@ -422,6 +494,12 @@ class GenerateContentPlanDialogState extends State<GenerateContentPlanDialog> {
                                   ContentPlanGenerateWithAI(
                                     personaId: _selectedPersona!.personaId!,
                                     weekStartDate: _weekStartDate,
+                                    weeks: _weeks,
+                                    planFormat: _planFormat,
+                                    theme:
+                                        _themeController.text.trim().isEmpty
+                                        ? null
+                                        : _themeController.text.trim(),
                                   ),
                                 );
                               }

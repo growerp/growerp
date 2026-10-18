@@ -28,6 +28,8 @@ export 'src/adk_catalog_promotion_view.dart';
 export 'src/adk_catalog_maintain_view.dart';
 export 'src/adk_agent_catalog_view.dart';
 export 'src/adk_approvals_list_view.dart';
+export 'src/agent_control_guide_screen.dart';
+export 'src/get_adk_widgets.dart';
 // Knowledge base (RAG)
 export 'src/adk_knowledge_service.dart';
 export 'src/adk_knowledge_view.dart';

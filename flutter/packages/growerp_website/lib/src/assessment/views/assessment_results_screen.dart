@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 
 import 'package:growerp_models/growerp_models.dart';
 import '../blocs/assessment_bloc.dart';
@@ -371,7 +372,7 @@ class AssessmentResultsScreen extends StatelessWidget {
             const SizedBox(height: 24),
             _buildInfoRow('Assessment', assessment.assessmentName),
             if (assessment.description?.isNotEmpty == true)
-              _buildInfoRow('Description', assessment.description!),
+              _buildInfoRow('Description', MarkdownEditor.toPlainText(assessment.description!)),
             _buildInfoRow('Completed', _formatDate(DateTime.now())),
             _buildInfoRow('Questions Answered', '${answers.length}'),
           ],

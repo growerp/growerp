@@ -12,11 +12,16 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import '../bloc/master_content_bloc.dart';
@@ -24,12 +29,16 @@ import '../bloc/master_content_event.dart';
 import '../bloc/master_content_state.dart';
 import '../bloc/social_post_bloc.dart';
 import 'social_post_detail_screen.dart';
+import 'content_reads_view.dart';
 import 'package:growerp_marketing/l10n/generated/marketing_localizations.dart';
 
 class MasterContentDetailScreen extends StatefulWidget {
   final MasterContent? masterContent;
 
-  const MasterContentDetailScreen({super.key, this.masterContent});
+  /// website reads of this piece's links, when there are any
+  final ContentReadStats? reads;
+
+  const MasterContentDetailScreen({super.key, this.masterContent, this.reads});
 
   @override
   MasterContentDetailScreenState createState() =>
@@ -47,12 +56,19 @@ class MasterContentDetailScreenState
   late TextEditingController _pseudoIdController;
   late TextEditingController _titleController;
   late TextEditingController _bodyController;
+  late TextEditingController _briefController;
   late TextEditingController _ctaController;
   late TextEditingController _urlController;
+  late TextEditingController _ctaUrlController;
 
   String _selectedContentType = 'POSTING';
   String _selectedPnpType = 'OTHER';
   String _selectedStatus = 'DRAFT';
+  bool _teaserMode = false;
+
+  /// related image: a newly picked file, or the stored one removed
+  XFile? _imageFile;
+  bool _deleteImage = false;
 
   late MasterContentBloc _bloc;
 
@@ -66,7 +82,7 @@ class MasterContentDetailScreenState
     'SUBSTACK_NOTE',
     'EMAIL',
   ];
-  final Set<String> _selectedPlatforms = {...allPlatforms};
+  final Set<String> _selectedPlatforms = {};
 
   static String _platformLabel(String p) =>
       p == 'SUBSTACK_NOTE' ? 'Substack Note' : p;
@@ -98,14 +114,19 @@ class MasterContentDetailScreenState
         TextEditingController(text: widget.masterContent?.title ?? '');
     _bodyController =
         TextEditingController(text: widget.masterContent?.body ?? '');
+    _briefController =
+        TextEditingController(text: widget.masterContent?.brief ?? '');
     _ctaController =
         TextEditingController(text: widget.masterContent?.callToAction ?? '');
     _urlController =
         TextEditingController(text: widget.masterContent?.targetUrl ?? '');
+    _ctaUrlController =
+        TextEditingController(text: widget.masterContent?.ctaUrl ?? '');
 
     _selectedContentType = widget.masterContent?.contentType ?? 'POSTING';
     _selectedPnpType = widget.masterContent?.pnpType ?? 'OTHER';
     _selectedStatus = widget.masterContent?.status ?? 'DRAFT';
+    _teaserMode = widget.masterContent?.teaserMode == 'Y';
 
     _bloc = context.read<MasterContentBloc>();
     _loadVariants();
@@ -129,8 +150,10 @@ class MasterContentDetailScreenState
     _pseudoIdController.dispose();
     _titleController.dispose();
     _bodyController.dispose();
+    _briefController.dispose();
     _ctaController.dispose();
     _urlController.dispose();
+    _ctaUrlController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -168,6 +191,17 @@ class MasterContentDetailScreenState
                           state.message!.contains('deleted')) {
                         Navigator.of(context).pop();
                       } else {
+                        // a planned piece just written: show its text here
+                        final written = _currentMasterContent(state);
+                        if (state.message!.contains('generated') &&
+                            written != null) {
+                          setState(() {
+                            _titleController.text = written.title ?? '';
+                            _bodyController.text = written.body ?? '';
+                            _ctaController.text = written.callToAction ?? '';
+                            _selectedStatus = written.status;
+                          });
+                        }
                         HelperFunctions.showMessage(
                             context, state.message!, Colors.green);
                         // an adapt run just finished — reload the variants list
@@ -268,7 +302,10 @@ class MasterContentDetailScreenState
                           decoration:
                               const InputDecoration(labelText: 'Status'),
                           initialValue: _selectedStatus,
-                          items: statuses
+                          items: [
+                            if (_selectedStatus == 'PLANNED') 'PLANNED',
+                            ...statuses,
+                          ]
                               .map((t) => DropdownMenuItem<String>(
                                   value: t, child: Text(t)))
                               .toList(),
@@ -281,6 +318,53 @@ class MasterContentDetailScreenState
                 ],
               ),
             ),
+            const SizedBox(height: 20),
+            StyledImageUpload(
+              key: const Key('masterContentImage'),
+              label: 'Related image',
+              subtitle: 'Optional. Article hero and attached to the posts',
+              image: _imageFile != null
+                  ? (kIsWeb
+                      ? NetworkImage(_imageFile!.path)
+                      : FileImage(File(_imageFile!.path)))
+                  : null,
+              imageBytes: _imageFile == null && !_deleteImage
+                  ? masterContent?.image
+                  : null,
+              fallbackText: 'I',
+              onImageTap: () => _showLargeImage(masterContent),
+              onUploadTap: () async {
+                final pickedFile = await HelperFunctions.pickImage();
+                if (pickedFile != null) {
+                  setState(() => _imageFile = pickedFile);
+                }
+              },
+              onRemove: (_imageFile != null ||
+                      (!_deleteImage && masterContent?.image != null))
+                  ? () => setState(() {
+                        _imageFile = null;
+                        _deleteImage = true;
+                      })
+                  : null,
+            ),
+            if (widget.masterContent?.masterContentId != null)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  key: const Key('generateImage'),
+                  icon: const Icon(Icons.auto_awesome),
+                  label: const Text('Generate image with AI'),
+                  onPressed: () {
+                    // the generated image replaces any picked or removed one
+                    setState(() {
+                      _imageFile = null;
+                      _deleteImage = false;
+                    });
+                    _bloc.add(MasterContentGenerateImage(
+                        widget.masterContent!.masterContentId!));
+                  },
+                ),
+              ),
             const SizedBox(height: 20),
             GroupingDecorator(
               labelText: 'Platform-neutral content',
@@ -297,18 +381,36 @@ class MasterContentDetailScreenState
                         ? 'Title is required'
                         : null,
                   ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    key: const Key('body'),
-                    decoration: const InputDecoration(
-                      labelText: 'Body *',
-                      hintText:
-                          'Canonical content — no hashtags/platform styling',
-                      alignLabelWithHint: true,
+                  if (_selectedStatus == 'PLANNED' ||
+                      _briefController.text.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    MarkdownEditor(
+                      controller: _briefController,
+                      inputKey: const Key('brief'),
+                      label: 'Brief',
+                      height: 200,
                     ),
+                    Text(
+                      'What the text should say: the body is written '
+                      'from the title and this brief',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                  // a planned piece has no body yet: offer to write it here
+                  if (widget.masterContent?.masterContentId != null &&
+                      masterContent?.status == 'PLANNED') ...[
+                    const SizedBox(height: 10),
+                    _buildWriteNowSection(),
+                  ],
+                  const SizedBox(height: 10),
+                  MarkdownEditor(
                     controller: _bodyController,
-                    maxLines: 8,
-                    validator: (value) => (value == null || value.isEmpty)
+                    inputKey: const Key('body'),
+                    label: 'Body *',
+                    height: 400,
+                    // a planned piece gets its body when it is written
+                    validator: (_) => _bodyController.text.isEmpty &&
+                            _selectedStatus != 'PLANNED'
                         ? 'Body is required'
                         : null,
                   ),
@@ -329,6 +431,47 @@ class MasterContentDetailScreenState
                     ),
                     controller: _urlController,
                   ),
+                  if ((masterContent?.articlePath ?? '').isNotEmpty) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        masterContent?.approvedDate == null
+                            ? 'Website article: it goes on the website at the '
+                                'Target URL when you approve this piece.'
+                            : 'Website article: published at the Target URL.',
+                        key: const Key('articleInfo'),
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      key: const Key('ctaUrl'),
+                      decoration: const InputDecoration(
+                        labelText: 'Call to action link',
+                        hintText: 'Where the call to action at the bottom '
+                            'of the article links to',
+                      ),
+                      controller: _ctaUrlController,
+                    ),
+                  ],
+                  // without a Target URL the full text gets its own article
+                  // page on the website when saved
+                  ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _urlController,
+                    builder: (context, url, _) => SwitchListTile(
+                      key: const Key('teaserMode'),
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Teaser only (link to full article)'),
+                      subtitle: Text(url.text.isEmpty
+                          ? 'Posts get a short teaser linking to the full text '
+                              'on its own page of your website, where reads '
+                              'are measured'
+                          : 'Posts get a short teaser; the full article on the '
+                              'Target URL is where reads are measured'),
+                      value: _teaserMode,
+                      onChanged: (v) => setState(() => _teaserMode = v),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -347,8 +490,16 @@ class MasterContentDetailScreenState
                 Expanded(
                   child: ElevatedButton(
                     key: const Key('masterContentDetailSave'),
-                    onPressed: () {
+                    onPressed: () async {
                       if (_formKey.currentState!.validate()) {
+                        // null keeps the stored image, empty removes it
+                        final Uint8List? image = _imageFile != null
+                            ? await HelperFunctions.getResizedImage(
+                                _imageFile!.path,
+                                height: 1200)
+                            : _deleteImage
+                                ? Uint8List(0)
+                                : null;
                         final mc = MasterContent(
                           masterContentId:
                               widget.masterContent?.masterContentId,
@@ -370,7 +521,15 @@ class MasterContentDetailScreenState
                           targetUrl: _urlController.text.isEmpty
                               ? null
                               : _urlController.text,
+                          ctaUrl: _ctaUrlController.text.isEmpty
+                              ? null
+                              : _ctaUrlController.text,
+                          teaserMode: _teaserMode ? 'Y' : 'N',
+                          image: image,
                           status: _selectedStatus,
+                          brief: _briefController.text.isEmpty
+                              ? null
+                              : _briefController.text,
                         );
                         if (widget.masterContent?.masterContentId == null) {
                           _bloc.add(MasterContentCreate(mc));
@@ -387,15 +546,75 @@ class MasterContentDetailScreenState
                 ),
               ],
             ),
-            if (widget.masterContent?.masterContentId != null) ...[
+            if (widget.masterContent?.masterContentId != null &&
+                masterContent?.status != 'PLANNED') ...[
               const SizedBox(height: 20),
               _buildApprovalSection(masterContent),
+              const SizedBox(height: 20),
+              ContentReadsView(stats: widget.reads),
               const SizedBox(height: 20),
               _buildAdaptSection(state),
             ],
             const SizedBox(height: 20),
           ],
         ),
+      ),
+    );
+  }
+
+  /// The image enlarged: a just picked file as is, a stored one loaded in
+  /// full size (the piece itself only carries the small version).
+  Future<void> _showLargeImage(MasterContent? masterContent) async {
+    if (_imageFile != null) {
+      await StyledImageUpload.showLarge(context,
+          image: kIsWeb
+              ? NetworkImage(_imageFile!.path)
+              : FileImage(File(_imageFile!.path)),
+          title: 'Related image');
+      return;
+    }
+    Uint8List? bytes = masterContent?.image;
+    final id = masterContent?.masterContentId;
+    if (id != null) {
+      try {
+        final raw = await _bloc.restClient.getMasterContentImage(
+            masterContentId: id);
+        // dio may return the body as a raw JSON String; decode defensively
+        final large = ((raw is String ? jsonDecode(raw) : raw)
+            as Map<String, dynamic>)['image'] as String?;
+        if (large != null && large.isNotEmpty) bytes = base64Decode(large);
+      } catch (_) {
+        // fall back to the small version
+      }
+    }
+    if (bytes == null || !mounted) return;
+    await StyledImageUpload.showLarge(context,
+        imageBytes: bytes, title: 'Related image');
+  }
+
+  /// A planned piece of a content plan: only an outline, written on request.
+  Widget _buildWriteNowSection() {
+    return GroupingDecorator(
+      labelText: 'Planned piece',
+      child: Row(
+        children: [
+          const Expanded(
+            child: Text('Not written yet: AI writes the body from the title '
+                'and brief. Approve and adapt it afterwards.'),
+          ),
+          const SizedBox(width: 8),
+          ElevatedButton.icon(
+            key: const Key('writeNow'),
+            icon: const Icon(Icons.edit_note),
+            label: const Text('AI write now'),
+            onPressed: () {
+              // stays open: busy while writing, then shows the text
+              _bloc.add(MasterContentGenerateWithAI(
+                masterContentId: widget.masterContent!.masterContentId,
+              ));
+            },
+          ),
+        ],
       ),
     );
   }
@@ -486,6 +705,38 @@ class MasterContentDetailScreenState
     );
   }
 
+  /// Deletes one platform variant, so adapting to that platform makes it anew.
+  Future<void> _deleteVariant(SocialPost post) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete variant?'),
+        content: Text('Delete the ${post.platform} variant? Adapt to '
+            '${post.platform} again to make a new one.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(MarketingLocalizations.of(context)!.cancel),
+          ),
+          TextButton(
+            key: const Key('deleteVariantConfirm'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || post.postId == null) return;
+    try {
+      await _bloc.restClient.deleteSocialPost(postId: post.postId!);
+    } catch (e) {
+      if (mounted) {
+        HelperFunctions.showMessage(context, e.toString(), Colors.red);
+      }
+    }
+    _loadVariants();
+  }
+
   /// Lists the adapted per-platform SocialPost children. Tap a variant to
   /// edit/publish it via the existing Social Post dialog.
   Widget _buildVariants() {
@@ -523,8 +774,19 @@ class MasterContentDetailScreenState
                       style: const TextStyle(fontSize: 11),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis),
-              trailing: Text(post.status,
-                  style: const TextStyle(fontWeight: FontWeight.w500)),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(post.status,
+                      style: const TextStyle(fontWeight: FontWeight.w500)),
+                  IconButton(
+                    key: Key('deleteVariant${post.platform}'),
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    tooltip: 'Delete this variant (adapt again to remake it)',
+                    onPressed: () => _deleteVariant(post),
+                  ),
+                ],
+              ),
               onTap: () async {
                 await showDialog(
                   barrierDismissible: true,

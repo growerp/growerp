@@ -190,7 +190,10 @@ class SubscriptionTest {
       }
 
       // Check FormBuilder text fields
-      expect(formState.value['description'], subscription.description);
+      expect(
+        CommonTest.getTextFormField('description'),
+        subscription.description ?? '',
+      );
 
       // Now we can check the FormBuilder dropdown values
       if (subscription.product != null) {

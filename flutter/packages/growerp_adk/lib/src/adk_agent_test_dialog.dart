@@ -134,15 +134,12 @@ class _AdkAgentTestDialogState extends State<AdkAgentTestDialog> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              key: const Key('testPrompt'),
+            MarkdownEditor(
               controller: _promptCtrl,
-              minLines: 1,
-              maxLines: 3,
-              decoration: InputDecoration(
-                labelText: l.adk_testPrompt,
-                helperText: l.adk_testPromptHint,
-              ),
+              inputKey: const Key('testPrompt'),
+              label: l.adk_testPrompt,
+              helper: l.adk_testPromptHint,
+              height: 200,
             ),
             SwitchListTile(
               key: const Key('testDryRun'),

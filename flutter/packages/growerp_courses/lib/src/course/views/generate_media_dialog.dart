@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../bloc/course_bloc.dart';
 import 'package:growerp_courses/l10n/generated/courses_localizations.dart';
@@ -175,7 +176,7 @@ class _GenerateMediaDialogState extends State<GenerateMediaDialog> {
                 if (widget.course.description != null) ...[
                   const SizedBox(height: 4),
                   Text(
-                    widget.course.description!,
+                    MarkdownEditor.toPlainText(widget.course.description!),
                     style: Theme.of(context).textTheme.bodySmall,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,

@@ -65,6 +65,9 @@ class AdkConfigService {
         websiteChat: cfg.websiteChat,
         webSearch: cfg.webSearch,
         maxLlmCalls: cfg.maxLlmCalls,
+        loopEnabled: cfg.loopEnabled,
+        loopChatRoomId: cfg.loopChatRoomId,
+        loopReportEmail: cfg.loopReportEmail,
       );
     }
     return _client.updateAdkAgentConfig(
@@ -90,11 +93,18 @@ class AdkConfigService {
       websiteChat: cfg.websiteChat,
       webSearch: cfg.webSearch,
       maxLlmCalls: cfg.maxLlmCalls,
+      loopEnabled: catalog ? null : cfg.loopEnabled,
+      loopChatRoomId: catalog ? null : cfg.loopChatRoomId,
+      loopReportEmail: catalog ? null : cfg.loopReportEmail,
       catalog: catalog ? true : null,
       catalogPublished: catalog ? cfg.catalogPublished : null,
       catalogCategory: catalog ? cfg.catalogCategory : null,
     );
   }
+
+  /// Group chat rooms the user can see, to pick an agent's task inbox from.
+  Future<List<ChatRoom>> groupChatRooms() async =>
+      (await _client.getChatRooms(isPrivate: false, limit: 100)).chatRooms;
 
   /// The next runs of [cron] (server time zone) plus the server's time zone.
   Future<AdkSchedulePreview> schedulePreview(String? cron) =>

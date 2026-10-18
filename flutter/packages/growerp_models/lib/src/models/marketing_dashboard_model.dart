@@ -38,6 +38,7 @@ abstract class MarketingDashboard with _$MarketingDashboard {
     @Default(0) int contentToApprove,
     @Default(0) int activePlans,
     @Default(0) int newEngagements,
+    @Default(0) int contentReads,
   }) = _MarketingDashboard;
 
   factory MarketingDashboard.fromJson(Map<String, dynamic> json) =>

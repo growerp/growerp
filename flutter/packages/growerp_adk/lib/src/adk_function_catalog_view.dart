@@ -131,14 +131,12 @@ class _AdkFunctionCatalogViewState extends State<AdkFunctionCatalogView> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Suggest a function'),
-        content: TextField(
-          key: const Key('suggestFunctionDescription'),
+        content: MarkdownEditor(
           controller: descCtrl,
-          maxLines: 3,
-          decoration: const InputDecoration(
-            hintText: 'Describe what you want an agent to do, e.g. '
+          inputKey: const Key('suggestFunctionDescription'),
+          hint: 'Describe what you want an agent to do, e.g. '
                 '"remind customers about overdue invoices"',
-          ),
+          height: 200,
         ),
         actions: [
           TextButton(

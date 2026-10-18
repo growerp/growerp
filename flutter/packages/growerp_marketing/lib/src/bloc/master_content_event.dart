@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -61,6 +62,8 @@ class MasterContentDelete extends MasterContentEvent {
 
 /// Event to author a platform-neutral piece using AI
 class MasterContentGenerateWithAI extends MasterContentEvent {
+  /// a PLANNED piece of a content plan: written in place from its brief
+  final String? masterContentId;
   final String? personaId;
   final String? planId;
   final String contentType;
@@ -70,6 +73,7 @@ class MasterContentGenerateWithAI extends MasterContentEvent {
   final String? targetUrl;
 
   const MasterContentGenerateWithAI({
+    this.masterContentId,
     this.personaId,
     this.planId,
     this.contentType = 'POSTING',
@@ -81,7 +85,8 @@ class MasterContentGenerateWithAI extends MasterContentEvent {
 
   @override
   List<Object?> get props =>
-      [personaId, planId, contentType, pnpType, title, brief, targetUrl];
+      [masterContentId, personaId, planId, contentType, pnpType, title, brief,
+        targetUrl];
 }
 
 /// Event to fan a master piece out to per-platform children
@@ -126,4 +131,29 @@ class MasterContentSearchRequested extends MasterContentEvent {
 
   @override
   List<Object> get props => [searchString];
+}
+
+/// AI-make (or replace) the related image of a saved piece
+class MasterContentGenerateImage extends MasterContentEvent {
+  final String masterContentId;
+
+  const MasterContentGenerateImage(this.masterContentId);
+
+  @override
+  List<Object?> get props => [masterContentId];
+}
+
+/// Download all master content with images as a ZIP file
+class MasterContentExport extends MasterContentEvent {
+  const MasterContentExport();
+}
+
+/// Load master content from a ZIP made by [MasterContentExport]
+class MasterContentImport extends MasterContentEvent {
+  final Uint8List zipFile;
+
+  const MasterContentImport(this.zipFile);
+
+  @override
+  List<Object?> get props => [zipFile];
 }

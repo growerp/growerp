@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger
    - SUBSTACK_NOTE posts ride the scheduled publish job
    - add#SubstackSubscriber is idempotent and filters test (example.com) emails
    - collect#SubstackEngagements dedupes on externalEngagementId across runs
+   - the image of the master piece is uploaded to Substack and used in posts and notes
 
    To run: make sure moqui is in place with a loaded database, backend not running, then:
     "cd moqui && ./gradlew :runtime:component:growerp:test"
@@ -44,6 +45,8 @@ class SubstackServicesTests extends Specification {
     @Shared HttpServer stubServer
     @Shared String stubUrl
     @Shared AtomicInteger freeEndpointCalls = new AtomicInteger(0)
+    // request bodies by path, for the image tests
+    @Shared Map<String, String> lastBody = [:].asSynchronized()
 
     def setupSpec() {
         ec = Moqui.getExecutionContext()
@@ -53,9 +56,14 @@ class SubstackServicesTests extends Specification {
         stubServer = HttpServer.create(new InetSocketAddress('127.0.0.1', 0), 0)
         stubServer.createContext('/', { HttpExchange ex ->
             String path = ex.requestURI.path
+            lastBody[path] = ex.requestBody.text
             String response
             int status = 200
-            if (path == '/api/v1/drafts') {
+            if (path == '/api/v1/image') {
+                response = '{"url": "https://substackcdn.example/uploaded.jpg"}'
+            } else if (path == '/api/v1/comment/attachment') {
+                response = '{"id": "att-1"}'
+            } else if (path == '/api/v1/drafts') {
                 response = '{"id": 4242}'
             } else if (path ==~ '/api/v1/drafts/\\d+/publish') {
                 response = "{\"id\": 4242, \"slug\": \"test-post\", \"canonical_url\": \"${stubUrl}/p/test-post\"}"
@@ -124,6 +132,54 @@ class SubstackServicesTests extends Specification {
         out.success
         out.externalPostId == '4242'
         out.publishedUrl == "${stubUrl}/p/test-post"
+    }
+
+    /** a master piece of the test owner with a (tiny) related image */
+    private String masterWithImage() {
+        String id = "SUBSTACK_IMG_${System.currentTimeMillis()}"
+        String location = "dbresource://test/substack/${id}/"
+        ec.resource.getLocationReference(location + 'large').putBytes(
+                [0xFF, 0xD8, 0xFF, 0xE0, 0, 0x10] as byte[])
+        ec.service.sync().name('create#growerp.marketing.MasterContent').disableAuthz()
+                .parameters([masterContentId: id, ownerPartyId: ownerPartyId, contentType: 'POSTING',
+                        pnpType: 'PAIN', title: 'With image', body: 'Body.', status: 'APPROVED',
+                        imageLocation: location]).call()
+        return id
+    }
+
+    def "an article carries the master image uploaded to Substack"() {
+        setup:
+        lastBody.clear()
+        String postId = createPost([platform: 'SUBSTACK', status: 'DRAFT', headline: 'Image article',
+                finalContent: 'Text.', masterContentId: masterWithImage()])
+        EntityValue post = ec.entity.find('growerp.marketing.SocialPost').condition('postId', postId).one()
+
+        when:
+        Map out = ec.service.sync()
+                .name('growerp.100.SocialPostPublishingServices100.publish#SocialPostToSubstack')
+                .parameters([post: post, platformConfig: platformConfig()]).disableAuthz().call()
+
+        then:
+        out.success
+        lastBody['/api/v1/image'].contains('data:image/jpeg;base64,')
+        lastBody['/api/v1/drafts'].contains('https://substackcdn.example/uploaded.jpg')
+    }
+
+    def "a note gets the master image as attachment"() {
+        setup:
+        lastBody.clear()
+        String postId = createPost([platform: 'SUBSTACK_NOTE', status: 'DRAFT',
+                finalContent: 'Short note.', masterContentId: masterWithImage()])
+        EntityValue post = ec.entity.find('growerp.marketing.SocialPost').condition('postId', postId).one()
+
+        when:
+        Map out = ec.service.sync().name('growerp.100.SubstackServices100.publish#SubstackNote')
+                .parameters([post: post, platformConfig: platformConfig()]).disableAuthz().call()
+
+        then:
+        out.success
+        lastBody['/api/v1/comment/attachment'].contains('https://substackcdn.example/uploaded.jpg')
+        lastBody['/api/v1/comment/feed'].contains('"attachmentIds":["att-1"]')
     }
 
     def "SUBSTACK_NOTE posts are published by the scheduled job"() {

@@ -50,6 +50,8 @@ limitations under the License.
         title="Acct Setup" route="/acct-setup" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="64"/>
     <growerp.menu.MenuItem menuItemId="RENTAL_MARKETING" menuConfigurationId="RENTAL_DEFAULT"
         title="Marketing" route="/marketing" iconName="campaign" widgetName="ContentPlanList" sequenceNum="70"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_OUTREACH" menuConfigurationId="RENTAL_DEFAULT"
+        title="Outreach" route="/outreach" iconName="send" widgetName="CampaignListScreen" sequenceNum="72"/>
     <growerp.menu.MenuItem menuItemId="RENTAL_ABOUT" menuConfigurationId="RENTAL_DEFAULT"
         title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="100"/>
 
@@ -102,6 +104,18 @@ limitations under the License.
         title="Personas" iconName="people" widgetName="PersonaList" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="RENTAL_MKTG_ENGAGEMENT" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_MARKETING"
         title="Engagements" iconName="thumb_up" widgetName="SocialEngagementList" sequenceNum="38"/>
+
+    <!-- ====================== Outreach children ====================== -->
+    <growerp.menu.MenuItem menuItemId="RENTAL_OUT_GUIDE" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_OUTREACH"
+        title="Guide" iconName="checklist" widgetName="OutreachSetupGuideScreen" sequenceNum="5"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_OUT_CAMP" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_OUTREACH"
+        title="Campaigns" iconName="list" widgetName="CampaignListScreen" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_OUT_AUTO" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_OUTREACH"
+        title="Automation" iconName="settings_input_component" widgetName="AutomationScreen" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_OUT_PLAT" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_OUTREACH"
+        title="Platforms" iconName="public" widgetName="PlatformConfigListScreen" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_OUT_MSGS" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_OUTREACH"
+        title="Messages" iconName="message" widgetName="OutreachMessageList" sequenceNum="40"/>
 
     <growerp.menu.MenuItem menuItemId="RENTAL_EQ_ASSETS" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_EQUIPMENT"
         title="Equipment" iconName="construction" widgetName="AssetList" sequenceNum="10"/>

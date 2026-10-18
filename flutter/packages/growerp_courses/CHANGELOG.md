@@ -1,3 +1,30 @@
+## 1.11.0
+
+ - **FIX**(courses): test passwords for new participants, ids for demo courses. ([7ad22780](https://github.com/growerp/growerp/commit/7ad227802fbc569d1aaa13cba2f6ef872e0aef35))
+ - **FIX**(l10n): translate spanish files. ([d73c43ea](https://github.com/growerp/growerp/commit/d73c43eadb271fa9eabe7ba978e64b919ecc084c))
+ - **FIX**(l10n): localize list search-field hints. ([da9d0423](https://github.com/growerp/growerp/commit/da9d042313905d0ab2c7595f7b923498e8ec9ba6))
+ - **FIX**(l10n): localize all table column headers. ([a9f07958](https://github.com/growerp/growerp/commit/a9f079580e284d036e3452699f1e4782ad706936))
+ - **FIX**(l10n): translate all missing de/fr/nl/zh messages. ([19df4566](https://github.com/growerp/growerp/commit/19df4566f3aeb0998d6a17ce0e2955b07676de31))
+ - **FIX**(ci): register courses l10n delegate and tighten test gate. ([28a909b4](https://github.com/growerp/growerp/commit/28a909b4549cd179da91c0feb636fc3ec8d7a158))
+ - **FEAT**(courses): download and upload full courses as JSON. ([4e655abb](https://github.com/growerp/growerp/commit/4e655abb10c9f1df140f9698709bf5261201dd00))
+ - **FEAT**(shop): sell courses as website products through a modern checkout. ([eb246771](https://github.com/growerp/growerp/commit/eb2467713c24c64ef17d5981482f4fd47f248527))
+ - **FEAT**(courses): participants tab to manage learners and their courses. ([4515db6f](https://github.com/growerp/growerp/commit/4515db6fad705789e1688dab953825b228a73ebe))
+ - **FEAT**(academy): school directory instead of company registration. ([5e027954](https://github.com/growerp/growerp/commit/5e02795408ea33c99f31fb331abe95613b712dca))
+ - **FEAT**(courses): translation, instructor review, pacing, discussion, adaptive paths, content freshness. ([15977d51](https://github.com/growerp/growerp/commit/15977d516f0b0da4fe76a2fecda43c749a6ea035))
+ - **FEAT**(courses): exercises and capstone project with AI feedback. ([a09283ad](https://github.com/growerp/growerp/commit/a09283ad7568317dc06751d909b474dcadd9f1e2))
+ - **FEAT**(courses): AI tutor for learners. ([2aacc53e](https://github.com/growerp/growerp/commit/2aacc53e1f299370d22fc72cae26845ec0febdf6))
+ - **FEAT**(courses): translate the course and academy screens. ([15cf2416](https://github.com/growerp/growerp/commit/15cf2416568bc2c8a2e6eec98fd9836ea1f17846))
+ - **FEAT**(courses): AI promo pack. ([49aedfe2](https://github.com/growerp/growerp/commit/49aedfe25cf2bd3a0a47ed4f2d6ddc73635b5d88))
+ - **FEAT**(courses): narrated module videos from the slides. ([0d24b35a](https://github.com/growerp/growerp/commit/0d24b35a5d773deecc8e8c0b53fbd9c70803f850))
+ - **FEAT**(courses): slides and workbook pdf. ([2198b84c](https://github.com/growerp/growerp/commit/2198b84ca908ec455be065fa0b31cd9b7be59b32))
+ - **FEAT**(courses): module quizzes and completion certificate. ([223c33d2](https://github.com/growerp/growerp/commit/223c33d2d9661317c7ce0f400c37f6a06c52fd7f))
+ - **FEAT**(courses): prompt for own AI key when the allowance is used up. ([5d2cd243](https://github.com/growerp/growerp/commit/5d2cd243cf96e96a82a5596a06b15bc6340a1e69))
+ - **FEAT**(courses): create courses with AI. ([5789726e](https://github.com/growerp/growerp/commit/5789726e1bb1e50230b3a70560864c6a5c69455a))
+ - **FEAT**(courses): academy is learner-only; admin course preview. ([6ee712c3](https://github.com/growerp/growerp/commit/6ee712c37cf34424387938e7a93385b7b214e94f))
+ - **FEAT**(academy): learner app for taking courses. ([443c6415](https://github.com/growerp/growerp/commit/443c6415dd648b0a20463db8a077e5b6e486e00f))
+ - **FEAT**(l10n): add Spanish language scaffolding. ([7e7cc80f](https://github.com/growerp/growerp/commit/7e7cc80f09c20e4ac7efa86e1b203045877419fe))
+ - **FEAT**(l10n): add Spanish language scaffolding. ([a2386537](https://github.com/growerp/growerp/commit/a2386537663750b6e18a17ab6265ba20485b22a6))
+
 ## 1.10.1
 
  - **FIX**: relicense under Apache License 2.0 (LICENSE and file headers).

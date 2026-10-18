@@ -630,20 +630,11 @@ class CompanyFormState extends State<CompanyDialog> {
           children: [
             Expanded(
               child: TextFormField(
-                readOnly: !isAdmin,
+                // all host names of the store, set by registration/website, not here
+                readOnly: true,
                 key: const Key('hostName'),
                 decoration: InputDecoration(labelText: localizations.hostName),
                 controller: _hostNameController,
-                validator: (value) {
-                  // same rule as the backend: plain host name, optional port
-                  if (value == null || value.trim().isEmpty) return null;
-                  return RegExp(
-                        r'^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*(:\d+)?$',
-                        caseSensitive: false,
-                      ).hasMatch(value.trim())
-                      ? null
-                      : localizations.hostNameError;
-                },
               ),
             ),
             const SizedBox(width: 10),

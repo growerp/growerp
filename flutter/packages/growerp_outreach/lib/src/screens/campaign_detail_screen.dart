@@ -528,12 +528,11 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                         ],
                       ),
                       const SizedBox(height: 10),
-                      TextFormField(
-                        key: const Key('description'),
+                      MarkdownEditor(
                         controller: _descriptionController,
-                        decoration:
-                            const InputDecoration(labelText: 'Description'),
-                        maxLines: 2,
+                        inputKey: const Key('description'),
+                        label: 'Description',
+                        height: 200,
                       ),
                       const SizedBox(height: 20),
                       if (widget.campaign.campaignId != null) ...[
@@ -667,12 +666,11 @@ class CampaignDetailScreenState extends State<CampaignDetailScreen> {
                         },
                       ),
                       const SizedBox(height: 20),
-                      TextFormField(
-                        key: const Key('targetAudience'),
+                      MarkdownEditor(
                         controller: _targetAudienceController,
-                        decoration:
-                            const InputDecoration(labelText: 'Target Audience'),
-                        maxLines: 3,
+                        inputKey: const Key('targetAudience'),
+                        label: 'Target Audience',
+                        height: 160,
                       ),
                       const SizedBox(height: 20),
                       _landingPageField(),

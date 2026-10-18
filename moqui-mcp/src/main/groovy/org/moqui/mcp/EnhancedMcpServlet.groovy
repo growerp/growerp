@@ -43,6 +43,7 @@ class EnhancedMcpServlet extends HttpServlet {
     protected final static Logger logger = LoggerFactory.getLogger(EnhancedMcpServlet.class)
 
     private volatile boolean shuttingDown = false
+    private Thread shutdownHook
     private final java.util.concurrent.atomic.AtomicInteger activeSseCount =
             new java.util.concurrent.atomic.AtomicInteger(0)
 
@@ -112,6 +113,12 @@ class EnhancedMcpServlet extends HttpServlet {
             ecfi.registerNotificationMessageListener(notificationBridge)
             logger.info("Registered MoquiNotificationMcpBridge with ECF")
         }
+
+        // Close SSE streams as soon as the JVM starts shutting down. Jetty's graceful stop waits
+        // (stopTimeout, 30s) for open connections before destroy() is called, and SSE streams never end
+        // on their own, so without this every shutdown with an MCP client connected took 30s longer.
+        shutdownHook = new Thread({ beginShutdown() } as Runnable, "McpSseShutdown")
+        Runtime.getRuntime().addShutdownHook(shutdownHook)
 
         logger.info("EnhancedMcpServlet initialized with adapter architecture for webapp ${webappName}")
         logger.info("SSE endpoint: ${sseEndpoint}, Message endpoint: ${messageEndpoint}")
@@ -1125,15 +1132,23 @@ class EnhancedMcpServlet extends HttpServlet {
         return transport
     }
 
-    @Override
-    void destroy() {
-        logger.info("Destroying EnhancedMcpServlet")
+    private void beginShutdown() {
         shuttingDown = true
 
         // Close all sessions
         for (String sessionId in sessionAdapter.getAllSessionIds()) {
             transport.closeSession(sessionId)
         }
+    }
+
+    @Override
+    void destroy() {
+        logger.info("Destroying EnhancedMcpServlet")
+        if (shutdownHook) {
+            // throws IllegalStateException when the JVM is already shutting down; hook then already ran
+            try { Runtime.getRuntime().removeShutdownHook(shutdownHook) } catch (IllegalStateException ignored) {}
+        }
+        beginShutdown()
 
         // Wait for SSE threads to complete asyncContext.complete() before Moqui tears down the DB pool
         long deadline = System.currentTimeMillis() + 3000

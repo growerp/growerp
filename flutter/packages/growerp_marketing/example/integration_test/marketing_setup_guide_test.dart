@@ -89,16 +89,16 @@ void main() {
 
     // The engagements step cannot be checked from data: opening it completes
     // it, and it stays completed after returning to the list
-    await CommonTest.dragUntil(tester, key: 'guideStep7');
-    await CommonTest.tapByKey(tester, 'guideStep7');
+    await CommonTest.dragUntil(tester, key: 'guideStep8');
+    await CommonTest.tapByKey(tester, 'guideStep8');
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
     await CommonTest.checkWidgetKey(tester, 'guideStepPage');
     await CommonTest.tapByKey(tester, 'backToGuide');
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
-    await CommonTest.dragUntil(tester, key: 'guideStep7');
+    await CommonTest.dragUntil(tester, key: 'guideStep8');
     expect(
       find.descendant(
-        of: find.byKey(const Key('guideStep7')),
+        of: find.byKey(const Key('guideStep8')),
         matching: find.byIcon(Icons.check),
       ),
       findsOneWidget,

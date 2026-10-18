@@ -133,12 +133,22 @@ posts, landing pages) is written *for* the selected persona.
 
 ### 3.2 Content Plans
 
-A weekly content schedule per persona, based on the *Pain–News–Prize* formula
-(address a pain, share news, offer value).
+A content plan covers one or more weeks for a persona. It is an outline: for every piece a
+headline, a short brief and the day it goes out. The text itself is written week by week,
+so news stays current and you can still change next week's brief.
 
-- **Generate:** press **+**, pick a persona, and the AI proposes a themed weekly
-  plan of post headlines.
-- Open a plan to see its posts and their schedule.
+- **Generate:** press **+**, pick a persona, the number of **Weeks** (default 4) and a
+  **Format**:
+  - *Pain-News-Prize*: three pieces a week, Pain on Monday, News on Wednesday, Prize on
+    Friday (address a pain, share news, offer value).
+  - *Single posting*: one piece a week, on Monday.
+  The pieces appear with status *PLANNED*: a title and a brief, no text yet.
+- Open a plan to see its pieces grouped by week. Tap **Write now** on a planned piece (or
+  in the piece's dialog) and the AI writes its text from the title and brief; the piece
+  becomes *DRAFT* and gets an AI-made image in the background. The weekly content agent
+  does this for you every Monday for that week's pieces.
+- A planned piece cannot be approved or adapted until it is written. Adapting it
+  schedules the platform posts on the day the plan gave it.
 
 ### 3.3 Content
 
@@ -147,7 +157,42 @@ The content hub: author a piece of content **once**, then adapt it per platform
 
 - **Draft with AI:** from a headline, the draft service writes the full post text;
   review, humanise, and mark the platform variant *Scheduled* or *Published*.
+- **Markdown:** the text of a piece is Markdown (short paragraphs, `##` subheadings,
+  lists, **bold**). Your website article and Medium keep the formatting; LinkedIn, X,
+  Facebook, Substack and e-mail variants get plain text with the same paragraphs, as
+  those platforms show Markdown symbols as typed.
 - Post statuses: *Draft → Scheduled → Published*.
+- **Ideas strip** (top of the screen): paste text or notes, or give an article URL, or
+  both. **Write article** turns an idea into a ~500 word article in your house style
+  and removes the idea; the article goes on your website (listed on its **Articles**
+  page) when you approve it. Long-press and drag to reorder: the weekly content agent
+  uses the ideas in that order. Tap **Ideas (n)** to collapse the strip.
+- **Teaser only:** with a Target URL set, every platform gets a short teaser that
+  links to the full article instead of the full text. An article (content type
+  ARTICLE) that is not on your website yet gets its own page when it is adapted: the
+  Target URL becomes that page, and the old Target URL (for example a landing page)
+  becomes the **Call to action link** at the bottom of the article.
+- **Related image (optional):** a piece can carry one image. In the piece's dialog use
+  **Add** / **Update** to pick one, **Remove** to drop it, and tap the image to see it full
+  size. **Generate image with AI** makes one from the title and body (saved pieces
+  only, takes about 20 seconds). Pieces written by AI (Generate with AI, Write article,
+  the weekly plan) get an image automatically, made in the background just after the
+  piece is saved; refresh the list to see the thumbnail. The image is used:
+  - at the top of the article page on your website;
+  - in the LinkedIn, X and Facebook posts adapted from the piece;
+  - in Medium and Substack drafts, through its link on your website (only when your
+    company has a website).
+
+  Substack notes and e-mail variants go out without the image.
+- **Download / upload (ZIP):** the files button on the Content list. **Download ZIP**
+  saves every piece with its image in one ZIP file, as a backup or to move content to
+  another company. **Upload ZIP** loads such a file: a piece whose ID already exists is
+  updated, any other is added as a *Draft*. Uploaded pieces are never approved and get no
+  website page, so nothing is published until you approve them.
+- **Reads column:** website visitors who came in through the piece's links
+  (*read / landed*). A visit counts as read after 15 seconds on the page and scrolling
+  halfway, so bots and mail scanners are not counted. The per-platform breakdown is
+  in the piece's dialog under **Website reads**.
 
 ### 3.4 Email Sequences
 
@@ -355,6 +400,7 @@ Review each agent's configuration before enabling its schedule.
 |---|---|
 | Sequence e-mails not arriving | No outgoing e-mail server configured (System Setup), or the sequence is *Paused*. Enrollment state still advances; configure mail and future steps will send. |
 | Form doesn't appear on website page | The `data-growerp-form` div is missing or has the wrong form ID; check the ID on the Web Forms screen. |
+| "No image generated" on a content piece | No AI key set (System Setup → AI Settings) or the AI allowance is used up. A system-wide `GEMINI_IMAGE_MODEL` setting must name an image model (the default is `gemini-3.1-flash-image`); a text model such as `gemini-3.8-flash` returns no image. |
 | Campaign not sending on a platform | Platform disabled or daily limit reached — check Outreach → Platforms. |
 | Lead exists but no follow-up task visible | Refresh the CRM → My To Do list; tasks created by conversions/next-steps are set to *In Progress*. |
 | Expected leads missing from list | Use the search bar — the list is paged; also check the Customers tab if the person was already promoted. |

@@ -117,6 +117,33 @@ class ActivityTest {
         .toList();
   }
 
+  /// Add a comment to the first activity and check it is listed.
+  static Future<void> addComment(WidgetTester tester) async {
+    const comment = 'Please call back before noon';
+    await clearSearch(tester);
+    await tester.ensureVisible(find.byKey(const Key('name0')));
+    await tester.tap(find.byKey(const Key('name0')));
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+    await CommonTest.checkWidgetKey(tester, 'ActivityDialog');
+    await tester.ensureVisible(find.byKey(const Key('Comments')));
+    await CommonTest.tapByKey(tester, 'Comments');
+    await CommonTest.checkWidgetKey(tester, 'ActivityNotesDialog');
+    await CommonTest.enterText(tester, 'activityNoteText', comment);
+    await CommonTest.tapByKey(tester, 'activityNoteAdd');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('activityNote0')),
+        matching: find.text(comment),
+      ),
+      findsOneWidget,
+    );
+    // close the comments dialog, then the activity dialog
+    await tester.tap(find.byKey(const Key('cancel')).last);
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+    await CommonTest.tapByKey(tester, 'cancel');
+  }
+
   static Future<void> deleteLastActivity(WidgetTester tester) async {
     SaveTest test = await PersistFunctions.getTest();
     int count = test.activities.length;

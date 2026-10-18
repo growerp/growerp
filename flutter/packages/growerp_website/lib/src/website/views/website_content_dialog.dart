@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:markdown_widget/markdown_widget.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:growerp_core/growerp_core.dart';
@@ -61,6 +60,8 @@ class WebsiteContentState extends State<WebsiteContent> {
       TextEditingController();
   bool _seoDescriptionLoaded = false;
   final TextEditingController _htmlBodyController = TextEditingController();
+  final TextEditingController _mdController = TextEditingController();
+  bool _mdLoaded = false;
   bool _htmlBodyLoaded = false;
   static final RegExp _descriptionComment = RegExp(
     r'<!--\s*description:.*?-->\s*\n?',
@@ -71,10 +72,8 @@ class WebsiteContentState extends State<WebsiteContent> {
   XFile? _imageFile;
   late Content newContent;
   String data = '';
-  String newData = '';
   late bool isMarkDown;
   late ContentBloc _contentBloc;
-  late ThemeBloc _themeBloc;
   late WebsiteLocalizations _localizations;
   late final bool _wasHome = widget.isHome?.value ?? false;
 
@@ -95,13 +94,13 @@ class WebsiteContentState extends State<WebsiteContent> {
     }
     _contentBloc = context.read<ContentBloc>();
     _contentBloc.add(ContentFetch(widget.websiteId, widget.content));
-    _themeBloc = context.read<ThemeBloc>();
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
     _htmlBodyController.dispose();
+    _mdController.dispose();
     super.dispose();
   }
 
@@ -148,7 +147,6 @@ class WebsiteContentState extends State<WebsiteContent> {
           case ContentStatus.success:
             newContent = state.content!;
             data = state.content!.text;
-            if (newData.isEmpty) newData = data;
             if (!_seoDescriptionLoaded) {
               _seoDescriptionController.text = state.content!.description;
               _seoDescriptionLoaded = true;
@@ -156,6 +154,11 @@ class WebsiteContentState extends State<WebsiteContent> {
             if (!_htmlBodyLoaded && widget.content.contentType == 'ftl') {
               _htmlBodyController.text = data;
               _htmlBodyLoaded = true;
+            }
+            if (!_mdLoaded && widget.content.contentType != 'ftl') {
+              // the description comment is edited in its own field
+              _mdController.text = data.replaceAll(_descriptionComment, '');
+              _mdLoaded = true;
             }
             if (widget.content.text.isNotEmpty) {
               return Dialog(
@@ -293,22 +296,6 @@ class WebsiteContentState extends State<WebsiteContent> {
   Widget _showMdTextForm(bool isPhone) {
     // ftl content: raw FreeMarker/HTML page, no client-side preview possible
     final bool isFtl = widget.content.contentType == 'ftl';
-    Widget input = TextFormField(
-      key: const Key('mdInput'),
-      autofocus: true,
-      style: isFtl ? const TextStyle(fontFamily: 'monospace', fontSize: 13) : null,
-      decoration: InputDecoration(labelText: _localizations.description),
-      expands: true,
-      maxLines: null,
-      textAlignVertical: TextAlignVertical.top,
-      textInputAction: TextInputAction.newline,
-      initialValue: data,
-      onChanged: (text) {
-        setState(() {
-          newData = text;
-        });
-      },
-    );
     return Column(
       children: [
         TextFormField(
@@ -367,47 +354,10 @@ class WebsiteContentState extends State<WebsiteContent> {
                   monospace: true,
                 ),
               )
-            : isPhone
-            ? Expanded(
-                child: Column(
-                  children: [
-                    Expanded(child: input),
-                    const SizedBox(height: 10),
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(25.0),
-                          border: Border.all(
-                            style: BorderStyle.solid,
-                            width: 0.80,
-                          ),
-                        ),
-                        child: MarkdownWidget(
-                          data: newData,
-                          config: _themeBloc.state.themeMode == ThemeMode.dark
-                              ? MarkdownConfig.darkConfig
-                              : MarkdownConfig.defaultConfig,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              )
             : Expanded(
-                child: Row(
-                  children: [
-                    Expanded(child: input),
-                    const SizedBox(width: 20),
-                    Expanded(
-                      child: MarkdownWidget(
-                        data: newData,
-                        config: _themeBloc.state.themeMode == ThemeMode.dark
-                            ? MarkdownConfig.darkConfig
-                            : MarkdownConfig.defaultConfig,
-                      ),
-                    ),
-                  ],
+                child: MarkdownEditor(
+                  controller: _mdController,
+                  inputKey: const Key('mdInput'),
                 ),
               ),
         const SizedBox(height: 10),
@@ -419,7 +369,7 @@ class WebsiteContentState extends State<WebsiteContent> {
                 : _localizations.update,
           ),
           onPressed: () async {
-            final String bodyText = isFtl ? _htmlBodyController.text : newData;
+            final String bodyText = isFtl ? _htmlBodyController.text : _mdController.text;
             if (bodyText != '') {
               // description lives in the page text as a comment so the
               // public site can render it as <meta name="description">

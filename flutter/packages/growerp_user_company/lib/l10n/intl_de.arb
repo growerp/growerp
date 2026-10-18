@@ -59,7 +59,6 @@
   "firstName": "Vorname",
   "firstNameError": "Bitte Vornamen eingeben",
   "hostName": "Hostname",
-  "hostNameError": "Geben Sie einen einfachen Hostnamen wie shop.example.com ein",
   "id": "ICH WÜRDE",
   "lastName": "Nachname",
   "lastNameError": "Bitte geben Sie einen Nachnamen ein",

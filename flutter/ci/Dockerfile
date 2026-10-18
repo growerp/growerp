@@ -22,6 +22,14 @@ FROM ghcr.io/cirruslabs/flutter:stable
 
 ARG BRANCH=master
 USER root
+# cirruslabs publishes no image newer than Flutter 3.44 (Dart 3.12), the packages need Dart 3.13
+ARG FLUTTER_VERSION=3.47.6
+ENV FLUTTER_VERSION=${FLUTTER_VERSION}
+RUN rm -rf /sdks/flutter && \
+    curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz \
+    | tar -xJ -C /sdks && \
+    git config --system --add safe.directory '*' && \
+    flutter --version
 
 # Install Linux desktop build dependencies and xvfb for headless display
 # Enable universe repo (required on Ubuntu 24.04+ for cmake, gdb, clang, etc.)
@@ -32,7 +40,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     git zip gdb libstdc++6 fonts-noto nano sed curl \
     xvfb libgtk-3-dev ninja-build cmake clang lld llvm pkgconf liblzma-dev \
-    libglu1-mesa binutils \
+    libglu1-mesa binutils libpulse-dev unzip \
     libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 

@@ -289,11 +289,11 @@ class PolicyDialogState extends State<PolicyDialog> {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
           ),
           const SizedBox(height: 10),
-          TextFormField(
-            key: const Key('description'),
-            decoration: InputDecoration(labelText: localizations.description),
+          MarkdownEditor(
             controller: _descriptionController,
-            maxLines: 2,
+            inputKey: const Key('description'),
+            label: localizations.description,
+            height: 200,
           ),
           const SizedBox(height: 10),
           Text(

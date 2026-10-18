@@ -75,5 +75,8 @@
   "dashWeek": "周",
   "dashMonth": "月",
   "dashQuarter": "季度",
-  "signupsCount": "{count} 个注册"
+  "signupsCount": "{count} 个注册",
+  "signupRangeWeek": "最近7天",
+  "signupRangeMonth": "最近30天",
+  "signupRangeQuarter": "最近一个季度"
 }

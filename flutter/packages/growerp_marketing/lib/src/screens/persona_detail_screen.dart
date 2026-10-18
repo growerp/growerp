@@ -213,14 +213,12 @@ class PersonaDetailScreenState extends State<PersonaDetailScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: TextFormField(
-                          key: const Key('demographics'),
-                          decoration: const InputDecoration(
-                            labelText: 'Demographics',
-                            hintText: 'Age, occupation, location, etc.',
-                          ),
+                        child: MarkdownEditor(
                           controller: _demographicsController,
-                          maxLines: 2,
+                          inputKey: const Key('demographics'),
+                          label: 'Demographics',
+                          hint: 'Age, occupation, location, etc.',
+                          height: 160,
                         ),
                       ),
                     ],
@@ -236,14 +234,12 @@ class PersonaDetailScreenState extends State<PersonaDetailScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: TextFormField(
-                          key: const Key('painPoints'),
-                          decoration: const InputDecoration(
-                            labelText: 'Pain Points',
-                            hintText: 'What challenges does this persona face?',
-                          ),
+                        child: MarkdownEditor(
                           controller: _painPointsController,
-                          maxLines: 3,
+                          inputKey: const Key('painPoints'),
+                          label: 'Pain Points',
+                          hint: 'What challenges does this persona face?',
+                          height: 200,
                         ),
                       ),
                     ],
@@ -252,14 +248,12 @@ class PersonaDetailScreenState extends State<PersonaDetailScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: TextFormField(
-                          key: const Key('goals'),
-                          decoration: const InputDecoration(
-                            labelText: 'Goals',
-                            hintText: 'What does this persona want to achieve?',
-                          ),
+                        child: MarkdownEditor(
                           controller: _goalsController,
-                          maxLines: 3,
+                          inputKey: const Key('goals'),
+                          label: 'Goals',
+                          hint: 'What does this persona want to achieve?',
+                          height: 200,
                         ),
                       ),
                     ],
@@ -275,14 +269,12 @@ class PersonaDetailScreenState extends State<PersonaDetailScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: TextFormField(
-                          key: const Key('toneOfVoice'),
-                          decoration: const InputDecoration(
-                            labelText: 'Tone of Voice',
-                            hintText: 'e.g., Professional yet approachable',
-                          ),
+                        child: MarkdownEditor(
                           controller: _toneOfVoiceController,
-                          maxLines: 2,
+                          inputKey: const Key('toneOfVoice'),
+                          label: 'Tone of Voice',
+                          hint: 'e.g., Professional yet approachable',
+                          height: 160,
                         ),
                       ),
                     ],

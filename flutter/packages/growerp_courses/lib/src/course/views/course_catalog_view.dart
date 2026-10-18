@@ -15,6 +15,7 @@
 import '../../documents/backend_url.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../bloc/course_bloc.dart';
@@ -225,7 +226,7 @@ class _CourseCatalogTile extends StatelessWidget {
                     if (course.description != null) ...[
                       SizedBox(height: 4),
                       Text(
-                        course.description!,
+                        MarkdownEditor.toPlainText(course.description!),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(

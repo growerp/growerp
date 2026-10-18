@@ -9,6 +9,7 @@ screen/store/landingpage/
 screen/store/assessment/
 screen/store/freelance/
 screen/store/academy/
+screen/store/insurance/
 
 
 # gradle/build files

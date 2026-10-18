@@ -91,11 +91,13 @@ limitations under the License.
                          request came in on and only fall back on the date. -->
                     <script><![CDATA[
                         // no web request on a background job: keep the date order there
-                        String requestHost = ec.web?.getHostName(true)
+                        // ports are ignored on both sides, as get#ProductStoreIdFromHostName does:
+                        // getHostName(true) always adds one (even :80) while most rows have none
+                        String requestHost = ec.web?.getHostName(false)
                         def match = null
                         if (requestHost) {
-                            match = hostNames.find { it.settingValue == requestHost } ?:
-                                    hostNames.find { it.settingValue?.endsWith(requestHost) }
+                            match = hostNames.find { it.settingValue?.replaceFirst(/:\d+$/, '') == requestHost } ?:
+                                    hostNames.find { it.settingValue?.replaceFirst(/:\d+$/, '')?.endsWith(requestHost) }
                         }
                         context.hostName = (match ?: hostNames[0]).settingValue
                     ]]></script>
@@ -395,14 +397,15 @@ limitations under the License.
                              row get#Website would show for this request instead of always the
                              newest by date, or editing silently targets the wrong host name. -->
                         <script><![CDATA[
-                            String requestHost = ec.web?.getHostName(true)
+                            // ports ignored on both sides, as in get#Website
+                            String requestHost = ec.web?.getHostName(false)
                             if (requestHost == '10.0.2.2') {
-                                requestHost = "${stores[0].productStoreId}.localhost:${ec.web?.request?.getServerPort() ?: 8080}"
+                                requestHost = "${stores[0].productStoreId}.localhost"
                             }
                             def match = null
                             if (requestHost) {
-                                match = prodStoreSettings.find { it.settingValue == requestHost } ?:
-                                        prodStoreSettings.find { it.settingValue?.endsWith(requestHost) }
+                                match = prodStoreSettings.find { it.settingValue?.replaceFirst(/:\d+$/, '') == requestHost } ?:
+                                        prodStoreSettings.find { it.settingValue?.replaceFirst(/:\d+$/, '')?.endsWith(requestHost) }
                             }
                             currentSetting = match ?: prodStoreSettings[0]
                         ]]></script>

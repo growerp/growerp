@@ -114,7 +114,7 @@ List<Widget> getPersonaListRow({
             ),
           if (persona.demographics != null)
             Text(
-              persona.demographics!.truncate(30),
+              MarkdownEditor.toPlainText(persona.demographics!).truncate(30),
               key: Key('demographics$index'),
               style: TextStyle(
                 fontSize: 11,
@@ -148,7 +148,7 @@ List<Widget> getPersonaListRow({
     // Demographics
     cells.add(
       Text(
-        persona.demographics ?? 'N/A',
+        MarkdownEditor.toPlainText(persona.demographics ?? 'N/A'),
         key: Key('demographics$index'),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
@@ -158,7 +158,7 @@ List<Widget> getPersonaListRow({
     // Pain Points
     cells.add(
       Text(
-        persona.painPoints ?? 'N/A',
+        MarkdownEditor.toPlainText(persona.painPoints ?? 'N/A'),
         key: Key('painPoints$index'),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
@@ -168,7 +168,7 @@ List<Widget> getPersonaListRow({
     // Goals
     cells.add(
       Text(
-        persona.goals ?? 'N/A',
+        MarkdownEditor.toPlainText(persona.goals ?? 'N/A'),
         key: Key('goals$index'),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,

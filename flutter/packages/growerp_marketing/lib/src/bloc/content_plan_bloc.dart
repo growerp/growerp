@@ -234,6 +234,9 @@ class ContentPlanBloc extends Bloc<ContentPlanEvent, ContentPlanState> {
                 event.weekStartDate!.day,
               ).millisecondsSinceEpoch
             : null,
+        weeks: event.weeks,
+        planFormat: event.planFormat,
+        theme: event.theme,
       );
 
       final updatedContentPlans = List<ContentPlan>.from(state.contentPlans)

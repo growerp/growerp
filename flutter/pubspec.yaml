@@ -54,7 +54,7 @@ workspace:
   - packages/support
   - packages/website
 dev_dependencies:
-  melos: ^7.4.0
+  melos: ^7.8.1
 
 melos:
   name: growerp
@@ -118,8 +118,13 @@ melos:
       runPubGetInParallel: false
       hooks:
         post: bash setup-flutter.sh
+    version:
+      linkToCommits: true
 
   scripts:
+    upgrade:
+      description: Upgrade deps within current majors and raise lower bounds.
+      run: flutter pub upgrade --tighten && flutter pub outdated
     analyze:
       exec: dart --suppress-analytics analyze .
       description: Analyse all packages for possible problems.
@@ -142,9 +147,7 @@ melos:
         dependsOn: build_runner
     l10n:
       description: Generates l10n for all app packages.
-      exec: flutter gen-l10n --suppress-analytics
-      packageFilters:
-        fileExists: "l10n.yaml"
+      run: melos exec --concurrency 1 --file-exists "l10n.yaml" -- "flutter gen-l10n --suppress-analytics"
     test_package:
       description: run all integration tests. Set BACKEND_PORT env var to override default 8080.
       exec:

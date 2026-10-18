@@ -315,6 +315,16 @@ class _MarketingSetupGuideScreenState extends State<MarketingSetupGuideScreen> {
             : localizations.mktGuideStatusPlans(plans.length),
       ),
       _GuideStep(
+        id: 'ideas',
+        icon: Icons.lightbulb_outline,
+        title: localizations.mktGuideStepIdeasTitle,
+        description: localizations.mktGuideStepIdeasDesc,
+        // the Ideas strip sits at the top of the Content screen
+        targetWidgetName: 'MasterContentList',
+        optional: true,
+        status: _statusOfOpened('ideas', localizations),
+      ),
+      _GuideStep(
         id: 'masterContent',
         icon: Icons.auto_awesome,
         title: localizations.mktGuideStep5Title,
@@ -362,6 +372,16 @@ class _MarketingSetupGuideScreenState extends State<MarketingSetupGuideScreen> {
         targetWidgetName: 'SocialEngagementList',
         optional: true,
         status: _statusOfOpened('engagements', localizations),
+      ),
+      _GuideStep(
+        id: 'reads',
+        icon: Icons.trending_up,
+        title: localizations.mktGuideStepReadsTitle,
+        description: localizations.mktGuideStepReadsDesc,
+        // the Reads column and each piece's reads section are on Content
+        targetWidgetName: 'MasterContentList',
+        optional: true,
+        status: _statusOfOpened('reads', localizations),
       ),
     ];
   }

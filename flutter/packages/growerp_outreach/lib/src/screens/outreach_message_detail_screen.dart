@@ -401,21 +401,34 @@ class OutreachMessageDetailScreenState
                     const SizedBox(height: 20),
                   ],
 
-                  // Message Content
-                  TextFormField(
-                    key: const Key('messageContent'),
-                    controller: _messageContentController,
-                    readOnly: !_isEditable,
-                    decoration:
-                        const InputDecoration(labelText: 'Message Content *'),
-                    maxLines: 5,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter message content';
-                      }
-                      return null;
-                    },
-                  ),
+                  // Message Content: an email is sent as html rendered from
+                  // markdown, the other platforms only take plain text
+                  if (_selectedPlatform == 'EMAIL')
+                    MarkdownEditor(
+                      controller: _messageContentController,
+                      inputKey: const Key('messageContent'),
+                      label: 'Message Content *',
+                      height: 250,
+                      enabled: _isEditable,
+                      validator: (value) => (value ?? '').isEmpty
+                          ? 'Please enter message content'
+                          : null,
+                    )
+                  else
+                    TextFormField(
+                      key: const Key('messageContent'),
+                      controller: _messageContentController,
+                      readOnly: !_isEditable,
+                      decoration:
+                          const InputDecoration(labelText: 'Message Content *'),
+                      maxLines: 5,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter message content';
+                        }
+                        return null;
+                      },
+                    ),
                   const SizedBox(height: 20),
 
                   // Display dates for existing messages

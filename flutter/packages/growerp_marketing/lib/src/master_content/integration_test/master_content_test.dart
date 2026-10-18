@@ -12,12 +12,19 @@
  * limitations under the License.
  */
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import 'memory_file_picker.dart';
+
 class MasterContentTest {
+  static bool _teaserSwitch(WidgetTester tester) => tester
+      .widget<SwitchListTile>(find.byKey(const Key('teaserMode')))
+      .value;
+
   static Future<void> selectMasterContent(WidgetTester tester) async {
     await CommonTest.selectOption(
       tester,
@@ -79,6 +86,42 @@ class MasterContentTest {
     );
   }
 
+  /// Downloads all master content as a ZIP, deletes the first piece and
+  /// uploads the ZIP again: the deleted piece comes back.
+  static Future<void> downloadDeleteUploadMasterContent(
+    WidgetTester tester,
+  ) async {
+    final original = FilePickerPlatform.instance;
+    final picker = MemoryFilePicker();
+    FilePickerPlatform.instance = picker;
+    try {
+      SaveTest test = await PersistFunctions.getTest();
+      final pieces = test.masterContents;
+      await CommonTest.tapByKey(tester, 'upDownload');
+      await CommonTest.tapByKey(tester, 'download',
+          seconds: CommonTest.waitTime);
+      expect(picker.fileName, endsWith('.zip'));
+      expect(picker.bytes, isNotEmpty);
+      await CommonTest.tapByKey(tester, 'cancel');
+
+      await deleteMasterContent(tester);
+
+      await CommonTest.tapByKey(tester, 'upDownload');
+      await CommonTest.tapByKey(tester, 'upload',
+          seconds: CommonTest.waitTime);
+      expect(
+        find.byKey(const Key('masterContentItem'), skipOffstage: false),
+        findsNWidgets(pieces.length),
+      );
+      // ids are new for the deleted piece: keep the persisted list as it was
+      // before the delete, except for that one
+      await PersistFunctions.persistTest(
+          (await PersistFunctions.getTest()).copyWith(masterContents: pieces));
+    } finally {
+      FilePickerPlatform.instance = original;
+    }
+  }
+
   static Future<void> doMasterContentSearch(
     WidgetTester tester, {
     required String searchString,
@@ -125,10 +168,21 @@ class MasterContentTest {
           key: 'body',
           listViewName: 'masterContentDetailListView',
         );
-        await CommonTest.enterText(tester, 'body', mc.body!);
+        await CommonTest.enterMarkdown(tester, 'body', mc.body!);
       }
       if (mc.callToAction != null) {
         await CommonTest.enterText(tester, 'callToAction', mc.callToAction!);
+      }
+      if (mc.targetUrl != null) {
+        await CommonTest.dragUntil(
+          tester,
+          key: 'teaserMode',
+          listViewName: 'masterContentDetailListView',
+        );
+        await CommonTest.enterText(tester, 'targetUrl', mc.targetUrl!);
+        if (_teaserSwitch(tester) != (mc.teaserMode == 'Y')) {
+          await CommonTest.tapByKey(tester, 'teaserMode');
+        }
       }
 
       await CommonTest.dragUntil(
@@ -215,6 +269,15 @@ class MasterContentTest {
 
       if (mc.title != null) {
         expect(CommonTest.getTextFormField('title'), equals(mc.title));
+      }
+      if (mc.targetUrl != null) {
+        await CommonTest.dragUntil(
+          tester,
+          key: 'teaserMode',
+          listViewName: 'masterContentDetailListView',
+        );
+        expect(CommonTest.getTextFormField('targetUrl'), equals(mc.targetUrl));
+        expect(_teaserSwitch(tester), equals(mc.teaserMode == 'Y'));
       }
 
       await CommonTest.tapByKey(tester, 'cancel');

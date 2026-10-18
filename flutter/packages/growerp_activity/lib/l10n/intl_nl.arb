@@ -67,5 +67,9 @@
   "activity_dashUnInvoiced": "niet gefactureerd",
   "activity_dashBarAll": "Alle",
   "activity_dashBarToDo": "Te doen",
-  "activity_dashBarEvents": "Afspraken"
+  "activity_dashBarEvents": "Afspraken",
+  "activity_comments": "Opmerkingen",
+  "activity_noComments": "Nog geen opmerkingen",
+  "activity_addComment": "Opmerking toevoegen",
+  "activity_aiAgent": "AI-agent"
 }

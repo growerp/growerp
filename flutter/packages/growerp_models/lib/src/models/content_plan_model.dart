@@ -3,7 +3,8 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'content_plan_model.g.dart';
 
-/// Content Plan model representing a weekly Pain-News-Prize content strategy
+/// Content Plan: an outline of PLANNED master content pieces over one or more
+/// weeks, Pain-News-Prize or a single posting per week
 ///
 /// Supports dual-ID strategy:
 /// - planId: System-wide unique identifier
@@ -23,7 +24,13 @@ class ContentPlan {
   @NullableTimestampConverter()
   final DateTime? weekStartDate;
 
-  /// Weekly theme
+  /// Number of weeks the plan covers, from [weekStartDate]
+  final int? weeks;
+
+  /// PNP (Pain/News/Prize on Mon/Wed/Fri) or SINGLE (one posting on Monday)
+  final String? planFormat;
+
+  /// Plan theme
   final String? theme;
 
   /// Timestamp when created
@@ -42,6 +49,8 @@ class ContentPlan {
     this.pseudoId,
     this.personaId,
     this.weekStartDate,
+    this.weeks,
+    this.planFormat,
     this.theme,
     this.createdDate,
     this.lastModifiedDate,
@@ -54,6 +63,8 @@ class ContentPlan {
     String? pseudoId,
     String? personaId,
     DateTime? weekStartDate,
+    int? weeks,
+    String? planFormat,
     String? theme,
     DateTime? createdDate,
     DateTime? lastModifiedDate,
@@ -64,6 +75,8 @@ class ContentPlan {
       pseudoId: pseudoId ?? this.pseudoId,
       personaId: personaId ?? this.personaId,
       weekStartDate: weekStartDate ?? this.weekStartDate,
+      weeks: weeks ?? this.weeks,
+      planFormat: planFormat ?? this.planFormat,
       theme: theme ?? this.theme,
       createdDate: createdDate ?? this.createdDate,
       lastModifiedDate: lastModifiedDate ?? this.lastModifiedDate,

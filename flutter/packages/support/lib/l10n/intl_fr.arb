@@ -75,5 +75,8 @@
   "dashWeek": "semaine",
   "dashMonth": "mois",
   "dashQuarter": "trimestre",
-  "signupsCount": "{count} inscriptions"
+  "signupsCount": "{count} inscriptions",
+  "signupRangeWeek": "7 derniers jours",
+  "signupRangeMonth": "30 derniers jours",
+  "signupRangeQuarter": "Dernier trimestre"
 }

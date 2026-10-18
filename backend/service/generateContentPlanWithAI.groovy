@@ -49,7 +49,7 @@ try {
     // Load the shared LLM helper; it resolves provider, model and key per tenant
     def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
     
-    // Step 4: Determine week start date
+    // Step 4: Determine the plan's first week (its Monday) and its shape
     // Flutter sends weekStartDate as epoch milliseconds (Long); fall back to today
     LocalDate weekStart
     if (weekStartDate) {
@@ -60,12 +60,40 @@ try {
     } else {
         weekStart = LocalDate.now()
     }
+    weekStart = weekStart.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+    int planWeeks = Math.max(1, Math.min((weeks ?: 4) as int, 12))
+    def format = planFormat == 'SINGLE' ? 'SINGLE' : 'PNP'
+    // the slots of one week: angle and day offset from Monday
+    def slots = format == 'SINGLE' ? [[type: 'OTHER', day: 0]]
+        : [[type: 'PAIN', day: 0], [type: 'NEWS', day: 2], [type: 'PRIZE', day: 4]]
 
     def formatter = DateTimeFormatter.ISO_LOCAL_DATE
-    
-    // Step 5: Construct prompt for content plan generation
+
+    // Optional user direction; captured before 'theme' is overwritten with the AI result
+    def userDirection = theme?.toString()?.trim()
+    def directionSection = userDirection ? """USER DIRECTION (theme & strategy for the plan):
+${userDirection}
+Build the plan theme and every week around this direction.
+
+""" : ""
+
+    def formulaSection = format == 'SINGLE' ? """CONTENT FORMAT: ONE posting per week, published on Monday. Each week picks the most
+useful angle for the persona that week (a pain, a trend or a concrete offer); use type "OTHER".""" :
+"""CONTENT FORMULA (Pain-News-Prize), three pieces per week:
+- Monday: PAIN - Address a specific pain point or challenge the persona faces
+- Wednesday: NEWS - Share industry news, trends, or insights relevant to the persona
+- Friday: PRIZE - Offer value, solutions, or a call-to-action (e.g., free resource, consultation)"""
+    def itemsExample = slots.collect { slot -> """        {
+          "type": "${slot.type}",
+          "headline": "Compelling headline",
+          "brief": "2-3 sentences: the point to make, the key facts or examples, the angle",
+          "callToAction": "One-line call to action"
+        }""" }.join(',\n')
+
+    // Step 5: Construct prompt for the plan outline; the bodies are written week by week
     def generationPrompt = """
-Generate a weekly content plan using the Pain-News-Prize (PNP) formula for social media marketing.
+Generate a ${planWeeks}-week content plan OUTLINE for social media marketing.
+Do NOT write the posts themselves: each piece is written in its own week from your brief.
 
 CUSTOMER AVATAR:
 Name: ${persona.name}
@@ -74,55 +102,35 @@ Pain Points: ${persona.painPoints}
 Goals: ${persona.goals}
 Tone of Voice: ${persona.toneOfVoice}
 
-WEEK STARTING: ${weekStart.format(formatter)}
+FIRST WEEK STARTING: ${weekStart.format(formatter)}
 
-CONTENT FORMULA (PNP):
-- Monday: PAIN - Address a specific pain point or challenge the persona faces
-- Wednesday: NEWS - Share industry news, trends, or insights relevant to the persona
-- Friday: PRIZE - Offer value, solutions, or a call-to-action (e.g., free resource, consultation)
+${directionSection}${formulaSection}
 
 REQUIREMENTS:
-1. Generate a theme for the week that ties all three pieces together
-2. For each day (Monday, Wednesday, Friday), create:
+1. A one-sentence theme for the whole plan${userDirection ? ' that captures the user direction' : ''}.
+2. For each of the ${planWeeks} weeks: a one-sentence week theme, building on the previous
+   weeks without repeating a topic, and ${slots.size() == 1 ? 'one piece' : 'three pieces in the order above'} with:
    - A compelling headline (10-15 words)
-   - Content type (PAIN, NEWS, or PRIZE)
-   - Platform-neutral body copy (100-180 words) that can later be adapted per platform
+   - A brief of 2-3 sentences: the point, the facts or examples to use, the angle
    - A one-line call to action
-3. Ensure the content:
-   - Speaks directly to the persona's pain points and goals
-   - Uses the specified tone of voice
-   - Includes a clear call-to-action for the PRIZE piece
-   - Is platform-neutral: no hashtags, no platform-specific formatting
+3. Speak to the persona's pain points and goals, in the specified tone of voice.
+4. Platform-neutral: no hashtags, no platform-specific formatting.
 
-RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this exact structure:
+RETURN FORMAT: Return ONLY valid JSON (no markdown, no code blocks) with this exact structure,
+with exactly ${planWeeks} entries in "weeks":
 {
-  "theme": "Weekly theme description",
-  "posts": [
+  "theme": "Plan theme",
+  "weeks": [
     {
-      "day": "Monday",
-      "type": "PAIN",
-      "headline": "Compelling headline addressing pain point",
-      "body": "Platform-neutral body copy",
-      "callToAction": "One-line call to action"
-    },
-    {
-      "day": "Wednesday",
-      "type": "NEWS",
-      "headline": "Headline about industry news or trend",
-      "body": "Platform-neutral body copy",
-      "callToAction": "One-line call to action"
-    },
-    {
-      "day": "Friday",
-      "type": "PRIZE",
-      "headline": "Headline offering value or solution",
-      "body": "Platform-neutral body copy",
-      "callToAction": "One-line call to action"
+      "theme": "Week theme",
+      "pieces": [
+${itemsExample}
+      ]
     }
   ]
 }
 
-Generate the content plan now.
+Generate the content plan outline now.
 """
 
     ec.logger.info("Calling the configured LLM API for content plan generation...")
@@ -130,7 +138,7 @@ Generate the content plan now.
     // Call the tenant's LLM (gemini, anthropic or openai)
     def jsonSlurper = new JsonSlurper()
     def generatedText = GeminiAiUtil.callLlmApi(ec, generationPrompt,
-        [ownerPartyId: ownerPartyId, temperature: 0.8, maxOutputTokens: 4096])
+        [ownerPartyId: ownerPartyId, temperature: 0.8, maxOutputTokens: 8192])
     ec.logger.info("Generated content plan text: ${generatedText}")
     
     // Clean up markdown code blocks if present
@@ -150,6 +158,8 @@ Generate the content plan now.
             ownerPartyId: ownerPartyId,
             personaId: personaId,
             weekStartDate: java.sql.Date.valueOf(weekStart),
+            weeks: planWeeks,
+            planFormat: format,
             theme: planData.theme,
             createdDate: ec.user.nowTimestamp,
             lastModifiedDate: ec.user.nowTimestamp
@@ -159,38 +169,46 @@ Generate the content plan now.
     planId = createPlanResult.planId
     ec.logger.info("Created ContentPlan with ID: ${planId}")
     
-    // Step 10: Create a MasterContent piece per PNP angle; social posts are
-    // created later by adapt#ContentForPlatform (author once -> fan out)
+    // Step 10: Create a PLANNED MasterContent piece per slot: title, brief and date only.
+    // The body is written in its week (generate#MasterContent with the masterContentId),
+    // social posts later by adapt#ContentForPlatform (author once -> fan out)
     def createdContents = []
-    planData.posts.each { post ->
-        def contentPseudoIdResult = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
-            .parameters([ownerPartyId: ownerPartyId, seqName: 'MasterContent'])
-            .call()
+    (planData.weeks ?: []).take(planWeeks).eachWithIndex { week, weekIndex ->
+        (week.pieces ?: []).take(slots.size()).eachWithIndex { piece, slotIndex ->
+            def slot = slots[slotIndex]
+            // 10:00 UTC, the hour adapt#ContentForPlatform also uses
+            def plannedDate = java.sql.Timestamp.from(weekStart.plusWeeks(weekIndex)
+                .plusDays(slot.day).atTime(10, 0).toInstant(java.time.ZoneOffset.UTC))
+            def contentPseudoIdResult = ec.service.sync().name("growerp.100.GeneralServices100.getNext#PseudoId")
+                .parameters([ownerPartyId: ownerPartyId, seqName: 'MasterContent'])
+                .call()
 
-        def createContentResult = ec.service.sync().name("create#growerp.marketing.MasterContent")
-            .parameters([
-                pseudoId: contentPseudoIdResult.seqNum,
-                ownerPartyId: ownerPartyId,
-                planId: planId,
-                contentType: 'POSTING',
-                pnpType: post.type,
-                title: post.headline,
-                body: post.body,
-                callToAction: post.callToAction,
-                status: 'DRAFT',
-                createdDate: ec.user.nowTimestamp,
-                lastModifiedDate: ec.user.nowTimestamp
+            def createContentResult = ec.service.sync().name("create#growerp.marketing.MasterContent")
+                .parameters([
+                    pseudoId: contentPseudoIdResult.seqNum,
+                    ownerPartyId: ownerPartyId,
+                    planId: planId,
+                    contentType: 'POSTING',
+                    pnpType: slot.type,
+                    title: piece.headline,
+                    brief: (week.theme ? "Week theme: ${week.theme}\n\n" : '') + (piece.brief ?: ''),
+                    callToAction: piece.callToAction,
+                    plannedDate: plannedDate,
+                    status: 'PLANNED',
+                    createdDate: ec.user.nowTimestamp,
+                    lastModifiedDate: ec.user.nowTimestamp
+                ])
+                .call()
+
+            createdContents.add([
+                masterContentId: createContentResult.masterContentId,
+                pnpType: slot.type,
+                title: piece.headline,
+                plannedDate: plannedDate
             ])
-            .call()
-
-        createdContents.add([
-            masterContentId: createContentResult.masterContentId,
-            pnpType: post.type,
-            title: post.headline
-        ])
-
-        ec.logger.info("Created MasterContent (${post.type}) with ID: ${createContentResult.masterContentId}")
+        }
     }
+    ec.logger.info("Created ${createdContents.size()} PLANNED MasterContent pieces for plan ${planId}")
 
     // Return the created plan with the same field shapes as list#ContentPlans
     // (dates as epoch millis, personaId included) so the frontend can insert
@@ -198,11 +216,13 @@ Generate the content plan now.
     pseudoId = pseudoIdResult.seqNum
     theme = planData.theme
     weekStartDate = java.sql.Date.valueOf(weekStart)
+    weeks = planWeeks
+    planFormat = format
     createdDate = ec.user.nowTimestamp
     lastModifiedDate = ec.user.nowTimestamp
     masterContents = createdContents
 
-    ec.message.addMessage("Content plan for week of ${weekStart.format(formatter)} generated successfully with ${createdContents.size()} content pieces!")
+    ec.message.addMessage("Content plan of ${planWeeks} weeks from ${weekStart.format(formatter)} generated with ${createdContents.size()} planned pieces")
     
 } catch (Exception e) {
     ec.logger.error("Error generating content plan with AI", e)

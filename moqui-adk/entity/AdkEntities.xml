@@ -59,6 +59,13 @@
              Operations, Sales, ...). -->
         <field name="catalogPublished"   type="text-indicator"/>
         <field name="catalogCategory"    type="text-short"/>
+        <!-- Task loop (AdkLoopServices.run#AgentLoop): loopEnabled Y → the agent's schedule
+             works the task inbox instead of running schedulePrompt. Inbox = new messages in
+             loopChatRoomId plus open todo Activities assigned to the agent party. Reports go
+             to loopReportEmail, else the requester's email. -->
+        <field name="loopEnabled"        type="text-indicator"/>
+        <field name="loopChatRoomId"     type="id"/>
+        <field name="loopReportEmail"    type="text-medium"/>
     </entity>
 
     <!-- Phase 4: members of a coordinator/workflow agent's team. A coordinator delegates to
@@ -169,8 +176,37 @@
         <field name="requestTime"      type="date-time"/>
         <field name="decisionTime"     type="date-time"/>
         <field name="expireTime"       type="date-time"/>
+        <!-- task-loop Activity this approval belongs to; a decision re-queues that task -->
+        <field name="workEffortId"     type="id"/>
         <index name="ADKAPPR_OWNER"><index-field name="ownerPartyId"/></index>
         <index name="ADKAPPR_STATUS"><index-field name="status"/></index>
+    </entity>
+
+    <!-- ── Task loop ──────────────────────────────────────────────────────────
+         Loop state per task. The task itself is a todo WorkEffort (Activity) assigned to
+         the agent party; its WorkEffortNotes hold the conversation and technical detail.
+         loopStatusId: queued | working | waiting | done | failed
+         waitingReason: question | approval | error -->
+    <entity entity-name="AdkLoopTask" package="moqui.adk" use="transactional">
+        <field name="workEffortId"      type="id" is-pk="true"/>
+        <field name="adkAgentConfigId"  type="id"/>
+        <field name="ownerPartyId"      type="id"/>
+        <field name="loopStatusId"      type="text-short"/>
+        <field name="waitingReason"     type="text-short"/>
+        <!-- newest note the loop has already taken into account -->
+        <field name="lastSeenNoteDate"  type="date-time"/>
+        <field name="lastRunDate"       type="date-time"/>
+        <field name="runCount"          type="number-integer"/>
+        <index name="ADKLOOP_CFG"><index-field name="adkAgentConfigId"/><index-field name="loopStatusId"/></index>
+    </entity>
+
+    <!-- Claim ledger for the loop's chat inbox: one row per chat message the loop took,
+         tracked by id (never by read state or date), written before any work starts. -->
+    <entity entity-name="AdkLoopInbox" package="moqui.adk" use="transactional">
+        <field name="chatMessageId"     type="id" is-pk="true"/>
+        <field name="adkAgentConfigId"  type="id"/>
+        <field name="workEffortId"      type="id"/>
+        <field name="claimedDate"       type="date-time"/>
     </entity>
 
     <!-- ── Phase 3: Knowledge / RAG ──────────────────────────────────────────

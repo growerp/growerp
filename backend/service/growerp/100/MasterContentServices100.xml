@@ -19,6 +19,8 @@
             <parameter name="planId" />
             <parameter name="contentType" />
             <parameter name="status" />
+            <parameter name="plannedThisWeek"><description>Y: only pieces whose plannedDate is
+                in the current week (Monday to Monday, UTC)</description></parameter>
             <parameter name="start" type="Integer" />
             <parameter name="limit" type="Integer" />
         </in-parameters>
@@ -32,6 +34,14 @@
             <!-- normalize null (param omitted) to '' so the LIKE conditions below become
                  the benign '%%' wildcard instead of the literal string '%null%' -->
             <set field="searchString" from="searchString ?: ''" />
+            <if condition="plannedThisWeek == 'Y'">
+                <set field="weekMonday" from="java.time.LocalDate.now(java.time.ZoneOffset.UTC)
+                    .with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))" />
+                <set field="plannedFrom" from="java.sql.Timestamp.from(weekMonday
+                    .atStartOfDay(java.time.ZoneOffset.UTC).toInstant())" />
+                <set field="plannedThru" from="java.sql.Timestamp.from(weekMonday.plusWeeks(1)
+                    .atStartOfDay(java.time.ZoneOffset.UTC).toInstant())" />
+            </if>
 
             <entity-find entity-name="growerp.marketing.MasterContent" list="masterContents"
                 offset="start" limit="limit">
@@ -40,6 +50,10 @@
                 <econdition field-name="planId" from="planId" ignore-if-empty="true" />
                 <econdition field-name="contentType" from="contentType" ignore-if-empty="true" />
                 <econdition field-name="status" from="status" ignore-if-empty="true" />
+                <econdition field-name="plannedDate" operator="greater-equals" from="plannedFrom"
+                    ignore-if-empty="true" />
+                <econdition field-name="plannedDate" operator="less" from="plannedThru"
+                    ignore-if-empty="true" />
                 <econditions combine="or">
                     <econdition field-name="pseudoId" operator="like" value="%${searchString}%"
                         ignore-if-empty="true" ignore-case="true" />
@@ -48,8 +62,23 @@
                     <econdition field-name="pnpType" operator="like" value="%${searchString}%"
                         ignore-if-empty="true" ignore-case="true" />
                 </econditions>
+                <!-- unplanned pieces (drafts, articles) first, then the plan weeks newest
+                     first so the pieces of one week stay together -->
+                <order-by field-name="-plannedDate NULLS FIRST" />
                 <order-by field-name="-lastModifiedDate" />
             </entity-find>
+            <!-- rows as maps carrying the small image (base64) for the list/dialog -->
+            <set field="rows" from="[]" />
+            <iterate list="masterContents" entry="m">
+                <set field="row" from="new HashMap(m.getMap())" />
+                <if condition="m.imageLocation">
+                    <service-call name="growerp.100.ImageServices100.download#Image"
+                        in-map="[contentLocation: m.imageLocation + 'small']" out-map="img" />
+                    <set field="row.image" from="img.imageFile ?: null" />
+                </if>
+                <script>rows.add(row)</script>
+            </iterate>
+            <set field="masterContents" from="rows" />
         </actions>
     </service>
 
@@ -68,7 +97,12 @@
             <parameter name="body" />
             <parameter name="callToAction" />
             <parameter name="targetUrl" />
+            <parameter name="teaserMode" default-value="N">
+                <description>Y = adapted posts are teasers linking to targetUrl</description>
+            </parameter>
+            <parameter name="ctaUrl" />
             <parameter name="status" default-value="DRAFT" />
+            <parameter name="image"><description>optional related image, base64</description></parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="masterContentId" />
@@ -80,10 +114,16 @@
             <parameter name="body" />
             <parameter name="callToAction" />
             <parameter name="targetUrl" />
+            <parameter name="teaserMode" />
+            <parameter name="articlePath" />
+            <parameter name="ctaUrl" />
             <parameter name="status" />
+            <parameter name="brief" />
+            <parameter name="plannedDate" type="Timestamp" />
             <parameter name="approvedDate" type="Timestamp" />
             <parameter name="createdDate" type="Timestamp" />
             <parameter name="lastModifiedDate" type="Timestamp" />
+            <parameter name="image" />
         </out-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
@@ -91,7 +131,6 @@
             <if condition="!ownerPartyId">
                 <return error="true" message="User not authenticated or no party associated" />
             </if>
-
             <if condition="!pseudoId">
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                     in-map="[ownerPartyId: ownerPartyId, seqName: 'MasterContent']"
@@ -110,10 +149,21 @@
                     body: body,
                     callToAction: callToAction,
                     targetUrl: targetUrl,
+                    teaserMode: teaserMode == 'Y' ? 'Y' : 'N',
+                    ctaUrl: ctaUrl,
                     status: status,
                     createdDate: ec.user.nowTimestamp,
                     lastModifiedDate: ec.user.nowTimestamp
                 ]" />
+            <if condition="image">
+                <service-call name="growerp.100.MasterContentServices100.save#MasterContentImage"
+                    in-map="[masterContentId: masterContentId, image: image]" />
+            </if>
+            <!-- a teaser without a link to the full text: the piece gets its own page -->
+            <if condition="teaserMode == 'Y' &amp;&amp; !targetUrl">
+                <service-call name="growerp.100.MasterContentServices100.assign#ArticlePage"
+                    in-map="[masterContentId: masterContentId]" />
+            </if>
 
             <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc">
                 <field-map field-name="masterContentId" />
@@ -125,10 +175,19 @@
             <set field="body" from="mc.body" />
             <set field="callToAction" from="mc.callToAction" />
             <set field="targetUrl" from="mc.targetUrl" />
+            <set field="teaserMode" from="mc.teaserMode" />
+            <set field="articlePath" from="mc.articlePath" />
+            <set field="ctaUrl" from="mc.ctaUrl" />
             <set field="status" from="mc.status" />
             <set field="approvedDate" from="mc.approvedDate" />
             <set field="createdDate" from="mc.createdDate" />
             <set field="lastModifiedDate" from="mc.lastModifiedDate" />
+            <set field="image" from="null" />
+            <if condition="mc.imageLocation">
+                <service-call name="growerp.100.ImageServices100.download#Image"
+                    in-map="[contentLocation: mc.imageLocation + 'small']" out-map="img" />
+                <set field="image" from="img.imageFile ?: null" />
+            </if>
         </actions>
     </service>
 
@@ -143,7 +202,11 @@
             <parameter name="body" />
             <parameter name="callToAction" />
             <parameter name="targetUrl" />
+            <parameter name="teaserMode" />
+            <parameter name="ctaUrl" />
             <parameter name="status" />
+            <parameter name="brief" />
+            <parameter name="image"><description>base64; empty string removes the image, omitted keeps it</description></parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="masterContentId" />
@@ -155,10 +218,16 @@
             <parameter name="body" />
             <parameter name="callToAction" />
             <parameter name="targetUrl" />
+            <parameter name="teaserMode" />
+            <parameter name="articlePath" />
+            <parameter name="ctaUrl" />
             <parameter name="status" />
+            <parameter name="brief" />
+            <parameter name="plannedDate" type="Timestamp" />
             <parameter name="approvedDate" type="Timestamp" />
             <parameter name="createdDate" type="Timestamp" />
             <parameter name="lastModifiedDate" type="Timestamp" />
+            <parameter name="image" />
         </out-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
@@ -173,7 +242,6 @@
             <if condition="mc.ownerPartyId != ownerPartyId">
                 <return error="true" message="Access denied to this master content" />
             </if>
-
             <service-call name="update#growerp.marketing.MasterContent"
                 in-map="[
                     masterContentId: masterContentId,
@@ -185,9 +253,22 @@
                     body: body ?: mc.body,
                     callToAction: callToAction ?: mc.callToAction,
                     targetUrl: targetUrl ?: mc.targetUrl,
-                    status: status ?: mc.status,
+                    teaserMode: teaserMode ?: mc.teaserMode,
+                    ctaUrl: ctaUrl ?: mc.ctaUrl,
+                    brief: brief ?: mc.brief,
+                    status: (status ?: mc.status) == 'PLANNED' &amp;&amp; (body ?: mc.body)
+                        ? 'DRAFT' : (status ?: mc.status),
                     lastModifiedDate: ec.user.nowTimestamp
                 ]" />
+            <if condition="image != null">
+                <service-call name="growerp.100.MasterContentServices100.save#MasterContentImage"
+                    in-map="[masterContentId: masterContentId, image: image]" />
+            </if>
+            <!-- a teaser without a link to the full text: the piece gets its own page -->
+            <if condition="(teaserMode ?: mc.teaserMode) == 'Y' &amp;&amp; !(targetUrl ?: mc.targetUrl)">
+                <service-call name="growerp.100.MasterContentServices100.assign#ArticlePage"
+                    in-map="[masterContentId: masterContentId]" />
+            </if>
 
             <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="updated">
                 <field-map field-name="masterContentId" />
@@ -200,10 +281,21 @@
             <set field="body" from="updated.body" />
             <set field="callToAction" from="updated.callToAction" />
             <set field="targetUrl" from="updated.targetUrl" />
+            <set field="teaserMode" from="updated.teaserMode" />
+            <set field="articlePath" from="updated.articlePath" />
+            <set field="ctaUrl" from="updated.ctaUrl" />
             <set field="status" from="updated.status" />
+            <set field="brief" from="updated.brief" />
+            <set field="plannedDate" from="updated.plannedDate" />
             <set field="approvedDate" from="updated.approvedDate" />
             <set field="createdDate" from="updated.createdDate" />
             <set field="lastModifiedDate" from="updated.lastModifiedDate" />
+            <set field="image" from="null" />
+            <if condition="updated.imageLocation">
+                <service-call name="growerp.100.ImageServices100.download#Image"
+                    in-map="[contentLocation: updated.imageLocation + 'small']" out-map="img" />
+                <set field="image" from="img.imageFile ?: null" />
+            </if>
         </actions>
     </service>
 
@@ -226,7 +318,12 @@
             <parameter name="body" />
             <parameter name="callToAction" />
             <parameter name="targetUrl" />
+            <parameter name="teaserMode" />
+            <parameter name="articlePath" />
+            <parameter name="ctaUrl" />
             <parameter name="status" />
+            <parameter name="brief" />
+            <parameter name="plannedDate" type="Timestamp" />
             <parameter name="approvedDate" type="Timestamp" />
             <parameter name="createdDate" type="Timestamp" />
             <parameter name="lastModifiedDate" type="Timestamp" />
@@ -244,6 +341,9 @@
             <if condition="mc.ownerPartyId != ownerPartyId">
                 <return error="true" message="Access denied to this master content" />
             </if>
+            <if condition="approve == 'Y' &amp;&amp; mc.status == 'PLANNED'">
+                <return error="true" message="Planned piece ${mc.pseudoId} has no text yet: write it first" />
+            </if>
 
             <service-call name="update#growerp.marketing.MasterContent"
                 in-map="[
@@ -251,6 +351,13 @@
                     approvedDate: approve == 'Y' ? ec.user.nowTimestamp : null,
                     lastModifiedDate: ec.user.nowTimestamp
                 ]" />
+            <!-- an article written from an idea goes onto the website only now: nothing a
+                 human has not approved becomes public. Revoking keeps the page (the teasers
+                 that already went out still link to it). -->
+            <if condition="approve == 'Y' &amp;&amp; mc.articlePath">
+                <service-call name="growerp.100.MasterContentServices100.publish#ArticlePage"
+                    in-map="[masterContentId: masterContentId]" />
+            </if>
 
             <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="updated">
                 <field-map field-name="masterContentId" />
@@ -263,7 +370,12 @@
             <set field="body" from="updated.body" />
             <set field="callToAction" from="updated.callToAction" />
             <set field="targetUrl" from="updated.targetUrl" />
+            <set field="teaserMode" from="updated.teaserMode" />
+            <set field="articlePath" from="updated.articlePath" />
+            <set field="ctaUrl" from="updated.ctaUrl" />
             <set field="status" from="updated.status" />
+            <set field="brief" from="updated.brief" />
+            <set field="plannedDate" from="updated.plannedDate" />
             <set field="approvedDate" from="updated.approvedDate" />
             <set field="createdDate" from="updated.createdDate" />
             <set field="lastModifiedDate" from="updated.lastModifiedDate" />
@@ -286,14 +398,350 @@
             <if condition="mc.ownerPartyId != ownerPartyId">
                 <return error="true" message="Access denied to this master content" />
             </if>
+            <if condition="mc.imageLocation">
+                <service-call name="growerp.100.MasterContentServices100.save#MasterContentImage"
+                    in-map="[masterContentId: masterContentId, image: '']" />
+            </if>
             <service-call name="delete#growerp.marketing.MasterContent"
                 in-map="[masterContentId: masterContentId]" />
         </actions>
     </service>
 
-    <service verb="generate" noun="MasterContent" authenticate="true">
-        <description>AI-write one platform-neutral master content piece for a persona and PNP angle.</description>
+    <!-- ========================================================= -->
+    <!--  Related image: stored by upload#Image under              -->
+    <!--  images/masterContent/<id>/ (large/medium/small); a public -->
+    <!--  copy is registered as website image                       -->
+    <!--  /getImage/articles/<id>.jpg for the article hero and the  -->
+    <!--  platforms that fetch an image by URL.                     -->
+    <!-- ========================================================= -->
+    <service verb="save" noun="MasterContentImage" authenticate="true">
+        <description>Store (base64) or remove (empty) the related image of a master piece.</description>
         <in-parameters>
+            <parameter name="masterContentId" required="true" />
+            <parameter name="image"><description>base64 image; empty removes it</description></parameter>
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc"
+                for-update="true" />
+            <if condition="!mc || mc.ownerPartyId != ownerPartyId">
+                <return error="true" message="Master content not found: ${masterContentId}" />
+            </if>
+            <set field="publicName" value="articles/${masterContentId}.jpg" />
+            <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find>
+            <iterate list="stores" entry="store">
+                <entity-delete-by-condition entity-name="growerp.store.ProductStoreContent">
+                    <econdition field-name="productStoreId" from="store.productStoreId" />
+                    <econdition field-name="description" from="publicName" />
+                </entity-delete-by-condition>
+            </iterate>
+            <if condition="image">
+                <service-call name="growerp.100.ImageServices100.upload#Image"
+                    in-map="[type: 'masterContent', id: masterContentId, base64: image]" />
+                <set field="mc.imageLocation"
+                    value="dbresource://C${companyPartyId}/images/masterContent/${masterContentId}/" />
+                <iterate list="stores" entry="store">
+                    <service-call name="create#growerp.store.ProductStoreContent"
+                        in-map="[productStoreId: store.productStoreId, description: publicName,
+                            contentTypeEnumId: 'PrstImageLarge',
+                            contentLocation: mc.imageLocation + 'large']" />
+                </iterate>
+                <else>
+                    <if condition="mc.imageLocation">
+                        <service-call name="growerp.100.ImageServices100.delete#Image"
+                            in-map="[type: 'masterContent', id: masterContentId]" />
+                    </if>
+                    <set field="mc.imageLocation" from="null" />
+                </else>
+            </if>
+            <set field="mc.lastModifiedDate" from="ec.user.nowTimestamp" />
+            <entity-update value-field="mc" />
+            <!-- an article already on the website gets the new (or no) hero right away -->
+            <if condition="mc.approvedDate &amp;&amp; mc.articlePath">
+                <service-call name="growerp.100.MasterContentServices100.publish#ArticlePage"
+                    in-map="[masterContentId: masterContentId]" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="MasterContentImage" authenticate="true">
+        <description>The related image of a master piece for publishing: the large image as
+            base64 and its public website URL (empty when the company has no website address
+            reachable from outside: a localhost one is never used, platforms cannot fetch it).
+            imageBase64 is empty when the piece has no image.</description>
+        <in-parameters>
+            <parameter name="masterContentId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="imageBase64" />
+            <parameter name="publicPath"><description>/getImage/articles/&lt;id&gt;.jpg</description></parameter>
+            <parameter name="publicUrl" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc" />
+            <if condition="!mc?.imageLocation">
+                <return />
+            </if>
+            <service-call name="growerp.100.ImageServices100.download#Image"
+                in-map="[contentLocation: mc.imageLocation + 'large']" out-map="img" />
+            <set field="imageBase64" from="img.imageFile ?: null" />
+            <set field="publicName" value="articles/${masterContentId}.jpg" />
+            <entity-find entity-name="growerp.store.ProductStoreContent" list="publicRows" limit="1">
+                <econdition field-name="description" from="publicName" />
+            </entity-find>
+            <if condition="publicRows">
+                <set field="publicPath" value="/getImage/${publicName}" />
+                <!-- host from the store itself: the scheduler runs as SystemSupport, so
+                     get#Website (logged-in user's company) would give the wrong site -->
+                <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                    list="hostNames">
+                    <econdition field-name="productStoreId" from="publicRows[0].productStoreId" />
+                    <econdition field-name="settingTypeEnumId" value="PsstHostname" />
+                    <date-filter />
+                    <order-by field-name="fromDate" />
+                </entity-find>
+                <set field="hostName" from="hostNames.find { !it.settingValue?.contains('localhost') }?.settingValue" />
+                <if condition="hostName">
+                    <set field="publicUrl" from="(hostName.contains('localhost') ? 'http' : 'https') +
+                        '://' + hostName + publicPath" />
+                </if>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="download" noun="MasterContentImage" authenticate="true">
+        <description>The large related image of an own master piece, for viewing it full size.</description>
+        <in-parameters>
+            <parameter name="masterContentId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="image"><description>base64, empty when there is none</description></parameter>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc" />
+            <if condition="!mc || mc.ownerPartyId != ownerPartyId">
+                <return error="true" message="Master content not found: ${masterContentId}" />
+            </if>
+            <if condition="mc.imageLocation">
+                <service-call name="growerp.100.ImageServices100.download#Image"
+                    in-map="[contentLocation: mc.imageLocation + 'large']" out-map="img" />
+                <set field="image" from="img.imageFile" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="generate" noun="MasterContentImage" authenticate="true" transaction-timeout="180">
+        <description>AI-make the related image of a master piece from its title and body and
+            store it (replaces an existing one). A failed AI call is returned in imageError, not
+            raised, so a caller creating the piece in the same transaction is not rolled back.
+            In test mode (GROWERP_TEST_MODE) a plain placeholder image is stored instead.</description>
+        <in-parameters>
+            <parameter name="masterContentId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="image"><description>the new image, small version, base64</description></parameter>
+            <parameter name="imageError" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc" />
+            <if condition="!mc || mc.ownerPartyId != ownerPartyId">
+                <return error="true" message="Master content not found: ${masterContentId}" />
+            </if>
+            <script><![CDATA[
+                import java.awt.Color
+                import java.awt.image.BufferedImage
+                import javax.imageio.ImageIO
+
+                imageBase64 = null
+                try {
+                    byte[] bytes
+                    if ('true'.equals(System.getenv('GROWERP_TEST_MODE'))) {
+                        BufferedImage img = new BufferedImage(640, 360, BufferedImage.TYPE_INT_RGB)
+                        img.createGraphics().with { setColor(new Color(0x3F51B5)); fillRect(0, 0, 640, 360); dispose() }
+                        ByteArrayOutputStream out = new ByteArrayOutputStream()
+                        ImageIO.write(img, 'png', out)
+                        bytes = out.toByteArray()
+                    } else {
+                        String about = (mc.body ?: '').replaceAll(/[#*_`>\[\]()]/, ' ').replaceAll(/\s+/, ' ').trim()
+                        if (about.length() > 800) about = about.substring(0, 800)
+                        def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
+                        bytes = GeminiAiUtil.callGeminiImage(ec, """Create a wide 16:9 illustration to go with
+a social media post and website article. Title: ${mc.title ?: ''}. About: ${about}
+Style: modern, clean, professional illustration with a clear focal subject and calm colors.
+Strictly no text, no words, no letters, no numbers, no brand logos, no social media icons or
+symbols anywhere in the image; screens and documents show only simple shapes.""", [ownerPartyId: ownerPartyId, purpose: 'marketing image'])
+                    }
+                    imageBase64 = Base64.encoder.encodeToString(bytes)
+                } catch (Exception e) {
+                    ec.logger.warn("generate#MasterContentImage ${masterContentId} failed: ${e.message}")
+                    imageError = e.message ?: e.toString()
+                }
+            ]]></script>
+            <if condition="imageBase64">
+                <service-call name="growerp.100.MasterContentServices100.save#MasterContentImage"
+                    in-map="[masterContentId: masterContentId, image: imageBase64]" />
+                <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc" />
+                <service-call name="growerp.100.ImageServices100.download#Image"
+                    in-map="[contentLocation: mc.imageLocation + 'small']" out-map="img" />
+                <set field="image" from="img.imageFile ?: null" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="generate" noun="MasterContentImages" authenticate="anonymous" transaction="ignore">
+        <description>Background worker: AI-make the related image of each piece, each in its own
+            transaction; one failing does not stop the others. Queued after the commit of the
+            AI generators (registerOnCommit), so it runs on a thread without a user: it logs in
+            as the user who generated the content.</description>
+        <in-parameters>
+            <parameter name="masterContentIds" type="List" required="true" />
+            <parameter name="username" required="true" />
+        </in-parameters>
+        <actions>
+            <if condition="!ec.user.userId">
+                <script>ec.user.internalLoginUser(username)</script>
+            </if>
+            <iterate list="masterContentIds" entry="id">
+                <service-call name="growerp.100.MasterContentServices100.generate#MasterContentImage"
+                    in-map="[masterContentId: id]" out-map="genOut"
+                    transaction="force-new" ignore-error="true" />
+            </iterate>
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!--  ZIP up/download: masterContents.json + images/<pseudoId>  -->
+    <!--  (the large image). Groovy only for the zip and JSON work. -->
+    <!-- ========================================================= -->
+    <service verb="export" noun="MasterContents" authenticate="true">
+        <description>All master content pieces of the owner with their images as a ZIP.</description>
+        <out-parameters>
+            <parameter name="zip"><description>base64 zip file</description></parameter>
+            <parameter name="fileName" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find entity-name="growerp.marketing.MasterContent" list="pieces">
+                <econdition field-name="ownerPartyId" />
+                <order-by field-name="pseudoId" />
+            </entity-find>
+            <script><![CDATA[
+                import groovy.json.JsonOutput
+                import java.util.zip.ZipEntry
+                import java.util.zip.ZipOutputStream
+
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream()
+                ZipOutputStream zipOut = new ZipOutputStream(bytes)
+                List rows = []
+                for (mc in pieces) {
+                    Map row = [pseudoId: mc.pseudoId, contentType: mc.contentType,
+                        pnpType: mc.pnpType, title: mc.title, body: mc.body,
+                        callToAction: mc.callToAction, targetUrl: mc.targetUrl,
+                        teaserMode: mc.teaserMode, ctaUrl: mc.ctaUrl, status: mc.status]
+                    def ref = mc.imageLocation ? ec.resource.getLocationReference(mc.imageLocation + 'large') : null
+                    if (ref?.getExists()) {
+                        byte[] img = ref.openStream().withCloseable { it.bytes }
+                        String ext = (img.length > 3 && (img[0] & 0xff) == 0x89 && img[1] == 0x50) ? 'png' :
+                            (img.length > 3 && img[0] == 0x47 && img[1] == 0x49) ? 'gif' : 'jpg'
+                        row.image = "images/${mc.pseudoId}.${ext}".toString()
+                        zipOut.putNextEntry(new ZipEntry(row.image))
+                        zipOut.write(img)
+                        zipOut.closeEntry()
+                    }
+                    rows.add(row)
+                }
+                zipOut.putNextEntry(new ZipEntry('masterContents.json'))
+                zipOut.write(JsonOutput.prettyPrint(JsonOutput.toJson([masterContents: rows])).getBytes('UTF-8'))
+                zipOut.closeEntry()
+                zipOut.close()
+                zip = Base64.getEncoder().encodeToString(bytes.toByteArray())
+                fileName = "master-content-${ec.user.nowTimestamp.toLocalDateTime().toLocalDate()}.zip"
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="import" noun="MasterContents" authenticate="true">
+        <description>Load master content pieces from a ZIP made by export#MasterContents. A
+            piece with a pseudoId the owner already has updates that piece, any other is
+            created as DRAFT. Imported pieces are never approved and get no website article
+            page, so nothing is published until a human approves them here.</description>
+        <in-parameters>
+            <parameter name="zip" required="true"><description>base64 zip file</description></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="createdCount" type="Integer" />
+            <parameter name="updatedCount" type="Integer" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <script><![CDATA[
+                import groovy.json.JsonSlurper
+                import java.util.zip.ZipInputStream
+
+                pieces = []
+                Map files = [:]
+                new ZipInputStream(new ByteArrayInputStream(Base64.getMimeDecoder().decode(zip))).withCloseable { zin ->
+                    def entry
+                    while ((entry = zin.getNextEntry()) != null) {
+                        if (!entry.isDirectory()) files[entry.getName()] = zin.readAllBytes()
+                    }
+                }
+                byte[] json = files['masterContents.json']
+                if (!json) {
+                    ec.message.addError("No masterContents.json in the ZIP file")
+                    return
+                }
+                pieces = (new JsonSlurper().parseText(new String(json, 'UTF-8'))?.masterContents ?: [])
+                    .findAll { it instanceof Map && it.title }
+                for (Map piece in pieces) {
+                    byte[] img = piece.image ? files[piece.image] : null
+                    piece.image = img ? Base64.getEncoder().encodeToString(img) : null
+                }
+            ]]></script>
+            <set field="createdCount" from="0" type="Integer" />
+            <set field="updatedCount" from="0" type="Integer" />
+            <iterate list="pieces" entry="piece">
+                <set field="existing" from="null" />
+                <if condition="piece.pseudoId">
+                    <entity-find entity-name="growerp.marketing.MasterContent" list="found" limit="1">
+                        <econdition field-name="ownerPartyId" />
+                        <econdition field-name="pseudoId" from="piece.pseudoId" />
+                    </entity-find>
+                    <set field="existing" from="found ? found[0] : null" />
+                </if>
+                <set field="fields" from="[contentType: piece.contentType, pnpType: piece.pnpType,
+                    title: piece.title, body: piece.body, callToAction: piece.callToAction,
+                    targetUrl: piece.targetUrl, teaserMode: piece.teaserMode, ctaUrl: piece.ctaUrl,
+                    image: piece.image]" />
+                <if condition="existing">
+                    <service-call name="growerp.100.MasterContentServices100.update#MasterContent"
+                        in-map="fields + [masterContentId: existing.masterContentId]" />
+                    <set field="updatedCount" from="updatedCount + 1" />
+                    <else>
+                        <service-call name="growerp.100.MasterContentServices100.create#MasterContent"
+                            in-map="fields + [pseudoId: piece.pseudoId, status: 'DRAFT']" />
+                        <set field="createdCount" from="createdCount + 1" />
+                    </else>
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="generate" noun="MasterContent" authenticate="true">
+        <description>AI-write one platform-neutral master content piece for a persona and PNP angle.
+            With the masterContentId of a PLANNED piece (from a content plan) that piece is written
+            in place from its title and brief, and becomes DRAFT.</description>
+        <in-parameters>
+            <parameter name="masterContentId" />
             <parameter name="personaId" />
             <parameter name="planId" />
             <parameter name="contentType" default-value="POSTING">
@@ -339,16 +787,31 @@
             <parameter name="contentType" required="true" />
             <parameter name="callToAction" />
             <parameter name="targetUrl" />
+            <parameter name="teaser" type="Boolean" default="false">
+                <description>true = write a short teaser that links to targetUrl for the full text</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="adaptedContent" />
+            <parameter name="aiError"><description>why the AI call failed, when it did</description></parameter>
         </out-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="relInfo" />
             <script>
                 def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
-                adaptedContent = GeminiAiUtil.generateAdaptedContent(ec, title, body,
-                    platform, contentType, callToAction, targetUrl, relInfo.ownerPartyId)
+                // a failed AI call is returned, not raised: raising marks the caller's
+                // transaction rollback-only and hides the reason (e.g. allowance used up)
+                try {
+                    adaptedContent = GeminiAiUtil.generateAdaptedContent(ec, title, body,
+                        platform, contentType, callToAction, targetUrl, relInfo.ownerPartyId, teaser)
+                    // only Medium renders markdown; elsewhere leftover syntax shows as typed
+                    if (adaptedContent &amp;&amp; platform.toUpperCase() != 'MEDIUM')
+                        adaptedContent = GeminiAiUtil.markdownToPlainText(adaptedContent)
+                } catch (Exception e) {
+                    ec.logger.warn("adapt#PlatformContent ${platform} failed: ${e.message}")
+                    adaptedContent = null
+                    aiError = e.message
+                }
             </script>
         </actions>
     </service>
@@ -396,6 +859,21 @@
             <if condition="!mc.body">
                 <return error="true" message="Master content has no body to adapt" />
             </if>
+            <!-- a teaser says "read the full article": an article without its own page
+                 (seeded or written by hand) gets one, else the teasers would link to
+                 whatever targetUrl is, e.g. a landing page; any other piece gets one
+                 when it has no link at all -->
+            <if condition="mc.teaserMode == 'Y' &amp;&amp; !mc.articlePath &amp;&amp;
+                    (mc.contentType == 'ARTICLE' || !mc.targetUrl)">
+                <service-call name="growerp.100.MasterContentServices100.assign#ArticlePage"
+                    in-map="[masterContentId: masterContentId]" />
+                <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc">
+                    <field-map field-name="masterContentId" />
+                </entity-find-one>
+            </if>
+            <if condition="mc.teaserMode == 'Y' &amp;&amp; !mc.targetUrl">
+                <return error="true" message="Teaser mode needs a target URL: the link to the full article" />
+            </if>
 
             <!-- Default platform list = enabled PlatformConfiguration for this owner -->
             <if condition="!platforms">
@@ -422,6 +900,10 @@
                  appears on the content calendar. All platform variants of one piece share
                  the slot: cross-posting the same piece at once is wanted, it is separate
                  pieces landing together that is not. -->
+            <!-- a piece from a content plan keeps the day the plan gave it -->
+            <if condition="!scheduledDate &amp;&amp; mc.plannedDate">
+                <set field="scheduledDate" from="mc.plannedDate.time" type="Long" />
+            </if>
             <if condition="!scheduledDate">
                 <!-- 10:00 UTC: the hour the weekly content agent's prompt already uses, so
                      hand-adapted and agent-adapted pieces land at the same time of day -->
@@ -459,21 +941,13 @@
                           .toEpochMilli()" type="Long" />
             </if>
 
-            <!-- Preflight: the AI key must be set (user preference, then GEMINI_API_KEY env,
-                 then GOOGLE_API_KEY env, then system property). -->
-            <set field="aiKey" from="ec.user.getPreference('GEMINI_API_KEY')" />
-            <if condition="!aiKey">
-                <set field="aiKey" from="System.getenv('GEMINI_API_KEY')" />
-            </if>
-            <if condition="!aiKey">
-                <set field="aiKey" from="System.getenv('GOOGLE_API_KEY')" />
-            </if>
-            <if condition="!aiKey">
-                <set field="aiKey" from="System.getProperty('GEMINI_API_KEY')" />
-            </if>
-            <if condition="!aiKey">
+            <!-- Preflight: an AI key must be found the way the AI call finds it (the tenant's
+                 own key in System Setup, else the system default provider's key) -->
+            <script>aiKeyFound = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
+                .hasApiKey(ec, ownerPartyId)</script>
+            <if condition="!aiKeyFound">
                 <return error="true"
-                    message="AI key not configured: set GEMINI_API_KEY (or GOOGLE_API_KEY) in the environment or in user preferences before adapting content." />
+                    message="AI key not configured: add one in System Setup -> AI Settings before adapting content." />
             </if>
 
             <set field="adaptedCount" from="0" type="Integer" />
@@ -483,15 +957,39 @@
             <iterate list="platforms" entry="platformRaw">
                 <set field="platform" from="platformRaw.toString().toUpperCase()" />
 
+                <!-- Broadcast posts get the link tagged per platform, so reads on the
+                     website (ContentRead) are counted per master piece and platform.
+                     1:1 messages keep the plain link. -->
+                <set field="platformUrl" from="mc.targetUrl" />
+                <if condition="mc.targetUrl &amp;&amp; mc.contentType != 'MESSAGE'">
+                    <set field="platformUrl" from="mc.targetUrl + (mc.targetUrl.contains('?') ? '&amp;' : '?') +
+                        'utm_source=' + platform.toLowerCase() +
+                        '&amp;utm_medium=' + (platform in ['EMAIL', 'SUBSTACK'] ? 'email' : 'social') +
+                        '&amp;utm_campaign=' + java.net.URLEncoder.encode(mc.pseudoId ?: mc.masterContentId, 'UTF-8')" />
+                </if>
                 <!-- AI-adapt the body for this platform; ignore-error so one
                      platform failing does not abort the rest of the loop -->
                 <set field="adaptedContent" from="null" />
+                <set field="aiError" from="null" />
                 <service-call out-map="context" ignore-error="true"
                     name="growerp.100.MasterContentServices100.adapt#PlatformContent"
                     in-map="[title: mc.title, body: mc.body, platform: platform,
                              contentType: mc.contentType, callToAction: mc.callToAction,
-                             targetUrl: mc.targetUrl]" />
-                <if condition="!adaptedContent"><continue /></if>
+                             targetUrl: platformUrl,
+                             teaser: mc.teaserMode == 'Y' &amp;&amp; mc.contentType != 'MESSAGE']" />
+                <if condition="!adaptedContent">
+                    <set field="lastAiError" from="aiError ?: lastAiError" />
+                    <continue />
+                </if>
+
+                <!-- the AI does not always copy the tagged link exactly (it cut the
+                     utm_campaign off to fit X's 280 characters, so reads went uncounted):
+                     put the full tagged link back wherever the target url shows up -->
+                <if condition="platformUrl != mc.targetUrl">
+                    <set field="adaptedContent" from="adaptedContent.replaceAll(
+                        java.util.regex.Pattern.quote(mc.targetUrl) + '[^\\s)\\]&gt;&quot;]*',
+                        java.util.regex.Matcher.quoteReplacement(platformUrl))" />
+                </if>
 
                 <if condition="mc.contentType == 'MESSAGE' &amp;&amp; campaignId">
                     <!-- 1:1 message: merge the adapted template into the campaign settings -->
@@ -532,7 +1030,7 @@
             <!-- Nothing created and nothing skipped => every AI adaptation failed -->
             <if condition="adaptedCount == 0 &amp;&amp; skippedCount == 0">
                 <return error="true"
-                    message="No content was adapted — the AI call failed for every platform. Check the server log and the AI key." />
+                    message="No content was adapted, the AI call failed for every platform: ${lastAiError ?: 'see the server log'}" />
             </if>
 
             <!-- Mark the master piece adapted if anything succeeded -->
@@ -541,6 +1039,309 @@
                     in-map="[masterContentId: masterContentId, status: 'ADAPTED',
                              lastModifiedDate: ec.user.nowTimestamp]" />
             </if>
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!--  Content ideas: raw text and/or an article URL handed in   -->
+    <!--  by a person, turned into a ~500 word website article      -->
+    <!-- ========================================================= -->
+    <service verb="list" noun="ContentIdeas" authenticate="true">
+        <description>List the owner's content ideas in their order (sequenceNum): the next one to use is on top.</description>
+        <in-parameters>
+            <parameter name="searchString" />
+            <parameter name="start" type="Integer" />
+            <parameter name="limit" type="Integer" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="contentIdeas" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <set field="searchString" from="searchString ?: ''" />
+            <entity-find entity-name="growerp.marketing.ContentIdea" list="contentIdeas"
+                offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" />
+                <econditions combine="or">
+                    <econdition field-name="pseudoId" operator="like" value="%${searchString}%"
+                        ignore-if-empty="true" ignore-case="true" />
+                    <econdition field-name="title" operator="like" value="%${searchString}%"
+                        ignore-if-empty="true" ignore-case="true" />
+                    <econdition field-name="sourceUrl" operator="like" value="%${searchString}%"
+                        ignore-if-empty="true" ignore-case="true" />
+                </econditions>
+                <order-by field-name="sequenceNum" />
+                <order-by field-name="createdDate" />
+            </entity-find>
+        </actions>
+    </service>
+
+    <service verb="create" noun="ContentIdea" authenticate="true">
+        <description>Hand in raw material for an article: pasted text or notes, the URL of an
+            article, or both (both are used).</description>
+        <in-parameters>
+            <parameter name="title" />
+            <parameter name="rawText" allow-html="any" />
+            <parameter name="sourceUrl" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="contentIdea" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <if condition="!ownerPartyId">
+                <return error="true" message="User not authenticated or no party associated" />
+            </if>
+            <if condition="!rawText?.trim() &amp;&amp; !sourceUrl?.trim() &amp;&amp; !title?.trim()">
+                <return error="true" message="Give an idea, some text, an article URL, or both" />
+            </if>
+            <if condition="sourceUrl &amp;&amp; !(sourceUrl ==~ /(?i)https?:\/\/.+/)">
+                <return error="true" message="The article URL must start with http:// or https://" />
+            </if>
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'ContentIdea']" out-map="seqOut" />
+            <!-- a new idea goes to the end of the list -->
+            <entity-find entity-name="growerp.marketing.ContentIdea" list="lastIdeas" limit="1">
+                <econdition field-name="ownerPartyId" />
+                <order-by field-name="-sequenceNum" />
+            </entity-find>
+            <service-call name="create#growerp.marketing.ContentIdea" out-map="created"
+                in-map="[ownerPartyId: ownerPartyId, pseudoId: seqOut.seqNum, title: title,
+                    sequenceNum: (lastIdeas ? (lastIdeas[0].sequenceNum ?: 0) : 0) + 1,
+                    rawText: rawText, sourceUrl: sourceUrl?.trim(),
+                    createdDate: ec.user.nowTimestamp]" />
+            <entity-find-one entity-name="growerp.marketing.ContentIdea" value-field="contentIdea">
+                <field-map field-name="ideaId" from="created.ideaId" />
+            </entity-find-one>
+        </actions>
+    </service>
+
+    <service verb="update" noun="ContentIdea" authenticate="true">
+        <in-parameters>
+            <parameter name="ideaId" required="true" />
+            <parameter name="title" />
+            <parameter name="rawText" allow-html="any" />
+            <parameter name="sourceUrl" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="contentIdea" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.marketing.ContentIdea" value-field="idea" />
+            <if condition="!idea || idea.ownerPartyId != ownerPartyId">
+                <return error="true" message="Content idea not found" />
+            </if>
+            <if condition="sourceUrl &amp;&amp; !(sourceUrl ==~ /(?i)https?:\/\/.+/)">
+                <return error="true" message="The article URL must start with http:// or https://" />
+            </if>
+            <service-call name="update#growerp.marketing.ContentIdea"
+                in-map="[ideaId: ideaId, title: title ?: idea.title,
+                    rawText: rawText != null ? rawText : idea.rawText,
+                    sourceUrl: sourceUrl != null ? sourceUrl.trim() : idea.sourceUrl]" />
+            <entity-find-one entity-name="growerp.marketing.ContentIdea" value-field="contentIdea" />
+        </actions>
+    </service>
+
+    <service verb="reorder" noun="ContentIdeas" authenticate="true">
+        <description>Put the owner's ideas in the given order (first = next to use). Ideas left
+            out keep their place after the given ones.</description>
+        <in-parameters>
+            <parameter name="ideaIds" type="List" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <set field="seq" from="0" type="Integer" />
+            <iterate list="ideaIds" entry="orderedId">
+                <entity-find-one entity-name="growerp.marketing.ContentIdea" value-field="idea"
+                    for-update="true">
+                    <field-map field-name="ideaId" from="orderedId" />
+                </entity-find-one>
+                <if condition="idea &amp;&amp; idea.ownerPartyId == ownerPartyId">
+                    <set field="seq" from="seq + 1" type="Integer" />
+                    <set field="idea.sequenceNum" from="seq" type="Integer" />
+                    <entity-update value-field="idea" />
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="delete" noun="ContentIdea" authenticate="true">
+        <in-parameters>
+            <parameter name="ideaId" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.marketing.ContentIdea" value-field="idea" />
+            <if condition="!idea || idea.ownerPartyId != ownerPartyId">
+                <return error="true" message="Content idea not found" />
+            </if>
+            <entity-delete value-field="idea" />
+        </actions>
+    </service>
+
+    <service verb="write" noun="ArticleFromIdea" authenticate="true" transaction-timeout="300">
+        <description>Turn one content idea into a ~500 word article in the house voice and delete
+            the idea: the pasted text and the fetched article URL are both used as material. Creates a DRAFT
+            MasterContent (contentType ARTICLE, teaser mode on) whose targetUrl is the website page
+            the article goes to; the page itself is written when the piece is approved
+            (approve#MasterContent), so nothing becomes public without a human. Adapting it per
+            platform afterwards gives teasers that link to the article.</description>
+        <in-parameters>
+            <parameter name="ideaId" required="true" />
+            <parameter name="pnpType" default-value="OTHER">
+                <description>PAIN, NEWS, PRIZE or OTHER</description>
+            </parameter>
+            <parameter name="planId" />
+            <parameter name="plannedContentId"><description>a PLANNED piece of a content plan: the
+                article takes its slot (plan, angle and day) and the planned piece is removed</description></parameter>
+            <parameter name="personaId"><description>default: the owner's first persona</description></parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="masterContentId" />
+            <parameter name="pseudoId" />
+            <parameter name="title" />
+            <parameter name="targetUrl" />
+        </out-parameters>
+        <actions>
+            <script location="component://growerp/service/writeArticleFromIdeaWithAI.groovy" />
+        </actions>
+    </service>
+
+    <service verb="assign" noun="ArticlePage" authenticate="true">
+        <description>Give a piece its own article page under the hidden '_articles/' folder of
+            the owner's website and turn teaser mode on: targetUrl becomes the page, so teasers
+            that say "read the full article" link to the article. The previous targetUrl (e.g.
+            a landing page) is kept as ctaUrl, the call-to-action link at the bottom of the
+            page. The page is written on approval (publish#ArticlePage), right away when the
+            piece is already approved. Does nothing when the piece has a page already.</description>
+        <in-parameters>
+            <parameter name="masterContentId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="articlePath" />
+            <parameter name="targetUrl" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc" />
+            <if condition="!mc || mc.ownerPartyId != ownerPartyId">
+                <return error="true" message="Master content not found: ${masterContentId}" />
+            </if>
+            <if condition="mc.articlePath">
+                <set field="articlePath" from="mc.articlePath" />
+                <set field="targetUrl" from="mc.targetUrl" />
+                <return />
+            </if>
+            <service-call name="growerp.100.WebsiteServices100.get#Website" out-map="siteOut" />
+            <set field="hostName" from="siteOut.website?.hostName" />
+            <if condition="!hostName || hostName == '????'">
+                <return error="true" message="The company has no website address to publish the article on" />
+            </if>
+
+            <!-- page path from the title, unique for the owner -->
+            <set field="slug" from="(mc.title ?: '').toLowerCase().replaceAll(/[^a-z0-9]+/, '-')
+                .replaceAll(/^-+|-+$/, '')" />
+            <if condition="slug.length() &gt; 60">
+                <set field="slug" from="slug.substring(0, 60).replaceAll(/-+$/, '')" />
+            </if>
+            <set field="slug" from="slug ?: 'article'" />
+            <set field="articlePath" value="_articles/${slug}" />
+            <set field="suffix" from="2" type="Integer" />
+            <set field="pathTaken" from="true" type="Boolean" />
+            <while condition="pathTaken">
+                <entity-find-count entity-name="growerp.marketing.MasterContent" count-field="pathCount">
+                    <econdition field-name="ownerPartyId" />
+                    <econdition field-name="articlePath" />
+                </entity-find-count>
+                <if condition="pathCount == 0">
+                    <set field="pathTaken" from="false" type="Boolean" />
+                    <else>
+                        <set field="articlePath" value="_articles/${slug}-${suffix}" />
+                        <set field="suffix" from="suffix + 1" type="Integer" />
+                    </else>
+                </if>
+            </while>
+            <set field="targetUrl" from="(hostName.contains('localhost') ? 'http' : 'https') +
+                '://' + hostName + '/content/' + articlePath" />
+
+            <service-call name="update#growerp.marketing.MasterContent"
+                in-map="[masterContentId: masterContentId, articlePath: articlePath,
+                    targetUrl: targetUrl, ctaUrl: mc.ctaUrl ?: mc.targetUrl, teaserMode: 'Y',
+                    lastModifiedDate: ec.user.nowTimestamp]" />
+            <if condition="mc.approvedDate">
+                <service-call name="growerp.100.MasterContentServices100.publish#ArticlePage"
+                    in-map="[masterContentId: masterContentId]" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="publish" noun="ArticlePage" authenticate="true">
+        <description>Write an approved article (MasterContent with articlePath) as a page of the
+            owner's website and refresh the 'articles' index page that lists all of them. Article
+            pages live under the hidden '_articles/' folder, so they do not each become a menu
+            item; the index page is the one menu entry.</description>
+        <in-parameters>
+            <parameter name="masterContentId" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <entity-find-one entity-name="growerp.marketing.MasterContent" value-field="mc" />
+            <if condition="!mc || mc.ownerPartyId != ownerPartyId || !mc.articlePath">
+                <return error="true" message="No article to publish for ${masterContentId}" />
+            </if>
+            <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find>
+            <if condition="!stores">
+                <return error="true" message="The company has no website to publish the article on" />
+            </if>
+            <service-call name="growerp.100.MasterContentServices100.get#MasterContentImage"
+                in-map="[masterContentId: masterContentId]" out-map="heroOut" />
+            <set field="heroPath" from="heroOut.publicPath" />
+            <!-- page and index text are built in Groovy (string work); the pages are plain
+                 markdown, a ${...} in the text is shown as is -->
+            <entity-find entity-name="growerp.marketing.MasterContent" list="articles">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="articlePath" operator="is-not-null" />
+                <econdition field-name="approvedDate" operator="is-not-null" />
+                <order-by field-name="-approvedDate" />
+            </entity-find>
+            <script><![CDATA[
+                def summary = { String body ->
+                    String plain = (body ?: '').replaceAll(/[#*_`>\[\]]/, '').readLines()
+                        .collect { it.trim() }.find { it.length() > 40 } ?: ''
+                    if (plain.length() > 155) {
+                        int cut = plain.substring(0, 155).lastIndexOf(' ')
+                        plain = plain.substring(0, cut > 0 ? cut : 155) + '...'
+                    }
+                    return plain.replace('-->', '')
+                }
+                pageText = "<!-- description: ${summary(mc.body)} -->\n# ${mc.title}\n\n" +
+                    (heroPath ? "![${mc.title}](${heroPath})\n\n" : '') +
+                    "${mc.body}\n\n" + (mc.callToAction ? (mc.ctaUrl ? "**[${mc.callToAction}](${mc.ctaUrl})**\n"
+                        : "**${mc.callToAction}**\n") : '')
+                StringBuilder idx = new StringBuilder("<!-- description: All articles -->\n# Articles\n\n")
+                for (a in articles) {
+                    String date = a.approvedDate.toLocalDateTime().toLocalDate().toString()
+                    idx.append("### [${a.title}](/content/${a.articlePath})\n${date} - ${summary(a.body)}\n\n")
+                }
+                indexText = idx.toString()
+            ]]></script>
+            <service-call name="growerp.100.WebsiteTranslationServices100.store#TranslatedPage"
+                in-map="[productStoreId: stores[0].productStoreId, pagePath: mc.articlePath,
+                    text: pageText, contentType: 'md', sequenceNum: 900]" />
+            <service-call name="growerp.100.WebsiteTranslationServices100.store#TranslatedPage"
+                in-map="[productStoreId: stores[0].productStoreId, pagePath: 'articles',
+                    text: indexText, contentType: 'md', sequenceNum: 899]" />
+            <script>ec.cache.getCache('growerp.seo.index').clear()</script>
         </actions>
     </service>
 

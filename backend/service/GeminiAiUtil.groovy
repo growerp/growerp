@@ -32,7 +32,9 @@ import groovy.json.JsonOutput
 
 class GeminiAiUtil {
     
-    static final String DEFAULT_MODEL = "gemini-3.7-flash"
+    static final String DEFAULT_MODEL = "gemini-3.8-flash"
+    // the text model returns no image: images need an image model
+    static final String DEFAULT_IMAGE_MODEL = "gemini-3.1-flash-image"
     static final String API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
     static final String ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
     static final String ANTHROPIC_VERSION = "2023-06-01"
@@ -138,6 +140,19 @@ class GeminiAiUtil {
     }
 
     /**
+     * Whether callLlmApi will find an API key for this owner: the same model/provider and key
+     * choice it makes (own key for the tenant's provider, else the system default's provider).
+     * For preflight checks before a long run; the allowance is still checked per call.
+     */
+    static boolean hasApiKey(def ec, String ownerPartyId) {
+        Map modelConfig = resolveModelConfig(ec, ownerPartyId)
+        if (!hasOwnApiKey(ec, ownerPartyId, modelConfig.provider as String, null)) {
+            modelConfig = resolveModelConfig(ec, null)
+        }
+        return resolveApiKey(ec, ownerPartyId, modelConfig.provider as String) ? true : false
+    }
+
+    /**
      * Send a prompt to whichever LLM the tenant configured.
      *
      * @param ec ExecutionContext from Moqui
@@ -231,7 +246,7 @@ class GeminiAiUtil {
 
     /**
      * Make an image with Gemini, on a Gemini key like [callGeminiTts]. Model: GEMINI_IMAGE_MODEL
-     * (preference or environment variable), else DEFAULT_MODEL.
+     * (preference or environment variable), else DEFAULT_IMAGE_MODEL.
      *
      * @return the image bytes (png or jpeg, see the model)
      */
@@ -248,7 +263,7 @@ class GeminiAiUtil {
             checkMonthlyAllowance(ec, ownerPartyId, options.purpose as String)
         }
         String model = ec.user.getPreference("GEMINI_IMAGE_MODEL") ?: System.getenv("GEMINI_IMAGE_MODEL") ?:
-            DEFAULT_MODEL
+            DEFAULT_IMAGE_MODEL
         def requestMap = [
             contents: [[parts: [[text: prompt]]]],
             generationConfig: [responseModalities: ["IMAGE"]]
@@ -526,6 +541,32 @@ class GeminiAiUtil {
     }
     
     /**
+     * Turn a markdown text into plain text for platforms that show markdown as typed
+     * (LinkedIn, X, Facebook, Substack, email), keeping its line breaks and blank lines.
+     * A text that still is one solid block of more than three sentences is split into
+     * paragraphs of two sentences, so a post never reads as a single wall of text.
+     */
+    static String markdownToPlainText(String text) {
+        if (!text) return text
+        String out = text.replace('\r\n', '\n')
+            .replaceAll(/(?m)^#{1,6}\s+/, '')                 // heading: keep its text on its own line
+            .replaceAll(/(?m)^(\s*)[*+]\s+/, '$1- ')          // bullets as dashes
+            .replaceAll(/\*\*(.+?)\*\*/, '$1')
+            .replaceAll(/__(.+?)__/, '$1')
+            .replaceAll(/(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])/, '$1')
+            .replaceAll(/`([^`]*)`/, '$1')
+            .replaceAll(/!\[[^\]]*\]\(([^)\s]+)\)/, '$1')     // image: keep the url
+            .replaceAll(/\[([^\]]+)\]\(([^)\s]+)\)/) { all, label, url -> label == url ? url : "${label} ${url}" }
+            .replaceAll(/\n{3,}/, '\n\n')
+            .trim()
+        if (!out.contains('\n')) {
+            def sentences = out.split(/(?<=[.!?])\s+(?=["'(\p{Lu}\d])/) as List
+            if (sentences.size() > 3) out = sentences.collate(2).collect { it.join(' ') }.join('\n\n')
+        }
+        return out
+    }
+
+    /**
      * Parse JSON from AI response safely.
      */
     static def parseJsonResponse(String text) {
@@ -654,7 +695,17 @@ the subject is a separate field and must not appear in the body.
      */
     static String generateAdaptedContent(def ec, String title, String body, String platform,
             String contentType, String callToAction = null, String targetUrl = null,
-            String ownerPartyId = null) {
+            String ownerPartyId = null, Boolean teaser = false) {
+        // teaser mode: the full article lives on the website, the post only has to make
+        // people click through, so reads can be measured there instead of by open pixels
+        def teaserRules = teaser && targetUrl ? """
+
+TEASER MODE (overrides the length rules above):
+- Do NOT reproduce the full content. Write a short teaser: a strong hook and 2-4 sentences
+  that make the reader curious about the full article, keeping the platform's tone and format.
+- End with a clear "Read the full article" call-to-action followed by exactly this link: ${targetUrl}
+- Use the link exactly as given, do not shorten or change it.
+""" : ''
         def prompt = """
 Adapt the following platform-neutral marketing content for the ${platform} platform.
 Keep the core message and facts intact; rewrite tone, length and format to fit the platform.
@@ -662,16 +713,16 @@ Keep the core message and facts intact; rewrite tone, length and format to fit t
 TITLE: ${title ?: '(none)'}
 CONTENT TYPE: ${contentType}
 CALL TO ACTION: ${callToAction ?: '(none)'}
-LINK: ${targetUrl ?: '(none)'}
+LINK: ${targetUrl ? targetUrl + ' (use exactly as given, keep the query string)' : '(none)'}
 
-MASTER CONTENT:
+MASTER CONTENT (Markdown):
 ${body}
 
 HOUSE VOICE (how it must sound; wins over platform tone where they disagree):
 ${houseVoice(ec, ownerPartyId)}
 
 PLATFORM + FORMAT REQUIREMENTS:
-${getAdaptationRules(platform, contentType, targetUrl)}
+${getAdaptationRules(platform, contentType, targetUrl)}${teaserRules}
 
 Return ONLY the adapted content text, no explanations, no markdown code fences.
 """
@@ -684,14 +735,25 @@ Return ONLY the adapted content text, no explanations, no markdown code fences.
      */
     private static String getAdaptationRules(String platform, String contentType, String targetUrl) {
         def hasUrl = targetUrl != null && !targetUrl.trim().isEmpty()
-        switch (platform.toUpperCase()) {
+        def upper = platform.toUpperCase()
+        return (upper == 'MEDIUM'
+            ? "- Markdown, as in the master content: '## ' sub-headings, lists, **bold**\n"
+            : "- Plain text only: no markdown syntax (no #, **, *, backticks or [text](url)); " +
+              "write links as bare URLs\n" +
+              "- Keep a clear structure: short paragraphs of 1-3 sentences separated by a blank " +
+              "line, never one solid block; list items on separate lines starting with a dash\n") +
+            platformRules(upper, contentType, hasUrl)
+    }
+
+    private static String platformRules(String platform, String contentType, boolean hasUrl) {
+        switch (platform) {
             case 'LINKEDIN':
                 if (contentType == 'MESSAGE') {
                     return "- 1:1 DM tone: short, human, specific\n- Under ~400 characters\n- End on a question\n- Include NO URL (we share the link only after they reply)"
                 }
                 return "- Professional post, up to ~1300 characters\n- Short paragraphs, 1-2 relevant emojis\n- 3-5 topical hashtags at the end\n- ${hasUrl ? 'Include the link near the end' : 'No link needed'}\n- End with an engaging question"
             case 'TWITTER':
-                return "- Thread of tweets, each MAX 280 characters, separated by a blank line\n- Hook in the first tweet\n- 1-2 hashtags total\n- ${hasUrl ? 'Put the link in the last tweet' : 'No link needed'}"
+                return "- Thread of tweets, each MAX 280 characters, separated by a blank line\n- Hook in the first tweet\n- 1-2 hashtags total\n- ${hasUrl ? 'Put the link in the last tweet; X counts any link as 23 characters, so count it as 23' : 'No link needed'}"
             case 'FACEBOOK':
                 return "- Conversational, community tone\n- ~400 characters plus a link preview\n- Minimal hashtags\n- ${hasUrl ? 'End with the link (it renders a preview)' : 'No link needed'}"
             case 'MEDIUM':

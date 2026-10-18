@@ -1881,6 +1881,13 @@ limitations under the License.
                     <parameter name="appsUsed" type="List"/>
                 </parameter>
             </parameter>
+            <!-- signups per day for all matching rows, ignoring search and paging -->
+            <parameter name="dailyCounts" type="List">
+                <parameter name="dailyCount" type="Map">
+                    <parameter name="date"/><!-- yyyy-MM-dd -->
+                    <parameter name="count" type="Integer"/>
+                </parameter>
+            </parameter>
         </out-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.check#SupportUser"/>
@@ -1906,6 +1913,7 @@ limitations under the License.
             <!-- no signups in the period: return the empty result, not an error -->
             <if condition="!ownerIds">
                 <set field="signups" from="[]"/>
+                <set field="dailyCounts" from="[]"/>
                 <set field="signupCount" value="0" type="Integer"/>
                 <return/>
             </if>
@@ -2035,6 +2043,9 @@ limitations under the License.
                         userCount: owner.userIds.size(),
                         appsUsed: (appsPerOwner[ownerId] ?: []) as List])
                 }
+                dailyCounts = rows.countBy { it.signupDate }
+                    .collect { date, count -> [date: date, count: count as Integer] }
+                    .sort { it.date }
                 if (search) {
                     def term = search.toLowerCase()
                     rows = rows.findAll {
@@ -2903,7 +2914,7 @@ limitations under the License.
 
     <service verb="migrate" noun="StaleLlmModelNames">
         <description>One-time idempotent migration for rows still naming a retired Gemini model
-            (2.0/2.5/3.5 flash). Agent rows and tenant settings are cleared so they follow the
+            (2.0/2.5/3.5/3.7 flash). Agent rows and tenant settings are cleared so they follow the
             central default again (SystemDefault -> env -> built-in); the SystemDefault row itself
             is pointed at the current built-in default. Rows naming a current or non-Gemini model
             are left untouched. Run from /apps/tools/Service/ServiceRun/runJson.</description>
@@ -2914,7 +2925,8 @@ limitations under the License.
         </out-parameters>
         <actions>
             <set field="retired" from="['gemini-2.0-flash', 'gemini-2.5-flash',
-                'gemini-2.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.5-flash-lite']"/>
+                'gemini-2.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.5-flash-lite',
+                'gemini-3.7-flash']"/>
             <set field="agentsCleared" from="0"/>
             <set field="tenantsCleared" from="0"/>
 

@@ -28,14 +28,17 @@
     <!--  Content Plan (Weekly PNP Schedule)                       -->
     <!-- ========================================================= -->
     <entity entity-name="ContentPlan" package="growerp.marketing">
-        <description>Represents a weekly content plan based on the Pain-News-Prize formula.</description>
+        <description>A content plan over one or more weeks: an outline of PLANNED MasterContent
+            pieces (Pain-News-Prize or a single posting per week) written week by week.</description>
         <field name="planId" type="id" is-pk="true" />
         <field name="pseudoId" type="id" />
         <field name="ownerPartyId" type="id" />
         <field name="personaId" type="id" />
         <field name="weekStartDate" type="date-time" />
-        <field name="theme" type="text-medium" />
+        <field name="theme" type="text-long" />
         <field name="status" type="text-short" /> <!-- DRAFT, ACTIVE, COMPLETED -->
+        <field name="weeks" type="number-integer" /> <!-- number of weeks from weekStartDate -->
+        <field name="planFormat" type="text-short" /> <!-- PNP (Pain/News/Prize Mon/Wed/Fri) or SINGLE (one posting on Monday); empty = PNP -->
 
         <field name="createdDate" type="date-time" />
         <field name="lastModifiedDate" type="date-time" />
@@ -97,7 +100,22 @@
         <field name="body" type="text-very-long" /> <!-- canonical platform-neutral copy -->
         <field name="callToAction" type="text-long" />
         <field name="targetUrl" type="text-medium" />
-        <field name="status" type="text-short" /> <!-- DRAFT, APPROVED, ADAPTED -->
+        <!-- Y = adapted posts are short teasers linking to targetUrl (the full article on
+             the website), so reads are measured on the site, see ContentRead -->
+        <field name="teaserMode" type="text-indicator" />
+        <!-- website page (under content/) holding the full article written from a ContentIdea;
+             written to the website when the piece is approved -->
+        <field name="articlePath" type="text-medium" />
+        <!-- link of the call to action at the bottom of the article page, e.g. the landing
+             page targetUrl pointed to before the piece got its own article page -->
+        <field name="ctaUrl" type="text-medium" />
+        <!-- optional related image: dbresource folder holding large/medium/small (upload#Image),
+             shown as article hero and attached to the adapted social posts -->
+        <field name="imageLocation" type="text-medium" />
+        <field name="status" type="text-short" /> <!-- PLANNED (outline only, no body yet), DRAFT, APPROVED, ADAPTED -->
+        <!-- outline from a ContentPlan: what to write and when; the body is written in that week -->
+        <field name="brief" type="text-long" />
+        <field name="plannedDate" type="date-time" />
         <field name="approvedDate" type="date-time" /> <!-- human approval gate: set = scheduler may auto-publish this piece's SocialPost variants -->
 
         <field name="createdDate" type="date-time" />
@@ -134,6 +152,71 @@
             <key-map field-name="postId" />
         </relationship>
     </entity>
+
+    <!-- ========================================================= -->
+    <!--  Content ideas: raw material for website articles         -->
+    <!-- ========================================================= -->
+    <entity entity-name="ContentIdea" package="growerp.marketing">
+        <description>Raw material handed in by a person: pasted text, notes or a one-line idea,
+            and/or the URL of an article. write#ArticleFromIdea turns it into a ~500 word website
+            article (a MasterContent ARTICLE in teaser mode) and deletes the idea; the weekly
+            content agent uses the ideas in their order (sequenceNum) before inventing subjects.</description>
+        <field name="ideaId" type="id" is-pk="true" />
+        <field name="pseudoId" type="id" />
+        <field name="ownerPartyId" type="id" />
+        <field name="title" type="text-medium" />
+        <field name="rawText" type="text-very-long" />
+        <field name="sourceUrl" type="text-medium" />
+        <!-- the order people put the ideas in; the agent uses them top first -->
+        <field name="sequenceNum" type="number-integer" />
+        <field name="createdDate" type="date-time" />
+        <relationship type="one" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+    </entity>
+
+    <!-- ========================================================= -->
+    <!--  Content reads on the tenant website                      -->
+    <!-- ========================================================= -->
+    <entity entity-name="ContentRead" package="growerp.marketing">
+        <description>One visit to a website page arriving from a tagged content link
+            (utm_campaign = MasterContent pseudoId, utm_source = platform). A row is created
+            on landing; readDate is set once the visitor really read the page (visible dwell
+            and scroll), which bots, link previews and mail privacy proxies never do.</description>
+        <field name="readId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" />
+        <field name="productStoreId" type="id" />
+        <field name="pagePath" type="text-medium" />
+        <field name="utmSource" type="text-short" />
+        <field name="utmMedium" type="text-short" />
+        <field name="utmCampaign" type="text-medium" />
+        <field name="visitKey" type="text-short" /> <!-- random per browser tab session -->
+        <field name="userAgent" type="text-medium" />
+        <field name="landedDate" type="date-time" />
+        <field name="readDate" type="date-time" />
+        <field name="maxScrollPct" type="number-integer" />
+        <field name="dwellSeconds" type="number-integer" />
+        <index name="CONTENT_READ_VISIT" unique="false">
+            <index-field name="visitKey" />
+        </index>
+        <index name="CONTENT_READ_OWNER" unique="false">
+            <index-field name="ownerPartyId" />
+            <index-field name="utmCampaign" />
+        </index>
+    </entity>
+
+    <!-- per master piece (utm_campaign) and platform (utm_source) totals -->
+    <view-entity entity-name="ContentReadSummary" package="growerp.marketing">
+        <member-entity entity-alias="CR" entity-name="growerp.marketing.ContentRead" />
+        <alias entity-alias="CR" name="ownerPartyId" />
+        <alias entity-alias="CR" name="utmCampaign" />
+        <alias entity-alias="CR" name="utmSource" />
+        <alias entity-alias="CR" name="landings" field="readId" function="count" />
+        <alias entity-alias="CR" name="uniqueVisitors" field="visitKey" function="count-distinct" />
+        <alias entity-alias="CR" name="reads" field="readDate" function="count" type="number-integer" />
+        <alias entity-alias="CR" name="avgDwellSeconds" field="dwellSeconds" function="avg" />
+        <alias entity-alias="CR" name="lastLandedDate" field="landedDate" function="max" />
+    </view-entity>
 
     <!-- ========================================================= -->
     <!--  Substack subscriber sync tracking                        -->

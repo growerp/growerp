@@ -1,8 +1,9 @@
 name: growerp_marketing
 resolution: workspace
-description: Assessment and lead scoring module for GrowERP
-version: 1.9.0
-publish_to: "none"
+description: GrowERP marketing building block - assessments and lead scoring, landing pages, personas and an AI-assisted social media content plan.
+version: 2.0.0
+homepage: https://www.growerp.com
+repository: https://github.com/growerp/growerp
 
 environment:
   sdk: ^3.10.0
@@ -15,31 +16,41 @@ dependencies:
     sdk: flutter
 
   # Core packages (dependency on growerp ecosystem)
-  growerp_models: ^1.12.0
-  growerp_core: ^1.11.0
+  growerp_models: ^1.13.0
+  growerp_core: ^1.12.0
 
   # JSON serialization
-  json_annotation: ^4.9.0
+  json_annotation: ^4.12.0
 
   # HTTP client for API calls
-  retrofit: ^4.9.2
-  dio: ^5.3.1
-  logger: ^2.1.0
+  retrofit: ^4.10.0
+  dio: ^5.11.1
+  logger: ^2.8.0
 
   # State management & utilities
   flutter_bloc: ^9.1.1
-  equatable: ^2.0.5
-  intl: ^0.20.0
+  bloc: ^9.2.1
+  stream_transform: ^2.1.2
+  responsive_framework: ^1.5.1
+  equatable: ^2.1.0
+  intl: ^0.20.3
+
+  # related image and ZIP up/download
+  image_picker: ^1.2.4
+  file_picker: ^13.1.0
+  cross_file: ^0.3.5+5
 
   # Web support
 
-dev_dependencies:
+  # test helper classes in lib/src/*/integration_test are part of the public API
   flutter_test:
     sdk: flutter
 
+dev_dependencies:
+
   # Testing & analysis
   flutter_lints: ^6.0.0
-  mocktail: ^1.0.0
+  mocktail: ^1.0.5
 
 flutter:
   generate: true

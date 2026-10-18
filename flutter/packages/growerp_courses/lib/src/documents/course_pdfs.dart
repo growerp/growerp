@@ -200,7 +200,7 @@ Future<Uint8List> workbookPdf(
         ),
         pw.SizedBox(height: 12),
         if (course.description?.isNotEmpty ?? false)
-          pw.Paragraph(text: course.description!),
+          ...markdownToPdf(course.description!),
         if (course.objectives?.isNotEmpty ?? false) ...[
           pw.Header(level: 2, text: l.courses_whatYouWillLearn),
           ...markdownToPdf(course.objectives!),
@@ -215,7 +215,7 @@ Future<Uint8List> workbookPdf(
             ),
           ),
           if (module.description?.isNotEmpty ?? false)
-            pw.Paragraph(text: module.description!),
+            ...markdownToPdf(module.description!),
           for (final lesson in module.lessons ?? <CourseLesson>[]) ...[
             pw.Header(level: 1, text: lesson.title),
             ...markdownToPdf(lesson.content ?? ''),

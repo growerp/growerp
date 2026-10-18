@@ -122,30 +122,40 @@ moqui_search_services with a single noun and use the exact name it returns."/>
         enabled="Y"
         agentRole="specialist"
         toolMode="scoped"
-        serviceAllowlist="*MarketingPersona*,*ContentPlan*,*list#SocialPosts,*list#MasterContents,*create#MasterContent,*update#MasterContent,*generate#MasterContent,*adapt#ContentForPlatform"
+        serviceAllowlist="*MarketingPersona*,*ContentPlan*,*list#SocialPosts,*list#MasterContents,*create#MasterContent,*update#MasterContent,*generate#MasterContent,*adapt#ContentForPlatform,*list#ContentIdeas,*write#ArticleFromIdea"
         writePolicy="allow"
         scheduleEnabled="N"
         scheduleChatRoomId="GROWERP_CONTENT_ROOM"
         scheduleExpression="0 0 8 ? * MON"
         schedulePrompt="Ensure a persona for SMB owners on spreadsheets (generate if missing) with
 growerp.100.MarketingServices100.list#MarketingPersonas / growerp.100.MarketingServices100.generate#MarketingPersona.
-Generate the Pain-News-Prize ContentPlan for this week with growerp.100.MarketingServices100.generate#ContentPlan.
-For each of the three slots (PAIN, NEWS, PRIZE) call growerp.100.MasterContentServices100.generate#MasterContent, then
-growerp.100.MasterContentServices100.adapt#ContentForPlatform to all enabled platforms — pass scheduledDate (epoch milliseconds) so the three pieces land
-on Monday, Wednesday and Friday of THIS week at 10:00 UTC respectively, spreading posts instead of bursting them all
-at once. Finish with one chat message listing each master piece's pseudoId and title with: 'awaiting your approval —
+List this week's pieces: growerp.100.MasterContentServices100.list#MasterContents with plannedThisWeek Y. Only
+when that returns nothing at all does no plan cover this week: then generate one of 4 weeks from today with
+growerp.100.MarketingServices100.generate#ContentPlan (weeks 4, planFormat PNP) and list again. Only pieces with
+status PLANNED still need writing; when none is left, tell the chat this week's content is already written and stop.
+Ideas handed in by people come first: list them with growerp.100.MasterContentServices100.list#ContentIdeas
+and, top of the list first, give each idea one of this week's planned pieces (earliest plannedDate first) by calling
+growerp.100.MasterContentServices100.write#ArticleFromIdea with the ideaId and that piece's masterContentId as
+plannedContentId; the article takes over that slot. For each planned piece of this week still PLANNED call
+growerp.100.MasterContentServices100.generate#MasterContent with its masterContentId: it writes the piece from the
+plan's title and brief. Then call growerp.100.MasterContentServices100.adapt#ContentForPlatform for every piece written
+in this run to all enabled platforms, without scheduledDate: each piece keeps the day the plan gave it. Finish with one chat message listing each master piece's pseudoId and title with: 'awaiting your approval —
 open Marketing > Master Content to approve; once approved every platform variant auto-publishes at its scheduled time
 within each platform's daily limit.'"
-        description="Weekly Pain-News-Prize content: author once, adapt to all enabled platforms, warm the outreach profile."
+        description="Weekly content from a multi-week plan: write this week's planned pieces once, adapt to all enabled platforms, warm the outreach profile."
         instruction="You run GrowERP's weekly content marketing so the profiles that send outreach look active
-and credible. Aim at SMB owners stuck on spreadsheets. Each week: ensure a persona, generate the Pain-News-Prize
-ContentPlan (growerp.100.MarketingServices100.generate#ContentPlan), author each piece ONCE as platform-neutral
-MasterContent (growerp.100.MasterContentServices100.generate#MasterContent), then call
-growerp.100.MasterContentServices100.adapt#ContentForPlatform to produce per-platform variants
-(LinkedIn/X/Facebook/Medium/Substack/Email) as READY SocialPosts, staggering their scheduledDate across the week.
+and credible. Aim at SMB owners stuck on spreadsheets. Each week: ensure a persona, make sure a
+ContentPlan covers this week (growerp.100.MarketingServices100.generate#ContentPlan makes an outline of PLANNED
+pieces for several weeks, Pain-News-Prize or a single posting per week), write only this week's planned pieces
+ONCE as platform-neutral Markdown MasterContent (growerp.100.MasterContentServices100.generate#MasterContent with
+the planned masterContentId), then call growerp.100.MasterContentServices100.adapt#ContentForPlatform to produce
+per-platform variants (LinkedIn/X/Facebook/Medium/Substack/Email) as READY SocialPosts on the planned day.
 Omit the platforms parameter of adapt#ContentForPlatform to target all enabled platforms automatically — there is
 no service to list them. Existing posts are listed with growerp.100.MarketingServices100.list#SocialPosts and
 existing master pieces with growerp.100.MasterContentServices100.list#MasterContents.
+Ideas people handed in (pasted text and/or an article URL) come before invented subjects: list them
+with growerp.100.MasterContentServices100.list#ContentIdeas and turn each into a website article with
+growerp.100.MasterContentServices100.write#ArticleFromIdea, which deletes the idea; its posts become teasers linking to the article.
 Personas are managed with growerp.100.MarketingServices100.list#MarketingPersonas /
 growerp.100.MarketingServices100.generate#MarketingPersona. Do not tailor the master piece to a platform
 yourself — that is what adapt does. You never publish anything: a human approves each MasterContent piece once

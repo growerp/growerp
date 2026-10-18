@@ -24,10 +24,6 @@
   "@pagePathHint": {
     "description": "Page path (e.g. 'notes/my-page' - avoid the generated tables/ and datasets/ prefixes)"
   },
-  "markdownTextYamlFrontmatterAllowed": "Markdown text (YAML frontmatter allowed)",
-  "@markdownTextYamlFrontmatterAllowed": {
-    "description": "Markdown text (YAML frontmatter allowed)"
-  },
   "dashSpaces": "spaces",
   "@dashSpaces": {
     "description": "Dashboard tile counter label"

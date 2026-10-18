@@ -1,3 +1,13 @@
+## 1.2.0
+
+ - **PERF**: reduce Flutter app size across mobile, web and desktop. ([bb9ba9ad](https://github.com/growerp/growerp/commit/bb9ba9ad9926ed5d8b19bdae90f30a35ab539692))
+ - **FIX**(l10n): translate spanish files. ([d73c43ea](https://github.com/growerp/growerp/commit/d73c43eadb271fa9eabe7ba978e64b919ecc084c))
+ - **FIX**(l10n): localize all table column headers. ([a9f07958](https://github.com/growerp/growerp/commit/a9f079580e284d036e3452699f1e4782ad706936))
+ - **FIX**(l10n): register missing localization delegates in the liner and outreach examples. ([491a24b6](https://github.com/growerp/growerp/commit/491a24b6c5acbac85624e3ad34a469f9837953f8))
+ - **FEAT**(l10n): add Spanish language scaffolding. ([7e7cc80f](https://github.com/growerp/growerp/commit/7e7cc80f09c20e4ac7efa86e1b203045877419fe))
+ - **FEAT**(l10n): add Spanish language scaffolding. ([a2386537](https://github.com/growerp/growerp/commit/a2386537663750b6e18a17ab6265ba20485b22a6))
+ - **FEAT**: localize hardcoded strings in multiple packages. ([7539f2c5](https://github.com/growerp/growerp/commit/7539f2c55412ea89fc417ed265d87ff6f1b53cca))
+
 ## 1.1.1
 
  - **FIX**: relicense under Apache License 2.0 (LICENSE and file headers).

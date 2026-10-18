@@ -100,7 +100,8 @@ class PlatformConfigBloc
     }
   }
 
-  /// Probe the platform with the stored credentials, then reload the list so
+  /// Save the on-screen values when given, probe the platform with the stored
+  /// credentials, then reload the list so
   /// the row carries the fresh lastCheckDate/lastCheckError. Emits [verified],
   /// never [success]: a success with a message closes the detail dialog.
   Future<void> _onPlatformConfigVerify(
@@ -109,6 +110,18 @@ class PlatformConfigBloc
   ) async {
     emit(state.copyWith(status: PlatformConfigStatus.loading));
     try {
+      final config = event.config;
+      if (config != null) {
+        await restClient.updatePlatformConfiguration(
+          configId: event.configId,
+          isEnabled: config.isEnabled ? 'Y' : 'N',
+          dailyLimit: config.dailyLimit,
+          apiKey: config.apiKey,
+          apiSecret: config.apiSecret,
+          username: config.username,
+          password: config.password,
+        );
+      }
       dynamic result = await restClient.verifyPlatformConfiguration(
         configId: event.configId,
       );

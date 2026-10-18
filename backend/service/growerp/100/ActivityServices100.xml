@@ -1283,4 +1283,71 @@ limitations under the License.
             <script>reportItems = reportItems.sort { it.lastName ?: '' }</script>
         </actions>
     </service>
+
+    <service verb="get" noun="ActivityNotes">
+        <description>Comments on an activity, oldest first. Notes written by an AI agent
+            (task loop) are flagged isAgent.</description>
+        <in-parameters>
+            <parameter name="activityId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="activityNotes" type="List">
+                <parameter name="activityNote" type="Map">
+                    <parameter name="activityId" />
+                    <!-- ISO-8601 UTC string for the Flutter DateTimeConverter -->
+                    <parameter name="noteDate" />
+                    <parameter name="noteText" />
+                    <parameter name="userFullName" />
+                    <parameter name="isAgent" type="Boolean" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="we"
+                auto-field-map="[workEffortId: activityId]" />
+            <if condition="!we || we.ownerPartyId != ownerPartyId">
+                <return error="true" message="Activity ${activityId} not found" />
+            </if>
+            <entity-find entity-name="mantle.work.effort.WorkEffortNote" list="notes">
+                <econdition field-name="workEffortId" from="activityId" />
+                <order-by field-name="noteDate" />
+            </entity-find>
+            <set field="activityNotes" from="[]" />
+            <iterate list="notes" entry="note">
+                <entity-find-one entity-name="moqui.security.UserAccount" value-field="author"
+                    auto-field-map="[userId: note.userId]" />
+                <script>activityNotes.add([activityId: activityId, noteDate: note.noteDate?.toInstant()?.toString(),
+                    noteText: note.noteText, userFullName: author?.userFullName ?: '',
+                    isAgent: author?.username?.startsWith('agent-') ?: false])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="ActivityNote">
+        <description>Add a comment to an activity. On a task the AI agent works, the comment is
+            its reply: the task loop picks it up on its next check.</description>
+        <in-parameters>
+            <parameter name="activityId" required="true" />
+            <parameter name="noteText" required="true" allow-html="any" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="activityNotes" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="we"
+                auto-field-map="[workEffortId: activityId]" />
+            <if condition="!we || we.ownerPartyId != ownerPartyId">
+                <return error="true" message="Activity ${activityId} not found" />
+            </if>
+            <service-call name="create#mantle.work.effort.WorkEffortNote"
+                in-map="[workEffortId: activityId, noteText: noteText,
+                        noteDate: ec.user.nowTimestamp, userId: ec.user.userId]" />
+            <service-call name="growerp.100.ActivityServices100.get#ActivityNotes"
+                in-map="[activityId: activityId]" out-map="context" />
+        </actions>
+    </service>
 </services>

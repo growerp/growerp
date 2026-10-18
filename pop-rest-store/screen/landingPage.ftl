@@ -1,3 +1,8 @@
+<#-- markdown text as html; mdInline drops the paragraph around a single line -->
+<#function md text><#return mdRenderer.render(mdParser.parse(text))></#function>
+<#function mdInline text><#local html = md(text)?trim>
+    <#if html?starts_with("<p>") && html?ends_with("</p>") && html?index_of("<p>", 1) == -1>
+        <#return html?keep_after("<p>")?keep_before_last("</p>")></#if><#return html></#function>
 <!DOCTYPE html>
 <html lang="en"<#if theme?? && theme == 'dark'> class="theme-dark"</#if>>
 <head>
@@ -204,7 +209,7 @@
                 <section class="section">
                     <div class="section-content">
                         <#if section.sectionTitle?has_content><h2>${section.sectionTitle}</h2></#if>
-                        <#if section.sectionDescription?has_content><p>${section.sectionDescription}</p></#if>
+                        <#if section.sectionDescription?has_content><div>${md(section.sectionDescription)}</div></#if>
 
                         <#if section.sectionType == 'stats'>
                             <div class="stats-bar">
@@ -264,7 +269,7 @@
                     <div class="split-section">
                         <div>
                             <#if benefitsSection.sectionTitle?has_content><h2 style="text-align:left;">${benefitsSection.sectionTitle}</h2></#if>
-                            <#if benefitsSection.sectionDescription?has_content><p style="text-align:left;">${benefitsSection.sectionDescription}</p></#if>
+                            <#if benefitsSection.sectionDescription?has_content><div style="text-align:left;">${md(benefitsSection.sectionDescription)}</div></#if>
                             <ul class="benefits-list" style="margin-left:0;">
                                 <#list benefitsSection.rows as row>
                                     <li><span class="benefit-icon">${row.icon!}</span><span>${row.text!}</span></li>
@@ -295,9 +300,9 @@
     <#if credibility?? && credibility.creatorBio??>
         <section class="credibility-section">
             <div class="credibility-content">
-                <blockquote>"${credibility.creatorBio!}"</blockquote>
+                <blockquote>"${mdInline(credibility.creatorBio!)}"</blockquote>
                 <#if credibility.backgroundText??>
-                    <cite>— ${credibility.backgroundText!}</cite>
+                    <cite>— ${mdInline(credibility.backgroundText!)}</cite>
                 </#if>
                 <#if credibility.statistics?? && (credibility.statistics?size > 0)>
                     <div class="credibility-stats">

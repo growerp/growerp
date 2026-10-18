@@ -1,3 +1,29 @@
+## 1.12.0
+
+ - **PERF**: reduce Flutter app size across mobile, web and desktop. ([bb9ba9ad](https://github.com/growerp/growerp/commit/bb9ba9ad9926ed5d8b19bdae90f30a35ab539692))
+ - **FIX**: bump file_picker/package_info_plus off deprecated KGP plugin apply. ([9109e8e5](https://github.com/growerp/growerp/commit/9109e8e5301a9832262f376b8c77da3e3a36e319))
+ - **FIX**(flutter): wire up bloc success messages to actual translations. ([803d0857](https://github.com/growerp/growerp/commit/803d085790ccf6049e5223f377093fd19830e2fb))
+ - **FIX**(core): stop leaking the post-logout authz denial to the user. ([a867dbde](https://github.com/growerp/growerp/commit/a867dbde28b28d6fb4b65d16035ea322d18e5d1f))
+ - **FIX**(accounting): revenue/expense chart for fiscal years not starting in january. ([1bf30c68](https://github.com/growerp/growerp/commit/1bf30c689352f38ebe2bfdccab6747d96174cb64))
+ - **FIX**(accounting): ledger import, posting errors and email sending. ([073b8e15](https://github.com/growerp/growerp/commit/073b8e15251ae26004a7b0d4f13000a68ca7645f))
+ - **FIX**(l10n): translate the dashboard tiles and empty states. ([8f2ccf68](https://github.com/growerp/growerp/commit/8f2ccf68ab7877e89cc2047f34b403e02d60482a))
+ - **FIX**(l10n): correct Spanish terms and add the backend es messages. ([525e74d1](https://github.com/growerp/growerp/commit/525e74d14d5971af2010eba59c3dcc0330596176))
+ - **FIX**(l10n): translate spanish files. ([d73c43ea](https://github.com/growerp/growerp/commit/d73c43eadb271fa9eabe7ba978e64b919ecc084c))
+ - **FIX**(l10n): localize list search-field hints. ([da9d0423](https://github.com/growerp/growerp/commit/da9d042313905d0ab2c7595f7b923498e8ec9ba6))
+ - **FIX**(l10n): localize all table column headers. ([a9f07958](https://github.com/growerp/growerp/commit/a9f079580e284d036e3452699f1e4782ad706936))
+ - **FIX**(l10n): translate all missing de/fr/nl/zh messages. ([19df4566](https://github.com/growerp/growerp/commit/19df4566f3aeb0998d6a17ce0e2955b07676de31))
+ - **FIX**(analyze): clear analyzer problems left by the localization passes. ([f888437e](https://github.com/growerp/growerp/commit/f888437e1037fbbfd179cb8cf6a1c837c7a7f22d))
+ - **FEAT**(agents): add GrowERP Operations Team, function catalog, and inter-company invoice/Stripe integration. ([ee54e8ef](https://github.com/growerp/growerp/commit/ee54e8ef4db53b437b1c0415d76e756e944fed48))
+ - **FEAT**(accounting): give the cash book a short category list. ([852fb93f](https://github.com/growerp/growerp/commit/852fb93f1c283b529a375e217ee0822c8b03ac12))
+ - **FEAT**(accounting): simplified cash in / cash out bookkeeping for freelance. ([1805b168](https://github.com/growerp/growerp/commit/1805b168b6c763dc0862cd3cc365f7ed15e8b41c))
+ - **FEAT**(accounting): allow the fiscal year to start in any month. ([b73193dc](https://github.com/growerp/growerp/commit/b73193dcbc37685bfb054be2045305be8ece583d))
+ - **FEAT**(accounting): GL account CSV up/download and fiscal year close. ([81a02c8c](https://github.com/growerp/growerp/commit/81a02c8c6368c6de86ed32ae4be508774efa6c13))
+ - **FEAT**(accounting): let the accounting year start at any quarter. ([8a49aa38](https://github.com/growerp/growerp/commit/8a49aa383e757b15912e8181190694e6acd7b945))
+ - **FEAT**(accounting): translate GL account names per user language. ([c04d2295](https://github.com/growerp/growerp/commit/c04d229527ef6e239c396663d6aee6b903e8c24e))
+ - **FEAT**(l10n): add Spanish language scaffolding. ([7e7cc80f](https://github.com/growerp/growerp/commit/7e7cc80f09c20e4ac7efa86e1b203045877419fe))
+ - **FEAT**(l10n): add Spanish language scaffolding. ([a2386537](https://github.com/growerp/growerp/commit/a2386537663750b6e18a17ab6265ba20485b22a6))
+ - **FEAT**: localize hardcoded strings in marketing, order_accounting, outreach, and rental packages. ([2367f65d](https://github.com/growerp/growerp/commit/2367f65d87a907b74d4ba0b62a1042c6fb9a3c64))
+
 ## 1.11.1
 
  - **FIX**: relicense under Apache License 2.0 (LICENSE and file headers).
