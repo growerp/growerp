@@ -1254,7 +1254,9 @@ jobs:
       # The version comes from the image's `version` label — set at build time by
       # release_tool.dart and already used by the server's sync-to-prod.sh. It is
       # only readable from the running container, which works because the swarm is
-      # a single node. Services without a -test/-prod suffix are infrastructure.
+      # a single node. growerp_<app>-review is the store review backend
+      # (*.growerp.net, pinned frozen copy of staging, managed by the server's
+      # review.sh). Services without a -test/-prod/-review suffix are infrastructure.
       - name: Collect deployed image versions on growerp.com
         id: ssh_images
         continue-on-error: true
@@ -1270,6 +1272,7 @@ jobs:
               case "$base" in
                 *-test) app=${base%-test}; envn=staging ;;
                 *-prod) app=${base%-prod}; envn=production ;;
+                *-review) app=${base%-review}; envn=review ;;
                 *) continue ;;
               esac
               img=$(docker service inspect "$s" --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}' 2>/dev/null)
@@ -1284,7 +1287,18 @@ jobs:
               printf '%s|%s|%s|%s|%s|%s\n' "$app" "$envn" "$ver" "${img%%@*}" "$rep" "$upd"
             done
 
-      # The two SSH steps are saved independently — one failing must not blank
+      # Where production sends native apps newer than itself (store builds in
+      # review): backend.growerp.net = review backend, backend.growerp.org = staging.
+      # Same public call as review.sh status, so no SSH needed.
+      - name: Ask production where newer apps go
+        id: routing
+        continue-on-error: true
+        run: |
+          url=$(curl -s --max-time 20 "https://backend.growerp.com/rest/s1/growerp/100/BackendUrl?applicationId=AppAdmin&version=99.0.0&platform=ios" \
+            | python3 -c 'import json,sys; print(json.load(sys.stdin).get("backendUrl") or "")' 2>/dev/null || true)
+          echo "backend_url=$url" >> "$GITHUB_OUTPUT"
+
+      # The SSH steps are saved independently — one failing must not blank
       # the other's section on the page.
       - name: Save swarm status fragment
         if: always()
@@ -1292,6 +1306,7 @@ jobs:
           SWARM_OUT: ${{ steps.ssh.outputs.stdout }}
           SSH_OUTCOME: ${{ steps.ssh.outcome }}
           IMAGES_OUT: ${{ steps.ssh_images.outputs.stdout }}
+          ROUTING_URL: ${{ steps.routing.outputs.backend_url }}
         run: |
           mkdir -p /tmp/swarm
           if [ -n "$SWARM_OUT" ]; then
@@ -1305,6 +1320,9 @@ jobs:
             printf '%s\n' "$IMAGES_OUT" \
               | { grep -v '^=\{4,\}' || true; } \
               | { grep '|' || true; } > /tmp/swarm/images.txt
+          fi
+          if [ -n "$ROUTING_URL" ]; then
+            printf '%s\n' "$ROUTING_URL" > /tmp/swarm/routing.txt
           fi
           cat /tmp/swarm/*.txt
 
@@ -2028,7 +2046,7 @@ jobs:
 
           # ── Deployed images: which version runs on staging vs production ──
           # images.txt lines: app|env|version|image|replicas|updated, one per
-          # <app>-test / <app>-prod service. Staging is deployed from :latest,
+          # <app>-test / <app>-prod / <app>-review service. Staging is deployed from :latest,
           # so its version can only come from the image's `version` label;
           # production pins the version as the tag, which is the fallback when
           # the label is unreadable (container not running).
@@ -2052,13 +2070,14 @@ jobs:
               apps = {}
               for line in open(path, errors='replace'):
                   parts = [p.strip() for p in line.split('|')]
-                  if len(parts) != 6 or parts[1] not in ('staging', 'production'):
+                  if len(parts) != 6 or parts[1] not in ('staging', 'production', 'review'):
                       continue
                   app, env, version, image, replicas, updated = parts
                   tag = image.rsplit(':', 1)[-1] if ':' in image else ''
                   if not version and re.match(r'^\d+\.\d+\.\d+', tag):
                       version = tag
                   apps.setdefault(app, {})[env] = {
+                      'label': version,
                       'version': version.split('+')[0] or '?',
                       'image': image,
                       'replicas': replicas or '?',
@@ -2088,15 +2107,51 @@ jobs:
                       behind = (env == 'production' and stg
                                 and stg['version'] != env_data['version'])
                       cls = ' class="warn"' if behind else ''
+                      image = esc(env_data['image'])
+                      # Staging runs :latest — say which build that is.
+                      if env_data['image'].endswith(':latest'):
+                          image += (f' = {esc(env_data["label"])}' if env_data['label']
+                                    else ' = <span class="warn">?</span>')
                       rows += (f'<tr><td>{esc(app)}</td>'
                                + f'<td{cls}>{esc(env_data["version"])}</td>'
-                               + f'<td>{esc(env_data["image"])}</td>'
+                               + f'<td>{image}</td>'
                                + swarm_cell('REPLICAS', env_data['replicas'])
                                + f'<td>{esc(env_data["updated"])}</td></tr>')
                   return f'<h3>{title}</h3><table>{head}{rows}</table>'
 
+              def review_table():
+                  # Store review backend (review.sh): only the apps it runs, no
+                  # "not deployed" rows — absent entirely when not frozen.
+                  rows = ''
+                  for app in sorted(a for a in apps if 'review' in apps[a]):
+                      rv = apps[app]['review']
+                      stg = apps[app].get('staging')
+                      note = ('' if not stg else 'frozen at current staging'
+                              if stg['version'] == rv['version']
+                              else f'staging moved on to {stg["version"]}')
+                      rows += (f'<tr><td>{esc(app)}</td>'
+                               + f'<td>{esc(rv["version"])}</td>'
+                               + f'<td>{esc(rv["image"])}</td>'
+                               + swarm_cell('REPLICAS', rv['replicas'])
+                               + f'<td>{esc(rv["updated"])}</td>'
+                               + f'<td>{esc(note)}</td></tr>')
+                  routing = os.path.join(SWARM_DIR, 'routing.txt')
+                  route = ''
+                  if os.path.exists(routing):
+                      url = open(routing).read().strip()
+                      what = {'backend.growerp.net': 'review backend',
+                              'backend.growerp.org': 'staging'}.get(url, 'unexpected')
+                      route = ('<p>Production sends native apps newer than production '
+                               f'to: <b>{esc(url)}</b> ({what}).</p>')
+                  if not rows:
+                      return route
+                  return ('<h3>Review backend (store reviewers, *.growerp.net)</h3><table>'
+                          + head.replace('</tr>', '<th>Note</th></tr>') + rows
+                          + '</table>' + route)
+
               return (env_table('Staging images (test services)', 'staging')
                       + env_table('Production images', 'production')
+                      + review_table()
                       + '<p>Versions are compared per app: an amber production version '
                       'means that app\'s staging build is ahead of it. Both "Update '
                       'Staging" and "Copy Staging to Production" can run for a single '
@@ -2168,7 +2223,7 @@ jobs:
               + legend
               + f'<h2>{tests_heading}</h2>'
               + tests_table
-              + '<h2>Swarm Status — Staging and Production</h2>'
+              + '<h2>Swarm Status — Staging, Production and Review</h2>'
               + swarm_html()
               + '</body></html>'
           )
