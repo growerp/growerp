@@ -48,6 +48,18 @@ void main() {
     await server.close();
   }, timeout: const Timeout(Duration(seconds: 40)));
 
+  test('staging web hosts stay on the staging backend', () {
+    // production sends apps newer than itself to the store review backend;
+    // staging web runs the same newer version and must not follow it there
+    expect(stagingWebBackend('admin.growerp.org'), 'backend.growerp.org');
+    expect(stagingWebBackend('www.growerp.org'), 'backend.growerp.org');
+    expect(stagingWebBackend('growerp.org'), 'backend.growerp.org');
+    expect(stagingWebBackend('erp.accugeo.com'), 'backend.growerp.org');
+    expect(stagingWebBackend('admin.growerp.com'), isNull);
+    expect(stagingWebBackend('backend.growerp.net'), isNull);
+    expect(stagingWebBackend('evilgrowerp.org'), isNull);
+  });
+
   test('getStartupCompany gives up when the backend never answers', () async {
     // Runs before runApp() too: an unanswered company lookup used to hold the
     // app on an empty window for as long as the dio receive timeout allowed.
