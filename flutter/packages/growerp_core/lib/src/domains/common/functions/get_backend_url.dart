@@ -54,6 +54,21 @@ String _getCurrentPlatform() {
   return 'web';
 }
 
+/// Web hosts served by the staging (test) system, always on the staging backend.
+/// Production answers newer native apps with the store review backend instead
+/// (growerp.net) while they wait for store approval, so staging web must not
+/// follow that answer.
+const _stagingBackendUrl = 'backend.growerp.org';
+const _stagingWebHosts = ['erp.accugeo.com'];
+
+/// Returns the staging backend for a staging web host, otherwise null
+String? stagingWebBackend(String host) =>
+    host == 'growerp.org' ||
+        host.endsWith('.growerp.org') ||
+        _stagingWebHosts.contains(host)
+    ? _stagingBackendUrl
+    : null;
+
 /// Checks if there is an override for the production/test backend URL
 /// Updates the GlobalConfiguration with the new backend URL if available
 /// Returns ForceUpdateInfo if a force update is required
@@ -86,6 +101,16 @@ Future<ForceUpdateInfo> getBackendUrlOverride(
       chatUrl = 'chatUrlDebug';
       secure = '';
     } else {
+      final stagingBackend = kIsWeb ? stagingWebBackend(Uri.base.host) : null;
+      if (stagingBackend != null) {
+        GlobalConfiguration().updateValue(
+          'databaseUrl',
+          'https://$stagingBackend',
+        );
+        GlobalConfiguration().updateValue('chatUrl', 'wss://$stagingBackend');
+        GlobalConfiguration().updateValue("test", true);
+        return ForceUpdateInfo.none;
+      }
       backendBaseUrl = 'https://backend.growerp.com';
       databaseUrl = 'databaseUrl';
       chatUrl = 'chatUrl';
