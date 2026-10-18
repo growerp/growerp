@@ -14,7 +14,7 @@
 #growerp-ml-box{position:relative;width:100%;max-width:420px;box-sizing:border-box;
   padding:28px 24px 20px;border-radius:14px;background:#fff;color:#222;text-align:center;
   box-shadow:0 12px 40px rgba(0,0,0,.3)}
-#growerp-ml-box h3{margin:0 0 8px;font-size:22px}
+#growerp-ml-box h3{margin:0 0 8px;font-size:22px;color:#222}
 #growerp-ml-box p{margin:0 0 16px;font-size:14px;color:#555}
 #growerp-ml-join{width:100%;background:#2962ff;color:#fff;border:none;
   border-radius:6px;padding:11px;font-size:15px;cursor:pointer}
