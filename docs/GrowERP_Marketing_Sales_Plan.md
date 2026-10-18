@@ -3,6 +3,7 @@
 **Status:** Master go-to-market plan — consolidates and extends [marketing_plan.md](./marketing_plan.md), [MarketingProposal.md](./MarketingProposal.md) and [SocialMediaLeadSystem.md](./SocialMediaLeadSystem.md)
 **Principle:** GrowERP markets and sells GrowERP *using GrowERP*. Every activity in this plan runs on a GrowERP module. Where a step cannot yet run on GrowERP, it is listed in [Section 10: System Enhancements](#10-system-enhancements-required).
 **Date:** July 2026
+**Current focus (Oct 2026):** pre-traction — execution runs from [GrowERP_First_10_Customers_Plan.md](./GrowERP_First_10_Customers_Plan.md) until 10 companies are weekly active. §9 and §10 below are paused until then.
 
 ---
 
@@ -179,6 +180,8 @@ Publish a real pricing page and wire trial→paid checkout ([Gap #4]); today con
 
 ## 9. 90-Day Execution Calendar
 
+> **Paused (Oct 20, 2026):** superseded for now by [GrowERP_First_10_Customers_Plan.md](./GrowERP_First_10_Customers_Plan.md). Resume after its exit criteria are met.
+
 **Weeks 1–2 — Foundation**
 - Create 4 MarketingPersonas in `growerp_marketing`; generate first ContentPlans.
 - Verify assessment funnel end-to-end on production (.com); fix copy; confirm results email/PDF.
@@ -207,6 +210,8 @@ Publish a real pricing page and wire trial→paid checkout ([Gap #4]); today con
 
 ## 10. System Enhancements Required
 
+> **Deferred (Oct 20, 2026):** do not build until 10 companies are weekly active; then re-prioritize by friction observed with real customers (see [First 10 Customers Plan §9](./GrowERP_First_10_Customers_Plan.md#9-exit-criteria--back-to-the-master-plan)). Trial→paid in the meantime: manual invoice or Stripe payment link.
+
 Prioritized by funnel impact. Effort: S < 1 wk · M = 1–3 wk · L > 3 wk.
 Engineering detail per item: [GrowERP_Marketing_Enhancements_Implementation_Plan.md](./GrowERP_Marketing_Enhancements_Implementation_Plan.md).
 
@@ -228,6 +233,7 @@ Engineering detail per item: [GrowERP_Marketing_Enhancements_Implementation_Plan
 
 ## 11. Relationship to Existing Documents
 
+- [GrowERP_First_10_Customers_Plan.md](./GrowERP_First_10_Customers_Plan.md) — current 90-day plan (Oct 2026 – Jan 2027) for the pre-traction stage; replaces §9 until 10 weekly-active companies.
 - [Marketing_Weekly_Operational_Guide.md](./Marketing_Weekly_Operational_Guide.md) — the day-by-day runbook that executes this plan for one work week in the Marketing app.
 - [marketing_plan.md](./marketing_plan.md) — its outreach scripts and 7-email sequence copy are adopted verbatim into §4 Nurture / §5.1; this document supersedes it as the plan of record.
 - [MarketingProposal.md](./MarketingProposal.md) / [SocialMediaLeadSystem.md](./SocialMediaLeadSystem.md) — the social system is the Awareness/Capture engine of §4; its Phase 2 and Phase 4 gaps appear here as enhancements #6 and #5.
