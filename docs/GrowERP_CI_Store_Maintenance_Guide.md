@@ -397,6 +397,7 @@ This document describes all GitHub Actions workflows used in the GrowERP reposit
    - [Publish Metadata to Stores (`publish-metadata.yml`)](#7-publish-metadata-to-stores-publish-metadatayml)
    - [Create Store Screenshots (`screenshots.yml`)](#8-create-store-screenshots-screenshotsyml)
    - [Download Store Metadata (`download-store-metadata.yml`)](#9-download-store-metadata-download-store-metadatayml)
+   - [Freeze for Review (`freeze-review.yml`)](#10-freeze-for-review-freeze-reviewyml)
 4. [Secrets Reference](#secrets-reference)
    - [Automatic Secrets](#automatic-secrets)
    - [Production Server Secrets](#production-server-secrets)
@@ -422,6 +423,7 @@ GrowERP uses ten GitHub Actions workflows to automate testing, releasing Docker 
 ├── update-staging.yml                    ##### Docker image build + version bump (manual)
 ├── publish-binary.yml                    ##### Build & submit binaries to stores (manual)
 ├── release-approved.yml                  ##### Release store-approved versions to public (manual)
+├── freeze-review.yml                     ##### Copy staging to the store review backend before store submission (manual)
 ├── update-production.yml                 ##### Promote the store review versions (or staging) to production (manual)
 ├── revert-last-sync.yml                  ##### Revert last production promotion (manual)
 ├── publish-metadata.yml                  ##### Upload listing text + screenshots to stores (manual)
@@ -440,6 +442,7 @@ GrowERP uses ten GitHub Actions workflows to automate testing, releasing Docker 
 | Update Staging | Manual | `ubuntu-latest` | `GITHUB_TOKEN` |
 | Publish to Stores | Manual | macOS / Ubuntu / Windows | See [Secrets Reference](#secrets-reference) |
 | Release Approved Submissions | Manual | macOS / Ubuntu / Windows | See [Secrets Reference](#secrets-reference) |
+| Freeze for Review | Manual | `ubuntu-latest` | `PROD_SSH_USER`, `PROD_SSH_KEY` |
 | Update Production | Manual | `ubuntu-latest` | `PROD_SSH_USER`, `PROD_SSH_KEY` |
 | Revert Production Update | Manual | `ubuntu-latest` | `PROD_SSH_USER`, `PROD_SSH_KEY` |
 | Publish Metadata to Stores | Manual | macOS / Ubuntu | Store API secrets (see [Secrets Reference](#secrets-reference)) |
@@ -499,7 +502,7 @@ check-changes                       resolve-matrix              swarm-status
 **What it does — report:**
 1. Merges the store fragments into one matrix table (app rows × store columns) and lists apps waiting for approval.
 2. Sums the test totals (backend Spock, Flutter mobile/desktop packages and tests). When the tests were skipped, the last published totals are carried over from `tests-data.json` on the Pages site and labelled with their original date.
-3. Renders the swarm section from the `status-swarm` fragment: the `docker stack ps` tasks, plus a **Staging images** and a **Production images** table listing every app's running version, image, replica count and last-deployed time. Non-running tasks and incomplete replica counts (`0/1`) are red; a production version behind staging is amber. The staging/production comparison is per app — since both `Update Staging` and `Update Production` can be run for one app at a time, apps within the same environment routinely sit at different versions. While builds are in store review, production behind staging is expected: production is updated from the review versions, staging already runs the next version.
+3. Renders the swarm section from the `status-swarm` fragment: the `docker stack ps` tasks, plus a **Staging images** and a **Production images** table listing every app's running version, image, replica count and last-deployed time. Non-running tasks and incomplete replica counts (`0/1`) are red; a production version behind staging is amber. The staging/production comparison is per app — since both `Update Staging` and `Update Production` can be run for one app at a time, apps within the same environment routinely sit at different versions. While builds are in store review, production behind staging is expected: production is updated from the review versions, staging runs the version after the review version.
 4. Writes `index.html`, `failures.html`, `tests-data.json` for GitHub Pages, a PDF artifact (`status-report`, retained 30 days) and the run's step summary. All timestamps on the page are converted from the runner's UTC to Bangkok local time.
 5. Fails the run when more than one individual test failed on a layout, or when the backend tests failed — the page is still published in that case.
 
@@ -513,7 +516,7 @@ check-changes                       resolve-matrix              swarm-status
 
 ####### 2. Update Staging (`update-staging.yml`)
 
-**Purpose:** Bumps app versions, builds Docker images, and pushes them to `ghcr.io/growerp`. Optionally commits a version bump and pushes a git tag.
+**Purpose:** Bumps app versions, builds Docker images, and pushes them to `ghcr.io/growerp`, commits the version bump and pushes a git tag. Every run gets a new version (there is no `none` bump): a version tag is never pushed twice, so the image a store reviewed is exactly the image Update Production deploys, nothing is rebuilt.
 
 **Trigger:** Manual only (`workflow_dispatch`).
 
@@ -523,10 +526,10 @@ check-changes                       resolve-matrix              swarm-status
 
 | Input | Type | Required | Default | Options | Description |
 |-------|------|----------|---------|---------|-------------|
-| `bump` | choice | Yes | `patch` | `patch`, `minor`, `major`, `none` | Version bump type. Use `none` to build images at the current version without committing a bump. |
+| `bump` | choice | Yes | `patch` | `patch`, `minor`, `major` | Version bump type. |
 | `all_apps` | boolean | No | off | — | Release every app in `defaultApps` (incl. Moqui); overrides the app boxes. |
 | `app_admin` … `app_insurance`, `app_moqui` | boolean | No | off | — | One checkbox per app (admin, hotel, freelance, support, agents, rental, marketing, academy, insurance, Moqui backend). Nothing ticked fails the run. |
-| `comment` | string | No | *(empty)* | — | Optional comment appended to the git commit message (ignored when `bump` is `none`). |
+| `comment` | string | No | *(empty)* | — | Optional comment appended to the git commit message. |
 
 **Job Flow:**
 
@@ -546,7 +549,7 @@ release  (single job)
    - `--parallel` — build all selected apps in parallel
    - `--workspace=local` — use current checkout, no extra clone
    - `--push-docker` — push images to `ghcr.io/growerp`
-   - `--push-github` — commit bump + tag and push (omitted when `bump=none`)
+   - `--push-github` — commit bump + tag and push
 
 **Secrets required:**
 
@@ -692,7 +695,7 @@ If no held version is found for a given app/platform combination, the job exits 
 
 **Concurrency:** Only one sync at a time; never cancelled.
 
-**Manual Input Variables:** `source` (`review`, default = the store-reviewed versions; `staging` = the images running on staging, only when no store review is running), then `all_apps` (runs the script once with `all` = every changed service) or one checkbox per service (`app_admin` … `app_insurance`, `app_moqui`); the script runs once per ticked service, so apps approved by the stores at different times can be promoted one by one. All off by default; nothing ticked fails the run.
+**Manual Input Variables:** `source` (`review`, default = the store-reviewed versions; `staging` = the images running on staging, the version after the review version: refused while the store review routing is on), then `all_apps` (runs the script once with `all` = every changed service) or one checkbox per service (`app_admin` … `app_insurance`, `app_moqui`); the script runs once per ticked service, so apps approved by the stores at different times can be promoted one by one. All off by default; nothing ticked fails the run.
 
 **Secrets required:**
 
@@ -862,6 +865,20 @@ yet.
 
 ---
 
+####### 10. Freeze for Review (`freeze-review.yml`)
+
+**Purpose:** Run right before Publish to Stores. SSHs into the production server and runs `swarm/review.sh freeze --apply`: copies the staging database into the store review backend (`backend.growerp.net`), pauses its scheduled jobs and agents, records the version of every staging app in `swarm/review-versions.conf` (what Update Production promotes after approval), deploys it and, once healthy, routes native apps newer than production to it. Staging can then move on to the version after the review version. Don't run Update Staging between this and Publish to Stores: the binaries must be the version that was frozen.
+
+**Guard:** refuses while a version of the previous review is not on production yet (its reviewers would lose their backend). Promote with Update Production first; `--force` exists only by hand on the server.
+
+**Trigger:** Manual only (`workflow_dispatch`), no inputs.
+
+**Concurrency:** Only one freeze at a time; never cancelled.
+
+**Secrets required:** Same as Update Production (`PROD_SSH_USER`, `PROD_SSH_KEY`).
+
+---
+
 ###### Secrets Reference
 
 All secrets are stored under **Settings → Secrets and variables → Actions** in the GitHub repository (or organisation-level secrets).
@@ -876,7 +893,7 @@ All secrets are stored under **Settings → Secrets and variables → Actions** 
 
 ####### Production Server Secrets
 
-Used by: `update-production.yml`, `revert-last-sync.yml`
+Used by: `update-production.yml`, `revert-last-sync.yml`, `freeze-review.yml`
 
 | Secret | Format | Where to find / how to generate |
 |--------|--------|----------------------------------|

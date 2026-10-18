@@ -1,0 +1,33 @@
+name: Freeze for Review
+
+# Copies staging into the store review backend (backend.growerp.net) right before
+# "Publish to Stores": the reviewers keep a stable backend while staging moves on to
+# the version after the review version. Runs swarm/review.sh freeze on the server:
+# copy the test database, pause its jobs, record the versions "Update Production"
+# promotes later, deploy, and route newer native apps to it once healthy.
+# Refuses while a version of the previous review is not on production yet
+# (--force only by hand on the server).
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: freeze-review
+  cancel-in-progress: false
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Freeze staging into the review backend on growerp.com
+        uses: appleboy/ssh-action@v1
+        with:
+          host: growerp.com
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          # copy + restart + up to 15 minutes waiting for the backend to get healthy
+          command_timeout: 35m
+          script: |
+            cd server/swarm && ./review.sh freeze --apply && ./review.sh status

@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       bump:
-        description: "Version bump type. Use 'none' to push images at the current version without a version commit."
+        description: "Version bump type. Every run gets a new version: a version tag is never pushed twice, so the image a store reviewed is the image production gets."
         required: true
         default: "patch"
         type: choice
@@ -18,7 +18,6 @@ on:
           - patch
           - minor
           - major
-          - none
       all_apps:
         description: "All Apps (overrides the app boxes below)"
         type: boolean
@@ -64,7 +63,7 @@ on:
         type: boolean
         default: false
       comment:
-        description: "Optional comment added to the git commit (ignored when bump is 'none')"
+        description: "Optional comment added to the git commit"
         required: false
         default: ""
 
@@ -157,19 +156,16 @@ jobs:
         working-directory: flutter/release
 
       - name: Bump version files
-        if: inputs.bump != 'none'
         working-directory: flutter
         run: dart release/release_tool.dart --ci --bump=${{ inputs.bump }} --workspace=local --no-push-docker --no-push-github --no-build-docker
 
       - name: Upload bumped pubspecs
-        if: inputs.bump != 'none'
         uses: actions/upload-artifact@v4
         with:
           name: bumped-pubspecs
           path: flutter/**/pubspec.yaml
 
       - name: Upload bumped component.xml
-        if: inputs.bump != 'none'
         uses: actions/upload-artifact@v4
         with:
           name: bumped-component-xml
@@ -194,7 +190,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Download bumped pubspecs
-        if: inputs.bump != 'none'
         uses: actions/download-artifact@v4
         with:
           name: bumped-pubspecs
@@ -258,14 +253,12 @@ jobs:
         run: bash setup-backend.sh
 
       - name: Download bumped pubspecs
-        if: inputs.bump != 'none'
         uses: actions/download-artifact@v4
         with:
           name: bumped-pubspecs
           path: flutter
 
       - name: Download bumped component.xml
-        if: inputs.bump != 'none'
         uses: actions/download-artifact@v4
         with:
           name: bumped-component-xml
@@ -313,7 +306,7 @@ jobs:
   commit:
     needs: [prepare, build-image, build-moqui]
     runs-on: ubuntu-latest
-    if: always() && needs.prepare.result == 'success' && inputs.bump != 'none' && (needs.build-image.result == 'success' || needs.build-image.result == 'skipped') && (needs.build-moqui.result == 'success' || needs.build-moqui.result == 'skipped')
+    if: always() && needs.prepare.result == 'success' && (needs.build-image.result == 'success' || needs.build-image.result == 'skipped') && (needs.build-moqui.result == 'success' || needs.build-moqui.result == 'skipped')
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -461,7 +454,6 @@ jobs:
   # 6. Pull the new :latest images onto the staging swarm right away.
   #    Without this the redeploy only happens on the host's cron (up to 15 min
   #    later) and the workflow gives no feedback on whether staging picked it up.
-  #    Runs for bump=none too — that is the case that has no commit job at all.
   # ───────────────────────────────────────────────────────────────────────────
   deploy-staging:
     needs: [prepare, build-image, build-moqui]
