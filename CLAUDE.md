@@ -209,3 +209,17 @@ tar xf flutter_linux_3.33.0-stable.tar.xz
 export FLUTTER_ROOT="$FLUTTER_DIR/flutter"
 export PATH="$FLUTTER_ROOT/bin:$PATH"
 ```
+
+## Agent skills
+
+### Issue tracker
+
+Issues tracked in GitHub Issues (growerp/growerp) via `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five canonical labels (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: root `GLOSSARY.md` + `docs/adr/` (created lazily). See `docs/agents/domain.md`.
