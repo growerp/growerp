@@ -1234,7 +1234,7 @@ jobs:
     timeout-minutes: 5
     continue-on-error: true
     steps:
-      # Same SSH setup as stage-to-production.yml; capture_stdout hands the
+      # Same SSH setup as update-production.yml; capture_stdout hands the
       # output back as a step output. cd is required: deploy.sh sources .env
       # relative to the current directory.
       - name: Run deploy.sh status on growerp.com
@@ -2153,8 +2153,10 @@ jobs:
                       + env_table('Production images', 'production')
                       + review_table()
                       + '<p>Versions are compared per app: an amber production version '
-                      'means that app\'s staging build is ahead of it. Both "Update '
-                      'Staging" and "Copy Staging to Production" can run for a single '
+                      'means that app\'s staging build is ahead of it, expected while '
+                      'builds are in store review: production is updated from the review '
+                      'versions, staging already runs the next one. Both "Update '
+                      'Staging" and "Update Production" can run for a single '
                       'app, so apps sitting at different versions within the same '
                       'environment is normal, not an error.</p>')
 

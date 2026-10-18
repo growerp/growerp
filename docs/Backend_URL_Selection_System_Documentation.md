@@ -304,6 +304,8 @@ _applicationBloc.add(ApplicationUpdate(Application(
 `Application.version` and `Application.backendUrl` live in the production database only (never in seed data):
 `sync-to-prod.sh` writes the version and backend.growerp.org, and `review.sh on|off` (server repo, `swarm/`)
 switches `backendUrl` between backend.growerp.net and backend.growerp.org while native builds wait for store approval.
+Production is updated to the reviewed versions ("Update Production", source review), never to a staging build newer
+than the approved store apps: its `Application.version` would be above theirs and production would force them to update.
 
 ## Security Considerations
 

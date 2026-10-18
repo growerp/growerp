@@ -20,10 +20,13 @@ The GrowERP release process consist out of the following workflows:
    ./review.sh on --apply       native apps newer than production now use backend.growerp.net
    From now on staging can follow master again ("update staging" as usual).
 7. When review ok,
-    a. "Copy staging to production"
-       Backend upgrade from Staging run: ./sync-to-prod.sh  --apply
-       (this also points newer apps back at backend.growerp.org: the review backend
-       is unused now, ./review.sh remove --apply or keep it for the next cycle)
+    a. "Update Production" (source: review)
+       promotes the versions the stores reviewed (review-versions.conf, written by
+       the freeze), NOT staging, which already runs the next version
+       (server: ./sync-to-prod.sh --from review --apply). Apps can be promoted one
+       by one as their stores approve. It also points newer apps back at
+       backend.growerp.org: once all are promoted the review backend is unused,
+       ./review.sh remove --apply or keep it for the next cycle
     b. "release approved store submissions"
        releases every app that passed review and is waiting for a manual
        release action (IOS/MACOS/Android/Windows). Snap is off by default.

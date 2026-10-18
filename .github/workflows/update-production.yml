@@ -1,8 +1,16 @@
-name: Copy Staging to Production
+name: Update Production
 
 on:
   workflow_dispatch:
     inputs:
+      source:
+        description: "Promote from: review = the versions the stores reviewed (review-versions.conf), staging = what staging runs now (only when no store review is running, staging may already be the next version)"
+        required: true
+        default: "review"
+        type: choice
+        options:
+          - review
+          - staging
       all_apps:
         description: "All Apps (overrides the app boxes below)"
         type: boolean
@@ -49,7 +57,7 @@ on:
         default: false
 
 concurrency:
-  group: stage-to-production
+  group: update-production
   cancel-in-progress: false
 
 jobs:
@@ -93,7 +101,7 @@ jobs:
           if [[ -z "$SERVICES" ]]; then echo "::error::at least one app is mandatory"; exit 1; fi
           echo "services=$SERVICES" >> "$GITHUB_OUTPUT"
 
-      - name: Sync staging to production on growerp.com
+      - name: Sync ${{ inputs.source }} to production on growerp.com
         uses: appleboy/ssh-action@v1
         with:
           host: growerp.com
@@ -102,6 +110,6 @@ jobs:
           script: |
             rc=0
             for svc in ${{ steps.services.outputs.services }}; do
-              server/swarm/sync-to-prod.sh "$svc" --apply || rc=1
+              server/swarm/sync-to-prod.sh "$svc" --from ${{ inputs.source == 'review' && 'review' || 'test' }} --apply || rc=1
             done
             exit $rc

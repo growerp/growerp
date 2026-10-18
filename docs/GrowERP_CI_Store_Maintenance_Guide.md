@@ -392,7 +392,7 @@ This document describes all GitHub Actions workflows used in the GrowERP reposit
    - [Update Staging (`update-staging.yml`)](#2-update-staging-update-stagingyml)
    - [Publish to Stores (`publish-binary.yml`)](#3-publish-to-stores-publish-binaryyml)
    - [Release Approved Submissions (`release-approved.yml`)](#4-release-approved-submissions-release-approvedyml)
-   - [Stage to Production (`stage-to-production.yml`)](#5-stage-to-production-stage-to-productionyml)
+   - [Update Production (`update-production.yml`)](#5-update-production-update-productionyml)
    - [Revert Production Update (`revert-last-sync.yml`)](#6-revert-production-update-revert-last-syncyml)
    - [Publish Metadata to Stores (`publish-metadata.yml`)](#7-publish-metadata-to-stores-publish-metadatayml)
    - [Create Store Screenshots (`screenshots.yml`)](#8-create-store-screenshots-screenshotsyml)
@@ -422,7 +422,7 @@ GrowERP uses ten GitHub Actions workflows to automate testing, releasing Docker 
 ├── update-staging.yml                    ##### Docker image build + version bump (manual)
 ├── publish-binary.yml                    ##### Build & submit binaries to stores (manual)
 ├── release-approved.yml                  ##### Release store-approved versions to public (manual)
-├── stage-to-production.yml               ##### Promote staging Docker stack to production (manual)
+├── update-production.yml                 ##### Promote the store review versions (or staging) to production (manual)
 ├── revert-last-sync.yml                  ##### Revert last production promotion (manual)
 ├── publish-metadata.yml                  ##### Upload listing text + screenshots to stores (manual)
 ├── screenshots.yml                       ##### Capture + frame store screenshots (manual)
@@ -440,7 +440,7 @@ GrowERP uses ten GitHub Actions workflows to automate testing, releasing Docker 
 | Update Staging | Manual | `ubuntu-latest` | `GITHUB_TOKEN` |
 | Publish to Stores | Manual | macOS / Ubuntu / Windows | See [Secrets Reference](#secrets-reference) |
 | Release Approved Submissions | Manual | macOS / Ubuntu / Windows | See [Secrets Reference](#secrets-reference) |
-| Stage to Production | Manual | `ubuntu-latest` | `PROD_SSH_USER`, `PROD_SSH_KEY` |
+| Update Production | Manual | `ubuntu-latest` | `PROD_SSH_USER`, `PROD_SSH_KEY` |
 | Revert Production Update | Manual | `ubuntu-latest` | `PROD_SSH_USER`, `PROD_SSH_KEY` |
 | Publish Metadata to Stores | Manual | macOS / Ubuntu | Store API secrets (see [Secrets Reference](#secrets-reference)) |
 | Create Store Screenshots | Manual | `ubuntu-latest` | None |
@@ -499,7 +499,7 @@ check-changes                       resolve-matrix              swarm-status
 **What it does — report:**
 1. Merges the store fragments into one matrix table (app rows × store columns) and lists apps waiting for approval.
 2. Sums the test totals (backend Spock, Flutter mobile/desktop packages and tests). When the tests were skipped, the last published totals are carried over from `tests-data.json` on the Pages site and labelled with their original date.
-3. Renders the swarm section from the `status-swarm` fragment: the `docker stack ps` tasks, plus a **Staging images** and a **Production images** table listing every app's running version, image, replica count and last-deployed time. Non-running tasks and incomplete replica counts (`0/1`) are red; a production version behind staging is amber. The staging/production comparison is per app — since both `Update Staging` and `Copy Staging to Production` can be run for one app at a time, apps within the same environment routinely sit at different versions.
+3. Renders the swarm section from the `status-swarm` fragment: the `docker stack ps` tasks, plus a **Staging images** and a **Production images** table listing every app's running version, image, replica count and last-deployed time. Non-running tasks and incomplete replica counts (`0/1`) are red; a production version behind staging is amber. The staging/production comparison is per app — since both `Update Staging` and `Update Production` can be run for one app at a time, apps within the same environment routinely sit at different versions. While builds are in store review, production behind staging is expected: production is updated from the review versions, staging already runs the next version.
 4. Writes `index.html`, `failures.html`, `tests-data.json` for GitHub Pages, a PDF artifact (`status-report`, retained 30 days) and the run's step summary. All timestamps on the page are converted from the runner's UTC to Bangkok local time.
 5. Fails the run when more than one individual test failed on a layout, or when the backend tests failed — the page is still published in that case.
 
@@ -684,15 +684,15 @@ If no held version is found for a given app/platform combination, the job exits 
 
 ---
 
-####### 5. Stage to Production (`stage-to-production.yml`)
+####### 5. Update Production (`update-production.yml`)
 
-**Purpose:** SSHs into the production server (`growerp.com`) and runs `swarm/sync-to-prod.sh` to promote the staging Docker stack to production.
+**Purpose:** SSHs into the production server (`growerp.com`) and runs `swarm/sync-to-prod.sh --from review|test` to promote to production. With source **review** (default) it deploys the versions the stores reviewed, recorded by `swarm/review.sh freeze` in `swarm/review-versions.conf`; staging may already run the next version by then. Copying staging instead would set `growerp.Application.version` above the approved store apps, and production would force them to update to a version no store has yet. Either way the script writes `Application.version` (major.minor.0) and `backend_url = backend.growerp.org` for every synced app, which also ends the store review routing for it.
 
 **Trigger:** Manual only (`workflow_dispatch`).
 
 **Concurrency:** Only one sync at a time; never cancelled.
 
-**Manual Input Variables:** `all_apps` (runs the script once with `all` = every changed service) or one checkbox per service (`app_admin` … `app_insurance`, `app_moqui`); the script runs once per ticked service. All off by default; nothing ticked fails the run.
+**Manual Input Variables:** `source` (`review`, default = the store-reviewed versions; `staging` = the images running on staging, only when no store review is running), then `all_apps` (runs the script once with `all` = every changed service) or one checkbox per service (`app_admin` … `app_insurance`, `app_moqui`); the script runs once per ticked service, so apps approved by the stores at different times can be promoted one by one. All off by default; nothing ticked fails the run.
 
 **Secrets required:**
 
@@ -711,9 +711,9 @@ If no held version is found for a given app/platform combination, the job exits 
 
 **Concurrency:** Only one revert at a time; never cancelled.
 
-**Manual Input Variables:** Same checkboxes as Stage to Production (`all_apps` = revert every service).
+**Manual Input Variables:** Same checkboxes as Update Production (`all_apps` = revert every service).
 
-**Secrets required:** Same as Stage to Production.
+**Secrets required:** Same as Update Production.
 
 | Secret | Description |
 |--------|-------------|
@@ -876,7 +876,7 @@ All secrets are stored under **Settings → Secrets and variables → Actions** 
 
 ####### Production Server Secrets
 
-Used by: `stage-to-production.yml`, `revert-last-sync.yml`
+Used by: `update-production.yml`, `revert-last-sync.yml`
 
 | Secret | Format | Where to find / how to generate |
 |--------|--------|----------------------------------|
