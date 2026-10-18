@@ -32,6 +32,11 @@ flutter/packages/growerp_core/lib/src/domains/common/functions/get_backend_url.d
 
 **Logic Flow**:
 
+0. **Staging web**: a release web build served on a staging host (`growerp.org`, `*.growerp.org`,
+   `erp.accugeo.com`, see `stagingWebBackend()`) sets databaseUrl/chatUrl to `backend.growerp.org`
+   and skips the discovery call. Production would otherwise send it (a newer-than-production
+   version) to the store review backend, see [Environments and routing](#environments-and-routing).
+
 1. **Environment Detection**:
    ```dart
    if (kDebugMode) {
@@ -252,12 +257,12 @@ _applicationBloc.add(ApplicationUpdate(Application(
    - Makes HTTP GET request to `/rest/s1/growerp/100/BackendUrl`
    - Passes `applicationId` (applicationId) and `version` parameters
 
-4. **Backend Service Processing**:
-   - Looks up `PartyClassification` record where `partyClassificationId = applicationId`
-   - Parses the `standardCode` field to extract backend URL and version rules
-   - Compares the requesting application version against minimum version thresholds
-   - Determines whether to return test backend URL or production backend URL
-   - Returns appropriate backend URL based on version compatibility and environment rules
+4. **Backend Service Processing** (`get#BackendUrl` in GeneralServices100.xml):
+   - Looks up the `growerp.Application` row of the `applicationId`
+   - Compares the app's major.minor with `Application.version` (the production version; patch is ignored):
+     - app newer: returns `Application.backendUrl`
+     - app equal: no override (production), except requests from a `.growerp.org` origin get `backendUrl`
+     - app older: `forceUpdate` with the store update URL
 
 5. **Frontend Configuration Update**:
    - Updates `GlobalConfiguration` with received backend URL
@@ -285,6 +290,20 @@ _applicationBloc.add(ApplicationUpdate(Application(
    - Different applications can have different backend URLs
    - Supports development, staging, and production environments
    - Enables backend server load distribution
+
+### Environments and routing
+
+| Build | Backend |
+|---|---|
+| native or web at the production version | backend.growerp.com (production) |
+| native newer than production, while store review is on | backend.growerp.net (store review backend) |
+| native newer than production, otherwise | backend.growerp.org (staging) |
+| web on a staging host | backend.growerp.org (staging, no discovery call) |
+| debug build | localhost:8080 / 10.0.2.2:8080 |
+
+`Application.version` and `Application.backendUrl` live in the production database only (never in seed data):
+`sync-to-prod.sh` writes the version and backend.growerp.org, and `review.sh on|off` (server repo, `swarm/`)
+switches `backendUrl` between backend.growerp.net and backend.growerp.org while native builds wait for store approval.
 
 ## Security Considerations
 

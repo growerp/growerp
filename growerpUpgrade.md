@@ -9,14 +9,21 @@ The GrowERP release process consist out of the following workflows:
    will create framed screenshots of apps in the stores
 3. "publish binary to stores"
    with new version from 'update staging'
-   using the staging backend for the store review to test
 4. "published metadata to stores" (opt)
    will send meta dat in apps dirs to the stores
-5. Create userid/password for stores to check app on staging
+5. Create userid/password for stores to check the app, on staging BEFORE the freeze
+   below (the review backend is a copy, later staging changes do not reach it),
    submit for review
-6. When review ok,
+6. Freeze the store review backend (server, ~/server/swarm):
+   ./review.sh freeze --apply   copy staging to backend.growerp.net, pause jobs/agents, pin image
+   curl https://backend.growerp.net/status
+   ./review.sh on --apply       native apps newer than production now use backend.growerp.net
+   From now on staging can follow master again ("update staging" as usual).
+7. When review ok,
     a. "Copy staging to production"
        Backend upgrade from Staging run: ./sync-to-prod.sh  --apply
+       (this also points newer apps back at backend.growerp.org: the review backend
+       is unused now, ./review.sh remove --apply or keep it for the next cycle)
     b. "release approved store submissions"
        releases every app that passed review and is waiting for a manual
        release action (IOS/MACOS/Android/Windows). Snap is off by default.
