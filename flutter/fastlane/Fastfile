@@ -13,6 +13,29 @@ def optional_env(key)
   value.empty? ? nil : value
 end
 
+# Pin manual App Store signing on the Runner target only. Passing
+# PROVISIONING_PROFILE_SPECIFIER as an xcarg applies it to every target, and
+# Swift pod frameworks (CwlCatchException via speech_to_text) then fail with
+# "does not support provisioning profiles". The sdk-conditional variants are
+# dropped because they win over the base key (iOS carries a stale
+# PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]).
+def pin_runner_signing!(project_path, profile)
+  require "xcodeproj"
+  project = Xcodeproj::Project.open(project_path)
+  runner = project.targets.find { |t| t.name == "Runner" }
+  UI.user_error!("No Runner target in #{project_path}") unless runner
+  config = runner.build_configurations.find { |c| c.name == "Release" }
+  UI.user_error!("No Release configuration in #{project_path}") unless config
+  settings = config.build_settings
+  signing_keys = %w[CODE_SIGN_STYLE DEVELOPMENT_TEAM CODE_SIGN_IDENTITY PROVISIONING_PROFILE_SPECIFIER]
+  settings.keys.select { |k| signing_keys.include?(k.sub(/\[.*\z/, "")) }.each { |k| settings.delete(k) }
+  settings["CODE_SIGN_STYLE"] = "Manual"
+  settings["DEVELOPMENT_TEAM"] = "P64T65C668"
+  settings["CODE_SIGN_IDENTITY"] = "Apple Distribution"
+  settings["PROVISIONING_PROFILE_SPECIFIER"] = profile
+  project.save
+end
+
 def release_pending_versions(app, platform_filter)
   require "spaceship"
   versions = app.get_app_store_versions(
@@ -384,6 +407,10 @@ lane :ci_build do
   # reports are unreadable, so the CI job uploads this directory.
   symbols_path = File.expand_path("../packages/#{app_name}/build/symbols", __dir__)
   FileUtils.mkdir_p(symbols_path)
+  pin_runner_signing!(
+    File.expand_path("../packages/#{app_name}/ios/Runner.xcodeproj", __dir__),
+    profile_name
+  )
   build_app(
     workspace: workspace_path,
     scheme: "Runner",
@@ -401,9 +428,7 @@ lane :ci_build do
       "SWIFT_COMPILATION_MODE=wholemodule",
       "DART_OBFUSCATION=true",
       "SPLIT_DEBUG_INFO=\"#{symbols_path}\"",
-      "CODE_SIGN_STYLE=Manual",
-      "DEVELOPMENT_TEAM=P64T65C668",
-      "PROVISIONING_PROFILE_SPECIFIER=\"#{profile_name}\""
+      "DEVELOPMENT_TEAM=P64T65C668"
     ].join(" ")
   )
 end
@@ -706,6 +731,10 @@ lane :build_macos do
   # See ci_build: obfuscation has to travel as Xcode build settings.
   symbols_path = File.expand_path("../packages/#{app}/build/symbols", __dir__)
   FileUtils.mkdir_p(symbols_path)
+  pin_runner_signing!(
+    File.expand_path("../packages/#{app}/macos/Runner.xcodeproj", __dir__),
+    profile
+  )
 
   build_mac_app(
     workspace:            "packages/#{app}/macos/Runner.xcworkspace",
@@ -724,9 +753,7 @@ lane :build_macos do
       "CURRENT_PROJECT_VERSION=#{build_num}",
       "DEVELOPMENT_TEAM=P64T65C668",
       "DART_OBFUSCATION=true",
-      "SPLIT_DEBUG_INFO=\"#{symbols_path}\"",
-      "CODE_SIGN_STYLE=Manual",
-      "PROVISIONING_PROFILE_SPECIFIER=\"#{profile}\""
+      "SPLIT_DEBUG_INFO=\"#{symbols_path}\""
     ].join(" "),
     export_options: {
       provisioningProfiles: {
