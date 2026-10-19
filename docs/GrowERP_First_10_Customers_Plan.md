@@ -68,7 +68,7 @@ Repeat every week. Keep it consistent; don't do bursts.
 
 | Day | Activity | Target |
 |---|---|---|
-| Mon–Thu | Personal messages: written one by one, no automation, no mass templates | **20 / week** |
+| Mon–Thu | Personal messages: written one by one, no automation, no mass templates ([templates](./GrowERP_First_10_Customers_Messages.md)) | **20 / week** |
 | Mon–Thu | Discovery calls of 20 minutes (see script below) | **3 / week** |
 | Tue + Thu | LinkedIn posts (see content mix) | **2 / week** |
 | Any | Onboard new founding customers personally; check in with active ones | all |
@@ -177,6 +177,7 @@ When **10 companies are active weekly**, or at the day-90 retro, whichever comes
 
 ## Related documents
 
+- [GrowERP_First_10_Customers_Messages.md](./GrowERP_First_10_Customers_Messages.md) — outreach message templates per target group.
 - [GrowERP_Marketing_Sales_Plan.md](./GrowERP_Marketing_Sales_Plan.md) — master go-to-market plan; resumes after this plan.
 - [Marketing_Weekly_Operational_Guide.md](./Marketing_Weekly_Operational_Guide.md) — Marketing app runbook, for when content volume scales up.
 - [GrowERP_Content_Voice_Guide.md](./GrowERP_Content_Voice_Guide.md) — tone for posts and messages.
