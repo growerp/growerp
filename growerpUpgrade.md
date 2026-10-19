@@ -2,37 +2,39 @@
 
 ## Automated
 
-The GrowERP release process is a cycle of GitHub workflows. Production always runs
-the version the stores approved, the store review backend (backend.growerp.net) the
-version in store review, staging the version after the review version. Nothing is
-rebuilt on the way: every "update staging" run gets a new version (patch, minor or
-major), and production gets exactly the image that was reviewed.
+The GrowERP release process is two alternating cycles of GitHub workflows (B → A →
+B → A ...). Production always runs the version the stores approved, the store review
+backend (backend.growerp.net) the version in store review, staging the version after
+the review version. Nothing is rebuilt on the way: every "update staging" run gets a
+new version (patch, minor or major), and production gets exactly the image that was
+reviewed. "update staging" can run any time, except between B3 and B4.
 
-1. "update staging" (any time)
-   builds and deploys to staging with a new version
-2. Submit to the stores, in this order and without "update staging" in between:
-    a. "update staging" with the version to submit
-    b. create the userid/password for the store reviewers on staging (the review
-       backend is a copy: later staging changes do not reach it)
-    c. "freeze for review"
-       copies staging to backend.growerp.net, pauses its jobs/agents, records the
-       versions in review-versions.conf and, once healthy, routes native apps newer
-       than production to it. Refuses while a version of the previous review is
-       not on production yet.
-    d. "create store screenshots" / "published metadata to stores" (opt)
-    e. "publish binary to stores", submit for review
-3. Staging continues with the version after the review version ("update staging").
-4. When a store approves (apps one by one is fine):
-    a. "update production" (source: review)
-       promotes the versions the stores reviewed (review-versions.conf), not
-       staging. It also points newer apps back at backend.growerp.org: they go to
-       staging again until the next freeze. Source staging is refused while
-       store review routing is on.
-    b. "release approved store submissions"
-       releases every app that passed review and is waiting for a manual
-       release action (IOS/MACOS/Android/Windows). Snap is off by default.
-5. Back to 2 for the next release. The review backend stays running, the next
-   freeze replaces it.
+### A. Update production
+
+1. Wait for the store approvals (stores can approve at different times).
+2. "update production" (source: review), for the approved apps or all at once
+   promotes the versions the stores reviewed (review-versions.conf), not staging.
+   It also points the promoted apps' newer native builds back at
+   backend.growerp.org. Source staging is refused while store review routing is on.
+3. "release approved store submissions", for the same apps
+   releases every app that passed review and is waiting for a manual release
+   action (IOS/MACOS/Android/Windows). Snap is off by default.
+
+### B. Prepare a new version for review
+
+1. Prepare the new release in staging: the last "update staging" run is the
+   version to submit. Create the userid/password for the store reviewers on
+   staging (the review backend is a copy: later staging changes do not reach it).
+2. Wait until review is empty: every version in review is on production (cycle A).
+   Step 3 refuses until then.
+3. "freeze for review"
+   copies staging to backend.growerp.net, pauses its jobs/agents, records the
+   versions in review-versions.conf and, once healthy, routes native apps newer
+   than production to it. The review backend stays running between cycles, the
+   next freeze replaces it.
+4. "create store screenshots" (opt), "published metadata to stores" (opt),
+   "publish binary to stores": submit for review. No "update staging" between
+   step 3 and this step: the binaries must be the frozen version.
 
 ## when cleardb production
 
