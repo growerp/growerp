@@ -36,6 +36,24 @@ reviewed. "update staging" can run any time, except between B3 and B4.
    "publish binary to stores": submit for review. No "update staging" between
    step 3 and this step: the binaries must be the frozen version.
 
+### When a store approval takes too long (mostly new apps)
+
+Everything is per app, only the next freeze (B3) waits for every app in review.
+
+1. Promote what is approved: "update production" for the approved apps and moqui
+   (the backend has no Application row, so it changes no app's routing). The slow
+   app stays in review, its reviewers keep backend.growerp.net.
+2. A new app without store users yet: promote it anyway. Nobody can be forced to
+   update. Its review build then has the production version and the reviewer
+   lands on production: create the reviewer userid/password on production first.
+3. Skip the app this cycle (an existing app whose review is stuck): cancel its
+   store submission, then on the server `./review.sh drop <app> --apply`: removes it
+   from review-versions.conf (the freeze no longer waits for it) and points its
+   Application row back at staging. Resubmit it with the next version (cycle B).
+
+Don't use `./review.sh freeze --force` while an app is still in review: it replaces
+the review backend and the recorded versions, its reviewers lose their backend.
+
 ## when cleardb production
 
 1. apps-prod.yml set - DB_DATA=INSTALL
