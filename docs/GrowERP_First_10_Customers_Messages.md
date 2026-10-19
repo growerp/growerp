@@ -96,9 +96,64 @@ Tone follows [GrowERP_Content_Voice_Guide.md](./GrowERP_Content_Voice_Guide.md):
 
 ---
 
+### 11. Weekly newsletter issue — the founding-customer round
+Send it once as a full issue, then add a 2-line reminder in each following issue while places are left. Keep the newsletter's usual shape and close.
+
+> **Subject: Looking for 10 companies to run GrowERP for real**
+>
+> This week I did something I had been putting off: I counted how many companies actually *use* GrowERP every week, not how many signed up. The answer is a handful. Many of you tried it, and most of you stopped.
+>
+> The software is in good shape now: orders, stock, invoices, accounting, the website and AI agents all work together. What it misses is real businesses using it every day and telling me where it hurts.
+>
+> So I'm starting a founding-customer round for 10 companies:
+>
+> 1. I set up your system with you, and import your products, customers and suppliers from your spreadsheets or current system.
+> 2. It's free for six months, then half price for as long as you use it.
+> 3. In return: a short feedback call each week for the first month, and honest answers.
+>
+> If you run a small business, or know someone who does, reply to this email with one line about it. I read every reply myself.
+>
+> And if you tried GrowERP before and stopped: I would really like to know why. A one-line reply helps more than you think.
+>
+> Thanks for reading, see you next week!
+
+### 12. Past trial user — "what stopped you?" (personal email, plain text)
+Send from your own address, one by one, not through the newsletter tool. Short emails get answers.
+
+> **Subject: GrowERP — one question**
+>
+> Hi [Name],
+>
+> You tried GrowERP [in month/year] for [Company / with the X app]. Thank you for that.
+>
+> I can see you didn't continue, and that's fine. I'd like to know why, so I can fix it. Was it something missing, something confusing, or just bad timing?
+>
+> One line is plenty.
+>
+> Hans
+
+### 13. Their answer — thank and dig one level deeper
+> Thanks [Name], that's really useful.
+>
+> When you say [their reason], do you mean [concrete guess A] or [concrete guess B]? I'm putting it on my list for the coming weeks.
+>
+> If I fix it, may I let you know?
+
+### 14. "I fixed what stopped you" — invite back as founding customer
+> Hi [Name],
+>
+> A few weeks ago you told me GrowERP stopped working for you because [their reason]. That's fixed now: [one sentence on what changed, ideally with a screenshot or 30-second video].
+>
+> I'm also starting a small founding-customer round: I set GrowERP up for [Company] with your data, and it's free for six months. Your old account [is still there / I can restore it].
+>
+> Want to give it another go? Here's a 20-minute slot to do it together: [link]
+>
+> Hans
+
 ## Usage notes
 - Personalize every bracketed part. A generic first line gets ignored.
 - Send 20 per week, one by one (plan §4). Log each one as a Lead activity in the GrowERP CRM.
+- Newsletter replies and trial-user answers come first: answer within a day, every time.
 - Follow up only once. Silence after that means no; move on.
 - Change the wording if conversations stay below 2 a week. Ask a friendly contact why they wouldn't answer.
 - Sign with your own name; swap "Hans" if someone else sends them.

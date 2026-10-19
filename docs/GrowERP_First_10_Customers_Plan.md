@@ -54,6 +54,8 @@ Build it once in week 1 and keep it in the **GrowERP CRM as Leads**. This dogfoo
 
 | Tier | Source | Count | Approach |
 |---|---|---|---|
+| **Hottest** | **Past trial users** (signed up, then stopped) — they are on the weekly mailing list | all | Personal plain-text email from your own address, *not* the newsletter: "what stopped you?" (message 12). Every answer is a friction to fix, and a reason to write back when it's fixed |
+| Hot | **Weekly mailing list** (~1000 subscribers) | 1000 | One newsletter issue announcing the founding-customer round (message 11), then a short mention in every issue. Replies become leads |
 | Warm | Past clients, former colleagues, people who know your work | 30–40 | Personal message or phone call; ask for a referral even if they're not a fit |
 | Lukewarm | 1st/2nd-degree LinkedIn connections who own or run an SMB (5–100 staff) | 50–60 | Personal LinkedIn message that mentions something specific about them |
 | Partners | Accountants, bookkeepers and IT consultants in your network | 5–10 | They see many SMBs; offer a referral fee or free partner tenant |
@@ -102,12 +104,15 @@ Every post ends with a soft call to action: *"Looking for 10 founding customers 
 ### Weeks 1–2 (Oct 20 – Nov 2) — Prep
 - [ ] Walk the full path yourself on production, the way a stranger would: website → signup → first product → first invoice. Write down every hesitation and fix the worst 3.
 - [ ] Build the 100-name target list in the CRM.
+- [ ] Export the past trial users (signups without recent activity) from the support app / mailing list; send each one message 12 personally (spread over the 2 weeks, ~10 a day). Log every reason in the CRM.
 - [ ] Publish the founding-customer page and add a calendar link for the 20-minute calls.
 - [ ] Make a 1-page PDF: "What GrowERP replaces" (spreadsheets, invoicing tool, stock list, CRM), with before/after.
 - [ ] Record 3 short demo videos: invoice, inventory, AI agent.
 - [ ] Prepare a data-import routine for customer spreadsheets (products, customers, suppliers), so onboarding takes hours, not days.
 
 ### Weeks 3–6 (Nov 3 – Nov 30) — Warm outreach
+- [ ] Week 3 newsletter issue: the founding-customer round (message 11). Answer every reply personally within a day.
+- [ ] Past trial users whose reason is fixed: send message 14.
 - [ ] Message every warm contact first. Ask each one: *"Do you know 2 business owners still running on spreadsheets?"*
 - [ ] Start the LinkedIn rhythm.
 - [ ] Approach the partners (accountants/bookkeepers).
