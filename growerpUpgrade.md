@@ -59,7 +59,12 @@ the review backend and the recorded versions, its reviewers lose their backend.
 1. apps-prod.yml set - DB_DATA=INSTALL
 2. run ./clearDb.sh prod --apply
 3. run https://backend.growerp.com/vapps change password 'SystemSupport'
-4. check tools -> entity 'application' -> admin backend.growerp.org latest version assm: business
+4. write the Application versions + backend url again (the clear reloads the rows
+   from seed data without them, so routing and forced updates stop working):
+   on the server `cd ~/server/swarm && ./sync-to-prod.sh --versions-only`
+   (writes right away, no --apply: version of each running prod app, backend url
+   backend.growerp.org). During a store review run `./review.sh on --apply` after it.
+   Check: tools -> entity 'application' -> admin assm: business
 5. run: https://admin.growerp.com/
     a. register info@growerp.com
     b. login growerp
