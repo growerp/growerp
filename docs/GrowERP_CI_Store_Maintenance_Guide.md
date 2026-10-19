@@ -415,7 +415,7 @@ This document describes all GitHub Actions workflows used in the GrowERP reposit
 
 ###### Overview
 
-GrowERP uses ten GitHub Actions workflows to automate testing, releasing Docker images, and publishing to platform stores. All workflows live in `.github/workflows/`. The nine documented in detail below are the release path; `match-bootstrap.yml` is a one-time setup helper.
+GrowERP uses eleven GitHub Actions workflows to automate testing, releasing Docker images, and publishing to platform stores. All workflows live in `.github/workflows/`. The ten documented in detail below are the release path; `match-bootstrap.yml` is a one-time setup helper.
 
 ```
 .github/workflows/
@@ -527,8 +527,7 @@ check-changes                       resolve-matrix              swarm-status
 | Input | Type | Required | Default | Options | Description |
 |-------|------|----------|---------|---------|-------------|
 | `bump` | choice | Yes | `patch` | `patch`, `minor`, `major` | Version bump type. |
-| `all_apps` | boolean | No | off | — | Release every app in `defaultApps` (incl. Moqui); overrides the app boxes. |
-| `app_admin` … `app_insurance`, `app_moqui` | boolean | No | off | — | One checkbox per app (admin, hotel, freelance, support, agents, rental, marketing, academy, insurance, Moqui backend). Nothing ticked fails the run. |
+| `apps` | string | Yes | `all` | `all` or a comma list | `all` = every app in `defaultApps` (incl. Moqui), or a comma list of admin,hotel,freelance,support,agents,rental,marketing,academy,insurance,moqui. Case and spaces are ignored; an unknown name fails the run with the valid list. |
 | `comment` | string | No | *(empty)* | — | Optional comment appended to the git commit message. |
 
 **Job Flow:**
@@ -575,10 +574,8 @@ release  (single job)
 
 | Input | Type | Default | Options | Description |
 |-------|------|---------|---------|-------------|
-| `all_apps` | boolean | off | — | Every app in `storeApps`; overrides the app boxes. |
-| `app_admin` … `app_insurance` | boolean | off | — | One checkbox per app (admin, hotel, freelance, support, agents, rental, marketing, academy, insurance). |
-| `all_stores` | boolean | off | — | Every store; overrides the store boxes. |
-| `store_ios` / `store_macos` / `store_android` / `store_windows` / `store_snap` | boolean | off | — | Stores to deploy to. |
+| `apps` | string | `all` | `all` or a comma list | `all` = every app in `storeApps`, or a comma list of admin,hotel,freelance,support,agents,rental,marketing,academy,insurance. |
+| `stores` | string | `all` | `all` or a comma list | Stores to deploy to: `all` or a comma list of ios,macos,android,windows,snap. |
 | `track` | choice | `beta` | `beta`, `stable` | Release track. `beta` = TestFlight only (no review submission). `stable` = submit to App Store review / production. |
 | `android_release_status` | choice | `auto` | `auto`, `draft`, `completed` | Google Play release status. `auto` = `completed` for a published app (managed publishing holds it after review), `draft` only for an app Play has never published. `draft` forces the staged-release gate on apps without managed publishing. |
 
@@ -605,7 +602,7 @@ resolve-matrix ──┬──> bootstrap ──┬──> deploy-ios     ─┐
                  └──> bump-version ──> deploy-ios / deploy-macos / deploy-android
 ```
 
-**Job: `resolve-matrix`** — Resolves the app/store checkboxes (`all_apps` / `all_stores` override them; nothing ticked fails the run) into JSON matrix arrays for downstream jobs. Sets `run_<platform>` flags.
+**Job: `resolve-matrix`** — Resolves the `apps` / `stores` inputs (`all` or a comma list; an unknown name or an empty selection fails the run) into JSON matrix arrays for downstream jobs. Sets `run_<platform>` flags.
 
 **Job: `bootstrap`** — Runs once on Ubuntu. Bootstraps the Melos workspace, runs code generation (Freezed, Retrofit, l10n), and uploads the generated sources as an artifact so no other job needs to regenerate them.
 
@@ -662,11 +659,8 @@ resolve-matrix ──┬──> bootstrap ──┬──> deploy-ios     ─┐
 
 | Input | Type | Default | Description |
 |-------|------|---------|-------------|
-| `all_apps` | boolean | `false` | Every app in `storeApps`; overrides the app boxes. |
-| `app_admin` … `app_insurance` | boolean | `false` | One checkbox per app (admin, hotel, freelance, support, agents, rental, marketing, academy, insurance). |
-| `all_stores` | boolean | `false` | Every store; overrides the store boxes. |
-| `store_ios` / `store_macos` / `store_android` / `store_windows` | boolean | `false` | Stores to check for approved-but-held versions. |
-| `store_snap` | boolean | `false` | Promote `latest/candidate` to `stable`. `publish-binary` parks stable-track revisions in `candidate`, so this is the Snap equivalent of the other stores' release gate. |
+| `apps` | string | `all` | `all` = every app in `storeApps`, or a comma list of admin,hotel,freelance,support,agents,rental,marketing,academy,insurance. |
+| `stores` | string | `all` | `all` or a comma list of ios,macos,android,windows,snap: the stores to check for approved-but-held versions. `snap` promotes `latest/candidate` to `stable` (`publish-binary` parks stable-track revisions in `candidate`, so this is the Snap equivalent of the other stores' release gate). |
 
 Apps are intersected with `storeApps` in `flutter/release/release_config.json`, so an app is only
 checked on the stores it is actually published on (e.g. `support` is android + snap only).
@@ -695,7 +689,7 @@ If no held version is found for a given app/platform combination, the job exits 
 
 **Concurrency:** Only one sync at a time; never cancelled.
 
-**Manual Input Variables:** `source` (`review`, default = the store-reviewed versions; `staging` = the images running on staging, the version after the review version: refused while the store review routing is on), then `all_apps` (runs the script once with `all` = every changed service) or one checkbox per service (`app_admin` … `app_insurance`, `app_moqui`); the script runs once per ticked service, so apps approved by the stores at different times can be promoted one by one. All off by default; nothing ticked fails the run.
+**Manual Input Variables:** `source` (`review`, default = the store-reviewed versions; `staging` = the images running on staging, the version after the review version: refused while the store review routing is on), then `apps`: `all` (default; runs the script once with `all` = every changed service) or a comma list of admin,hotel,freelance,support,agents,rental,marketing,academy,insurance,moqui; the script runs once per listed service, so apps approved by the stores at different times can be promoted one by one. An unknown name or an empty list fails the run.
 
 **Secrets required:**
 
@@ -714,7 +708,7 @@ If no held version is found for a given app/platform combination, the job exits 
 
 **Concurrency:** Only one revert at a time; never cancelled.
 
-**Manual Input Variables:** Same checkboxes as Update Production (`all_apps` = revert every service).
+**Manual Input Variables:** `apps`, as in Update Production (`all` = revert every service, or a comma list including `moqui`).
 
 **Secrets required:** Same as Update Production.
 
@@ -739,10 +733,8 @@ committed metadata files and the `framed-screenshots` artifact and calls the sto
 
 | Input | Type | Default | Description |
 |-------|------|---------|-------------|
-| `all_apps` | boolean | `false` | Every app in `storeApps`; overrides the app boxes. |
-| `app_admin` … `app_insurance` | boolean | `false` | One checkbox per app (admin, hotel, freelance, support, agents, rental, marketing, academy, insurance). |
-| `all_stores` | boolean | `false` | Every store; overrides the store boxes. |
-| `store_ios` / `store_macos` / `store_android` / `store_windows` / `store_snap` | boolean | `false` | Stores to upload to. |
+| `apps` | string | `all` | `all` = every app in `storeApps`, or a comma list of admin,hotel,freelance,support,agents,rental,marketing,academy,insurance. |
+| `stores` | string | `all` | Stores to upload to: `all` or a comma list of ios,macos,android,windows,snap. |
 
 Apps are intersected with `storeApps` in `flutter/release/release_config.json`, so an app is only
 uploaded to the stores it is published on (`support` is android + snap only).
@@ -795,8 +787,7 @@ Fastlane frameit device frames, adds captions, and resizes to each store's requi
 
 | Input | Type | Default | Description |
 |-------|------|---------|-------------|
-| `all_apps` | boolean | `false` | Every `storeApps` app that has `integration_test/screenshot_test.dart`; apps without it are skipped silently. Overrides the app boxes. |
-| `app_admin` … `app_insurance` | boolean | `false` | One checkbox per app (admin, hotel, freelance, support, agents, rental, marketing, academy, insurance). Ticking an app without that test is an error. |
+| `apps` | string | `all` | `all` = every `storeApps` app that has `integration_test/screenshot_test.dart` (apps without it are skipped silently), or a comma list of admin,hotel,freelance,support,agents,rental,marketing,academy,insurance; naming an app without that test is an error. |
 | `commit_screenshots` | boolean | `true` | Commit the refreshed README and website-hero images back to the branch. |
 
 **Device profiles:** `phone`, `tablet7`, `tablet10` (Play), `iphone`, `ipad_pro` (App Store),
@@ -834,10 +825,8 @@ after someone edits a listing directly in a store console.
 
 | Input | Type | Default | Description |
 |-------|------|---------|-------------|
-| `all_apps` | boolean | `false` | Every `storeApps` app; overrides the app boxes. |
-| `app_admin` … `app_insurance` | boolean | `false` | One checkbox per app (admin, hotel, freelance, support, agents, rental, marketing, academy, insurance). |
-| `all_stores` | boolean | `false` | ios, macos, android and windows; overrides the store boxes. |
-| `store_ios` / `store_macos` / `store_android` / `store_windows` | boolean | `false` | Stores to download from. Snap listings are not downloaded — `snapcraft.yaml` is the source of truth there. |
+| `apps` | string | `all` | `all` = every `storeApps` app, or a comma list of admin,hotel,freelance,support,agents,rental,marketing,academy,insurance. |
+| `stores` | string | `all` | Stores to download from: `all` (ios, macos, android and windows) or a comma list of them. Snap listings are not downloaded — `snapcraft.yaml` is the source of truth there. |
 | `allow_non_default_branch` | boolean | `false` | Permits a run on a branch other than the default one. Without it the run fails immediately. |
 
 **This workflow treats the store as authoritative.** Android, iOS and macOS restores *prune*:
@@ -1089,8 +1078,8 @@ Go to **Actions → Publish to Stores → Run workflow** and fill in:
 
 | Input | Description | Example |
 |-------|-------------|---------|
-| `all_apps` / `app_<name>` | App checkboxes (`all_apps` = every app) | tick Admin + Hotel |
-| `all_stores` / `store_<name>` | Store checkboxes (`all_stores` = every store) | tick All Stores |
+| `apps` | `all` or a comma list of apps | `admin,hotel` |
+| `stores` | `all` or a comma list of stores | `all` |
 | `track` | Release track | `beta` = TestFlight only · `stable` = submit for App Store review / production |
 
 The `track` input controls iOS review submission: `beta` uploads to TestFlight without submitting for review; `stable` builds, uploads, and submits the build for App Store review.
@@ -1101,9 +1090,8 @@ Go to **Actions → Release Approved Store Submissions → Run workflow** and fi
 
 | Input | Description | Default |
 |-------|-------------|---------|
-| `all_apps` / `app_admin` … `app_insurance` | App checkboxes | all off |
-| `all_stores` / `store_ios` / `store_macos` / `store_android` / `store_windows` | Stores to check | all off |
-| `store_snap` | Promote `latest/candidate` to `stable` | off |
+| `apps` | `all` or a comma list of apps | `all` |
+| `stores` | `all` or a comma list of ios,macos,android,windows,snap (`snap` promotes `latest/candidate` to `stable`) | `all` |
 
 This workflow does **not** build anything. It queries each store API for versions that have passed review and are waiting for a manual developer release, then releases them. Run this after Apple/Google/Microsoft notifies you that your submission has been approved.
 

@@ -25,70 +25,16 @@ name: Release Approved Store Submissions
 on:
   workflow_dispatch:
     inputs:
-      all_apps:
-        description: "All Apps (overrides the app boxes below)"
-        type: boolean
-        default: false
-      app_admin:
-        description: "Admin App"
-        type: boolean
-        default: false
-      app_hotel:
-        description: "Hotel App"
-        type: boolean
-        default: false
-      app_freelance:
-        description: "Freelance App"
-        type: boolean
-        default: false
-      app_support:
-        description: "Support App"
-        type: boolean
-        default: false
-      app_agents:
-        description: "Agents App"
-        type: boolean
-        default: false
-      app_rental:
-        description: "Rental App"
-        type: boolean
-        default: false
-      app_marketing:
-        description: "Marketing App"
-        type: boolean
-        default: false
-      app_academy:
-        description: "Academy App"
-        type: boolean
-        default: false
-      app_insurance:
-        description: "Insurance App"
-        type: boolean
-        default: false
-      all_stores:
-        description: "All Stores (overrides the store boxes below)"
-        type: boolean
-        default: false
-      store_ios:
-        description: "iOS App Store"
-        type: boolean
-        default: false
-      store_macos:
-        description: "Mac App Store"
-        type: boolean
-        default: false
-      store_android:
-        description: "Google Play"
-        type: boolean
-        default: false
-      store_windows:
-        description: "Windows Store"
-        type: boolean
-        default: false
-      store_snap:
-        description: "Snap Store (promote latest/candidate to stable)"
-        type: boolean
-        default: false
+      apps:
+        description: "Apps: all, or a comma list of admin,hotel,freelance,support,agents,rental,marketing,academy,insurance"
+        required: true
+        default: "all"
+        type: string
+      stores:
+        description: "Stores: all, or a comma list of ios,macos,android,windows,snap"
+        required: true
+        default: "all"
+        type: string
 
 concurrency:
   group: store-release
@@ -123,23 +69,27 @@ jobs:
           sparse-checkout-cone-mode: false
       - id: matrix
         env:
-          ALL_APPS: ${{ inputs.all_apps }}
-          APP_ADMIN: ${{ inputs.app_admin }}
-          APP_HOTEL: ${{ inputs.app_hotel }}
-          APP_FREELANCE: ${{ inputs.app_freelance }}
-          APP_SUPPORT: ${{ inputs.app_support }}
-          APP_AGENTS: ${{ inputs.app_agents }}
-          APP_RENTAL: ${{ inputs.app_rental }}
-          APP_MARKETING: ${{ inputs.app_marketing }}
-          APP_ACADEMY: ${{ inputs.app_academy }}
-          APP_INSURANCE: ${{ inputs.app_insurance }}
-          ALL_STORES: ${{ inputs.all_stores }}
-          STORE_IOS: ${{ inputs.store_ios }}
-          STORE_MACOS: ${{ inputs.store_macos }}
-          STORE_ANDROID: ${{ inputs.store_android }}
-          STORE_WINDOWS: ${{ inputs.store_windows }}
-          STORE_SNAP: ${{ inputs.store_snap }}
+          APPS_INPUT: ${{ inputs.apps }}
+          STORES_INPUT: ${{ inputs.stores }}
         run: |
+          # apps / stores inputs: "all" or a comma list (e.g. admin,hotel), case and spaces ignored.
+          # Sets the ALL_*/APP_*/STORE_* flags the selection below works with.
+          _sel() { echo "${1:-}" | tr 'A-Z' 'a-z' | tr -d ' '; }
+          _flags() {  # <selection> <prefix> <ALL_ var> <valid names...>
+            local sel="$1" prefix="$2" all="$3" name; shift 3
+            printf -v "$all" '%s' false
+            for name in ${sel//,/ }; do
+              [[ "$name" == all ]] && { printf -v "$all" '%s' true; continue; }
+              [[ " $* " == *" $name "* ]] || { echo "::error::unknown '$name', use all or a comma list of: $*"; exit 1; }
+            done
+            for name in "$@"; do
+              if [[ ",$sel," == *",$name,"* ]]; then printf -v "${prefix}${name^^}" '%s' true
+              else printf -v "${prefix}${name^^}" '%s' false; fi
+            done
+          }
+          _flags "$(_sel "$APPS_INPUT")" APP_ ALL_APPS admin hotel freelance support agents rental marketing academy insurance
+          _flags "$(_sel "$STORES_INPUT")" STORE_ ALL_STORES ios macos android windows snap
+
           if [[ "$ALL_APPS" == "true" ]]; then
             APPS=$(jq -r '.storeApps | keys_unsorted | join(",")' flutter/release/release_config.json)
           else
