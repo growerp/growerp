@@ -207,7 +207,16 @@ jobs:
       - name: Build Moqui backend image
         run: |
           mkdir -p moqui/build
-          cd moqui && ./gradlew -Dorg.gradle.jvmargs=-Xmx3g build getPostgresJdbc
+          cd moqui
+          # Retry: a transient OOM in compileGroovy on one runner otherwise
+          # fails the whole matrix and skips framing/committing.
+          ok=0
+          for attempt in 1 2 3; do
+            if ./gradlew -Dorg.gradle.jvmargs=-Xmx3g build getPostgresJdbc; then ok=1; break; fi
+            echo "gradlew attempt $attempt failed; retrying in 20s..."
+            sleep 20
+          done
+          [ "$ok" = 1 ] || { echo "gradlew failed after 3 attempts"; exit 1; }
           cd docker/simple && bash docker-build.sh ../.. growerp/growerp-moqui eclipse-temurin:21-jdk
 
       # ── Build Flutter test runner image (layer-cached) ────────────────────
