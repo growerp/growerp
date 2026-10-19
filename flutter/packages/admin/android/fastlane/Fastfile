@@ -48,9 +48,16 @@ platform :android do
     # otherwise an empty local dir would wipe the live listing's screenshots.
     skip_images = ENV['SKIP_PLAY_IMAGES'] == 'true'
     UI.important("SKIP_PLAY_IMAGES set — uploading listing text only") if skip_images
+    # The track can hold more than one release (live + draft/in-review); supply
+    # then refuses to pick one, so pin the latest version code.
+    codes = google_play_track_version_codes(
+      json_key: ENV['GOOGLE_PLAY_JSON_KEY_FILE'],
+      track:    'production'
+    )
     upload_to_play_store(
       json_key:                ENV['GOOGLE_PLAY_JSON_KEY_FILE'],
       track:                   'production',
+      version_code:            codes.max,
       skip_upload_aab:         true,
       skip_upload_apk:         true,
       skip_upload_metadata:    false,

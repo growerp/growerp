@@ -837,6 +837,7 @@ jobs:
           import json
           import os
           import requests
+          import time
           import yaml
           from craft_store import UbuntuOneStoreClient, endpoints
           from PIL import Image
@@ -901,10 +902,20 @@ jobs:
               snap_names.append('growerp')
 
           for snap_name in snap_names:
-              info_resp = requests.get(
-                  f'https://api.snapcraft.io/v2/snaps/info/{snap_name}',
-                  headers={'Snap-Device-Series': '16'},
-              )
+              # The parallel matrix jobs hit the public API at once and get
+              # rate-limited (429); retry that and 5xx with backoff.
+              for attempt in range(5):
+                  info_resp = requests.get(
+                      f'https://api.snapcraft.io/v2/snaps/info/{snap_name}',
+                      headers={'Snap-Device-Series': '16'},
+                      timeout=60,
+                  )
+                  if info_resp.status_code != 429 and info_resp.status_code < 500:
+                      break
+                  retry_after = info_resp.headers.get('Retry-After', '')
+                  wait = int(retry_after) if retry_after.isdigit() else 15 * (attempt + 1)
+                  print(f'{snap_name}: info got {info_resp.status_code}, retry in {wait}s ({attempt + 1}/5)')
+                  time.sleep(wait)
               if info_resp.status_code == 404:
                   print(f'{snap_name}: not found in Snap Store. Skipping.')
                   continue
