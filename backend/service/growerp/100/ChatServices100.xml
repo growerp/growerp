@@ -1213,7 +1213,7 @@ limitations under the License.
             </entity-find-one>
             <set field="fromAddress"
                 from="mailServer?.mailUsername?.contains('@') ? mailServer.mailUsername
-                        : 'noreply@growerp.com'" />
+                        : 'support@growerp.com'" />
             <script><![CDATA[
                 boolean isVisitor = toUserId == room.visitorUserId
                 // private rooms carry no name: fall back to who wrote last

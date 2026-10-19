@@ -3124,7 +3124,7 @@ limitations under the License.
             <parameter name="subject" required="true"/>
             <parameter name="bodyHtml" allow-html="any"/>
             <parameter name="bodyText" allow-html="any"/>
-            <parameter name="fromAddress" default-value="noreply@growerp.com"/>
+            <parameter name="fromAddress" default-value="support@growerp.com"/>
             <parameter name="fromName"/>
             <parameter name="attachmentBase64">
                 <description>Optional single attachment, base64-encoded (e.g. a PDF). Requires
@@ -3149,7 +3149,7 @@ limitations under the License.
             <set field="emailServerId" from="serverOut.emailServerId"/>
             <set field="emailConfigured" from="serverOut.emailConfigured"/>
             <!-- a tenant SMTP server rejects the default growerp sender domain -->
-            <if condition="serverOut.fromAddress &amp;&amp; fromAddress == 'noreply@growerp.com'">
+            <if condition="serverOut.fromAddress &amp;&amp; fromAddress == 'support@growerp.com'">
                 <set field="fromAddress" from="serverOut.fromAddress"/>
             </if>
             <if condition="!emailConfigured">
