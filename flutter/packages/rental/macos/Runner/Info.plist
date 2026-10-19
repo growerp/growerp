@@ -32,5 +32,9 @@
 	<string>public.app-category.business</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Used to dictate messages to the AI assistant.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Used to turn your speech into messages for the AI assistant.</string>
 </dict>
 </plist>
