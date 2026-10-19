@@ -1,0 +1,8 @@
+// Gradle starts the Groovy compiler worker with -Xmx512m unless forkOptions say
+// otherwise. :framework:compileGroovy sits right at that limit and randomly dies
+// with "Java heap space" on CI runners (screenshots run 39213037882).
+allprojects {
+    tasks.withType(GroovyCompile).configureEach {
+        groovyOptions.forkOptions.memoryMaximumSize = '2g'
+    }
+}

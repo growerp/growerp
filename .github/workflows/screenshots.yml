@@ -208,11 +208,11 @@ jobs:
         run: |
           mkdir -p moqui/build
           cd moqui
-          # Retry: a transient OOM in compileGroovy on one runner otherwise
+          # Retry: a transient failure on one runner otherwise
           # fails the whole matrix and skips framing/committing.
           ok=0
           for attempt in 1 2 3; do
-            if ./gradlew -Dorg.gradle.jvmargs=-Xmx3g build getPostgresJdbc; then ok=1; break; fi
+            if ./gradlew -Dorg.gradle.jvmargs=-Xmx3g -I ../ci/groovy-compile-heap.init.gradle build getPostgresJdbc; then ok=1; break; fi
             echo "gradlew attempt $attempt failed; retrying in 20s..."
             sleep 20
           done
