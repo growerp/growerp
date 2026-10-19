@@ -32,5 +32,11 @@
 	<string>public.app-category.business</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>The image you upload will be used on Business documents like invoices or shown on screen
+		with the relevant data.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>The app needs the camera to take pictures of persons and paper documents to show later
+		as reference in the app.</string>
 </dict>
 </plist>
