@@ -122,6 +122,10 @@ class DashboardMini extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final rowHeight = constraints.maxHeight / bars.length;
+        // Too small to draw readable rows: show only the counters.
+        if (rowHeight < 10 || constraints.maxWidth < 120) {
+          return const SizedBox.shrink();
+        }
         final barHeight = (rowHeight - 4).clamp(4.0, 12.0);
         final labelStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
           fontSize: (rowHeight - 4).clamp(8.0, 12.0),

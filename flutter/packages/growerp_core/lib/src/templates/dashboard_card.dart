@@ -1055,8 +1055,6 @@ class _DashboardGridState extends State<DashboardGrid> {
     final minimizedItems = _searchQuery.isEmpty
         ? widget.items.where((m) => m.isMinimized).toList()
         : <MenuItem>[];
-    final crossAxisCount = isPhone ? 3 : 6;
-
     int crossCells(MenuItem m) => switch (effectiveType(m)) {
       'statistic' => 2,
       'graphic' => 2,
@@ -1082,6 +1080,10 @@ class _DashboardGridState extends State<DashboardGrid> {
       padding: const EdgeInsets.all(16),
       child: LayoutBuilder(
         builder: (context, constraints) {
+          // Fewer columns on narrow desktop windows so a column never drops
+          // much below 150pt; compact graphic tiles overlap otherwise.
+          final w = constraints.maxWidth;
+          final crossAxisCount = isPhone || w < 648 ? 3 : (w < 980 ? 4 : 6);
           // Store column width so _buildFeedback can size the floating card.
           _colWidth =
               (constraints.maxWidth - (crossAxisCount - 1) * 16) /
