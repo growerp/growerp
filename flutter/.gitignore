@@ -7,6 +7,8 @@
 *.freezed.dart
 
 pubspec.lock
+# the workspace lockfile pins plugin versions for store builds
+!/pubspec.lock
 generated
 
 #melos
