@@ -67,7 +67,7 @@ fi
 if [ -f "$RUNTIME_DIR/.gitmodules" ]; then
   echo "Initialising moqui-runtime submodules ..."
   if [ "$USE_SSH" = true ]; then
-    sed -i 's|https://github.com/|git@github.com:|g' "$RUNTIME_DIR/.gitmodules"
+    sed -i.bak 's|https://github.com/|git@github.com:|g' "$RUNTIME_DIR/.gitmodules" && rm "$RUNTIME_DIR/.gitmodules.bak"
     git -C "$RUNTIME_DIR" submodule sync
   fi
   git -C "$RUNTIME_DIR" submodule update --init --recursive

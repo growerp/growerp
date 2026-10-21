@@ -62,6 +62,18 @@ Build it once in week 1 and keep it in the **GrowERP CRM as Leads**. This dogfoo
 
 Note for each lead: industry, current tools (Excel, QuickBooks, Odoo, paper…), and the pain they mention.
 
+### Examples per tier
+
+Made-up leads, to show what a good entry looks like and what to do with it.
+
+| Tier | Example lead | How you find them | CRM note | First step |
+|---|---|---|---|---|
+| **Hottest** | Somchai, owner of a 6-room guesthouse in Chiang Mai. Signed up for the Hotel app in March, entered 3 rooms, no bookings after week 1 | Owners whose tenant has no orders, invoices or bookings in the last 60 days | *Hospitality · Booking.com + paper calendar · "Couldn't connect my Booking.com rooms"* | Message 12. If he answers "channel manager missing", follow with 13 and, once it's fixed, 14 |
+| Hot | Maria, newsletter subscriber since 2024, runs a 12-person bakery supply wholesaler; never signed up | Replies to the founding-customer issue | *Wholesale · Excel + Xero · "Stock counts never match, 1 day/month to fix"* | Reply within a day with message 8, book the call |
+| Warm | Peter, former client from a 2022 website project, now runs an 8-person electrical installation company | Your old invoices, project folders, email contacts | *Services/trades · paper job sheets + QuickBooks · "Invoicing takes me every Sunday"* | Message 1 by WhatsApp. If not a fit: message 2, ask for one name |
+| Lukewarm | Anna, 2nd-degree LinkedIn connection, co-founder of a 25-person furniture webshop; recently posted about hiring a warehouse lead | LinkedIn search: owner/founder/MD, company size 11–50 or 51–200, your region | *E-commerce · Shopify + spreadsheets · posted about warehouse chaos* | Message 3 (connection request, mention the hiring post), then message 4 once connected |
+| Partners | Ken, independent bookkeeper with about 30 SMB clients, most of them sending Excel exports | Your own accountant, local business association, LinkedIn "bookkeeper" + city | *Accounting · ~30 clients · "Month-end chasing receipts"* | Message 7. Goal: one of his clients set up together with him |
+
 ---
 
 ## 4. Weekly rhythm
