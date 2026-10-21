@@ -59,6 +59,8 @@ jobs:
       android_matrix: ${{ steps.matrix.outputs.android_matrix }}
       windows_matrix: ${{ steps.matrix.outputs.windows_matrix }}
       snap_matrix: ${{ steps.matrix.outputs.snap_matrix }}
+      run_apple: ${{ steps.matrix.outputs.run_apple }}
+      apple_matrix: ${{ steps.matrix.outputs.apple_matrix }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -68,6 +70,7 @@ jobs:
         env:
           APPS_INPUT: ${{ inputs.apps }}
           STORES_INPUT: ${{ inputs.stores }}
+          TRACK: ${{ inputs.track }}
         run: |
           # apps / stores inputs: "all" or a comma list (e.g. admin,hotel), case and spaces ignored.
           # Sets the ALL_*/APP_*/STORE_* flags the selection below works with.
@@ -145,6 +148,7 @@ jobs:
 
           contains() { echo "$STORES" | grep -qw "$1"; }
 
+          declare -A MATRICES
           for store in ios macos android windows snap; do
             store_apps=$(jq -r --arg s "$store" \
               '[.storeApps | to_entries[] | select(.value | index($s)) | .key] | join(" ")' \
@@ -153,11 +157,37 @@ jobs:
             if contains "$store" && [[ "$matrix" != "[]" ]]; then
               echo "run_${store}=true"          >> "$GITHUB_OUTPUT"
               echo "${store}_matrix=${matrix}"  >> "$GITHUB_OUTPUT"
+              MATRICES[$store]="$matrix"
             else
               echo "run_${store}=false"         >> "$GITHUB_OUTPUT"
               echo "${store}_matrix=[]"         >> "$GITHUB_OUTPUT"
+              MATRICES[$store]="[]"
             fi
           done
+
+          # One entry per app on an Apple store this run, with the platforms
+          # selected for it: submit-apple submits those for review together.
+          apple_matrix=$(jq -cn --argjson ios "${MATRICES[ios]}" --argjson mac "${MATRICES[macos]}" '
+            [([$ios[].app] + [$mac[].app] | unique)[] as $a | {
+              app: $a,
+              platforms: ([(if any($ios[]; .app == $a) then "IOS" else empty end),
+                           (if any($mac[]; .app == $a) then "MAC_OS" else empty end)] | join(","))
+            }]')
+          echo "apple_matrix=${apple_matrix}" >> "$GITHUB_OUTPUT"
+          if [[ "$apple_matrix" != "[]" ]]; then
+            echo "run_apple=true"  >> "$GITHUB_OUTPUT"
+          else
+            echo "run_apple=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          # iOS and macOS share one App Info that Apple locks while either is in
+          # review, so the platform submitted later cannot get in until the
+          # earlier one is released.
+          has_ios=false;   contains ios   && has_ios=true
+          has_macos=false; contains macos && has_macos=true
+          if [[ "$TRACK" == stable && "$has_ios" != "$has_macos" ]]; then
+            echo "::warning::stable track with only one of ios/macos: the other platform cannot be submitted until this one is released. Publish ios,macos together."
+          fi
 
   # ───────────────────────────────────────────────────────────────────────────
   # Run once: bootstrap the Melos workspace and generate all Freezed / Retrofit
@@ -641,6 +671,15 @@ jobs:
         run: bundle exec fastlane upload
         working-directory: flutter/fastlane
 
+      # Tells submit-apple this platform is uploaded (see write_submit_marker).
+      - name: Upload submit marker
+        if: inputs.track == 'stable'
+        uses: actions/upload-artifact@v4
+        with:
+          name: apple-submit-ios-${{ matrix.app }}
+          path: flutter/apple-submit/IOS
+          if-no-files-found: error
+
   # ───────────────────────────────────────────────────────────────────────────
   # macOS — Fastlane Match + xcodebuild + xcrun altool on macos-latest
   # Secrets: APP_STORE_CONNECT_API_KEY_ID, APP_STORE_CONNECT_API_ISSUER_ID,
@@ -864,6 +903,86 @@ jobs:
           SUBMIT_FOR_REVIEW: ${{ inputs.track == 'stable' && 'true' || 'false' }}
         run: bundle exec fastlane upload_macos
         working-directory: flutter
+
+      - name: Upload submit marker
+        if: inputs.track == 'stable'
+        uses: actions/upload-artifact@v4
+        with:
+          name: apple-submit-macos-${{ matrix.app }}
+          path: flutter/apple-submit/MAC_OS
+          if-no-files-found: error
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Apple review submission — stable track only. deploy-ios / deploy-macos only
+  # upload; this submits both platforms of an app seconds apart once both are
+  # uploaded. iOS and macOS share one App Info that Apple locks as soon as a
+  # reviewer picks up either submission, so submitting them minutes or days
+  # apart leaves the second one blocked until the first is released.
+  # If one platform's upload failed nothing is submitted for that app:
+  # "Re-run failed jobs" re-runs the upload and then this job.
+  # ───────────────────────────────────────────────────────────────────────────
+  submit-apple:
+    needs: [ resolve-matrix, deploy-ios, deploy-macos ]
+    if: |
+      !cancelled() && inputs.track == 'stable' &&
+      needs.resolve-matrix.outputs.run_apple == 'true'
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve-matrix.outputs.apple_matrix) }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Download bumped pubspecs
+        uses: actions/download-artifact@v4
+        with:
+          name: bumped-pubspecs
+          path: flutter/packages
+
+      - name: Download submit markers
+        uses: actions/download-artifact@v4
+        with:
+          pattern: apple-submit-*-${{ matrix.app }}
+          path: flutter/apple-submit
+          merge-multiple: true
+
+      - name: Resolve platforms to submit
+        env:
+          MATRIX_APP: ${{ matrix.app }}
+          EXPECTED: ${{ matrix.platforms }}
+        run: |
+          set -euo pipefail
+          submit=()
+          for platform in ${EXPECTED//,/ }; do
+            marker="flutter/apple-submit/$platform"
+            if [[ ! -f "$marker" ]]; then
+              echo "::error::$MATRIX_APP $platform upload did not finish; nothing submitted so the platforms stay together. Re-run failed jobs."
+              exit 1
+            fi
+            [[ "$(cat "$marker")" == submit ]] && submit+=("$platform")
+          done
+          echo "PLATFORMS=$(IFS=,; echo "${submit[*]:-}")" >> "$GITHUB_ENV"
+
+      - uses: ruby/setup-ruby@v1
+        if: env.PLATFORMS != ''
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+          working-directory: flutter/fastlane
+
+      - name: Fastlane submit for review
+        if: env.PLATFORMS != ''
+        env:
+          APP_NAME: ${{ matrix.app }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        run: bundle exec fastlane submit_apple
+        working-directory: flutter/fastlane
 
   # ───────────────────────────────────────────────────────────────────────────
   # Android — flutter build appbundle + Google Play API

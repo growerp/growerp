@@ -286,6 +286,15 @@ def target_version(app_name)
   match[1]
 end
 
+# Tells the submit-apple job this platform's stable upload finished: "submit"
+# when a version is ready for review, "skip" when it went to TestFlight only
+# (never-published app). The workflow uploads flutter/apple-submit/ as an artifact.
+def write_submit_marker(platform_filter, action)
+  dir = File.expand_path("../apple-submit", __dir__)
+  FileUtils.mkdir_p(dir)
+  File.write(File.join(dir, platform_filter), action)
+end
+
 # States in which a version has not gone live yet, so its release type still
 # decides whether Apple publishes it automatically.
 UNRELEASED_STATES = %w[
@@ -441,7 +450,8 @@ lane :upload do
     is_key_content_base64: true,
     in_house:              false
   )
-  submit_for_review = ENV.fetch("SUBMIT_FOR_REVIEW", "false") == "true"
+  stable_track      = ENV.fetch("SUBMIT_FOR_REVIEW", "false") == "true"
+  submit_for_review = stable_track
   if submit_for_review
     app_name = required_env!("APP_NAME")
     # Creates the App Store version the build is about to fill. Only a
@@ -452,13 +462,13 @@ lane :upload do
   end
 
   if submit_for_review
-    # stable: create App Store version if missing, upload release notes, submit for review
+    # stable: upload binary + release notes; submit_apple submits for review
     app_name      = required_env!("APP_NAME")
     metadata_path = File.expand_path("../packages/#{app_name}/ios/fastlane/metadata", __dir__)
     upload_to_app_store(
       api_key:                    api_key,
       app_identifier:             "org.growerp.#{app_name}",
-      submit_for_review:          true,
+      submit_for_review:          false,
       automatic_release:          false,
       run_precheck_before_submit: false,
       skip_metadata:              false,
@@ -467,7 +477,9 @@ lane :upload do
       force:                      true
     )
     ensure_manual_release(api_key, "org.growerp.#{app_name}", "IOS")
+    write_submit_marker("IOS", "submit")
   else
+    write_submit_marker("IOS", "skip") if stable_track
     # beta: upload to TestFlight only
     upload_to_testflight(
       api_key:                 api_key,
@@ -603,7 +615,8 @@ lane :upload_macos do
   pkg = Dir["#{export_dir}/*.pkg"].first
   UI.user_error!("No .pkg found in #{export_dir}") if pkg.nil?
 
-  submit_for_review = ENV.fetch("SUBMIT_FOR_REVIEW", "false") == "true"
+  stable_track      = ENV.fetch("SUBMIT_FOR_REVIEW", "false") == "true"
+  submit_for_review = stable_track
   # Creates the App Store version the build is about to fill. Only a
   # never-published app returns false (TestFlight); anything else raises.
   if submit_for_review
@@ -622,18 +635,82 @@ lane :upload_macos do
       skip_metadata:              false,
       metadata_path:              metadata_path,
       skip_screenshots:           true,
-      submit_for_review:          true,
+      submit_for_review:          false,
       automatic_release:          false,
       run_precheck_before_submit: false,
       force:                      true
     )
     ensure_manual_release(api_key, "org.growerp.#{app_name}", "MAC_OS")
+    write_submit_marker("MAC_OS", "submit")
   else
+    write_submit_marker("MAC_OS", "skip") if stable_track
     upload_to_testflight(
       api_key:                 api_key,
       pkg:                     pkg,
       skip_submission:         true,
       notify_external_testers: false
+    )
+  end
+end
+
+# Submits the versions upload / upload_macos prepared (binary, release notes,
+# MANUAL release) for review, all platforms back to back. iOS and macOS share
+# one App Info, which Apple locks as soon as a reviewer picks up either
+# submission; submitted separately, the second platform cannot get in until the
+# first is released. Submitted seconds apart, both are queued before that can
+# happen, are reviewed together and end up waiting for release together.
+# Required env vars:
+#   APP_NAME   — e.g. admin
+#   PLATFORMS  — comma list of IOS, MAC_OS
+#   APP_STORE_CONNECT_API_KEY_ID / _ISSUER_ID / _KEY_CONTENT
+lane :submit_apple do
+  app_name       = required_env!("APP_NAME")
+  bundle_id      = "org.growerp.#{app_name}"
+  version_string = target_version(app_name)
+
+  api_key = app_store_connect_api_key(
+    key_id:                required_env!("APP_STORE_CONNECT_API_KEY_ID"),
+    issuer_id:             required_env!("APP_STORE_CONNECT_API_ISSUER_ID"),
+    key_content:           required_env!("APP_STORE_CONNECT_API_KEY_CONTENT"),
+    is_key_content_base64: true,
+    in_house:              false
+  )
+
+  require "spaceship"
+  Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: api_key)
+  app = Spaceship::ConnectAPI::App.find(bundle_id)
+  UI.user_error!("App not found: #{bundle_id}") unless app
+
+  required_env!("PLATFORMS").split(",").map(&:strip).each do |platform_filter|
+    # A re-run after a partial failure: this platform already went in.
+    if app.get_in_progress_review_submission(platform: platform_filter)
+      UI.success("#{bundle_id} (#{platform_filter}): already submitted for review, skipping.")
+      next
+    end
+
+    edit = app.get_edit_app_store_version(platform: platform_filter)
+    if edit.nil? || edit.version_string != version_string
+      UI.user_error!(
+        "#{bundle_id} (#{platform_filter}): no editable version #{version_string} to submit " \
+        "(found #{edit&.version_string || 'none'}). Re-run the upload job first."
+      )
+    end
+
+    # Binary and metadata are already there; this only selects the latest
+    # processed build of version_string and submits it.
+    upload_to_app_store(
+      api_key:                    api_key,
+      app_identifier:             bundle_id,
+      platform:                   platform_filter == "IOS" ? "ios" : "osx",
+      app_version:                version_string,
+      skip_app_version_update:    true,
+      skip_binary_upload:         true,
+      skip_metadata:              true,
+      skip_screenshots:           true,
+      submit_for_review:          true,
+      automatic_release:          false,
+      run_precheck_before_submit: false,
+      force:                      true
     )
   end
 end

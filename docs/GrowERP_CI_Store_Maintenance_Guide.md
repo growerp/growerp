@@ -106,7 +106,18 @@ these lines in the job log:
   while a just-released version settles.
 - `App Store Connect did not accept version … within 10 minutes` — the run **fails** here. Clear
   the blocking version (`release-approved.yml`, or reject the submission in App Store Connect) and
-  re-run; the binary is not shipped to TestFlight as a consolation.
+  re-run; the binary is not shipped to TestFlight as a consolation. `App Info is still locked` with
+  no blocker named usually means the **other** Apple platform is in review or held: iOS and macOS
+  share one App Info, so release that platform first.
+
+**Publish iOS and macOS together.** Because of that shared App Info, the Apple platform submitted
+second cannot get in once a reviewer has picked up the first. So on the stable track
+`deploy-ios` / `deploy-macos` only upload (binary, release notes, `MANUAL` release type), and the
+`submit-apple` job submits both platforms of each app seconds apart once both uploads are done.
+Both are then reviewed together and end up in `PENDING_DEVELOPER_RELEASE` together, ready for one
+`release-approved.yml` run with `stores=ios,macos`. If one platform's upload fails, nothing is
+submitted for that app: use **Re-run failed jobs**, which re-runs the upload and then
+`submit-apple`. A stable run selecting only one of `ios` / `macos` prints a warning.
 
 **Can metadata be uploaded at any time?**
 
