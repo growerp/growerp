@@ -113,6 +113,28 @@ class WebsiteChatServicesTests extends Specification {
         users.users.any { it.email == email && it.firstName == 'leadtest1' }
     }
 
+    def "submit#WebsiteChat logs the chat start in the lead's communications"() {
+        setup:
+        String email = "leadtest${System.currentTimeMillis()}@example.com"
+
+        when:
+        ec.service.sync().name('growerp.100.ChatServices100.submit#WebsiteChat')
+                .parameters([productStoreId: productStoreId, email: email, question: 'Do you ship abroad?'])
+                .disableAuthz().call()
+        Map detail = visitorPartyDetail(email)
+        List events = ec.entity.find('mantle.party.communication.CommunicationEvent')
+                .condition([fromPartyId: detail.partyId, communicationEventTypeId: 'WebsiteChat'] as Map)
+                .useCache(false).list()
+
+        then: 'one incoming Website chat entry from the lead to the company'
+        events.size() == 1
+        events[0].ownerPartyId == ownerPartyId
+        events[0].toPartyId == companyPartyId
+        events[0].statusId == 'CeReceived'
+        events[0].subject == 'Website chat'
+        events[0].body == 'Do you ship abroad?'
+    }
+
     def "resubmitting the same email does not create a duplicate Lead"() {
         setup:
         String email = 'leadtest2@example.com'

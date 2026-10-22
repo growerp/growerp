@@ -257,6 +257,8 @@
   "commTypeEmail": "E-Mail",
   "commTypeFaceToFace": "Treffen",
   "commTypeVideoCall": "Videoanruf",
+  "commTypeWebsiteForm": "Webformular",
+  "commTypeWebsiteChat": "Website-Chat",
   "commTypeLetter": "Brief",
   "commTypeComment": "Kommentar",
   "commTypeMessage": "Nachricht",

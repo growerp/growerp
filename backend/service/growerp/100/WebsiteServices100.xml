@@ -1536,6 +1536,8 @@ limitations under the License.
                     if (it.fieldType == 'text' &amp;&amp; !name &amp;&amp; v) name = v
                 }
                 context.email = email
+                context.submissionText = formFields.collect {
+                    "${it.label ?: it.fieldId}: ${values[it.fieldId] ?: ''}" }.join('\n')
                 context.visitorName = name ?: (email &amp;&amp; email.contains('@')
                     ? email.substring(0, email.indexOf('@')) : 'website')
             </script>
@@ -1593,6 +1595,19 @@ limitations under the License.
                 in-map="[formId: formId, ownerPartyId: ownerPartyId,
                     partyId: visitorPartyId, submittedDate: ec.user.nowTimestamp,
                     valuesJson: valuesJson]" />
+            <!-- log the submission in the lead's communications list -->
+            <if condition="visitorPartyId">
+                <service-call name="create#mantle.party.communication.CommunicationEvent"
+                    in-map="[ownerPartyId: ownerPartyId,
+                        communicationEventTypeId: 'WebsiteForm',
+                        statusId: 'CeReceived',
+                        fromPartyId: visitorPartyId,
+                        toPartyId: form.ownerPartyId,
+                        entryDate: ec.user.nowTimestamp,
+                        subject: 'Website form: ' + (form.title ?: form.formName ?: formId),
+                        body: submissionText,
+                        contentType: 'text/plain']" />
+            </if>
             <!-- enroll into the form's nurture sequence when configured -->
             <if condition="form.emailSequenceId">
                 <service-call name="growerp.100.NurtureServices100.enroll#EmailSequence"

@@ -21,6 +21,7 @@ import 'package:growerp_core/test_data.dart';
 import 'package:growerp_user_company/growerp_user_company.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_user_company/src/user/integration_test/user_test.dart';
+import 'package:growerp_user_company/src/communication/integration_test/communication_test.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -49,6 +50,12 @@ void main() {
     await selectLeads(tester);
     await UserTest.addUsers(tester, leads.sublist(0, 3));
     await UserTest.checkUsers(tester);
+    await CommunicationTest.addUpdateDeleteCommunication(
+      tester,
+      (await PersistFunctions.getTest()).users[0].pseudoId!,
+      communications,
+      fromList: true,
+    );
     await UserTest.updateUsers(tester, leads.sublist(3, 6));
     await UserTest.checkUsers(tester);
     await UserTest.deleteUsers(tester);

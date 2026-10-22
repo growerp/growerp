@@ -35,6 +35,10 @@ enum CommunicationEventType {
   message,
   @JsonValue('VideoCall')
   videoCall,
+  @JsonValue('WebsiteForm')
+  websiteForm,
+  @JsonValue('WebsiteChat')
+  websiteChat,
   @JsonValue('AutoEmail')
   autoEmail,
 }

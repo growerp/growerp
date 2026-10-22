@@ -257,6 +257,8 @@
   "commTypeEmail": "อีเมล",
   "commTypeFaceToFace": "การประชุม",
   "commTypeVideoCall": "วิดีโอคอล",
+  "commTypeWebsiteForm": "แบบฟอร์มเว็บไซต์",
+  "commTypeWebsiteChat": "แชทเว็บไซต์",
   "commTypeLetter": "จดหมาย",
   "commTypeComment": "ความคิดเห็น",
   "commTypeMessage": "ข้อความ",

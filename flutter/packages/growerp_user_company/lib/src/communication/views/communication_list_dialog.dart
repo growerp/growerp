@@ -302,6 +302,8 @@ IconData communicationTypeIcon(CommunicationEventType? type) {
     CommunicationEventType.comment => Icons.comment_outlined,
     CommunicationEventType.message => Icons.message_outlined,
     CommunicationEventType.videoCall => Icons.videocam_outlined,
+    CommunicationEventType.websiteForm => Icons.web_outlined,
+    CommunicationEventType.websiteChat => Icons.chat_bubble_outline,
     null => Icons.help_outline,
   };
 }
@@ -319,6 +321,8 @@ String communicationTypeLabel(
     CommunicationEventType.comment => localizations.commTypeComment,
     CommunicationEventType.message => localizations.commTypeMessage,
     CommunicationEventType.videoCall => localizations.commTypeVideoCall,
+    CommunicationEventType.websiteForm => localizations.commTypeWebsiteForm,
+    CommunicationEventType.websiteChat => localizations.commTypeWebsiteChat,
     null => '',
   };
 }

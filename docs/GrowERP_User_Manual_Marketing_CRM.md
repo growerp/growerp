@@ -101,6 +101,10 @@ form, assessments, chat, engagement conversion, LinkedIn import or manual entry.
 - **Add manually:** press **+** and fill in at least first name, last name, e-mail.
 - **Promote:** open a lead and change its role when it becomes a paying customer,
   or create an opportunity for it from the CRM → Opportunities tab.
+- **Communications:** the speech-bubble icon on a lead's row (or the
+  **Communications** button in the lead's detail) opens its communications log.
+  Website form submissions (*Website form*) and website chats (*Website chat*) are
+  logged there automatically, so you can see how and why the lead came in.
 
 ### 2.5 Customers
 
@@ -345,14 +349,17 @@ Build lead-capture forms without code, under **Organization → Web Forms**.
   <div data-growerp-form="FORM_ID"></div>
   ```
 
-  The form renders there with your fields; submissions create a lead and store the
-  submitted values (visible per form).
+  The form renders there with your fields; submissions create a lead (last name
+  *website*) and store the submitted values. Each submission is also added to the
+  lead's **Communications** as *Website form: <form title>* with the submitted values;
+  a repeat submission from the same e-mail adds an entry to the same lead.
 
 ### 5.2 Website chat
 
 The public chat widget on your website lets visitors start a conversation; a
 visitor who leaves contact details becomes a lead and their messages arrive in the
-app's chat.
+app's chat. Each new chat is also added to the lead's **Communications** as
+*Website chat* with the visitor's first question.
 
 ### 5.3 SEO
 
