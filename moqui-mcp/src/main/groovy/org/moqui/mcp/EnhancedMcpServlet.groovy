@@ -189,7 +189,7 @@ class EnhancedMcpServlet extends HttpServlet {
         // the pooled Jetty thread with its user and the next request on that thread inherits it
         boolean ownsEc = false
         if (ec == null) {
-            logger.warn("No ExecutionContext found from MoquiAuthFilter, creating new one")
+            logger.debug("No ExecutionContext found from MoquiAuthFilter, creating new one")
             ec = ecfi.getEci()
             ownsEc = true
         }
