@@ -96,6 +96,19 @@ class ActivityTest {
     // Clear search to show all activities
     await clearSearch(tester);
 
+    // every activity listed once, with its start date and assignee
+    int rows = 0;
+    while (tester.any(find.byKey(Key('id$rows')))) {
+      rows++;
+    }
+    expect(rows, activities.length, reason: 'duplicate or missing rows');
+    for (int i = 0; i < activities.length; i++) {
+      expect(CommonTest.getTextField('estFromDate$i'), isNotEmpty);
+      if (tester.any(find.byKey(Key('assignee$i')))) {
+        expect(CommonTest.getTextField('assignee$i'), isNotEmpty);
+      }
+    }
+
     // Build a map from activityName → activityId by iterating visible rows
     final Map<String, String> nameToId = {};
     for (int i = 0; i < activities.length; i++) {
@@ -158,6 +171,8 @@ class ActivityTest {
       'delete${count - 1}',
       seconds: CommonTest.waitTime,
     );
+    // confirm the delete
+    await CommonTest.tapByKey(tester, 'continue');
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
     // Verify one fewer row
     int newCount = 0;

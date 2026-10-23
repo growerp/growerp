@@ -502,15 +502,16 @@ CRITICAL tool-use rules — follow exactly:
                     }
                     initConfig(cfg.getString('adkAgentConfigId'), cfg.getString('ownerPartyId'),
                             cfg.getString('agentName'), cfg.getString('modelName'),
-                            cfg.getString('instruction'), resolvedApiKey, provider,
-                            cfg.getString('description'))
+                            withParameters(cfg.getString('instruction'), cfg.getString('parameters')),
+                            resolvedApiKey, provider, cfg.getString('description'))
                 }
             } catch (Exception ignored) {
                 for (def cfg in cfgList) {
                     if (!defaultKey && cfg.getString('apiKey')) defaultKey = cfg.getString('apiKey')
                     initConfig(cfg.getString('adkAgentConfigId'), cfg.getString('ownerPartyId'),
                             cfg.getString('agentName'), cfg.getString('modelName'),
-                            cfg.getString('instruction'), cfg.getString('apiKey') ?: '',
+                            withParameters(cfg.getString('instruction'), cfg.getString('parameters')),
+                            cfg.getString('apiKey') ?: '',
                             cfg.getString('llmProvider') ?: 'gemini', cfg.getString('description'))
                 }
             } finally {
@@ -1106,7 +1107,7 @@ CRITICAL tool-use rules — follow exactly:
                     .name(agentName)
                     .description((cfg.description ?: cfg.agentName ?: 'GrowERP agent') as String)
                     .model(modelArg)
-                    .instruction(CONTEXT_PREAMBLE + ((cfg.instruction ?: '') as String))
+                    .instruction(CONTEXT_PREAMBLE + withParameters(cfg.instruction as String, cfg.parameters as String))
                     .tools(tools)
                     .build()
             run.maxLlmCalls = (cfg.maxLlmCalls as Integer) ?: 10
@@ -1154,6 +1155,31 @@ CRITICAL tool-use rules — follow exactly:
                                 text.contains('denied') || text.contains('Unknown service')) ? 'blocked' : 'ok'
             }
         }
+    }
+
+    /**
+     * The instruction plus its input parameters (AdkAgentConfig.parameters, a JSON list of
+     * [name, label, value, fixed]). Rendered as plain text, not as ADK state variables: an unset
+     * variable fails the run. A value is the default for runs whose message names none, so a
+     * scheduled run gets it; a fixed value also overrides the message.
+     */
+    static String withParameters(String instruction, String parametersJson) {
+        String text = instruction ?: ''
+        if (!parametersJson?.trim()) return text
+        List params
+        try { params = new groovy.json.JsonSlurper().parseText(parametersJson) as List }
+        catch (Exception e) { logger.warn("Agent parameters are not valid JSON: ${e.message}"); return text }
+        // braces would be read as ADK session-state variables
+        Closure clean = { Object v -> ((v ?: '') as String).replace('{', '[').replace('}', ']').trim() }
+        List<String> lines = params.findAll { it instanceof Map && it.name }.collect { Map p ->
+            String label = clean(p.label)
+            "- ${clean(p.name)}${label ? ' (' + label + ')' : ''}: " + (p.fixed ?
+                    "${clean(p.value)} (fixed: use this value, ignore any other value in the message)" :
+                    (clean(p.value) ?: '(no default: take it from the message)'))
+        } as List<String>
+        if (!lines) return text
+        text + '\n\nINPUT PARAMETERS (use the value given in the message; otherwise the value below):\n' +
+                lines.join('\n')
     }
 
     /** A plain-language fix for the run errors agent builders hit. */
@@ -1588,7 +1614,8 @@ CRITICAL tool-use rules — follow exactly:
             String key = (cfg.apiKey as String) ?:
                     resolveTenantKey(cfg.ownerPartyId as String, provider)
             initConfig(configId, cfg.ownerPartyId as String, cfg.agentName as String,
-                    cfg.modelName as String, cfg.instruction as String, key, provider,
+                    cfg.modelName as String,
+                    withParameters(cfg.instruction as String, cfg.parameters as String), key, provider,
                     cfg.description as String)
         } catch (Exception e) {
             logger.warn("ensureAgentBuilt failed for ${configId}: ${e.message}")
@@ -1660,7 +1687,7 @@ CRITICAL tool-use rules — follow exactly:
         return LlmAgent.builder()
                 .name(sanitizeAgentName((cfg.agentName ?: memberConfigId) as String))
                 .description((cfg.description ?: cfg.agentName ?: 'GrowERP agent') as String)
-                .instruction(CONTEXT_PREAMBLE + ((cfg.instruction ?: '') as String))
+                .instruction(CONTEXT_PREAMBLE + withParameters(cfg.instruction as String, cfg.parameters as String))
                 .model(modelArg)
                 .tools(tools)
                 .build()

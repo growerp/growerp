@@ -143,7 +143,7 @@ limitations under the License.
                     <parameter name="estimatedEndDate" />
                     <parameter name="unInvoicedHours" />
                     <parameter name="rate" />
-                    <parameter name="employee" type="Map">
+                    <parameter name="originator" type="Map">
                         <parameter name="partyId" />
                         <parameter name="pseudoId" />
                         <parameter name="email" />
@@ -172,15 +172,15 @@ limitations under the License.
                             <parameter name="role" />
                             <parameter name="email" />
                         </parameter>
-                        <parameter name="timeEntries" type="List">
-                            <parameter name="timeEntry" type="Map">
-                                <parameter name="timeEntryId" />
-                                <parameter name="activityId" />
-                                <parameter name="partyId" />
-                                <parameter name="hours" />
-                                <parameter name="date" />
-                                <parameter name="comments" />
-                            </parameter>
+                    </parameter>
+                    <parameter name="timeEntries" type="List">
+                        <parameter name="timeEntry" type="Map">
+                            <parameter name="timeEntryId" />
+                            <parameter name="activityId" />
+                            <parameter name="partyId" />
+                            <parameter name="hours" />
+                            <parameter name="date" />
+                            <parameter name="comments" />
                         </parameter>
                     </parameter>
                 </parameter>
@@ -299,27 +299,37 @@ limitations under the License.
                         </if>
                         <!-- multiple activities-->
                         <else>
-                            <!-- by type -->
-                            <entity-find offset="start" limit="limit" list="entries"
-                                entity-name="growerp.workEffort.WorkEffortSubWorkEffortLinksAndParties">
+                            <!-- by type: page on the work effort itself, the view returns
+                                a row per party role/relationship of every participant -->
+                            <entity-find offset="start" limit="limit" list="workEfforts"
+                                entity-name="mantle.work.effort.WorkEffort">
                                 <econdition field-name="workEffortTypeEnumId" from="workEffortType" />
                                 <econdition field-name="ownerPartyId" />
-                                <!--econdition
-                                field-name="assPartyId" from="userPartyId"
-                                        ignore-if-empty="true" /-->
                                 <econdition field-name="statusId" operator="in"
                                     from="openStatusList" ignore-if-empty="true" />
                                 <econditions combine="or">
-                                    <econdition field-name="pseudoId" ignore-case="true"
+                                    <econdition field-name="workEffortPseudoId" ignore-case="true"
                                         operator="like" from="searchString" ignore-if-empty="true" />
                                     <econdition field-name="workEffortName" ignore-case="true"
                                         operator="like" from="searchString" ignore-if-empty="true" />
                                     <econdition field-name="description" ignore-case="true"
                                         operator="like" from="searchString" ignore-if-empty="true" />
                                 </econditions>
+                                <select-field field-name="workEffortId" />
                             </entity-find>
+                            <set field="entries" from="[]" />
+                            <iterate list="workEfforts" entry="workEffort">
+                                <entity-find list="weEntries" limit="1"
+                                    entity-name="growerp.workEffort.WorkEffortSubWorkEffortLinksAndParties">
+                                    <econdition field-name="workEffortId"
+                                        from="workEffort.workEffortId" />
+                                </entity-find>
+                                <script>if (weEntries) entries.add(weEntries[0])</script>
+                            </iterate>
                         </else>
                     </if>
+                    <!-- one activity per work effort -->
+                    <set field="entries" from="entries.unique(false) { it.workEffortId }" />
                     <if condition="isForDropDown">
                         <then>
                             <iterate entry="entry" list="entries">
@@ -342,6 +352,48 @@ limitations under the License.
                                 <service-call name="growerp.100.FinDocServices100.convert#StatusId"
                                     in-map="[docType: 'activity', statusId: entry.statusId]"
                                     out-map="context" />
+                                <set
+                                    field="originator"
+                                    from="[
+                            partyId: entry.orgPartyId,
+                            pseudoId: entry.orgPseudoId,
+                            role: entry.orgRole,
+                            firstName: entry.orgFirstName,
+                            lastName: entry.orgLastName,
+                            email: entry.orgEmail,
+                            company: [
+                                partyId: entry.orgCompanyPartyId,
+                                pseudoId: entry.orgCompanyPseudoId,
+                                name: entry.orgCompanyName,
+                            ]]" />
+                                <set
+                                    field="assignee"
+                                    from="[
+                            partyId: entry.assPartyId,
+                            pseudoId: entry.assPseudoId,
+                            role: entry.assRole,
+                            firstName: entry.assFirstName,
+                            lastName: entry.assLastName,
+                            email: entry.assEmail,
+                            company: [
+                                partyId: entry.assCompanyPartyId,
+                                pseudoId: entry.assCompanyPseudoId,
+                                name: entry.assCompanyName,
+                            ]]" />
+                                <set
+                                    field="thirdParty"
+                                    from="[
+                            partyId: entry.tpPartyId,
+                            pseudoId: entry.tpPseudoId,
+                            role: entry.tpRole,
+                            firstName: entry.tpFirstName,
+                            lastName: entry.tpLastName,
+                            email: entry.tpEmail,
+                            company: [
+                                partyId: entry.tpCompanyPartyId,
+                                pseudoId: entry.tpCompanyPseudoId,
+                                name: entry.tpCompanyName,
+                            ]]" />
                                 <entity-find entity-name="mantle.work.time.TimeEntry"
                                     list="timeEntries">
                                     <econdition field-name="workEffortId" from="entry.workEffortId" />
@@ -377,48 +429,6 @@ limitations under the License.
                                     <set
                                         field="unInvoicedHours" from="unInvoicedHours + te.hours" />
                                     <script>teOutList.add(teOut)</script>
-                                    <set
-                                        field="originator"
-                                        from="[
-                                partyId: entry.orgPartyId,
-                                pseudoId: entry.orgPseudoId,
-                                role: entry.orgRole,
-                                firstName: entry.orgFirstName,
-                                lastName: entry.orgLastName,
-                                email: entry.orgEmail,
-                                company: [
-                                    partyId: entry.orgCompanyPartyId,
-                                    pseudoId: entry.orgCompanyPseudoId,
-                                    name: entry.orgCompanyName,
-                                ]]" />
-                                    <set
-                                        field="assignee"
-                                        from="[
-                                partyId: entry.assPartyId,
-                                pseudoId: entry.assPseudoId,
-                                role: entry.assRole,
-                                firstName: entry.assFirstName,
-                                lastName: entry.assLastName,
-                                email: entry.assEmail,
-                                company: [
-                                    partyId: entry.assCompanyPartyId,
-                                    pseudoId: entry.assCompanyPseudoId,
-                                    name: entry.assCompanyName,
-                                ]]" />
-                                    <set
-                                        field="thirdParty"
-                                        from="[
-                                partyId: entry.tpPartyId,
-                                pseudoId: entry.tpPseudoId,
-                                role: entry.tpRole,
-                                firstName: entry.tpFirstName,
-                                lastName: entry.tpLastName,
-                                email: entry.tpEmail,
-                                company: [
-                                    partyId: entry.tpCompanyPartyId,
-                                    pseudoId: entry.tpCompanyPseudoId,
-                                    name: entry.tpCompanyName,
-                                ]]" />
                                 </iterate>
                                 <if condition="isForDropDown">
                                     <set field="workEffortOut"
@@ -601,6 +611,8 @@ limitations under the License.
                         activity.startDate.substring(0,18) : null,
                     actualCompletionDate: activity.endDate ?
                         activity.endDate.substring(0,18) : null,
+                    estimatedStartDate: activity.estimatedStartDate ?
+                        ec.l10n.parseTimestamp(activity.estimatedStartDate.substring(0,10), 'yyyy-MM-dd') : null,
                     routing: activity.routing,
                  ]"
                 out-map="context" />
@@ -669,6 +681,12 @@ limitations under the License.
                 <!-- client hourly rate used when invoicing time entries -->
                 <parameter name="rate" />
                 <parameter name="flowElementId" />
+                <parameter name="assignee" type="Map">
+                    <parameter name="partyId" />
+                </parameter>
+                <parameter name="thirdParty" type="Map">
+                    <parameter name="partyId" />
+                </parameter>
             </parameter>
         </in-parameters>
         <out-parameters>
@@ -734,9 +752,10 @@ limitations under the License.
                 in-map="[activityId: activity.activityId, activityType: activity.activityType]"
                 out-map="oldActivity" />
             <!-- owner checked here -->
-            <if condition="!oldActivity">
+            <if condition="!oldActivity?.activities">
                 <return error="true" message="Activity ${activity.activityId} not found" />
             </if>
+            <set field="old" from="oldActivity.activities[0]" />
             <set field="typeConvert"
                 from="[event: 'WetEvent', todo: 'WetTask']"
                 type="NewMap" />
@@ -754,9 +773,11 @@ limitations under the License.
                 in-map="[docType: 'activity', statusId: activity.statusId]" out-map="context" />
             <if
                 condition="
-                    activity.activityName &amp;&amp; oldActivity.activityName != activity.activityName ||
-                    activity.description &amp;&amp; oldActivity.description != activity.description ||
-                    activity.statusId &amp;&amp; oldActivity.statusId != activity.statusId">
+                    activity.activityName &amp;&amp; old.activityName != activity.activityName ||
+                    activity.description &amp;&amp; old.description != activity.description ||
+                    activity.statusId &amp;&amp; old.statusId != activity.statusId ||
+                    activity.estimatedStartDate?.take(10) != old.estimatedStartDate ||
+                    activity.estimatedEndDate?.take(10) != old.estimatedEndDate">
                 <set field="statusId" from="convertedStatusId" />
                 <service-call name="update#mantle.work.effort.WorkEffort"
                     in-map="[
@@ -767,18 +788,20 @@ limitations under the License.
                         workEffortName: activity.activityName,
                         statusId: statusId,
                         description: activity.description,
-                        actualStartDate: activity.estimatedStartDate ?
-                            activity.estimatedStartDate.substring(0,18) : null,
-                        actualCompletionDate: activity.estimatedEndDate ?
-                            activity.estimatedEndDate.substring(0,18) : null
+                        estimatedStartDate: activity.estimatedStartDate ?
+                            ec.l10n.parseTimestamp(activity.estimatedStartDate.substring(0,10), 'yyyy-MM-dd') : null,
+                        estimatedCompletionDate: activity.estimatedEndDate ?
+                            ec.l10n.parseTimestamp(activity.estimatedEndDate.substring(0,10), 'yyyy-MM-dd') : null
                     ]" />
             </if>
             <!-- assignee-->
             <if
-                condition="activity.assignee != activity.assignee">
+                condition="activity.assignee != null &amp;&amp;
+                    (activity.assignee.partyId ?: null) != (old.assignee?.partyId ?: null)">
                 <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="assignees">
                     <econdition field-name="workEffortId" from="activity.activityId" />
                     <econdition field-name="roleTypeId" value="Assignee" />
+                    <econdition field-name="thruDate" operator="is-null" />
                 </entity-find>
                 <if condition="assignees">
                     <set field="assignees[0].thruDate" from="ec.user.nowTimestamp" />
@@ -796,10 +819,12 @@ limitations under the License.
             </if>
             <!-- thirdparty-->
             <if
-                condition="activity.thirdParty != activity.thirdParty">
+                condition="activity.thirdParty != null &amp;&amp;
+                    (activity.thirdParty.partyId ?: null) != (old.thirdParty?.partyId ?: null)">
                 <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="thirdParties">
                     <econdition field-name="workEffortId" from="activity.activityId" />
                     <econdition field-name="roleTypeId" value="ThirdParty" />
+                    <econdition field-name="thruDate" operator="is-null" />
                 </entity-find>
                 <if condition="thirdParties">
                     <set field="thirdParties[0].thruDate" from="ec.user.nowTimestamp" />

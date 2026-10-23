@@ -161,6 +161,7 @@ mixin AdkApi {
     @Field() bool? loopEnabled,
     @Field() String? loopChatRoomId,
     @Field() String? loopReportEmail,
+    @Field() String? parameters,
   });
 
   @PATCH("rest/s1/growerp/100/AdkAgentConfig")
@@ -190,6 +191,7 @@ mixin AdkApi {
     @Field() bool? loopEnabled,
     @Field() String? loopChatRoomId,
     @Field() String? loopReportEmail,
+    @Field() String? parameters,
     @Field() bool? catalog,
     @Field() bool? catalogPublished,
     @Field() String? catalogCategory,

@@ -20,7 +20,8 @@ general agent screens.
 
 1. Searches the web for independent ERP consultants and small implementation firms (Odoo,
    ERPNext, Dolibarr, SAP Business One, Business Central, Zoho, iDempiere and similar) in the
-   country of the run. It also considers bookkeepers and digital agencies that set up
+   country of the run: the country named in the prompt, else the agent's **country** input
+   parameter (see §4). It also considers bookkeepers and digital agencies that set up
    business systems.
 2. Scores each candidate 1–10 on SME focus, proven implementations, independence, CRM and
    e-commerce experience, local presence and a public business contact. It keeps 6 or more.
@@ -59,9 +60,10 @@ Without your own key the run stops with *Free monthly LLM allowance used*.
 1. Open **Agent Control → AI Agents** and tap the **Agent catalog** icon.
 2. Under **Marketing**, check **Partner Scout** and tap **Add selected**. Companies that get
    the marketing team with their demo data already have it, inactive.
-3. Open the new agent. Its instruction and scheduled-run prompt contain fill-ins in double
-   square brackets, for example `[[YOUR COMPANY: name, country and a one-line description]]`
-   and `[[COUNTRY]]`. Replace each one, brackets included, with your own text.
+3. Open the new agent. Its instruction contains fill-ins in double square brackets, for
+   example `[[YOUR COMPANY: name, country and a one-line description]]`, and the default value
+   of its **country** input parameter is `[[COUNTRY]]`. Replace each one, brackets included,
+   with your own text.
 4. Save. The agent dialog shows which fill-ins are left.
 
 While any `[[...]]` fill-in is left, the agent is saved but **inactive**: it does not answer in
@@ -71,9 +73,17 @@ run.
 
 ## 4. Running it
 
+**The country.** The agent searches one country per run. It takes it from the prompt when you
+name one, for example *Find up to 5 new partners in Malaysia.* Otherwise it uses its **country**
+input parameter: open the agent and change the **Default value** under **Input parameters**
+(GrowERP's own agent comes with *Vietnam*). Scheduled runs always use that value. To keep the
+agent to that one country, also when someone asks for another in chat, tick **Fixed** next to
+it.
+
 The agent is not scheduled by default. To run it **once**, tap **Run** in the agent dialog,
-type the country and number as the prompt (for example *Find up to 5 new partners in Vietnam.*),
-turn **Simulate writes** off and tap **Run**. The summary table appears in the dialog; the
+type the number and, if you want another country than the parameter, the country as the
+prompt (for example *Find up to 5 new partners in Vietnam.*), turn **Simulate writes** off and
+tap **Run**. The summary table appears in the dialog; the
 leads, notes and messages are stored. You can also ask it in **AI Chat**. See
 [Running an Agent](Agent_Control_Center_User_Guide.md#running-an-agent).
 
@@ -82,12 +92,12 @@ To run it on a schedule:
 1. Tap the **Edit** icon next to the agent.
 2. Tick **Enable scheduled runs**, tap **Change** next to the schedule and pick, for example,
    *Daily*, only **Mon**, at 08:00 in your time. The popup shows the next runs.
-3. Change **Prompt for each scheduled run** to the country and number you want, for example
-   *Find up to 5 new ERP implementation freelancer partners in Malaysia.*
+3. Set the country in the **country** input parameter, and the number in **Prompt for each
+   scheduled run**, for example *Find up to 5 new ERP implementation freelancer partners.*
 4. Optional: enter a **Chat Room ID for delivery** to get the agent's summary table in chat.
 5. Save. The run appears under **Agent Control → Jobs** with its last status.
 
-One country per run works best. To cover several countries, change the scheduled-run prompt each
+One country per run works best. To cover several countries, change the country parameter each
 week, or run it once per extra country as described above.
 
 Before scheduling, tap **Run** in the agent dialog and run it once with **Simulate writes**
@@ -111,8 +121,9 @@ without anything being stored. See
 4. **Follow the conversation.** Every sent message appears in the lead's **Communications**:
    emails automatically, LinkedIn messages when you mark them sent. Each draft ends with
    *Pick a time for a 20-minute call:* and your booking link (the line is left out when no
-   booking page is set). A Meet call the candidate books there shows up as a *Video call*,
-   with the Gemini meeting notes added after the call.
+   booking page is set: starting the campaign then shows a warning, and so does the LinkedIn
+   send queue for each message that loses the line). A Meet call the candidate books there
+   shows up as a *Video call*, with the Gemini meeting notes added after the call.
 5. **When they answer**, set the message to *Responded*. GrowERP then creates an opportunity
    for that same lead in **CRM → Opportunities**.
 
@@ -127,6 +138,7 @@ to be found again.
 | Max AI calls per run | 40 | Every search, check and save is a call. The default of 10 is not enough for one candidate. |
 | Tool mode | scoped | It may only call the seven services in the allow list. |
 | Allowed services | get#Companies, get#User, list#OutreachCampaigns, create#OutreachCampaign, create#User, create#CommunicationEvent, create#OutreachMessage | Check for duplicates, find or create the campaign, create the lead, its research note and its pending message. It cannot send, start a campaign or change a status. |
+| Input parameter country | Vietnam (GrowERP), `[[COUNTRY]]` (catalog) | The country searched when the prompt names none, so also on scheduled runs. Tick **Fixed** to never search another country. |
 | Write policy | allow | These writes need no approval, because nothing leaves your system until you start the campaign or send by hand. |
 
 The agent works as your company's **AI Agent** user: everything it creates belongs to your
@@ -145,16 +157,17 @@ company and shows up in your CRM like any other record.
 
 ## 8. Changing what it looks for
 
-Open the agent and edit the **Instruction**. The sections are in capitals (METHOD, GROWERP
-ADVANTAGES, TARGETS, SCORE, PER CANDIDATE, RULES), so you can change, for example, the
-target ERP products or the scoring without touching the rest.
+Open the agent and edit the **Instruction**. It is written in markdown and opens formatted
+(**Visual**); **Source** shows the markdown itself. Each part has its own heading (Method the
+partner sells, Partner advantages, Targets, Score, Once per run, Per candidate, The draft,
+Rules), so you can change, for example, the target ERP products or the scoring without touching
+the rest. Service names and values the agent must copy exactly are in code format.
 
-Three rules for the instruction text:
+Two rules for the instruction text:
 
 * No curly braces `{ }`: the agent reads `{word}` as a variable and the run fails with
   *Context variable not found*. Use `[word]`.
 * No `<` or `>`: saving and uploading reject them.
-* At most about 4,000 characters.
 
 ## 9. Troubleshooting
 

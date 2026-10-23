@@ -60,6 +60,7 @@
                     loopEnabled       : cfg.loopEnabled == 'Y',
                     loopChatRoomId    : cfg.loopChatRoomId,
                     loopReportEmail   : cfg.loopReportEmail,
+                    parameters        : cfg.parameters,
                     catalogNominated  : cfg.catalogNominated == 'Y',
                     catalogPublished  : cfg.catalogPublished != 'N',
                     catalogCategory   : cfg.catalogCategory,
@@ -96,6 +97,8 @@
             <parameter name="loopEnabled" type="Boolean"/>
             <parameter name="loopChatRoomId"/>
             <parameter name="loopReportEmail"/>
+            <!-- JSON list of input parameters [name, label, value, fixed] -->
+            <parameter name="parameters"/>
         </in-parameters>
         <out-parameters>
             <parameter name="adkAgentConfig" type="Map"/>
@@ -107,7 +110,8 @@
                 in-map="[instruction: instruction, schedulePrompt: schedulePrompt, llmProvider: llmProvider,
                          toolMode: toolMode, serviceAllowlist: serviceAllowlist, writePolicy: writePolicy,
                          webSearch: webSearch, scheduleEnabled: scheduleEnabled,
-                         scheduleExpression: scheduleExpression, maxLlmCalls: maxLlmCalls]"/>
+                         scheduleExpression: scheduleExpression, maxLlmCalls: maxLlmCalls,
+                         parameters: parameters]"/>
             <set field="checkErrors" from="chk.issues.findAll { it.level == 'error' }"/>
             <if condition="checkErrors"><return error="true" message="${checkErrors*.message.join(' ')}"/></if>
             <service-call name="AdkServices.update#AgentConfig" out-map="context"
@@ -125,7 +129,7 @@
                           agentRole: agentRole, orchestrationType: orchestrationType,
                           loopMaxIterations: loopMaxIterations, maxLlmCalls: maxLlmCalls, teamName: teamName,
                           loopEnabled: loopEnabled == null ? null : (loopEnabled ? 'Y' : 'N'), loopChatRoomId: loopChatRoomId,
-                          loopReportEmail: loopReportEmail]"/>
+                          loopReportEmail: loopReportEmail, parameters: parameters]"/>
             <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
                 auto-field-map="[adkAgentConfigId: adkAgentConfigId]"/>
             <set field="adkAgentConfig" from="[
@@ -155,6 +159,7 @@
                 loopEnabled       : cfg.loopEnabled == 'Y',
                 loopChatRoomId    : cfg.loopChatRoomId,
                 loopReportEmail   : cfg.loopReportEmail,
+                parameters        : cfg.parameters,
             ]"/>
         </actions>
     </service>
@@ -187,6 +192,8 @@
             <parameter name="loopEnabled" type="Boolean"/>
             <parameter name="loopChatRoomId"/>
             <parameter name="loopReportEmail"/>
+            <!-- JSON list of input parameters [name, label, value, fixed] -->
+            <parameter name="parameters"/>
             <parameter name="catalog" type="Boolean" default="false"/>
             <parameter name="catalogPublished" type="Boolean"/>
             <parameter name="catalogCategory"/>
@@ -213,7 +220,8 @@
                 in-map="[adkAgentConfigId: adkAgentConfigId, instruction: instruction, schedulePrompt: schedulePrompt, llmProvider: llmProvider,
                          toolMode: toolMode, serviceAllowlist: serviceAllowlist, writePolicy: writePolicy,
                          webSearch: webSearch, scheduleEnabled: scheduleEnabled,
-                         scheduleExpression: scheduleExpression, maxLlmCalls: maxLlmCalls]"/>
+                         scheduleExpression: scheduleExpression, maxLlmCalls: maxLlmCalls,
+                         parameters: parameters]"/>
             <set field="checkErrors" from="chk.issues.findAll { it.level == 'error' }"/>
             <if condition="checkErrors"><return error="true" message="${checkErrors*.message.join(' ')}"/></if>
             <service-call name="AdkServices.update#AgentConfig" out-map="context"
@@ -235,7 +243,7 @@
                           agentRole: agentRole, orchestrationType: orchestrationType,
                           loopMaxIterations: loopMaxIterations, maxLlmCalls: maxLlmCalls, teamName: teamName,
                           loopEnabled: loopEnabled == null ? null : (loopEnabled ? 'Y' : 'N'), loopChatRoomId: loopChatRoomId,
-                          loopReportEmail: loopReportEmail,
+                          loopReportEmail: loopReportEmail, parameters: parameters,
                           catalogPublished: (catalog &amp;&amp; catalogPublished != null) ? (catalogPublished ? 'Y' : 'N') : null,
                           catalogCategory: catalog ? catalogCategory : null]"/>
             <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
@@ -267,6 +275,7 @@
                 loopEnabled       : cfg.loopEnabled == 'Y',
                 loopChatRoomId    : cfg.loopChatRoomId,
                 loopReportEmail   : cfg.loopReportEmail,
+                parameters        : cfg.parameters,
                 catalogPublished  : cfg.catalogPublished != 'N',
                 catalogCategory   : cfg.catalogCategory,
             ]"/>
@@ -400,6 +409,7 @@
                     webSearch: src.webSearch,
                     agentRole: src.agentRole, orchestrationType: src.orchestrationType,
                     loopMaxIterations: src.loopMaxIterations, maxLlmCalls: src.maxLlmCalls, teamName: src.teamName,
+                    parameters: src.parameters,
                     catalogPublished: already ? null : 'N']"/>
             <!-- explicitly NOT copied: apiKey, agentPartyId, scheduleChatRoomId,
                  approvalChatRoomId, catalogNominated — all tenant-specific or must
@@ -1543,6 +1553,7 @@
             <parameter name="scheduleEnabled" type="Boolean"/>
             <parameter name="scheduleExpression"/>
             <parameter name="maxLlmCalls" type="Integer"/>
+            <parameter name="parameters"/>
         </in-parameters>
         <out-parameters>
             <!-- [level: error|warning, field, message] -->
@@ -1565,6 +1576,7 @@
                 boolean scheduled = scheduleEnabled != null ? scheduleEnabled : cfg?.scheduleEnabled == 'Y'
                 String cron = v('scheduleExpression', scheduleExpression) ?: ''
                 Integer maxCalls = v('maxLlmCalls', maxLlmCalls) as Integer
+                String paramsJson = v('parameters', parameters) ?: ''
                 issues = []
 
                 // ADK reads {name} as a session-state variable (same rule as its InstructionUtils):
@@ -1585,13 +1597,32 @@
                     }
                 }
                 // [[...]] = a catalog template's fill-in; update#AgentConfig keeps the agent inactive
-                [instruction: instr, schedulePrompt: prompt].each { field, text ->
+                [instruction: instr, schedulePrompt: prompt, parameters: paramsJson].each { field, text ->
                     def open = (text =~ /\[\[([^\[\]]+)\]\]/).collect { it[0] as String }.unique()
                     if (open)
                         issues << [level: 'warning', field: field, message: "Fill in ${open.join(', ')}: the agent stays inactive until every [[...]] placeholder is replaced."]
                 }
                 if (!instr.trim() && !prompt.trim())
                     issues << [level: 'error', field: 'instruction', message: 'Set an instruction or a scheduled-run prompt.']
+                // input parameters: JSON list of [name, label, value, fixed], see AdkManager.withParameters
+                if (paramsJson.trim()) {
+                    def plist = null
+                    try { plist = new groovy.json.JsonSlurper().parseText(paramsJson) } catch (Exception e) { }
+                    if (!(plist instanceof List) || plist.any { !(it instanceof Map) }) {
+                        issues << [level: 'error', field: 'parameters', message: 'Input parameters are not a valid list.']
+                    } else {
+                        def names = plist.collect { (it.name ?: '') as String }
+                        if (names.any { !(it ==~ /[A-Za-z_][A-Za-z0-9_]*/) })
+                            issues << [level: 'error', field: 'parameters', message: 'A parameter name must be one word of letters, digits or _.']
+                        if (names.size() != names.unique(false).size())
+                            issues << [level: 'error', field: 'parameters', message: 'Parameter names must be unique.']
+                        plist.findAll { it.fixed && !it.value }.each {
+                            issues << [level: 'error', field: 'parameters', message: "Parameter ${it.name} is fixed but has no value."]
+                        }
+                        if (plist.any { "${it.label ?: ''}${it.value ?: ''}" =~ /[<>]/ })
+                            issues << [level: 'error', field: 'parameters', message: 'Parameter labels and values may not contain < or >.']
+                    }
+                }
                 if (mode == 'scoped') {
                     def globs = allow.split(/[,\s]+/).findAll { it }
                     if (!globs) {

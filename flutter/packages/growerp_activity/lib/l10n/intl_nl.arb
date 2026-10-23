@@ -71,5 +71,7 @@
   "activity_comments": "Opmerkingen",
   "activity_noComments": "Nog geen opmerkingen",
   "activity_addComment": "Opmerking toevoegen",
-  "activity_aiAgent": "AI-agent"
+  "activity_aiAgent": "AI-agent",
+  "activity_deleteConfirm": "{activityType} {name} verwijderen?",
+  "activity_deleteConfirmText": "Dit kan niet ongedaan worden gemaakt!"
 }

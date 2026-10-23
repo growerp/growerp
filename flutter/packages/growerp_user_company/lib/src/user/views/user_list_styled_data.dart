@@ -19,6 +19,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../common/common.dart';
+import '../../communication/communication.dart';
 import '../user.dart';
 import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
@@ -37,7 +38,7 @@ List<StyledColumn> getUserListColumns(BuildContext context, {Role? role}) {
         StyledColumn(header: localizations.company, flex: 3),
       if (role == Role.lead)
         StyledColumn(header: localizations.leadStatus, flex: 2),
-      const StyledColumn(header: '', flex: 1), // Actions
+      StyledColumn(header: '', flex: role == Role.lead ? 2 : 1), // Actions
     ];
   }
 
@@ -52,7 +53,7 @@ List<StyledColumn> getUserListColumns(BuildContext context, {Role? role}) {
       StyledColumn(header: localizations.company, flex: 2),
     if (role == Role.lead)
       StyledColumn(header: localizations.leadStatus, flex: 2),
-    const StyledColumn(header: '', flex: 1), // Actions
+    StyledColumn(header: '', flex: role == Role.lead ? 2 : 1), // Actions
   ];
 }
 
@@ -196,18 +197,45 @@ List<Widget> getUserListRow({
     );
   }
 
-  // Delete action
-  cells.add(
-    IconButton(
-      key: Key("delete$index"),
-      icon: const Icon(Icons.delete_forever),
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(),
-      onPressed: () {
-        bloc.add(UserDelete(user.copyWith(image: null)));
-      },
-    ),
+  // Delete action, plus communications on the lead list
+  final deleteButton = IconButton(
+    key: Key("delete$index"),
+    icon: const Icon(Icons.delete_forever),
+    padding: EdgeInsets.zero,
+    constraints: const BoxConstraints(),
+    onPressed: () {
+      bloc.add(UserDelete(user.copyWith(image: null)));
+    },
   );
+  if (role == Role.lead && user.pseudoId != null) {
+    final localizations = UserCompanyLocalizations.of(context)!;
+    cells.add(
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            key: Key("communications$index"),
+            icon: const Icon(Icons.forum_outlined),
+            tooltip: localizations.communications,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            onPressed: () => showCommunicationListDialog(
+              context,
+              userPseudoId: user.pseudoId,
+              partyPseudoId: user.pseudoId!,
+              title:
+                  '${localizations.communications} '
+                  '${user.firstName ?? ''} ${user.lastName ?? ''}',
+            ),
+          ),
+          const SizedBox(width: 8),
+          deleteButton,
+        ],
+      ),
+    );
+  } else {
+    cells.add(deleteButton);
+  }
 
   return cells;
 }

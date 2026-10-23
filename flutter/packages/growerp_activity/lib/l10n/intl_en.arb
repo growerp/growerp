@@ -354,5 +354,23 @@
   "activity_aiAgent": "AI agent",
   "@activity_aiAgent": {
     "description": "Author label of a comment written by the AI agent (task loop)"
+  },
+  "activity_deleteConfirm": "Delete {activityType} {name}?",
+  "@activity_deleteConfirm": {
+    "description": "Title of the confirmation dialog before deleting an activity",
+    "placeholders": {
+      "activityType": {
+        "type": "String",
+        "description": "Type of activity"
+      },
+      "name": {
+        "type": "String",
+        "description": "Name of the activity"
+      }
+    }
+  },
+  "activity_deleteConfirmText": "This cannot be undone!",
+  "@activity_deleteConfirmText": {
+    "description": "Text of the confirmation dialog before deleting an activity"
   }
 }

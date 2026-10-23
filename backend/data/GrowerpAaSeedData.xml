@@ -19,6 +19,11 @@ limitations under the License.
     <!-- communications log: a video call, e.g. a Google Meet booked through the booking page -->
     <mantle.party.communication.CommunicationEventType communicationEventTypeId="VideoCall"
         description="Video call" />
+    <!-- communications log: a lead's website form submission / website chat start -->
+    <mantle.party.communication.CommunicationEventType communicationEventTypeId="WebsiteForm"
+        description="Website form" />
+    <mantle.party.communication.CommunicationEventType communicationEventTypeId="WebsiteChat"
+        description="Website chat" />
 
     <moqui.basic.Enumeration enumCode="product_store_id_from_hostname"
         description="Hostname of the html website" enumId="PsstHostname"

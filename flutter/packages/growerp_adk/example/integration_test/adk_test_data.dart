@@ -37,6 +37,9 @@ List<AdkAgentConfig> agents = [
     toolMode: 'scoped',
     serviceAllowlist: 'growerp.*#get*, mantle.order.*',
     writePolicy: 'approve',
+    parameters: [
+      AdkAgentParameter(name: 'country', label: 'Country', value: 'Vietnam'),
+    ],
   ),
 ];
 
@@ -59,6 +62,10 @@ List<AdkAgentConfig> agentsUpdate = [
     toolMode: 'scoped',
     serviceAllowlist: 'growerp.*#get*',
     writePolicy: 'approve',
+    parameters: [
+      AdkAgentParameter(
+          name: 'country', label: 'Country', value: 'Malaysia', fixed: true),
+    ],
   ),
 ];
 

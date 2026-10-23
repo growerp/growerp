@@ -68,6 +68,7 @@ class AdkConfigService {
         loopEnabled: cfg.loopEnabled,
         loopChatRoomId: cfg.loopChatRoomId,
         loopReportEmail: cfg.loopReportEmail,
+        parameters: AdkAgentParameter.encode(cfg.parameters),
       );
     }
     return _client.updateAdkAgentConfig(
@@ -96,6 +97,7 @@ class AdkConfigService {
       loopEnabled: catalog ? null : cfg.loopEnabled,
       loopChatRoomId: catalog ? null : cfg.loopChatRoomId,
       loopReportEmail: catalog ? null : cfg.loopReportEmail,
+      parameters: AdkAgentParameter.encode(cfg.parameters),
       catalog: catalog ? true : null,
       catalogPublished: catalog ? cfg.catalogPublished : null,
       catalogCategory: catalog ? cfg.catalogCategory : null,

@@ -48,14 +48,18 @@ List<Widget> getActivityListRow({
   required ActivityBloc bloc,
 }) {
   bool isPhone = isAPhone(context);
+  // no assignee: show the originator
+  final assignee = activity.assignee?.partyId?.isNotEmpty == true
+      ? activity.assignee
+      : activity.originator;
   return [
     Text(activity.pseudoId, key: Key('id$index')),
     Text(activity.activityName, key: Key('name$index')),
     if (!isPhone && activity.activityType == ActivityType.todo)
       Text(
         [
-          activity.originator?.firstName,
-          activity.originator?.lastName,
+          assignee?.firstName,
+          assignee?.lastName,
         ].where((s) => s != null && s.isNotEmpty).join(' '),
         key: Key('assignee$index'),
       ),
@@ -83,10 +87,21 @@ List<Widget> getActivityListRow({
       key: Key('delete$index'),
       padding: EdgeInsets.zero,
       icon: const Icon(Icons.delete_forever),
-      onPressed: () {
-        bloc.add(
-          ActivityUpdate(activity.copyWith(statusId: ActivityStatus.closed)),
+      onPressed: () async {
+        final localizations = ActivityLocalizations.of(context)!;
+        bool? result = await confirmDialog(
+          context,
+          localizations.activity_deleteConfirm(
+            activity.activityType.toString(),
+            activity.activityName,
+          ),
+          localizations.activity_deleteConfirmText,
         );
+        if (result == true) {
+          bloc.add(
+            ActivityUpdate(activity.copyWith(statusId: ActivityStatus.closed)),
+          );
+        }
       },
     ),
   ];

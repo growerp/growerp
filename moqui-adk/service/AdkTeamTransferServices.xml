@@ -66,6 +66,7 @@
                     orchestrationType : cfg.orchestrationType,
                     loopMaxIterations : cfg.loopMaxIterations,
                     maxLlmCalls       : cfg.maxLlmCalls,
+                    parameters        : cfg.parameters,
                 ])</script>
             </iterate>
             <entity-find entity-name="moqui.adk.AdkAgentTeamMember" list="tmList">
@@ -133,7 +134,8 @@
                              llmProvider: a.llmProvider, toolMode: a.toolMode,
                              serviceAllowlist: a.serviceAllowlist, writePolicy: a.writePolicy,
                              webSearch: a.webSearch ?: false, scheduleEnabled: a.scheduleEnabled ?: false,
-                             scheduleExpression: a.scheduleExpression, maxLlmCalls: a.maxLlmCalls]"/>
+                             scheduleExpression: a.scheduleExpression, maxLlmCalls: a.maxLlmCalls,
+                             parameters: a.parameters]"/>
                 <iterate list="chk.issues.findAll { it.level == 'error' }" entry="issue">
                     <script>uploadErrors.add("${a.agentName}: ${issue.message}".toString())</script>
                 </iterate>
@@ -159,6 +161,7 @@
                              webSearch: a.webSearch ? 'Y' : 'N',
                              agentRole: a.agentRole, orchestrationType: a.orchestrationType,
                              loopMaxIterations: a.loopMaxIterations, maxLlmCalls: a.maxLlmCalls, teamName: importedTeamName,
+                             parameters: a.parameters,
                              catalogPublished: toCatalog ? 'N' : null,
                              catalogCategory: toCatalog ? catalogCategory : null]"/>
                 <script>idMap[a.adkAgentConfigId as String] = cfgOut.adkAgentConfigId</script>
@@ -178,7 +181,8 @@
                                  writePolicy: a.writePolicy, websiteChat: a.websiteChat ? 'Y' : 'N',
                                  webSearch: a.webSearch ? 'Y' : 'N',
                                  agentRole: a.agentRole, orchestrationType: a.orchestrationType,
-                                 loopMaxIterations: a.loopMaxIterations, maxLlmCalls: a.maxLlmCalls, teamName: importedTeamName]"/>
+                                 loopMaxIterations: a.loopMaxIterations, maxLlmCalls: a.maxLlmCalls, teamName: importedTeamName,
+                                 parameters: a.parameters]"/>
                 </if>
             </iterate>
             <!-- 2. Recreate team membership with remapped coordinator/member ids -->

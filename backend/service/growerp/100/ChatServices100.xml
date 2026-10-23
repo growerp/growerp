@@ -865,6 +865,17 @@ limitations under the License.
             <!-- store the question as the first message from the visitor -->
             <service-call name="create#growerp.general.ChatMessage" out-map="context"
                 in-map="[chatRoomId: chatRoomId, fromUserId: visitorUserId, content: question]" />
+            <!-- log the chat start in the lead's communications list -->
+            <service-call name="create#mantle.party.communication.CommunicationEvent"
+                in-map="[ownerPartyId: ownerPartyId,
+                    communicationEventTypeId: 'WebsiteChat',
+                    statusId: 'CeReceived',
+                    fromPartyId: visitorPartyId,
+                    toPartyId: store.organizationPartyId,
+                    entryDate: ec.user.nowTimestamp,
+                    subject: 'Website chat',
+                    body: question,
+                    contentType: 'text/plain']" />
             <!-- push over the chat WebSocket so the admin app's unread indicator lights up -->
             <service-call name="growerp.100.ChatServices100.push#WebsiteChatWs"
                 in-map="[chatRoomId: chatRoomId, fromUserId: visitorUserId,

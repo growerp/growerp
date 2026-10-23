@@ -32,6 +32,8 @@ test {
     dependsOn cleanTest
     include '**/CurrencyAndSubscriptionTests.class'
     include '**/WebsiteChatServicesTests.class'
+    include '**/WebsiteFormServicesTests.class'
+    include '**/CommunicationServicesTests.class'
     include '**/SubstackServicesTests.class'
 
     systemProperty 'moqui.runtime', moquiDir.absolutePath + '/runtime'

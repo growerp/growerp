@@ -1191,6 +1191,14 @@
   "@commTypeVideoCall": {
     "description": "Communication type: a video call, e.g. a booked Google Meet"
   },
+  "commTypeWebsiteForm": "Website form",
+  "@commTypeWebsiteForm": {
+    "description": "Communication type: a lead-capture form submitted on the website"
+  },
+  "commTypeWebsiteChat": "Website chat",
+  "@commTypeWebsiteChat": {
+    "description": "Communication type: a chat started by a visitor on the website"
+  },
   "commTypeLetter": "Letter",
   "@commTypeLetter": {
     "description": "Communications log: Letter"

@@ -86,10 +86,12 @@ A 5–7 bullet daily digest: messages sent by channel, reply rate, pipeline by s
 weighted value, new and advancing opportunities, and anything stalled. Read-only.
 
 ### Partner Scout
-Searches the web for implementation partners in one country you name, scores them, adds
-the good ones as leads with a research note and writes a pending outreach draft for each.
-It never sends anything. Its instruction has `[[...]]` fill-ins for your company, product,
-pitch and targets: the agent stays inactive until every one is replaced. Not scheduled by
+Searches the web for implementation partners in one country, scores them, adds the good
+ones as leads with a research note and writes a pending outreach draft for each. The country
+is the one named in the prompt, else its **country** input parameter. It never sends
+anything. Its instruction has `[[...]]` fill-ins for your company, product, pitch and
+targets, and its country parameter one for the country: the agent stays inactive until every
+one is replaced. Not scheduled by
 default. Details: [Partner Scout Agent User Guide](Partner_Scout_Agent_User_Guide.md).
 
 * Default schedule: daily 09:00 (`0 0 9 * * ?`) — **the only one enabled after install**

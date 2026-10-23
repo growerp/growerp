@@ -20,22 +20,42 @@ import 'package:growerp_models/growerp_models.dart';
 class CommunicationTest {
   /// Open the communications of the user with [pseudoId] from a user list,
   /// then add, check, update and delete one, ending back on the user list.
+  /// With [fromList] the communications are opened with the row icon of the
+  /// (lead) list instead of the button in the user dialog.
   static Future<void> addUpdateDeleteCommunication(
     WidgetTester tester,
     String pseudoId,
-    List<CommunicationEvent> communications,
-  ) async {
-    await CommonTest.doNewSearch(tester, searchString: pseudoId);
-    await CommonTest.dragUntil(
-      tester,
-      key: 'communications',
-      listViewName: 'userDialogListView',
-    );
-    await CommonTest.tapByKey(
-      tester,
-      'communications',
-      seconds: CommonTest.waitTime,
-    );
+    List<CommunicationEvent> communications, {
+    bool fromList = false,
+  }) async {
+    if (fromList) {
+      await CommonTest.enterText(tester, 'searchField', pseudoId);
+      await tester.pump(const Duration(seconds: CommonTest.waitTime));
+      await tester.pumpAndSettle();
+      // the search may return several rows: use the one with this id
+      int index = 0;
+      while (tester.any(find.byKey(Key('id$index'))) &&
+          tester.widget<Text>(find.byKey(Key('id$index'))).data != pseudoId) {
+        index++;
+      }
+      await CommonTest.tapByKey(
+        tester,
+        'communications$index',
+        seconds: CommonTest.waitTime,
+      );
+    } else {
+      await CommonTest.doNewSearch(tester, searchString: pseudoId);
+      await CommonTest.dragUntil(
+        tester,
+        key: 'communications',
+        listViewName: 'userDialogListView',
+      );
+      await CommonTest.tapByKey(
+        tester,
+        'communications',
+        seconds: CommonTest.waitTime,
+      );
+    }
     expect(find.byKey(const Key('CommunicationListDialog')), findsOneWidget);
     expect(find.byKey(const Key('empty')), findsOneWidget);
 
@@ -63,7 +83,7 @@ class CommunicationTest {
 
     // close the communications list and the user dialog
     await CommonTest.tapByKey(tester, 'cancel');
-    await CommonTest.tapByKey(tester, 'cancel');
+    if (!fromList) await CommonTest.tapByKey(tester, 'cancel');
   }
 
   static Future<void> enterCommunicationData(
