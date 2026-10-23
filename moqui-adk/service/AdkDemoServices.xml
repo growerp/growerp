@@ -71,6 +71,7 @@
                              schedulePrompt: tmpl.schedulePrompt,
                              toolMode: tmpl.toolMode, serviceAllowlist: tmpl.serviceAllowlist,
                              writePolicy: tmpl.writePolicy, websiteChat: tmpl.websiteChat,
+                             webSearch: tmpl.webSearch, maxLlmCalls: tmpl.maxLlmCalls,
                              agentRole: tmpl.agentRole, orchestrationType: tmpl.orchestrationType,
                              loopMaxIterations: tmpl.loopMaxIterations, teamName: tmpl.teamName,
                              parameters: tmpl.parameters]"/>
@@ -92,6 +93,7 @@
                                  scheduleChatRoomId: cfgOut.adkAgentConfigId,
                                  toolMode: tmpl.toolMode, serviceAllowlist: tmpl.serviceAllowlist,
                                  writePolicy: tmpl.writePolicy, websiteChat: tmpl.websiteChat,
+                                 webSearch: tmpl.webSearch, maxLlmCalls: tmpl.maxLlmCalls,
                                  agentRole: tmpl.agentRole, orchestrationType: tmpl.orchestrationType,
                                  loopMaxIterations: tmpl.loopMaxIterations, teamName: tmpl.teamName,
                                  parameters: tmpl.parameters]"/>
