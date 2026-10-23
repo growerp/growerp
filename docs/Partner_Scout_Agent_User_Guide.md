@@ -157,16 +157,17 @@ company and shows up in your CRM like any other record.
 
 ## 8. Changing what it looks for
 
-Open the agent and edit the **Instruction**. The sections are in capitals (METHOD, GROWERP
-ADVANTAGES, TARGETS, SCORE, PER CANDIDATE, RULES), so you can change, for example, the
-target ERP products or the scoring without touching the rest.
+Open the agent and edit the **Instruction**. It is written in markdown and opens formatted
+(**Visual**); **Source** shows the markdown itself. Each part has its own heading (Method the
+partner sells, Partner advantages, Targets, Score, Once per run, Per candidate, The draft,
+Rules), so you can change, for example, the target ERP products or the scoring without touching
+the rest. Service names and values the agent must copy exactly are in code format.
 
-Three rules for the instruction text:
+Two rules for the instruction text:
 
 * No curly braces `{ }`: the agent reads `{word}` as a variable and the run fails with
   *Context variable not found*. Use `[word]`.
 * No `<` or `>`: saving and uploading reject them.
-* At most about 4,000 characters.
 
 ## 9. Troubleshooting
 

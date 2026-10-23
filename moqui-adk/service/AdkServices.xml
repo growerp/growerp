@@ -52,6 +52,10 @@
             <parameter name="adkAgentConfigId"/>
         </out-parameters>
         <actions>
+            <!-- the dialog's Visual markdown editor writes \[ \] \_ \*: a prompt never needs
+                 them, and an escaped [[...]] fill-in would no longer keep the agent inactive -->
+            <set field="instruction" from="instruction?.replaceAll(/\\([\[\]_*])/, '\$1')"/>
+            <set field="schedulePrompt" from="schedulePrompt?.replaceAll(/\\([\[\]_*])/, '\$1')"/>
             <!-- [[...]] placeholders (catalog templates the company still has to fill in): the
                  agent is saved but stays inactive — no runtime, no scheduled job — until a save
                  without them -->

@@ -31,7 +31,7 @@ When you tap the **+** button or edit an existing agent, you will open the Agent
 * **Agent Name**: A descriptive, unique name for the agent (required).
 * **Model**: The AI model the agent will use. Defaults to `gemini-3.8-flash`.
 * **LLM Provider**: The provider hosting the model (e.g., `gemini`, `openai`, `anthropic`). Defaults to `gemini`.
-* **Instruction (System Prompt)**: The exact instructions detailing what the agent should do, its persona, and rules to follow.
+* **Instruction (System Prompt)**: The exact instructions detailing what the agent should do, its persona, and rules to follow. It is markdown: **Visual** shows it formatted, **Source** shows the markdown. Use headings and lists to keep long instructions readable, and put service names in code format.
 * **Description**: An optional brief summary of the agent's purpose.
 * **Input parameters** (optional): named values the agent works with, for example the
   `country` the Partner Scout searches. Each has a **Name** (one word: letters, digits or `_`),
