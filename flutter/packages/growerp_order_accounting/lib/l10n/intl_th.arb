@@ -399,5 +399,8 @@
   "cashBookCategoryHelp": "หมวดหมู่ที่ปิดไว้ยังคงอยู่ในรายงาน เพียงแต่ไม่แสดงให้เลือกในสมุดเงินสด",
   "searchCashBookCategoryHint": "ค้นหาหมวดหมู่",
   "cashBookCategoryAddSuccess": "เพิ่มหมวดหมู่แล้ว",
-  "cashBookCategoryUpdateSuccess": "แก้ไขหมวดหมู่แล้ว"
+  "cashBookCategoryUpdateSuccess": "แก้ไขหมวดหมู่แล้ว",
+  "exchangeRate": "อัตรา",
+  "searchHintExchangeRates": "ค้นหาสกุลเงิน...",
+  "fetchExchangeRatesFail": "ดึงอัตราแลกเปลี่ยนไม่สำเร็จ:"
 }

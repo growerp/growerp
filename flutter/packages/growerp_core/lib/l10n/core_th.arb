@@ -114,6 +114,7 @@
   "test": "ทดสอบ",
   "testSystem": "ระบบทดสอบ",
   "theme": "ธีม",
+  "currencyExchange": "อัตราแลกเปลี่ยน",
   "timePeriods": "ช่วงเวลา",
   "transaction": "ธุรกรรม",
   "transactions": "ธุรกรรม",
@@ -167,7 +168,6 @@
   "outgoingPayments": "การชำระเงินที่ออก",
   "outgoingShipments": "การจัดส่งที่ออก",
   "paymtTypes": "ประเภทการชำระเงิน",
-  "planSelection": "การเลือกแผน",
   "products": "สินค้า",
   "purchaseOrders": "ใบสั่งซื้อ",
   "purchaseUnpaidInvoices": "ใบแจ้งหนี้ซื้อที่ยังไม่ชำระ",
@@ -775,9 +775,6 @@
   },
   "@paymtTypes": {
     "description": "Payment types menu item"
-  },
-  "@planSelection": {
-    "description": "Plan selection menu item"
   },
   "@products": {
     "description": "Products menu item"

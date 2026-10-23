@@ -1652,5 +1652,17 @@
   },
   "searchCashBookCategoryHint": "Search category",
   "cashBookCategoryAddSuccess": "Category added",
-  "cashBookCategoryUpdateSuccess": "Category updated"
+  "cashBookCategoryUpdateSuccess": "Category updated",
+  "exchangeRate": "Rate",
+  "@exchangeRate": {
+    "description": "Column header for a currency exchange rate"
+  },
+  "searchHintExchangeRates": "Search currency...",
+  "@searchHintExchangeRates": {
+    "description": "Search field hint"
+  },
+  "fetchExchangeRatesFail": "Failed to fetch exchange rates:",
+  "@fetchExchangeRatesFail": {
+    "description": "Error prefix when exchange rates cannot be loaded"
+  }
 }

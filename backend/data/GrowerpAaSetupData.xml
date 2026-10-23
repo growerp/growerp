@@ -27,6 +27,12 @@ limitations under the License.
         serviceName="growerp.100.CrmServices100.collect#OpportunityWeekStats"
         cronExpression="0 15 0 ? * MON" paused="N" transactionTimeout="1800" />
 
+    <!-- Service Job: Refresh the central currency exchange rates - weekly, monday night -->
+    <moqui.service.job.ServiceJob jobName="update_exchange_rates"
+        description="Store the latest USD and EUR based exchange rates for all tenant currencies"
+        serviceName="growerp.100.GeneralServices100.update#ExchangeRates"
+        cronExpression="0 0 3 ? * MON" paused="N" transactionTimeout="600" />
+
     <!-- Service Job: Auto-renew tenant subscriptions expiring within 3 days - daily -->
     <moqui.service.job.ServiceJob jobName="renew_due_tenant_subscriptions"
         description="Auto-renew tenant subscriptions expiring soon using their stored payment method; dunning email on failure"

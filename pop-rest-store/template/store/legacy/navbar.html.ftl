@@ -1,3 +1,4 @@
+<#include "component://PopRestStore/template/store/currencySelect.html.ftl">
 <#-- url prefix of a translated site, '' for the language the site is written in; the chrome
      labels come from moqui.basic.LocalizedMessage, see growerp data/GrowerpL10nData.xml -->
 <#assign up = urlPrefix!''>
@@ -92,6 +93,8 @@
                     </div>
                 </li>
                 </#if>
+                <#-- display currency, only shown on pages with prices -->
+                <li class="nav-item d-flex align-items-center ml-2"><@currencySelect header=true/></li>
             </ul>
 
             <!-- Right Aligned Nav Items -->

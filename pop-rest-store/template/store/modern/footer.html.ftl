@@ -1,3 +1,4 @@
+<#include "component://PopRestStore/template/store/currencySelect.html.ftl">
 <#-- url prefix of a translated site, '' for the language the site is written in; the chrome
      labels come from moqui.basic.LocalizedMessage, see growerp data/GrowerpL10nData.xml -->
 <#assign up = urlPrefix!''>
@@ -126,3 +127,4 @@
         </div>
     </div>
 </footer>
+<@currencyScript/>

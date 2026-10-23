@@ -130,14 +130,14 @@
                                     <!-- Price -->
                                     <figcaption class="text-left figure-caption mt-2">
                                         <#if localProd.price?? && localProd.price gt 0>
-                                            <span class="product-price-text">${ec.l10n.formatCurrency(localProd.price, localProd.priceUomId)}</span>
+                                            <span class="product-price-text" data-price-amount="${localProd.price?c}" data-price-currency="${localProd.priceUomId}">${ec.l10n.formatCurrency(localProd.price, localProd.priceUomId)}</span>
                                             <#if localProd.listPrice?? && localProd.listPrice gt localProd.price>
                                                 <span class="product-last-price ml-2">
-                                                    <del>${ec.l10n.formatCurrency(localProd.listPrice, localProd.priceUomId)}</del>
+                                                    <del data-price-amount="${localProd.listPrice?c}" data-price-currency="${localProd.priceUomId}">${ec.l10n.formatCurrency(localProd.listPrice, localProd.priceUomId)}</del>
                                                 </span>
                                             </#if>
                                         <#elseif localProd.listPrice?? && localProd.listPrice gt 0>
-                                            <span class="product-price-text">${ec.l10n.formatCurrency(localProd.listPrice,localProd.priceUomId)}</span>
+                                            <span class="product-price-text" data-price-amount="${localProd.listPrice?c}" data-price-currency="${localProd.priceUomId}">${ec.l10n.formatCurrency(localProd.listPrice, localProd.priceUomId)}</span>
                                         <#else>
                                             <span class="product-price-text">Free</span>
                                         </#if>

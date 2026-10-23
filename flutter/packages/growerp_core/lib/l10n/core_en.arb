@@ -480,6 +480,10 @@
   "@colorScheme": {
     "description": "Color scheme picker dialog title"
   },
+  "currencyExchange": "Currency Exchange",
+  "@currencyExchange": {
+    "description": "Currency exchange rates menu item"
+  },
   "timePeriods": "Time Periods",
   "@timePeriods": {
     "description": "Time periods menu item or section header"
@@ -704,10 +708,6 @@
   "paymtTypes": "Payment Types",
   "@paymtTypes": {
     "description": "Payment types menu item"
-  },
-  "planSelection": "Plan Selection",
-  "@planSelection": {
-    "description": "Plan selection menu item"
   },
   "products": "Products",
   "@products": {

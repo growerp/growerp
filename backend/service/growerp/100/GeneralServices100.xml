@@ -995,6 +995,109 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="update" noun="ExchangeRates" authenticate="false">
+        <description>
+            Weekly job: fetch USD and EUR based rates from the free daily-rate API and store
+            one new moqui.basic.UomConversion per tenant base currency. The rates are
+            central (UomConversion has no owner) and also serve as convert#Currency cache.
+        </description>
+        <actions>
+            <entity-find entity-name="mantle.ledger.config.PartyAcctgPreference" list="prefList" distinct="true">
+                <econdition field-name="baseCurrencyUomId" operator="is-not-null" />
+                <select-field field-name="baseCurrencyUomId" />
+            </entity-find>
+            <set field="currencyIds" from="(prefList*.baseCurrencyUomId + ['USD', 'EUR']).unique()" />
+            <iterate list="['USD', 'EUR']" entry="baseCurrencyId">
+                <set field="rates" from="null" />
+                <script><![CDATA[
+                    try {
+                        def conn = new java.net.URL('https://open.er-api.com/v6/latest/' + baseCurrencyId).openConnection()
+                        conn.connectTimeout = 10000
+                        conn.readTimeout = 10000
+                        conn.setRequestProperty('Accept', 'application/json')
+                        rates = new groovy.json.JsonSlurper().parseText(conn.inputStream.getText('UTF-8'))?.rates
+                    } catch (Exception e) {
+                        ec.logger.warn("Exchange rate API call for ${baseCurrencyId} failed: ${e.message}")
+                    }
+                ]]></script>
+                <if condition="!rates"><continue /></if>
+                <iterate list="currencyIds" entry="currencyId">
+                    <if condition="currencyId == baseCurrencyId || !rates[currencyId]"><continue /></if>
+                    <service-call name="create#moqui.basic.UomConversion"
+                        in-map="[uomId: baseCurrencyId, toUomId: currencyId,
+                            conversionFactor: rates[currencyId] as BigDecimal, fromDate: ec.user.nowTimestamp]" />
+                </iterate>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="get" noun="ExchangeRates">
+        <description>
+            Read-only list of the newest USD and EUR based exchange rate per currency,
+            central for all tenants and refreshed weekly by update#ExchangeRates.
+        </description>
+        <out-parameters>
+            <parameter name="exchangeRates" type="List">
+                <parameter name="exchangeRate" type="Map">
+                    <parameter name="fromCurrencyId" />
+                    <parameter name="toCurrencyId" />
+                    <parameter name="rate" />
+                    <parameter name="fromDate" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="moqui.basic.UomConversionAndToDetail" list="rateList">
+                <econdition field-name="uomId" operator="in" from="['USD', 'EUR']" />
+                <econdition field-name="uomTypeEnumId" value="UT_CURRENCY_MEASURE" />
+                <order-by field-name="uomId" />
+                <order-by field-name="toUomId" />
+                <order-by field-name="-fromDate" />
+            </entity-find>
+            <set field="exchangeRates" from="[]" />
+            <set field="seenPairs" from="new HashSet()" />
+            <iterate list="rateList" entry="rateRow">
+                <if condition="rateRow.uomId == rateRow.toUomId || !seenPairs.add(rateRow.uomId + '/' + rateRow.toUomId)">
+                    <continue /></if>
+                <script>exchangeRates.add([fromCurrencyId: rateRow.uomId, toCurrencyId: rateRow.toUomId,
+                    rate: (rateRow.conversionFactor as BigDecimal).stripTrailingZeros().toPlainString(),
+                    fromDate: rateRow.fromDate?.toInstant()?.toString()])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="get" noun="CurrencyConversionRates" authenticate="anonymous-view">
+        <description>
+            Conversion factors from one currency to every currency with a stored central
+            USD based rate (see update#ExchangeRates), crossed through USD. Used by the
+            website product page currency dropdown; the from currency itself is always 1.
+        </description>
+        <in-parameters>
+            <parameter name="fromCurrencyUomId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="rates" type="Map" />
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="moqui.basic.UomConversionAndToDetail" list="usdRateList">
+                <econdition field-name="uomId" value="USD" />
+                <econdition field-name="uomTypeEnumId" value="UT_CURRENCY_MEASURE" />
+                <order-by field-name="-fromDate" />
+            </entity-find>
+            <script><![CDATA[
+                Map usdRates = [USD: BigDecimal.ONE]
+                usdRateList.each { if (!usdRates.containsKey(it.toUomId)) usdRates[it.toUomId] = it.conversionFactor as BigDecimal }
+                rates = new TreeMap()
+                rates[fromCurrencyUomId] = BigDecimal.ONE
+                BigDecimal fromRate = usdRates[fromCurrencyUomId]
+                if (fromRate) usdRates.each { currencyId, usdRate ->
+                    if (currencyId != fromCurrencyUomId)
+                        rates[currencyId] = usdRate.divide(fromRate, 8, java.math.RoundingMode.HALF_UP)
+                }
+            ]]></script>
+        </actions>
+    </service>
+
     <service verb="get" noun="CountryList" authenticate="anonymous-all">
         <description>
             Get country list for registration.

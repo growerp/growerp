@@ -399,5 +399,8 @@
   "cashBookCategoryHelp": "Les catégories désactivées restent dans les rapports, elles ne sont plus proposées dans le livre de caisse",
   "searchCashBookCategoryHint": "Rechercher une catégorie",
   "cashBookCategoryAddSuccess": "Catégorie ajoutée",
-  "cashBookCategoryUpdateSuccess": "Catégorie modifiée"
+  "cashBookCategoryUpdateSuccess": "Catégorie modifiée",
+  "exchangeRate": "Taux",
+  "searchHintExchangeRates": "Rechercher une devise...",
+  "fetchExchangeRatesFail": "Échec du chargement des taux de change :"
 }

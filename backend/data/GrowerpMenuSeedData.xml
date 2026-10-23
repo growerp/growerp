@@ -277,13 +277,13 @@ limitations under the License.
 
     <!-- ADMIN_ACC_SETUP children -->
     <growerp.menu.MenuItem menuItemId="ADMIN_ACCU_PERIODS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ACC_SETUP"
-        title="setUp" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="10"/>
+        title="Time Periods" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ACCU_ITEMTYPES" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ACC_SETUP"
         title="Item Types" iconName="list" widgetName="ItemTypeList" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ACCU_PAYTYPES" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ACC_SETUP"
         title="Payment Types" iconName="list" widgetName="PaymentTypeList" sequenceNum="30"/>
-    <growerp.menu.MenuItem menuItemId="ADMIN_ACCU_PLAN" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ACC_SETUP"
-        title="Plan Selection" iconName="subscriptions" widgetName="PlanSelectionForm" sequenceNum="40"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_ACCU_CURRENCY" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ACC_SETUP"
+        title="Currency Exchange" iconName="currency_exchange" widgetName="CurrencyExchangeList" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ACCU_SYSTEM" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_ACC_SETUP"
         title="System Setup" iconName="settings" widgetName="SystemSetupDialog"
         userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="50"/>
@@ -517,7 +517,7 @@ limitations under the License.
     <growerp.menu.MenuItem menuItemId="HOTEL_ACCR_HOTEL" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ACC_REPORTS"
         title="Occupancy/ADR" iconName="hotel" widgetName="StatisticsForm" sequenceNum="40"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_ACCU_PER" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ACC_SETUP"
-        title="setUp" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="10"/>
+        title="Time Periods" iconName="settings" widgetName="TimePeriodListForm" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_ACCU_ITEM" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ACC_SETUP"
         title="Item Types" iconName="list" widgetName="ItemTypeList" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_ACCU_PAY" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ACC_SETUP"

@@ -37,7 +37,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:go_router/go_router.dart';
 import 'views/admin_dashboard_content.dart';
-import 'views/plan_selection_form.dart';
 import 'views/accounting_form.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'l10n/generated/admin_localizations.dart';
@@ -269,7 +268,6 @@ List<Map<String, GrowerpWidgetBuilder>> adminWidgetRegistrations = [
   {
     'AdminDashboard': (args) => const AdminDashboardContent(),
     'AccountingForm': (args) => const AccountingForm(),
-    'PlanSelectionForm': (args) => const PlanSelectionForm(),
     'AboutForm': (args) => const AboutForm(),
     'AdkAgentListView': (args) => const AdkAgentListView(),
     'AdkMcpServerListView': (args) => const AdkMcpServerListView(),

@@ -79,7 +79,7 @@ when the organization's menu shows it a screen that drives that domain.
     <growerp.menu.WidgetDomain widgetName="GlAccountTranslationList" artifactGroupId="GROWERP_ACCOUNTING"/>
     <growerp.menu.WidgetDomain widgetName="LedgerJournalList" artifactGroupId="GROWERP_ACCOUNTING"/>
     <growerp.menu.WidgetDomain widgetName="LedgerTreeForm" artifactGroupId="GROWERP_ACCOUNTING"/>
-    <growerp.menu.WidgetDomain widgetName="PlanSelectionForm" artifactGroupId="GROWERP_ACCOUNTING"/>
+    <growerp.menu.WidgetDomain widgetName="CurrencyExchangeList" artifactGroupId="GROWERP_ACCOUNTING"/>
     <growerp.menu.WidgetDomain widgetName="ProfitLossForm" artifactGroupId="GROWERP_ACCOUNTING"/>
     <growerp.menu.WidgetDomain widgetName="PurchaseInvoiceList" artifactGroupId="GROWERP_ACCOUNTING"/>
     <growerp.menu.WidgetDomain widgetName="PurchasePaymentList" artifactGroupId="GROWERP_ACCOUNTING"/>

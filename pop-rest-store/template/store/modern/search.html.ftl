@@ -106,12 +106,12 @@
                             <h6 class="text-sm font-medium text-on-surface line-clamp-2 min-h-[2.5rem] mb-1 group-hover:text-primary transition-colors">${localProd.productName}</h6>
                             <div class="flex items-baseline gap-2">
                                 <#if localProd.price?? && localProd.price gt 0>
-                                    <span class="text-primary font-semibold text-base">${ec.l10n.formatCurrency(localProd.price, localProd.priceUomId)}</span>
+                                    <span class="text-primary font-semibold text-base" data-price-amount="${localProd.price?c}" data-price-currency="${localProd.priceUomId}">${ec.l10n.formatCurrency(localProd.price, localProd.priceUomId)}</span>
                                     <#if localProd.listPrice?? && localProd.listPrice gt localProd.price>
-                                        <span class="text-on-surface-variant text-sm line-through">${ec.l10n.formatCurrency(localProd.listPrice, localProd.priceUomId)}</span>
+                                        <span class="text-on-surface-variant text-sm line-through" data-price-amount="${localProd.listPrice?c}" data-price-currency="${localProd.priceUomId}">${ec.l10n.formatCurrency(localProd.listPrice, localProd.priceUomId)}</span>
                                     </#if>
                                 <#elseif localProd.listPrice?? && localProd.listPrice gt 0>
-                                    <span class="text-primary font-semibold text-base">${ec.l10n.formatCurrency(localProd.listPrice,localProd.priceUomId)}</span>
+                                    <span class="text-primary font-semibold text-base" data-price-amount="${localProd.listPrice?c}" data-price-currency="${localProd.priceUomId}">${ec.l10n.formatCurrency(localProd.listPrice, localProd.priceUomId)}</span>
                                 <#else>
                                     <span class="text-primary font-semibold text-base">Free</span>
                                 </#if>

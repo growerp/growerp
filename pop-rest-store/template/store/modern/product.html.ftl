@@ -138,23 +138,28 @@
                 <!-- Save Badge -->
                 <#if product.listPrice??>
                     <div class="inline-flex items-center gap-1 bg-tertiary/15 border border-tertiary/30 text-tertiary px-3 py-1.5 rounded-full font-label text-xs font-bold mb-4">
-                        <span class="material-symbols-outlined text-[14px]">sell</span>SAVE ${ec.l10n.formatCurrency((product.listPrice - product.price)?string(",##0.00"), product.priceUomId)}
+                        <span class="material-symbols-outlined text-[14px]">sell</span>SAVE <span data-price-amount="${(product.listPrice - product.price)?c}" data-price-currency="${product.priceUomId}">${ec.l10n.formatCurrency((product.listPrice - product.price)?string(",##0.00"), product.priceUomId)}</span>
                     </div>
                 </#if>
 
                 <!-- Price Display -->
+                <#include "component://PopRestStore/template/store/currencySelect.html.ftl">
+                <#if currencyRatesJson?? && currencyIds?size gt 1>
+                <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem;font-size:.875rem;"><span>Currency</span><@currencySelect/></div>
+                <div class="js-currency-note" style="display:none;font-size:.75rem;opacity:.7;margin-top:-.5rem;margin-bottom:.75rem;">Indicative price, charged in ${product.priceUomId}.</div>
+                </#if>
                 <div class="mb-5">
                     <#if product.price?? && product.price gt 0>
-                        <div class="font-display text-3xl font-bold text-primary">
+                        <div class="font-display text-3xl font-bold text-primary" data-price-amount="${product.price?c}" data-price-currency="${product.priceUomId}">
                             ${ec.l10n.formatCurrency(product.price, product.priceUomId)}
                         </div>
                         <#if product.listPrice?? && product.listPrice gt product.price>
                             <div class="text-sm text-on-surface-variant/70">
-                                was <del>${ec.l10n.formatCurrency(product.listPrice, product.priceUomId)}</del>
+                                was <del data-price-amount="${product.listPrice?c}" data-price-currency="${product.priceUomId}">${ec.l10n.formatCurrency(product.listPrice, product.priceUomId)}</del>
                             </div>
                         </#if>
                     <#elseif product.listPrice?? && product.listPrice gt 0>
-                        <div class="font-display text-3xl font-bold text-primary">
+                        <div class="font-display text-3xl font-bold text-primary" data-price-amount="${product.listPrice?c}" data-price-currency="${product.priceUomId}">
                             ${ec.l10n.formatCurrency(product.listPrice, product.priceUomId)}
                         </div>
                     <#else>

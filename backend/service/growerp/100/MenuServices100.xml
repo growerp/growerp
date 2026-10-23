@@ -1043,6 +1043,51 @@ Service definitions for menu configuration and menu item management
     </actions>
   </service>
 
+  <!-- migrateAccountingSetupMenu: one-time update of existing (cloned) menus -->
+  <service verb="migrate" noun="AccountingSetupMenu" authenticate="true">
+    <description>One-time idempotent migration for menus cloned before the accounting setup
+      change: the Plan Selection tab is replaced by Currency Exchange and the 'setUp' tab
+      of TimePeriodListForm is renamed 'Time Periods'. Covers the seed configuration and
+      every organization/user clone. Run from /apps/tools/Service/ServiceRun/runJson.</description>
+    <out-parameters>
+      <parameter name="replaced" type="Integer" />
+      <parameter name="renamed" type="Integer" />
+    </out-parameters>
+    <actions>
+      <set field="replaced" from="0" />
+      <set field="renamed" from="0" />
+      <entity-find entity-name="growerp.menu.MenuItem" list="planItems">
+        <econdition field-name="widgetName" value="PlanSelectionForm" />
+      </entity-find>
+      <iterate list="planItems" entry="planItem">
+        <service-call name="delete#growerp.menu.MenuItem" in-map="[menuItemId: planItem.menuItemId]" />
+        <entity-find-count entity-name="growerp.menu.MenuItem" count-field="currencyCount">
+          <econdition field-name="menuConfigurationId" from="planItem.menuConfigurationId" />
+          <econdition field-name="widgetName" value="CurrencyExchangeList" />
+        </entity-find-count>
+        <if condition="planItem.parentMenuItemId &amp;&amp; currencyCount == 0">
+          <service-call name="create#growerp.menu.MenuItem"
+            in-map="[menuItemId: planItem.menuItemId == 'ADMIN_ACCU_PLAN' ? 'ADMIN_ACCU_CURRENCY' : null,
+              menuConfigurationId: planItem.menuConfigurationId,
+              parentMenuItemId: planItem.parentMenuItemId, title: 'Currency Exchange',
+              iconName: 'currency_exchange', widgetName: 'CurrencyExchangeList',
+              userGroupsJson: planItem.userGroupsJson, sequenceNum: planItem.sequenceNum,
+              isActive: planItem.isActive]" />
+        </if>
+        <set field="replaced" from="replaced + 1" />
+      </iterate>
+      <entity-find entity-name="growerp.menu.MenuItem" list="periodItems" for-update="true">
+        <econdition field-name="widgetName" value="TimePeriodListForm" />
+        <econdition field-name="title" value="setUp" />
+      </entity-find>
+      <iterate list="periodItems" entry="periodItem">
+        <set field="periodItem.title" value="Time Periods" />
+        <entity-update value-field="periodItem" />
+        <set field="renamed" from="renamed + 1" />
+      </iterate>
+    </actions>
+  </service>
+
   <!-- reorderMenuItems: Update sequence numbers for multiple items -->
   <service verb="reorder" noun="MenuItems" authenticate="true">
     <description>Update sequence numbers for multiple menu items in one operation (for drag-and-drop reordering).</description>

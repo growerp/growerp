@@ -114,6 +114,7 @@
   "test": "测试",
   "testSystem": "测试系统",
   "theme": "主题",
+  "currencyExchange": "汇率",
   "timePeriods": "时间段",
   "transaction": "交易",
   "transactions": "交易",
@@ -167,7 +168,6 @@
   "outgoingPayments": "发出的付款",
   "outgoingShipments": "发出的装运",
   "paymtTypes": "付款类型",
-  "planSelection": "计划选择",
   "products": "产品",
   "purchaseOrders": "采购订单",
   "purchaseUnpaidInvoices": "采购未付发票",
@@ -820,9 +820,6 @@
   },
   "@paymtTypes": {
     "description": "Payment types menu item"
-  },
-  "@planSelection": {
-    "description": "Plan selection menu item"
   },
   "@products": {
     "description": "Products menu item"

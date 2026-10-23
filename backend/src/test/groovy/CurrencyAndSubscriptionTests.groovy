@@ -108,6 +108,26 @@ class CurrencyAndSubscriptionTests extends Specification {
         out.convertedAmount == 21.00
     }
 
+    def "exchange rates list the newest rate per currency pair"() {
+        given: 'an older and a newer EUR to THB rate (future dates so they are the newest)'
+        long now = System.currentTimeMillis()
+        ec.service.sync().name('create#moqui.basic.UomConversion').disableAuthz()
+                .parameters([uomId: 'EUR', toUomId: 'THB', conversionFactor: 30.0,
+                        fromDate: new Timestamp(now + 86400000L)]).call()
+        ec.service.sync().name('create#moqui.basic.UomConversion').disableAuthz()
+                .parameters([uomId: 'EUR', toUomId: 'THB', conversionFactor: 40.0,
+                        fromDate: new Timestamp(now + 2 * 86400000L)]).call()
+
+        when:
+        List rates = ec.service.sync().name('growerp.100.GeneralServices100.get#ExchangeRates')
+                .disableAuthz().call().exchangeRates
+        List eurThb = rates.findAll { it.fromCurrencyId == 'EUR' && it.toCurrencyId == 'THB' }
+
+        then:
+        eurThb.size() == 1
+        eurThb[0].rate == '40'
+    }
+
     def "one page checkout books payment in company currency with original USD amount"() {
         when:
         Map out = ec.service.sync().name('growerp.100.AccountingServices100.checkOut#OnePage')

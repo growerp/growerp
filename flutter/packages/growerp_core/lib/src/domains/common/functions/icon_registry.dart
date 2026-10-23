@@ -153,6 +153,7 @@ final Map<String, Icon> iconRegistry = {
   // Referenced by the Dart menu configurations of the package example apps.
   'account_balance_wallet': const Icon(Icons.account_balance_wallet),
   'attach_money': const Icon(Icons.attach_money),
+  'currency_exchange': const Icon(Icons.currency_exchange),
   'bed': const Icon(Icons.bed),
   'calendar_today': const Icon(Icons.calendar_today),
   'check_circle': const Icon(Icons.check_circle),

@@ -114,6 +114,7 @@
   "test": "Test",
   "testSystem": "Système de test",
   "theme": "Thème",
+  "currencyExchange": "Taux de change",
   "timePeriods": "Périodes",
   "transaction": "Transaction",
   "transactions": "Transactions",
@@ -167,7 +168,6 @@
   "outgoingPayments": "Paiements sortants",
   "outgoingShipments": "Expéditions sortantes",
   "paymtTypes": "Types de paiement",
-  "planSelection": "Sélection du plan",
   "products": "Produits",
   "purchaseOrders": "Bons de commande",
   "purchaseUnpaidInvoices": "Acheter des factures impayées",
@@ -820,9 +820,6 @@
   },
   "@paymtTypes": {
     "description": "Payment types menu item"
-  },
-  "@planSelection": {
-    "description": "Plan selection menu item"
   },
   "@products": {
     "description": "Products menu item"

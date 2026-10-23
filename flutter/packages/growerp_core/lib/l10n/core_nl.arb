@@ -114,6 +114,7 @@
   "test": "Test",
   "testSystem": "Test systeem",
   "theme": "Thema",
+  "currencyExchange": "Wisselkoersen",
   "timePeriods": "Tijdsperioden",
   "transaction": "Transactie",
   "transactions": "Transacties",
@@ -167,7 +168,6 @@
   "outgoingPayments": "Uitgaande betalingen",
   "outgoingShipments": "Uitgaande zendingen",
   "paymtTypes": "Betaalmethoden",
-  "planSelection": "Planselectie",
   "products": "Producten",
   "purchaseOrders": "Inkooporders",
   "purchaseUnpaidInvoices": "Onbetaalde inkoopfacturen",
@@ -820,9 +820,6 @@
   },
   "@paymtTypes": {
     "description": "Payment types menu item"
-  },
-  "@planSelection": {
-    "description": "Plan selection menu item"
   },
   "@products": {
     "description": "Products menu item"

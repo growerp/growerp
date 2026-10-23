@@ -113,6 +113,7 @@ Map<String, GrowerpWidgetBuilder> getOrderAccountingWidgets() {
     'ProfitLossForm': (args) => const ProfitLossForm(),
     'TaxSummaryForm': (args) => const TaxSummaryForm(),
     'TimePeriodListForm': (args) => const TimePeriodListForm(),
+    'CurrencyExchangeList': (args) => const CurrencyExchangeList(),
     'ItemTypeList': (args) => const ItemTypeList(),
     'PaymentTypeList': (args) =>
         const PaymentTypeList(key: Key('PaymentTypeList')),

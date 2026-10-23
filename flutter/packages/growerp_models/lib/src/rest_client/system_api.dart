@@ -147,6 +147,10 @@ mixin SystemApi {
   @Extra({'noApiKey': true})
   Future<Uoms> getUom(@Query('uomTypes') List<String>? uomTypes);
 
+  // central currency exchange rates (read only)
+  @GET("rest/s1/growerp/100/ExchangeRates")
+  Future<ExchangeRates> getExchangeRates();
+
   // import / export ========
   @POST("rest/s1/growerp/100/ImportExport")
   Future<void> uploadEntities({
