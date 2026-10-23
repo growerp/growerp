@@ -1,0 +1,3 @@
+# Gemini API keys moved from the flat SystemSettings.geminiApiKey field into
+# LlmConfig(llmProvider='gemini'); the flat field is cleared.
+growerp.100.GeneralServices100.migrate#GeminiApiKeyToLlmConfig

@@ -1,0 +1,3 @@
+# Agents and tenant settings naming a retired Gemini model (2.0/2.5/3.5/3.7 flash)
+# follow the central default again; the SystemDefault row gets the current default.
+growerp.100.GeneralServices100.migrate#StaleLlmModelNames

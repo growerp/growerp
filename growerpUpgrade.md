@@ -88,6 +88,7 @@ the review backend and the recorded versions, its reviewers lose their backend.
 1. upgrade the backend from test version 
     a. login: gcloud compute ssh growerpcom
     b. run script
+    c. run the data migrations of the new version(s): see migration/README.md
 
 increment version code(0.0.0+??) in pubspec.yaml
 
