@@ -2530,6 +2530,7 @@ limitations under the License.
             <key-map field-name="workEffortId" />
             <entity-condition>
                 <econdition field-name="roleTypeId" value="Originator" />
+                <econdition field-name="thruDate" operator="is-null" />
             </entity-condition>
         </member-entity>
         <member-entity entity-alias="ORG_PARTY" entity-name="mantle.party.Party"
@@ -2586,6 +2587,7 @@ limitations under the License.
             <key-map field-name="workEffortId" />
             <entity-condition>
                 <econdition field-name="roleTypeId" value="Assignee" />
+                <econdition field-name="thruDate" operator="is-null" />
             </entity-condition>
         </member-entity>
         <member-entity entity-alias="ASS_PARTY" entity-name="mantle.party.Party"
@@ -2642,6 +2644,7 @@ limitations under the License.
             <key-map field-name="workEffortId" />
             <entity-condition>
                 <econdition field-name="roleTypeId" value="ThirdParty" />
+                <econdition field-name="thruDate" operator="is-null" />
             </entity-condition>
         </member-entity>
         <member-entity entity-alias="TP_PARTY" entity-name="mantle.party.Party"

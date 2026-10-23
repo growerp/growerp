@@ -71,5 +71,7 @@
   "activity_comments": "评论",
   "activity_noComments": "暂无评论",
   "activity_addComment": "添加评论",
-  "activity_aiAgent": "AI 助手"
+  "activity_aiAgent": "AI 助手",
+  "activity_deleteConfirm": "删除 {activityType} {name}？",
+  "activity_deleteConfirmText": "此操作无法撤销！"
 }

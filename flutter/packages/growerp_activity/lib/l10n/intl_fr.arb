@@ -71,5 +71,7 @@
   "activity_comments": "Commentaires",
   "activity_noComments": "Pas encore de commentaires",
   "activity_addComment": "Ajouter un commentaire",
-  "activity_aiAgent": "Agent IA"
+  "activity_aiAgent": "Agent IA",
+  "activity_deleteConfirm": "Supprimer {activityType} {name} ?",
+  "activity_deleteConfirmText": "Cette action est irréversible !"
 }

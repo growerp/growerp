@@ -71,5 +71,7 @@
   "activity_comments": "Comentarios",
   "activity_noComments": "Aún no hay comentarios",
   "activity_addComment": "Añadir un comentario",
-  "activity_aiAgent": "Agente de IA"
+  "activity_aiAgent": "Agente de IA",
+  "activity_deleteConfirm": "¿Eliminar {activityType} {name}?",
+  "activity_deleteConfirmText": "¡Esto no se puede deshacer!"
 }

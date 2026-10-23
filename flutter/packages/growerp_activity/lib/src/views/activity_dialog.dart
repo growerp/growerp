@@ -39,8 +39,6 @@ class ActivityDialogState extends State<ActivityDialog> {
   late ActivityBloc _activityBloc;
   late AuthBloc _authBloc;
   late ActivityLocalizations _localizations;
-  late DataFetchBloc<Users> _assigneeBloc;
-  late DataFetchBlocOther<Users> _thirdPartyBloc;
   late ActivityStatus _updatedStatus;
   late final User _originator = _authBloc.state.authenticate!.user!;
   late User _selectedAssignee;
@@ -50,7 +48,8 @@ class ActivityDialogState extends State<ActivityDialog> {
   @override
   void initState() {
     super.initState();
-    _selectedDate = CustomizableDateTime.current;
+    _selectedDate =
+        widget.activity.estimatedStartDate ?? CustomizableDateTime.current;
     _pseudoIdController.text = widget.activity.pseudoId;
     _nameController.text = widget.activity.activityName;
     _descriptionController.text = widget.activity.description;
@@ -58,22 +57,26 @@ class ActivityDialogState extends State<ActivityDialog> {
     _activityBloc = context.read<ActivityBloc>();
     _authBloc = context.read<AuthBloc>();
     _updatedStatus = widget.activity.statusId ?? ActivityStatus.planning;
-    _selectedAssignee = widget.activity.assignee ?? _originator;
-    _selectedThirdParty = widget.activity.thirdParty;
-    _assigneeBloc = context.read<DataFetchBloc<Users>>()
-      ..add(
-        GetDataEvent(
-          () =>
-              context.read<RestClient>().getUser(limit: 3, role: Role.company),
-        ),
-      );
-    _thirdPartyBloc = context.read<DataFetchBlocOther<Users>>()
-      ..add(
-        GetDataEvent(
-          () =>
-              context.read<RestClient>().getUser(limit: 3, role: Role.unknown),
-        ),
-      );
+    // no assignee: show the originator
+    _selectedAssignee = widget.activity.assignee?.partyId?.isNotEmpty == true
+        ? widget.activity.assignee!
+        : widget.activity.originator?.partyId?.isNotEmpty == true
+        ? widget.activity.originator!
+        : _originator;
+    _selectedThirdParty =
+        widget.activity.thirdParty?.partyId?.isNotEmpty == true
+        ? widget.activity.thirdParty
+        : null;
+    context.read<DataFetchBloc<Users>>().add(
+      GetDataEvent(
+        () => context.read<RestClient>().getUser(limit: 3, role: Role.company),
+      ),
+    );
+    context.read<DataFetchBlocOther<Users>>().add(
+      GetDataEvent(
+        () => context.read<RestClient>().getUser(limit: 3, role: Role.unknown),
+      ),
+    );
   }
 
   @override
@@ -125,7 +128,7 @@ class ActivityDialogState extends State<ActivityDialog> {
                     : widget.activity.pseudoId,
               ),
               height: isPhone ? 650 : 550,
-              width: 350,
+              width: isPhone ? 350 : 900,
               child: _showForm(isPhone),
             ),
           },
@@ -142,8 +145,10 @@ class ActivityDialogState extends State<ActivityDialog> {
 
       final DateTime? picked = await showDatePicker(
         context: context,
-        initialDate: CustomizableDateTime.current,
-        firstDate: CustomizableDateTime.current,
+        initialDate: _selectedDate,
+        firstDate: _selectedDate.isBefore(CustomizableDateTime.current)
+            ? _selectedDate
+            : CustomizableDateTime.current,
         lastDate: CustomizableDateTime.current.add(const Duration(days: 356)),
         locale: localeState.locale,
         builder: (BuildContext context, Widget? child) {
@@ -182,6 +187,198 @@ class ActivityDialogState extends State<ActivityDialog> {
       }
     }
 
+    final left = <Widget>[
+      Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              key: const Key('pseudoId'),
+              decoration: InputDecoration(
+                labelText: _localizations.activity_id,
+              ),
+              controller: _pseudoIdController,
+            ),
+          ),
+          const SizedBox(width: 10),
+          if (widget.activity.activityType == ActivityType.todo)
+            Expanded(
+              child: DropdownButtonFormField<ActivityStatus>(
+                key: const Key('statusDropDown'),
+                decoration: InputDecoration(
+                  labelText: _localizations.activity_status,
+                ),
+                initialValue: _updatedStatus,
+                validator: (value) => value == null
+                    ? _localizations.activity_fieldRequired
+                    : null,
+                items: ActivityStatus.validActivityStatusList(_updatedStatus)
+                    .map(
+                      (label) => DropdownMenuItem<ActivityStatus>(
+                        value: label,
+                        child: Text(label.status),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (ActivityStatus? newValue) {
+                  setState(() {
+                    _updatedStatus = newValue!;
+                  });
+                },
+                isExpanded: true,
+              ),
+            ),
+        ],
+      ),
+      TextFormField(
+        key: const Key('name'),
+        decoration: InputDecoration(
+          labelText: _localizations.activity_nameError(
+            widget.activity.activityType.toString(),
+          ),
+        ),
+        controller: _nameController,
+        validator: (value) {
+          if (value!.isEmpty) {
+            return _localizations.activity_nameError(
+              widget.activity.activityType.toString(),
+            );
+          }
+          return null;
+        },
+      ),
+      const SizedBox(height: 10),
+      MarkdownEditor(
+        controller: _descriptionController,
+        inputKey: const Key('description'),
+        label: _localizations.activity_description,
+        height: isPhone ? 200 : 300,
+      ),
+    ];
+    final right = <Widget>[
+      if (widget.activity.activityType == ActivityType.todo &&
+          _authBloc.state.authenticate?.user?.userGroup == UserGroup.admin)
+        const SizedBox(height: 10),
+      if (widget.activity.activityType == ActivityType.todo &&
+          _authBloc.state.authenticate?.user?.userGroup == UserGroup.admin)
+        TextFormField(
+          key: const Key('rate'),
+          decoration: const InputDecoration(
+            labelText: 'Hourly rate (client billing)',
+          ),
+          controller: _rateController,
+          keyboardType: TextInputType.number,
+        ),
+      if (widget.activity.activityType == ActivityType.todo)
+        const SizedBox(height: 10),
+      if (widget.activity.activityType == ActivityType.todo)
+        BlocBuilder<DataFetchBloc<Users>, DataFetchState<Users>>(
+          buildWhen: (previous, current) =>
+              current.status != DataFetchStatus.loading,
+          builder: (context, state) {
+            switch (state.status) {
+              case DataFetchStatus.failure:
+                return FatalErrorForm(
+                  message: _localizations.activity_serverError,
+                );
+              case DataFetchStatus.loading:
+                return const LoadingIndicator();
+              case DataFetchStatus.success:
+                return AutocompleteLabel<User>(
+                  key: const Key('assignee'),
+                  label: _localizations.activity_assignee,
+                  initialValue: _selectedAssignee,
+                  optionsBuilder: (TextEditingValue textEditingValue) async {
+                    final result = await context.read<RestClient>().getUser(
+                      searchString: textEditingValue.text,
+                      limit: 3,
+                      isForDropDown: true,
+                      role: Role.company,
+                    );
+                    return result.users;
+                  },
+                  displayStringForOption: (User u) =>
+                      " ${[u.firstName, u.lastName].where((s) => s != null && s.isNotEmpty).join(' ')} "
+                      "${u.company?.name ?? ''}",
+                  onSelected: (User? newValue) {
+                    setState(() {
+                      _selectedAssignee = newValue ?? _originator;
+                    });
+                  },
+                );
+              default:
+                return const Center(child: LoadingIndicator());
+            }
+          },
+        ),
+      if (widget.activity.activityType == ActivityType.todo ||
+          (widget.activity.activityType == ActivityType.event &&
+              widget.companyUser == null))
+        const SizedBox(height: 10),
+      if (widget.activity.activityType == ActivityType.todo ||
+          (widget.activity.activityType == ActivityType.event &&
+              widget.companyUser == null))
+        BlocBuilder<DataFetchBlocOther<Users>, DataFetchState<Users>>(
+          buildWhen: (previous, current) =>
+              current.status != DataFetchStatus.loading,
+          builder: (context, state) {
+            switch (state.status) {
+              case DataFetchStatus.failure:
+                return FatalErrorForm(
+                  message: _localizations.activity_serverError,
+                );
+              case DataFetchStatus.loading:
+                return const LoadingIndicator();
+              case DataFetchStatus.success:
+                return AutocompleteLabel<User>(
+                  key: const Key('thirdParty'),
+                  label: _localizations.activity_thirdParty,
+                  initialValue: _selectedThirdParty,
+                  optionsBuilder: (TextEditingValue textEditingValue) async {
+                    final result = await context.read<RestClient>().getUser(
+                      searchString: textEditingValue.text,
+                      limit: 3,
+                      isForDropDown: true,
+                      role: Role.unknown,
+                    );
+                    return result.users;
+                  },
+                  displayStringForOption: (User u) =>
+                      " ${[u.firstName, u.lastName].where((s) => s != null && s.isNotEmpty).join(' ')} "
+                      "${u.company?.name ?? ''}",
+                  onSelected: (User? newValue) {
+                    setState(() {
+                      _selectedThirdParty = newValue;
+                    });
+                  },
+                );
+              default:
+                return const Center(child: LoadingIndicator());
+            }
+          },
+        ),
+      const SizedBox(height: 20),
+      GroupingDecorator(
+        labelText: _localizations.activity_startDate,
+        child: Row(
+          children: [
+            Expanded(
+              child: Center(
+                child: Text(
+                  "${_selectedDate.toLocal()}".split(' ')[0],
+                  key: const Key('date'),
+                ),
+              ),
+            ),
+            OutlinedButton(
+              key: const Key('setDate'),
+              onPressed: () => selectDate(context),
+              child: Text(_localizations.activity_update),
+            ),
+          ],
+        ),
+      ),
+    ];
+
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
@@ -189,221 +386,19 @@ class ActivityDialogState extends State<ActivityDialog> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    key: const Key('pseudoId'),
-                    decoration: InputDecoration(
-                      labelText: _localizations.activity_id,
-                    ),
-                    controller: _pseudoIdController,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                if (widget.activity.activityType == ActivityType.todo)
-                  Expanded(
-                    child: DropdownButtonFormField<ActivityStatus>(
-                      key: const Key('statusDropDown'),
-                      decoration: InputDecoration(
-                        labelText: _localizations.activity_status,
-                      ),
-                      initialValue: _updatedStatus,
-                      validator: (value) => value == null
-                          ? _localizations.activity_fieldRequired
-                          : null,
-                      items:
-                          ActivityStatus.validActivityStatusList(_updatedStatus)
-                              .map(
-                                (label) => DropdownMenuItem<ActivityStatus>(
-                                  value: label,
-                                  child: Text(label.status),
-                                ),
-                              )
-                              .toList(),
-                      onChanged: (ActivityStatus? newValue) {
-                        setState(() {
-                          _updatedStatus = newValue!;
-                        });
-                      },
-                      isExpanded: true,
-                    ),
-                  ),
-              ],
-            ),
-            TextFormField(
-              key: const Key('name'),
-              decoration: InputDecoration(
-                labelText: _localizations.activity_nameError(
-                  widget.activity.activityType.toString(),
-                ),
-              ),
-              controller: _nameController,
-              validator: (value) {
-                if (value!.isEmpty) {
-                  return _localizations.activity_nameError(
-                    widget.activity.activityType.toString(),
-                  );
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 10),
-            MarkdownEditor(
-              controller: _descriptionController,
-              inputKey: const Key('description'),
-              label: _localizations.activity_description,
-              height: 200,
-            ),
-            if (widget.activity.activityType == ActivityType.todo &&
-                _authBloc.state.authenticate?.user?.userGroup ==
-                    UserGroup.admin)
-              const SizedBox(height: 10),
-            if (widget.activity.activityType == ActivityType.todo &&
-                _authBloc.state.authenticate?.user?.userGroup ==
-                    UserGroup.admin)
-              TextFormField(
-                key: const Key('rate'),
-                decoration: const InputDecoration(
-                  labelText: 'Hourly rate (client billing)',
-                ),
-                controller: _rateController,
-                keyboardType: TextInputType.number,
-              ),
-            if (widget.activity.activityType == ActivityType.todo)
-              const SizedBox(height: 10),
-            if (widget.activity.activityType == ActivityType.todo)
-              BlocBuilder<DataFetchBloc<Users>, DataFetchState<Users>>(
-                buildWhen: (previous, current) =>
-                    current.status != DataFetchStatus.loading,
-                builder: (context, state) {
-                  switch (state.status) {
-                    case DataFetchStatus.failure:
-                      return FatalErrorForm(
-                        message: _localizations.activity_serverError,
-                      );
-                    case DataFetchStatus.loading:
-                      return const LoadingIndicator();
-                    case DataFetchStatus.success:
-                      return AutocompleteLabel<User>(
-                        key: const Key('assignee'),
-                        label: _localizations.activity_assignee,
-                        initialValue: _selectedAssignee,
-                        optionsBuilder: (TextEditingValue textEditingValue) {
-                          _assigneeBloc.add(
-                            GetDataEvent(
-                              () => context.read<RestClient>().getUser(
-                                searchString: textEditingValue.text,
-                                limit: 3,
-                                isForDropDown: true,
-                                role: Role.company,
-                              ),
-                            ),
-                          );
-                          return Future.delayed(
-                            const Duration(milliseconds: 150),
-                            () {
-                              return (_assigneeBloc.state.data as Users).users;
-                            },
-                          );
-                        },
-                        displayStringForOption: (User u) =>
-                            " ${[
-                              u.firstName,
-                              u.lastName,
-                            ].where((s) => s != null && s.isNotEmpty).join(' ')} "
-                            "${u.company?.name ?? ''}",
-                        onSelected: (User? newValue) {
-                          setState(() {
-                            _selectedAssignee = newValue ?? _originator;
-                          });
-                        },
-                      );
-                    default:
-                      return const Center(child: LoadingIndicator());
-                  }
-                },
-              ),
-            if (widget.activity.activityType == ActivityType.todo ||
-                (widget.activity.activityType == ActivityType.event &&
-                    widget.companyUser == null))
-              const SizedBox(height: 10),
-            if (widget.activity.activityType == ActivityType.todo ||
-                (widget.activity.activityType == ActivityType.event &&
-                    widget.companyUser == null))
-              BlocBuilder<DataFetchBloc<Users>, DataFetchState<Users>>(
-                buildWhen: (previous, current) =>
-                    current.status != DataFetchStatus.loading,
-                builder: (context, state) {
-                  switch (state.status) {
-                    case DataFetchStatus.failure:
-                      return FatalErrorForm(
-                        message: _localizations.activity_serverError,
-                      );
-                    case DataFetchStatus.loading:
-                      return const LoadingIndicator();
-                    case DataFetchStatus.success:
-                      return AutocompleteLabel<User>(
-                        key: const Key('thirdParty'),
-                        label: _localizations.activity_thirdParty,
-                        initialValue: _selectedThirdParty,
-                        optionsBuilder: (TextEditingValue textEditingValue) {
-                          _thirdPartyBloc.add(
-                            GetDataEvent(
-                              () => context.read<RestClient>().getUser(
-                                searchString: textEditingValue.text,
-                                limit: 3,
-                                isForDropDown: true,
-                                role: Role.unknown,
-                              ),
-                            ),
-                          );
-                          return Future.delayed(
-                            const Duration(milliseconds: 150),
-                            () {
-                              return (_thirdPartyBloc.state.data as Users)
-                                  .users;
-                            },
-                          );
-                        },
-                        displayStringForOption: (User u) =>
-                            " ${[
-                              u.firstName,
-                              u.lastName,
-                            ].where((s) => s != null && s.isNotEmpty).join(' ')} "
-                            "${u.company?.name ?? ''}",
-                        onSelected: (User? newValue) {
-                          setState(() {
-                            _selectedThirdParty = newValue;
-                          });
-                        },
-                      );
-                    default:
-                      return const Center(child: LoadingIndicator());
-                  }
-                },
-              ),
-            const SizedBox(height: 20),
-            GroupingDecorator(
-              labelText: _localizations.activity_startDate,
-              child: Row(
+            // two columns on desktop, like the company dialog
+            if (isPhone) ...[
+              ...left,
+              ...right,
+            ] else
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        "${_selectedDate.toLocal()}".split(' ')[0],
-                        key: const Key('date'),
-                      ),
-                    ),
-                  ),
-                  OutlinedButton(
-                    key: const Key('setDate'),
-                    onPressed: () => selectDate(context),
-                    child: Text(_localizations.activity_update),
-                  ),
+                  Expanded(child: Column(children: left)),
+                  const SizedBox(width: 24),
+                  Expanded(child: Column(children: right)),
                 ],
               ),
-            ),
             const SizedBox(height: 10),
             Row(
               children: [
@@ -466,6 +461,7 @@ class ActivityDialogState extends State<ActivityDialog> {
                               statusId: _updatedStatus,
                               assignee: _selectedAssignee,
                               thirdParty: _selectedThirdParty,
+                              estimatedStartDate: _selectedDate,
                               rate: _rateController.text.isNotEmpty
                                   ? Decimal.tryParse(_rateController.text)
                                   : null,

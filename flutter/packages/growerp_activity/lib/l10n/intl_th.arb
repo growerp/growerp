@@ -71,5 +71,7 @@
   "activity_comments": "ความคิดเห็น",
   "activity_noComments": "ยังไม่มีความคิดเห็น",
   "activity_addComment": "เพิ่มความคิดเห็น",
-  "activity_aiAgent": "เอเจนต์ AI"
+  "activity_aiAgent": "เอเจนต์ AI",
+  "activity_deleteConfirm": "ลบ {activityType} {name}?",
+  "activity_deleteConfirmText": "ไม่สามารถยกเลิกได้!"
 }

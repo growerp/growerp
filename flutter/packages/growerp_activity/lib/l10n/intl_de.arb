@@ -71,5 +71,7 @@
   "activity_comments": "Kommentare",
   "activity_noComments": "Noch keine Kommentare",
   "activity_addComment": "Kommentar hinzufügen",
-  "activity_aiAgent": "KI-Agent"
+  "activity_aiAgent": "KI-Agent",
+  "activity_deleteConfirm": "{activityType} {name} löschen?",
+  "activity_deleteConfirmText": "Dies kann nicht rückgängig gemacht werden!"
 }
