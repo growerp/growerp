@@ -66,6 +66,10 @@
         <field name="loopEnabled"        type="text-indicator"/>
         <field name="loopChatRoomId"     type="id"/>
         <field name="loopReportEmail"    type="text-medium"/>
+        <!-- Optional input parameters, JSON list of [name, label, value, fixed]. value is the
+             default for runs whose message names none (scheduled runs); fixed Y overrides the
+             message. Appended to the instruction by AdkManager.withParameters. -->
+        <field name="parameters"         type="text-long"/>
     </entity>
 
     <!-- Phase 4: members of a coordinator/workflow agent's team. A coordinator delegates to

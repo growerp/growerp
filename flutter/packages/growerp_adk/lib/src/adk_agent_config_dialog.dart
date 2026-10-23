@@ -69,6 +69,8 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   String _loopChatRoomId = '';
   List<ChatRoom> _chatRooms = [];
   final _loopReportEmailCtrl = TextEditingController();
+  // Optional input parameters, appended to the instruction by the backend.
+  final List<_ParamRow> _params = [];
   bool _loopEnabled = false; // works the task inbox on its schedule
   bool _catalogPublished = true;
   bool _deleting = false;
@@ -129,6 +131,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       _loopEnabled = e.loopEnabled;
       _loopChatRoomId = e.loopChatRoomId ?? '';
       _loopReportEmailCtrl.text = e.loopReportEmail ?? '';
+      _params.addAll(e.parameters.map(_ParamRow.from));
       if (!widget.catalog) {
         if (_agentRole != 'specialist' && e.adkAgentConfigId != null) {
           _loadTeam();
@@ -314,6 +317,9 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     _teamNameCtrl.dispose();
     _catalogCategoryCtrl.dispose();
     _loopReportEmailCtrl.dispose();
+    for (final p in _params) {
+      p.dispose();
+    }
     super.dispose();
   }
 
@@ -354,10 +360,15 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   /// backend keeps the agent inactive while any is left in the instruction or
   /// the scheduled-run prompt. Lists them live as the user edits.
   Widget _placeholderWarning() => ListenableBuilder(
-        listenable: Listenable.merge([_instructionCtrl, _schedulePromptCtrl]),
+        listenable: Listenable.merge([
+          _instructionCtrl,
+          _schedulePromptCtrl,
+          ..._params.map((p) => p.value),
+        ]),
         builder: (context, _) {
           final open = RegExp(r'\[\[[^\[\]]+\]\]')
-              .allMatches('${_instructionCtrl.text} ${_schedulePromptCtrl.text}')
+              .allMatches('${_instructionCtrl.text} ${_schedulePromptCtrl.text} '
+                  '${_params.map((p) => p.value.text).join(' ')}')
               .map((m) => m.group(0)!)
               .toSet();
           if (open.isEmpty) return const SizedBox.shrink();
@@ -518,6 +529,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
         loopEnabled: _scheduleEnabled && _loopEnabled,
         loopChatRoomId: _loopChatRoomId,
         loopReportEmail: _loopReportEmailCtrl.text.trim(),
+        parameters: _params.map((p) => p.toParameter()).toList(),
       );
       final apiKey = _apiKeyCtrl.text.trim();
       final saved = await svc.save(cfg,
@@ -534,6 +546,87 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+
+  /// Optional input parameters: name, label, default value and a fixed flag.
+  /// The default is used when a run's message gives no value, so scheduled
+  /// runs get it; a fixed value also overrides the message.
+  Widget _parametersSection() {
+    final l = AdkLocalizations.of(context)!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(l.adk_parameters, style: TextStyle(fontWeight: FontWeight.w600)),
+        Text(l.adk_parametersHint,
+            style: Theme.of(context).textTheme.bodySmall),
+        for (final (i, p) in _params.indexed)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Wrap(
+              spacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                SizedBox(
+                  width: 140,
+                  child: TextFormField(
+                    key: Key('paramName$i'),
+                    controller: p.name,
+                    decoration: InputDecoration(labelText: l.adk_parameterName),
+                    validator: (v) => RegExp(r'^[A-Za-z_][A-Za-z0-9_]*$')
+                            .hasMatch(v?.trim() ?? '')
+                        ? null
+                        : l.adk_parameterNameError,
+                  ),
+                ),
+                SizedBox(
+                  width: 180,
+                  child: TextFormField(
+                    key: Key('paramLabel$i'),
+                    controller: p.label,
+                    decoration:
+                        InputDecoration(labelText: l.adk_parameterLabel),
+                  ),
+                ),
+                SizedBox(
+                  width: 180,
+                  child: TextFormField(
+                    key: Key('paramValue$i'),
+                    controller: p.value,
+                    decoration:
+                        InputDecoration(labelText: l.adk_parameterValue),
+                  ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Checkbox(
+                      key: Key('paramFixed$i'),
+                      value: p.fixed,
+                      onChanged: (v) => setState(() => p.fixed = v ?? false),
+                    ),
+                    Tooltip(
+                      message: l.adk_parameterFixedHint,
+                      child: Text(l.adk_parameterFixed),
+                    ),
+                  ],
+                ),
+                IconButton(
+                  key: Key('removeParam$i'),
+                  icon: Icon(Icons.delete_outline),
+                  onPressed: () =>
+                      setState(() => _params.removeAt(i).dispose()),
+                ),
+              ],
+            ),
+          ),
+        TextButton.icon(
+          key: Key('addParam'),
+          onPressed: () => setState(() => _params.add(_ParamRow())),
+          icon: Icon(Icons.add),
+          label: Text(l.adk_addParameter),
+        ),
+      ],
+    );
   }
 
   /// Current members + an add-from-available picker. Members can only be managed on a
@@ -862,6 +955,8 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
                         decoration: InputDecoration(
                             labelText: 'Description (optional)'),
                       ),
+                      SizedBox(height: 8),
+                      _parametersSection(),
                       if (!widget.catalog) ...[
                       SizedBox(height: 8),
                       TextFormField(
@@ -1220,5 +1315,35 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
         ),
       ),
     );
+  }
+}
+
+/// Editing state of one [AdkAgentParameter] row.
+class _ParamRow {
+  final TextEditingController name;
+  final TextEditingController label;
+  final TextEditingController value;
+  bool fixed;
+
+  _ParamRow(
+      {String name = '', String label = '', String value = '', this.fixed = false})
+      : name = TextEditingController(text: name),
+        label = TextEditingController(text: label),
+        value = TextEditingController(text: value);
+
+  factory _ParamRow.from(AdkAgentParameter p) =>
+      _ParamRow(name: p.name, label: p.label, value: p.value, fixed: p.fixed);
+
+  AdkAgentParameter toParameter() => AdkAgentParameter(
+        name: name.text.trim(),
+        label: label.text.trim(),
+        value: value.text.trim(),
+        fixed: fixed,
+      );
+
+  void dispose() {
+    name.dispose();
+    label.dispose();
+    value.dispose();
   }
 }

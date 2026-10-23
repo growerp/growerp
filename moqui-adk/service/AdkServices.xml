@@ -45,6 +45,8 @@
             <parameter name="loopEnabled"/>
             <parameter name="loopChatRoomId"/>
             <parameter name="loopReportEmail"/>
+            <!-- JSON list of input parameters [name, label, value, fixed]; AdkManager.withParameters -->
+            <parameter name="parameters"/>
         </in-parameters>
         <out-parameters>
             <parameter name="adkAgentConfigId"/>
@@ -53,7 +55,7 @@
             <!-- [[...]] placeholders (catalog templates the company still has to fill in): the
                  agent is saved but stays inactive — no runtime, no scheduled job — until a save
                  without them -->
-            <set field="activeFlag" from="((instruction ?: '') + ' ' + (schedulePrompt ?: '')) =~ /\[\[[^\[\]]+\]\]/ ? 'N' : 'Y'"/>
+            <set field="activeFlag" from="((instruction ?: '') + ' ' + (schedulePrompt ?: '') + ' ' + (parameters ?: '')) =~ /\[\[[^\[\]]+\]\]/ ? 'N' : 'Y'"/>
             <!-- Edit (id given) updates that exact row — so renames don't create a duplicate.
                  Create (no id) upserts by (ownerPartyId, agentName). -->
             <if condition="adkAgentConfigId">
@@ -103,6 +105,7 @@
                 <if condition="loopEnabled != null"><set field="existing.loopEnabled" from="loopEnabled"/></if>
                 <if condition="loopChatRoomId != null"><set field="existing.loopChatRoomId" from="loopChatRoomId ?: null"/></if>
                 <if condition="loopReportEmail != null"><set field="existing.loopReportEmail" from="loopReportEmail ?: null"/></if>
+                <if condition="parameters != null"><set field="existing.parameters" from="parameters ?: null"/></if>
                 <entity-update value-field="existing"/>
                 <set field="adkAgentConfigId" from="existing.adkAgentConfigId"/>
                 <else>
@@ -139,6 +142,7 @@
                     <set field="newCfg.loopEnabled"        from="loopEnabled ?: 'N'"/>
                     <set field="newCfg.loopChatRoomId"     from="loopChatRoomId ?: null"/>
                     <set field="newCfg.loopReportEmail"    from="loopReportEmail ?: null"/>
+                    <set field="newCfg.parameters"         from="parameters ?: null"/>
                     <entity-sequenced-id-primary value-field="newCfg"/>
                     <entity-create value-field="newCfg"/>
                     <set field="adkAgentConfigId" from="newCfg.adkAgentConfigId"/>
@@ -176,7 +180,7 @@
                     savedCfg.ownerPartyId ?: null,
                     savedCfg.agentName    ?: null,
                     savedCfg.modelName    ?: null,
-                    savedCfg.instruction  ?: '',
+                    org.moqui.adk.AdkManager.withParameters(savedCfg.instruction, savedCfg.parameters),
                     resolvedApiKey,
                     savedCfg.llmProvider  ?: 'gemini',
                     savedCfg.description  ?: null

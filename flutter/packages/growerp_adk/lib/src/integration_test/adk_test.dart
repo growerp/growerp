@@ -84,6 +84,11 @@ class AdkTest {
       if ((cfg.description ?? '').isNotEmpty) {
         expect(CommonTest.getTextFormField('description'), cfg.description);
       }
+      for (final (i, p) in cfg.parameters.indexed) {
+        expect(CommonTest.getTextFormField('paramName$i'), p.name);
+        expect(CommonTest.getTextFormField('paramValue$i'), p.value);
+        expect(CommonTest.getCheckbox('paramFixed$i'), p.fixed);
+      }
       expect(CommonTest.getDropdown('toolMode'), cfg.toolMode);
       expect(CommonTest.getDropdown('writePolicy'), cfg.writePolicy);
       if (cfg.toolMode == 'scoped' && (cfg.serviceAllowlist ?? '').isNotEmpty) {
@@ -191,6 +196,17 @@ class AdkTest {
     }
     if ((a.description ?? '').isNotEmpty) {
       await CommonTest.enterText(tester, 'description', a.description!);
+    }
+    for (final (i, p) in a.parameters.indexed) {
+      if (!await CommonTest.doesExistKey(tester, 'paramName$i')) {
+        await CommonTest.tapByKey(tester, 'addParam');
+      }
+      await CommonTest.enterText(tester, 'paramName$i', p.name);
+      await CommonTest.enterText(tester, 'paramLabel$i', p.label);
+      await CommonTest.enterText(tester, 'paramValue$i', p.value);
+      if (CommonTest.getCheckbox('paramFixed$i') != p.fixed) {
+        await CommonTest.tapByKey(tester, 'paramFixed$i');
+      }
     }
     final toolLabel = _toolModeLabel(a.toolMode);
     if (toolLabel != null) {

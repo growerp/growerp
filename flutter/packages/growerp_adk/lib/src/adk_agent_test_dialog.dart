@@ -141,6 +141,15 @@ class _AdkAgentTestDialogState extends State<AdkAgentTestDialog> {
               helper: l.adk_testPromptHint,
               height: 200,
             ),
+            if (widget.agent.parameters.isNotEmpty)
+              Text(
+                l.adk_testParameters(widget.agent.parameters
+                    .map((p) =>
+                        '${p.name} = ${p.value}${p.fixed ? ' (${l.adk_parameterFixed})' : ''}')
+                    .join(', ')),
+                key: const Key('testParameters'),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             SwitchListTile(
               key: const Key('testDryRun'),
               contentPadding: EdgeInsets.zero,

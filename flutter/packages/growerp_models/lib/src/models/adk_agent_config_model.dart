@@ -12,6 +12,8 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
+
 import 'package:json_annotation/json_annotation.dart';
 
 part 'adk_agent_config_model.g.dart';
@@ -94,6 +96,15 @@ class AdkAgentConfig {
   final String? loopChatRoomId;
   final String? loopReportEmail;
 
+  /// Optional input parameters: [AdkAgentParameter.value] is the default for
+  /// runs whose message names none (scheduled runs). Stored as a JSON string.
+  @JsonKey(
+    defaultValue: <AdkAgentParameter>[],
+    fromJson: AdkAgentParameter.decode,
+    toJson: AdkAgentParameter.encode,
+  )
+  final List<AdkAgentParameter> parameters;
+
   /// Write-only: sent on create/update, never returned by GET.
   @JsonKey(includeFromJson: false)
   final String? apiKey;
@@ -129,6 +140,7 @@ class AdkAgentConfig {
     this.loopEnabled = false,
     this.loopChatRoomId,
     this.loopReportEmail,
+    this.parameters = const [],
     this.apiKey,
   });
 
@@ -168,6 +180,7 @@ class AdkAgentConfig {
     bool? loopEnabled,
     String? loopChatRoomId,
     String? loopReportEmail,
+    List<AdkAgentParameter>? parameters,
     String? apiKey,
   }) =>
       AdkAgentConfig(
@@ -201,11 +214,62 @@ class AdkAgentConfig {
         loopEnabled: loopEnabled ?? this.loopEnabled,
         loopChatRoomId: loopChatRoomId ?? this.loopChatRoomId,
         loopReportEmail: loopReportEmail ?? this.loopReportEmail,
+        parameters: parameters ?? this.parameters,
         apiKey: apiKey ?? this.apiKey,
       );
 
   @override
   String toString() => 'AdkAgentConfig[$adkAgentConfigId: $agentName]';
+}
+
+/// One optional input of an agent, e.g. the country Partner Scout searches.
+/// [value] is the default; [fixed] makes the agent ignore any other value
+/// given in the run's message.
+class AdkAgentParameter {
+  final String name;
+  final String label;
+  final String value;
+  final bool fixed;
+
+  const AdkAgentParameter({
+    required this.name,
+    this.label = '',
+    this.value = '',
+    this.fixed = false,
+  });
+
+  factory AdkAgentParameter.fromJson(Map<String, dynamic> json) =>
+      AdkAgentParameter(
+        name: json['name'] as String? ?? '',
+        label: json['label'] as String? ?? '',
+        value: json['value'] as String? ?? '',
+        fixed: json['fixed'] == true,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        if (label.isNotEmpty) 'label': label,
+        if (value.isNotEmpty) 'value': value,
+        if (fixed) 'fixed': true,
+      };
+
+  /// The backend stores the list as a JSON string; also accepts a list.
+  static List<AdkAgentParameter> decode(dynamic raw) {
+    try {
+      final list = raw is String ? (raw.isEmpty ? [] : jsonDecode(raw)) : raw;
+      if (list is! List) return [];
+      return list
+          .whereType<Map>()
+          .map((m) => AdkAgentParameter.fromJson(Map<String, dynamic>.from(m)))
+          .toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// '' clears the stored list; null would keep it.
+  static String encode(List<AdkAgentParameter> list) =>
+      list.isEmpty ? '' : jsonEncode(list.map((p) => p.toJson()).toList());
 }
 
 @JsonSerializable()

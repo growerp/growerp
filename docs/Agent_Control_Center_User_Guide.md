@@ -33,6 +33,17 @@ When you tap the **+** button or edit an existing agent, you will open the Agent
 * **LLM Provider**: The provider hosting the model (e.g., `gemini`, `openai`, `anthropic`). Defaults to `gemini`.
 * **Instruction (System Prompt)**: The exact instructions detailing what the agent should do, its persona, and rules to follow.
 * **Description**: An optional brief summary of the agent's purpose.
+* **Input parameters** (optional): named values the agent works with, for example the
+  `country` the Partner Scout searches. Each has a **Name** (one word: letters, digits or `_`),
+  a **Label** and a **Default value**. The parameters are added to the end of the instruction,
+  so refer to them by name there, for example *in the country of input parameter country*.
+  * The default value is used when the run's message gives no value. Scheduled runs use it, so
+    the scheduled-run prompt does not have to repeat it.
+  * A value given in the message or chat, for example *…partners in Malaysia*, replaces the
+    default for that run.
+  * Tick **Fixed** to always use the value, also when the message names another one: the
+    agent then only works with that value.
+  * A `[[...]]` fill-in in a value keeps the agent inactive, like one in the instruction.
 * **API Key**: If left blank, the agent uses the server default API key for the chosen LLM Provider. You can enter a specific key if this agent needs its own billing/rate limits.
 
 ### 2. Permissions & Governance
@@ -103,14 +114,17 @@ To run an agent one time, without a schedule, open the saved agent and tap **Run
 Cancel. It always runs the **saved** version of the agent, so save your changes first.
 
 * **Prompt**: leave it empty to use the agent's prompt for scheduled runs, or type a one-off
-  task, for example *Find up to 5 new partners in Vietnam.*
+  task, for example *Find up to 5 new partners in Vietnam.* The agent's input parameters and
+  their values are listed under the prompt; name another value in the prompt to replace one
+  that is not fixed.
 * **Simulate writes** (on by default): every create, update or delete goes through the
   permission rules but is not executed. Email, GitHub and Substack tools and external MCP
   servers are left out, because they cannot be simulated. Turn it off for a real run that
   changes data.
 * **Check only** runs the rule checks, without any AI call. Errors are problems the next run
   will hit for sure, for example `{name}` in the instruction (read as a variable that does not
-  exist) or scheduled runs without a cron expression. Warnings are likely problems, such as an
+  exist), scheduled runs without a cron expression or an input parameter name that is not one
+  word. Warnings are likely problems, such as an
   allowed service that matches nothing, web search with a provider other than Gemini, or
   `[[...]]` fill-ins that keep the agent inactive.
 * **Run** runs the agent once with the prompt. It takes as long as a scheduled run, often a few
