@@ -300,11 +300,23 @@ class _LinkedInSendQueueScreenState extends State<LinkedInSendQueueScreen> {
   }
 
   Widget _card(OutreachMessage m) {
+    final noBookingPage = m.messageContent.contains('{meetingUrl}') &&
+        (_campaign(m)?.meetingUrl ?? 'loading').isEmpty;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (noBookingPage)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                'No booking page is set in the Google Workspace settings: '
+                'the call line of this message is left out.',
+                key: const Key('noBookingPageWarning'),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            ),
           Text(
             m.recipientName ?? 'Unknown',
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),

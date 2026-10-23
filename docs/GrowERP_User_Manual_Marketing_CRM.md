@@ -297,7 +297,8 @@ link into the messages.
 
 - **The booking link:** `{meetingUrl}` is the *Booking page URL* from the Google
   Workspace settings (your Google Calendar appointment schedule). Without one, a line
-  holding a plain `{meetingUrl}` is left out of the message. A Google Meet call booked
+  holding a plain `{meetingUrl}` is left out of the message; starting the campaign and the
+  LinkedIn send queue then warn about it. A Google Meet call booked
   through the page appears in the person's **Communications** as a *Video call*, within
   15 minutes, and its Gemini notes are added after the call.
 

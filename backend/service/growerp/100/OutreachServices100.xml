@@ -2012,6 +2012,11 @@
             <parameter name="marketingCampaignId" />
             <parameter name="statusId" />
             <parameter name="message" />
+            <parameter name="warning">
+                <description>Set when the template or a pending message uses {meetingUrl}
+                    but no booking page is set: the call line is then left out. Does not
+                    stop the start.</description>
+            </parameter>
         </out-parameters>
         <actions>
             <service-call out-map="context"
@@ -2041,6 +2046,21 @@
 
             <set field="statusId" value="MKTG_CAMP_INPROGRESS" />
             <set field="message" value="Campaign automation started" />
+
+            <service-call name="growerp.100.OutreachServices100.get#CampaignLandingPageUrl"
+                in-map="[ownerPartyId: ownerPartyId]" out-map="landingOut" />
+            <if condition="!landingOut.meetingUrl">
+                <entity-find-count entity-name="growerp.marketing.OutreachMessage"
+                    count-field="meetingUrlPending">
+                    <econdition field-name="marketingCampaignId" />
+                    <econdition field-name="status" value="PENDING" />
+                    <econdition field-name="messageContent" operator="like" value="%{meetingUrl}%" />
+                </entity-find-count>
+                <if condition="meetingUrlPending || campaign.messageTemplate?.contains('{meetingUrl}')">
+                    <set field="warning"
+                        value="Messages use {meetingUrl} but no booking page is set in the Google Workspace settings: the call line is left out." />
+                </if>
+            </if>
         </actions>
     </service>
 

@@ -168,9 +168,10 @@ class OutreachCampaignBloc
       );
 
       // Auto-start automation when status changes to APPROVED
+      CampaignDetail? detail;
       if (event.status == 'MKTG_CAMP_APPROVED') {
         // Fetch the updated campaign to get full data
-        final detail = await restClient.getOutreachCampaignDetail(
+        detail = await restClient.getOutreachCampaignDetail(
           marketingCampaignId: event.campaignId,
         );
 
@@ -185,8 +186,8 @@ class OutreachCampaignBloc
         state.copyWith(
           status: OutreachCampaignStatus.success,
           campaigns: result.campaigns,
-          message: event.status == 'MKTG_CAMP_APPROVED'
-              ? 'Campaign approved and started'
+          message: detail != null
+              ? _withBookingWarning('Campaign approved and started', detail)
               : 'Campaign updated successfully',
         ),
       );
@@ -307,6 +308,20 @@ class OutreachCampaignBloc
     }
   }
 
+  /// Messages keep {meetingUrl} until they are sent; without a booking page
+  /// the backend then drops that line, so say so when the campaign starts.
+  String _withBookingWarning(String message, CampaignDetail detail) {
+    if ((detail.campaign.meetingUrl ?? '').isNotEmpty) return message;
+    final usesMeetingUrl =
+        (detail.campaign.messageTemplate ?? '').contains('{meetingUrl}') ||
+            detail.messages.any((m) =>
+                m.status == 'PENDING' && m.messageContent.contains('{meetingUrl}'));
+    return usesMeetingUrl
+        ? '$message. Messages use {meetingUrl} but no booking page is set in '
+            'the Google Workspace settings: the call line is left out.'
+        : message;
+  }
+
   Future<void> _onStart(
     OutreachCampaignStart event,
     Emitter<OutreachCampaignState> emit,
@@ -321,13 +336,12 @@ class OutreachCampaignBloc
         }
       }
 
-      // If not found in state, fetch from backend
-      if (campaign == null) {
-        final detail = await restClient.getOutreachCampaignDetail(
-          marketingCampaignId: event.campaignId,
-        );
-        campaign = detail.campaign;
-      }
+      // Fetch the detail also when found: its pending messages are needed
+      // for the booking-page warning
+      final detail = await restClient.getOutreachCampaignDetail(
+        marketingCampaignId: event.campaignId,
+      );
+      campaign ??= detail.campaign;
 
       // Start local automation (this also notifies backend)
       // Run in background - don't await the full automation
@@ -339,7 +353,7 @@ class OutreachCampaignBloc
         state.copyWith(
           status: OutreachCampaignStatus.success,
           campaigns: result.campaigns,
-          message: 'Campaign started',
+          message: _withBookingWarning('Campaign started', detail),
         ),
       );
     } catch (error) {

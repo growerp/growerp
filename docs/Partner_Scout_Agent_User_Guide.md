@@ -121,8 +121,9 @@ without anything being stored. See
 4. **Follow the conversation.** Every sent message appears in the lead's **Communications**:
    emails automatically, LinkedIn messages when you mark them sent. Each draft ends with
    *Pick a time for a 20-minute call:* and your booking link (the line is left out when no
-   booking page is set). A Meet call the candidate books there shows up as a *Video call*,
-   with the Gemini meeting notes added after the call.
+   booking page is set: starting the campaign then shows a warning, and so does the LinkedIn
+   send queue for each message that loses the line). A Meet call the candidate books there
+   shows up as a *Video call*, with the Gemini meeting notes added after the call.
 5. **When they answer**, set the message to *Responded*. GrowERP then creates an opportunity
    for that same lead in **CRM → Opportunities**.
 
