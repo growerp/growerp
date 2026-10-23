@@ -802,6 +802,431 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   Widget build(BuildContext context) {
     final isNew = widget.existing == null;
     final id = widget.existing?.adkAgentConfigId ?? 'new';
+    final isPhone = isAPhone(context);
+    // left: what the agent is and does; right: access, team and schedule
+    final left = <Widget>[
+      TextFormField(
+        key: Key('agentName'),
+        controller: _nameCtrl,
+        maxLength: 63,
+        decoration:
+            InputDecoration(labelText: 'Agent name *'),
+        validator: (v) =>
+            (v == null || v.trim().isEmpty) ? 'Required' : null,
+      ),
+      if (widget.catalog) ...[
+        SwitchListTile(
+          key: Key('catalogPublished'),
+          contentPadding: EdgeInsets.zero,
+          title: Text('Published'),
+          subtitle: Text(
+            'Visible in every company\'s function catalog and '
+            'on the website',
+            style: TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+          value: _catalogPublished,
+          onChanged: (v) =>
+              setState(() => _catalogPublished = v),
+        ),
+        TextFormField(
+          key: Key('catalogCategory'),
+          controller: _catalogCategoryCtrl,
+          decoration: InputDecoration(
+            labelText: 'Catalog category',
+            hintText: 'Marketing, Operations, Sales, ...',
+          ),
+        ),
+      ],
+      SizedBox(height: 8),
+      if (!_providersLoading && _providerOptions().isEmpty)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text(
+            'No LLM API key configured yet. Add one in '
+            'System Setup before creating an agent.',
+            key: const Key('noLlmKeyWarning'),
+            style: TextStyle(
+                color: Theme.of(context).colorScheme.error),
+          ),
+        ),
+      TextFormField(
+        key: Key('modelName'),
+        controller: _modelCtrl,
+        enabled: _providerOptions().isNotEmpty,
+        decoration: InputDecoration(
+          labelText: 'Model',
+          hintText: defaultLlmModel.modelId,
+          suffixIcon: PopupMenuButton<String>(
+            key: Key('modelNameMenu'),
+            tooltip: 'Pick a model',
+            icon: Icon(Icons.arrow_drop_down),
+            itemBuilder: (context) => llmModels
+                .where((m) =>
+                    m.provider == _llmProviderCtrl.text.trim())
+                .map((m) => PopupMenuItem<String>(
+                      value: m.modelId,
+                      child: Text(m.modelId),
+                    ))
+                .toList(),
+            onSelected: (m) =>
+                setState(() => _modelCtrl.text = m),
+          ),
+        ),
+      ),
+      SizedBox(height: 8),
+      DropdownButtonFormField<String>(
+        key: Key('llmProvider'),
+        initialValue: _providerOptions()
+                .contains(_llmProviderCtrl.text.trim())
+            ? _llmProviderCtrl.text.trim()
+            : null,
+        decoration: InputDecoration(
+          labelText: 'LLM Provider',
+          helperText:
+              'Only providers with an API key in System Setup',
+        ),
+        items: _providerOptions()
+            .map((p) => DropdownMenuItem<String>(
+                  value: p,
+                  child: Text(_providersWithKey.contains(p)
+                      ? p
+                      : '$p  (no API key)'),
+                ))
+            .toList(),
+        onChanged: _providerOptions().isEmpty
+            ? null
+            : (v) => setState(() {
+                  _llmProviderCtrl.text = v ?? '';
+                  // keep model and provider consistent
+                  final first = llmModels
+                      .where((m) => m.provider == v)
+                      .toList();
+                  if (first.isNotEmpty &&
+                      !llmModels.any((m) =>
+                          m.provider == v &&
+                          m.modelId == _modelCtrl.text)) {
+                    _modelCtrl.text = first.first.modelId;
+                  }
+                }),
+      ),
+      if (_llmProviderCtrl.text.trim().isNotEmpty &&
+          !adkRoutedProviders
+              .contains(_llmProviderCtrl.text.trim()))
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(
+            'The ADK runtime has no model implementation for '
+            'this provider; an agent on it is registered but '
+            'will not answer.',
+            key: const Key('providerNotRoutedWarning'),
+            style: TextStyle(
+                color: Theme.of(context).colorScheme.error),
+          ),
+        ),
+      SizedBox(height: 8),
+      _placeholderWarning(),
+      MarkdownEditor(
+        controller: _instructionCtrl,
+        inputKey: const Key('instruction'),
+        label: 'Instruction (system prompt)',
+        hint: 'You are a helpful assistant…',
+        height: 400,
+      ),
+      SizedBox(height: 8),
+      TextFormField(
+        key: Key('description'),
+        controller: _descriptionCtrl,
+        maxLength: 255,
+        decoration: InputDecoration(
+            labelText: 'Description (optional)'),
+      ),
+      SizedBox(height: 8),
+      _parametersSection(),
+      if (!widget.catalog) ...[
+      SizedBox(height: 8),
+      TextFormField(
+        key: Key('apiKey'),
+        controller: _apiKeyCtrl,
+        decoration: InputDecoration(
+          labelText: isNew
+              ? 'Google API key (leave blank to use server default)'
+              : 'New API key (leave blank to keep existing)',
+        ),
+        obscureText: true,
+      ),
+      ],
+    ];
+    final right = <Widget>[
+      Text(AdkLocalizations.of(context)!.adk_permissionsGovernance,
+          style: TextStyle(fontWeight: FontWeight.bold)),
+      SizedBox(height: 8),
+      DropdownButtonFormField<String>(
+        key: Key('toolMode'),
+        initialValue: _toolMode,
+        decoration: InputDecoration(
+          labelText: 'Tool access',
+          helperText:
+              'readOnly: queries only · scoped: allow-listed services · full: any service',
+        ),
+        items: [
+          DropdownMenuItem(
+              value: 'readOnly', child: Text(AdkLocalizations.of(context)!.adk_readOnly)),
+          DropdownMenuItem(
+              value: 'scoped', child: Text(AdkLocalizations.of(context)!.adk_scopedAllowList)),
+          DropdownMenuItem(value: 'full', child: Text('Full')),
+        ],
+        onChanged: (v) =>
+            setState(() => _toolMode = v ?? 'readOnly'),
+      ),
+      if (_toolMode == 'scoped') ...[
+        SizedBox(height: 8),
+        TextFormField(
+          key: Key('serviceAllowlist'),
+          controller: _allowlistCtrl,
+          decoration: InputDecoration(
+            labelText: 'Allowed services',
+            hintText: 'growerp.*#get*, mantle.order.*',
+            helperText:
+                'Comma-separated service-name globs (* wildcard)',
+          ),
+        ),
+      ],
+      SizedBox(height: 8),
+      DropdownButtonFormField<String>(
+        key: Key('writePolicy'),
+        initialValue: _writePolicy,
+        decoration: InputDecoration(
+          labelText: 'Write policy',
+          helperText:
+              'How write (create/update/…) actions are handled',
+        ),
+        items: [
+          DropdownMenuItem(
+              value: 'block', child: Text(AdkLocalizations.of(context)!.adk_blockWrites)),
+          DropdownMenuItem(
+              value: 'approve',
+              child: Text(AdkLocalizations.of(context)!.adk_requireApproval)),
+          DropdownMenuItem(
+              value: 'allow', child: Text(AdkLocalizations.of(context)!.adk_allowAutoRun)),
+        ],
+        onChanged: (v) =>
+            setState(() => _writePolicy = v ?? 'approve'),
+      ),
+      if (_writePolicy == 'approve') ...[
+        SizedBox(height: 8),
+        _chatRoomPicker(
+          keyName: 'approvalChatRoomId',
+          label: AdkLocalizations.of(context)!.adk_approvalChatRoom,
+          helper: AdkLocalizations.of(context)!.adk_approvalChatRoomHint,
+          value: _approvalChatRoomId,
+          onChanged: (v) => _approvalChatRoomId = v,
+        ),
+      ],
+      SizedBox(height: 8),
+      CheckboxListTile(
+        key: Key('websiteChat'),
+        contentPadding: EdgeInsets.zero,
+        controlAffinity: ListTileControlAffinity.leading,
+        value: _websiteChat,
+        title: Text(AdkLocalizations.of(context)!.adk_answerWebsiteChat),
+        subtitle: Text(AdkLocalizations.of(context)!.adk_thisAgentRepliesTo,
+          style: TextStyle(fontSize: 12, color: Colors.grey),
+        ),
+        onChanged: (v) =>
+            setState(() => _websiteChat = v ?? false),
+      ),
+      CheckboxListTile(
+        key: Key('webSearch'),
+        contentPadding: EdgeInsets.zero,
+        controlAffinity: ListTileControlAffinity.leading,
+        value: _webSearch,
+        title: Text(AdkLocalizations.of(context)!.adk_webSearch),
+        subtitle: Text(AdkLocalizations.of(context)!.adk_webSearchHint,
+          style: TextStyle(fontSize: 12, color: Colors.grey),
+        ),
+        onChanged: (v) =>
+            setState(() => _webSearch = v ?? false),
+      ),
+      TextFormField(
+        key: Key('maxLlmCalls'),
+        controller: _maxLlmCallsCtrl,
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(
+          labelText: AdkLocalizations.of(context)!.adk_maxLlmCalls,
+          hintText: '10',
+          helperText: AdkLocalizations.of(context)!.adk_maxLlmCallsHint,
+        ),
+      ),
+      Divider(height: 24),
+      Text(AdkLocalizations.of(context)!.adk_teamOrchestration,
+          style: TextStyle(fontWeight: FontWeight.bold)),
+      SizedBox(height: 8),
+      TextFormField(
+        key: Key('teamName'),
+        controller: _teamNameCtrl,
+        decoration: InputDecoration(
+          labelText: 'Team name',
+          helperText:
+              'Groups this agent in the Agent Control Center list and '
+              'lets the whole team be downloaded/uploaded together',
+        ),
+      ),
+      SizedBox(height: 8),
+      DropdownButtonFormField<String>(
+        key: Key('agentRole'),
+        initialValue: _agentRole,
+        decoration: InputDecoration(
+          labelText: 'Role',
+          helperText:
+              'specialist: does the work · coordinator: delegates to a team of specialists',
+        ),
+        items: [
+          DropdownMenuItem(
+              value: 'specialist', child: Text('Specialist')),
+          DropdownMenuItem(
+              value: 'coordinator', child: Text(AdkLocalizations.of(context)!.adk_coordinatorTeam)),
+        ],
+        onChanged: (v) =>
+            setState(() => _agentRole = v ?? 'specialist'),
+      ),
+      if (_agentRole != 'specialist') ...[
+        SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          key: Key('orchestrationType'),
+          initialValue: _orchestrationType,
+          decoration: InputDecoration(
+            labelText: 'Orchestration',
+            helperText:
+                'router: the LLM picks specialists (sequential/parallel/loop: Phase 4b)',
+          ),
+          items: [
+            DropdownMenuItem(value: 'router', child: Text(AdkLocalizations.of(context)!.adk_routerLlmPicks)),
+            DropdownMenuItem(value: 'sequential', child: Text('Sequential')),
+            DropdownMenuItem(value: 'parallel', child: Text('Parallel')),
+            DropdownMenuItem(value: 'loop', child: Text('Loop')),
+          ],
+          onChanged: (v) =>
+              setState(() => _orchestrationType = v ?? 'router'),
+        ),
+        if (_orchestrationType == 'loop') ...[
+          SizedBox(height: 8),
+          TextFormField(
+            key: Key('loopMaxIterations'),
+            controller: _loopMaxCtrl,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: 'Max loop iterations',
+              hintText: '3',
+              helperText: 'Safety cap for the loop workflow',
+            ),
+          ),
+        ],
+        if (!widget.catalog) ...[
+          SizedBox(height: 8),
+          _teamMembersSection(isNew: widget.existing == null),
+        ],
+      ],
+      if (!widget.catalog) ...[
+      Divider(height: 24),
+      Text(AdkLocalizations.of(context)!.adk_mcpServers,
+          style: TextStyle(fontWeight: FontWeight.bold)),
+      Text(
+        'External tool servers (SSE / HTTP) this agent may use. '
+        'Register them in the MCP Servers screen first.',
+        style: TextStyle(fontSize: 12, color: Colors.grey),
+      ),
+      SizedBox(height: 8),
+      _mcpServersSection(isNew: widget.existing == null),
+      ],
+      Divider(height: 24),
+      SwitchListTile(
+        key: Key('scheduleEnabled'),
+        contentPadding: EdgeInsets.zero,
+        title: Text(AdkLocalizations.of(context)!.adk_enableScheduledRuns),
+        value: _scheduleEnabled,
+        onChanged: (v) async {
+          setState(() => _scheduleEnabled = v);
+          // a new schedule starts as daily at 09:00 local time
+          if (v && _scheduleCronCtrl.text.trim().isEmpty) {
+            final cron = await defaultScheduleCron();
+            if (mounted) setState(() => _scheduleCronCtrl.text = cron);
+          }
+        },
+      ),
+      if (_scheduleEnabled) ...[
+        ListTile(
+          key: Key('scheduleSummary'),
+          contentPadding: EdgeInsets.zero,
+          leading: Icon(Icons.schedule),
+          title: _scheduleCronCtrl.text.trim().isEmpty
+              ? Text('—')
+              : ScheduleText(_scheduleCronCtrl.text.trim()),
+          trailing: TextButton(
+            key: Key('editSchedule'),
+            onPressed: () async {
+              final cron = await AdkScheduleDialog.show(context,
+                  cron: _scheduleCronCtrl.text.trim());
+              if (cron != null) {
+                setState(() => _scheduleCronCtrl.text = cron);
+              }
+            },
+            child: Text(AdkLocalizations.of(context)!.adk_schedChange),
+          ),
+        ),
+        SwitchListTile(
+          key: Key('loopEnabled'),
+          contentPadding: EdgeInsets.zero,
+          title: Text(AdkLocalizations.of(context)!.adk_loopEnabled),
+          subtitle: Text(
+              AdkLocalizations.of(context)!.adk_loopEnabledHint,
+              style: TextStyle(fontSize: 12)),
+          value: _loopEnabled,
+          onChanged: (v) => setState(() {
+            _loopEnabled = v;
+            // a task loop checks its inbox every 10 minutes
+            if (v) _scheduleCronCtrl.text = '0 */10 * * * ?';
+          }),
+        ),
+        if (_loopEnabled) ...[
+          _chatRoomPicker(
+            keyName: 'loopChatRoomId',
+            label: AdkLocalizations.of(context)!.adk_loopChatRoomId,
+            helper: AdkLocalizations.of(context)!.adk_loopChatRoomIdHint,
+            value: _loopChatRoomId,
+            onChanged: (v) => _loopChatRoomId = v,
+          ),
+          SizedBox(height: 8),
+          TextFormField(
+            key: Key('loopReportEmail'),
+            controller: _loopReportEmailCtrl,
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecoration(
+              labelText: AdkLocalizations.of(context)!.adk_loopReportEmail,
+              hintText: AdkLocalizations.of(context)!.adk_loopReportEmailHint,
+            ),
+          ),
+        ],
+        if (!_loopEnabled) ...[
+        SizedBox(height: 8),
+        TextFormField(
+          key: Key('schedulePrompt'),
+          controller: _schedulePromptCtrl,
+          decoration: InputDecoration(
+            labelText: 'Prompt for each scheduled run',
+            hintText: 'What is the current time?',
+          ),
+        ),
+        SizedBox(height: 8),
+        _chatRoomPicker(
+          keyName: 'scheduleChatRoomId',
+          label: AdkLocalizations.of(context)!.adk_scheduleChatRoom,
+          helper: AdkLocalizations.of(context)!.adk_scheduleChatRoomHint,
+          value: _scheduleChatRoomId,
+          onChanged: (v) => _scheduleChatRoomId = v,
+        ),
+        ],
+      ],
+    ];
     return Dialog(
       key: Key('AdkAgentConfigDialog'),
       insetPadding: EdgeInsets.all(10),
@@ -809,439 +1234,38 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       child: popUp(
         context: context,
         title: 'ADK Agent #$id',
-        width: 500,
-        height: _scheduleEnabled ? 760 : 600,
+        width: isPhone ? 500 : 900,
+        height: isPhone ? (_scheduleEnabled ? 760 : 600) : 750,
         child: Form(
           key: _formKey,
           child: Column(
             children: [
               Expanded(
                 child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextFormField(
-                        key: Key('agentName'),
-                        controller: _nameCtrl,
-                        maxLength: 63,
-                        decoration:
-                            InputDecoration(labelText: 'Agent name *'),
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'Required' : null,
-                      ),
-                      if (widget.catalog) ...[
-                        SwitchListTile(
-                          key: Key('catalogPublished'),
-                          contentPadding: EdgeInsets.zero,
-                          title: Text('Published'),
-                          subtitle: Text(
-                            'Visible in every company\'s function catalog and '
-                            'on the website',
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
-                          ),
-                          value: _catalogPublished,
-                          onChanged: (v) =>
-                              setState(() => _catalogPublished = v),
-                        ),
-                        TextFormField(
-                          key: Key('catalogCategory'),
-                          controller: _catalogCategoryCtrl,
-                          decoration: InputDecoration(
-                            labelText: 'Catalog category',
-                            hintText: 'Marketing, Operations, Sales, ...',
-                          ),
-                        ),
-                      ],
-                      SizedBox(height: 8),
-                      if (!_providersLoading && _providerOptions().isEmpty)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Text(
-                            'No LLM API key configured yet. Add one in '
-                            'System Setup before creating an agent.',
-                            key: const Key('noLlmKeyWarning'),
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.error),
-                          ),
-                        ),
-                      TextFormField(
-                        key: Key('modelName'),
-                        controller: _modelCtrl,
-                        enabled: _providerOptions().isNotEmpty,
-                        decoration: InputDecoration(
-                          labelText: 'Model',
-                          hintText: defaultLlmModel.modelId,
-                          suffixIcon: PopupMenuButton<String>(
-                            key: Key('modelNameMenu'),
-                            tooltip: 'Pick a model',
-                            icon: Icon(Icons.arrow_drop_down),
-                            itemBuilder: (context) => llmModels
-                                .where((m) =>
-                                    m.provider == _llmProviderCtrl.text.trim())
-                                .map((m) => PopupMenuItem<String>(
-                                      value: m.modelId,
-                                      child: Text(m.modelId),
-                                    ))
-                                .toList(),
-                            onSelected: (m) =>
-                                setState(() => _modelCtrl.text = m),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      DropdownButtonFormField<String>(
-                        key: Key('llmProvider'),
-                        initialValue: _providerOptions()
-                                .contains(_llmProviderCtrl.text.trim())
-                            ? _llmProviderCtrl.text.trim()
-                            : null,
-                        decoration: InputDecoration(
-                          labelText: 'LLM Provider',
-                          helperText:
-                              'Only providers with an API key in System Setup',
-                        ),
-                        items: _providerOptions()
-                            .map((p) => DropdownMenuItem<String>(
-                                  value: p,
-                                  child: Text(_providersWithKey.contains(p)
-                                      ? p
-                                      : '$p  (no API key)'),
-                                ))
-                            .toList(),
-                        onChanged: _providerOptions().isEmpty
-                            ? null
-                            : (v) => setState(() {
-                                  _llmProviderCtrl.text = v ?? '';
-                                  // keep model and provider consistent
-                                  final first = llmModels
-                                      .where((m) => m.provider == v)
-                                      .toList();
-                                  if (first.isNotEmpty &&
-                                      !llmModels.any((m) =>
-                                          m.provider == v &&
-                                          m.modelId == _modelCtrl.text)) {
-                                    _modelCtrl.text = first.first.modelId;
-                                  }
-                                }),
-                      ),
-                      if (_llmProviderCtrl.text.trim().isNotEmpty &&
-                          !adkRoutedProviders
-                              .contains(_llmProviderCtrl.text.trim()))
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            'The ADK runtime has no model implementation for '
-                            'this provider; an agent on it is registered but '
-                            'will not answer.',
-                            key: const Key('providerNotRoutedWarning'),
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.error),
-                          ),
-                        ),
-                      SizedBox(height: 8),
-                      _placeholderWarning(),
-                      MarkdownEditor(
-                        controller: _instructionCtrl,
-                        inputKey: const Key('instruction'),
-                        label: 'Instruction (system prompt)',
-                        hint: 'You are a helpful assistant…',
-                        height: 400,
-                      ),
-                      SizedBox(height: 8),
-                      TextFormField(
-                        key: Key('description'),
-                        controller: _descriptionCtrl,
-                        maxLength: 255,
-                        decoration: InputDecoration(
-                            labelText: 'Description (optional)'),
-                      ),
-                      SizedBox(height: 8),
-                      _parametersSection(),
-                      if (!widget.catalog) ...[
-                      SizedBox(height: 8),
-                      TextFormField(
-                        key: Key('apiKey'),
-                        controller: _apiKeyCtrl,
-                        decoration: InputDecoration(
-                          labelText: isNew
-                              ? 'Google API key (leave blank to use server default)'
-                              : 'New API key (leave blank to keep existing)',
-                        ),
-                        obscureText: true,
-                      ),
-                      ],
-                      Divider(height: 24),
-                      Text(AdkLocalizations.of(context)!.adk_permissionsGovernance,
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      SizedBox(height: 8),
-                      DropdownButtonFormField<String>(
-                        key: Key('toolMode'),
-                        initialValue: _toolMode,
-                        decoration: InputDecoration(
-                          labelText: 'Tool access',
-                          helperText:
-                              'readOnly: queries only · scoped: allow-listed services · full: any service',
-                        ),
-                        items: [
-                          DropdownMenuItem(
-                              value: 'readOnly', child: Text(AdkLocalizations.of(context)!.adk_readOnly)),
-                          DropdownMenuItem(
-                              value: 'scoped', child: Text(AdkLocalizations.of(context)!.adk_scopedAllowList)),
-                          DropdownMenuItem(value: 'full', child: Text('Full')),
-                        ],
-                        onChanged: (v) =>
-                            setState(() => _toolMode = v ?? 'readOnly'),
-                      ),
-                      if (_toolMode == 'scoped') ...[
-                        SizedBox(height: 8),
-                        TextFormField(
-                          key: Key('serviceAllowlist'),
-                          controller: _allowlistCtrl,
-                          decoration: InputDecoration(
-                            labelText: 'Allowed services',
-                            hintText: 'growerp.*#get*, mantle.order.*',
-                            helperText:
-                                'Comma-separated service-name globs (* wildcard)',
-                          ),
-                        ),
-                      ],
-                      SizedBox(height: 8),
-                      DropdownButtonFormField<String>(
-                        key: Key('writePolicy'),
-                        initialValue: _writePolicy,
-                        decoration: InputDecoration(
-                          labelText: 'Write policy',
-                          helperText:
-                              'How write (create/update/…) actions are handled',
-                        ),
-                        items: [
-                          DropdownMenuItem(
-                              value: 'block', child: Text(AdkLocalizations.of(context)!.adk_blockWrites)),
-                          DropdownMenuItem(
-                              value: 'approve',
-                              child: Text(AdkLocalizations.of(context)!.adk_requireApproval)),
-                          DropdownMenuItem(
-                              value: 'allow', child: Text(AdkLocalizations.of(context)!.adk_allowAutoRun)),
-                        ],
-                        onChanged: (v) =>
-                            setState(() => _writePolicy = v ?? 'approve'),
-                      ),
-                      if (_writePolicy == 'approve') ...[
-                        SizedBox(height: 8),
-                        _chatRoomPicker(
-                          keyName: 'approvalChatRoomId',
-                          label: AdkLocalizations.of(context)!.adk_approvalChatRoom,
-                          helper: AdkLocalizations.of(context)!.adk_approvalChatRoomHint,
-                          value: _approvalChatRoomId,
-                          onChanged: (v) => _approvalChatRoomId = v,
-                        ),
-                      ],
-                      SizedBox(height: 8),
-                      CheckboxListTile(
-                        key: Key('websiteChat'),
-                        contentPadding: EdgeInsets.zero,
-                        controlAffinity: ListTileControlAffinity.leading,
-                        value: _websiteChat,
-                        title: Text(AdkLocalizations.of(context)!.adk_answerWebsiteChat),
-                        subtitle: Text(AdkLocalizations.of(context)!.adk_thisAgentRepliesTo,
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                        onChanged: (v) =>
-                            setState(() => _websiteChat = v ?? false),
-                      ),
-                      CheckboxListTile(
-                        key: Key('webSearch'),
-                        contentPadding: EdgeInsets.zero,
-                        controlAffinity: ListTileControlAffinity.leading,
-                        value: _webSearch,
-                        title: Text(AdkLocalizations.of(context)!.adk_webSearch),
-                        subtitle: Text(AdkLocalizations.of(context)!.adk_webSearchHint,
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                        onChanged: (v) =>
-                            setState(() => _webSearch = v ?? false),
-                      ),
-                      TextFormField(
-                        key: Key('maxLlmCalls'),
-                        controller: _maxLlmCallsCtrl,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: AdkLocalizations.of(context)!.adk_maxLlmCalls,
-                          hintText: '10',
-                          helperText: AdkLocalizations.of(context)!.adk_maxLlmCallsHint,
-                        ),
-                      ),
-                      Divider(height: 24),
-                      Text(AdkLocalizations.of(context)!.adk_teamOrchestration,
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      SizedBox(height: 8),
-                      TextFormField(
-                        key: Key('teamName'),
-                        controller: _teamNameCtrl,
-                        decoration: InputDecoration(
-                          labelText: 'Team name',
-                          helperText:
-                              'Groups this agent in the Agent Control Center list and '
-                              'lets the whole team be downloaded/uploaded together',
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      DropdownButtonFormField<String>(
-                        key: Key('agentRole'),
-                        initialValue: _agentRole,
-                        decoration: InputDecoration(
-                          labelText: 'Role',
-                          helperText:
-                              'specialist: does the work · coordinator: delegates to a team of specialists',
-                        ),
-                        items: [
-                          DropdownMenuItem(
-                              value: 'specialist', child: Text('Specialist')),
-                          DropdownMenuItem(
-                              value: 'coordinator', child: Text(AdkLocalizations.of(context)!.adk_coordinatorTeam)),
-                        ],
-                        onChanged: (v) =>
-                            setState(() => _agentRole = v ?? 'specialist'),
-                      ),
-                      if (_agentRole != 'specialist') ...[
-                        SizedBox(height: 8),
-                        DropdownButtonFormField<String>(
-                          key: Key('orchestrationType'),
-                          initialValue: _orchestrationType,
-                          decoration: InputDecoration(
-                            labelText: 'Orchestration',
-                            helperText:
-                                'router: the LLM picks specialists (sequential/parallel/loop: Phase 4b)',
-                          ),
-                          items: [
-                            DropdownMenuItem(value: 'router', child: Text(AdkLocalizations.of(context)!.adk_routerLlmPicks)),
-                            DropdownMenuItem(value: 'sequential', child: Text('Sequential')),
-                            DropdownMenuItem(value: 'parallel', child: Text('Parallel')),
-                            DropdownMenuItem(value: 'loop', child: Text('Loop')),
+                  // two columns on desktop, like the company dialog
+                  child: isPhone
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [...left, Divider(height: 24), ...right],
+                        )
+                      : Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: left,
+                              ),
+                            ),
+                            SizedBox(width: 24),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: right,
+                              ),
+                            ),
                           ],
-                          onChanged: (v) =>
-                              setState(() => _orchestrationType = v ?? 'router'),
                         ),
-                        if (_orchestrationType == 'loop') ...[
-                          SizedBox(height: 8),
-                          TextFormField(
-                            key: Key('loopMaxIterations'),
-                            controller: _loopMaxCtrl,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              labelText: 'Max loop iterations',
-                              hintText: '3',
-                              helperText: 'Safety cap for the loop workflow',
-                            ),
-                          ),
-                        ],
-                        if (!widget.catalog) ...[
-                          SizedBox(height: 8),
-                          _teamMembersSection(isNew: widget.existing == null),
-                        ],
-                      ],
-                      if (!widget.catalog) ...[
-                      Divider(height: 24),
-                      Text(AdkLocalizations.of(context)!.adk_mcpServers,
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text(
-                        'External tool servers (SSE / HTTP) this agent may use. '
-                        'Register them in the MCP Servers screen first.',
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                      SizedBox(height: 8),
-                      _mcpServersSection(isNew: widget.existing == null),
-                      ],
-                      Divider(height: 24),
-                      SwitchListTile(
-                        key: Key('scheduleEnabled'),
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(AdkLocalizations.of(context)!.adk_enableScheduledRuns),
-                        value: _scheduleEnabled,
-                        onChanged: (v) async {
-                          setState(() => _scheduleEnabled = v);
-                          // a new schedule starts as daily at 09:00 local time
-                          if (v && _scheduleCronCtrl.text.trim().isEmpty) {
-                            final cron = await defaultScheduleCron();
-                            if (mounted) setState(() => _scheduleCronCtrl.text = cron);
-                          }
-                        },
-                      ),
-                      if (_scheduleEnabled) ...[
-                        ListTile(
-                          key: Key('scheduleSummary'),
-                          contentPadding: EdgeInsets.zero,
-                          leading: Icon(Icons.schedule),
-                          title: _scheduleCronCtrl.text.trim().isEmpty
-                              ? Text('—')
-                              : ScheduleText(_scheduleCronCtrl.text.trim()),
-                          trailing: TextButton(
-                            key: Key('editSchedule'),
-                            onPressed: () async {
-                              final cron = await AdkScheduleDialog.show(context,
-                                  cron: _scheduleCronCtrl.text.trim());
-                              if (cron != null) {
-                                setState(() => _scheduleCronCtrl.text = cron);
-                              }
-                            },
-                            child: Text(AdkLocalizations.of(context)!.adk_schedChange),
-                          ),
-                        ),
-                        SwitchListTile(
-                          key: Key('loopEnabled'),
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(AdkLocalizations.of(context)!.adk_loopEnabled),
-                          subtitle: Text(
-                              AdkLocalizations.of(context)!.adk_loopEnabledHint,
-                              style: TextStyle(fontSize: 12)),
-                          value: _loopEnabled,
-                          onChanged: (v) => setState(() {
-                            _loopEnabled = v;
-                            // a task loop checks its inbox every 10 minutes
-                            if (v) _scheduleCronCtrl.text = '0 */10 * * * ?';
-                          }),
-                        ),
-                        if (_loopEnabled) ...[
-                          _chatRoomPicker(
-                            keyName: 'loopChatRoomId',
-                            label: AdkLocalizations.of(context)!.adk_loopChatRoomId,
-                            helper: AdkLocalizations.of(context)!.adk_loopChatRoomIdHint,
-                            value: _loopChatRoomId,
-                            onChanged: (v) => _loopChatRoomId = v,
-                          ),
-                          SizedBox(height: 8),
-                          TextFormField(
-                            key: Key('loopReportEmail'),
-                            controller: _loopReportEmailCtrl,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: InputDecoration(
-                              labelText: AdkLocalizations.of(context)!.adk_loopReportEmail,
-                              hintText: AdkLocalizations.of(context)!.adk_loopReportEmailHint,
-                            ),
-                          ),
-                        ],
-                        if (!_loopEnabled) ...[
-                        SizedBox(height: 8),
-                        TextFormField(
-                          key: Key('schedulePrompt'),
-                          controller: _schedulePromptCtrl,
-                          decoration: InputDecoration(
-                            labelText: 'Prompt for each scheduled run',
-                            hintText: 'What is the current time?',
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        _chatRoomPicker(
-                          keyName: 'scheduleChatRoomId',
-                          label: AdkLocalizations.of(context)!.adk_scheduleChatRoom,
-                          helper: AdkLocalizations.of(context)!.adk_scheduleChatRoomHint,
-                          value: _scheduleChatRoomId,
-                          onChanged: (v) => _scheduleChatRoomId = v,
-                        ),
-                        ],
-                      ],
-                    ],
-                  ),
                 ),
               ),
               SizedBox(height: 8),
