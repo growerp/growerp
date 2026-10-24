@@ -27,9 +27,8 @@ import java.util.concurrent.ConcurrentHashMap
  * takes precedence. Scopes per service: see SERVICE_SCOPES.
  *
  * Usage from service XML:
- *   <script location="component://growerp/service/GoogleWorkspaceUtil.groovy"/>
  *   <script>
- *       def GoogleWorkspaceUtil = _scriptResult
+ *       def GoogleWorkspaceUtil = ec.resource.script('component://growerp/service/GoogleWorkspaceUtil.groovy', null)
  *       events = GoogleWorkspaceUtil.listEvents(ec, ownerPartyId, calendarId, updatedMinIso)
  *   </script>
  */

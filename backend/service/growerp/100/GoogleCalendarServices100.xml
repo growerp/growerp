@@ -78,9 +78,9 @@ limitations under the License.
                     ec.user.nowTimestamp.toInstant().minusSeconds(30L * 24 * 3600)
                 updatedMinIso = fromInstant.toString()
             ]]></script>
-            <script location="component://growerp/service/GoogleWorkspaceUtil.groovy"/>
             <script>
-                def GoogleWorkspaceUtil = _scriptResult
+                // a script location attribute discards the return value: load the class here
+                def GoogleWorkspaceUtil = ec.resource.script('component://growerp/service/GoogleWorkspaceUtil.groovy', null)
                 events = GoogleWorkspaceUtil.listEvents(ec, ownerPartyId,
                     settings.googleCalendarId ?: 'primary', updatedMinIso)
             </script>
@@ -355,9 +355,9 @@ limitations under the License.
             </entity-find-one>
             <if condition="!workEffort"><return /></if>
 
-            <script location="component://growerp/service/GoogleWorkspaceUtil.groovy"/>
             <script><![CDATA[
-                def GoogleWorkspaceUtil = _scriptResult
+                // a script location attribute discards the return value: load the class here
+                def GoogleWorkspaceUtil = ec.resource.script('component://growerp/service/GoogleWorkspaceUtil.groovy', null)
                 def calendarId = settings?.googleCalendarId ?: 'primary'
                 def docId = syncRow.minutesDocId
                 if (!docId) {
