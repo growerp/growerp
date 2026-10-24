@@ -788,7 +788,7 @@ limitations under the License.
             <service-call name="growerp.100.CalendarSyncServices100.get#CalendarProvider"
                 in-map="[ownerPartyId: relInfo.ownerPartyId]" out-map="prov" />
             <if condition="!prov.providerId">
-                <return error="true" message="Connect Google Calendar (again) to sync the user calendars" /></if>
+                <return error="true" message="Google Calendar is not usable: connect it (again), or this server has no Google OAuth client configured" /></if>
             <service-call name="growerp.100.CalendarSyncServices100.sync#AllUserCalendars"
                 in-map="[ownerPartyId: relInfo.ownerPartyId]" async="true" />
         </actions>

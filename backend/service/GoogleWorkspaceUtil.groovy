@@ -183,16 +183,18 @@ class GoogleWorkspaceUtil {
         return ([SERVICE_SCOPES[service]] + (EXTRA_SCOPES[service] ?: [])).findAll { it }
     }
 
-    /** True when the tenant may read calendars: connected with the calendar scope. */
+    /** True when the tenant may read calendars: connected with the calendar scope, and
+     *  this server has the OAuth client to refresh the token. */
     static boolean calendarReadable(def ss) {
-        if (!ss?.googleRefreshToken) return false
+        if (!ss?.googleRefreshToken || !clientCredentials(ss)) return false
         def granted = ((String) ss.googleGrantedScopes ?: '').split(' ') as List
         return granted.contains(SERVICE_SCOPES.calendar)
     }
 
-    /** True when the tenant may write calendars: connected with the extra calendar scopes. */
+    /** True when the tenant may write calendars: connected with the extra calendar scopes,
+     *  and this server has the OAuth client to refresh the token. */
     static boolean calendarWritable(def ss) {
-        if (!ss?.googleRefreshToken) return false
+        if (!ss?.googleRefreshToken || !clientCredentials(ss)) return false
         def granted = ((String) ss.googleGrantedScopes ?: '').split(' ') as List
         return EXTRA_SCOPES.calendar.every { granted.contains(it) }
     }
