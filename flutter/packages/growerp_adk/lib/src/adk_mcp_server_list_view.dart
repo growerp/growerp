@@ -96,18 +96,19 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
       (_settings?.googleGrantedScopes ?? '').isNotEmpty;
 
   Future<void> _configureEmail() async {
-    final ok = await EmailSettingsDialog.show(context);
-    if (ok == true) await _load();
+    await EmailSettingsDialog.show(context);
+    await _load();
   }
 
   Future<void> _configureGithub() async {
-    final ok = await GithubSettingsDialog.show(context);
-    if (ok == true) await _load();
+    await GithubSettingsDialog.show(context);
+    await _load();
   }
 
   Future<void> _configureGoogle() async {
     // Sign in and disconnect are stored on the server right away, also when the
-    // dialog is then closed with its X button (no result): always reload.
+    // dialog is then closed with its X button (no result): always reload, as
+    // for the other integrations.
     await GoogleWorkspaceSettingsDialog.show(context);
     await _load();
   }
