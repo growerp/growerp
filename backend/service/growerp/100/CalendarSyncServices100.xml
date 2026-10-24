@@ -245,7 +245,27 @@ limitations under the License.
                 in-map="[ownerPartyId: ownerPartyId, partyId: partyId]" out-map="usersOut" />
             <if condition="!usersOut.users"><return /></if>
             <set field="user" from="usersOut.users[0]" />
-            <set field="timeZone" from="user.timeZone ?: TimeZone.getDefault().getID()" />
+            <!-- the provider needs a zone name; the app stores the UTC offset as a Dart
+                 Duration (7:00:00.000000): use the server zone when it has that offset,
+                 else Etc/GMT-7 (signs inverted), else the server zone -->
+            <script><![CDATA[
+                String stored = (String) user.timeZone
+                String zone = null
+                if (stored) {
+                    try { zone = java.time.ZoneId.of(stored).getId() }
+                    catch (Exception e) {
+                        def m = stored =~ /^(-?)(\d{1,2}):(\d{2})/
+                        if (m.find() && m.group(3) == '00') {
+                            int hours = (m.group(2) as int) * (m.group(1) == '-' ? -1 : 1)
+                            def server = TimeZone.getDefault()
+                            zone = server.getOffset(System.currentTimeMillis()) == hours * 3600000 ?
+                                server.getID() :
+                                hours == 0 ? 'UTC' : 'Etc/GMT' + (hours > 0 ? '-' : '+') + Math.abs(hours)
+                        }
+                    }
+                }
+                timeZone = zone ?: TimeZone.getDefault().getID()
+            ]]></script>
             <entity-find-one entity-name="growerp.crm.UserCalendar" value-field="userCalendar"
                 for-update="true">
                 <field-map field-name="ownerPartyId" />
