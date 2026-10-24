@@ -106,8 +106,10 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
   }
 
   Future<void> _configureGoogle() async {
-    final ok = await GoogleWorkspaceSettingsDialog.show(context);
-    if (ok == true) await _load();
+    // Sign in and disconnect are stored on the server right away, also when the
+    // dialog is then closed with its X button (no result): always reload.
+    await GoogleWorkspaceSettingsDialog.show(context);
+    await _load();
   }
 
   Future<void> _create() async {
