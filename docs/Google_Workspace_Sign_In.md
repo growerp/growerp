@@ -11,6 +11,8 @@ The dialog checks every 2 seconds and shows the service as connected.
 | Drive    | `https://www.googleapis.com/auth/drive.readonly`   | Gemini meeting notes attached to lead activities |
 | Gmail    | `https://mail.google.com/`                         | Mail server (SMTP/IMAP) with OAuth2 (XOAUTH2)    |
 | Calendar | `https://www.googleapis.com/auth/calendar.readonly`| Meet bookings imported as lead activities        |
+|          | `https://www.googleapis.com/auth/calendar.app.created` | the per-user `GrowERP - <name>` calendars: create them, write and read their events ([Calendar_Sync.md](Calendar_Sync.md)) |
+|          | `https://www.googleapis.com/auth/calendar.acls`    | share each per-user calendar with the user's email |
 
 `openid email` is always requested, so the dialog can show which account is connected.
 
@@ -61,6 +63,12 @@ Console → **Google Auth Platform → Branding**
 - `https://www.googleapis.com/auth/drive.readonly`
 - `https://mail.google.com/`
 - `https://www.googleapis.com/auth/calendar.readonly`
+- `https://www.googleapis.com/auth/calendar.app.created`
+- `https://www.googleapis.com/auth/calendar.acls`
+
+Tenants that connected Calendar before the per-user calendars existed only granted
+`calendar.readonly`. Their Meet import keeps working, and the dialog asks them to sign in
+to Calendar again to add the user calendars.
 
 ### 5. Create the client
 
@@ -125,15 +133,45 @@ external, so a deploy without it fails.
 ### Going to production (verification)
 
 While the app is in **Testing**, only test users can sign in, and refresh tokens **expire
-after 7 days**: users must sign in again weekly. To lift both limits, go to **Audience →
-Publish app**. Google then reviews the app:
+after 7 days**: users must sign in again weekly. Production lifts both limits, but Google
+first verifies the app. Steps in the Google Cloud console (project of the OAuth client):
 
-- `calendar.readonly` is a *sensitive* scope: Google verifies the app (demo video, scope
-  justification).
-- `https://mail.google.com/` and `drive.readonly` are *restricted* scopes: they also need a
-  yearly CASA security assessment by an approved assessor.
+1. **Google Auth Platform → Branding**: app name `GrowERP`, logo (120x120), user support
+   email, developer contact email, application home page `https://www.growerp.com`, privacy
+   policy and terms of service URLs. Every URL must be on a domain listed under
+   **Authorized domains** (`growerp.com`, `growerp.org`, `growerp.net`).
+2. Verify each authorized domain in [Google Search Console](https://search.google.com/search-console)
+   with an account that is Owner or Editor of the Cloud project (DNS TXT record).
+3. **Data access**: make sure exactly the scopes of step 4 are listed. Each sensitive and
+   restricted scope needs a justification: what GrowERP does with it and why a narrower
+   scope does not work. For example:
+   - `calendar.readonly`: import Meet bookings from the company calendar as CRM activities.
+   - `calendar.app.created`: create one calendar per user and keep their todos, events and
+     bookings in it both ways; only calendars GrowERP created are touched.
+   - `calendar.acls`: share each of those calendars with its user.
+4. Record a demo video (unlisted YouTube) in English. It shows the consent screen with the
+   app name and the browser URL bar containing the OAuth `client_id`, followed by each scope
+   in use in GrowERP: the dialog connecting, a todo appearing in the user calendar, an edit
+   in Google coming back, a Meet booking imported, meeting notes attached, mail sent through
+   Gmail.
+5. **Audience → Publish app**: the publishing status changes from Testing to In production.
+   With sensitive or restricted scopes Google then shows **Prepare for verification**
+   (also under **Verification Center**). Fill in the justifications and the video link and
+   submit.
+6. Answer the Google review emails (sent to the developer contact). Until approval users
+   see the "unverified app" warning and the 100-user cap applies.
 
-This can take weeks. Until it is done, keep Testing and list the users who need access.
+Scope classes:
+
+- The Calendar scopes are *sensitive*: Google verification only (usually days to a few
+  weeks).
+- `https://mail.google.com/` and `drive.readonly` are *restricted*: on top of that a yearly
+  CASA security assessment by an approved assessor is required.
+
+To get Calendar into production fast, submit the calendar scopes first. Take Gmail and Drive
+out of the Data access list, or move them to a second OAuth client that stays in Testing
+until CASA is done. Check the class of each scope on the **Data access** page (sensitive
+and restricted scopes are marked there).
 
 ### Troubleshooting
 
@@ -144,6 +182,7 @@ This can take weeks. Until it is done, keep Testing and list the users who need 
 | Browser shows "Google sign in failed … Sign in expired" | more than 10 minutes between Sign in and consent, or Moqui restarted in between; sign in again |
 | Dialog says sign in is not available | `GOOGLE_OAUTH_CLIENT_ID` or `GOOGLE_OAUTH_CLIENT_SECRET` is not set for Moqui |
 | Calendar import works for a week, then fails | app still in Testing: the refresh token expired. Sign in again or publish the app |
+| No `GrowERP - <name>` calendars appear | Calendar connected with `calendar.readonly` only: sign in to Calendar again; then **Resync user calendars**. A user needs an email on the login account |
 
 ## Backend flow
 
@@ -156,8 +195,11 @@ This can take weeks. Until it is done, keep Testing and list the users who need 
   runs as the user who started the sign in. Gmail also switches the mail server to
   smtp.gmail.com / imap.gmail.com with `mailUseOauth=Y`. The tenant's own client
   id/secret are cleared, because a refresh token only works with the client that issued it.
+- After the sign in, when the calendar write scopes were granted, `sync#AllUserCalendars`
+  builds the per-user calendars ([Calendar_Sync.md](Calendar_Sync.md)).
 - `POST SystemSettings/googleDisconnect {service}` (`disconnect#GoogleService`): removes
-  the service's scope. Disconnecting Gmail sets `mailUseOauth=N`. When no service is left,
+  the service's scopes. Disconnecting Calendar stops the calendar sync; the calendars stay
+  in the Google account. Disconnecting Gmail sets `mailUseOauth=N`. When no service is left,
   the token is revoked at Google and removed.
 
 Incremental authorization (`include_granted_scopes=true`) keeps one refresh token that

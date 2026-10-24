@@ -132,6 +132,10 @@ mixin SystemApi {
     @Field() required String service,
   });
 
+  /// Rebuild the per-user calendars of the tenant in the background.
+  @POST("rest/s1/growerp/100/SystemSettings/calendarResync")
+  Future<void> resyncCalendars();
+
   @GET("rest/s1/growerp/100/SystemDefault")
   Future<SystemDefault> getSystemDefault();
 

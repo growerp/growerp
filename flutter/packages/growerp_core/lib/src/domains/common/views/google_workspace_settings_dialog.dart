@@ -22,7 +22,8 @@ import 'package:growerp_models/growerp_models.dart';
 
 /// Connects the tenant's Google Workspace: Drive (Gemini meeting notes), Gmail
 /// (mail server with OAuth2) and Calendar (Meet bookings imported as lead
-/// activities). Each service has a Sign in button that opens the Google
+/// activities; todos, events and bookings kept in sync two-way with a
+/// 'GrowERP - name' calendar per user). Each service has a Sign in button that opens the Google
 /// consent page in the browser; the backend callback stores the refresh token
 /// and this dialog polls the settings until the service shows as connected.
 /// Tenants with their own OAuth client keep the client id/secret/refresh token
@@ -41,11 +42,16 @@ class GoogleWorkspaceSettingsDialog extends StatefulWidget {
       _GoogleWorkspaceSettingsDialogState();
 }
 
-/// Scope per service, same as SERVICE_SCOPES in GoogleWorkspaceUtil.groovy.
+/// Scopes per service, same as SERVICE_SCOPES + EXTRA_SCOPES in
+/// GoogleWorkspaceUtil.groovy.
 const _serviceScopes = {
-  'drive': 'https://www.googleapis.com/auth/drive.readonly',
-  'gmail': 'https://mail.google.com/',
-  'calendar': 'https://www.googleapis.com/auth/calendar.readonly',
+  'drive': ['https://www.googleapis.com/auth/drive.readonly'],
+  'gmail': ['https://mail.google.com/'],
+  'calendar': [
+    'https://www.googleapis.com/auth/calendar.readonly',
+    'https://www.googleapis.com/auth/calendar.app.created',
+    'https://www.googleapis.com/auth/calendar.acls',
+  ],
 };
 
 class _GoogleWorkspaceSettingsDialogState
@@ -126,9 +132,16 @@ class _GoogleWorkspaceSettingsDialogState
     }
   }
 
-  bool _connected(String service) => (_settings?.googleGrantedScopes ?? '')
-      .split(' ')
-      .contains(_serviceScopes[service]);
+  List<String> get _grantedScopes =>
+      (_settings?.googleGrantedScopes ?? '').split(' ');
+
+  bool _connected(String service) =>
+      (_serviceScopes[service] ?? []).every(_grantedScopes.contains);
+
+  // connected before the per-user calendars existed: import only
+  bool get _calendarReadOnly =>
+      !_connected('calendar') &&
+      _grantedScopes.contains(_serviceScopes['calendar']!.first);
 
   bool get _signInAvailable => _settings?.googleOAuthAvailable == true;
 
@@ -207,6 +220,27 @@ class _GoogleWorkspaceSettingsDialogState
         HelperFunctions.showMessage(
           context,
           'Failed to disconnect: $e',
+          Colors.red,
+        );
+      }
+    }
+  }
+
+  Future<void> _resyncCalendars() async {
+    try {
+      await _restClient!.resyncCalendars();
+      if (mounted) {
+        HelperFunctions.showMessage(
+          context,
+          'The user calendars are updated in the background',
+          Colors.green,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        HelperFunctions.showMessage(
+          context,
+          'Calendar resync failed: $e',
           Colors.red,
         );
       }
@@ -467,7 +501,8 @@ class _GoogleWorkspaceSettingsDialogState
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final showCalendarFields = _connected('calendar') || _ownClient;
+    final showCalendarFields =
+        _connected('calendar') || _calendarReadOnly || _ownClient;
     return Dialog(
       key: const Key('GoogleWorkspaceSettingsDialog'),
       insetPadding: const EdgeInsets.all(10),
@@ -536,10 +571,23 @@ class _GoogleWorkspaceSettingsDialogState
                               icon: Icons.calendar_month,
                               iconColor: Colors.blue,
                               title: 'Google Calendar',
-                              description:
-                                  'Import Meet bookings as lead '
-                                  'activities',
+                              description: _calendarReadOnly
+                                  ? 'Sign in again to add a calendar per '
+                                        'user'
+                                  : 'Import Meet bookings; keep todos, '
+                                        'events and bookings in a calendar '
+                                        'per user',
                             ),
+                            if (_connected('calendar'))
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton.icon(
+                                  key: const Key('googleCalendarResync'),
+                                  onPressed: _resyncCalendars,
+                                  icon: const Icon(Icons.sync),
+                                  label: const Text('Resync user calendars'),
+                                ),
+                              ),
                             if (_waitingFor != null)
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 8),
@@ -573,8 +621,10 @@ class _GoogleWorkspaceSettingsDialogState
                                   !_signInAvailable || _ownClient,
                               title: const Text('Use your own OAuth client'),
                               subtitle: Text(
-                                'Scopes: calendar.readonly, drive.readonly; '
-                                'add https://mail.google.com/ for Gmail',
+                                'Scopes: calendar.readonly, '
+                                'calendar.app.created, calendar.acls, '
+                                'drive.readonly; add https://mail.google.com/ '
+                                'for Gmail',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: colors.outline,

@@ -565,6 +565,11 @@ ${notesText.take(20000)}"""
                 <script>ss.update()</script>
             </if>
             <script>util.clearCache(st.ownerPartyId)</script>
+            <!-- calendar connected with write scopes: build the per-user calendars -->
+            <if condition="util.calendarWritable(ss)">
+                <script>ec.service.special().name('growerp.100.CalendarSyncServices100.sync#AllUserCalendars')
+                    .parameters([ownerPartyId: st.ownerPartyId]).registerOnCommit()</script>
+            </if>
         </actions>
     </service>
 
@@ -587,9 +592,9 @@ ${notesText.take(20000)}"""
             </entity-find-one>
             <if condition="ss == null"><return error="true" message="Google not connected"/></if>
             <set field="util" from="ec.resource.script('component://growerp/service/GoogleWorkspaceUtil.groovy', null)"/>
-            <set field="scope" from="util.SERVICE_SCOPES[service]"/>
-            <if condition="!scope"><return error="true" message="Unknown Google service ${service}"/></if>
-            <set field="remaining" from="(ss.googleGrantedScopes ?: '').split(' ').findAll { it &amp;&amp; it != scope }"/>
+            <set field="scopes" from="util.serviceScopes(service)"/>
+            <if condition="!scopes"><return error="true" message="Unknown Google service ${service}"/></if>
+            <set field="remaining" from="(ss.googleGrantedScopes ?: '').split(' ').findAll { it &amp;&amp; !scopes.contains(it) }"/>
             <set field="ss.googleGrantedScopes" from="remaining.join(' ')"/>
             <!-- only openid/email left: nothing is connected any more -->
             <if condition="!remaining.any { util.SERVICE_SCOPES.values().contains(it) }">

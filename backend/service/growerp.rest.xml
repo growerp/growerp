@@ -105,6 +105,12 @@ limitations under the License.
                     <service name="growerp.100.GoogleCalendarServices100.disconnect#GoogleService" />
                 </method>
             </resource>
+            <resource name="calendarResync"
+                description="Rebuild the per-user calendars of the tenant in the background">
+                <method type="post">
+                    <service name="growerp.100.CalendarSyncServices100.resync#Calendars" />
+                </method>
+            </resource>
             <resource name="generateWritingStyle">
                 <method type="post">
                     <service name="growerp.100.GeneralServices100.generate#WritingStyle" />

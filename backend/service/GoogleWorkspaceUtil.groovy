@@ -45,6 +45,12 @@ class GoogleWorkspaceUtil {
         gmail: 'https://mail.google.com/',
         calendar: 'https://www.googleapis.com/auth/calendar.readonly',
     ]
+    /** Scopes asked together with the service scope: calendar also writes the per-user
+     *  GrowERP calendars (created by the app) and shares them (CalendarSyncServices100). */
+    static final Map<String, List<String>> EXTRA_SCOPES = [
+        calendar: ['https://www.googleapis.com/auth/calendar.app.created',
+                   'https://www.googleapis.com/auth/calendar.acls'],
+    ]
     static final String CALENDAR_BASE = "https://www.googleapis.com/calendar/v3"
     static final String DRIVE_BASE = "https://www.googleapis.com/drive/v3"
 
@@ -71,7 +77,8 @@ class GoogleWorkspaceUtil {
     static String authUrl(List<String> services, String redirectUri, String state) {
         def client = platformClient()
         if (!client) throw new Exception("Google sign in not available: platform OAuth client not configured")
-        def scopes = ['openid', 'email'] + services.collect { SERVICE_SCOPES[it] }.findAll { it }
+        def scopes = ['openid', 'email'] + services.collect { SERVICE_SCOPES[it] }.findAll { it } +
+            services.collectMany { EXTRA_SCOPES[it] ?: [] }
         return AUTH_URL + "?response_type=code&access_type=offline&prompt=consent" +
             "&include_granted_scopes=true" +
             "&client_id=" + URLEncoder.encode(client[0], 'UTF-8') +
@@ -169,6 +176,108 @@ class GoogleWorkspaceUtil {
             throw new Exception("Google API error (${connection.responseCode}) for ${url}: ${errorText}")
         }
         return connection.inputStream.getText('UTF-8')
+    }
+
+    /** All scopes of a service: the service scope plus its extra scopes. */
+    static List<String> serviceScopes(String service) {
+        return ([SERVICE_SCOPES[service]] + (EXTRA_SCOPES[service] ?: [])).findAll { it }
+    }
+
+    /** True when the tenant may write calendars: connected with the extra calendar scopes. */
+    static boolean calendarWritable(def ss) {
+        if (!ss?.googleRefreshToken) return false
+        def granted = ((String) ss.googleGrantedScopes ?: '').split(' ') as List
+        return EXTRA_SCOPES.calendar.every { granted.contains(it) }
+    }
+
+    /**
+     * POST/PUT/PATCH/DELETE a Google API URL with a JSON body, return the parsed JSON map.
+     * Returns null for 404/410 on DELETE (already gone) and for 404 otherwise when
+     * notFoundNull is true.
+     */
+    static Map apiSend(def ec, String ownerPartyId, String method, String url, Map body,
+            boolean notFoundNull = false) {
+        def token = getAccessToken(ec, ownerPartyId)
+        def connection = new URL(url).openConnection() as HttpURLConnection
+        if (method == 'PATCH') {
+            connection.setRequestMethod('POST')
+            connection.setRequestProperty('X-HTTP-Method-Override', 'PATCH')
+        } else connection.setRequestMethod(method)
+        connection.setRequestProperty("Authorization", "Bearer ${token}")
+        connection.setConnectTimeout(30000)
+        connection.setReadTimeout(60000)
+        if (body != null) {
+            connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
+            connection.setDoOutput(true)
+            connection.outputStream.withWriter("UTF-8") { it.write(JsonOutput.toJson(body)) }
+        }
+        int code = connection.responseCode
+        if ((code == 404 || code == 410) && (method == 'DELETE' || notFoundNull)) return null
+        if (code < 200 || code > 299) {
+            def errorText = connection.errorStream ? connection.errorStream.text : ''
+            throw new Exception("Google API error (${code}) for ${method} ${url}: ${errorText}")
+        }
+        def text = connection.inputStream.getText('UTF-8')
+        return text ? (Map) new JsonSlurper().parseText(text) : [:]
+    }
+
+    /** Create a secondary calendar in the connected account, return its id. */
+    static String createCalendar(def ec, String ownerPartyId, String summary, String timeZone) {
+        def resp = apiSend(ec, ownerPartyId, 'POST', "${CALENDAR_BASE}/calendars",
+            [summary: summary, timeZone: timeZone ?: 'UTC'])
+        return resp.id
+    }
+
+    /** Share a calendar with an email address (role writer: the user may edit events). */
+    static void shareCalendar(def ec, String ownerPartyId, String calendarId, String email) {
+        def calId = URLEncoder.encode(calendarId, 'UTF-8')
+        apiSend(ec, ownerPartyId, 'POST', "${CALENDAR_BASE}/calendars/${calId}/acl?sendNotifications=true",
+            [role: 'writer', scope: [type: 'user', value: email]])
+    }
+
+    /** Replace an event with a client chosen id, insert it when it does not exist yet. */
+    static Map upsertEvent(def ec, String ownerPartyId, String calendarId, String eventId, Map event) {
+        def calId = URLEncoder.encode(calendarId, 'UTF-8')
+        def body = event + [id: eventId, status: 'confirmed']
+        def resp = apiSend(ec, ownerPartyId, 'PUT',
+            "${CALENDAR_BASE}/calendars/${calId}/events/" + URLEncoder.encode(eventId, 'UTF-8'), body, true)
+        if (resp == null) resp = apiSend(ec, ownerPartyId, 'POST',
+            "${CALENDAR_BASE}/calendars/${calId}/events", body)
+        return resp
+    }
+
+    static void deleteEvent(def ec, String ownerPartyId, String calendarId, String eventId) {
+        def calId = URLEncoder.encode(calendarId, 'UTF-8')
+        apiSend(ec, ownerPartyId, 'DELETE',
+            "${CALENDAR_BASE}/calendars/${calId}/events/" + URLEncoder.encode(eventId, 'UTF-8'), null)
+    }
+
+    /**
+     * Incremental change list of a calendar. With a null or expired (410) syncToken all events
+     * are listed. Returns [items: List, nextSyncToken: String].
+     */
+    static Map listChanges(def ec, String ownerPartyId, String calendarId, String syncToken) {
+        def calId = URLEncoder.encode(calendarId, 'UTF-8')
+        def items = []
+        String pageToken = null
+        String nextSyncToken = null
+        while (true) {
+            def url = "${CALENDAR_BASE}/calendars/${calId}/events?singleEvents=true&maxResults=250" +
+                (syncToken ? "&syncToken=" + URLEncoder.encode(syncToken, 'UTF-8') : "&showDeleted=true") +
+                (pageToken ? "&pageToken=" + URLEncoder.encode(pageToken, 'UTF-8') : '')
+            Map resp
+            try { resp = apiGet(ec, ownerPartyId, url) }
+            catch (Exception e) {
+                // 410 Gone: sync token expired, start over with a full list
+                if (syncToken && e.message?.contains('(410)'))
+                    return listChanges(ec, ownerPartyId, calendarId, null)
+                throw e
+            }
+            if (resp.items) items.addAll(resp.items)
+            pageToken = resp.nextPageToken
+            if (!pageToken) { nextSyncToken = resp.nextSyncToken; break }
+        }
+        return [items: items, nextSyncToken: nextSyncToken]
     }
 
     /**
