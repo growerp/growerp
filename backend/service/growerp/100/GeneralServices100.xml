@@ -2612,6 +2612,9 @@ limitations under the License.
             ]]></script>
             </else>
             </if>
+            <!-- Google Sign in offered: the platform OAuth client is configured -->
+            <script>systemSettings.googleOAuthAvailable = ec.resource.script(
+                'component://growerp/service/GoogleWorkspaceUtil.groovy', null).platformClient() != null</script>
             <!-- read only display values: the free allowance now in effect and what
                  was used of it this month -->
             <entity-find-one entity-name="growerp.general.SystemDefault" value-field="sd">
@@ -2692,6 +2695,8 @@ limitations under the License.
             <parameter name="googleClientId"/>
             <parameter name="googleClientSecret"/>
             <parameter name="googleRefreshToken"/>
+            <parameter name="googleGrantedScopes"/>
+            <parameter name="googleAccountEmail"/>
             <parameter name="googleCalendarId"/>
             <parameter name="googleBookingUrl"/>
             <parameter name="touristTaxPerNight" type="BigDecimal"/>
@@ -2774,6 +2779,8 @@ limitations under the License.
             <if condition="googleRefreshToken &amp;&amp; googleRefreshToken != '****'">
                 <set field="ss.googleRefreshToken" from="googleRefreshToken"/>
             </if>
+            <if condition="googleGrantedScopes != null"><set field="ss.googleGrantedScopes" from="googleGrantedScopes"/></if>
+            <if condition="googleAccountEmail != null"><set field="ss.googleAccountEmail" from="googleAccountEmail"/></if>
             <if condition="googleCalendarId != null"><set field="ss.googleCalendarId" from="googleCalendarId"/></if>
             <if condition="googleBookingUrl != null"><set field="ss.googleBookingUrl" from="googleBookingUrl"/></if>
             <if condition="touristTaxPerNight != null"><set field="ss.touristTaxPerNight" from="touristTaxPerNight"/></if>
@@ -2856,12 +2863,15 @@ limitations under the License.
                 <if condition="mailPassword &amp;&amp; mailPassword != '****'">
                     <set field="es.mailPassword" from="mailPassword"/>
                 </if>
-                <!-- OAuth2 (XOAUTH2) sign in with the Google Workspace credentials; the
-                     refresh token needs scope https://mail.google.com/ -->
+                <!-- OAuth2 (XOAUTH2) sign in with the Google Workspace credentials (own
+                     client or the platform client); the refresh token needs scope
+                     https://mail.google.com/ -->
                 <if condition="ss.mailUseOauth == 'Y'">
                     <then>
-                        <set field="es.oauthClientId"     from="ss.googleClientId"/>
-                        <set field="es.oauthClientSecret" from="ss.googleClientSecret"/>
+                        <set field="googleClient" from="ec.resource.script(
+                            'component://growerp/service/GoogleWorkspaceUtil.groovy', null).clientCredentials(ss)"/>
+                        <set field="es.oauthClientId"     from="googleClient?.getAt(0)"/>
+                        <set field="es.oauthClientSecret" from="googleClient?.getAt(1)"/>
                         <set field="es.oauthRefreshToken" from="ss.googleRefreshToken"/>
                     </then>
                     <else>

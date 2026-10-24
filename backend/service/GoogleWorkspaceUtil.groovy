@@ -21,8 +21,10 @@ import java.util.concurrent.ConcurrentHashMap
  * Google Workspace (Calendar v3 + Drive v3) API utility for GrowERP.
  *
  * Auth: per-tenant OAuth 2.0 refresh token stored in growerp.general.SystemSettings
- * (googleClientId, googleClientSecret, googleRefreshToken). Scopes needed:
- * calendar.readonly drive.readonly.
+ * (googleRefreshToken), obtained with the Sign in flow (authUrl/exchangeCode) against the
+ * GrowERP platform OAuth client (env GOOGLE_OAUTH_CLIENT_ID/GOOGLE_OAUTH_CLIENT_SECRET).
+ * A tenant may still use its own client (googleClientId/googleClientSecret), which then
+ * takes precedence. Scopes per service: see SERVICE_SCOPES.
  *
  * Usage from service XML:
  *   <script location="component://growerp/service/GoogleWorkspaceUtil.groovy"/>
@@ -35,11 +37,88 @@ import java.util.concurrent.ConcurrentHashMap
 class GoogleWorkspaceUtil {
 
     static final String TOKEN_URL = "https://oauth2.googleapis.com/token"
+    static final String AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
+    static final String REVOKE_URL = "https://oauth2.googleapis.com/revoke"
+    static final String USERINFO_URL = "https://openidconnect.googleapis.com/v1/userinfo"
+    static final Map<String, String> SERVICE_SCOPES = [
+        drive: 'https://www.googleapis.com/auth/drive.readonly',
+        gmail: 'https://mail.google.com/',
+        calendar: 'https://www.googleapis.com/auth/calendar.readonly',
+    ]
     static final String CALENDAR_BASE = "https://www.googleapis.com/calendar/v3"
     static final String DRIVE_BASE = "https://www.googleapis.com/drive/v3"
 
     // ownerPartyId -> [token: String, expires: long millis]
     private static final Map<String, Map> tokenCache = new ConcurrentHashMap<>()
+
+    /** Platform OAuth client [id, secret] from env or system property; null when not set. */
+    static List<String> platformClient() {
+        String id = System.getenv('GOOGLE_OAUTH_CLIENT_ID') ?: System.getProperty('google_oauth_client_id')
+        String secret = System.getenv('GOOGLE_OAUTH_CLIENT_SECRET') ?: System.getProperty('google_oauth_client_secret')
+        return id && secret ? [id, secret] : null
+    }
+
+    /** Client [id, secret] for a tenant: its own client when set, else the platform client. */
+    static List<String> clientCredentials(def ss) {
+        if (ss?.googleClientId && ss?.googleClientSecret)
+            return [(String) ss.googleClientId, (String) ss.googleClientSecret]
+        return platformClient()
+    }
+
+    static void clearCache(String ownerPartyId) { tokenCache.remove(ownerPartyId) }
+
+    /** Google consent URL for the platform client asking for the scopes of the services. */
+    static String authUrl(List<String> services, String redirectUri, String state) {
+        def client = platformClient()
+        if (!client) throw new Exception("Google sign in not available: platform OAuth client not configured")
+        def scopes = ['openid', 'email'] + services.collect { SERVICE_SCOPES[it] }.findAll { it }
+        return AUTH_URL + "?response_type=code&access_type=offline&prompt=consent" +
+            "&include_granted_scopes=true" +
+            "&client_id=" + URLEncoder.encode(client[0], 'UTF-8') +
+            "&redirect_uri=" + URLEncoder.encode(redirectUri, 'UTF-8') +
+            "&scope=" + URLEncoder.encode(scopes.join(' '), 'UTF-8') +
+            "&state=" + URLEncoder.encode(state, 'UTF-8')
+    }
+
+    /** Exchange an authorization code; returns the token response plus 'email'. */
+    static Map exchangeCode(String code, String redirectUri) {
+        def client = platformClient()
+        if (!client) throw new Exception("Google sign in not available: platform OAuth client not configured")
+        def resp = postForm(TOKEN_URL, "grant_type=authorization_code" +
+            "&code=" + URLEncoder.encode(code, 'UTF-8') +
+            "&client_id=" + URLEncoder.encode(client[0], 'UTF-8') +
+            "&client_secret=" + URLEncoder.encode(client[1], 'UTF-8') +
+            "&redirect_uri=" + URLEncoder.encode(redirectUri, 'UTF-8'))
+        def connection = new URL(USERINFO_URL).openConnection() as HttpURLConnection
+        connection.setRequestProperty("Authorization", "Bearer ${resp.access_token}")
+        connection.setConnectTimeout(30000)
+        connection.setReadTimeout(30000)
+        if (connection.responseCode == 200)
+            resp.email = new JsonSlurper().parseText(connection.inputStream.text).email
+        return resp
+    }
+
+    /** Revoke a refresh token at Google; failures are logged only. */
+    static void revoke(def ec, String refreshToken) {
+        try { postForm(REVOKE_URL, "token=" + URLEncoder.encode(refreshToken, 'UTF-8')) }
+        catch (Exception e) { ec.logger.warn("Google token revoke failed: ${e.message}") }
+    }
+
+    private static Map postForm(String url, String body) {
+        def connection = new URL(url).openConnection() as HttpURLConnection
+        connection.setRequestMethod("POST")
+        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+        connection.setDoOutput(true)
+        connection.setConnectTimeout(30000)
+        connection.setReadTimeout(30000)
+        connection.outputStream.withWriter("UTF-8") { it.write(body) }
+        if (connection.responseCode != 200) {
+            def errorText = connection.errorStream ? connection.errorStream.text : ''
+            throw new Exception("Google ${url} failed (${connection.responseCode}): ${errorText}")
+        }
+        def text = connection.inputStream.text
+        return text ? (Map) new JsonSlurper().parseText(text) : [:]
+    }
 
     /** Get (and cache) an OAuth access token for the tenant's refresh token. */
     static String getAccessToken(def ec, String ownerPartyId) {
@@ -48,28 +127,15 @@ class GoogleWorkspaceUtil {
 
         def ss = ec.entity.find('growerp.general.SystemSettings')
             .condition('ownerPartyId', ownerPartyId).useCache(false).one()
-        if (!ss?.googleRefreshToken || !ss?.googleClientId || !ss?.googleClientSecret) {
+        def client = clientCredentials(ss)
+        if (!ss?.googleRefreshToken || !client) {
             throw new Exception("Google credentials not configured for owner ${ownerPartyId}")
         }
 
-        def body = "grant_type=refresh_token" +
-            "&client_id=" + URLEncoder.encode((String) ss.googleClientId, 'UTF-8') +
-            "&client_secret=" + URLEncoder.encode((String) ss.googleClientSecret, 'UTF-8') +
-            "&refresh_token=" + URLEncoder.encode((String) ss.googleRefreshToken, 'UTF-8')
-
-        def connection = new URL(TOKEN_URL).openConnection() as HttpURLConnection
-        connection.setRequestMethod("POST")
-        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
-        connection.setDoOutput(true)
-        connection.setConnectTimeout(30000)
-        connection.setReadTimeout(30000)
-        connection.outputStream.withWriter("UTF-8") { it.write(body) }
-
-        if (connection.responseCode != 200) {
-            def errorText = connection.errorStream ? connection.errorStream.text : ''
-            throw new Exception("Google token refresh failed (${connection.responseCode}): ${errorText}")
-        }
-        def resp = new JsonSlurper().parseText(connection.inputStream.text)
+        def resp = postForm(TOKEN_URL, "grant_type=refresh_token" +
+            "&client_id=" + URLEncoder.encode(client[0], 'UTF-8') +
+            "&client_secret=" + URLEncoder.encode(client[1], 'UTF-8') +
+            "&refresh_token=" + URLEncoder.encode((String) ss.googleRefreshToken, 'UTF-8'))
         long expires = System.currentTimeMillis() + (((resp.expires_in ?: 3600) as long) - 60) * 1000L
         tokenCache.put(ownerPartyId, [token: resp.access_token, expires: expires])
         return resp.access_token

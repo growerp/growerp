@@ -52,7 +52,10 @@ void main() {
 
     // ── Tools list shows the built-in tools ──────────────────────────────────
     await CommonTest.selectOption(
-        tester, '/adk-mcp-servers', 'AdkMcpServerListView');
+      tester,
+      '/adk-mcp-servers',
+      'AdkMcpServerListView',
+    );
     await CommonTest.checkWidgetKey(tester, 'builtinMcpServer');
     await CommonTest.checkWidgetKey(tester, 'emailIntegration');
     await CommonTest.checkWidgetKey(tester, 'githubIntegration');
@@ -64,16 +67,22 @@ void main() {
     await CommonTest.enterText(tester, 'mailUsername', mailUser);
     await CommonTest.enterText(tester, 'mailPassword', 'secret');
     await CommonTest.enterDropDown(tester, 'smtpSecurity', 'SSL/TLS');
-    await CommonTest.tapByKey(tester, 'saveEmailSettings',
-        seconds: CommonTest.waitTime);
+    await CommonTest.tapByKey(
+      tester,
+      'saveEmailSettings',
+      seconds: CommonTest.waitTime,
+    );
     await CommonTest.waitForSnackbarToGo(tester);
 
     // Reopen: email config persisted (host + SSL security).
     await CommonTest.tapByKey(tester, 'configureEmailIntegration');
     await CommonTest.checkWidgetKey(tester, 'EmailSettingsDialog');
     expect(CommonTest.getTextFormField('smtpHost'), smtpHost);
-    expect(find.text('SSL/TLS'), findsWidgets,
-        reason: 'SMTP security should be persisted as SSL/TLS');
+    expect(
+      find.text('SSL/TLS'),
+      findsWidgets,
+      reason: 'SMTP security should be persisted as SSL/TLS',
+    );
     await CommonTest.tapByKey(tester, 'cancelEmailSettings');
 
     // ── Configure GitHub (token + repo) ──────────────────────────────────────
@@ -81,62 +90,109 @@ void main() {
     await CommonTest.checkWidgetKey(tester, 'GithubSettingsDialog');
     await CommonTest.enterText(tester, 'githubToken', 'ghp_dummy_token');
     await CommonTest.enterText(tester, 'githubRepository', githubRepo);
-    await CommonTest.tapByKey(tester, 'saveGithubSettings',
-        seconds: CommonTest.waitTime);
+    await CommonTest.tapByKey(
+      tester,
+      'saveGithubSettings',
+      seconds: CommonTest.waitTime,
+    );
     await CommonTest.waitForSnackbarToGo(tester);
 
     // ── Anti-clobber: the GitHub save must not reset the email config ─────────
     await CommonTest.tapByKey(tester, 'configureEmailIntegration');
     await CommonTest.checkWidgetKey(tester, 'EmailSettingsDialog');
-    expect(CommonTest.getTextFormField('smtpHost'), smtpHost,
-        reason: 'GitHub save must not clear the SMTP host');
-    expect(find.text('SSL/TLS'), findsWidgets,
-        reason: 'GitHub save must not reset SMTP security to default');
+    expect(
+      CommonTest.getTextFormField('smtpHost'),
+      smtpHost,
+      reason: 'GitHub save must not clear the SMTP host',
+    );
+    expect(
+      find.text('SSL/TLS'),
+      findsWidgets,
+      reason: 'GitHub save must not reset SMTP security to default',
+    );
     await CommonTest.tapByKey(tester, 'cancelEmailSettings');
 
     // ── System Setup shows and saves the same email settings ────────────────
-    await CommonTest.selectOption(
-        tester, '/systemSetup', 'SystemSetupDialog');
-    expect(CommonTest.getTextFormField('smtpHost'), smtpHost,
-        reason: 'system setup should show the configured SMTP host');
+    await CommonTest.selectOption(tester, '/systemSetup', 'SystemSetupDialog');
+    expect(
+      CommonTest.getTextFormField('smtpHost'),
+      smtpHost,
+      reason: 'system setup should show the configured SMTP host',
+    );
 
     await CommonTest.enterText(tester, 'storeHost', 'imap.example.com');
-    await CommonTest.tapByKey(tester, 'saveEmailSettings',
-        seconds: CommonTest.waitTime);
+    await CommonTest.tapByKey(
+      tester,
+      'saveEmailSettings',
+      seconds: CommonTest.waitTime,
+    );
     await CommonTest.waitForSnackbarToGo(tester);
 
     // Saving there keeps the email settings and the GitHub repository
     await CommonTest.selectOption(
-        tester, '/adk-mcp-servers', 'AdkMcpServerListView');
+      tester,
+      '/adk-mcp-servers',
+      'AdkMcpServerListView',
+    );
     await CommonTest.tapByKey(tester, 'configureEmailIntegration');
     await CommonTest.checkWidgetKey(tester, 'EmailSettingsDialog');
-    expect(CommonTest.getTextFormField('smtpHost'), smtpHost,
-        reason: 'system setup save must keep the SMTP host');
-    expect(CommonTest.getTextFormField('storeHost'), 'imap.example.com',
-        reason: 'IMAP host entered in system setup should be saved');
+    expect(
+      CommonTest.getTextFormField('smtpHost'),
+      smtpHost,
+      reason: 'system setup save must keep the SMTP host',
+    );
+    expect(
+      CommonTest.getTextFormField('storeHost'),
+      'imap.example.com',
+      reason: 'IMAP host entered in system setup should be saved',
+    );
     await CommonTest.tapByKey(tester, 'cancelEmailSettings');
     await CommonTest.tapByKey(tester, 'configureGithubIntegration');
     await CommonTest.checkWidgetKey(tester, 'GithubSettingsDialog');
-    expect(CommonTest.getTextFormField('githubRepository'), githubRepo,
-        reason: 'system setup save must not clear the GitHub repository');
+    expect(
+      CommonTest.getTextFormField('githubRepository'),
+      githubRepo,
+      reason: 'system setup save must not clear the GitHub repository',
+    );
     await CommonTest.tapByKey(tester, 'cancelGithubSettings');
 
+    // ── Connect Google Workspace: one card per service, Not now closes ───────
+    // (the Google consent itself happens in the browser and is not automated)
+    await CommonTest.tapByKey(tester, 'configureGoogleWorkspaceIntegration');
+    await CommonTest.checkWidgetKey(tester, 'GoogleWorkspaceSettingsDialog');
+    for (final service in ['all', 'drive', 'gmail', 'calendar']) {
+      await CommonTest.checkWidgetKey(tester, 'googleCard_$service');
+    }
+    await CommonTest.checkWidgetKey(tester, 'googleOwnClient');
+    await CommonTest.tapByKey(tester, 'googleNotNow');
+    expect(
+      find.byKey(const Key('GoogleWorkspaceSettingsDialog')),
+      findsNothing,
+    );
+
     // ── The house writing voice saves and survives, without clobbering AI ────
-    await CommonTest.selectOption(
-        tester, '/systemSetup', 'SystemSetupDialog');
+    await CommonTest.selectOption(tester, '/systemSetup', 'SystemSetupDialog');
     const writingStyle = 'Write plainly. Open on the work in progress.';
     await tester.ensureVisible(find.byKey(const Key('writingStyle')));
     await CommonTest.enterText(tester, 'writingStyle', writingStyle);
-    await CommonTest.tapByKey(tester, 'saveAiSettings',
-        seconds: CommonTest.waitTime);
+    await CommonTest.tapByKey(
+      tester,
+      'saveAiSettings',
+      seconds: CommonTest.waitTime,
+    );
     await CommonTest.waitForSnackbarToGo(tester);
 
-    await CommonTest.selectOption(
-        tester, '/systemSetup', 'SystemSetupDialog');
-    expect(CommonTest.getTextFormField('writingStyle'), writingStyle,
-        reason: 'the writing style should be stored on the tenant');
-    expect(CommonTest.getTextFormField('smtpHost'), smtpHost,
-        reason: 'saving the writing style must not clear the SMTP host');
+    await CommonTest.selectOption(tester, '/systemSetup', 'SystemSetupDialog');
+    expect(
+      CommonTest.getTextFormField('writingStyle'),
+      writingStyle,
+      reason: 'the writing style should be stored on the tenant',
+    );
+    expect(
+      CommonTest.getTextFormField('smtpHost'),
+      smtpHost,
+      reason: 'saving the writing style must not clear the SMTP host',
+    );
 
     // ── The agent dialog shows the built-in Moqui server (read-only) ─────────
     await AdkTest.selectAgents(tester);

@@ -120,6 +120,18 @@ mixin SystemApi {
     @Field() required List<String> samples,
   });
 
+  /// Google consent URL ({authUrl}) for the services: drive, gmail, calendar.
+  @POST("rest/s1/growerp/100/SystemSettings/googleSignIn")
+  Future<dynamic> startGoogleSignIn({
+    @Field() required List<String> services,
+  });
+
+  /// Disconnect one Google service: drive, gmail or calendar.
+  @POST("rest/s1/growerp/100/SystemSettings/googleDisconnect")
+  Future<SystemSettings> disconnectGoogleService({
+    @Field() required String service,
+  });
+
   @GET("rest/s1/growerp/100/SystemDefault")
   Future<SystemDefault> getSystemDefault();
 

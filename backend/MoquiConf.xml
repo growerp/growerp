@@ -53,6 +53,9 @@
          menu write (clear#OwnerDomainAccessCache); the idle expiry is only a
          backstop. -->
     <cache-list>
+        <!-- Google Sign in: state token -> [ownerPartyId, username, services, redirectUri] -->
+        <cache name="growerp.google.oauthState" max-elements="1000"
+            expire-time-live="600" eviction-strategy="least-recently-used"/>
         <cache name="growerp.security.restDomain" max-elements="2000"
             expire-time-idle="3600" eviction-strategy="least-recently-used"/>
         <cache name="growerp.security.restPatterns" max-elements="10"
@@ -68,6 +71,9 @@
             <!-- course videos (streamed with Range support) and cover images -->
             <subscreens-item name="courseMedia" menu-include="false"
                 location="component://growerp/screen/courseMedia.xml"/>
+            <!-- Google Sign in redirect target: /googleOAuth/callback -->
+            <subscreens-item name="googleOAuth" menu-include="false"
+                location="component://growerp/screen/googleOAuth.xml"/>
         </screen>
     </screen-facade>
 

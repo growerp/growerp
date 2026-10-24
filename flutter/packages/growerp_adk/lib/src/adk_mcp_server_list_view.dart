@@ -91,7 +91,9 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
 
   bool get _emailConfigured => (_settings?.smtpHost ?? '').isNotEmpty;
   bool get _githubConfigured => (_settings?.githubToken ?? '') == '****';
-  bool get _googleConfigured => (_settings?.googleRefreshToken ?? '') == '****';
+  bool get _googleConfigured =>
+      (_settings?.googleRefreshToken ?? '') == '****' ||
+      (_settings?.googleGrantedScopes ?? '').isNotEmpty;
 
   Future<void> _configureEmail() async {
     final ok = await EmailSettingsDialog.show(context);

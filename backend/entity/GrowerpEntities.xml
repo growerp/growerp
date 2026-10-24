@@ -487,6 +487,13 @@ limitations under the License.
         <field name="googleClientId"     type="text-medium"/>
         <field name="googleClientSecret" type="text-medium" encrypt="true" enable-audit-log="true"/>
         <field name="googleRefreshToken" type="text-medium" encrypt="true" enable-audit-log="true"/>
+        <field name="googleGrantedScopes" type="text-long">
+            <description>Space separated OAuth scopes the refresh token was granted, from the
+                Sign in flow; tells which services (Drive, Gmail, Calendar) are connected</description>
+        </field>
+        <field name="googleAccountEmail" type="text-medium">
+            <description>Google account that signed in</description>
+        </field>
         <field name="googleCalendarId"   type="text-medium">
             <description>Google Calendar id to sync bookings from; 'primary' when empty</description>
         </field>

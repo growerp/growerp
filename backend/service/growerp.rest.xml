@@ -94,6 +94,17 @@ limitations under the License.
             <method type="post">
                 <service name="growerp.100.GeneralServices100.update#SystemSettings" />
             </method>
+            <resource name="googleSignIn"
+                description="Start Google sign in: returns the consent URL for the given services">
+                <method type="post">
+                    <service name="growerp.100.GoogleCalendarServices100.start#GoogleSignIn" />
+                </method>
+            </resource>
+            <resource name="googleDisconnect" description="Disconnect one Google service">
+                <method type="post">
+                    <service name="growerp.100.GoogleCalendarServices100.disconnect#GoogleService" />
+                </method>
+            </resource>
             <resource name="generateWritingStyle">
                 <method type="post">
                     <service name="growerp.100.GeneralServices100.generate#WritingStyle" />

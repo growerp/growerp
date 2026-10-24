@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<!-- Google Sign in redirect target: /googleOAuth/callback?code&state (or &error).
+     The state token started by start#GoogleSignIn identifies tenant and user, so no
+     login is needed here. read-only: Google redirects with a GET. Answers a small page; the app sees the result by polling
+     get#SystemSettings. -->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    require-authentication="false" track-artifact-hit="false" default-menu-include="false">
+
+    <transition name="callback" read-only="true" begin-transaction="false">
+        <parameter name="code" />
+        <parameter name="state" />
+        <parameter name="error" />
+        <actions>
+            <script><![CDATA[
+                boolean ok = false
+                Map result = null
+                String message = null
+                if (code && state && !error) {
+                    try {
+                        result = ec.service.sync().name('growerp.100.GoogleCalendarServices100.complete#GoogleSignIn')
+                            .parameters([code: code, state: state]).call()
+                        ok = !ec.message.hasError()
+                    } catch (Throwable t) {
+                        message = t.message
+                    }
+                    if (ec.message.hasError()) { message = ec.message.getErrorsString(); ec.message.clearErrors() }
+                    // complete#GoogleSignIn acts as the user that started the sign in
+                    if (ec.user.userId) ec.user.logoutUser()
+                }
+                String title = ok ? 'Google connected' : 'Google sign in failed'
+                String body = ok ? "Connected${result?.email ? ' as ' + result.email : ''}. You can close this window and return to GrowERP." :
+                    "Google sign in did not complete${error ? ' (' + error + ')' : ''}. Close this window and try again."
+                if (!ok && message) ec.logger.warn("Google sign in failed: ${message}")
+                String html = """<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title>
+<style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#f5f5f5}
+div{background:#fff;padding:32px;border-radius:16px;max-width:420px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.1)}</style>
+</head><body><div><h2>${title}</h2><p>${org.moqui.util.StringUtilities.encodeForXmlAttribute(body)}</p></div>
+<script>setTimeout(function(){window.close()},${ok ? 2000 : 8000})</script></body></html>"""
+                ec.web.sendTextResponse(html, 'text/html', null)
+            ]]></script>
+        </actions>
+        <default-response type="none" />
+    </transition>
+</screen>
