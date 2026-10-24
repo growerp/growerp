@@ -51,19 +51,41 @@ List<WidgetMetadata> getActivityWidgetsWithMetadata() {
     ),
     WidgetMetadata(
       widgetName: 'ActivityDialog',
-      description: 'Create or edit an activity/task. Pass activityId to edit an '
+      description:
+          'Create or edit an activity/task. Pass activityId to edit an '
           'existing activity; omit it to create a new one.',
       iconName: 'task',
-      keywords: ['add activity', 'new activity', 'create task', 'add task', 'edit activity'],
-      parameters: {'activityId': 'open this activity for editing; omit to create new'},
+      keywords: [
+        'add activity',
+        'new activity',
+        'create task',
+        'add task',
+        'edit activity',
+      ],
+      parameters: {
+        'activityId': 'open this activity for editing; omit to create new',
+        'activityType': 'todo or event, for a new activity',
+        'startDate': 'start date (DateTime) of a new activity',
+      },
       builder: (args) {
         final id = (args?['activityId'] ?? args?['id'])?.toString();
         if (id == null || id.isEmpty) {
-          return ActivityDialog(Activity(), null);
+          final type = args?['activityType']?.toString();
+          final startDate = args?['startDate'];
+          return ActivityDialog(
+            Activity(
+              activityType: type == null ? null : ActivityType.tryParse(type),
+              estimatedStartDate: startDate is DateTime ? startDate : null,
+            ),
+            null,
+          );
         }
         return AsyncRecordDialog<Activity>(
           fetch: (ctx) async {
-            final r = await ctx.read<RestClient>().getActivity(activityId: id, limit: 1);
+            final r = await ctx.read<RestClient>().getActivity(
+              activityId: id,
+              limit: 1,
+            );
             return r.activities.isNotEmpty ? r.activities.first : null;
           },
           onLoaded: (a) => ActivityDialog(a, null),

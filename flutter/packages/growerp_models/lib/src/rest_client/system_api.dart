@@ -136,6 +136,16 @@ mixin SystemApi {
   @POST("rest/s1/growerp/100/SystemSettings/calendarResync")
   Future<void> resyncCalendars();
 
+  /// The in-app calendar of the user for a period (epoch millis, thru
+  /// exclusive): connected calendar events or else activities, plus social
+  /// posts with includeContent.
+  @GET("rest/s1/growerp/100/CalendarItems")
+  Future<CalendarItems> getCalendarItems({
+    @Query('fromDate') required int fromDate,
+    @Query('thruDate') required int thruDate,
+    @Query('includeContent') bool? includeContent,
+  });
+
   @GET("rest/s1/growerp/100/SystemDefault")
   Future<SystemDefault> getSystemDefault();
 

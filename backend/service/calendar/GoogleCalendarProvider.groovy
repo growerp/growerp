@@ -39,6 +39,20 @@ class GoogleCalendarProvider {
         return util(ec).calendarWritable(ss)
     }
 
+    /** True when the tenant is connected with the scope to read calendars. */
+    static boolean isReadable(def ec, String ownerPartyId) {
+        def ss = ec.entity.find('growerp.general.SystemSettings')
+            .condition('ownerPartyId', ownerPartyId).useCache(true).one()
+        return util(ec).calendarReadable(ss)
+    }
+
+    /** The company calendar of the connected account (Meet bookings). */
+    static String companyCalendarId(def ec, String ownerPartyId) {
+        def ss = ec.entity.find('growerp.general.SystemSettings')
+            .condition('ownerPartyId', ownerPartyId).useCache(true).one()
+        return ss?.googleCalendarId ?: 'primary'
+    }
+
     static String createCalendar(def ec, String ownerPartyId, String name, String timeZone) {
         return util(ec).createCalendar(ec, ownerPartyId, name, timeZone)
     }
@@ -74,6 +88,25 @@ class GoogleCalendarProvider {
     static Map listChanges(def ec, String ownerPartyId, String calendarId, String syncToken) {
         def resp = util(ec).listChanges(ec, ownerPartyId, calendarId, syncToken)
         return [events: resp.items.collect { toNeutral(it) }, nextSyncToken: resp.nextSyncToken]
+    }
+
+    /**
+     * Events overlapping [from, thru) for display: [eventId, title, description,
+     * start, end (ISO: yyyy-MM-dd when allDay, else date-time with offset), allDay,
+     * sourceType, sourceId].
+     */
+    static List listRange(def ec, String ownerPartyId, String calendarId,
+            Timestamp from, Timestamp thru) {
+        def items = util(ec).listEventsInRange(ec, ownerPartyId, calendarId,
+            from.toInstant().toString(), thru.toInstant().toString())
+        return items.findAll { it.status != 'cancelled' }.collect { item ->
+            def priv = item.extendedProperties?.private ?: [:]
+            [eventId: item.id, title: item.summary ?: '', description: item.description ?: '',
+                start: item.start?.date ?: item.start?.dateTime,
+                end: item.end?.date ?: item.end?.dateTime,
+                allDay: item.start?.date != null,
+                sourceType: priv.growerpSourceType, sourceId: priv.growerpSourceId]
+        }
     }
 
     static Map toNeutral(Map item) {

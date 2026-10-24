@@ -1151,6 +1151,12 @@ limitations under the License.
                 <service name="growerp.100.ChatServices100.get#Notification" />
             </method>
         </resource>
+        <!-- in-app calendar: calendar events or activities, plus social posts -->
+        <resource name="CalendarItems">
+            <method type="get">
+                <service name="growerp.100.CalendarSyncServices100.get#CalendarItems" />
+            </method>
+        </resource>
         <!-- chatRoom -->
         <resource name="ChatRoom">
             <method type="get">

@@ -198,6 +198,7 @@ mixin MarketingApi {
   // Social Post endpoints
   @GET("rest/s1/growerp/100/SocialPosts")
   Future<SocialPosts> getSocialPosts({
+    @Query('postId') String? postId,
     @Query('searchString') String? searchString,
     @Query('planId') String? planId,
     @Query('masterContentId') String? masterContentId,

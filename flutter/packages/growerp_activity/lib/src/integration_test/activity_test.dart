@@ -18,6 +18,8 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_core/test_data.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import '../get_activity_widgets.dart';
+
 class ActivityTest {
   static Future<void> selectActivities(WidgetTester tester) async {
     await CommonTest.selectOption(tester, '/todos', 'ActivityList');
@@ -205,5 +207,27 @@ class ActivityTest {
     await PersistFunctions.persistTest(
       test.copyWith(activities: updActivities),
     );
+  }
+
+  /// Without a connected calendar the in-app calendar shows the user's own
+  /// todos on their start date (today); tapping one opens its dialog. The
+  /// example app registers no widgets, so ActivityDialog is registered here.
+  static Future<void> checkCalendar(WidgetTester tester) async {
+    SaveTest test = await PersistFunctions.getTest();
+    WidgetRegistry.registerAllWithMetadata(getActivityWidgetsWithMetadata());
+    await CalendarTest.openCalendar(tester);
+    expect(
+      find.byKey(const Key('calendarFilter_activity')),
+      findsOneWidget,
+      reason: 'the backend reports a connected calendar',
+    );
+    await CalendarTest.tapItem(tester, test.activities[0].activityName);
+    expect(find.byKey(const Key('ActivityDialog')), findsOneWidget);
+    expect(
+      CommonTest.getTextFormField('name'),
+      test.activities[0].activityName,
+    );
+    await CalendarTest.closeDialog(tester);
+    await CalendarTest.closeDialog(tester);
   }
 }

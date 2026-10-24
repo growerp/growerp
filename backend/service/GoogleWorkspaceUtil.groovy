@@ -183,6 +183,13 @@ class GoogleWorkspaceUtil {
         return ([SERVICE_SCOPES[service]] + (EXTRA_SCOPES[service] ?: [])).findAll { it }
     }
 
+    /** True when the tenant may read calendars: connected with the calendar scope. */
+    static boolean calendarReadable(def ss) {
+        if (!ss?.googleRefreshToken) return false
+        def granted = ((String) ss.googleGrantedScopes ?: '').split(' ') as List
+        return granted.contains(SERVICE_SCOPES.calendar)
+    }
+
     /** True when the tenant may write calendars: connected with the extra calendar scopes. */
     static boolean calendarWritable(def ss) {
         if (!ss?.googleRefreshToken) return false
@@ -292,6 +299,29 @@ class GoogleWorkspaceUtil {
             def url = "${CALENDAR_BASE}/calendars/${calId}/events" +
                 "?singleEvents=true&showDeleted=true&maxResults=250" +
                 "&updatedMin=" + URLEncoder.encode(updatedMinIso, 'UTF-8') +
+                (pageToken ? "&pageToken=" + URLEncoder.encode(pageToken, 'UTF-8') : '')
+            def resp = apiGet(ec, ownerPartyId, url)
+            if (resp.items) items.addAll(resp.items)
+            pageToken = resp.nextPageToken
+            if (!pageToken) break
+        }
+        return items
+    }
+
+    /**
+     * List the events of a calendar starting before timeMaxIso and ending after timeMinIso
+     * (RFC3339), recurring events expanded. Returns the combined items list across pages.
+     */
+    static List listEventsInRange(def ec, String ownerPartyId, String calendarId,
+            String timeMinIso, String timeMaxIso) {
+        def calId = URLEncoder.encode(calendarId ?: 'primary', 'UTF-8')
+        def items = []
+        String pageToken = null
+        while (true) {
+            def url = "${CALENDAR_BASE}/calendars/${calId}/events" +
+                "?singleEvents=true&orderBy=startTime&maxResults=250" +
+                "&timeMin=" + URLEncoder.encode(timeMinIso, 'UTF-8') +
+                "&timeMax=" + URLEncoder.encode(timeMaxIso, 'UTF-8') +
                 (pageToken ? "&pageToken=" + URLEncoder.encode(pageToken, 'UTF-8') : '')
             def resp = apiGet(ec, ownerPartyId, url)
             if (resp.items) items.addAll(resp.items)

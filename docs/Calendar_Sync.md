@@ -58,6 +58,23 @@ New users get their calendar at the first activity assigned to them.
 - `service/calendar/GoogleCalendarProvider.groovy`: the Google adapter, on top of
   `GoogleWorkspaceUtil.groovy`.
 
+## In-app calendar
+
+The calendar button next to chat in the app bar opens one month/week calendar
+(`growerp_core/lib/src/domains/calendar/`) with everything that has a date. It reads
+`GET /rest/s1/growerp/100/CalendarItems` (`get#CalendarItems`, open to every signed-in user via
+`GROWERP_BASE`):
+
+| Tenant | Shows |
+|--------|-------|
+| Connected with the calendar scope | the events of the company calendar (`googleCalendarId`, else `primary`); with write access also the user's own `GrowERP - <name>` calendar and Bookings. Events pushed from an activity carry its id. |
+| Not connected, or the provider fails | the user's todos and events (assignee or originator) with a start date, all-day, same rule as `push#Activity`, plus a "Connect Google Calendar" link |
+| App with marketing (`SocialPostDialog` registered) | also the social posts of the period, and the undated ones as a backlog strip |
+
+Filter chips switch the sources off. Tapping an item opens `ActivityDialog` or `SocialPostDialog`
+through the `WidgetRegistry` when the app registers them, otherwise a read-only event view.
+Tapping a day, or the add button, creates a todo or a post on that day.
+
 ## Adding a provider (e.g. Microsoft 365)
 
 1. Write `service/calendar/<Name>CalendarProvider.groovy` with the same static methods as
@@ -74,6 +91,9 @@ New users get their calendar at the first activity assigned to them.
    | `upsertEvent(ec, owner, calendarId, eventId, event)` | returns `[eventId, updated]` |
    | `deleteEvent(ec, owner, calendarId, eventId)` | already gone is fine |
    | `listChanges(ec, owner, calendarId, syncToken)` | returns `[events, nextSyncToken]`; all events when the token is null or expired |
+   | `isReadable(ec, ownerPartyId)` | the tenant is connected with read access (in-app calendar) |
+   | `companyCalendarId(ec, ownerPartyId)` | the company calendar of the connected account |
+   | `listRange(ec, owner, calendarId, from, thru)` | events overlapping the period for display: `[eventId, title, description, start, end, allDay, sourceType, sourceId]` |
 
    Keep `sourceType`/`sourceId` in the event's private data (Graph: an open extension).
 2. Add it to the registry in `get#CalendarProvider`.

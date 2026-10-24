@@ -1363,5 +1363,17 @@
   "insRenewalsDue": "Verlängerungen fällig",
   "insOpenClaims": "Offene Schäden",
   "mailUseOauth": "Mit Google OAuth2 anmelden",
-  "mailUseOauthHelp": "Verwendet die Google-Workspace-Zugangsdaten; das Refresh-Token benötigt den Scope https://mail.google.com/"
+  "mailUseOauthHelp": "Verwendet die Google-Workspace-Zugangsdaten; das Refresh-Token benötigt den Scope https://mail.google.com/",
+  "calendar": "Kalender",
+  "calendarToday": "Heute",
+  "calendarMonth": "Monat",
+  "calendarWeek": "Woche",
+  "calendarEmpty": "Nichts in diesem Zeitraum",
+  "calendarBacklog": "{count, plural, =1{1 Beitrag ohne Datum} other{{count} Beiträge ohne Datum}}",
+  "calendarSourceCalendar": "Kalender",
+  "calendarSourceActivities": "Aktivitäten",
+  "calendarSourcePosts": "Beiträge",
+  "calendarConnectHint": "Google Kalender verbinden",
+  "calendarNewActivity": "Neue Aktivität",
+  "calendarNewPost": "Neuer Beitrag"
 }

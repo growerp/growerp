@@ -1363,5 +1363,17 @@
   "insRenewalsDue": "待续保",
   "insOpenClaims": "未结理赔",
   "mailUseOauth": "使用 Google OAuth2 登录",
-  "mailUseOauthHelp": "使用 Google Workspace 凭据；刷新令牌需要 scope https://mail.google.com/"
+  "mailUseOauthHelp": "使用 Google Workspace 凭据；刷新令牌需要 scope https://mail.google.com/",
+  "calendar": "日历",
+  "calendarToday": "今天",
+  "calendarMonth": "月",
+  "calendarWeek": "周",
+  "calendarEmpty": "此期间没有内容",
+  "calendarBacklog": "{count, plural, other{{count} 篇无日期的帖子}}",
+  "calendarSourceCalendar": "日历",
+  "calendarSourceActivities": "活动",
+  "calendarSourcePosts": "帖子",
+  "calendarConnectHint": "连接 Google 日历",
+  "calendarNewActivity": "新活动",
+  "calendarNewPost": "新帖子"
 }

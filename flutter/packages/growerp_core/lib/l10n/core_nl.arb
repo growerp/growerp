@@ -1363,5 +1363,17 @@
   "insRenewalsDue": "Te verlengen",
   "insOpenClaims": "Open schades",
   "mailUseOauth": "Aanmelden met Google OAuth2",
-  "mailUseOauthHelp": "Gebruikt de Google Workspace-gegevens; het refresh token heeft scope https://mail.google.com/ nodig"
+  "mailUseOauthHelp": "Gebruikt de Google Workspace-gegevens; het refresh token heeft scope https://mail.google.com/ nodig",
+  "calendar": "Agenda",
+  "calendarToday": "Vandaag",
+  "calendarMonth": "Maand",
+  "calendarWeek": "Week",
+  "calendarEmpty": "Niets in deze periode",
+  "calendarBacklog": "{count, plural, =1{1 bericht zonder datum} other{{count} berichten zonder datum}}",
+  "calendarSourceCalendar": "Agenda",
+  "calendarSourceActivities": "Activiteiten",
+  "calendarSourcePosts": "Berichten",
+  "calendarConnectHint": "Google Agenda koppelen",
+  "calendarNewActivity": "Nieuwe activiteit",
+  "calendarNewPost": "Nieuw bericht"
 }

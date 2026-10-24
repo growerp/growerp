@@ -66,7 +66,7 @@ This phase leverages Generative AI to assist users in creating high-quality, tar
 
 #### UI Components
 *   **Persona Editor**: Form to view/edit the AI-generated avatar (`growerp_marketing/lib/src/persona/`).
-*   **Content Calendar**: View of the weekly plan with content management (`growerp_marketing/lib/src/content_plan/`, `social_post/`).
+*   **Content Calendar**: scheduled posts show in the in-app calendar (app bar calendar button, `growerp_core/lib/src/domains/calendar/`) next to the user's calendar events; see [Calendar_Sync.md](Calendar_Sync.md#in-app-calendar). Plans and posts are managed in `growerp_marketing/lib/src/content_plan/` and `social_post/`.
 
 ---
 

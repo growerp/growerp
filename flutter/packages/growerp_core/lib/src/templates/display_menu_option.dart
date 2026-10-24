@@ -469,6 +469,18 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
   void _buildActions(ChatRoomState? chatState) {
     actions = List.of(widget.actions);
 
+    // In-app calendar, next to the chat button
+    actions.insert(
+      0,
+      IconButton(
+        key: const Key('calendarButton'),
+        icon: const Icon(Icons.calendar_month),
+        padding: EdgeInsets.zero,
+        tooltip: CoreLocalizations.of(context)!.calendar,
+        onPressed: () => showAppCalendar(context),
+      ),
+    );
+
     // Add chat button if chat is available
     if (chatState != null) {
       List<ChatRoom> unReadRooms = chatState.chatRooms

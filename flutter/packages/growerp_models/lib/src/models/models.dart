@@ -85,6 +85,7 @@ export 'campaign_metrics_model.dart';
 export 'platform_configuration_model.dart';
 export 'campaign_detail_model.dart';
 export 'activity_model.dart';
+export 'calendar_item_model.dart';
 export 'activity_note_model.dart';
 export 'communication_event_model.dart';
 export 'activity_status_model.dart';

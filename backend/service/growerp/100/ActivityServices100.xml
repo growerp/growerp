@@ -280,7 +280,7 @@ limitations under the License.
                         <script>activities.add(eventOut)</script>
                     </iterate>
                 </then>
-                <else-if condition="activityType.toLowerCase() == 'todo' || activityId || pseudoId">
+                <else-if condition="activityType?.toLowerCase() == 'todo' || activityId || pseudoId">
 
                     <!-- only check status for a list -->
                     <if

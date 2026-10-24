@@ -1818,5 +1818,58 @@
   "mailUseOauthHelp": "Uses the Google Workspace credentials; the refresh token needs scope https://mail.google.com/",
   "@mailUseOauthHelp": {
     "description": "Help text under the OAuth2 email switch"
+  },
+  "calendar": "Calendar",
+  "@calendar": {
+    "description": "Title of the in-app calendar and tooltip of its app bar button"
+  },
+  "calendarToday": "Today",
+  "@calendarToday": {
+    "description": "Button returning the calendar to the current period"
+  },
+  "calendarMonth": "Month",
+  "@calendarMonth": {
+    "description": "Calendar period option: a whole month"
+  },
+  "calendarWeek": "Week",
+  "@calendarWeek": {
+    "description": "Calendar period option: a single week"
+  },
+  "calendarEmpty": "Nothing in this period",
+  "@calendarEmpty": {
+    "description": "Shown when nothing falls inside the shown calendar period"
+  },
+  "calendarBacklog": "{count, plural, =1{1 post with no date} other{{count} posts with no date}}",
+  "@calendarBacklog": {
+    "description": "Heading of the strip holding posts that have no scheduled or published date",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "calendarSourceCalendar": "Calendar",
+  "@calendarSourceCalendar": {
+    "description": "Filter chip: events of the connected calendar"
+  },
+  "calendarSourceActivities": "Activities",
+  "@calendarSourceActivities": {
+    "description": "Filter chip: todos and events of GrowERP"
+  },
+  "calendarSourcePosts": "Posts",
+  "@calendarSourcePosts": {
+    "description": "Filter chip: scheduled social posts"
+  },
+  "calendarConnectHint": "Connect Google Calendar",
+  "@calendarConnectHint": {
+    "description": "Button opening the Google Workspace connect dialog from the calendar"
+  },
+  "calendarNewActivity": "New activity",
+  "@calendarNewActivity": {
+    "description": "Option adding a new activity from the calendar"
+  },
+  "calendarNewPost": "New post",
+  "@calendarNewPost": {
+    "description": "Option adding a new social post from the calendar"
   }
 }

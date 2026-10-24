@@ -1363,5 +1363,17 @@
   "insRenewalsDue": "Renouvellements dus",
   "insOpenClaims": "Sinistres ouverts",
   "mailUseOauth": "Connexion avec Google OAuth2",
-  "mailUseOauthHelp": "Utilise les identifiants Google Workspace ; le jeton d'actualisation nécessite le scope https://mail.google.com/"
+  "mailUseOauthHelp": "Utilise les identifiants Google Workspace ; le jeton d'actualisation nécessite le scope https://mail.google.com/",
+  "calendar": "Calendrier",
+  "calendarToday": "Aujourd'hui",
+  "calendarMonth": "Mois",
+  "calendarWeek": "Semaine",
+  "calendarEmpty": "Rien sur cette période",
+  "calendarBacklog": "{count, plural, =1{1 publication sans date} other{{count} publications sans date}}",
+  "calendarSourceCalendar": "Calendrier",
+  "calendarSourceActivities": "Activités",
+  "calendarSourcePosts": "Publications",
+  "calendarConnectHint": "Connecter Google Agenda",
+  "calendarNewActivity": "Nouvelle activité",
+  "calendarNewPost": "Nouvelle publication"
 }

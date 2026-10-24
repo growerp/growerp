@@ -27,9 +27,11 @@ limitations under the License.
          ownerPartyId explicitly. -->
 
     <service verb="get" noun="CalendarProvider" authenticate="false" allow-remote="false">
-        <description>The writable calendar provider of a tenant; empty when none.</description>
+        <description>The writable calendar provider of a tenant (readable with readOnly);
+            empty when none.</description>
         <in-parameters>
             <parameter name="ownerPartyId" required="true" />
+            <parameter name="readOnly" type="Boolean" default="false" />
         </in-parameters>
         <out-parameters>
             <parameter name="providerId" />
@@ -41,12 +43,162 @@ limitations under the License.
             <iterate list="registry" entry="location" key="registryId">
                 <if condition="!providerId">
                     <set field="candidate" from="ec.resource.script(location, null)" />
-                    <if condition="candidate.isWritable(ec, ownerPartyId)">
+                    <if condition="readOnly ? candidate.isReadable(ec, ownerPartyId) :
+                            candidate.isWritable(ec, ownerPartyId)">
                         <set field="providerId" from="registryId" />
                         <set field="provider" from="candidate" />
                     </if>
                 </if>
             </iterate>
+        </actions>
+    </service>
+
+    <service verb="get" noun="CalendarItems" authenticate="true">
+        <description>What the in-app calendar shows for the logged in user in a period.
+            Connected to a calendar provider: the events of the company calendar, plus the
+            user's own GrowERP calendar and Bookings when writable. Otherwise (or when the
+            provider fails): the user's todos and events with a start date, same rule as
+            push#Activity. With includeContent also the social posts of the period and the
+            undated ones (backlog).</description>
+        <in-parameters>
+            <parameter name="fromDate" type="Long" required="true">
+                <description>Epoch milliseconds, start of the period</description></parameter>
+            <parameter name="thruDate" type="Long" required="true">
+                <description>Epoch milliseconds, exclusive end of the period</description></parameter>
+            <parameter name="includeContent" type="Boolean" default="false" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="calendarConnected" type="Boolean" />
+            <parameter name="calendarItems" type="List">
+                <parameter name="calendarItem" type="Map">
+                    <parameter name="itemId" />
+                    <parameter name="source"><description>CALENDAR, ACTIVITY or SOCIAL_POST</description></parameter>
+                    <parameter name="calendarName" />
+                    <parameter name="title" />
+                    <parameter name="description" />
+                    <parameter name="start"><description>yyyy-MM-dd when allDay, else ISO date-time</description></parameter>
+                    <parameter name="end"><description>exclusive, same format as start</description></parameter>
+                    <parameter name="allDay" type="Boolean" />
+                    <parameter name="activityId" />
+                    <parameter name="postId" />
+                    <parameter name="statusId" />
+                    <parameter name="platform" />
+                    <parameter name="publishError" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <set field="userPartyId" from="ec.user.userAccount?.partyId" />
+            <!-- a Long reaches the database untyped, Postgres rejects it against a timestamp -->
+            <set field="fromTs" from="new java.sql.Timestamp(fromDate)" />
+            <set field="thruTs" from="new java.sql.Timestamp(thruDate)" />
+            <set field="calendarItems" from="[]" />
+            <set field="calendarConnected" from="false" />
+
+            <service-call name="growerp.100.CalendarSyncServices100.get#CalendarProvider"
+                in-map="[ownerPartyId: ownerPartyId, readOnly: true]" out-map="prov" />
+            <if condition="prov.providerId">
+                <!-- the calendars to read: [externalCalendarId, name] -->
+                <set field="calendars"
+                    from="[[prov.provider.companyCalendarId(ec, ownerPartyId), 'Company']]" />
+                <entity-find entity-name="growerp.crm.UserCalendar" list="userCalendars">
+                    <econdition field-name="ownerPartyId" />
+                    <econdition field-name="providerId" from="prov.providerId" />
+                    <econdition field-name="partyId" operator="in"
+                        from="[userPartyId, companyPartyId].findAll { it }" />
+                </entity-find>
+                <iterate list="userCalendars" entry="userCalendar">
+                    <script>calendars.add([userCalendar.externalCalendarId,
+                        userCalendar.partyId == userPartyId ? 'My calendar' : 'Bookings'])</script>
+                </iterate>
+                <script><![CDATA[
+                    def seen = [] as Set
+                    try {
+                        for (cal in calendars) {
+                            for (ev in prov.provider.listRange(ec, ownerPartyId, cal[0], fromTs, thruTs)) {
+                                if (!seen.add(ev.eventId)) continue
+                                calendarItems.add([itemId: ev.eventId, source: 'CALENDAR',
+                                    calendarName: cal[1], title: ev.title,
+                                    description: ev.description, start: ev.start, end: ev.end,
+                                    allDay: ev.allDay,
+                                    activityId: ev.sourceType == 'activity' ? ev.sourceId : null])
+                            }
+                        }
+                        calendarConnected = true
+                    } catch (Exception e) {
+                        ec.logger.warn("Calendar items of ${ownerPartyId} from ${prov.providerId} failed, showing activities: ${e.message}")
+                        calendarItems.clear()
+                    }
+                ]]></script>
+            </if>
+
+            <if condition="!calendarConnected &amp;&amp; userPartyId">
+                <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="parties">
+                    <econdition field-name="partyId" from="userPartyId" />
+                    <econdition field-name="roleTypeId" operator="in" value="Assignee,Originator" />
+                    <econdition field-name="thruDate" operator="is-null" />
+                    <select-field field-name="workEffortId" />
+                </entity-find>
+                <set field="workEffortIds" from="parties*.workEffortId.unique()" />
+                <if condition="workEffortIds">
+                    <entity-find entity-name="mantle.work.effort.WorkEffort" list="workEfforts">
+                        <econdition field-name="workEffortId" operator="in" from="workEffortIds" />
+                        <econdition field-name="ownerPartyId" />
+                        <econdition field-name="workEffortTypeEnumId" operator="in"
+                            value="WetTask,WetEvent" />
+                        <econdition field-name="statusId" operator="not-in"
+                            value="WeCancelled,WeClosed" />
+                        <econditions combine="or">
+                            <econditions combine="and">
+                                <econdition field-name="estimatedStartDate" operator="greater-equals"
+                                    from="fromTs" />
+                                <econdition field-name="estimatedStartDate" operator="less"
+                                    from="thruTs" />
+                            </econditions>
+                            <econditions combine="and">
+                                <econdition field-name="estimatedStartDate" from="null" />
+                                <econdition field-name="actualStartDate" operator="greater-equals"
+                                    from="fromTs" />
+                                <econdition field-name="actualStartDate" operator="less"
+                                    from="thruTs" />
+                            </econditions>
+                        </econditions>
+                    </entity-find>
+                    <iterate list="workEfforts" entry="we">
+                        <set field="startTs" from="we.estimatedStartDate ?: we.actualStartDate" />
+                        <set field="endTs"
+                            from="we.estimatedCompletionDate ?: we.actualCompletionDate" />
+                        <!-- all-day like push#Activity: days in the user's time zone,
+                             the end exclusive -->
+                        <script><![CDATA[
+                            def tz = ec.user.getTimeZone()
+                            String startDay = ec.l10n.format(startTs, 'yyyy-MM-dd', null, tz)
+                            String lastDay = endTs && endTs.after(startTs) ?
+                                ec.l10n.format(endTs, 'yyyy-MM-dd', null, tz) : startDay
+                            calendarItems.add([itemId: we.workEffortId, source: 'ACTIVITY',
+                                title: we.workEffortName, description: we.description,
+                                start: startDay,
+                                end: java.time.LocalDate.parse(lastDay).plusDays(1).toString(),
+                                allDay: true, activityId: we.workEffortId,
+                                statusId: we.statusId])
+                        ]]></script>
+                    </iterate>
+                </if>
+            </if>
+
+            <if condition="includeContent">
+                <service-call name="growerp.100.MarketingServices100.list#SocialPosts"
+                    in-map="[fromDate: fromDate, thruDate: thruDate, limit: 500]" out-map="postsOut" />
+                <iterate list="postsOut.socialPosts" entry="post">
+                    <set field="postTs" from="post.scheduledDate ?: post.publishedDate" />
+                    <script>calendarItems.add([itemId: post.postId, source: 'SOCIAL_POST',
+                        title: post.headline ?: post.pseudoId, start: postTs?.toInstant()?.toString(),
+                        allDay: false, postId: post.postId, statusId: post.status,
+                        platform: post.platform, publishError: post.publishError])</script>
+                </iterate>
+            </if>
         </actions>
     </service>
 
