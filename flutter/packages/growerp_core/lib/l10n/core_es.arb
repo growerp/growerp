@@ -467,5 +467,7 @@
   "calendarSourcePosts": "Publicaciones",
   "calendarConnectHint": "Conectar Google Calendar",
   "calendarNewActivity": "Nueva actividad",
-  "calendarNewPost": "Nueva publicación"
+  "calendarNewPost": "Nueva publicación",
+  "calendarResync": "Resincronizar calendarios de usuarios",
+  "calendarResyncStarted": "Los calendarios de usuarios se actualizan en segundo plano"
 }

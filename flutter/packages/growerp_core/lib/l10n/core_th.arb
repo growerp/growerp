@@ -1375,5 +1375,7 @@
   "calendarSourcePosts": "โพสต์",
   "calendarConnectHint": "เชื่อมต่อ Google ปฏิทิน",
   "calendarNewActivity": "กิจกรรมใหม่",
-  "calendarNewPost": "โพสต์ใหม่"
+  "calendarNewPost": "โพสต์ใหม่",
+  "calendarResync": "ซิงค์ปฏิทินผู้ใช้ใหม่",
+  "calendarResyncStarted": "กำลังอัปเดตปฏิทินผู้ใช้เบื้องหลัง"
 }

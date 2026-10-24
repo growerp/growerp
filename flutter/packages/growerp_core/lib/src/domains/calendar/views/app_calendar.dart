@@ -408,6 +408,17 @@ class AppCalendarState extends State<AppCalendar> {
                 () => on ? _hidden.remove(source) : _hidden.add(source),
               ),
             ),
+          // the per-user calendars are kept by the backend; an admin can
+          // rebuild them, e.g. after adding users
+          if (state.calendarConnected &&
+              context.read<AuthBloc>().state.authenticate?.user?.userGroup ==
+                  UserGroup.admin)
+            TextButton.icon(
+              key: const Key('calendarResync'),
+              icon: const Icon(Icons.sync, size: 16),
+              label: Text(localizations.calendarResync),
+              onPressed: _resync,
+            ),
           if (!state.calendarConnected &&
               state.status == CalendarStatus.success)
             TextButton.icon(
@@ -425,6 +436,23 @@ class AppCalendarState extends State<AppCalendar> {
         ],
       ),
     );
+  }
+
+  Future<void> _resync() async {
+    final localizations = CoreLocalizations.of(context)!;
+    try {
+      await context.read<RestClient>().resyncCalendars();
+      if (mounted) {
+        HelperFunctions.showMessage(
+          context,
+          localizations.calendarResyncStarted,
+          Colors.green,
+        );
+      }
+    } catch (e) {
+      final message = await getDioError(e);
+      if (mounted) HelperFunctions.showMessage(context, message, Colors.red);
+    }
   }
 
   /// Posts with no date at all. They are invisible on a calendar otherwise, and

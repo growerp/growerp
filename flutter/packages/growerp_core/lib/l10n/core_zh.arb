@@ -1375,5 +1375,7 @@
   "calendarSourcePosts": "帖子",
   "calendarConnectHint": "连接 Google 日历",
   "calendarNewActivity": "新活动",
-  "calendarNewPost": "新帖子"
+  "calendarNewPost": "新帖子",
+  "calendarResync": "重新同步用户日历",
+  "calendarResyncStarted": "用户日历正在后台更新"
 }

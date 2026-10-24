@@ -1375,5 +1375,7 @@
   "calendarSourcePosts": "Berichten",
   "calendarConnectHint": "Google Agenda koppelen",
   "calendarNewActivity": "Nieuwe activiteit",
-  "calendarNewPost": "Nieuw bericht"
+  "calendarNewPost": "Nieuw bericht",
+  "calendarResync": "Gebruikersagenda's opnieuw synchroniseren",
+  "calendarResyncStarted": "De gebruikersagenda's worden op de achtergrond bijgewerkt"
 }

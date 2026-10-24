@@ -1375,5 +1375,7 @@
   "calendarSourcePosts": "Publications",
   "calendarConnectHint": "Connecter Google Agenda",
   "calendarNewActivity": "Nouvelle activité",
-  "calendarNewPost": "Nouvelle publication"
+  "calendarNewPost": "Nouvelle publication",
+  "calendarResync": "Resynchroniser les calendriers des utilisateurs",
+  "calendarResyncStarted": "Les calendriers des utilisateurs sont mis à jour en arrière-plan"
 }

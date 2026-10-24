@@ -1375,5 +1375,7 @@
   "calendarSourcePosts": "Beiträge",
   "calendarConnectHint": "Google Kalender verbinden",
   "calendarNewActivity": "Neue Aktivität",
-  "calendarNewPost": "Neuer Beitrag"
+  "calendarNewPost": "Neuer Beitrag",
+  "calendarResync": "Benutzerkalender neu synchronisieren",
+  "calendarResyncStarted": "Die Benutzerkalender werden im Hintergrund aktualisiert"
 }

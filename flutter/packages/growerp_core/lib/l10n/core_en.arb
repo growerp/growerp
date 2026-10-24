@@ -1871,5 +1871,13 @@
   "calendarNewPost": "New post",
   "@calendarNewPost": {
     "description": "Option adding a new social post from the calendar"
+  },
+  "calendarResync": "Resync user calendars",
+  "@calendarResync": {
+    "description": "Calendar button (admins): rebuild the per-user calendars in the connected calendar account"
+  },
+  "calendarResyncStarted": "The user calendars are updated in the background",
+  "@calendarResyncStarted": {
+    "description": "Message after starting the calendar resync"
   }
 }
