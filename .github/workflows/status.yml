@@ -252,6 +252,13 @@ jobs:
               f.write(''.join(f'- {d}\n' for d in detail[:50]))
           PYEOF
 
+      - name: Bloc coverage report
+        if: always()
+        working-directory: flutter
+        run: |
+          python3 ci/bloc_coverage.py --json packages/bloc-coverage.json --markdown /tmp/bloc-coverage.md
+          { echo "## Bloc Test Coverage"; echo; cat /tmp/bloc-coverage.md; } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload unit test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -259,6 +266,7 @@ jobs:
           name: unit-test-results
           path: |
             flutter/packages/unit-summary.json
+            flutter/packages/bloc-coverage.json
             flutter/packages/*/build/unit_test.json
           if-no-files-found: ignore
           retention-days: 7
@@ -2049,6 +2057,16 @@ jobs:
                   tests_data['rows'] = others[:1] + [unit[0]] + others[1:]
                   tests_data.setdefault('details', {})['unit'] = unit[1]
 
+          # ── Bloc coverage (ci/bloc_coverage.py in the unit-tests job) ───
+          # Fresh when the unit tests ran, else carried in tests-data.json.
+          try:
+              with open('unit-test-logs/bloc-coverage.json') as f:
+                  if tests_data is not None:
+                      tests_data['bloc_coverage'] = json.load(f)
+          except (OSError, ValueError):
+              pass
+          bloc_cov = (tests_data or {}).get('bloc_coverage')
+
           # ── Failure drill-down page ──────────────────────────────────────
           # The detail travels inside tests-data.json, so a run that skipped the
           # tests rebuilds the same failures page from the carried-over data.
@@ -2108,6 +2126,34 @@ jobs:
               )
           else:
               tests_table = '<p>No test results published yet.</p>'
+
+          if bloc_cov:
+              def cov_pct(b):
+                  return f"{100 * b['hit'] / b['lines']:.1f}%" if b['lines'] else '0.0%'
+              tests_table += (
+                  f'<p>Bloc test coverage: <a href="{PAGES_URL}/coverage.html">'
+                  f"{bloc_cov['tested_blocs']}/{bloc_cov['total_blocs']} blocs with tests, "
+                  f"{bloc_cov['percent']}% of their lines</a></p>")
+              cov_rows = ''.join(
+                  f"<tr><td>{esc(b['package'])}</td><td>{esc(os.path.basename(b['file']))}</td>"
+                  + (f"<td>{cov_pct(b)}</td><td>{b['hit']}/{b['lines']}</td>" if b['tested']
+                     else '<td class="bad">no tests</td><td></td>')
+                  + '</tr>'
+                  for b in sorted(bloc_cov['blocs'], key=lambda b: (b['package'], b['file'])))
+
+          def coverage_page():  # css is defined further down
+              return (
+                  '<!DOCTYPE html><html><head><meta charset="utf-8">'
+                  '<title>GrowERP Bloc Coverage</title>'
+                  f'<style>\n{css}\n</style></head><body>'
+                  '<h1>GrowERP Bloc Test Coverage</h1>'
+                  f'<p>Test run: {esc((tests_data or {}).get("generated", "?"))}</p>'
+                  f'<p><a href="{PAGES_URL}/">Back to status</a></p>'
+                  f"<p>{bloc_cov['tested_blocs']} of {bloc_cov['total_blocs']} blocs have unit "
+                  f"tests; together they cover {bloc_cov['percent']}% of those blocs' lines "
+                  f"({bloc_cov['hit']}/{bloc_cov['lines']}).</p>"
+                  '<table><tr><th>Package</th><th>Bloc</th><th>Coverage</th><th>Lines</th></tr>'
+                  + cov_rows + '</table></body></html>')
 
           # ══ Swarm status ════════════════════════════════════════════════
           # Raw output of `./deploy.sh status` on growerp.com, collected by the
@@ -2372,6 +2418,9 @@ jobs:
               + swarm_html()
               + '</body></html>'
           )
+          if bloc_cov:
+              with open('/tmp/pages/coverage.html', 'w') as f:
+                  f.write(coverage_page())
           with open('/tmp/pages/index.html', 'w') as f:
               f.write(full_html)
           HTML(string=full_html).write_pdf('/tmp/status-report.pdf')
