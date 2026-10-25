@@ -26,6 +26,7 @@
 set -e
 
 REPO="growerp/growerp"
+PROD_HOST="growerp.com" # the swarm manager, as in update-production.yml
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STORE_APPS=(admin hotel freelance support agents rental marketing academy insurance)
 STORES=(ios macos android windows snap)
@@ -401,9 +402,11 @@ newest_tag() {
     git -C "$SCRIPT_DIR" tag -l '[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -1
 }
 
-# a file of the server repo, where the server commits its production pins and the
-# versions frozen into review
+# a swarm file as the production server has it (update production and freeze edit
+# it there); without ssh the growerp/server repo copy, committed by hand, may be stale
 server_file() {
+    ssh -n -o BatchMode=yes -o ConnectTimeout=10 "$PROD_HOST" "cat server/swarm/$1" 2>/dev/null && return
+    warn "  no ssh to $PROD_HOST: $1 from the growerp/server repo, may be stale" >&2
     gh api "repos/growerp/server/contents/swarm/$1" -H 'Accept: application/vnd.github.raw'
 }
 
