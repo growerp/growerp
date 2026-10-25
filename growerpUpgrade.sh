@@ -189,10 +189,13 @@ cmd_prepare() {
     fi
 }
 
-# newest version branch on origin (1.21), where the next version is developed
+# newest version branch on origin (1.21), where the next version is developed;
+# master when there is none
 version_branch() {
-    git -C "$SCRIPT_DIR" branch -r --format='%(refname:lstrip=3)' -l 'origin/[0-9]*' |
-        grep -E '^[0-9]+\.[0-9]+$' | sort -V | tail -1
+    local branch
+    branch=$(git -C "$SCRIPT_DIR" branch -r --format='%(refname:lstrip=3)' -l 'origin/[0-9]*' |
+        grep -E '^[0-9]+\.[0-9]+$' | sort -V | tail -1)
+    echo "${branch:-master}"
 }
 
 # cmd_staging [branch]: update-staging runs on and commits to that branch
@@ -202,7 +205,7 @@ cmd_staging() {
     if [[ -z "$ref" ]]; then
         git -C "$SCRIPT_DIR" fetch -q origin
         ask "Branch" "$(version_branch)"
-        ref="$REPLY"
+        ref="${REPLY:-master}"
     fi
     local frozen published
     frozen=$(last_success freeze-review.yml)
@@ -227,6 +230,10 @@ merge_to_master() {
     git -C "$SCRIPT_DIR" fetch -q origin
     ask "Version branch" "$(version_branch)"
     branch="$REPLY"
+    if [[ "$branch" == master ]]; then
+        echo "No version branch: developed on master, nothing to merge."
+        return
+    fi
     git -C "$SCRIPT_DIR" rev-parse -q --verify "refs/remotes/origin/$branch" >/dev/null ||
         die "no branch origin/$branch"
     if git -C "$SCRIPT_DIR" rev-parse -q --verify "refs/heads/$branch" >/dev/null; then
