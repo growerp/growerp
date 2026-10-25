@@ -96,6 +96,19 @@ last_success() {
     gh run list -R "$REPO" -w "$1" --status success -L1 --json createdAt -q '.[0].createdAt'
 }
 
+# start_at default "step"...: a restart skips the steps already done -> START
+start_at() {
+    local default="$1" i=1 name
+    shift
+    for name in "$@"; do
+        echo "  $i  $name"
+        i=$((i + 1))
+    done
+    ask "Start at step (restarted: skip the steps done)" "$default"
+    [[ "$REPLY" =~ ^[0-9]+$ ]] && ((REPLY >= 1 && REPLY <= $#)) || die "no step $REPLY"
+    START=$REPLY
+}
+
 # run_workflow file.yml [-f key=value ...]: dispatch, wait, stop on failure
 run_workflow() {
     local workflow="$1"
@@ -157,18 +170,20 @@ changed_screen_apps() {
 # of that run), so create new ones for the apps when screens changed or it expired
 cmd_prepare() {
     step "Store screenshots when screens changed"
-    local changed last
+    local changed last available=false
     changed=$(changed_screen_apps)
     last=$(last_success screenshots.yml)
+    [[ -n "$last" && "$last" > "$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)" ]] && available=true
     if [[ -n "$changed" ]]; then
-        echo "Apps with changed screens: $(tr ' ' ',' <<<"${changed% }")"
-    elif [[ -n "$last" && "$last" > "$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)" ]]; then
+        echo "Apps with changed screens since the last screenshots: $(tr ' ' ',' <<<"${changed% }")"
+        $available && echo "The screenshots of $last are still available: N skips and uses them."
+    elif $available; then
         echo "Screens unchanged, screenshots of $last still available."
         return
     else
         echo "Screens unchanged, but the screenshots artifact expired (last run: ${last:-none})."
     fi
-    if confirm "Create store screenshots?"; then
+    if confirm "Create new store screenshots?"; then
         ask_apps "${1:-all}"
         run_workflow screenshots.yml -f apps="$REPLY"
     fi
@@ -245,15 +260,23 @@ merge_to_master() {
 }
 
 cmd_prod_review() {
-    require_review true
-    step "1. Store approvals"
-    echo "Approval taking too long? See 'When a store approval takes too long' in growerpUpgrade.md."
-    list_review_apps
-    pause "Wait until the stores approved the apps to promote (per app is fine)."
-    step "2. Update production from review"
-    ask_apps_moqui
-    local apps="$REPLY"
-    run_workflow update-production.yml -f source=review -f apps="$apps"
+    start_at 1 "Store approvals" "Update production from review" \
+        "Release approved store submissions"
+    # after promoting everything no review is open, a restart at 3 still releases
+    ((START > 2)) || require_review true
+    local apps=all
+    if ((START <= 1)); then
+        step "1. Store approvals"
+        echo "Approval taking too long? See 'When a store approval takes too long' in growerpUpgrade.md."
+        list_review_apps
+        pause "Wait until the stores approved the apps to promote (per app is fine)."
+    fi
+    if ((START <= 2)); then
+        step "2. Update production from review"
+        ask_apps_moqui
+        apps="$REPLY"
+        run_workflow update-production.yml -f source=review -f apps="$apps"
+    fi
     step "3. Release approved store submissions"
     [[ "$apps" == "all" ]] || apps=$(tr ',' '\n' <<<"$apps" | grep -vx moqui | paste -sd,)
     if [[ -z "$apps" ]]; then
@@ -400,44 +423,64 @@ list_review_apps() {
 
 # preparing is fine while the previous review waits for approvals, the freeze is not
 cmd_review() {
-    [[ -n "$REVIEW_OPEN" ]] || show_versions >/dev/null
-    if $REVIEW_OPEN; then
-        list_review_apps
-        echo "Steps 1-4 can run now, the freeze (5) waits until these are promoted"
-        echo "or dropped (./review.sh drop <app> --apply on the server)."
-        confirm "Prepare the new review anyway?" || return
+    local default=1 frozen published
+    frozen=$(last_success freeze-review.yml)
+    published=$(last_success publish-binary.yml)
+    [[ -n "$frozen" && "$frozen" > "${published:-}" ]] && default=6
+    start_at "$default" "Merge the version branch into master" "Update staging from master" \
+        "Reviewer login" "GitHub release" "Freeze for review" "Submit for review"
+    if ((START <= 5)); then
+        [[ -n "$REVIEW_OPEN" ]] || show_versions >/dev/null
+        if $REVIEW_OPEN; then
+            list_review_apps
+            echo "Steps 1-4 can run now, the freeze (5) waits until these are promoted"
+            echo "or dropped (./review.sh drop <app> --apply on the server)."
+            confirm "Prepare the new review anyway?" || return
+        fi
     fi
-    step "1. Merge the version branch into master"
-    merge_to_master || return
-    step "2. Update staging from master"
-    echo "The version to submit: staging built from master."
-    confirm "Update staging from master?" && cmd_staging master
-    step "3. Reviewer login"
-    pause "Create the userid/password for the store reviewers on staging."
-    step "4. GitHub release"
-    confirm "Create a GitHub release for the version to submit?" && cmd_release
-    step "5. Freeze for review"
-    show_versions >/dev/null
-    while $REVIEW_OPEN; do
-        list_review_apps
-        confirm "Promoted or dropped them? Check again" || return
+    if ((START <= 1)); then
+        step "1. Merge the version branch into master"
+        merge_to_master || echo "Merge skipped."
+    fi
+    if ((START <= 2)); then
+        step "2. Update staging from master"
+        echo "The version to submit: staging built from master."
+        confirm "Update staging from master?" && cmd_staging master
+    fi
+    if ((START <= 3)); then
+        step "3. Reviewer login"
+        pause "Create the userid/password for the store reviewers on staging."
+    fi
+    if ((START <= 4)); then
+        step "4. GitHub release"
+        confirm "Create a GitHub release for the version to submit?" && cmd_release
+    fi
+    if ((START <= 5)); then
+        step "5. Freeze for review"
         show_versions >/dev/null
-    done
-    confirm "Freeze for review?" || return
-    run_workflow freeze-review.yml
-    warn "No 'update staging' until the binaries are published: they must be the frozen version."
+        while $REVIEW_OPEN; do
+            list_review_apps
+            confirm "Promoted or dropped them? Check again" || return
+            show_versions >/dev/null
+        done
+        confirm "Freeze for review?" || return
+        run_workflow freeze-review.yml
+        warn "No 'update staging' until the binaries are published: they must be the frozen version."
+    fi
     # The binary creates the new store version, metadata writes into it (the Windows
     # binary submission carries its listing itself); both use the screenshots
     step "6. Submit for review"
-    confirm "Publish binary to stores?" || return
-    ask_apps
-    local apps="$REPLY"
-    ask_stores
-    local stores="$REPLY"
-    cmd_prepare "$apps"
-    ask_list "Track (stable = submit for review, beta = TestFlight only)" stable stable beta
-    run_workflow publish-binary.yml -f apps="$apps" -f stores="$stores" -f track="$REPLY" \
-        -f android_release_status=auto
+    local apps=all stores=all
+    if confirm "Publish binary to stores (N: already published, go to metadata)?"; then
+        ask_apps
+        apps="$REPLY"
+        ask_stores
+        stores="$REPLY"
+        cmd_prepare "$apps"
+        ask_list "Track (stable = submit for review, beta = TestFlight only)" stable stable beta
+        run_workflow publish-binary.yml -f apps="$apps" -f stores="$stores" -f track="$REPLY" \
+            -f android_release_status=auto
+    fi
     if confirm "Publish metadata to stores?"; then
         ask_apps "$apps"
         apps="$REPLY"
