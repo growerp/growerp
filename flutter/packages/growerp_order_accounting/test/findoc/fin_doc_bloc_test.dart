@@ -145,6 +145,66 @@ void main() {
       ],
     );
 
+    // https://github.com/growerp/growerp/issues/41
+    blocTest<FinDocBloc, FinDocState>(
+      'FinDocFetch_secondPage_keepsItemTypes',
+      setUp: () => stubGetFinDoc(
+        start: 1,
+        answer: (_) async => FinDocs(finDocs: [order2]),
+      ),
+      build: orderBloc,
+      seed: () => FinDocState(
+        status: FinDocStatus.success,
+        finDocs: [order1],
+        itemTypes: [itemType1],
+      ),
+      act: (bloc) => bloc.add(const FinDocFetch()),
+      wait: fetchWait,
+      expect: () => [
+        finDocState(FinDocStatus.loading),
+        finDocState(
+          FinDocStatus.success,
+          finDocs: [order1, order2],
+        ).having((s) => s.itemTypes, 'itemTypes', [itemType1]),
+      ],
+      verify: (_) => verifyNever(
+        () => restClient.getItemTypes(sales: any(named: 'sales')),
+      ),
+    );
+
+    // https://github.com/growerp/growerp/issues/41
+    blocTest<FinDocBloc, FinDocState>(
+      'FinDocFetch_secondPage_keepsPaymentTypes',
+      setUp: () => stubGetFinDoc(
+        docType: FinDocType.payment,
+        sales: false,
+        start: 1,
+        answer: (_) async => FinDocs(finDocs: [payment1]),
+      ),
+      build: () =>
+          FinDocBloc(restClient, false, FinDocType.payment, applicationId),
+      seed: () => FinDocState(
+        status: FinDocStatus.success,
+        finDocs: [payment1],
+        paymentTypes: [paymentType1],
+      ),
+      act: (bloc) => bloc.add(const FinDocFetch()),
+      wait: fetchWait,
+      expect: () => [
+        finDocState(FinDocStatus.loading),
+        finDocState(
+          FinDocStatus.success,
+          finDocs: [payment1, payment1],
+        ).having((s) => s.paymentTypes, 'paymentTypes', [paymentType1]),
+      ],
+      verify: (_) {
+        verifyNever(
+          () => restClient.getPaymentTypes(sales: any(named: 'sales')),
+        );
+        verifyNever(() => restClient.getItemTypes(sales: any(named: 'sales')));
+      },
+    );
+
     blocTest<FinDocBloc, FinDocState>(
       'FinDocFetch_restThrowsDio_emitsFailureAndKeepsList',
       setUp: () => stubGetFinDoc(
