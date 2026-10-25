@@ -17,15 +17,19 @@ mkdir -p flutter/packages/growerp_[domain]/example/integration_test
 
 #### [entity]_bloc.dart
 ```dart
+import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 part '[entity]_event.dart';
 part '[entity]_state.dart';
 
+// For search and paging add the throttle/debounce transformers, see
+// growerp_order_accounting/lib/src/accounting/gl_account/blocs/gl_account_bloc.dart
 class [Entity]Bloc extends Bloc<[Entity]Event, [Entity]State> {
-  [Entity]Bloc({required this.restClient}) : super(const [Entity]State()) {
+  [Entity]Bloc(this.restClient) : super(const [Entity]State()) {
     on<[Entity]Fetch>(_on[Entity]Fetch);
     on<[Entity]Update>(_on[Entity]Update);
     on<[Entity]Delete>(_on[Entity]Delete);
@@ -45,10 +49,10 @@ class [Entity]Bloc extends Bloc<[Entity]Event, [Entity]State> {
         [entity]s: event.refresh ? result.[entity]s : state.[entity]s + result.[entity]s,
         hasReachedMax: result.[entity]s.length < event.limit,
       ));
-    } catch (error) {
+    } on DioException catch (e) {
       emit(state.copyWith(
         status: [Entity]Status.failure,
-        message: error.toString(),
+        message: await getDioError(e),
       ));
     }
   }
@@ -72,12 +76,13 @@ class [Entity]Bloc extends Bloc<[Entity]Event, [Entity]State> {
       emit(state.copyWith(
         status: [Entity]Status.success,
         [entity]s: updated[Entity]s,
-        message: '[Entity] ${event.[entity].id.isEmpty ? 'created' : 'updated'} successfully',
+        // l10n key, translated in the view by translate[Entity]BlocMessage
+        message: '${event.[entity].id.isEmpty ? '[entity]AddSuccess' : '[entity]UpdateSuccess'}:${[entity].name}',
       ));
-    } catch (error) {
+    } on DioException catch (e) {
       emit(state.copyWith(
         status: [Entity]Status.failure,
-        message: error.toString(),
+        message: await getDioError(e),
       ));
     }
   }
@@ -90,12 +95,12 @@ class [Entity]Bloc extends Bloc<[Entity]Event, [Entity]State> {
       emit(state.copyWith(
         status: [Entity]Status.success,
         [entity]s: updated[Entity]s,
-        message: '[Entity] deleted successfully',
+        message: '[entity]DeleteSuccess:${event.[entity].name}',
       ));
-    } catch (error) {
+    } on DioException catch (e) {
       emit(state.copyWith(
         status: [Entity]Status.failure,
-        message: error.toString(),
+        message: await getDioError(e),
       ));
     }
   }
@@ -525,31 +530,39 @@ class [Entity]Test {
 
 #### [entity]_model.dart
 ```dart
-import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:fast_csv/fast_csv.dart' as fast_csv;
 
 part '[entity]_model.freezed.dart';
 part '[entity]_model.g.dart';
 
+// freezed provides ==/hashCode: no Equatable. Reference: gl_account_model.dart
 @freezed
-class [Entity] extends Equatable with _$[Entity] {
-  const [Entity]._();
-  const factory [Entity]({
+abstract class [Entity] with _$[Entity] {
+  [Entity]._();
+  factory [Entity]({
+    // '' not a real value: partial PATCH objects get every default filled in
     @Default("") String id,
-    @Default("") String name,
+    String? name,
     String? description,
-    // Add other fields as needed
+    @DateTimeConverter() DateTime? createdDate,
+    // Add other fields as needed, lists as @Default([]) List<X> xs
   }) = _[Entity];
 
   factory [Entity].fromJson(Map<String, dynamic> json) =>
       _$[Entity]FromJson(json['[entity]'] ?? json);
 
   @override
-  List<Object?> get props => [id];
-
-  @override
   String toString() => '$name[$id]';
+}
+
+// list wrapper returned by the REST client
+@freezed
+abstract class [Entity]s with _$[Entity]s {
+  factory [Entity]s({@Default([]) List<[Entity]> [entity]s}) = _[Entity]s;
+
+  factory [Entity]s.fromJson(Map<String, dynamic> json) =>
+      _$[Entity]sFromJson(json);
 }
 
 // CSV Import/Export
@@ -586,7 +599,7 @@ String csvFrom[Entity]s(List<[Entity]> [entity]s) {
 
 ### 6. REST Client Integration
 
-Add to rest_client.dart:
+Add to the domain mixin `growerp_models/lib/src/rest_client/[domain]_api.dart` (mixed into `RestClient`); the path must match `backend/service/growerp.rest.xml`:
 ```dart
 @GET("rest/s1/growerp/100/[Entity]s")
 Future<[Entity]s> get[Entity]s({

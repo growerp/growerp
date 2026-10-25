@@ -69,12 +69,11 @@ growerp_[domain]/
 ### 1. BLoC Structure Template
 ```dart
 // [entity]_bloc.dart
-part of '[entity]_bloc.dart';
 part '[entity]_event.dart';
 part '[entity]_state.dart';
 
 class [Entity]Bloc extends Bloc<[Entity]Event, [Entity]State> {
-  [Entity]Bloc({required this.restClient}) : super(const [Entity]State()) {
+  [Entity]Bloc(this.restClient) : super(const [Entity]State()) {
     on<[Entity]Fetch>(_on[Entity]Fetch);
     on<[Entity]Update>(_on[Entity]Update);
     on<[Entity]Delete>(_on[Entity]Delete);
@@ -90,10 +89,10 @@ class [Entity]Bloc extends Bloc<[Entity]Event, [Entity]State> {
         status: [Entity]Status.success,
         [entity]s: result.[entity]s,
       ));
-    } catch (error) {
+    } on DioException catch (e) {
       emit(state.copyWith(
         status: [Entity]Status.failure,
-        message: error.toString(),
+        message: await getDioError(e),
       ));
     }
   }
@@ -367,21 +366,19 @@ class [Entity]Test {
 
 ### 1. Freezed Model Pattern
 ```dart
+// freezed provides ==/hashCode: no Equatable. Reference: gl_account_model.dart
 @freezed
-class [Entity] extends Equatable with _$[Entity] {
-  const [Entity]._();
-  const factory [Entity]({
-    @Default("") String id,
-    @Default("") String name,
+abstract class [Entity] with _$[Entity] {
+  [Entity]._();
+  factory [Entity]({
+    @Default("") String id, // '' not a real value: partial PATCH objects get defaults
+    String? name,
     String? description,
-    // Add other fields...
+    // Add other fields..., lists as @Default([]) List<X> xs
   }) = _[Entity];
 
   factory [Entity].fromJson(Map<String, dynamic> json) =>
       _$[Entity]FromJson(json['[entity]'] ?? json);
-
-  @override
-  List<Object?> get props => [id];
 
   @override
   String toString() => '$name[$id]';
@@ -424,6 +421,7 @@ String csvFrom[Entity]s(List<[Entity]> [entity]s) {
 ## API Integration Patterns
 
 ### 1. REST Client Method Pattern
+Methods go in the domain mixin `growerp_models/lib/src/rest_client/[domain]_api.dart`, mixed into `RestClient`. Return typed list wrappers, not `Map`/`dynamic`.
 ```dart
 @GET("rest/s1/growerp/100/[Entity]s")
 Future<[Entity]s> get[Entity]s({

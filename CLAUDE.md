@@ -190,7 +190,7 @@ Read-only (no create/update/delete) and restricted to the SystemSupport account.
 
 ## Conventions
 
-- **Models**: Use `@freezed` with `Equatable`. `fromJson` handles both wrapped (`json['entity']`) and unwrapped JSON.
+- **Models**: `@freezed abstract class X with _$X` (freezed equality, no `Equatable`). `fromJson` handles both wrapped (`json['entity']`) and unwrapped JSON. Full bloc/model/REST/bloc-test rules: `.claude/skills/growerp-flutter-patterns/SKILL.md`.
 - **Forms**: Use `FormBuilder` with `FormBuilderValidators`. All interactive widgets need `Key`.
 - **BLoC events**: Standard set: `Fetch`, `Update`, `Delete`. Status enum: `initial`, `loading`, `success`, `failure`.
 - **Error display**: `HelperFunctions.showMessage(context, message, Colors.red)` in BLoC listener.
