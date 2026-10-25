@@ -38,7 +38,9 @@ def collect(root='packages'):
     blocs = []
     for pkg_dir in sorted(glob.glob(f'{root}/*/')):
         pkg = os.path.basename(pkg_dir.rstrip('/'))
-        files = sorted(glob.glob(f'{pkg_dir}lib/**/*_bloc.dart', recursive=True))
+        # only real blocs: website/lib/widgets/text_bloc.dart is a widget
+        files = sorted(f for f in glob.glob(f'{pkg_dir}lib/**/*_bloc.dart', recursive=True)
+                       if 'extends Bloc<' in open(f).read())
         if not files:
             continue
         cov = lcov_lines(f'{pkg_dir}coverage/lcov.info')
