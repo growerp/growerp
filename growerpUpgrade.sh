@@ -38,6 +38,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 DIM='\033[2m'
 REVIEW_OPEN="" # true/false once show_versions ran
+REVIEW_APPS="" # "app review-version (production version)" lines still in review
 
 # the header comment, up to the first line that is not a comment
 show_help() {
@@ -273,14 +274,32 @@ cmd_prod_staging() {
     run_workflow update-production.yml -f source=staging -f apps="$REPLY"
 }
 
+# not approved yet: apps whose review version is not on production
+list_review_apps() {
+    warn "Not on production yet (store approval pending, or promote them with 1a):"
+    printf '%s' "$REVIEW_APPS"
+}
+
+# preparing is fine while the previous review waits for approvals, the freeze is not
 cmd_review() {
-    require_review false
+    [[ -n "$REVIEW_OPEN" ]] || show_versions >/dev/null
+    if $REVIEW_OPEN; then
+        list_review_apps
+        echo "Steps 1 and 2 can run now, the freeze (3) waits until these are promoted"
+        echo "or dropped (./review.sh drop <app> --apply on the server)."
+        confirm "Prepare the new review anyway?" || return
+    fi
     step "1. Version to submit"
     pause "The last 'update staging' run is the version to submit. Create the userid/password for the store reviewers on staging."
     step "2. GitHub release"
     confirm "Create a GitHub release for the version to submit?" && cmd_release
     step "3. Freeze for review"
-    echo "Freeze refuses until every version in review is on production."
+    show_versions >/dev/null
+    while $REVIEW_OPEN; do
+        list_review_apps
+        confirm "Promoted or dropped them? Check again" || return
+        show_versions >/dev/null
+    done
     confirm "Freeze for review?" || return
     run_workflow freeze-review.yml
     warn "No 'update staging' until the binaries are published: they must be the frozen version."
@@ -338,6 +357,7 @@ minor_dated() {
 show_versions() {
     local prod review name img rv pv rminors="" pminors="" rall="" pall=""
     REVIEW_OPEN=false
+    REVIEW_APPS=""
     git -C "$SCRIPT_DIR" fetch -q --tags origin
     prod=$(server_file apps-prod.yml)
     review=$(server_file review-versions.conf)
@@ -348,7 +368,10 @@ show_versions() {
         pv=$(grep -oE "ghcr.io/growerp/$img:[0-9.]+" <<<"$prod" | head -1 | cut -d: -f2)
         [[ -n "$rv" ]] && rminors+="${rv%.*}"$'\n' && rall+="$rv"$'\n'
         [[ -n "$pv" ]] && pminors+="${pv%.*}"$'\n' && pall+="$pv"$'\n'
-        [[ -n "$rv" && "$rv" != "$pv" ]] && REVIEW_OPEN=true
+        if [[ -n "$rv" && "$rv" != "$pv" ]]; then
+            REVIEW_OPEN=true
+            REVIEW_APPS+="    $name $rv (production ${pv:-none})"$'\n'
+        fi
     done
     local staging
     staging=$(newest_tag)
@@ -356,7 +379,7 @@ show_versions() {
         " ·  review $(minor_dated "$rminors" <<<"$rall")" \
         " ·  production $(minor_dated "$pminors" <<<"$pall")"
     if $REVIEW_OPEN; then
-        warn "  Review open: waiting for store approvals -> 1a"
+        warn "  Review open: waiting for store approvals -> 1a (2 can prepare)"
     else
         echo "  No review open -> 1b or 2"
     fi
@@ -381,7 +404,7 @@ menu() {
     if $REVIEW_OPEN; then off="$DIM"; else on="$DIM"; fi
     echo -e "${on}     1a  from review    versions the stores approved     (when a review is open)${NC}"
     echo -e "${off}     1b  from staging   new release of staging now       (when no review is open)${NC}"
-    echo -e "${off}  2  New review         GitHub release, freeze, submit   (when no review is open)${NC}"
+    echo    "  2  New review         GitHub release, freeze, submit   (freeze when no review is open)"
     echo
     echo "  Other: u update staging   p screenshots   g GitHub release   t status   q quit"
     echo
