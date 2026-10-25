@@ -1397,6 +1397,7 @@ jobs:
           STORE_IDS: ${{ needs.resolve-matrix.outputs.store_ids }}
           STORE_OVERRIDES: ${{ needs.resolve-matrix.outputs.store_overrides }}
           TESTS_RESULT: ${{ needs.integration-tests.result }}
+          GITHUB_TOKEN: ${{ github.token }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           # Always present so the Pages upload has something to publish,
@@ -2085,6 +2086,46 @@ jobs:
                   }
               return apps
 
+          # The backend (moqui) version is the GrowERP release: release_tool tags
+          # git with it, so the tag date is the release date.
+          _release_dates = {}
+          def release_date(version):
+              if version in _release_dates:
+                  return _release_dates[version]
+              api = f"https://api.github.com/repos/{os.environ.get('GITHUB_REPOSITORY', 'growerp/growerp')}"
+              hdrs = {'Accept': 'application/vnd.github+json'}
+              if os.environ.get('GITHUB_TOKEN'):
+                  hdrs['Authorization'] = f"Bearer {os.environ['GITHUB_TOKEN']}"
+              def get(url):
+                  req = urllib.request.Request(url, headers=hdrs)
+                  return json.loads(urllib.request.urlopen(req, timeout=20).read())
+              date = ''
+              try:
+                  obj = get(f'{api}/git/ref/tags/{version}')['object']
+                  if obj['type'] == 'tag':
+                      raw = get(f"{api}/git/tags/{obj['sha']}")['tagger']['date']
+                  else:
+                      raw = get(f"{api}/git/commits/{obj['sha']}")['committer']['date']
+                  date = (datetime.fromisoformat(raw.replace('Z', '+00:00'))
+                          .astimezone(TZ_LOCAL).strftime('%Y-%m-%d'))
+              except Exception as e:
+                  print(f'WARN: release date of {version} unavailable ({e})')
+              _release_dates[version] = date
+              return date
+
+          ENV_HEADERS = {
+              'staging':    ('Staging', 'backend.growerp.org'),
+              'review':     ('Review', 'backend.growerp.net'),
+              'production': ('Production', 'backend.growerp.com'),
+          }
+
+          def env_title(apps, env):
+              name, domain = ENV_HEADERS[env]
+              version = apps.get('moqui', {}).get(env, {}).get('version', '?')
+              date = release_date(version) if version != '?' else ''
+              return (f'{name} — GrowERP {esc(version)} · released {esc(date or "?")}'
+                      f' · {domain}')
+
           def images_table():
               apps = parse_swarm_images()
               if not apps:
@@ -2092,7 +2133,7 @@ jobs:
               head = ('<tr><th>App</th><th>Version</th><th>Image</th>'
                       f'<th>Replicas</th><th>Deployed ({TZ_NAME})</th></tr>')
 
-              def env_table(title, env):
+              def env_table(env):
                   rows = ''
                   # Backend first, then alphabetical — the server's apps.conf order.
                   for app in sorted(apps, key=lambda a: (0 if a == 'moqui' else 1, a)):
@@ -2117,7 +2158,7 @@ jobs:
                                + f'<td>{image}</td>'
                                + swarm_cell('REPLICAS', env_data['replicas'])
                                + f'<td>{esc(env_data["updated"])}</td></tr>')
-                  return f'<h3>{title}</h3><table>{head}{rows}</table>'
+                  return f'<h3>{env_title(apps, env)}</h3><table>{head}{rows}</table>'
 
               def review_table():
                   # Store review backend (review.sh): only the apps it runs, no
@@ -2145,13 +2186,13 @@ jobs:
                                f'to: <b>{esc(url)}</b> ({what}).</p>')
                   if not rows:
                       return route
-                  return ('<h3>Review backend (store reviewers, *.growerp.net)</h3><table>'
+                  return (f'<h3>{env_title(apps, "review")}</h3><table>'
                           + head.replace('</tr>', '<th>Note</th></tr>') + rows
                           + '</table>' + route)
 
-              return (env_table('Staging images (test services)', 'staging')
-                      + env_table('Production images', 'production')
+              return (env_table('staging')
                       + review_table()
+                      + env_table('production')
                       + '<p>Versions are compared per app: an amber production version '
                       'means that app\'s staging build is ahead of it, expected while '
                       'builds are in store review: production is updated from the review '
