@@ -1,0 +1,3 @@
+# gemini-3.7-flash retired as default (now gemini-3.8-flash): agents and tenant
+# settings still naming it follow the central default again.
+growerp.100.GeneralServices100.migrate#StaleLlmModelNames

@@ -9,6 +9,16 @@ the review version. Nothing is rebuilt on the way: every "update staging" run ge
 new version (patch, minor or major), and production gets exactly the image that was
 reviewed. "update staging" can run any time, except between B3 and B4.
 
+`./growerpUpgrade.sh` walks these cycles: it runs the workflows with gh, waits for each
+run and asks for the human steps. `./growerpUpgrade.sh -n` is a dry run: every prompt,
+but the workflows and the GitHub release are only shown. In B4, before publishing metadata, it creates the
+store screenshots when screens changed since the last screenshots run or its artifact
+(kept 7 days) expired (`./growerpUpgrade.sh prepare`). Just before
+the freeze (B3) it creates the GitHub release of the version to submit
+(`./growerpUpgrade.sh release`):
+a summary paragraph and the feat/fix/docs/ci commits since the previous release, edited
+before publishing.
+
 ### A. Update production
 
 1. Wait for the store approvals (stores can approve at different times).
