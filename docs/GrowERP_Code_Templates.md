@@ -526,6 +526,135 @@ class [Entity]Test {
 }
 ```
 
+### 4b. BLoC Unit Test Template
+
+Backend-free, run with `cd flutter && melos run test_unit`. Rules and rationale:
+`docs/adr/0001-flutter-unit-test-standard.md`. Add `bloc_test` and `mocktail` to
+the package's `dev_dependencies`.
+
+#### test/shared/mocks.dart
+```dart
+export 'package:growerp_models/testing.dart'; // MockRestClient, dioError()
+
+import 'package:growerp_models/growerp_models.dart';
+
+final entity1 = Entity(entityId: 'E1', entityName: 'First');
+final entity2 = Entity(entityId: 'E2', entityName: 'Second');
+```
+
+#### test/[entity]/[entity]_bloc_test.dart
+```dart
+import 'package:bloc_test/bloc_test.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:growerp_[domain]/growerp_[domain].dart';
+import 'package:growerp_models/growerp_models.dart';
+import 'package:mocktail/mocktail.dart';
+
+import '../shared/mocks.dart';
+
+// [Entity]Fetch is throttled 100ms: wait longer before asserting.
+const fetchWait = Duration(milliseconds: 150);
+
+TypeMatcher<[Entity]State> entityState(
+  [Entity]Status status, {
+  List<Entity>? entities,
+  String? message,
+}) {
+  var m = isA<[Entity]State>().having((s) => s.status, 'status', status);
+  if (entities != null) m = m.having((s) => s.entities, 'entities', entities);
+  if (message != null) m = m.having((s) => s.message, 'message', message);
+  return m;
+}
+
+void main() {
+  late MockRestClient restClient;
+
+  setUp(() => restClient = MockRestClient());
+
+  group('[Entity]Fetch', () {
+    blocTest<[Entity]Bloc, [Entity]State>(
+      '[Entity]Fetch_initial_loadsFirstPage',
+      // Arrange: stub with the exact arguments the bloc must send
+      setUp: () => when(
+        () => restClient.get[Entity](start: 0, limit: 20, searchString: ''),
+      ).thenAnswer((_) async => Entities(entities: [entity1, entity2])),
+      build: () => [Entity]Bloc(restClient),
+      // Act: one event
+      act: (bloc) => bloc.add(const [Entity]Fetch()),
+      wait: fetchWait,
+      // Assert
+      expect: () => [
+        entityState([Entity]Status.loading),
+        entityState([Entity]Status.success, entities: [entity1, entity2])
+            .having((s) => s.hasReachedMax, 'hasReachedMax', true),
+      ],
+    );
+
+    blocTest<[Entity]Bloc, [Entity]State>(
+      '[Entity]Fetch_nextPage_appendsFromCurrentLength',
+      setUp: () => when(
+        () => restClient.get[Entity](start: 1, limit: 20, searchString: ''),
+      ).thenAnswer((_) async => Entities(entities: [entity2])),
+      build: () => [Entity]Bloc(restClient),
+      seed: () => [Entity]State(
+        status: [Entity]Status.success,
+        entities: [entity1],
+      ),
+      act: (bloc) => bloc.add(const [Entity]Fetch()),
+      wait: fetchWait,
+      expect: () => [
+        entityState([Entity]Status.loading),
+        entityState([Entity]Status.success, entities: [entity1, entity2]),
+      ],
+    );
+
+    blocTest<[Entity]Bloc, [Entity]State>(
+      '[Entity]Fetch_restThrowsDio_emitsFailure',
+      setUp: () => when(
+        () => restClient.get[Entity](start: 0, limit: 20, searchString: ''),
+      ).thenThrow(dioError('No access')), // getDioError turns it into the text
+      build: () => [Entity]Bloc(restClient),
+      act: (bloc) => bloc.add(const [Entity]Fetch()),
+      wait: fetchWait,
+      expect: () => [
+        entityState([Entity]Status.loading),
+        entityState([Entity]Status.failure, message: 'No access'),
+      ],
+    );
+  });
+
+  group('[Entity]Update', () {
+    blocTest<[Entity]Bloc, [Entity]State>(
+      '[Entity]Update_new_createsAndInsertsFirst',
+      setUp: () => when(
+        () => restClient.create[Entity](entity: Entity(entityName: 'Second')),
+      ).thenAnswer((_) async => entity2),
+      build: () => [Entity]Bloc(restClient),
+      seed: () => [Entity]State(entities: [entity1]),
+      act: (bloc) => bloc.add([Entity]Update(Entity(entityName: 'Second'))),
+      expect: () => [
+        entityState([Entity]Status.loading),
+        entityState(
+          [Entity]Status.success,
+          entities: [entity2, entity1],
+          message: '[entity]AddSuccess:Second',
+        ),
+      ],
+    );
+  });
+
+  // A test that reproduces an open bug stays, skipped with the issue:
+  // (blocTest's own `skip:` skips emitted states, it does not skip the test)
+  group(
+    'paging bug',
+    skip: 'https://github.com/growerp/growerp/issues/NN',
+    () {
+      // blocTest(...) that fails until the issue is fixed
+    },
+  );
+}
+```
+
 ### 5. Model Template (Freezed)
 
 #### [entity]_model.dart

@@ -110,4 +110,6 @@ lowercase vs DB UPPERCASE, normalize on write and every read.
 - Match states with a `TypeMatcher` helper (`isA<XState>().having(...)`) rather than full equality.
 - Test names: `Event_condition_expectedResult`. A test exposing an open bug: `skip:` with the
   issue number, never delete it.
-- Run: `cd flutter/packages/<pkg> && flutter test test/`.
+- Run: `cd flutter/packages/<pkg> && flutter test test/`; all packages: `cd flutter && melos run test_unit`.
+- Template: `docs/GrowERP_Code_Templates.md` § 4b. Rules and what was adopted from the
+  `flutter-testing` skill: `docs/adr/0001-flutter-unit-test-standard.md`.

@@ -133,6 +133,10 @@ melos l10n
 # Lint
 melos analyze
 
+# Run all unit tests (test/ dirs, no backend; JSON results + coverage per package)
+melos run test_unit
+python3 ci/bloc_coverage.py   # bloc line coverage from the last test_unit run
+
 # Run all integration tests (requires running backend on port 8080)
 melos test
 
@@ -194,6 +198,7 @@ Read-only (no create/update/delete) and restricted to the SystemSupport account.
 - **Forms**: Use `FormBuilder` with `FormBuilderValidators`. All interactive widgets need `Key`.
 - **BLoC events**: Standard set: `Fetch`, `Update`, `Delete`. Status enum: `initial`, `loading`, `success`, `failure`.
 - **Error display**: `HelperFunctions.showMessage(context, message, Colors.red)` in BLoC listener.
+- **Unit tests**: In `test/` of each package, run by the CI status job (row "Flutter Unit tests" + bloc coverage page). Every bloc has a `test/<entity>/<entity>_bloc_test.dart` (bloc_test + mocktail, `MockRestClient` from `package:growerp_models/testing.dart`); a new or changed bloc gets its tests too. A test reproducing an open bug stays, skipped with the issue URL. Standard: `docs/adr/0001-flutter-unit-test-standard.md`.
 - **Integration tests**: In `example/integration_test/`. Use `CommonTest` utilities. Test class has `add`, `update`, `delete`, `check` static methods.
 - **Menu**: Configured per app via building block composition — see `docs/GrowERP_Extensibility_Guide.md`.
 

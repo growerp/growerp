@@ -1378,62 +1378,20 @@ void main() {
 
 ### BLoC Tests
 
-```dart
-// test/blocs/your_bloc_test.dart
-import 'package:bloc_test/bloc_test.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:growerp_your_domain/growerp_your_domain.dart';
+Every bloc gets backend-free unit tests in `test/[entity]/[entity]_bloc_test.dart`,
+run by `cd flutter && melos run test_unit` and by the CI status job (row
+"Flutter Unit tests" and the bloc coverage page). Use `bloc_test` + `mocktail`
+with the shared `MockRestClient` and `dioError()` from
+`package:growerp_models/testing.dart`, re-exported from `test/shared/mocks.dart`.
+Cover every event handler: success, `DioException` failure, paging and list
+changes.
 
-class MockYourRepository extends Mock implements YourRepository {}
-
-void main() {
-  group('YourBloc', () {
-    late YourRepository mockRepository;
-    late YourBloc yourBloc;
-    
-    setUp(() {
-      mockRepository = MockYourRepository();
-      yourBloc = YourBloc(mockRepository);
-    });
-    
-    tearDown(() {
-      yourBloc.close();
-    });
-    
-    test('initial state is YourInitial', () {
-      expect(yourBloc.state, YourInitial());
-    });
-    
-    blocTest<YourBloc, YourState>(
-      'emits [YourLoading, YourLoaded] when YourLoad is added',
-      build: () {
-        when(() => mockRepository.getItems()).thenAnswer(
-          (_) async => [testYourModel],
-        );
-        return yourBloc;
-      },
-      act: (bloc) => bloc.add(const YourLoad()),
-      expect: () => [
-        YourLoading(),
-        const YourLoaded(
-          items: [testYourModel],
-          hasReachedMax: true,
-          totalCount: 1,
-        ),
-      ],
-    );
-  });
-}
-
-final testYourModel = YourModel(
-  id: '1',
-  name: 'Test Item',
-  description: 'Test Description',
-  status: YourStatus.active,
-  createdDate: DateTime(2023, 1, 1),
-);
-```
+Copy the template in [GrowERP_Code_Templates.md § 4b](GrowERP_Code_Templates.md),
+or an existing test such as
+`flutter/packages/growerp_catalog/test/category/category_bloc_test.dart`.
+The rules (AAA, `Method_Scenario_ExpectedBehavior` names, `isA().having`
+matchers, skipped tests for open bugs) are in
+[ADR 0001](adr/0001-flutter-unit-test-standard.md).
 
 ### Widget Tests
 
