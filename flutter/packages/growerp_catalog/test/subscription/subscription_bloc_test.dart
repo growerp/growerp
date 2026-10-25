@@ -31,17 +31,18 @@ void main() {
   group('SubscriptionFetch', () {
     blocTest<SubscriptionBloc, SubscriptionState>(
       'SubscriptionFetch_initial_emitsLoadingThenFirstPage',
-      setUp: () => when(
-        () => restClient.getSubscription(
-          searchString: '',
-          growerp: false,
-          limit: 20,
-          start: 0,
-        ),
-      ).thenAnswer(
-        (_) async =>
-            Subscriptions(subscriptions: [subscription1, subscription2]),
-      ),
+      setUp: () =>
+          when(
+            () => restClient.getSubscription(
+              searchString: '',
+              growerp: false,
+              limit: 20,
+              start: 0,
+            ),
+          ).thenAnswer(
+            (_) async =>
+                Subscriptions(subscriptions: [subscription1, subscription2]),
+          ),
       build: () => SubscriptionBloc(restClient),
       act: (bloc) => bloc.add(const SubscriptionFetch()),
       expect: () => [

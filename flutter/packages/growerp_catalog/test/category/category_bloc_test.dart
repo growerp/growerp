@@ -120,8 +120,7 @@ void main() {
         status: CategoryStatus.success,
         categories: [category1, category2],
       ),
-      act: (bloc) =>
-          bloc.add(const CategorySearchChanged(searchString: 'Fru')),
+      act: (bloc) => bloc.add(const CategorySearchChanged(searchString: 'Fru')),
       wait: const Duration(milliseconds: 400), // 300ms debounce
       expect: () => [
         categoryState(CategoryStatus.success, categories: [category1]),
@@ -262,8 +261,9 @@ void main() {
   group('CategoryUpload', () {
     blocTest<CategoryBloc, CategoryState>(
       'CategoryUpload_csvWithTwoHeaderLines_importsDataRows',
-      setUp: () =>
-          when(() => restClient.importCategories(any())).thenAnswer((_) async {}),
+      setUp: () => when(
+        () => restClient.importCategories(any()),
+      ).thenAnswer((_) async {}),
       build: () => CategoryBloc(restClient, applicationId),
       act: (bloc) => bloc.add(
         const CategoryUpload(
@@ -276,9 +276,9 @@ void main() {
       ],
       verify: (_) {
         final imported =
-            verify(() => restClient.importCategories(captureAny()))
-                    .captured
-                    .single
+            verify(
+                  () => restClient.importCategories(captureAny()),
+                ).captured.single
                 as List<Category>;
         expect(imported.map((c) => c.categoryName), ['Fruit', 'Nuts']);
         expect(imported.first.image, [1, 2]);
