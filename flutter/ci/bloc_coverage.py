@@ -13,6 +13,7 @@ import argparse
 import glob
 import json
 import os
+import sys
 
 
 def lcov_lines(path):
@@ -77,10 +78,63 @@ def markdown(data):
     return '\n'.join(out) + '\n'
 
 
+GOOD, FAIR = 85, 70  # percent: green from GOOD, yellow from FAIR, red below
+
+
+def terminal(data, color=True):
+    """Aligned report grouped by package, with bars and coloured percentages."""
+    def paint(text, code):
+        return f'\033[{code}m{text}\033[0m' if color else text
+
+    def percent_text(p):
+        code = '32' if p >= GOOD else '33' if p >= FAIR else '31'
+        return paint(f'{p:5.1f}%', code)
+
+    def bar(p, width=20):
+        filled = round(p / 100 * width)
+        return paint('█' * filled, '32' if p >= GOOD else '33' if p >= FAIR else '31') + \
+            paint('░' * (width - filled), '2')
+
+    by_package = {}
+    for b in data['blocs']:
+        by_package.setdefault(b['package'], []).append(b)
+    name_width = max(
+        [len(p) for p in by_package] +
+        [len(os.path.basename(b['file'])) + 2 for b in data['blocs']])
+
+    out = ['', paint('Bloc test coverage', '1'),
+           f"{data['tested_blocs']}/{data['total_blocs']} blocs have tests, "
+           f"they cover {percent_text(data['percent']).strip()} of their lines "
+           f"({data['hit']}/{data['lines']})", '']
+    for package in sorted(by_package):
+        blocs = sorted(by_package[package], key=lambda b: b['file'])
+        tested = [b for b in blocs if b['tested']]
+        lines = sum(b['lines'] for b in tested)
+        hit = sum(b['hit'] for b in tested)
+        p = 100 * hit / lines if lines else 0.0
+        out.append(f"{paint(package.ljust(name_width), '1')}  {percent_text(p)}  "
+                   f"{bar(p)}  {hit:>5}/{lines:<5}")
+        for b in blocs:
+            name = ('  ' + os.path.basename(b['file'])).ljust(name_width)
+            if b['tested']:
+                out.append(f"{name}  {percent_text(pct(b))}  {bar(pct(b))}  "
+                           f"{b['hit']:>5}/{b['lines']:<5}")
+            else:
+                out.append(f"{name}  {paint('no tests', '31')}")
+    lowest = sorted((b for b in data['blocs'] if b['tested']), key=pct)[:5]
+    if lowest:
+        out += ['', 'Lowest: ' + ', '.join(
+            f"{os.path.basename(b['file'])} {pct(b)}%" for b in lowest)]
+    out.append(f"Green from {GOOD}%, yellow from {FAIR}%. "
+               'Line detail: genhtml packages/<pkg>/coverage/lcov.info -o /tmp/cov')
+    return '\n'.join(out) + '\n'
+
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument('--json')
     ap.add_argument('--markdown')
+    ap.add_argument('--no-color', action='store_true')
     args = ap.parse_args()
     data = collect()
     if args.json:
@@ -90,4 +144,6 @@ if __name__ == '__main__':
         with open(args.markdown, 'w') as f:
             f.write(markdown(data))
     if not args.json and not args.markdown:
-        print(markdown(data), end='')
+        color = (sys.stdout.isatty() and not args.no_color
+                 and 'NO_COLOR' not in os.environ)
+        print(terminal(data, color=color), end='')

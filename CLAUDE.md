@@ -135,7 +135,7 @@ melos analyze
 
 # Run all unit tests (test/ dirs, no backend; JSON results + coverage per package)
 melos run test_unit
-python3 ci/bloc_coverage.py   # bloc line coverage from the last test_unit run
+python3 ci/bloc_coverage.py   # reprint the bloc coverage report (test_unit prints it at the end)
 
 # Run all integration tests (requires running backend on port 8080)
 melos test

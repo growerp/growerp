@@ -149,7 +149,13 @@ melos:
       description: Generates l10n for all app packages.
       run: melos exec --concurrency 1 --file-exists "l10n.yaml" -- "flutter gen-l10n --suppress-analytics"
     test_unit:
-      description: run the unit tests (test/ dirs), no backend needed. JSON results in build/unit_test.json, coverage in coverage/lcov.info (bloc report - python3 ci/bloc_coverage.py).
+      description: run the unit tests of all packages (no backend needed), then print the bloc coverage report.
+      run: |
+        melos run test_unit_package --no-select; status=$?
+        python3 ci/bloc_coverage.py
+        exit $status
+    test_unit_package:
+      description: unit tests of the selected packages (test/ dirs). JSON results in build/unit_test.json, coverage in coverage/lcov.info.
       exec:
         concurrency: 1
       run: |
