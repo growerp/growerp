@@ -36,7 +36,8 @@ before publishing.
    version to submit. Create the userid/password for the store reviewers on
    staging (the review backend is a copy: later staging changes do not reach it).
 2. Wait until review is empty: every version in review is on production (cycle A).
-   Step 3 refuses until then. The script lists the apps still in review and lets
+   Step 3 refuses until then. The script lists the apps still in review with their
+   store approvals (status workflow, refreshed on request) and lets
    steps 1 and 2 run meanwhile.
 3. "freeze for review"
    copies staging to backend.growerp.net, pauses its jobs/agents, records the

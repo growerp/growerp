@@ -194,6 +194,7 @@ cmd_prod_review() {
     require_review true
     step "1. Store approvals"
     echo "Approval taking too long? See 'When a store approval takes too long' in growerpUpgrade.md."
+    list_review_apps
     pause "Wait until the stores approved the apps to promote (per app is fine)."
     step "2. Update production from review"
     ask_apps_moqui
@@ -274,10 +275,73 @@ cmd_prod_staging() {
     run_workflow update-production.yml -f source=staging -f apps="$REPLY"
 }
 
-# not approved yet: apps whose review version is not on production
+# store states per app from the status workflow (its status-<store>-<app> artifacts):
+# "app<TAB>approved" or "app<TAB>ios 1.20.2 WAITING_FOR_REVIEW, ..." in STORE_STATES
+STORE_STATES=""
+store_states() {
+    local id created dir
+    read -r id created < <(gh run list -R "$REPO" -w status.yml -s success -L1 \
+        --json databaseId,createdAt -q '.[0] | "\(.databaseId) \(.createdAt)"')
+    echo "Store states of the status run of $created"
+    if confirm "Refresh them (store-only status run, ~6 min)?"; then
+        if [[ -n "$(gh run list -R "$REPO" -w status.yml -s in_progress -L1 --json databaseId -q '.[0].databaseId')" ]]; then
+            warn "A status run is in progress: a new one cancels it."
+            confirm "Start anyway?" || return
+        fi
+        # read-only store queries: also in a dry run
+        DRY_RUN=false run_workflow status.yml -f skip_integration_tests=true
+        id=$(gh run list -R "$REPO" -w status.yml -s success -L1 --json databaseId -q '.[0].databaseId')
+    fi
+    dir=$(mktemp -d)
+    gh run download "$id" -R "$REPO" -p 'status-*-*' -D "$dir" >/dev/null 2>&1 || warn "no store states in run $id"
+    STORE_STATES=$(python3 -I - "$dir" <<'PYEOF'
+import json, sys
+from pathlib import Path
+APPLE_OK = {'READY_FOR_SALE', 'READY_FOR_DISTRIBUTION', 'PENDING_DEVELOPER_RELEASE',
+            'PROCESSING_FOR_DISTRIBUTION', 'PENDING_APPLE_RELEASE'}
+pending = {}
+for f in sorted(Path(sys.argv[1]).glob('status-*-*/fragment.json')):
+    d = json.loads(f.read_text())
+    store, rows = d['store'], d.get('rows') or [{}]
+    state = None
+    if store in ('ios', 'macos'):
+        r = rows[0]
+        if r.get('state') not in APPLE_OK:
+            state = f"{r.get('version')} {r.get('state')}"
+    elif store == 'android':
+        r = next((r for r in rows if r.get('track') == 'production'), {})
+        life = r.get('lifecycle', 'unknown')
+        if life not in ('waiting for developer release', 'published'):
+            state = f"{r.get('version')} {life}"
+    elif store == 'windows':
+        r = next((r for r in rows if r.get('label') == 'pending'), None)
+        if r and r.get('status') not in ('Release', 'PendingPublication', 'Publishing'):
+            state = f"{r.get('version')} {r.get('status')}"
+    pending.setdefault(d['app'], [])
+    if state:
+        pending[d['app']].append(f'{store} {state}')
+for app, states in pending.items():
+    print(f"{app}\t{', '.join(states) or 'approved'}")
+PYEOF
+)
+    rm -rf "$dir"
+}
+
+# apps whose review version is not on production, with their store approvals
 list_review_apps() {
-    warn "Not on production yet (store approval pending, or promote them with 1a):"
-    printf '%s' "$REVIEW_APPS"
+    store_states
+    warn "Not on production yet:"
+    local name rest state
+    while read -r name rest; do
+        [[ -n "$name" ]] || continue
+        state=$(awk -F'\t' -v a="$name" '$1 == a { print $2 }' <<<"$STORE_STATES")
+        case "$state" in
+            approved) state="${GREEN}approved, promote with 1a${NC}" ;;
+            "") state="no store (promote with 1a)" ;;
+            *) state="${YELLOW}waiting: $state${NC}" ;;
+        esac
+        echo -e "    $(printf '%-10s %s' "$name" "$rest")  $state"
+    done <<<"$REVIEW_APPS"
 }
 
 # preparing is fine while the previous review waits for approvals, the freeze is not
