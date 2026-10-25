@@ -32,7 +32,8 @@ before publishing.
 
 ### B. Prepare a new version for review
 
-1. Prepare the new release in staging: the last "update staging" run is the
+1. Prepare the new release in staging: merge the version branch (e.g. 1.21) into
+   master with a pull request, then "update staging" on master: that run is the
    version to submit. Create the userid/password for the store reviewers on
    staging (the review backend is a copy: later staging changes do not reach it).
 2. Wait until review is empty: every version in review is on production (cycle A).

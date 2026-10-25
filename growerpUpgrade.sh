@@ -9,12 +9,13 @@
 #                       update production, release the approved store submissions
 #   production staging  new release of what staging runs now (when no review exists):
 #                       GitHub release, update production
-#   review   new review (when review is empty): GitHub release, freeze for review,
+#   review   new review: merge the version branch into master, update staging from
+#            master, GitHub release, freeze for review (when review is empty),
 #            prepare, publish binary to stores, publish metadata (opt)
 #   prepare  create store screenshots when screens changed since the last screenshots
 #            run or its artifact (used by the Windows binary and publish metadata,
 #            kept 7 days) expired
-#   staging  update staging (new version: patch, minor or major)
+#   staging  update staging from a branch (new version: patch, minor or major)
 #   release  GitHub release of a version tag, notes: a summary paragraph and the
 #            feat/fix/docs/ci commits since the previous release, edited before publish
 #   status   last run of every release workflow
@@ -173,8 +174,21 @@ cmd_prepare() {
     fi
 }
 
+# newest version branch on origin (1.21), where the next version is developed
+version_branch() {
+    git -C "$SCRIPT_DIR" branch -r --format='%(refname:lstrip=3)' -l 'origin/[0-9]*' |
+        grep -E '^[0-9]+\.[0-9]+$' | sort -V | tail -1
+}
+
+# cmd_staging [branch]: update-staging runs on and commits to that branch
 cmd_staging() {
     step "Update staging"
+    local ref="$1"
+    if [[ -z "$ref" ]]; then
+        git -C "$SCRIPT_DIR" fetch -q origin
+        ask "Branch" "$(version_branch)"
+        ref="$REPLY"
+    fi
     local frozen published
     frozen=$(last_success freeze-review.yml)
     published=$(last_success publish-binary.yml)
@@ -188,7 +202,46 @@ cmd_staging() {
     ask_apps_moqui
     local apps="$REPLY"
     read -r -p "Comment (optional): " comment
-    run_workflow update-staging.yml -f bump="$bump" -f apps="$apps" -f comment="$comment"
+    run_workflow update-staging.yml --ref "$ref" -f bump="$bump" -f apps="$apps" \
+        -f comment="$comment"
+}
+
+# the version branch into master with a pull request, so master has the version to submit
+merge_to_master() {
+    local branch ahead pr
+    git -C "$SCRIPT_DIR" fetch -q origin
+    ask "Version branch" "$(version_branch)"
+    branch="$REPLY"
+    git -C "$SCRIPT_DIR" rev-parse -q --verify "refs/remotes/origin/$branch" >/dev/null ||
+        die "no branch origin/$branch"
+    if git -C "$SCRIPT_DIR" rev-parse -q --verify "refs/heads/$branch" >/dev/null; then
+        ahead=$(git -C "$SCRIPT_DIR" rev-list --count "origin/$branch..$branch")
+        if ((ahead > 0)); then
+            warn "$ahead local commits of $branch are not pushed: they are not part of the merge."
+            confirm "Merge without them?" || return 1
+        fi
+    fi
+    ahead=$(git -C "$SCRIPT_DIR" rev-list --count "origin/master..origin/$branch")
+    if ((ahead == 0)); then
+        echo "master has everything of $branch."
+        return
+    fi
+    git -C "$SCRIPT_DIR" log --oneline --no-merges "origin/master..origin/$branch" | head -20
+    echo "$ahead commits of $branch not in master."
+    confirm "Merge $branch into master (pull request)?" || return 1
+    if $DRY_RUN; then
+        warn "dry run: pull request $branch -> master not created/merged"
+        return
+    fi
+    pr=$(gh pr list -R "$REPO" --head "$branch" --base master --state open --json number -q '.[0].number')
+    if [[ -z "$pr" ]]; then
+        gh pr create -R "$REPO" --base master --head "$branch" --title "Release $branch" \
+            --body "Merge $branch into master: the version for the next store review."
+        pr=$(gh pr list -R "$REPO" --head "$branch" --base master --state open --json number -q '.[0].number')
+    fi
+    gh pr merge "$pr" -R "$REPO" --merge ||
+        die "merge failed (conflicts or checks?): https://github.com/$REPO/pull/$pr"
+    echo -e "${GREEN}$branch merged into master${NC}"
 }
 
 cmd_prod_review() {
@@ -350,15 +403,20 @@ cmd_review() {
     [[ -n "$REVIEW_OPEN" ]] || show_versions >/dev/null
     if $REVIEW_OPEN; then
         list_review_apps
-        echo "Steps 1 and 2 can run now, the freeze (3) waits until these are promoted"
+        echo "Steps 1-4 can run now, the freeze (5) waits until these are promoted"
         echo "or dropped (./review.sh drop <app> --apply on the server)."
         confirm "Prepare the new review anyway?" || return
     fi
-    step "1. Version to submit"
-    pause "The last 'update staging' run is the version to submit. Create the userid/password for the store reviewers on staging."
-    step "2. GitHub release"
+    step "1. Merge the version branch into master"
+    merge_to_master || return
+    step "2. Update staging from master"
+    echo "The version to submit: staging built from master."
+    confirm "Update staging from master?" && cmd_staging master
+    step "3. Reviewer login"
+    pause "Create the userid/password for the store reviewers on staging."
+    step "4. GitHub release"
     confirm "Create a GitHub release for the version to submit?" && cmd_release
-    step "3. Freeze for review"
+    step "5. Freeze for review"
     show_versions >/dev/null
     while $REVIEW_OPEN; do
         list_review_apps
@@ -370,7 +428,7 @@ cmd_review() {
     warn "No 'update staging' until the binaries are published: they must be the frozen version."
     # The binary creates the new store version, metadata writes into it (the Windows
     # binary submission carries its listing itself); both use the screenshots
-    step "4. Submit for review"
+    step "6. Submit for review"
     confirm "Publish binary to stores?" || return
     ask_apps
     local apps="$REPLY"
@@ -471,7 +529,7 @@ menu() {
     if $REVIEW_OPEN; then off="$DIM"; else on="$DIM"; fi
     echo -e "${on}     1a  from review    versions the stores approved     (when a review is open)${NC}"
     echo -e "${off}     1b  from staging   new release of staging now       (when no review is open)${NC}"
-    echo    "  2  New review         GitHub release, freeze, submit   (freeze when no review is open)"
+    echo    "  2  New review         merge, staging, freeze, submit   (freeze when no review is open)"
     echo
     echo "  Other: u update staging   p screenshots   g GitHub release   t status   q quit"
     echo
