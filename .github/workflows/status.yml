@@ -9,7 +9,8 @@ name: status
 # Compose for the Moqui backend + PostgreSQL and xvfb for a virtual display.
 # Full runs split across 4 parallel slices on separate runners, each with its own
 # Moqui + PostgreSQL. Tests are self-contained — each creates its own company/admin,
-# so slices don't interfere with each other. Backend Spock tests run alongside.
+# so slices don't interfere with each other. Backend Spock tests and the Flutter
+# unit tests (melos test_unit: test/ dirs, mocked RestClient) run alongside.
 #
 # Stores — every app is queried against every store for its current state
 # (latest public release, in-review, rejected, pending-developer-release, ...):
@@ -187,6 +188,78 @@ jobs:
         with:
           name: backend-test-results
           path: moqui/runtime/component/growerp/build/test-results/test/TEST-*.xml
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # ------------------------------------------------------------------
+  # 1a2. Flutter unit tests (every package's test/ dir)
+  #      No backend or display: blocs run against a mocked RestClient.
+  #      unit-summary.json carries the totals and failed tests to the report.
+  # ------------------------------------------------------------------
+  unit-tests:
+    needs: check-changes
+    if: needs.check-changes.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - uses: ./.github/actions/bootstrap
+
+      - name: Run unit tests
+        working-directory: flutter
+        run: melos run test_unit --no-select
+
+      - name: Unit test summary
+        if: always()
+        working-directory: flutter/packages
+        run: |
+          python3 - <<'PYEOF'
+          import glob, json, os
+          passed = failed = 0
+          detail = []
+          for path in sorted(glob.glob('**/build/unit_test.json', recursive=True)):
+              pkg = path.split('/build/')[0]
+              names, errors = {}, {}
+              for line in open(path):
+                  try:
+                      ev = json.loads(line)
+                  except ValueError:
+                      continue
+                  t = ev.get('type')
+                  if t == 'testStart':
+                      names[ev['test']['id']] = ev['test']['name']
+                  elif t == 'error':
+                      errors.setdefault(ev['testID'], ev.get('error', ''))
+                  elif t == 'testDone' and not ev.get('skipped'):
+                      if ev.get('result') == 'success':
+                          # hidden = the per-file "loading" pseudo test
+                          passed += 0 if ev.get('hidden') else 1
+                      else:
+                          failed += 1
+                          msg = ' | '.join(str(errors.get(ev['testID'], '')).splitlines()[:4])
+                          detail.append(f"{pkg}: {names.get(ev['testID'], '?')}: {msg}"[:500])
+          json.dump({'passed': passed, 'failed': failed, 'detail': detail[:200]},
+                    open('unit-summary.json', 'w'))
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+              f.write(f'## Flutter Unit Tests\n\npassed: {passed}, failed: {failed}\n\n')
+              f.write(''.join(f'- {d}\n' for d in detail[:50]))
+          PYEOF
+
+      - name: Upload unit test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: |
+            flutter/packages/unit-summary.json
+            flutter/packages/*/build/unit_test.json
           if-no-files-found: ignore
           retention-days: 7
 
@@ -572,7 +645,7 @@ jobs:
       # Depends on the test jobs only for ordering: the store answer is written
       # into the page by `report`, so querying at workflow start made every cell
       # 2+ hours old before anyone could read it.
-      needs: [ resolve-matrix, backend-tests, integration-tests ]
+      needs: [ resolve-matrix, backend-tests, unit-tests, integration-tests ]
       if: always() && needs.resolve-matrix.outputs.run_ios == 'true'
       runs-on: ubuntu-latest
       strategy:
@@ -697,7 +770,7 @@ jobs:
   #          APP_STORE_CONNECT_API_KEY_CONTENT
   # ─────────────────────────────────────────────────────────────────────────────
   status-macos:
-      needs: [ resolve-matrix, backend-tests, integration-tests ]
+      needs: [ resolve-matrix, backend-tests, unit-tests, integration-tests ]
       if: always() && needs.resolve-matrix.outputs.run_macos == 'true'
       runs-on: ubuntu-latest
       strategy:
@@ -815,7 +888,7 @@ jobs:
   # Secrets: GOOGLE_PLAY_SERVICE_ACCOUNT_JSON
   # ─────────────────────────────────────────────────────────────────────────────
   status-android:
-      needs: [ resolve-matrix, backend-tests, integration-tests ]
+      needs: [ resolve-matrix, backend-tests, unit-tests, integration-tests ]
       if: always() && needs.resolve-matrix.outputs.run_android == 'true'
       runs-on: ubuntu-latest
       strategy:
@@ -1022,7 +1095,7 @@ jobs:
   #          WINDOWS_<APP>_PRODUCT_ID per app
   # ─────────────────────────────────────────────────────────────────────────────
   status-windows:
-      needs: [ resolve-matrix, backend-tests, integration-tests ]
+      needs: [ resolve-matrix, backend-tests, unit-tests, integration-tests ]
       if: always() && needs.resolve-matrix.outputs.run_windows == 'true'
       runs-on: ubuntu-latest
       strategy:
@@ -1129,7 +1202,7 @@ jobs:
   # Snap name convention: growerp-<app>
   # ─────────────────────────────────────────────────────────────────────────────
   status-snap:
-      needs: [ resolve-matrix, backend-tests, integration-tests ]
+      needs: [ resolve-matrix, backend-tests, unit-tests, integration-tests ]
       if: always() && needs.resolve-matrix.outputs.run_snap == 'true'
       runs-on: ubuntu-latest
       strategy:
@@ -1228,7 +1301,7 @@ jobs:
   swarm-status:
     # Ordering only, like the store jobs: run just before `report` so the page
     # shows what the swarm ran at publish time.
-    needs: [ backend-tests, integration-tests ]
+    needs: [ backend-tests, unit-tests, integration-tests ]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -1351,7 +1424,7 @@ jobs:
   #   Snap        : latest/stable revision + version
   # ------------------------------------------------------------------
   report:
-    needs: [backend-tests, moqui-image, integration-tests, resolve-matrix, swarm-status,
+    needs: [backend-tests, unit-tests, moqui-image, integration-tests, resolve-matrix, swarm-status,
             status-ios, status-macos, status-android, status-windows, status-snap]
     if: always()
     runs-on: ubuntu-latest
@@ -1384,6 +1457,14 @@ jobs:
         with:
           name: backend-test-results
           path: backend-test-logs/
+        continue-on-error: true
+
+      - name: Download unit test results
+        if: always()
+        uses: actions/download-artifact@v4
+        with:
+          name: unit-test-results
+          path: unit-test-logs/
         continue-on-error: true
 
       - name: Install PDF dependencies
@@ -1887,6 +1968,15 @@ jobs:
               detail['exceptions'] = detail['exceptions'][:20]
               return passed_pkgs, failed_pkgs, ind_passed, ind_failed, detail
 
+          def unit_totals():
+              # Written by the unit-tests job: {passed, failed, detail}.
+              try:
+                  with open('unit-test-logs/unit-summary.json') as f:
+                      u = json.load(f)
+                  return ['Flutter Unit tests', u['passed'], u['failed']], u['detail']
+              except (OSError, ValueError, KeyError):
+                  return None
+
           def fresh_test_rows():
               if os.environ.get('TESTS_RESULT') == 'skipped':
                   return None
@@ -1918,14 +2008,17 @@ jobs:
 
               mobile  = format_totals('mobile')
               desktop = format_totals('desktop')
+              unit_row, unit_detail = unit_totals() or (['Flutter Unit tests', '-', '-'], [])
               rows = [
                   ['Backend (Spock) tests',    backend_passed, backend_failed],
+                  unit_row,
                   ['Flutter Mobile packages',  mobile[0],      mobile[1]],
                   ['Flutter Mobile tests',     mobile[2],      mobile[3]],
                   ['Flutter Desktop packages', desktop[0],     desktop[1]],
                   ['Flutter Desktop tests',    desktop[2],     desktop[3]],
               ]
               return rows, {'backend': backend_detail,
+                            'unit':    unit_detail,
                             'mobile':  mobile[4],
                             'desktop': desktop[4]}
 
@@ -1943,21 +2036,30 @@ jobs:
               rows, details = fresh
               tests_data = {'generated': now_str, 'run_url': os.environ.get('RUN_URL', ''),
                             'rows': rows, 'details': details}
-              tests_heading = 'Integration Test Results'
+              tests_heading = 'Test Results'
           else:
               tests_data = previous_test_data()
-              tests_heading = ('Integration Test Results (from %s)' % tests_data['generated']
-                               if tests_data else 'Integration Test Results')
+              tests_heading = ('Test Results (from %s)' % tests_data['generated']
+                               if tests_data else 'Test Results')
+              # The unit tests can run without the integration slices (e.g.
+              # a failed moqui image): their fresh numbers replace the old row.
+              unit = unit_totals()
+              if unit and tests_data:
+                  others = [r for r in tests_data['rows'] if r[0] != 'Flutter Unit tests']
+                  tests_data['rows'] = others[:1] + [unit[0]] + others[1:]
+                  tests_data.setdefault('details', {})['unit'] = unit[1]
 
           # ── Failure drill-down page ──────────────────────────────────────
           # The detail travels inside tests-data.json, so a run that skipped the
           # tests rebuilds the same failures page from the carried-over data.
           DETAIL_KEY = {'Backend (Spock) tests':    'backend',
+                        'Flutter Unit tests':       'unit',
                         'Flutter Mobile packages':  'mobile',
                         'Flutter Mobile tests':     'mobile',
                         'Flutter Desktop packages': 'desktop',
                         'Flutter Desktop tests':    'desktop'}
           SUITE_TITLE = {'backend': 'Backend (Spock) tests',
+                         'unit':    'Flutter Unit tests',
                          'mobile':  'Flutter Mobile layout',
                          'desktop': 'Flutter Desktop layout'}
           details = (tests_data or {}).get('details') or {}
@@ -2276,7 +2378,7 @@ jobs:
           print('index.html and PDF written.')
 
           # Failure drill-down page — only the suites that actually have detail.
-          failing = [k for k in ('backend', 'mobile', 'desktop') if has_detail(k)]
+          failing = [k for k in ('backend', 'unit', 'mobile', 'desktop') if has_detail(k)]
           if failing:
               run_url = (tests_data or {}).get('run_url') or ''
               run_link = (f'<p><a href="{run_url}">Workflow run (raw logs)</a></p>'
@@ -2323,12 +2425,16 @@ jobs:
         if: always()
         env:
           BACKEND_RESULT: ${{ needs.backend-tests.result }}
+          UNIT_RESULT: ${{ needs.unit-tests.result }}
           IMAGE_RESULT: ${{ needs.moqui-image.result }}
           TESTS_RESULT: ${{ needs.integration-tests.result }}
         run: |
           FAIL_FILE=$(mktemp)
           echo "0" > "$FAIL_FILE"
           if [ "$BACKEND_RESULT" = "failure" ]; then
+            echo "1" > "$FAIL_FILE"
+          fi
+          if [ "$UNIT_RESULT" = "failure" ]; then
             echo "1" > "$FAIL_FILE"
           fi
           # A failed image build leaves every slice skipped, not failed.
@@ -2349,6 +2455,16 @@ jobs:
               | sed -E 's/.*tests="([0-9]+)" skipped="([0-9]+)" failures="([0-9]+)" errors="([0-9]+)".*/tests: \1, skipped: \2, failures: \3, errors: \4/'
           else
             echo "No backend test report found (job result: ${BACKEND_RESULT})"
+          fi
+          echo '```'
+          echo ""
+
+          echo "## Flutter Unit Tests"
+          echo '```'
+          if [ -f unit-test-logs/unit-summary.json ]; then
+            python3 -c "import json; u = json.load(open('unit-test-logs/unit-summary.json')); print(f\"passed: {u['passed']}, failed: {u['failed']}\")"
+          else
+            echo "No unit test summary found (job result: ${UNIT_RESULT})"
           fi
           echo '```'
           echo ""
