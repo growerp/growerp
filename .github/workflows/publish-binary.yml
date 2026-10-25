@@ -1420,6 +1420,21 @@ jobs:
           if-no-files-found: error
           path: flutter/packages/${{ matrix.app }}/build/windows/x64/runner/Release/*.msix
 
+      # The submission carries the store listing (text + screenshots): a later
+      # publish-metadata run cannot replace a submission in certification.
+      - name: Download framed screenshots
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: screenshots.yml
+          name: framed-screenshots
+          path: framed-screenshots/
+          if_no_artifact_found: warn
+        continue-on-error: true
+
+      - name: Install Pillow
+        shell: pwsh
+        run: python -m pip install -q pillow
+
       - name: Submit to Partner Center
         shell: pwsh
         env:
@@ -1543,14 +1558,26 @@ jobs:
           $sub | Add-Member -NotePropertyName allowTargetFutureDeviceFamilies `
             -NotePropertyValue $aff -Force
 
-          # Update submission metadata
-          $subJson = $sub | ConvertTo-Json -Depth 100 -Compress
-          Invoke-RestMethod -Uri "$baseUri/submissions/$subId" -Method PUT `
-            -Headers $headers -ContentType "application/json" -Body $subJson | Out-Null
+          # Store listing (text + screenshots) from the repo, shared with
+          # publish-metadata.yml; the screenshots go into the upload zip
+          $subIn    = "$env:RUNNER_TEMP\sub_in.json"
+          $subOut   = "$env:RUNNER_TEMP\sub_out.json"
+          $filesOut = "$env:RUNNER_TEMP\listing_files.txt"
+          $sub | ConvertTo-Json -Depth 100 -Compress | Set-Content -Path $subIn -Encoding utf8
+          python .github/scripts/windows_listing.py "${{ matrix.app }}" framed-screenshots `
+            $subIn $subOut $filesOut
+          if ($LASTEXITCODE -ne 0) { throw "windows_listing.py failed" }
+          $subJson = Get-Content -Path $subOut -Raw -Encoding utf8
+          $listingFiles = @(Get-Content -Path $filesOut -Encoding utf8 | Where-Object { $_ })
 
-          # Package MSIX into zip and upload to Azure Blob
+          # Update submission metadata
+          Invoke-RestMethod -Uri "$baseUri/submissions/$subId" -Method PUT `
+            -Headers $headers -ContentType "application/json" `
+            -Body ([Text.Encoding]::UTF8.GetBytes($subJson)) | Out-Null
+
+          # Package MSIX (+ listing screenshots) into zip and upload to Azure Blob
           $zipPath = "$env:TEMP\submission_$subId.zip"
-          Compress-Archive -Path $msixPath -DestinationPath $zipPath -Force
+          Compress-Archive -LiteralPath (@($msixPath) + $listingFiles) -DestinationPath $zipPath -Force
           Invoke-RestMethod -Uri $uploadUrl -Method PUT -InFile $zipPath `
             -Headers @{ "x-ms-blob-type" = "BlockBlob" } | Out-Null
           Remove-Item $zipPath

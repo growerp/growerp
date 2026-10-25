@@ -125,7 +125,7 @@ submitted for that app: use **Re-run failed jobs**, which re-runs the upload and
 |-------|-----------|------------|
 | Snap | Yes | Written straight to the dashboard, live immediately, no review. |
 | Google Play | Yes | Listing-only edit, independent of release tracks. Play reviews listing changes before they appear. |
-| Microsoft | Usually | Blocked while a submission it cannot delete is in flight (first-time onboarding in certification, or a draft started by hand in Partner Center). |
+| Microsoft | Usually | While a binary submission is in flight it already carries the listing (`deploy-windows` applies it), so the job skips with a notice. Blocked by a draft started by hand in Partner Center. |
 | Apple (iOS + macOS) | **No** | Needs a version in an editable state — see step 3. |
 
 **A green run does not prove anything uploaded.** Two paths still exit 0 without uploading, by
@@ -646,6 +646,7 @@ resolve-matrix ──┬──> bootstrap ──┬──> deploy-ios     ─┐
 1. Imports the PFX signing certificate into the Windows certificate store.
 2. Builds the MSIX package (`flutter pub run msix:create`).
 3. Authenticates with Azure AD and submits to Microsoft Partner Center via the Ingestion API, forcing `targetPublishMode` to `Manual`.
+4. The submission carries the store listing: `.github/scripts/windows_listing.py` (shared with `publish-metadata.yml`) writes the text from `windows/fastlane/metadata/en-US` and the screenshots from the `framed-screenshots` artifact into it; the screenshots go into the upload zip next to the MSIX. A separate metadata submission would be blocked by this one while it is in certification.
 
 **Job: `deploy-snap`** — Runs on `ubuntu-22.04`.
 1. Installs `snapcraft` (with retry logic for flaky snap daemon).
@@ -771,9 +772,11 @@ absence never fails the run.
    `WAITING_FOR_UPLOAD` or `INVALID_BINARY` accept it. Anything live or in review logs
    `No editable iOS version` and skips. Editing the live version is deliberately disabled —
    fastlane 2.232.2 raises a `promotional_text` `NilClass` error against a Ready for Sale version.
-2. **Windows — undeletable pending submission.** The uploader clones a new submission, which
-   requires deleting any pending one first. A submission still in certification, or a draft
-   started by hand in Partner Center, cannot be deleted; the job warns and exits.
+2. **Windows — submission in flight.** The uploader clones a new submission, which requires
+   deleting any pending one first. A submission on its way to the store (PreProcessing,
+   Certification, Release, Publishing) is the binary's, which already carries the listing: the
+   job logs a notice and exits green. A draft started by hand in Partner Center cannot be
+   deleted either; the job fails and asks to delete it.
 3. **Android — no screenshots in the artifact.** The Play lane runs with `sync_image_upload`,
    which deletes store images not present locally, so an empty local directory would wipe the
    live listing's screenshots. The extract step checks the artifact first and, finding nothing,

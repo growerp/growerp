@@ -11,7 +11,7 @@ reviewed. "update staging" can run any time, except between B3 and B4.
 
 `./growerpUpgrade.sh` walks these cycles: it runs the workflows with gh, waits for each
 run and asks for the human steps. `./growerpUpgrade.sh -n` is a dry run: every prompt,
-but the workflows and the GitHub release are only shown. In B4, before publishing metadata, it creates the
+but the workflows and the GitHub release are only shown. In B4, before publishing the binary, it creates the
 store screenshots when screens changed since the last screenshots run or its artifact
 (kept 7 days) expired (`./growerpUpgrade.sh prepare`). Just before
 the freeze (B3) it creates the GitHub release of the version to submit
@@ -42,9 +42,11 @@ before publishing.
    versions in review-versions.conf and, once healthy, routes native apps newer
    than production to it. The review backend stays running between cycles, the
    next freeze replaces it.
-4. "create store screenshots" (opt), "published metadata to stores" (opt),
-   "publish binary to stores": submit for review. No "update staging" between
-   step 3 and this step: the binaries must be the frozen version.
+4. "create store screenshots" (opt), "publish binary to stores": submit for review,
+   then "publish metadata to stores" (opt). The binary creates the new store
+   version, metadata can only write into it; the Windows binary submission carries
+   its listing itself. No "update staging" between step 3 and this step: the
+   binaries must be the frozen version.
 
 ### When a store approval takes too long (mostly new apps)
 

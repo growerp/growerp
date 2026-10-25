@@ -500,36 +500,11 @@ jobs:
           if_no_artifact_found: warn
         continue-on-error: true
 
-      - name: Install ImageMagick
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y imagemagick -qq
-
       - name: Extract Windows screenshots
         run: |
-          set -euo pipefail
-          APP=${{ matrix.app }}
-          base="flutter/packages/$APP/windows/fastlane/metadata/en-US/screenshots"
-          mkdir -p "$base"
-          rm -f "$base"/*.png
-
-          count=0
-          shopt -s nullglob
-          # dashboard (main menu) first, so it's screenshot_1
-          dashboard="framed-screenshots/windows-${APP}-dashboard_framed.png"
-          while IFS= read -r src; do
-            [[ $count -ge 9 ]] && break
-            convert "$src" -background white -gravity center -extent 1920x1080 -flatten -type TrueColor "$base/screenshot_$((count+1)).png"
-            echo "  → $base/screenshot_$((count+1)).png"
-            (( count++ )) || true
-          done < <(
-            [[ -f "$dashboard" ]] && echo "$dashboard"
-            for src in framed-screenshots/windows-${APP}-*_framed.png; do
-              [[ "$src" == "$dashboard" ]] && continue
-              echo "$src"
-            done
-          )
-          echo "Extracted $count Windows screenshots"
+          pip install -q pillow
+          python3 -c "import sys; sys.path.insert(0, '.github/scripts'); \
+            import windows_listing; windows_listing.prepare_screenshots('${{ matrix.app }}', 'framed-screenshots')"
 
       - name: Upload Windows metadata to Partner Center
         env:
@@ -543,8 +518,10 @@ jobs:
           import requests
           import json
           import os
+          import sys
           import time
-          from pathlib import Path
+          sys.path.insert(0, '.github/scripts')
+          from windows_listing import apply_listing
 
           # Partner Center sits behind Azure Front Door which intermittently
           # returns 5xx (e.g. 504 OriginTimeout). Retry those; 4xx fail fast.
@@ -590,31 +567,6 @@ jobs:
           token = auth_resp.json()['access_token']
           headers = {'Authorization': f'Bearer {token}', 'Accept': 'application/json'}
 
-          # Read metadata from fastlane directory
-          metadata_dir = Path(f'flutter/packages/{app_name}/windows/fastlane/metadata/en-US')
-          def read_field(name):
-              f = metadata_dir / name
-              return f.read_text().strip() if f.exists() else ''
-
-          # Partner Center takes at most 7 search terms of 30 characters each.
-          keywords = [k.strip() for k in read_field('keywords.txt').split(',') if k.strip()]
-          keywords = [k for k in keywords if len(k) <= 30][:7]
-
-          metadata = {
-              'description': read_field('description.txt'),
-              'shortDescription': read_field('short_description.txt'),
-              'releaseNotes': read_field('release_notes.txt'),
-              'keywords': keywords,
-          }
-
-          # Read screenshots if available
-          screenshots_dir = metadata_dir / 'screenshots'
-          screenshots = []
-          if screenshots_dir.exists():
-              for img in sorted(screenshots_dir.glob('screenshot_*.png')):
-                  screenshots.append({'fileStatus': 'PendingUpload', 'fileName': img.name, 'imageType': 'Screenshot'})
-              print(f'Found {len(screenshots)} screenshots')
-
           base_url = f'https://manage.devcenter.microsoft.com/v1.0/my/applications/{app_id}'
 
           def delete_pending_submission():
@@ -623,6 +575,15 @@ jobs:
               pending_sub = app_resp.json().get('pendingApplicationSubmission')
               if pending_sub and pending_sub.get('id'):
                   old_sub_id = pending_sub['id']
+                  # A submission on its way to the store is the binary's
+                  # (publish-binary.yml), which already carries this listing.
+                  st_resp = call('GET', f'{base_url}/submissions/{old_sub_id}/status', headers=headers)
+                  status = st_resp.json().get('status', '') if st_resp.ok else ''
+                  if status in ('PreProcessing', 'Certification', 'Release',
+                                'PendingPublication', 'Publishing'):
+                      print(f'::notice::Windows {app_name}: submission {old_sub_id} is in '
+                            f'{status}; the binary submission carries the listing, skipped.')
+                      exit(0)
                   print(f'Deleting existing pending submission {old_sub_id}...')
                   del_resp = call('DELETE', f'{base_url}/submissions/{old_sub_id}', headers=headers)
                   if not del_resp.ok:
@@ -668,40 +629,8 @@ jobs:
           sub_id = sub['id']
           print(f'Created submission {sub_id}')
 
-          # Update listing with metadata + screenshots (en-US is default).
-          # The submission API keeps listing text under listings[lang].baseListing —
-          # fields written at the listing root are silently ignored.
-          listings = sub.get('listings', {})
-          if 'en-us' not in listings:
-              listings['en-us'] = {}
-          base_listing = listings['en-us'].setdefault('baseListing', {})
-
-          base_listing.update(metadata)
-
-          if screenshots:
-              # Preserve non-screenshot images (like StoreLogo)
-              old_images = base_listing.get('images', [])
-              new_images = [img for img in old_images if img.get('imageType') != 'Screenshot']
-              new_images.extend(screenshots)
-              base_listing['images'] = new_images
-
-          sub['listings'] = listings
-
-          # A never-published app clones a submission with applicationCategory
-          # 'NotSet', which the update rejects (400 InvalidParameterValue).
-          # Fill it from category.txt (e.g. Education, Business_AccountingAndFinance);
-          # an existing category set in Partner Center is left untouched.
-          category = read_field('category.txt')
-          if category and sub.get('applicationCategory') in (None, '', 'NotSet'):
-              sub['applicationCategory'] = category
-
-          # A cloned submission from an app whose baseline never set this returns
-          # 400 InvalidParameterValue on update. GrowERP ships a Desktop MSIX, so
-          # default Desktop=True and leave the other families as-is/False.
-          aff = sub.get('allowTargetFutureDeviceFamilies') or {}
-          for fam in ('Desktop', 'Mobile', 'Xbox', 'Holographic'):
-              aff.setdefault(fam, fam == 'Desktop')
-          sub['allowTargetFutureDeviceFamilies'] = aff
+          # Listing text, screenshots, category and device families (en-US)
+          screenshots = apply_listing(sub, app_name)
 
           # Update submission
           update_resp = call(
@@ -725,12 +654,8 @@ jobs:
               import io, zipfile
               buf = io.BytesIO()
               with zipfile.ZipFile(buf, 'w', zipfile.ZIP_DEFLATED) as zf:
-                  for s in screenshots:
-                      p = screenshots_dir / s['fileName']
-                      if p.exists():
-                          zf.write(p, arcname=s['fileName'])
-                      else:
-                          print(f'Warning: {p} not found')
+                  for p in screenshots:
+                      zf.write(p, arcname=p.name)
               # SAS URL must be passed unmodified (requests must not re-encode it).
               up = call(
                   'PUT',

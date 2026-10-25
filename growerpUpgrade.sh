@@ -10,9 +10,10 @@
 #   production staging  new release of what staging runs now (when no review exists):
 #                       GitHub release, update production
 #   review   new review (when review is empty): GitHub release, freeze for review,
-#            publish metadata (opt, after prepare), publish binary to stores
+#            prepare, publish binary to stores, publish metadata (opt)
 #   prepare  create store screenshots when screens changed since the last screenshots
-#            run or its artifact (used by publish metadata, kept 7 days) expired
+#            run or its artifact (used by the Windows binary and publish metadata,
+#            kept 7 days) expired
 #   staging  update staging (new version: patch, minor or major)
 #   release  GitHub release of a version tag, notes: a summary paragraph and the
 #            feat/fix/docs/ci commits since the previous release, edited before publish
@@ -148,9 +149,9 @@ changed_screen_apps() {
     done
 }
 
-# cmd_prepare [apps]: publish metadata uploads the framed-screenshots artifact of the
-# last screenshots run (kept 7 days, only the apps of that run), so create new ones
-# for the metadata apps when screens changed or the artifact expired
+# cmd_prepare [apps]: the Windows binary and publish metadata upload the
+# framed-screenshots artifact of the last screenshots run (kept 7 days, only the apps
+# of that run), so create new ones for the apps when screens changed or it expired
 cmd_prepare() {
     step "Store screenshots when screens changed"
     local changed last
@@ -283,23 +284,24 @@ cmd_review() {
     confirm "Freeze for review?" || return
     run_workflow freeze-review.yml
     warn "No 'update staging' until the binaries are published: they must be the frozen version."
+    # The binary creates the new store version, metadata writes into it (the Windows
+    # binary submission carries its listing itself); both use the screenshots
     step "4. Submit for review"
-    if confirm "Publish metadata to stores?"; then
-        ask_apps
-        local apps="$REPLY"
-        ask_stores
-        local stores="$REPLY"
-        cmd_prepare "$apps"
-        run_workflow publish-metadata.yml -f apps="$apps" -f stores="$stores"
-    fi
     confirm "Publish binary to stores?" || return
     ask_apps
     local apps="$REPLY"
     ask_stores
     local stores="$REPLY"
+    cmd_prepare "$apps"
     ask_list "Track (stable = submit for review, beta = TestFlight only)" stable stable beta
     run_workflow publish-binary.yml -f apps="$apps" -f stores="$stores" -f track="$REPLY" \
         -f android_release_status=auto
+    if confirm "Publish metadata to stores?"; then
+        ask_apps "$apps"
+        apps="$REPLY"
+        ask_list "Stores" "$stores" "${STORES[@]}"
+        run_workflow publish-metadata.yml -f apps="$apps" -f stores="$REPLY"
+    fi
 }
 
 cmd_status() {
