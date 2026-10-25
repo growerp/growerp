@@ -39,7 +39,7 @@ def prepare_screenshots(app_name, framed_dir):
         canvas.paste(img, ((1920 - img.width) // 2, (1080 - img.height) // 2), img)
         dest = out / f'screenshot_{count}.png'
         canvas.save(dest)
-        print(f'  → {dest}')
+        print(f'  -> {dest}')
     print(f'Extracted {min(len(sources), 9)} Windows screenshots')
 
 
@@ -50,7 +50,7 @@ def apply_listing(sub, app_name):
 
     def read_field(name):
         f = md / name
-        return f.read_text().strip() if f.exists() else ''
+        return f.read_text(encoding='utf-8').strip() if f.exists() else ''
 
     # Partner Center takes at most 7 search terms of 30 characters each.
     keywords = [k.strip() for k in read_field('keywords.txt').split(',') if k.strip()]
