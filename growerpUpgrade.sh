@@ -16,8 +16,8 @@
 #            run or its artifact (used by the Windows binary and publish metadata,
 #            kept 7 days) expired
 #   staging  update staging from a branch (new version: patch, minor or major)
-#   release  GitHub release of a version tag, notes: a summary paragraph and the
-#            feat/fix/docs/ci commits since the previous release, edited before publish
+#   release  GitHub release of a version tag: Claude (claude -p) writes title and notes
+#            from the commits in the form of the previous release, checked before publish
 #   status   last run of every release workflow
 #
 # Dispatches the GitHub workflows with gh, waits for each run and stops on a failure.
@@ -315,6 +315,32 @@ release_notes() {
     done
 }
 
+# claude_notes previous tag: Claude writes the notes in the form of the newest release
+# with written notes (not the template); first line "TITLE: ...", then the notes
+claude_notes() {
+    local example name
+    command -v claude >/dev/null || return 1
+    for name in $(gh release list -R "$REPO" -L10 --exclude-drafts --json tagName -q '.[].tagName'); do
+        example=$(gh release view "$name" -R "$REPO" --json name,body -q '"TITLE: \(.name)\n\n\(.body)"')
+        [[ "$example" == *"<one paragraph summary"* ]] || break
+    done
+    {
+        echo "EXAMPLE RELEASE:"
+        echo "$example"
+        echo
+        echo "COMMITS $1..$2:"
+        git -C "$SCRIPT_DIR" log --no-merges --format='- %s' "$1..$2"
+    } | claude -p "Write the GitHub release notes of GrowERP $2 from the commits on stdin, \
+in exactly the form and style of the example release. Output: a first line \
+'TITLE: <a few words naming the main themes, without version number>', a blank line, \
+one summary paragraph with the highlights in **bold**, then '### <emoji> <Theme>' \
+sections grouped by product area (not by commit type), each with '*   **Label**: \
+sentence' bullets that merge related commits into user-facing wording. Fixes, \
+Infrastructure & Code and CI/CD & Store Publishing sections come last, as in the \
+example. Leave out merges, version bumps, screenshot refreshes and trivial chores. \
+No Full Changelog line, nothing before TITLE or after the notes." 2>/dev/null
+}
+
 cmd_release() {
     step "Create GitHub release"
     git -C "$SCRIPT_DIR" fetch -q --tags origin
@@ -327,15 +353,24 @@ cmd_release() {
     gh release view "$tag" -R "$REPO" >/dev/null 2>&1 && die "release $tag exists already"
     ask "Previous release" "$previous"
     previous="$REPLY"
-    read -r -p "Title (after '$tag '): " title
     notes=$(mktemp --suffix=.md)
-    {
-        echo "<one paragraph summary of this release>"
-        echo
-        release_notes "$previous" "$tag"
-        echo "**Full Changelog**: https://github.com/$REPO/compare/$previous...$tag"
-    } >"$notes"
-    pause "Edit the release notes (summary paragraph, group/reword lines): $notes"
+    local written="" title=""
+    echo "Claude writes the release notes..."
+    if written=$(claude_notes "$previous" "$tag") && [[ "$written" == TITLE:* ]]; then
+        title=$(head -1 <<<"$written" | sed 's/^TITLE:[[:space:]]*//')
+        tail -n +2 <<<"$written" | sed '/./,$!d' >"$notes"
+    else
+        warn "Claude did not write the notes: template with the commits per type."
+        {
+            echo "<one paragraph summary of this release>"
+            echo
+            release_notes "$previous" "$tag"
+        } >"$notes"
+    fi
+    echo "**Full Changelog**: https://github.com/$REPO/compare/$previous...$tag" >>"$notes"
+    ask "Title (after '$tag ')" "$title"
+    title="$REPLY"
+    pause "Check the release notes: $notes"
     "${EDITOR:-nano}" "$notes"
     cat "$notes"
     if confirm "Publish release '$tag $title' as Latest?"; then

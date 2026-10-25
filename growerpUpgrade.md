@@ -18,8 +18,8 @@ store screenshots when screens changed since the last screenshots run or its art
 (kept 7 days) expired (`./growerpUpgrade.sh prepare`). Just before
 the freeze (B3) it creates the GitHub release of the version to submit
 (`./growerpUpgrade.sh release`):
-a summary paragraph and the feat/fix/docs/ci commits since the previous release, edited
-before publishing.
+Claude (`claude -p`) writes the title and notes from the commits since the previous
+release, in the form of the previous release notes; checked in the editor before publishing.
 
 ### A. Update production
 
