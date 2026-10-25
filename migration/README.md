@@ -60,7 +60,8 @@ service stops the run.
 | 1.18 | `migrate#UserGroups`, `migrate#RestAuthz` |
 | 1.19 | `migrate#CourseProducts` |
 | 1.20 | `migrate#StaleLlmModelNames` |
-| next | `migrate#AccountingSetupMenu` |
+| 1.21 | `migrate#AccountingSetupMenu` |
+| next |  |
 
 Directories before 1.21 hold the minor version of the first release tag that
 contained each service.

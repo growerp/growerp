@@ -1,3 +1,1 @@
-# Accounting setup menus cloned before the change: Plan Selection becomes
-# Currency Exchange, the 'setUp' tab is renamed 'Time Periods'.
-growerp.100.MenuServices100.migrate#AccountingSetupMenu
+# Migrations for the version not yet released, see ../README.md
