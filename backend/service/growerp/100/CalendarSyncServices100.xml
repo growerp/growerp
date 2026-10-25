@@ -1,0 +1,817 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <!-- ============ Per-user calendars, two-way (docs/Calendar_Sync.md) ============
+         Every internal user (admin, employee) gets a calendar 'GrowERP - <name>' in the
+         tenant's connected calendar account, shared with the user's email; rentals go to
+         one shared 'GrowERP - Bookings' calendar. Todos and events with a date are pushed
+         as all-day events (EECAs in entity/CalendarSync.eecas.xml, after commit); changes
+         made in the calendars are read back by the sync#UserCalendars job.
+         Provider neutral: an adapter (service/calendar/<Provider>CalendarProvider.groovy)
+         maps neutral events to the provider API; get#CalendarProvider holds the registry.
+         All services run on commit workers or the job without a user, so they take the
+         ownerPartyId explicitly. -->
+
+    <service verb="get" noun="CalendarProvider" authenticate="false" allow-remote="false">
+        <description>The writable calendar provider of a tenant (readable with readOnly);
+            empty when none.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="readOnly" type="Boolean" default="false" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="providerId" />
+            <parameter name="provider" type="Object" />
+        </out-parameters>
+        <actions>
+            <set field="registry"
+                from="[google: 'component://growerp/service/calendar/GoogleCalendarProvider.groovy']" />
+            <iterate list="registry" entry="location" key="registryId">
+                <if condition="!providerId">
+                    <set field="candidate" from="ec.resource.script(location, null)" />
+                    <if condition="readOnly ? candidate.isReadable(ec, ownerPartyId) :
+                            candidate.isWritable(ec, ownerPartyId)">
+                        <set field="providerId" from="registryId" />
+                        <set field="provider" from="candidate" />
+                    </if>
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="get" noun="CalendarItems" authenticate="true">
+        <description>What the in-app calendar shows for the logged in user in a period.
+            Connected to a calendar provider: the events of the company calendar, plus the
+            user's own GrowERP calendar and Bookings when writable. Otherwise (or when the
+            provider fails): the user's todos and events with a start date, same rule as
+            push#Activity. With includeContent also the social posts of the period and the
+            undated ones (backlog).</description>
+        <in-parameters>
+            <parameter name="fromDate" type="Long" required="true">
+                <description>Epoch milliseconds, start of the period</description></parameter>
+            <parameter name="thruDate" type="Long" required="true">
+                <description>Epoch milliseconds, exclusive end of the period</description></parameter>
+            <parameter name="includeContent" type="Boolean" default="false" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="calendarConnected" type="Boolean" />
+            <parameter name="calendarItems" type="List">
+                <parameter name="calendarItem" type="Map">
+                    <parameter name="itemId" />
+                    <parameter name="source"><description>CALENDAR, ACTIVITY or SOCIAL_POST</description></parameter>
+                    <parameter name="calendarName" />
+                    <parameter name="title" />
+                    <parameter name="description" />
+                    <parameter name="start"><description>yyyy-MM-dd when allDay, else ISO date-time</description></parameter>
+                    <parameter name="end"><description>exclusive, same format as start</description></parameter>
+                    <parameter name="allDay" type="Boolean" />
+                    <parameter name="activityId" />
+                    <parameter name="postId" />
+                    <parameter name="statusId" />
+                    <parameter name="platform" />
+                    <parameter name="publishError" />
+                </parameter>
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="context" />
+            <set field="userPartyId" from="ec.user.userAccount?.partyId" />
+            <!-- a Long reaches the database untyped, Postgres rejects it against a timestamp -->
+            <set field="fromTs" from="new java.sql.Timestamp(fromDate)" />
+            <set field="thruTs" from="new java.sql.Timestamp(thruDate)" />
+            <set field="calendarItems" from="[]" />
+            <set field="calendarConnected" from="false" />
+
+            <service-call name="growerp.100.CalendarSyncServices100.get#CalendarProvider"
+                in-map="[ownerPartyId: ownerPartyId, readOnly: true]" out-map="prov" />
+            <if condition="prov.providerId">
+                <!-- the calendars to read: [externalCalendarId, name] -->
+                <set field="calendars"
+                    from="[[prov.provider.companyCalendarId(ec, ownerPartyId), 'Company']]" />
+                <entity-find entity-name="growerp.crm.UserCalendar" list="userCalendars">
+                    <econdition field-name="ownerPartyId" />
+                    <econdition field-name="providerId" from="prov.providerId" />
+                    <econdition field-name="partyId" operator="in"
+                        from="[userPartyId, companyPartyId].findAll { it }" />
+                </entity-find>
+                <iterate list="userCalendars" entry="userCalendar">
+                    <script>calendars.add([userCalendar.externalCalendarId,
+                        userCalendar.partyId == userPartyId ? 'My calendar' : 'Bookings'])</script>
+                </iterate>
+                <script><![CDATA[
+                    def seen = [] as Set
+                    try {
+                        for (cal in calendars) {
+                            for (ev in prov.provider.listRange(ec, ownerPartyId, cal[0], fromTs, thruTs)) {
+                                if (!seen.add(ev.eventId)) continue
+                                calendarItems.add([itemId: ev.eventId, source: 'CALENDAR',
+                                    calendarName: cal[1], title: ev.title,
+                                    description: ev.description, start: ev.start, end: ev.end,
+                                    allDay: ev.allDay,
+                                    activityId: ev.sourceType == 'activity' ? ev.sourceId : null])
+                            }
+                        }
+                        calendarConnected = true
+                    } catch (Exception e) {
+                        ec.logger.warn("Calendar items of ${ownerPartyId} from ${prov.providerId} failed, showing activities: ${e.message}")
+                        calendarItems.clear()
+                    }
+                ]]></script>
+            </if>
+
+            <if condition="!calendarConnected &amp;&amp; userPartyId">
+                <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="parties">
+                    <econdition field-name="partyId" from="userPartyId" />
+                    <econdition field-name="roleTypeId" operator="in" value="Assignee,Originator" />
+                    <econdition field-name="thruDate" operator="is-null" />
+                    <select-field field-name="workEffortId" />
+                </entity-find>
+                <set field="workEffortIds" from="parties*.workEffortId.unique()" />
+                <if condition="workEffortIds">
+                    <entity-find entity-name="mantle.work.effort.WorkEffort" list="workEfforts">
+                        <econdition field-name="workEffortId" operator="in" from="workEffortIds" />
+                        <econdition field-name="ownerPartyId" />
+                        <econdition field-name="workEffortTypeEnumId" operator="in"
+                            value="WetTask,WetEvent" />
+                        <econdition field-name="statusId" operator="not-in"
+                            value="WeCancelled,WeClosed" />
+                        <econditions combine="or">
+                            <econditions combine="and">
+                                <econdition field-name="estimatedStartDate" operator="greater-equals"
+                                    from="fromTs" />
+                                <econdition field-name="estimatedStartDate" operator="less"
+                                    from="thruTs" />
+                            </econditions>
+                            <econditions combine="and">
+                                <econdition field-name="estimatedStartDate" from="null" />
+                                <econdition field-name="actualStartDate" operator="greater-equals"
+                                    from="fromTs" />
+                                <econdition field-name="actualStartDate" operator="less"
+                                    from="thruTs" />
+                            </econditions>
+                        </econditions>
+                    </entity-find>
+                    <iterate list="workEfforts" entry="we">
+                        <set field="startTs" from="we.estimatedStartDate ?: we.actualStartDate" />
+                        <set field="endTs"
+                            from="we.estimatedCompletionDate ?: we.actualCompletionDate" />
+                        <!-- all-day like push#Activity: days in the user's time zone,
+                             the end exclusive -->
+                        <script><![CDATA[
+                            def tz = ec.user.getTimeZone()
+                            String startDay = ec.l10n.format(startTs, 'yyyy-MM-dd', null, tz)
+                            String lastDay = endTs && endTs.after(startTs) ?
+                                ec.l10n.format(endTs, 'yyyy-MM-dd', null, tz) : startDay
+                            calendarItems.add([itemId: we.workEffortId, source: 'ACTIVITY',
+                                title: we.workEffortName, description: we.description,
+                                start: startDay,
+                                end: java.time.LocalDate.parse(lastDay).plusDays(1).toString(),
+                                allDay: true, activityId: we.workEffortId,
+                                statusId: we.statusId])
+                        ]]></script>
+                    </iterate>
+                </if>
+            </if>
+
+            <if condition="includeContent">
+                <service-call name="growerp.100.MarketingServices100.list#SocialPosts"
+                    in-map="[fromDate: fromDate, thruDate: thruDate, limit: 500]" out-map="postsOut" />
+                <iterate list="postsOut.socialPosts" entry="post">
+                    <set field="postTs" from="post.scheduledDate ?: post.publishedDate" />
+                    <script>calendarItems.add([itemId: post.postId, source: 'SOCIAL_POST',
+                        title: post.headline ?: post.pseudoId, start: postTs?.toInstant()?.toString(),
+                        allDay: false, postId: post.postId, statusId: post.status,
+                        platform: post.platform, publishError: post.publishError])</script>
+                </iterate>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="CalendarUsers" authenticate="false" allow-remote="false">
+        <description>Internal login users (admin, employee) of a tenant with an email.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="partyId" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="users" type="List" />
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="growerp.party.OwnerPersonDetailAndCompany" list="rows">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="userPartyId" from="partyId" ignore-if-empty="true" />
+                <econdition field-name="userGroupId" operator="in"
+                    value="GROWERP_M_ADMIN,GROWERP_M_EMPLOYEE" />
+                <econdition field-name="ugMemThruDate" operator="is-null" />
+                <econdition field-name="loginDisabled" operator="not-equals" value="Y"
+                    or-null="true" />
+                <econdition field-name="emailAddress" operator="is-not-null" />
+                <select-field field-name="userPartyId,firstName,lastName,emailAddress,timeZone" />
+            </entity-find>
+            <set field="users" from="rows.unique(false) { it.userPartyId }" />
+        </actions>
+    </service>
+
+    <service verb="ensure" noun="UserCalendar" authenticate="false" allow-remote="false">
+        <description>Find or create the calendar of an internal user and share it with the
+            user's email. Empty externalCalendarId when the party is no internal user.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="partyId" required="true" />
+            <parameter name="providerId" required="true" />
+            <parameter name="provider" type="Object" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="externalCalendarId" />
+            <parameter name="timeZone" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.CalendarSyncServices100.get#CalendarUsers"
+                in-map="[ownerPartyId: ownerPartyId, partyId: partyId]" out-map="usersOut" />
+            <if condition="!usersOut.users"><return /></if>
+            <set field="user" from="usersOut.users[0]" />
+            <!-- the provider needs a zone name; the app stores the UTC offset as a Dart
+                 Duration (7:00:00.000000): use the server zone when it has that offset,
+                 else Etc/GMT-7 (signs inverted), else the server zone -->
+            <script><![CDATA[
+                String stored = (String) user.timeZone
+                String zone = null
+                if (stored) {
+                    try { zone = java.time.ZoneId.of(stored).getId() }
+                    catch (Exception e) {
+                        def m = stored =~ /^(-?)(\d{1,2}):(\d{2})/
+                        if (m.find() && m.group(3) == '00') {
+                            int hours = (m.group(2) as int) * (m.group(1) == '-' ? -1 : 1)
+                            def server = TimeZone.getDefault()
+                            zone = server.getOffset(System.currentTimeMillis()) == hours * 3600000 ?
+                                server.getID() :
+                                hours == 0 ? 'UTC' : 'Etc/GMT' + (hours > 0 ? '-' : '+') + Math.abs(hours)
+                        }
+                    }
+                }
+                timeZone = zone ?: TimeZone.getDefault().getID()
+            ]]></script>
+            <entity-find-one entity-name="growerp.crm.UserCalendar" value-field="userCalendar"
+                for-update="true">
+                <field-map field-name="ownerPartyId" />
+                <field-map field-name="partyId" />
+                <field-map field-name="providerId" />
+            </entity-find-one>
+            <if condition="!userCalendar">
+                <set field="externalCalendarId"
+                    from="provider.createCalendar(ec, ownerPartyId,
+                        'GrowERP - ' + ((user.firstName ?: '') + ' ' + (user.lastName ?: '')).trim(),
+                        timeZone)" />
+                <service-call name="create#growerp.crm.UserCalendar"
+                    in-map="[ownerPartyId: ownerPartyId, partyId: partyId, providerId: providerId,
+                        externalCalendarId: externalCalendarId]" />
+                <entity-find-one entity-name="growerp.crm.UserCalendar" value-field="userCalendar"
+                    for-update="true">
+                    <field-map field-name="ownerPartyId" />
+                    <field-map field-name="partyId" />
+                    <field-map field-name="providerId" />
+                </entity-find-one>
+            </if>
+            <set field="externalCalendarId" from="userCalendar.externalCalendarId" />
+            <!-- (re)share when the user's email is new -->
+            <set field="sharedList" from="(userCalendar.sharedEmail ?: '').split(' ').findAll { it }" />
+            <if condition="!sharedList.contains(user.emailAddress)">
+                <script>provider.shareCalendar(ec, ownerPartyId, externalCalendarId, user.emailAddress)</script>
+                <set field="userCalendar.sharedEmail" from="(sharedList + user.emailAddress).join(' ')" />
+                <entity-update value-field="userCalendar" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="ensure" noun="CompanyCalendar" authenticate="false" allow-remote="false">
+        <description>Find or create the shared Bookings calendar of a tenant and share it
+            with every internal user.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="providerId" required="true" />
+            <parameter name="provider" type="Object" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="externalCalendarId" />
+            <parameter name="timeZone" />
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.party.PartyDetailAndRole" list="companies" limit="1">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="partyTypeEnumId" value="PtyOrganization" />
+                <econdition field-name="roleTypeId" value="OrgInternal" />
+            </entity-find>
+            <if condition="!companies"><return /></if>
+            <set field="companyPartyId" from="companies[0].partyId" />
+            <set field="timeZone" from="TimeZone.getDefault().getID()" />
+            <entity-find-one entity-name="growerp.crm.UserCalendar" value-field="userCalendar"
+                for-update="true">
+                <field-map field-name="ownerPartyId" />
+                <field-map field-name="partyId" from="companyPartyId" />
+                <field-map field-name="providerId" />
+            </entity-find-one>
+            <if condition="!userCalendar">
+                <set field="externalCalendarId"
+                    from="provider.createCalendar(ec, ownerPartyId, 'GrowERP - Bookings', timeZone)" />
+                <service-call name="create#growerp.crm.UserCalendar"
+                    in-map="[ownerPartyId: ownerPartyId, partyId: companyPartyId,
+                        providerId: providerId, externalCalendarId: externalCalendarId]" />
+                <entity-find-one entity-name="growerp.crm.UserCalendar" value-field="userCalendar"
+                    for-update="true">
+                    <field-map field-name="ownerPartyId" />
+                    <field-map field-name="partyId" from="companyPartyId" />
+                    <field-map field-name="providerId" />
+                </entity-find-one>
+            </if>
+            <set field="externalCalendarId" from="userCalendar.externalCalendarId" />
+            <service-call name="growerp.100.CalendarSyncServices100.get#CalendarUsers"
+                in-map="[ownerPartyId: ownerPartyId]" out-map="usersOut" />
+            <set field="sharedList" from="(userCalendar.sharedEmail ?: '').split(' ').findAll { it }" />
+            <set field="newEmails" from="usersOut.users*.emailAddress.findAll { !sharedList.contains(it) }.unique()" />
+            <iterate list="newEmails" entry="email">
+                <script>provider.shareCalendar(ec, ownerPartyId, externalCalendarId, email)</script>
+            </iterate>
+            <if condition="newEmails">
+                <set field="userCalendar.sharedEmail" from="(sharedList + newEmails).join(' ')" />
+                <entity-update value-field="userCalendar" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="push" noun="Activity" authenticate="false" allow-remote="false">
+        <description>Push a todo or event to the calendars of its assignees (originator
+            when none): all-day from the estimated (or actual) start to the completion date.
+            Removes it where it no longer belongs: no date, cancelled/closed, other assignee.
+            Unchanged content (contentHash) is not pushed again.</description>
+        <in-parameters>
+            <parameter name="workEffortId" required="true" />
+        </in-parameters>
+        <actions>
+            <!-- the lock serializes the pushes of one save (several EECAs fire) -->
+            <entity-find-one entity-name="mantle.work.effort.WorkEffort" value-field="workEffort"
+                for-update="true">
+                <field-map field-name="workEffortId" />
+            </entity-find-one>
+            <if condition="!workEffort?.ownerPartyId"><return /></if>
+            <if condition="!['WetTask', 'WetEvent'].contains(workEffort.workEffortTypeEnumId)">
+                <return /></if>
+            <set field="ownerPartyId" from="workEffort.ownerPartyId" />
+            <service-call name="growerp.100.CalendarSyncServices100.get#CalendarProvider"
+                in-map="[ownerPartyId: ownerPartyId]" out-map="prov" />
+            <if condition="!prov.providerId"><return /></if>
+            <!-- imported Meet bookings already live in the tenant calendar -->
+            <entity-find-count entity-name="growerp.crm.CalendarEventSync" count-field="imported">
+                <econdition field-name="workEffortId" />
+            </entity-find-count>
+            <if condition="imported"><return /></if>
+
+            <set field="startTs" from="workEffort.estimatedStartDate ?: workEffort.actualStartDate" />
+            <set field="endTs"
+                from="workEffort.estimatedCompletionDate ?: workEffort.actualCompletionDate" />
+            <set field="active"
+                from="startTs &amp;&amp; !['WeCancelled', 'WeClosed'].contains(workEffort.statusId)" />
+            <set field="targetPartyIds" from="[]" />
+            <if condition="active">
+                <entity-find entity-name="mantle.work.effort.WorkEffortParty" list="parties">
+                    <econdition field-name="workEffortId" />
+                    <econdition field-name="roleTypeId" operator="in" value="Assignee,Originator" />
+                    <econdition field-name="thruDate" operator="is-null" />
+                </entity-find>
+                <set field="targetPartyIds"
+                    from="parties.findAll { it.roleTypeId == 'Assignee' }*.partyId.unique()" />
+                <if condition="!targetPartyIds">
+                    <set field="targetPartyIds"
+                        from="parties.findAll { it.roleTypeId == 'Originator' }*.partyId.unique()" />
+                </if>
+            </if>
+
+            <entity-find entity-name="growerp.crm.CalendarEventLink" list="links" for-update="true">
+                <econdition field-name="sourceType" value="activity" />
+                <econdition field-name="sourceId" from="workEffortId" />
+                <econdition field-name="providerId" from="prov.providerId" />
+            </entity-find>
+            <set field="keepCalendarIds" from="[]" />
+            <iterate list="targetPartyIds" entry="targetPartyId">
+                <service-call name="growerp.100.CalendarSyncServices100.ensure#UserCalendar"
+                    in-map="[ownerPartyId: ownerPartyId, partyId: targetPartyId,
+                        providerId: prov.providerId, provider: prov.provider]" out-map="cal" />
+                <if condition="cal.externalCalendarId">
+                    <script><![CDATA[
+                        def tz = TimeZone.getTimeZone((String) cal.timeZone)
+                        String startDate = ec.l10n.format(startTs, 'yyyy-MM-dd', null, tz)
+                        String lastDate = endTs && endTs.after(startTs) ?
+                            ec.l10n.format(endTs, 'yyyy-MM-dd', null, tz) : startDate
+                        ev = [title: (workEffort.statusId == 'WeComplete' ? 'Done: ' : '') +
+                                (workEffort.workEffortName ?: ''),
+                            description: workEffort.description ?: '',
+                            startDate: startDate,
+                            endDate: java.time.LocalDate.parse(lastDate).plusDays(1).toString(),
+                            sourceType: 'activity', sourceId: workEffortId]
+                        contentHash = "${ev.title}|${ev.description}|${ev.startDate}|${ev.endDate}".md5()
+                        link = links.find { it.externalCalendarId == cal.externalCalendarId }
+                        keepCalendarIds.add(cal.externalCalendarId)
+                    ]]></script>
+                    <if condition="!link || link.contentHash != contentHash">
+                        <set field="pushed"
+                            from="prov.provider.upsertEvent(ec, ownerPartyId, cal.externalCalendarId,
+                                link?.externalEventId ?: prov.provider.newEventId('activity', workEffortId), ev)" />
+                        <if condition="link"><then>
+                            <set field="link.externalEventId" from="pushed.eventId" />
+                            <set field="link.externalUpdated" from="pushed.updated" />
+                            <set field="link.contentHash" from="contentHash" />
+                            <entity-update value-field="link" />
+                        </then><else>
+                            <service-call name="create#growerp.crm.CalendarEventLink"
+                                in-map="[ownerPartyId: ownerPartyId, providerId: prov.providerId,
+                                    sourceType: 'activity', sourceId: workEffortId,
+                                    partyId: targetPartyId,
+                                    externalCalendarId: cal.externalCalendarId,
+                                    externalEventId: pushed.eventId,
+                                    externalUpdated: pushed.updated,
+                                    contentHash: contentHash]" />
+                        </else></if>
+                    </if>
+                </if>
+            </iterate>
+            <!-- not (or no longer) in a calendar -->
+            <iterate list="links" entry="link">
+                <if condition="!keepCalendarIds.contains(link.externalCalendarId)">
+                    <script>prov.provider.deleteEvent(ec, ownerPartyId, link.externalCalendarId,
+                        link.externalEventId)</script>
+                    <entity-delete value-field="link" />
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="push" noun="Rental" authenticate="false" allow-remote="false">
+        <description>Push the rentals of an order (one per rented item) to the shared
+            Bookings calendar, from the rental from date to the thru (checkout) date.
+            Removes them when the order is cancelled or the rental is gone.</description>
+        <in-parameters>
+            <parameter name="orderId" required="true" />
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader"
+                for-update="true">
+                <field-map field-name="orderId" />
+            </entity-find-one>
+            <set field="rentals" from="[]" />
+            <if condition="orderHeader &amp;&amp; orderHeader.statusId != 'OrderCancelled'">
+                <entity-find entity-name="growerp.product.ProductAndAssetRental" list="rentals">
+                    <econdition field-name="orderId" />
+                    <econdition field-name="rentalFromDate" operator="is-not-null" />
+                </entity-find>
+            </if>
+            <entity-find entity-name="growerp.crm.CalendarEventLink" list="links" for-update="true">
+                <econdition field-name="sourceType" value="rental" />
+                <econdition field-name="sourceId" operator="like" value="${orderId}:%" />
+            </entity-find>
+            <set field="ownerPartyId"
+                from="rentals ? rentals[0].ownerPartyId : (links ? links[0].ownerPartyId : null)" />
+            <if condition="!ownerPartyId"><return /></if>
+            <service-call name="growerp.100.CalendarSyncServices100.get#CalendarProvider"
+                in-map="[ownerPartyId: ownerPartyId]" out-map="prov" />
+            <if condition="!prov.providerId"><return /></if>
+            <set field="keepSourceIds" from="[]" />
+            <if condition="rentals">
+                <service-call name="growerp.100.CalendarSyncServices100.ensure#CompanyCalendar"
+                    in-map="[ownerPartyId: ownerPartyId, providerId: prov.providerId,
+                        provider: prov.provider]" out-map="cal" />
+                <if condition="!cal.externalCalendarId"><return /></if>
+                <!-- customer name for the title -->
+                <entity-find entity-name="mantle.order.OrderPart" list="orderParts" limit="1">
+                    <econdition field-name="orderId" />
+                </entity-find>
+                <entity-find-one entity-name="mantle.party.PartyDetail" value-field="customer">
+                    <field-map field-name="partyId" from="orderParts ? orderParts[0].customerPartyId : null" />
+                </entity-find-one>
+                <set field="customerName"
+                    from="customer ? (customer.organizationName ?:
+                        ((customer.firstName ?: '') + ' ' + (customer.lastName ?: '')).trim()) : ''" />
+                <iterate list="rentals" entry="rental">
+                    <entity-find-one entity-name="mantle.product.asset.Asset" value-field="asset">
+                        <field-map field-name="assetId" from="rental.assetId" />
+                    </entity-find-one>
+                    <script><![CDATA[
+                        def tz = TimeZone.getTimeZone((String) cal.timeZone)
+                        String startDate = ec.l10n.format(rental.rentalFromDate, 'yyyy-MM-dd', null, tz)
+                        String endDate = rental.rentalThruDate && rental.rentalThruDate.after(rental.rentalFromDate) ?
+                            ec.l10n.format(rental.rentalThruDate, 'yyyy-MM-dd', null, tz) : null
+                        if (!endDate || endDate <= startDate)
+                            endDate = java.time.LocalDate.parse(startDate).plusDays(1).toString()
+                        sourceId = "${orderId}:${rental.orderItemSeqId}".toString()
+                        ev = [title: ([rental.productName, asset?.assetName].findAll { it }.join(' ') +
+                                (customerName ? ' - ' + customerName : '')),
+                            description: 'Order ' + (orderHeader.pseudoId ?: orderId),
+                            startDate: startDate, endDate: endDate,
+                            sourceType: 'rental', sourceId: sourceId]
+                        contentHash = "${ev.title}|${ev.description}|${ev.startDate}|${ev.endDate}".md5()
+                        link = links.find { it.sourceId == sourceId }
+                        keepSourceIds.add(sourceId)
+                    ]]></script>
+                    <if condition="!link || link.contentHash != contentHash">
+                        <set field="pushed"
+                            from="prov.provider.upsertEvent(ec, ownerPartyId, cal.externalCalendarId,
+                                link?.externalEventId ?: prov.provider.newEventId('rental', sourceId), ev)" />
+                        <if condition="link"><then>
+                            <set field="link.externalUpdated" from="pushed.updated" />
+                            <set field="link.contentHash" from="contentHash" />
+                            <entity-update value-field="link" />
+                        </then><else>
+                            <service-call name="create#growerp.crm.CalendarEventLink"
+                                in-map="[ownerPartyId: ownerPartyId, providerId: prov.providerId,
+                                    sourceType: 'rental', sourceId: sourceId,
+                                    partyId: orderParts ? orderParts[0].customerPartyId : null,
+                                    externalCalendarId: cal.externalCalendarId,
+                                    externalEventId: pushed.eventId,
+                                    externalUpdated: pushed.updated,
+                                    contentHash: contentHash]" />
+                        </else></if>
+                    </if>
+                </iterate>
+            </if>
+            <iterate list="links" entry="link">
+                <if condition="!keepSourceIds.contains(link.sourceId)">
+                    <script>prov.provider.deleteEvent(ec, ownerPartyId, link.externalCalendarId,
+                        link.externalEventId)</script>
+                    <entity-delete value-field="link" />
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="readBack" noun="UserCalendar" authenticate="false" allow-remote="false">
+        <description>Read the changes made in one user calendar back into GrowERP:
+            title/description/dates update the activity, a deleted event cancels it, a new
+            event becomes an event activity of the user. Rental events are owned by the
+            order: a changed one is pushed again.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="partyId" required="true" />
+            <parameter name="providerId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="changedCount" type="Integer" />
+        </out-parameters>
+        <actions>
+            <set field="changedCount" from="0" />
+            <service-call name="growerp.100.CalendarSyncServices100.get#CalendarProvider"
+                in-map="[ownerPartyId: ownerPartyId]" out-map="prov" />
+            <if condition="prov.providerId != providerId"><return /></if>
+            <entity-find-one entity-name="growerp.crm.UserCalendar" value-field="userCalendar"
+                for-update="true">
+                <field-map field-name="ownerPartyId" />
+                <field-map field-name="partyId" />
+                <field-map field-name="providerId" />
+            </entity-find-one>
+            <if condition="!userCalendar?.externalCalendarId"><return /></if>
+            <service-call name="growerp.100.CalendarSyncServices100.get#CalendarUsers"
+                in-map="[ownerPartyId: ownerPartyId, partyId: partyId]" out-map="usersOut" />
+            <!-- the Bookings calendar belongs to the company, no user -->
+            <set field="calendarUser" from="usersOut.users ? usersOut.users[0] : null" />
+            <set field="tz"
+                from="TimeZone.getTimeZone((String) (calendarUser?.timeZone ?: TimeZone.getDefault().getID()))" />
+            <set field="changes"
+                from="prov.provider.listChanges(ec, ownerPartyId, userCalendar.externalCalendarId,
+                    userCalendar.syncToken)" />
+            <set field="rentalOrderIds" from="[] as Set" />
+            <iterate list="changes.events" entry="ev">
+                <set field="contentHash"
+                    from="&quot;${ev.title}|${ev.description}|${ev.startDate}|${ev.endDate}&quot;.toString().md5()" />
+                <entity-find entity-name="growerp.crm.CalendarEventLink" list="links"
+                    for-update="true" limit="1">
+                    <econdition field-name="externalCalendarId" from="userCalendar.externalCalendarId" />
+                    <econdition field-name="externalEventId" from="ev.eventId" />
+                </entity-find>
+                <set field="link" from="links ? links[0] : null" />
+                <if condition="link">
+                    <then>
+                        <!-- own push echoed back, or nothing changed -->
+                        <if condition="!ev.deleted &amp;&amp; link.contentHash == contentHash">
+                            <continue /></if>
+                        <if condition="ev.updated &amp;&amp; link.externalUpdated &amp;&amp;
+                                !ev.updated.after(link.externalUpdated)">
+                            <continue /></if>
+                        <if condition="link.sourceType == 'rental'">
+                            <!-- force the next push to write GrowERP's version again -->
+                            <set field="link.contentHash" from="null" />
+                            <entity-update value-field="link" />
+                            <script>rentalOrderIds.add(link.sourceId.split(':')[0])</script>
+                            <continue />
+                        </if>
+                        <entity-find-one entity-name="mantle.work.effort.WorkEffort"
+                            value-field="workEffort" for-update="true">
+                            <field-map field-name="workEffortId" from="link.sourceId" />
+                        </entity-find-one>
+                        <if condition="!workEffort"><continue /></if>
+                        <!-- last write wins: GrowERP changed later, its push follows -->
+                        <if condition="ev.updated &amp;&amp; workEffort.lastUpdatedStamp &amp;&amp;
+                                workEffort.lastUpdatedStamp.after(ev.updated)">
+                            <continue /></if>
+                        <if condition="ev.deleted">
+                            <then>
+                                <entity-delete value-field="link" />
+                                <set field="workEffort.statusId" value="WeCancelled" />
+                            </then>
+                            <else>
+                                <script><![CDATA[
+                                    String title = ev.title ?: ''
+                                    workEffort.workEffortName = title.startsWith('Done: ') ? title.substring(6) : title
+                                    workEffort.description = ev.description ?: null
+                                    if (ev.startDate) {
+                                        workEffort.estimatedStartDate =
+                                            ec.l10n.parseTimestamp(ev.startDate, 'yyyy-MM-dd', null, tz)
+                                        String lastDate = ev.endDate ?
+                                            java.time.LocalDate.parse(ev.endDate).minusDays(1).toString() : ev.startDate
+                                        workEffort.estimatedCompletionDate = lastDate > ev.startDate ?
+                                            ec.l10n.parseTimestamp(lastDate, 'yyyy-MM-dd', null, tz) : null
+                                    }
+                                ]]></script>
+                                <set field="link.contentHash" from="contentHash" />
+                                <set field="link.externalUpdated" from="ev.updated" />
+                                <entity-update value-field="link" />
+                            </else>
+                        </if>
+                        <entity-update value-field="workEffort" />
+                        <set field="changedCount" from="changedCount + 1" />
+                    </then>
+                    <!-- new event made in the calendar of a user: an event activity -->
+                    <else-if condition="!ev.deleted &amp;&amp; !ev.sourceType &amp;&amp;
+                            calendarUser &amp;&amp; ev.startDate">
+                        <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                            in-map="[ownerPartyId: ownerPartyId, seqName: 'activity.activityType']"
+                            out-map="seqOut" />
+                        <script><![CDATA[
+                            String lastDate = ev.endDate ?
+                                java.time.LocalDate.parse(ev.endDate).minusDays(1).toString() : ev.startDate
+                            newStart = ec.l10n.parseTimestamp(ev.startDate, 'yyyy-MM-dd', null, tz)
+                            newEnd = lastDate > ev.startDate ?
+                                ec.l10n.parseTimestamp(lastDate, 'yyyy-MM-dd', null, tz) : null
+                        ]]></script>
+                        <service-call name="create#mantle.work.effort.WorkEffort" out-map="weOut"
+                            in-map="[workEffortTypeEnumId: 'WetEvent',
+                                workEffortPseudoId: seqOut.seqNum,
+                                workEffortName: ev.title ?: 'Calendar event',
+                                description: ev.description ?: null,
+                                statusId: 'WeApproved',
+                                ownerPartyId: ownerPartyId,
+                                visibilityEnumId: 'GROWERP_M_EMPLOYEE',
+                                estimatedStartDate: newStart,
+                                estimatedCompletionDate: newEnd]" />
+                        <iterate list="['Originator', 'Assignee']" entry="roleTypeId">
+                            <service-call name="create#mantle.work.effort.WorkEffortParty"
+                                in-map="[workEffortId: weOut.workEffortId, partyId: partyId,
+                                    roleTypeId: roleTypeId, statusId: 'WeptAssigned',
+                                    fromDate: ec.user.nowTimestamp]" />
+                        </iterate>
+                        <service-call name="create#growerp.crm.CalendarEventLink"
+                            in-map="[ownerPartyId: ownerPartyId, providerId: providerId,
+                                sourceType: 'activity', sourceId: weOut.workEffortId,
+                                partyId: partyId,
+                                externalCalendarId: userCalendar.externalCalendarId,
+                                externalEventId: ev.eventId,
+                                externalUpdated: ev.updated,
+                                contentHash: contentHash]" />
+                        <set field="changedCount" from="changedCount + 1" />
+                    </else-if>
+                </if>
+            </iterate>
+            <set field="userCalendar.syncToken" from="changes.nextSyncToken ?: userCalendar.syncToken" />
+            <set field="userCalendar.lastReadBack" from="ec.user.nowTimestamp" />
+            <entity-update value-field="userCalendar" />
+            <iterate list="rentalOrderIds" entry="rentalOrderId">
+                <script>ec.service.special().name('growerp.100.CalendarSyncServices100.push#Rental')
+                    .parameters([orderId: rentalOrderId]).registerOnCommit()</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="sync" noun="UserCalendars" authenticate="false" allow-remote="false"
+        transaction-timeout="600">
+        <description>Job: read back the user calendars of every tenant with a writable
+            calendar provider. One failing calendar does not stop the batch.</description>
+        <out-parameters>
+            <parameter name="calendarCount" type="Integer" />
+        </out-parameters>
+        <actions>
+            <if condition="!ec.user.userId">
+                <script>ec.user.internalLoginUser('SystemSupport')</script>
+            </if>
+            <entity-find entity-name="growerp.crm.UserCalendar" list="calendars">
+                <order-by field-name="ownerPartyId" />
+            </entity-find>
+            <set field="calendarCount" from="0" />
+            <iterate list="calendars" entry="calendar">
+                <service-call name="growerp.100.CalendarSyncServices100.readBack#UserCalendar"
+                    in-map="[ownerPartyId: calendar.ownerPartyId, partyId: calendar.partyId,
+                        providerId: calendar.providerId]"
+                    ignore-error="true" transaction="force-new" />
+                <set field="calendarCount" from="calendarCount + 1" />
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="sync" noun="AllUserCalendars" authenticate="false" allow-remote="false"
+        transaction-timeout="1800">
+        <description>Backfill after connecting: create the calendars of all internal users,
+            push open activities from 30 days ago on and rentals that did not end yet,
+            then take the initial read back position.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="activityCount" type="Integer" />
+            <parameter name="rentalCount" type="Integer" />
+        </out-parameters>
+        <actions>
+            <if condition="!ec.user.userId">
+                <script>ec.user.internalLoginUser('SystemSupport')</script>
+            </if>
+            <service-call name="growerp.100.CalendarSyncServices100.get#CalendarProvider"
+                in-map="[ownerPartyId: ownerPartyId]" out-map="prov" />
+            <if condition="!prov.providerId"><return message="no writable calendar for ${ownerPartyId}" /></if>
+            <service-call name="growerp.100.CalendarSyncServices100.get#CalendarUsers"
+                in-map="[ownerPartyId: ownerPartyId]" out-map="usersOut" />
+            <iterate list="usersOut.users" entry="user">
+                <service-call name="growerp.100.CalendarSyncServices100.ensure#UserCalendar"
+                    in-map="[ownerPartyId: ownerPartyId, partyId: user.userPartyId,
+                        providerId: prov.providerId, provider: prov.provider]"
+                    ignore-error="true" transaction="force-new" />
+            </iterate>
+            <set field="fromTs"
+                from="new java.sql.Timestamp(ec.user.nowTimestamp.time - 30L * 24 * 3600 * 1000)" />
+            <entity-find entity-name="mantle.work.effort.WorkEffort" list="workEfforts">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="workEffortTypeEnumId" operator="in" value="WetTask,WetEvent" />
+                <econdition field-name="statusId" operator="not-in" value="WeCancelled,WeClosed" />
+                <econditions combine="or">
+                    <econdition field-name="estimatedStartDate" operator="greater-equals" from="fromTs" />
+                    <econdition field-name="actualStartDate" operator="greater-equals" from="fromTs" />
+                </econditions>
+                <select-field field-name="workEffortId" />
+            </entity-find>
+            <iterate list="workEfforts" entry="we">
+                <service-call name="growerp.100.CalendarSyncServices100.push#Activity"
+                    in-map="[workEffortId: we.workEffortId]" ignore-error="true"
+                    transaction="force-new" />
+            </iterate>
+            <set field="activityCount" from="workEfforts.size()" />
+            <entity-find entity-name="growerp.product.ProductAndAssetRental" list="rentals">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="rentalThruDate" operator="greater-equals"
+                    from="ec.user.nowTimestamp" />
+                <select-field field-name="orderId" />
+            </entity-find>
+            <set field="orderIds" from="rentals*.orderId.unique()" />
+            <iterate list="orderIds" entry="orderId">
+                <service-call name="growerp.100.CalendarSyncServices100.push#Rental"
+                    in-map="[orderId: orderId]" ignore-error="true" transaction="force-new" />
+            </iterate>
+            <set field="rentalCount" from="orderIds.size()" />
+            <!-- initial read back position: everything there now was pushed by GrowERP -->
+            <entity-find entity-name="growerp.crm.UserCalendar" list="calendars">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="providerId" from="prov.providerId" />
+            </entity-find>
+            <iterate list="calendars" entry="calendar">
+                <service-call name="growerp.100.CalendarSyncServices100.readBack#UserCalendar"
+                    in-map="[ownerPartyId: ownerPartyId, partyId: calendar.partyId,
+                        providerId: calendar.providerId]"
+                    ignore-error="true" transaction="force-new" />
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="resync" noun="Calendars" authenticate="true">
+        <description>REST: rebuild the calendars of the current tenant in the background.</description>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="relInfo" />
+            <if condition="!relInfo.ownerPartyId">
+                <return error="true" message="ownerPartyId not found for current user" /></if>
+            <service-call name="growerp.100.CalendarSyncServices100.get#CalendarProvider"
+                in-map="[ownerPartyId: relInfo.ownerPartyId]" out-map="prov" />
+            <if condition="!prov.providerId">
+                <return error="true" message="Google Calendar is not usable: connect it (again), or this server has no Google OAuth client configured" /></if>
+            <service-call name="growerp.100.CalendarSyncServices100.sync#AllUserCalendars"
+                in-map="[ownerPartyId: relInfo.ownerPartyId]" async="true" />
+        </actions>
+    </service>
+
+</services>

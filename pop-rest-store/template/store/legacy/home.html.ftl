@@ -46,14 +46,14 @@
                                 </#if>
                                 <div class="price-section">
                                     <#if product.price?? && product.price gt 0>
-                                        <span class="product-price-text" style="color: var(--accent-600); font-size: 1.15rem; font-weight: 700;">${ec.l10n.formatCurrency(product.price,product.priceUomId)}</span>
+                                        <span class="product-price-text" style="color: var(--accent-600); font-size: 1.15rem; font-weight: 700;" data-price-amount="${product.price?c}" data-price-currency="${product.priceUomId}">${ec.l10n.formatCurrency(product.price, product.priceUomId)}</span>
                                         <#if product.listPrice?? && product.listPrice gt product.price>
                                             <span class="product-last-price ml-2" style="color: var(--neutral-400); font-size: 0.9rem;">
-                                                <del>${ec.l10n.formatCurrency(product.listPrice,product.priceUomId)}</del>
+                                                <del data-price-amount="${product.listPrice?c}" data-price-currency="${product.priceUomId}">${ec.l10n.formatCurrency(product.listPrice, product.priceUomId)}</del>
                                             </span>
                                         </#if>
                                     <#elseif product.listPrice?? && product.listPrice gt 0>
-                                        <span class="product-price-text" style="color: var(--accent-600); font-size: 1.15rem; font-weight: 700;">${ec.l10n.formatCurrency(product.listPrice,product.priceUomId)}</span>
+                                        <span class="product-price-text" style="color: var(--accent-600); font-size: 1.15rem; font-weight: 700;" data-price-amount="${product.listPrice?c}" data-price-currency="${product.priceUomId}">${ec.l10n.formatCurrency(product.listPrice, product.priceUomId)}</span>
                                     <#else>
                                         <span class="product-price-text" style="color: var(--accent-600); font-size: 1.15rem; font-weight: 700;">Free</span>
                                     </#if>
@@ -128,14 +128,14 @@
                                 </#if>
                                 <div class="price-section">
                                     <#if product.price?? && product.price gt 0>
-                                        <span class="product-price-text" style="color: var(--accent-600); font-size: 1.15rem; font-weight: 700;">${ec.l10n.formatCurrency(product.price,product.priceUomId)}</span>
+                                        <span class="product-price-text" style="color: var(--accent-600); font-size: 1.15rem; font-weight: 700;" data-price-amount="${product.price?c}" data-price-currency="${product.priceUomId}">${ec.l10n.formatCurrency(product.price, product.priceUomId)}</span>
                                         <#if product.listPrice?? && product.listPrice gt product.price>
                                             <span class="product-last-price ml-2" style="color: var(--neutral-400); font-size: 0.9rem;">
-                                                <del>${ec.l10n.formatCurrency(product.listPrice,product.priceUomId)}</del>
+                                                <del data-price-amount="${product.listPrice?c}" data-price-currency="${product.priceUomId}">${ec.l10n.formatCurrency(product.listPrice, product.priceUomId)}</del>
                                             </span>
                                         </#if>
                                     <#elseif product.listPrice?? && product.listPrice gt 0>
-                                        <span class="product-price-text" style="color: var(--accent-600); font-size: 1.15rem; font-weight: 700;">${ec.l10n.formatCurrency(product.listPrice,product.priceUomId)}</span>
+                                        <span class="product-price-text" style="color: var(--accent-600); font-size: 1.15rem; font-weight: 700;" data-price-amount="${product.listPrice?c}" data-price-currency="${product.priceUomId}">${ec.l10n.formatCurrency(product.listPrice, product.priceUomId)}</span>
                                     <#else>
                                         <span class="product-price-text" style="color: var(--accent-600); font-size: 1.15rem; font-weight: 700;">Free</span>
                                     </#if>

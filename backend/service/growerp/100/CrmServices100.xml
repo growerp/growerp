@@ -585,6 +585,7 @@ limitations under the License.
                         activityType: 'todo',
                         activityName: opportunity.nextStep,
                         statusId: 'planning',
+                        estimatedStartDate: ec.l10n.format(ec.user.nowTimestamp, 'yyyy-MM-dd'),
                         description: 'Next step for opportunity: ' +
                             (opportunity.opportunityName ?: ''),
                         opportunityId: salesOpportunityId,
@@ -716,6 +717,7 @@ limitations under the License.
                         activityType: 'todo',
                         activityName: opportunity.nextStep,
                         statusId: 'planning',
+                        estimatedStartDate: ec.l10n.format(ec.user.nowTimestamp, 'yyyy-MM-dd'),
                         description: 'Next step for opportunity: ' +
                             (opportunity.opportunityName ?: ''),
                         opportunityId: opportunity.opportunityId,

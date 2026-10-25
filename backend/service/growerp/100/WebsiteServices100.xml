@@ -873,16 +873,46 @@ limitations under the License.
                                     <set field="seq" from="wikiPage.sequenceNum" />
                                 </if>
                             </iterate>
+                            <!-- readable page path (url /content/<path>) from the page title:
+                                 md first heading, ftl title comment, same rules as get#Website -->
+                            <script>
+                                String titleSource = ''
+                                if (content.contentType == 'ftl') {
+                                    def titleMatch = (content.text =~ /title:\s*(.*?)\s*-->/)
+                                    if (titleMatch.find()) titleSource = titleMatch.group(1)
+                                } else {
+                                    for (String line in content.text.readLines()) {
+                                        if (line.startsWith('# ') || line.startsWith('## ')) {
+                                            titleSource = line.substring(line.indexOf(' ') + 1)
+                                            break
+                                        }
+                                    }
+                                }
+                                if (!titleSource) titleSource = content.title ?: ''
+                                String slug = titleSource.toLowerCase()
+                                        .replaceAll(/[^a-z0-9]+/, '-').replaceAll(/^-+|-+$/, '')
+                                if (slug) {
+                                    Set usedPaths = wikiPages*.pagePath as Set
+                                    String candidate = slug
+                                    int suffix = 2
+                                    while (usedPaths.contains(candidate)) candidate = slug + '-' + suffix++
+                                    slug = candidate
+                                }
+                            </script>
                             <service-call name="create#moqui.resource.wiki.WikiPage"
                                 out-map="context"
                                 in-map="[wikiSpaceId: stores[0].wikiSpaceId,
-                                pagePath:  '==temp==',
+                                pagePath:  slug ?: '==temp==',
                                 sequenceNum: seq + 1,
                                 publishedVersionName: '01']" />
-                            <service-call name="update#moqui.resource.wiki.WikiPage"
-                                in-map="[wikiPageId: wikiPageId,
-                                pagePath:  wikiPageId]" />
-                            <set field="content.path" from="wikiPageId" />
+                            <if condition="!slug">
+                                <!-- no title to derive a path from: fall back to the id -->
+                                <set field="slug" from="wikiPageId" />
+                                <service-call name="update#moqui.resource.wiki.WikiPage"
+                                    in-map="[wikiPageId: wikiPageId,
+                                    pagePath:  slug]" />
+                            </if>
+                            <set field="content.path" from="slug" />
                             <!-- file extension / mime type by content type (md default, ftl) -->
                             <if condition="content.contentType == 'ftl'">
                                 <then>
@@ -897,7 +927,7 @@ limitations under the License.
                             <!-- create db resource -->
                             <service-call name="create#moqui.resource.DbResource" out-map="context"
                                 in-map="[parentResourceId: topResourceContent[0].resourceId,
-                            isFile: 'Y', filename: wikiPageId + fileExt]" />
+                            isFile: 'Y', filename: slug + fileExt]" />
                             <!-- file -->
                             <service-call name="create#moqui.resource.DbResourceFile"
                                 in-map="[resourceId: resourceId,
@@ -911,6 +941,19 @@ limitations under the License.
                                 in-map="[resourceId: resourceId,
                                 versionName: '01', isDiff: 'N',
                                 versionDate: nowDate]" />
+                            <!-- a deleted page with the same path stays cached by location (the
+                                 reference keeps the old resourceId, no expiry in production) -->
+                            <entity-find-one entity-name="moqui.resource.wiki.WikiSpace" value-field="wikiSpace">
+                                <field-map field-name="wikiSpaceId" from="stores[0].wikiSpaceId" />
+                            </entity-find-one>
+                            <script>
+                                for (String ext in ['.md.ftl', '.html.ftl']) {
+                                    String pageLocation = "${wikiSpace.rootPageLocation}/content/${slug}${ext}".toString()
+                                    for (String cacheName in ['resource.reference.location', 'resource.text.location',
+                                            'resource.ftl.location', 'resource.markdown.location'])
+                                        ec.cache.getCache(cacheName).remove(pageLocation)
+                                }
+                            </script>
                         </else>
                     </if>
                 </then>

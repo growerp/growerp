@@ -27,6 +27,12 @@ limitations under the License.
         serviceName="growerp.100.CrmServices100.collect#OpportunityWeekStats"
         cronExpression="0 15 0 ? * MON" paused="N" transactionTimeout="1800" />
 
+    <!-- Service Job: Refresh the central currency exchange rates - weekly, monday night -->
+    <moqui.service.job.ServiceJob jobName="update_exchange_rates"
+        description="Store the latest USD and EUR based exchange rates for all tenant currencies"
+        serviceName="growerp.100.GeneralServices100.update#ExchangeRates"
+        cronExpression="0 0 3 ? * MON" paused="N" transactionTimeout="600" />
+
     <!-- Service Job: Auto-renew tenant subscriptions expiring within 3 days - daily -->
     <moqui.service.job.ServiceJob jobName="renew_due_tenant_subscriptions"
         description="Auto-renew tenant subscriptions expiring soon using their stored payment method; dunning email on failure"
@@ -70,6 +76,12 @@ limitations under the License.
         description="Import Google Calendar Meet bookings as lead activities and attach Gemini meeting notes"
         serviceName="growerp.100.GoogleCalendarServices100.sync#GoogleCalendarEvents"
         cronExpression="0 8/15 * * * ?" paused="N" transactionTimeout="300" />
+
+    <!-- Service Job: Read changes made in the per-user calendars back - every 5 minutes -->
+    <moqui.service.job.ServiceJob jobName="user_calendar_read_back"
+        description="Read changes made in the per-user GrowERP calendars (Google) back into the activities"
+        serviceName="growerp.100.CalendarSyncServices100.sync#UserCalendars"
+        cronExpression="0 2/5 * * * ?" paused="N" transactionTimeout="600" />
 
     <!-- Service Job: Email chat conversations to absent/unresponsive members - every minute -->
     <moqui.service.job.ServiceJob jobName="send_unanswered_chat_emails"

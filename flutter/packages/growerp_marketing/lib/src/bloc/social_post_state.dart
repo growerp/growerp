@@ -20,14 +20,6 @@ class SocialPostState extends Equatable {
   final SocialPostStatus searchStatus;
   final String? searchError;
 
-  /// Posts of the calendar's current period, ordered by scheduledDate.
-  ///
-  /// Separate from [socialPosts] and [status] so a calendar refresh never
-  /// emits a plain success: dialogs opened over the calendar close on any
-  /// success emission of the shared status.
-  final List<SocialPost> calendarPosts;
-  final SocialPostStatus calendarStatus;
-
   const SocialPostState({
     this.status = SocialPostStatus.initial,
     this.socialPosts = const [],
@@ -36,8 +28,6 @@ class SocialPostState extends Equatable {
     this.searchResults = const [],
     this.searchStatus = SocialPostStatus.initial,
     this.searchError,
-    this.calendarPosts = const [],
-    this.calendarStatus = SocialPostStatus.initial,
   });
 
   SocialPostState copyWith({
@@ -48,8 +38,6 @@ class SocialPostState extends Equatable {
     List<SocialPost>? searchResults,
     SocialPostStatus? searchStatus,
     String? searchError,
-    List<SocialPost>? calendarPosts,
-    SocialPostStatus? calendarStatus,
   }) {
     return SocialPostState(
       status: status ?? this.status,
@@ -59,8 +47,6 @@ class SocialPostState extends Equatable {
       searchResults: searchResults ?? this.searchResults,
       searchStatus: searchStatus ?? this.searchStatus,
       searchError: searchError ?? this.searchError,
-      calendarPosts: calendarPosts ?? this.calendarPosts,
-      calendarStatus: calendarStatus ?? this.calendarStatus,
     );
   }
 
@@ -73,15 +59,12 @@ class SocialPostState extends Equatable {
         searchResults,
         searchStatus,
         searchError,
-        calendarPosts,
-        calendarStatus,
       ];
 
   @override
   String toString() {
     return 'SocialPostState { status: $status, hasReachedMax: $hasReachedMax, '
         'socialPosts: ${socialPosts.length}, message: $message, '
-        'searchResults: ${searchResults.length}, searchStatus: $searchStatus, '
-        'calendarPosts: ${calendarPosts.length}, calendarStatus: $calendarStatus }';
+        'searchResults: ${searchResults.length}, searchStatus: $searchStatus }';
   }
 }

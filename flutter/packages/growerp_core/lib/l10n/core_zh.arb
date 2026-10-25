@@ -114,6 +114,7 @@
   "test": "测试",
   "testSystem": "测试系统",
   "theme": "主题",
+  "currencyExchange": "汇率",
   "timePeriods": "时间段",
   "transaction": "交易",
   "transactions": "交易",
@@ -167,7 +168,6 @@
   "outgoingPayments": "发出的付款",
   "outgoingShipments": "发出的装运",
   "paymtTypes": "付款类型",
-  "planSelection": "计划选择",
   "products": "产品",
   "purchaseOrders": "采购订单",
   "purchaseUnpaidInvoices": "采购未付发票",
@@ -821,9 +821,6 @@
   "@paymtTypes": {
     "description": "Payment types menu item"
   },
-  "@planSelection": {
-    "description": "Plan selection menu item"
-  },
   "@products": {
     "description": "Products menu item"
   },
@@ -1366,5 +1363,19 @@
   "insRenewalsDue": "待续保",
   "insOpenClaims": "未结理赔",
   "mailUseOauth": "使用 Google OAuth2 登录",
-  "mailUseOauthHelp": "使用 Google Workspace 凭据；刷新令牌需要 scope https://mail.google.com/"
+  "mailUseOauthHelp": "使用 Google Workspace 凭据；刷新令牌需要 scope https://mail.google.com/",
+  "calendar": "日历",
+  "calendarToday": "今天",
+  "calendarMonth": "月",
+  "calendarWeek": "周",
+  "calendarEmpty": "此期间没有内容",
+  "calendarBacklog": "{count, plural, other{{count} 篇无日期的帖子}}",
+  "calendarSourceCalendar": "日历",
+  "calendarSourceActivities": "活动",
+  "calendarSourcePosts": "帖子",
+  "calendarConnectHint": "连接 Google 日历",
+  "calendarNewActivity": "新活动",
+  "calendarNewPost": "新帖子",
+  "calendarResync": "重新同步用户日历",
+  "calendarResyncStarted": "用户日历正在后台更新"
 }

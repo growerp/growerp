@@ -114,6 +114,7 @@
   "test": "ทดสอบ",
   "testSystem": "ระบบทดสอบ",
   "theme": "ธีม",
+  "currencyExchange": "อัตราแลกเปลี่ยน",
   "timePeriods": "ช่วงเวลา",
   "transaction": "ธุรกรรม",
   "transactions": "ธุรกรรม",
@@ -167,7 +168,6 @@
   "outgoingPayments": "การชำระเงินที่ออก",
   "outgoingShipments": "การจัดส่งที่ออก",
   "paymtTypes": "ประเภทการชำระเงิน",
-  "planSelection": "การเลือกแผน",
   "products": "สินค้า",
   "purchaseOrders": "ใบสั่งซื้อ",
   "purchaseUnpaidInvoices": "ใบแจ้งหนี้ซื้อที่ยังไม่ชำระ",
@@ -776,9 +776,6 @@
   "@paymtTypes": {
     "description": "Payment types menu item"
   },
-  "@planSelection": {
-    "description": "Plan selection menu item"
-  },
   "@products": {
     "description": "Products menu item"
   },
@@ -1366,5 +1363,19 @@
   "insRenewalsDue": "ครบกำหนดต่ออายุ",
   "insOpenClaims": "เคลมที่เปิดอยู่",
   "mailUseOauth": "ลงชื่อเข้าใช้ด้วย Google OAuth2",
-  "mailUseOauthHelp": "ใช้ข้อมูลรับรอง Google Workspace; refresh token ต้องมี scope https://mail.google.com/"
+  "mailUseOauthHelp": "ใช้ข้อมูลรับรอง Google Workspace; refresh token ต้องมี scope https://mail.google.com/",
+  "calendar": "ปฏิทิน",
+  "calendarToday": "วันนี้",
+  "calendarMonth": "เดือน",
+  "calendarWeek": "สัปดาห์",
+  "calendarEmpty": "ไม่มีรายการในช่วงนี้",
+  "calendarBacklog": "{count, plural, other{{count} โพสต์ที่ไม่มีวันที่}}",
+  "calendarSourceCalendar": "ปฏิทิน",
+  "calendarSourceActivities": "กิจกรรม",
+  "calendarSourcePosts": "โพสต์",
+  "calendarConnectHint": "เชื่อมต่อ Google ปฏิทิน",
+  "calendarNewActivity": "กิจกรรมใหม่",
+  "calendarNewPost": "โพสต์ใหม่",
+  "calendarResync": "ซิงค์ปฏิทินผู้ใช้ใหม่",
+  "calendarResyncStarted": "กำลังอัปเดตปฏิทินผู้ใช้เบื้องหลัง"
 }

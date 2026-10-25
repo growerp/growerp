@@ -114,6 +114,7 @@
   "test": "Test",
   "testSystem": "Test systeem",
   "theme": "Thema",
+  "currencyExchange": "Wisselkoersen",
   "timePeriods": "Tijdsperioden",
   "transaction": "Transactie",
   "transactions": "Transacties",
@@ -167,7 +168,6 @@
   "outgoingPayments": "Uitgaande betalingen",
   "outgoingShipments": "Uitgaande zendingen",
   "paymtTypes": "Betaalmethoden",
-  "planSelection": "Planselectie",
   "products": "Producten",
   "purchaseOrders": "Inkooporders",
   "purchaseUnpaidInvoices": "Onbetaalde inkoopfacturen",
@@ -821,9 +821,6 @@
   "@paymtTypes": {
     "description": "Payment types menu item"
   },
-  "@planSelection": {
-    "description": "Plan selection menu item"
-  },
   "@products": {
     "description": "Products menu item"
   },
@@ -1366,5 +1363,19 @@
   "insRenewalsDue": "Te verlengen",
   "insOpenClaims": "Open schades",
   "mailUseOauth": "Aanmelden met Google OAuth2",
-  "mailUseOauthHelp": "Gebruikt de Google Workspace-gegevens; het refresh token heeft scope https://mail.google.com/ nodig"
+  "mailUseOauthHelp": "Gebruikt de Google Workspace-gegevens; het refresh token heeft scope https://mail.google.com/ nodig",
+  "calendar": "Agenda",
+  "calendarToday": "Vandaag",
+  "calendarMonth": "Maand",
+  "calendarWeek": "Week",
+  "calendarEmpty": "Niets in deze periode",
+  "calendarBacklog": "{count, plural, =1{1 bericht zonder datum} other{{count} berichten zonder datum}}",
+  "calendarSourceCalendar": "Agenda",
+  "calendarSourceActivities": "Activiteiten",
+  "calendarSourcePosts": "Berichten",
+  "calendarConnectHint": "Google Agenda koppelen",
+  "calendarNewActivity": "Nieuwe activiteit",
+  "calendarNewPost": "Nieuw bericht",
+  "calendarResync": "Gebruikersagenda's opnieuw synchroniseren",
+  "calendarResyncStarted": "De gebruikersagenda's worden op de achtergrond bijgewerkt"
 }

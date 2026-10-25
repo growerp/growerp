@@ -364,7 +364,13 @@ jobs:
 
             python3 .github/scripts/merge_pubspec_versions.py "$VERSIONS"
 
-            git add 'flutter/packages/*/pubspec.yaml' backend/component.xml
+            # The migrations collected in migration/next belong to this backend
+            # version: move them to its minor version directory
+            if grep -q '^backend/component.xml=' "$VERSIONS" && [ -n "$NEW_VERSION" ]; then
+              migration/release.sh "$NEW_VERSION"
+            fi
+
+            git add 'flutter/packages/*/pubspec.yaml' backend/component.xml migration
             if git diff --cached --quiet; then
               echo "Nothing to commit"
               COMMITTED=true

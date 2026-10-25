@@ -166,6 +166,14 @@ const orderAccountingMenuConfig = MenuConfiguration(
       widgetName: 'ItemTypeList',
     ),
     MenuItem(
+      menuItemId: 'OA_CURRENCY_EXCHANGE',
+      title: 'Currency Exchange',
+      route: '/accounting/setup/currency-exchange',
+      iconName: 'currency_exchange',
+      sequenceNum: 71,
+      widgetName: 'CurrencyExchangeList',
+    ),
+    MenuItem(
       menuItemId: 'OA_INCOMING_SHIP',
       title: 'Incoming Shipments',
       route: '/incoming-shipments',
@@ -262,6 +270,9 @@ GoRouter createOrderAccountingExampleRouter() {
       ),
       '/accounting/setup' => const PaymentTypeList(),
       '/accounting/setup/item-types' => const ItemTypeList(),
+      '/accounting/setup/currency-exchange' => const CurrencyExchangeList(
+        key: Key('CurrencyExchangeList'),
+      ),
       '/incoming-shipments' => const FinDocList(
         key: Key('ShipmentsIn'),
         sales: false,

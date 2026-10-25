@@ -399,5 +399,8 @@
   "cashBookCategoryHelp": "Ausgeschaltete Kategorien bleiben in den Berichten, sie werden nur im Kassenbuch nicht mehr angeboten",
   "searchCashBookCategoryHint": "Kategorie suchen",
   "cashBookCategoryAddSuccess": "Kategorie hinzugefügt",
-  "cashBookCategoryUpdateSuccess": "Kategorie geändert"
+  "cashBookCategoryUpdateSuccess": "Kategorie geändert",
+  "exchangeRate": "Kurs",
+  "searchHintExchangeRates": "Währung suchen...",
+  "fetchExchangeRatesFail": "Abrufen der Wechselkurse fehlgeschlagen:"
 }

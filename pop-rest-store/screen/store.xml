@@ -398,6 +398,16 @@ var storeInfo = ${storeInfoJson};
             </entity-find-one>
         </if>
 
+        <!-- display currency dropdown (header and product page): conversion factors from the
+             store currency, see template/store/currencySelect.html.ftl -->
+        <if condition="productStore?.defaultCurrencyUomId">
+            <service-call name="growerp.100.GeneralServices100.get#CurrencyConversionRates"
+                in-map="[fromCurrencyUomId: productStore.defaultCurrencyUomId]" out-map="currencyOut"/>
+            <set field="currencyRatesJson" from="groovy.json.JsonOutput.toJson(currencyOut.rates)"/>
+            <set field="currencyIds" from="new ArrayList(currencyOut.rates.keySet())"/>
+            <set field="storeCurrencyId" from="productStore.defaultCurrencyUomId"/>
+        </if>
+
         <!-- company logo, uploaded in the app's company dialog and served by the /getLogo
              transition above. The version query defeats the 24h browser cache on the image,
              so a newly uploaded logo shows immediately instead of a day later -->

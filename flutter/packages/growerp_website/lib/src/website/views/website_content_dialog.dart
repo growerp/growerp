@@ -120,10 +120,15 @@ class WebsiteContentState extends State<WebsiteContent> {
             //          context, "${state.message}", Colors.green);
             // Pop with locally-known content (including the new name the user
             // typed) rather than state.content!, which may reflect stale cached
-            // backend data for the title field after a rename.
-            Navigator.of(
-              context,
-            ).pop(newContent.copyWith(title: _nameController.text));
+            // backend data for the title field after a rename. Text pages have
+            // no name field: their title comes from the saved text.
+            Navigator.of(context).pop(
+              newContent.copyWith(
+                title: _nameController.text.isNotEmpty
+                    ? _nameController.text
+                    : state.content?.title ?? '',
+              ),
+            );
             break;
           case ContentStatus.failure:
             HelperFunctions.showMessage(

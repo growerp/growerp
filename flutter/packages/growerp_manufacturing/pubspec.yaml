@@ -46,7 +46,9 @@ dev_dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
-  mockito: ^5.8.1
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.5
   very_good_analysis: ^11.0.0
   bloc_test: ^10.0.0
   json_serializable: ^6.14.1

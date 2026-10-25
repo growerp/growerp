@@ -125,7 +125,7 @@ submitted for that app: use **Re-run failed jobs**, which re-runs the upload and
 |-------|-----------|------------|
 | Snap | Yes | Written straight to the dashboard, live immediately, no review. |
 | Google Play | Yes | Listing-only edit, independent of release tracks. Play reviews listing changes before they appear. |
-| Microsoft | Usually | Blocked while a submission it cannot delete is in flight (first-time onboarding in certification, or a draft started by hand in Partner Center). |
+| Microsoft | Usually | While a binary submission is in flight it already carries the listing (`deploy-windows` applies it), so the job skips with a notice. Blocked by a draft started by hand in Partner Center. |
 | Apple (iOS + macOS) | **No** | Needs a version in an editable state — see step 3. |
 
 **A green run does not prove anything uploaded.** Two paths still exit 0 without uploading, by
@@ -498,7 +498,7 @@ check-changes                       resolve-matrix              swarm-status
 
 **What it does — tests:**
 1. Checks if there are any relevant recent commits (skips the test jobs if none on a scheduled run).
-2. Runs the backend Spock tests of the `growerp` component against an embedded Moqui + H2.
+2. Runs the backend Spock tests of the `growerp` component against an embedded Moqui + H2, then `backend/ci/service_coverage.py` (services called, code blocks run; see `docs/adr/0002-backend-spock-test-standard.md`).
 3. Frees disk space on the runner, checks out the repo and initialises all git submodules.
 4. Builds the Moqui backend Docker image from local source using Gradle + Java 21.
 5. Builds a Flutter test runner Docker image (cached via GitHub Actions cache).
@@ -513,8 +513,8 @@ check-changes                       resolve-matrix              swarm-status
 **What it does — report:**
 1. Merges the store fragments into one matrix table (app rows × store columns) and lists apps waiting for approval.
 2. Sums the test totals (backend Spock, Flutter mobile/desktop packages and tests). When the tests were skipped, the last published totals are carried over from `tests-data.json` on the Pages site and labelled with their original date.
-3. Renders the swarm section from the `status-swarm` fragment: the `docker stack ps` tasks, plus a **Staging images** and a **Production images** table listing every app's running version, image, replica count and last-deployed time. Non-running tasks and incomplete replica counts (`0/1`) are red; a production version behind staging is amber. The staging/production comparison is per app — since both `Update Staging` and `Update Production` can be run for one app at a time, apps within the same environment routinely sit at different versions. While builds are in store review, production behind staging is expected: production is updated from the review versions, staging runs the version after the review version.
-4. Writes `index.html`, `failures.html`, `tests-data.json` for GitHub Pages, a PDF artifact (`status-report`, retained 30 days) and the run's step summary. All timestamps on the page are converted from the runner's UTC to Bangkok local time.
+3. Renders the swarm section from the `status-swarm` fragment: the `docker stack ps` tasks, plus a **Staging**, **Review** and **Production** image table (in that order) listing every app's running version, image, replica count and last-deployed time. Each table header has the same format — `<Env> — GrowERP <version> · released <date> · <backend domain>` — where the version is that environment's backend (moqui) image version and the release date is the date of the matching git tag (looked up via the GitHub API; `?` when unavailable). Non-running tasks and incomplete replica counts (`0/1`) are red; a production version behind staging is amber. The staging/production comparison is per app — since both `Update Staging` and `Update Production` can be run for one app at a time, apps within the same environment routinely sit at different versions. While builds are in store review, production behind staging is expected: production is updated from the review versions, staging runs the version after the review version.
+4. Writes `index.html`, `failures.html`, `coverage.html` (blocs), `backend-coverage.html` (services), `tests-data.json` for GitHub Pages, a PDF artifact (`status-report`, retained 30 days) and the run's step summary. All timestamps on the page are converted from the runner's UTC to Bangkok local time.
 5. Fails the run when more than one individual test failed on a layout, or when the backend tests failed — the page is still published in that case.
 
 **What it does — swarm:** `swarm-status` SSHes into `growerp.com` twice, both read-only. First `cd ~/server/swarm && ./deploy.sh status` (`docker stack ps` + `docker service ls`) → `status.txt`. Then an inline loop over the stack's `<app>-test` (staging) and `<app>-prod` (production) services, recording `app|env|version|image|replicas|updated` → `images.txt`. The version comes from the image's `version` label (set at build time by `release_tool.dart`), because staging is deployed from `:latest` and its tag carries no version. Both files are uploaded as the `status-swarm` fragment and are independent — one failing SSH call does not blank the other's table. The job never blocks the run; when the credentials are missing or the host is unreachable the page says the swarm status is unavailable.
@@ -646,6 +646,7 @@ resolve-matrix ──┬──> bootstrap ──┬──> deploy-ios     ─┐
 1. Imports the PFX signing certificate into the Windows certificate store.
 2. Builds the MSIX package (`flutter pub run msix:create`).
 3. Authenticates with Azure AD and submits to Microsoft Partner Center via the Ingestion API, forcing `targetPublishMode` to `Manual`.
+4. The submission carries the store listing: `.github/scripts/windows_listing.py` (shared with `publish-metadata.yml`) writes the text from `windows/fastlane/metadata/en-US` and the screenshots from the `framed-screenshots` artifact into it; the screenshots go into the upload zip next to the MSIX. A separate metadata submission would be blocked by this one while it is in certification.
 
 **Job: `deploy-snap`** — Runs on `ubuntu-22.04`.
 1. Installs `snapcraft` (with retry logic for flaky snap daemon).
@@ -771,9 +772,11 @@ absence never fails the run.
    `WAITING_FOR_UPLOAD` or `INVALID_BINARY` accept it. Anything live or in review logs
    `No editable iOS version` and skips. Editing the live version is deliberately disabled —
    fastlane 2.232.2 raises a `promotional_text` `NilClass` error against a Ready for Sale version.
-2. **Windows — undeletable pending submission.** The uploader clones a new submission, which
-   requires deleting any pending one first. A submission still in certification, or a draft
-   started by hand in Partner Center, cannot be deleted; the job warns and exits.
+2. **Windows — submission in flight.** The uploader clones a new submission, which requires
+   deleting any pending one first. A submission on its way to the store (PreProcessing,
+   Certification, Release, Publishing) is the binary's, which already carries the listing: the
+   job logs a notice and exits green. A draft started by hand in Partner Center cannot be
+   deleted either; the job fails and asks to delete it.
 3. **Android — no screenshots in the artifact.** The Play lane runs with `sync_image_upload`,
    which deletes store images not present locally, so an empty local directory would wipe the
    live listing's screenshots. The extract step checks the artifact first and, finding nothing,

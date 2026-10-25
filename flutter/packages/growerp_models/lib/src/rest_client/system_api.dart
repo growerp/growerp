@@ -120,6 +120,32 @@ mixin SystemApi {
     @Field() required List<String> samples,
   });
 
+  /// Google consent URL ({authUrl}) for the services: drive, gmail, calendar.
+  @POST("rest/s1/growerp/100/SystemSettings/googleSignIn")
+  Future<dynamic> startGoogleSignIn({
+    @Field() required List<String> services,
+  });
+
+  /// Disconnect one Google service: drive, gmail or calendar.
+  @POST("rest/s1/growerp/100/SystemSettings/googleDisconnect")
+  Future<SystemSettings> disconnectGoogleService({
+    @Field() required String service,
+  });
+
+  /// Rebuild the per-user calendars of the tenant in the background.
+  @POST("rest/s1/growerp/100/SystemSettings/calendarResync")
+  Future<void> resyncCalendars();
+
+  /// The in-app calendar of the user for a period (epoch millis, thru
+  /// exclusive): connected calendar events or else activities, plus social
+  /// posts with includeContent.
+  @GET("rest/s1/growerp/100/CalendarItems")
+  Future<CalendarItems> getCalendarItems({
+    @Query('fromDate') required int fromDate,
+    @Query('thruDate') required int thruDate,
+    @Query('includeContent') bool? includeContent,
+  });
+
   @GET("rest/s1/growerp/100/SystemDefault")
   Future<SystemDefault> getSystemDefault();
 
@@ -146,6 +172,10 @@ mixin SystemApi {
   @GET("rest/s1/growerp/100/Uoms")
   @Extra({'noApiKey': true})
   Future<Uoms> getUom(@Query('uomTypes') List<String>? uomTypes);
+
+  // central currency exchange rates (read only)
+  @GET("rest/s1/growerp/100/ExchangeRates")
+  Future<ExchangeRates> getExchangeRates();
 
   // import / export ========
   @POST("rest/s1/growerp/100/ImportExport")

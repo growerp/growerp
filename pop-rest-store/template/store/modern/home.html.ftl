@@ -25,12 +25,12 @@
         </#if>
         <div class="flex items-baseline gap-2">
             <#if product.price?? && product.price gt 0>
-                <span class="text-primary font-semibold text-base">${ec.l10n.formatCurrency(product.price,product.priceUomId)}</span>
+                <span class="text-primary font-semibold text-base" data-price-amount="${product.price?c}" data-price-currency="${product.priceUomId}">${ec.l10n.formatCurrency(product.price, product.priceUomId)}</span>
                 <#if product.listPrice?? && product.listPrice gt product.price>
-                    <span class="text-on-surface-variant text-sm line-through">${ec.l10n.formatCurrency(product.listPrice,product.priceUomId)}</span>
+                    <span class="text-on-surface-variant text-sm line-through" data-price-amount="${product.listPrice?c}" data-price-currency="${product.priceUomId}">${ec.l10n.formatCurrency(product.listPrice, product.priceUomId)}</span>
                 </#if>
             <#elseif product.listPrice?? && product.listPrice gt 0>
-                <span class="text-primary font-semibold text-base">${ec.l10n.formatCurrency(product.listPrice,product.priceUomId)}</span>
+                <span class="text-primary font-semibold text-base" data-price-amount="${product.listPrice?c}" data-price-currency="${product.priceUomId}">${ec.l10n.formatCurrency(product.listPrice, product.priceUomId)}</span>
             <#else>
                 <span class="text-primary font-semibold text-base">Free</span>
             </#if>

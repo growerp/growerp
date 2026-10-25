@@ -9,6 +9,16 @@ the review version. Nothing is rebuilt on the way: every "update staging" run ge
 new version (patch, minor or major), and production gets exactly the image that was
 reviewed. "update staging" can run any time, except between B3 and B4.
 
+`./growerpUpgrade.sh` walks these cycles: it runs the workflows with gh, waits for each
+run and asks for the human steps. `./growerpUpgrade.sh -n` is a dry run: every prompt,
+but the workflows and the GitHub release are only shown. In B4, before publishing the binary, it creates the
+store screenshots when screens changed since the last screenshots run or its artifact
+(kept 7 days) expired (`./growerpUpgrade.sh prepare`). Just before
+the freeze (B3) it creates the GitHub release of the version to submit
+(`./growerpUpgrade.sh release`):
+a summary paragraph and the feat/fix/docs/ci commits since the previous release, edited
+before publishing.
+
 ### A. Update production
 
 1. Wait for the store approvals (stores can approve at different times).
@@ -22,19 +32,24 @@ reviewed. "update staging" can run any time, except between B3 and B4.
 
 ### B. Prepare a new version for review
 
-1. Prepare the new release in staging: the last "update staging" run is the
+1. Prepare the new release in staging: merge the version branch (e.g. 1.21) into
+   master with a pull request, then "update staging" on master: that run is the
    version to submit. Create the userid/password for the store reviewers on
    staging (the review backend is a copy: later staging changes do not reach it).
 2. Wait until review is empty: every version in review is on production (cycle A).
-   Step 3 refuses until then.
+   Step 3 refuses until then. The script lists the apps still in review with their
+   store approvals (status workflow, refreshed on request) and lets
+   steps 1 and 2 run meanwhile.
 3. "freeze for review"
    copies staging to backend.growerp.net, pauses its jobs/agents, records the
    versions in review-versions.conf and, once healthy, routes native apps newer
    than production to it. The review backend stays running between cycles, the
    next freeze replaces it.
-4. "create store screenshots" (opt), "published metadata to stores" (opt),
-   "publish binary to stores": submit for review. No "update staging" between
-   step 3 and this step: the binaries must be the frozen version.
+4. "create store screenshots" (opt), "publish binary to stores": submit for review,
+   then "publish metadata to stores" (opt). The binary creates the new store
+   version, metadata can only write into it; the Windows binary submission carries
+   its listing itself. No "update staging" between step 3 and this step: the
+   binaries must be the frozen version.
 
 ### When a store approval takes too long (mostly new apps)
 
@@ -88,6 +103,7 @@ the review backend and the recorded versions, its reviewers lose their backend.
 1. upgrade the backend from test version 
     a. login: gcloud compute ssh growerpcom
     b. run script
+    c. run the data migrations of the new version(s): see migration/README.md
 
 increment version code(0.0.0+??) in pubspec.yaml
 

@@ -256,6 +256,8 @@ class HelperFunctions {
         return localizations.courseViewer;
       case 'crm':
         return localizations.crm;
+      case 'currencyexchange':
+        return localizations.currencyExchange;
       case 'customers':
         return localizations.customers;
       case 'emailsequences':
@@ -336,8 +338,6 @@ class HelperFunctions {
         return localizations.pickupReturn;
       case 'pipeline':
         return localizations.pipeline;
-      case 'planselection':
-        return localizations.planSelection;
       case 'platforms':
         return localizations.platforms;
       case 'products':
@@ -392,6 +392,8 @@ class HelperFunctions {
         return localizations.tasks;
       case 'toolsintegrations':
         return localizations.toolsIntegrations;
+      case 'timeperiods':
+        return localizations.timePeriods;
       case 'transactions':
         return localizations.transactions;
       case 'users':

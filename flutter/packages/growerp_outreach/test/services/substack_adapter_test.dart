@@ -74,15 +74,18 @@ void main() {
         return snapshotCallCount == 1 ? snapshotWithCompose : snapshotWithPost;
       });
       when(() => mockBrowser.clickElement(any())).thenAnswer((_) async {});
-      when(() => mockBrowser.typeIntoElement(any(), any()))
-          .thenAnswer((_) async {});
+      when(
+        () => mockBrowser.typeIntoElement(any(), any()),
+      ).thenAnswer((_) async {});
 
       await adapter.initialize();
 
       const noteContent = 'Hello Substack! This is a test note.';
       await adapter.postNote(noteContent);
 
-      verify(() => mockBrowser.navigate('https://substack.com/notes')).called(1);
+      verify(
+        () => mockBrowser.navigate('https://substack.com/notes'),
+      ).called(1);
       verify(() => mockBrowser.typeIntoElement(any(), noteContent)).called(1);
       // clickElement is called twice: once for compose area, once for Post button
       verify(() => mockBrowser.clickElement(any())).called(2);
@@ -103,8 +106,7 @@ void main() {
       );
 
       stubInitialize();
-      when(() => mockBrowser.snapshot())
-          .thenAnswer((_) async => emptySnapshot);
+      when(() => mockBrowser.snapshot()).thenAnswer((_) async => emptySnapshot);
 
       await adapter.initialize();
 
@@ -128,11 +130,13 @@ void main() {
       );
 
       stubInitialize();
-      when(() => mockBrowser.snapshot())
-          .thenAnswer((_) async => snapshotNoPostButton);
+      when(
+        () => mockBrowser.snapshot(),
+      ).thenAnswer((_) async => snapshotNoPostButton);
       when(() => mockBrowser.clickElement(any())).thenAnswer((_) async {});
-      when(() => mockBrowser.typeIntoElement(any(), any()))
-          .thenAnswer((_) async {});
+      when(
+        () => mockBrowser.typeIntoElement(any(), any()),
+      ).thenAnswer((_) async {});
 
       await adapter.initialize();
 

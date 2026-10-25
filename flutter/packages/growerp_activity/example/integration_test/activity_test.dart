@@ -47,6 +47,7 @@ void main() {
     await ActivityTest.addActivities(tester, activities);
     await ActivityTest.updateActivities(tester);
     await ActivityTest.addComment(tester);
+    await ActivityTest.checkCalendar(tester);
     await ActivityTest.deleteLastActivity(tester);
     await CommonTest.logout(tester);
   });

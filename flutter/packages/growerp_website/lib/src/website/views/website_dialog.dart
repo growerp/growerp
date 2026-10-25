@@ -161,6 +161,19 @@ class WebsiteDialogState extends State<WebsiteDialog> {
     );
   }
 
+  /// confirms a page or image saved by [WebsiteContentDialog]
+  void _showContentSaved(dynamic updContent) {
+    if (updContent is! Content) return;
+    HelperFunctions.showMessage(
+      context,
+      translateContentBlocMessage(
+        'contentUpdateSuccess:${updContent.title}',
+        _localizations,
+      ),
+      Colors.green,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     _localizations = WebsiteLocalizations.of(context)!;
@@ -168,11 +181,14 @@ class WebsiteDialogState extends State<WebsiteDialog> {
       listener: (context, websiteState) {
         switch (websiteState.status) {
           case WebsiteStatus.success:
-            HelperFunctions.showMessage(
-              context,
-              translateWebsiteBlocMessage(websiteState.message, _localizations),
-              Colors.green,
+            // a plain fetch has no message: nothing to confirm
+            final message = translateWebsiteBlocMessage(
+              websiteState.message,
+              _localizations,
             );
+            if (message.isNotEmpty) {
+              HelperFunctions.showMessage(context, message, Colors.green);
+            }
             break;
           case WebsiteStatus.failure:
             HelperFunctions.showMessage(
@@ -482,6 +498,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                     ),
                   );
                 } else {
+                  _showContentSaved(updContent);
                   _websiteBloc.add(WebsiteFetch());
                 }
               }
@@ -530,6 +547,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
           );
 
           if (updContent != null) {
+            _showContentSaved(updContent);
             _websiteBloc.add(WebsiteFetch());
           }
         },
@@ -556,6 +574,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
           );
 
           if (updContent != null) {
+            _showContentSaved(updContent);
             _websiteBloc.add(WebsiteFetch());
           }
         },
@@ -578,6 +597,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
                 },
               );
               if (updContent != null) {
+                _showContentSaved(updContent);
                 _websiteBloc.add(WebsiteFetch());
               }
             },
@@ -622,6 +642,7 @@ class WebsiteDialogState extends State<WebsiteDialog> {
             },
           );
           if (updContent != null) {
+            _showContentSaved(updContent);
             _websiteBloc.add(WebsiteFetch());
           }
         },

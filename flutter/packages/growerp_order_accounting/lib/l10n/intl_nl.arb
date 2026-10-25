@@ -399,5 +399,8 @@
   "cashBookCategoryHelp": "Uitgezette categorieën blijven in de rapporten staan, ze worden alleen niet meer aangeboden in het kasboek",
   "searchCashBookCategoryHint": "Zoek categorie",
   "cashBookCategoryAddSuccess": "Categorie toegevoegd",
-  "cashBookCategoryUpdateSuccess": "Categorie bijgewerkt"
+  "cashBookCategoryUpdateSuccess": "Categorie bijgewerkt",
+  "exchangeRate": "Koers",
+  "searchHintExchangeRates": "Zoek valuta...",
+  "fetchExchangeRatesFail": "Ophalen wisselkoersen mislukt:"
 }

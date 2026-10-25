@@ -35,6 +35,10 @@ dependencies:
   stream_transform: ^2.1.2
 
 dev_dependencies:
+  bloc_test: ^10.0.0
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.5
   flutter_lints: ^6.0.0
   test: ^1.31.1
 

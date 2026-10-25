@@ -41,6 +41,16 @@ abstract class Uoms with _$Uoms {
 }
 
 @freezed
+abstract class ExchangeRates with _$ExchangeRates {
+  factory ExchangeRates({@Default([]) List<ExchangeRate> exchangeRates}) =
+      _ExchangeRates;
+  ExchangeRates._();
+
+  factory ExchangeRates.fromJson(Map<String, dynamic> json) =>
+      _$ExchangeRatesFromJson(json);
+}
+
+@freezed
 abstract class GlAccounts with _$GlAccounts {
   factory GlAccounts({
     @Default([]) List<GlAccount> glAccounts,

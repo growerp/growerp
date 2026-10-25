@@ -98,6 +98,7 @@
                 <field-map field-name="personaId" />
                 <field-map field-name="ownerPartyId" />
             </entity-find-one>
+            <if condition="persona?.ownerPartyId != ownerPartyId"><set field="persona" from="null" /></if>
             <if condition="!persona">
                 <return error="true" message="Persona not found or access denied" />
             </if>
@@ -140,6 +141,7 @@
                 <field-map field-name="personaId" />
                 <field-map field-name="ownerPartyId" />
             </entity-find-one>
+            <if condition="persona?.ownerPartyId != ownerPartyId"><set field="persona" from="null" /></if>
             <if condition="!persona">
                 <return error="true" message="Persona not found or access denied" />
             </if>
@@ -303,6 +305,7 @@
                 <field-map field-name="planId" />
                 <field-map field-name="ownerPartyId" />
             </entity-find-one>
+            <if condition="plan?.ownerPartyId != ownerPartyId"><set field="plan" from="null" /></if>
             <if condition="!plan">
                 <return error="true" message="Content plan not found or access denied" />
             </if>
@@ -342,6 +345,7 @@
                 <field-map field-name="planId" />
                 <field-map field-name="ownerPartyId" />
             </entity-find-one>
+            <if condition="plan?.ownerPartyId != ownerPartyId"><set field="plan" from="null" /></if>
             <if condition="!plan">
                 <return error="true" message="Content plan not found or access denied" />
             </if>
@@ -508,6 +512,7 @@
                 <entity-find entity-name="growerp.marketing.SocialPost" list="socialPosts"
                     offset="start" limit="limit">
                     <econdition field-name="ownerPartyId" />
+                    <econdition field-name="postId" from="postId" ignore-if-empty="true" />
                     <econdition field-name="planId" from="planId" ignore-if-empty="true" />
                     <econdition field-name="masterContentId" from="masterContentId"
                         ignore-if-empty="true" />

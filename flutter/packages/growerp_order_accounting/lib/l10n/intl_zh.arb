@@ -399,5 +399,8 @@
   "cashBookCategoryHelp": "已关闭的类别仍会出现在报表中，只是不再出现在现金账簿的选项里",
   "searchCashBookCategoryHint": "搜索类别",
   "cashBookCategoryAddSuccess": "类别已添加",
-  "cashBookCategoryUpdateSuccess": "类别已更新"
+  "cashBookCategoryUpdateSuccess": "类别已更新",
+  "exchangeRate": "汇率",
+  "searchHintExchangeRates": "搜索货币...",
+  "fetchExchangeRatesFail": "获取汇率失败："
 }

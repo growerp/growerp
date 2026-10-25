@@ -17,22 +17,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import '../../get_marketing_widgets.dart';
+
 class ContentCalendarTest {
-  /// The calendar has no menu entry of its own: it is the calendar icon in the
-  /// content plan search bar.
+  /// The posts are in the in-app calendar, opened from the app bar; the
+  /// example app registers no widgets, so the post dialog is registered here.
   static Future<void> selectContentCalendar(WidgetTester tester) async {
-    await CommonTest.selectOption(
-      tester,
-      '/contentPlans',
-      'ContentPlanList',
-      null,
-    );
-    await CommonTest.tapByKey(
-      tester,
-      'contentCalendarToggle',
-      seconds: CommonTest.waitTime,
-    );
-    expect(find.byKey(const Key('contentCalendar')), findsOneWidget);
+    WidgetRegistry.registerAllWithMetadata(getMarketingWidgetsWithMetadata());
+    await CalendarTest.openCalendar(tester);
   }
 
   /// Puts the first saved post on [date] through the social post detail
@@ -84,36 +76,21 @@ class ContentCalendarTest {
 
   /// The scheduled post shows in its day cell, and tapping it opens the same
   /// post's detail dialog.
-  static Future<void> checkPostOnDay(
-    WidgetTester tester,
-    DateTime date,
-  ) async {
+  static Future<void> checkPostOnDay(WidgetTester tester, DateTime date) async {
     SaveTest test = await PersistFunctions.getTest(backup: false);
     SocialPost post = test.socialPosts.first;
 
     expect(
-      find.byKey(Key('calendarDay_${dayKey(date)}'), skipOffstage: false),
+      find.byKey(
+        Key('calendarDay_${CalendarTest.dayKey(date)}'),
+        skipOffstage: false,
+      ),
       findsOneWidget,
-      reason: 'day cell for ${dayKey(date)} not on the calendar',
+      reason: 'day cell for ${CalendarTest.dayKey(date)} not on the calendar',
     );
-    expect(
-      find.byKey(const Key('calendarPost0'), skipOffstage: false),
-      findsOneWidget,
-      reason: 'the scheduled post is not shown on the calendar',
-    );
-
-    await CommonTest.tapByKey(
-      tester,
-      'calendarPost0',
-      seconds: CommonTest.waitTime,
-    );
+    await CalendarTest.tapItem(tester, post.headline!);
     expect(find.byKey(Key('SocialPostDetail${post.pseudoId}')), findsOneWidget);
-    await CommonTest.tapByKey(tester, 'cancel');
+    await CalendarTest.closeDialog(tester);
+    await CalendarTest.closeDialog(tester);
   }
-
-  /// Same yyyyMMdd shape the calendar builds its day-cell keys from.
-  static String dayKey(DateTime day) =>
-      '${day.year.toString().padLeft(4, '0')}'
-      '${day.month.toString().padLeft(2, '0')}'
-      '${day.day.toString().padLeft(2, '0')}';
 }

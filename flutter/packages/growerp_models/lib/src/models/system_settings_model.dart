@@ -53,6 +53,12 @@ abstract class SystemSettings with _$SystemSettings {
     String? googleClientSecret,
     // write-only: backend returns '****' when set
     String? googleRefreshToken,
+    // space separated scopes granted by Google sign in: which services are connected
+    String? googleGrantedScopes,
+    // Google account that signed in
+    String? googleAccountEmail,
+    // read only: the platform OAuth client is configured, so Sign in is offered
+    bool? googleOAuthAvailable,
     String? googleCalendarId,
     // Public booking page (appointment schedule) link, the {meetingUrl} outreach placeholder
     String? googleBookingUrl,

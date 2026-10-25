@@ -487,6 +487,13 @@ limitations under the License.
         <field name="googleClientId"     type="text-medium"/>
         <field name="googleClientSecret" type="text-medium" encrypt="true" enable-audit-log="true"/>
         <field name="googleRefreshToken" type="text-medium" encrypt="true" enable-audit-log="true"/>
+        <field name="googleGrantedScopes" type="text-long">
+            <description>Space separated OAuth scopes the refresh token was granted, from the
+                Sign in flow; tells which services (Drive, Gmail, Calendar) are connected</description>
+        </field>
+        <field name="googleAccountEmail" type="text-medium">
+            <description>Google account that signed in</description>
+        </field>
         <field name="googleCalendarId"   type="text-medium">
             <description>Google Calendar id to sync bookings from; 'primary' when empty</description>
         </field>
@@ -550,6 +557,49 @@ limitations under the License.
         <index name="CAL_EVT_SYNC_OWNER_EVT" unique="true">
             <index-field name="ownerPartyId"/>
             <index-field name="googleEventId"/>
+        </index>
+    </entity>
+
+    <entity entity-name="UserCalendar" package="growerp.crm">
+        <description>External calendar (e.g. Google) GrowERP keeps in sync for one internal
+            user; the shared Bookings calendar uses the company partyId. See
+            CalendarSyncServices100.</description>
+        <field name="ownerPartyId" type="id" is-pk="true"/>
+        <field name="partyId" type="id" is-pk="true"/>
+        <field name="providerId" type="id" is-pk="true">
+            <description>Calendar provider: google (later e.g. microsoft)</description></field>
+        <field name="externalCalendarId" type="text-medium"/>
+        <field name="sharedEmail" type="text-medium">
+            <description>Space separated email addresses the calendar is shared with</description></field>
+        <field name="syncToken" type="text-medium">
+            <description>Provider incremental sync token for the read back</description></field>
+        <field name="lastReadBack" type="date-time"/>
+    </entity>
+
+    <entity entity-name="CalendarEventLink" package="growerp.crm"
+            sequence-primary-prefix="cel">
+        <description>A GrowERP record (activity, rental) pushed as event into a UserCalendar.
+            contentHash is the content last pushed or read back: unchanged content is not
+            pushed again, which also stops a read back from echoing to the provider.</description>
+        <field name="calendarEventLinkId" type="id" is-pk="true"/>
+        <field name="ownerPartyId" type="id"/>
+        <field name="providerId" type="id"/>
+        <field name="sourceType" type="id">
+            <description>activity (WorkEffort) or rental (AssetRental per order item)</description></field>
+        <field name="sourceId" type="text-short">
+            <description>workEffortId, or orderId:orderItemSeqId for a rental</description></field>
+        <field name="partyId" type="id"/>
+        <field name="externalCalendarId" type="text-medium"/>
+        <field name="externalEventId" type="text-medium"/>
+        <field name="externalUpdated" type="date-time"/>
+        <field name="contentHash" type="text-short"/>
+        <index name="CAL_EVT_LINK_SOURCE">
+            <index-field name="sourceType"/>
+            <index-field name="sourceId"/>
+        </index>
+        <index name="CAL_EVT_LINK_EXTERNAL">
+            <index-field name="externalCalendarId"/>
+            <index-field name="externalEventId"/>
         </index>
     </entity>
 

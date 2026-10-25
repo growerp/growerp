@@ -847,8 +847,15 @@ Future<String> buildDockerImage(
         // We're already in the root workspace directory
         rootDir = workspaceDir;
       }
+      // The Dockerfile git-clones the repo (default master): build the branch we are on,
+      // or a release branch (e.g. 1.21) ships master's backend.
+      var branch = Platform.environment['GITHUB_REF_NAME'] ??
+          'git -C $rootDir rev-parse --abbrev-ref HEAD'.firstLine ??
+          'master';
+      if (branch == 'HEAD') branch = 'master';
+      print("   Backend source branch: $branch");
       run(
-        'docker build --build-arg DOCKER_TAG=$version --label version=$version --progress=plain --no-cache -t $dockerImage:latest .',
+        'docker build --build-arg BRANCH=$branch --build-arg DOCKER_TAG=$version --label version=$version --progress=plain --no-cache -t $dockerImage:latest .',
         workingDirectory: rootDir,
       );
     } else {

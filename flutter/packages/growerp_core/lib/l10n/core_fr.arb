@@ -114,6 +114,7 @@
   "test": "Test",
   "testSystem": "Système de test",
   "theme": "Thème",
+  "currencyExchange": "Taux de change",
   "timePeriods": "Périodes",
   "transaction": "Transaction",
   "transactions": "Transactions",
@@ -167,7 +168,6 @@
   "outgoingPayments": "Paiements sortants",
   "outgoingShipments": "Expéditions sortantes",
   "paymtTypes": "Types de paiement",
-  "planSelection": "Sélection du plan",
   "products": "Produits",
   "purchaseOrders": "Bons de commande",
   "purchaseUnpaidInvoices": "Acheter des factures impayées",
@@ -821,9 +821,6 @@
   "@paymtTypes": {
     "description": "Payment types menu item"
   },
-  "@planSelection": {
-    "description": "Plan selection menu item"
-  },
   "@products": {
     "description": "Products menu item"
   },
@@ -1366,5 +1363,19 @@
   "insRenewalsDue": "Renouvellements dus",
   "insOpenClaims": "Sinistres ouverts",
   "mailUseOauth": "Connexion avec Google OAuth2",
-  "mailUseOauthHelp": "Utilise les identifiants Google Workspace ; le jeton d'actualisation nécessite le scope https://mail.google.com/"
+  "mailUseOauthHelp": "Utilise les identifiants Google Workspace ; le jeton d'actualisation nécessite le scope https://mail.google.com/",
+  "calendar": "Calendrier",
+  "calendarToday": "Aujourd'hui",
+  "calendarMonth": "Mois",
+  "calendarWeek": "Semaine",
+  "calendarEmpty": "Rien sur cette période",
+  "calendarBacklog": "{count, plural, =1{1 publication sans date} other{{count} publications sans date}}",
+  "calendarSourceCalendar": "Calendrier",
+  "calendarSourceActivities": "Activités",
+  "calendarSourcePosts": "Publications",
+  "calendarConnectHint": "Connecter Google Agenda",
+  "calendarNewActivity": "Nouvelle activité",
+  "calendarNewPost": "Nouvelle publication",
+  "calendarResync": "Resynchroniser les calendriers des utilisateurs",
+  "calendarResyncStarted": "Les calendriers des utilisateurs sont mis à jour en arrière-plan"
 }

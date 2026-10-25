@@ -148,6 +148,20 @@ melos:
     l10n:
       description: Generates l10n for all app packages.
       run: melos exec --concurrency 1 --file-exists "l10n.yaml" -- "flutter gen-l10n --suppress-analytics"
+    test_unit:
+      description: run the unit tests of all packages (no backend needed), then print the bloc coverage report.
+      run: |
+        melos run test_unit_package --no-select; status=$?
+        python3 ci/bloc_coverage.py
+        exit $status
+    test_unit_package:
+      description: unit tests of the selected packages (test/ dirs). JSON results in build/unit_test.json, coverage in coverage/lcov.info.
+      exec:
+        concurrency: 1
+      run: |
+        find test -name '*_test.dart' | grep -q . || exit 0; mkdir -p build; flutter test --coverage --reporter compact --file-reporter json:build/unit_test.json
+      packageFilters:
+        dirExists: "test"
     test_package:
       description: run all integration tests. Set BACKEND_PORT env var to override default 8080.
       exec:

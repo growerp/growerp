@@ -23,30 +23,34 @@ void main() {
     expect(ThemeBloc().state.themeMode, ThemeMode.light);
   });
 
-  test('getBackendUrlOverride gives up when the backend never answers', () async {
-    // A socket that accepts the connection and then stays silent: this runs
-    // before runApp(), so without a timeout the app never renders a frame.
-    HttpOverrides.global = null; // flutter_test would answer with a 400
-    final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
-    final sockets = <Socket>[];
-    server.listen(sockets.add);
+  test(
+    'getBackendUrlOverride gives up when the backend never answers',
+    () async {
+      // A socket that accepts the connection and then stays silent: this runs
+      // before runApp(), so without a timeout the app never renders a frame.
+      HttpOverrides.global = null; // flutter_test would answer with a 400
+      final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+      final sockets = <Socket>[];
+      server.listen(sockets.add);
 
-    final stopwatch = Stopwatch()..start();
-    final result = await getBackendUrlOverride(
-      'AppFreelance',
-      '1.0.0',
-      baseUrlOverride: 'http://127.0.0.1:${server.port}',
-    );
-    stopwatch.stop();
+      final stopwatch = Stopwatch()..start();
+      final result = await getBackendUrlOverride(
+        'AppFreelance',
+        '1.0.0',
+        baseUrlOverride: 'http://127.0.0.1:${server.port}',
+      );
+      stopwatch.stop();
 
-    expect(result.forceUpdate, isFalse);
-    expect(stopwatch.elapsed, greaterThan(const Duration(seconds: 2)));
-    expect(stopwatch.elapsed, lessThan(const Duration(seconds: 15)));
-    for (final socket in sockets) {
-      socket.destroy();
-    }
-    await server.close();
-  }, timeout: const Timeout(Duration(seconds: 40)));
+      expect(result.forceUpdate, isFalse);
+      expect(stopwatch.elapsed, greaterThan(const Duration(seconds: 2)));
+      expect(stopwatch.elapsed, lessThan(const Duration(seconds: 15)));
+      for (final socket in sockets) {
+        socket.destroy();
+      }
+      await server.close();
+    },
+    timeout: const Timeout(Duration(seconds: 40)),
+  );
 
   test('staging web hosts stay on the staging backend', () {
     // production sends apps newer than itself to the store review backend;
@@ -143,10 +147,11 @@ void main() {
     expect(retries, 1);
   });
 
-  testWidgets('StartupErrorScreen shows the failure instead of a blank window', (
-    tester,
-  ) async {
-    await tester.pumpWidget(const StartupErrorScreen(message: 'boom'));
-    expect(find.text('boom'), findsOneWidget);
-  });
+  testWidgets(
+    'StartupErrorScreen shows the failure instead of a blank window',
+    (tester) async {
+      await tester.pumpWidget(const StartupErrorScreen(message: 'boom'));
+      expect(find.text('boom'), findsOneWidget);
+    },
+  );
 }

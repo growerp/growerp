@@ -99,6 +99,8 @@ class UserDialogState extends State<UserDialogStateFull> {
   final _telephoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _urlController = TextEditingController();
+  // company name typed but not selected, prefills a new related company
+  String _companySearchText = '';
 
   late List<UserGroup> localUserGroups;
   late UserGroup _selectedUserGroup;
@@ -644,6 +646,7 @@ class UserDialogState extends State<UserDialogStateFull> {
                                   : _selectedCompany,
                               optionsBuilder:
                                   (TextEditingValue textEditingValue) {
+                                    _companySearchText = textEditingValue.text;
                                     _companyBloc.add(
                                       CompanyFetch(
                                         ownerPartyId: _authBloc
@@ -731,7 +734,15 @@ class UserDialogState extends State<UserDialogStateFull> {
                           context: context,
                           builder: (BuildContext context) {
                             return ShowCompanyDialog(
-                              Company(partyId: '_NEW_', role: _selectedRole),
+                              Company(
+                                partyId: '_NEW_',
+                                role: _selectedRole,
+                                name:
+                                    _selectedCompany.name == null &&
+                                        _companySearchText.trim().isNotEmpty
+                                    ? _companySearchText.trim()
+                                    : null,
+                              ),
                               dialog: true,
                             );
                           },

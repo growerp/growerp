@@ -475,6 +475,7 @@ Service definitions for landing page, sections, credibility, and CTA management
         <field-map field-name="landingPageId" from="landingPageId" />
         <field-map field-name="ownerPartyId" from="ownerPartyId" />
       </entity-find-one>
+      <if condition="existingPage?.ownerPartyId != ownerPartyId"><set field="existingPage" from="null" /></if>
 
       <if condition="!existingPage">
         <return error="true" message="Landing page not found or access denied" />
@@ -543,6 +544,7 @@ Service definitions for landing page, sections, credibility, and CTA management
         <field-map field-name="landingPageId" from="landingPageId" />
         <field-map field-name="ownerPartyId" from="ownerPartyId" />
       </entity-find-one>
+      <if condition="existingPage?.ownerPartyId != ownerPartyId"><set field="existingPage" from="null" /></if>
 
       <if condition="!existingPage">
         <return error="true" message="Landing page not found or access denied" />
@@ -622,6 +624,7 @@ Service definitions for landing page, sections, credibility, and CTA management
         <field-map field-name="landingPageId" from="landingPageId" />
         <field-map field-name="ownerPartyId" from="ownerPartyId" />
       </entity-find-one>
+      <if condition="landingPage?.ownerPartyId != ownerPartyId"><set field="landingPage" from="null" /></if>
 
       <if condition="!landingPage">
         <return error="true" message="Landing page not found or access denied" />
@@ -722,6 +725,7 @@ Service definitions for landing page, sections, credibility, and CTA management
         <field-map field-name="landingPageId" from="landingPageId" />
         <field-map field-name="ownerPartyId" from="ownerPartyId" />
       </entity-find-one>
+      <if condition="landingPage?.ownerPartyId != ownerPartyId"><set field="landingPage" from="null" /></if>
 
       <if condition="!landingPage">
         <return error="true" message="Landing page not found or access denied" />
@@ -855,6 +859,7 @@ Service definitions for landing page, sections, credibility, and CTA management
         <field-map field-name="landingPageId" from="existingSection.landingPageId" />
         <field-map field-name="ownerPartyId" from="ownerPartyId" />
       </entity-find-one>
+      <if condition="landingPage?.ownerPartyId != ownerPartyId"><set field="landingPage" from="null" /></if>
 
       <if condition="!landingPage">
         <return error="true" message="Access denied to this page section" />
@@ -918,6 +923,7 @@ Service definitions for landing page, sections, credibility, and CTA management
         <field-map field-name="landingPageId" from="existingSection.landingPageId" />
         <field-map field-name="ownerPartyId" from="ownerPartyId" />
       </entity-find-one>
+      <if condition="landingPage?.ownerPartyId != ownerPartyId"><set field="landingPage" from="null" /></if>
 
       <if condition="!landingPage">
         <return error="true" message="Access denied to this page section" />
@@ -1123,6 +1129,7 @@ Service definitions for landing page, sections, credibility, and CTA management
         <field-map field-name="landingPageId" from="landingPageId" />
         <field-map field-name="ownerPartyId" from="ownerPartyId" />
       </entity-find-one>
+      <if condition="landingPage?.ownerPartyId != ownerPartyId"><set field="landingPage" from="null" /></if>
 
       <if condition="!landingPage">
         <return error="true" message="Landing page not found or access denied" />
@@ -1270,6 +1277,7 @@ Service definitions for landing page, sections, credibility, and CTA management
         <field-map field-name="landingPageId" from="existingCredibility.landingPageId" />
         <field-map field-name="ownerPartyId" from="ownerPartyId" />
       </entity-find-one>
+      <if condition="landingPage?.ownerPartyId != ownerPartyId"><set field="landingPage" from="null" /></if>
 
       <if condition="!landingPage">
         <return error="true" message="Access denied to this credibility info" />
@@ -1387,6 +1395,7 @@ Service definitions for landing page, sections, credibility, and CTA management
         <field-map field-name="landingPageId" from="existingCredibility.landingPageId" />
         <field-map field-name="ownerPartyId" from="ownerPartyId" />
       </entity-find-one>
+      <if condition="landingPage?.ownerPartyId != ownerPartyId"><set field="landingPage" from="null" /></if>
 
       <if condition="!landingPage">
         <return error="true" message="Access denied to this credibility info" />

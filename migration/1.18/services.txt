@@ -1,0 +1,5 @@
+# Members of the deprecated role-derived groups (GROWERP_M_CUSTOMER/_LEAD/_SUPPLIER)
+# move to GROWERP_M_OTHER.
+growerp.100.SecurityServices100.migrate#UserGroups
+# Removes the old blanket REST grants that a seed-initial reload never deletes.
+growerp.100.SecurityServices100.migrate#RestAuthz

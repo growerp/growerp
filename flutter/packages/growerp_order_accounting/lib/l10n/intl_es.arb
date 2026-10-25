@@ -399,5 +399,8 @@
   "cashBookCategoryHelp": "Las categorías desactivadas siguen en los informes, solo dejan de ofrecerse en el libro de caja",
   "searchCashBookCategoryHint": "Buscar categoría",
   "cashBookCategoryAddSuccess": "Categoría añadida",
-  "cashBookCategoryUpdateSuccess": "Categoría actualizada"
+  "cashBookCategoryUpdateSuccess": "Categoría actualizada",
+  "exchangeRate": "Tipo",
+  "searchHintExchangeRates": "Buscar moneda...",
+  "fetchExchangeRatesFail": "Error al obtener los tipos de cambio:"
 }

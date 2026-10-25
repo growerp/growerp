@@ -83,6 +83,14 @@ limitations under the License.
                 ownerPartyId: ownerPartyId, actualStartDate: ec.user.nowTimestamp,
                 visibilityEnumId: userGroupId, 
                 ]" />
+            <!-- creator: the event shows in the creator's calendar (CalendarSyncServices100) -->
+            <if condition="ec.user.userAccount?.partyId">
+                <service-call name="create#mantle.work.effort.WorkEffortParty"
+                    in-map="[workEffortId: workEffortId,
+                        partyId: ec.user.userAccount.partyId,
+                        roleTypeId: 'Originator',
+                        statusId: 'WeptAssigned']" />
+            </if>
 
             <if condition="opportunityId">
                 <entity-find-one entity-name="mantle.sales.opportunity.SalesOpportunity"
@@ -272,7 +280,7 @@ limitations under the License.
                         <script>activities.add(eventOut)</script>
                     </iterate>
                 </then>
-                <else-if condition="activityType.toLowerCase() == 'todo' || activityId || pseudoId">
+                <else-if condition="activityType?.toLowerCase() == 'todo' || activityId || pseudoId">
 
                     <!-- only check status for a list -->
                     <if
@@ -613,6 +621,8 @@ limitations under the License.
                         activity.endDate.substring(0,18) : null,
                     estimatedStartDate: activity.estimatedStartDate ?
                         ec.l10n.parseTimestamp(activity.estimatedStartDate.substring(0,10), 'yyyy-MM-dd') : null,
+                    estimatedCompletionDate: activity.estimatedEndDate ?
+                        ec.l10n.parseTimestamp(activity.estimatedEndDate.substring(0,10), 'yyyy-MM-dd') : null,
                     routing: activity.routing,
                  ]"
                 out-map="context" />

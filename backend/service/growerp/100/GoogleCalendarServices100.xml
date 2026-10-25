@@ -20,8 +20,9 @@ limitations under the License.
          Meet link land in the company Google Calendar. These services import them
          as CRM activities (Lead + WetEvent) and afterwards attach the Gemini
          "take notes" doc from Drive as meeting minutes plus follow-up todos.
-         Credentials per tenant in growerp.general.SystemSettings (googleClientId,
-         googleClientSecret, googleRefreshToken, googleCalendarId). -->
+         Credentials per tenant in growerp.general.SystemSettings (googleRefreshToken
+         from Google Sign in below, or an own googleClientId/googleClientSecret;
+         googleCalendarId). -->
 
     <service verb="sync" noun="GoogleCalendarEvents" authenticate="false"
         allow-remote="false" transaction-timeout="300">
@@ -36,8 +37,15 @@ limitations under the License.
             <if condition="!ec.user.userId">
                 <script>ec.user.internalLoginUser('SystemSupport')</script>
             </if>
+            <set field="googleUtil"
+                from="ec.resource.script('component://growerp/service/GoogleWorkspaceUtil.groovy', null)" />
+            <!-- without the server-wide OAuth client only tenants with an own client can sync -->
             <entity-find entity-name="growerp.general.SystemSettings" list="settingsList">
                 <econdition field-name="googleRefreshToken" operator="is-not-null" />
+                <econdition field-name="googleClientId" operator="is-not-null"
+                    ignore="googleUtil.platformClient()" />
+                <econdition field-name="googleClientSecret" operator="is-not-null"
+                    ignore="googleUtil.platformClient()" />
             </entity-find>
             <set field="tenantCount" from="0" />
             <iterate list="settingsList" entry="settings">
@@ -65,6 +73,13 @@ limitations under the License.
             <if condition="!settings?.googleRefreshToken">
                 <return message="no google credentials for ${ownerPartyId}" />
             </if>
+            <!-- a script location attribute discards the return value: load the class here -->
+            <set field="googleUtil"
+                from="ec.resource.script('component://growerp/service/GoogleWorkspaceUtil.groovy', null)" />
+            <if condition="!googleUtil.clientCredentials(settings)">
+                <log level="info" message="Google calendar sync skipped for ${ownerPartyId}: no Google OAuth client configured" />
+                <return message="no Google OAuth client configured for ${ownerPartyId}" />
+            </if>
             <!-- incremental: last imported update time minus 10 min overlap, fallback 30 days -->
             <entity-find entity-name="growerp.crm.CalendarEventSync" list="lastSyncList" limit="1">
                 <econdition field-name="ownerPartyId" />
@@ -77,10 +92,8 @@ limitations under the License.
                     ec.user.nowTimestamp.toInstant().minusSeconds(30L * 24 * 3600)
                 updatedMinIso = fromInstant.toString()
             ]]></script>
-            <script location="component://growerp/service/GoogleWorkspaceUtil.groovy"/>
             <script>
-                def GoogleWorkspaceUtil = _scriptResult
-                events = GoogleWorkspaceUtil.listEvents(ec, ownerPartyId,
+                events = googleUtil.listEvents(ec, ownerPartyId,
                     settings.googleCalendarId ?: 'primary', updatedMinIso)
             </script>
             <set field="importedCount" from="0" />
@@ -354,9 +367,9 @@ limitations under the License.
             </entity-find-one>
             <if condition="!workEffort"><return /></if>
 
-            <script location="component://growerp/service/GoogleWorkspaceUtil.groovy"/>
             <script><![CDATA[
-                def GoogleWorkspaceUtil = _scriptResult
+                // a script location attribute discards the return value: load the class here
+                def GoogleWorkspaceUtil = ec.resource.script('component://growerp/service/GoogleWorkspaceUtil.groovy', null)
                 def calendarId = settings?.googleCalendarId ?: 'primary'
                 def docId = syncRow.minutesDocId
                 if (!docId) {
@@ -478,4 +491,141 @@ ${notesText.take(20000)}"""
             </iterate>
         </actions>
     </service>
+    <!-- ============ Google Sign in (Connect Google Workspace) ============
+         The tenant connects Drive, Gmail and/or Calendar with the GrowERP platform OAuth
+         client (env GOOGLE_OAUTH_CLIENT_ID/GOOGLE_OAUTH_CLIENT_SECRET): start#GoogleSignIn
+         returns the Google consent URL, Google redirects to /googleOAuth/callback
+         (screen/googleOAuth.xml) which calls complete#GoogleSignIn. Incremental
+         authorization keeps one refresh token covering all granted scopes. -->
+
+    <service verb="start" noun="GoogleSignIn" authenticate="true">
+        <description>Google consent URL asking for the scopes of the given services
+            (drive, gmail, calendar) for the current tenant.</description>
+        <in-parameters>
+            <parameter name="services" type="List" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="authUrl"/>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="relInfo"/>
+            <if condition="!relInfo.ownerPartyId"><return error="true" message="ownerPartyId not found for current user"/></if>
+            <script><![CDATA[
+                def util = ec.resource.script('component://growerp/service/GoogleWorkspaceUtil.groovy', null)
+                services = services.findAll { util.SERVICE_SCOPES.containsKey(it) }
+                if (!services) { ec.message.addError('No valid Google service given'); return }
+                // behind a proxy the request scheme/host may not be the public one
+                String redirectUri = System.getenv('GOOGLE_OAUTH_REDIRECT_URI') ?:
+                    ec.web.getWebappRootUrl(true, null) + '/googleOAuth/callback'
+                String state = UUID.randomUUID().toString()
+                ec.cache.getCache('growerp.google.oauthState').put(state,
+                    [ownerPartyId: relInfo.ownerPartyId, username: ec.user.username,
+                     services: services, redirectUri: redirectUri])
+                authUrl = util.authUrl(services, redirectUri, state)
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="complete" noun="GoogleSignIn" authenticate="anonymous-all" allow-remote="false">
+        <description>Called by the /googleOAuth/callback screen: exchange the code and store
+            the refresh token, granted scopes and account email on the tenant that started
+            the sign in. Gmail switches the mail server to Gmail with OAuth2.</description>
+        <in-parameters>
+            <parameter name="state" required="true"/>
+            <parameter name="code" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="email"/>
+        </out-parameters>
+        <actions>
+            <set field="util" from="ec.resource.script('component://growerp/service/GoogleWorkspaceUtil.groovy', null)"/>
+            <script><![CDATA[
+                def stateCache = ec.cache.getCache('growerp.google.oauthState')
+                st = stateCache.get(state)
+                if (st == null) { ec.message.addError('Sign in expired, please try again'); return }
+                stateCache.remove(state)
+                tokens = util.exchangeCode(code, (String) st.redirectUri)
+                email = tokens.email
+            ]]></script>
+            <!-- update#SystemSettings works on the tenant of the logged in user and also
+                 syncs the EmailServer: act as the user that started the sign in -->
+            <script>ec.user.internalLoginUser(st.username)</script>
+            <set field="update" from="[googleGrantedScopes: tokens.scope ?: '', googleAccountEmail: email ?: '']"/>
+            <if condition="tokens.refresh_token">
+                <set field="update.googleRefreshToken" from="tokens.refresh_token"/>
+            </if>
+            <if condition="tokens.scope?.contains(util.SERVICE_SCOPES.gmail)">
+                <set field="update.mailUseOauth" value="Y"/>
+                <set field="update.mailUsername" from="email"/>
+                <set field="update.smtpHost" value="smtp.gmail.com"/>
+                <set field="update.smtpPort" value="587"/>
+                <set field="update.smtpStartTls" value="Y"/>
+                <set field="update.smtpSsl" value="N"/>
+                <set field="update.storeHost" value="imap.gmail.com"/>
+                <set field="update.storePort" value="993"/>
+                <set field="update.storeProtocol" value="imaps"/>
+            </if>
+            <service-call name="growerp.100.GeneralServices100.update#SystemSettings" in-map="update"/>
+            <!-- the own client is cleared: a refresh token only works with its own client -->
+            <entity-find-one entity-name="growerp.general.SystemSettings" value-field="ss" cache="false">
+                <field-map field-name="ownerPartyId" from="st.ownerPartyId"/>
+            </entity-find-one>
+            <if condition="ss.googleClientId || ss.googleClientSecret">
+                <set field="ss.googleClientId" from="null"/>
+                <set field="ss.googleClientSecret" from="null"/>
+                <script>ss.update()</script>
+            </if>
+            <script>util.clearCache(st.ownerPartyId)</script>
+            <!-- calendar connected with write scopes: build the per-user calendars -->
+            <if condition="util.calendarWritable(ss)">
+                <script>ec.service.special().name('growerp.100.CalendarSyncServices100.sync#AllUserCalendars')
+                    .parameters([ownerPartyId: st.ownerPartyId]).registerOnCommit()</script>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="disconnect" noun="GoogleService" authenticate="true">
+        <description>Disconnect one Google service (drive, gmail, calendar) of the current
+            tenant. Gmail stops the OAuth2 mail sign in. When no service is left the refresh
+            token is revoked at Google and removed.</description>
+        <in-parameters>
+            <parameter name="service" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="systemSettings" type="Map"/>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="relInfo"/>
+            <set field="ownerPartyId" from="relInfo.ownerPartyId"/>
+            <entity-find-one entity-name="growerp.general.SystemSettings" value-field="ss" cache="false">
+                <field-map field-name="ownerPartyId"/>
+            </entity-find-one>
+            <if condition="ss == null"><return error="true" message="Google not connected"/></if>
+            <set field="util" from="ec.resource.script('component://growerp/service/GoogleWorkspaceUtil.groovy', null)"/>
+            <set field="scopes" from="util.serviceScopes(service)"/>
+            <if condition="!scopes"><return error="true" message="Unknown Google service ${service}"/></if>
+            <set field="remaining" from="(ss.googleGrantedScopes ?: '').split(' ').findAll { it &amp;&amp; !scopes.contains(it) }"/>
+            <set field="ss.googleGrantedScopes" from="remaining.join(' ')"/>
+            <!-- only openid/email left: nothing is connected any more -->
+            <if condition="!remaining.any { util.SERVICE_SCOPES.values().contains(it) }">
+                <if condition="ss.googleRefreshToken &amp;&amp; !ss.googleClientId">
+                    <script>util.revoke(ec, ss.googleRefreshToken)</script>
+                </if>
+                <set field="ss.googleRefreshToken" from="null"/>
+                <set field="ss.googleGrantedScopes" from="null"/>
+                <set field="ss.googleAccountEmail" from="null"/>
+            </if>
+            <script>ss.update(); util.clearCache(ownerPartyId)</script>
+            <set field="update" from="[:]"/>
+            <if condition="service == 'gmail' &amp;&amp; ss.mailUseOauth == 'Y'">
+                <set field="update.mailUseOauth" value="N"/>
+            </if>
+            <!-- returns the settings and re-syncs the EmailServer -->
+            <service-call name="growerp.100.GeneralServices100.update#SystemSettings"
+                in-map="update" out-map="context"/>
+        </actions>
+    </service>
+
 </services>

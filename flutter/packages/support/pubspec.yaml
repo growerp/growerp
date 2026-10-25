@@ -1,7 +1,7 @@
 name: support
 resolution: workspace
 description: System support app, for the GrowERP system
-version: 1.21.0+30
+version: 1.21.2+30
 repository: https://github.com/growerp/growerp
 homepage: https://www.growerp.com
 publish_to: none
@@ -37,6 +37,8 @@ dependencies:
   web: ^1.1.1
 
 dev_dependencies:
+  bloc_test: ^10.0.0
+  mocktail: ^1.0.5
   flutter_test:
     sdk: flutter
   flutter_driver:

@@ -153,25 +153,29 @@
                     <!-- Save Badge -->
                     <#if product.listPrice??>
                         <div class="save-badge mb-3" style="display: inline-block; background: linear-gradient(135deg, var(--gold-light), var(--gold)); color: var(--neutral-900); padding: 0.5rem 1rem; border-radius: var(--radius-full); font-weight: 700; font-size: 0.85rem;">
-                            <i class="fas fa-tag mr-1"></i>SAVE ${ec.l10n.formatCurrency((product.listPrice - product.price)?string(",##0.00"), product.priceUomId)}
+                            <i class="fas fa-tag mr-1"></i>SAVE <span data-price-amount="${(product.listPrice - product.price)?c}" data-price-currency="${product.priceUomId}">${ec.l10n.formatCurrency((product.listPrice - product.price)?string(",##0.00"), product.priceUomId)}</span>
                         </div>
                     </#if>
                     
                     <!-- Price Display -->
-
+                    <#include "component://PopRestStore/template/store/currencySelect.html.ftl">
+                    <#if currencyRatesJson?? && currencyIds?size gt 1>
+                    <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem;font-size:.875rem;"><span>Currency</span><@currencySelect/></div>
+                    <div class="js-currency-note" style="display:none;font-size:.75rem;opacity:.7;margin-top:-.5rem;margin-bottom:.75rem;">Indicative price, charged in ${product.priceUomId}.</div>
+                    </#if>
                     <div class="price-section mb-4">
                         <#if product.price?? && product.price gt 0>
-                            <div class="price-text" style="font-size: 2rem; font-weight: 700; color: var(--accent-600);">
+                            <div class="price-text" style="font-size: 2rem; font-weight: 700; color: var(--accent-600);" data-price-amount="${product.price?c}" data-price-currency="${product.priceUomId}">
                                 ${ec.l10n.formatCurrency(product.price, product.priceUomId)}
                             </div>
                             <#if product.listPrice?? && product.listPrice gt product.price>
                                 <div style="color: var(--neutral-400); font-size: 0.9rem;">
                                     <span>was </span>
-                                    <del>${ec.l10n.formatCurrency(product.listPrice, product.priceUomId)}</del>
+                                    <del data-price-amount="${product.listPrice?c}" data-price-currency="${product.priceUomId}">${ec.l10n.formatCurrency(product.listPrice, product.priceUomId)}</del>
                                 </div>
                             </#if>
                         <#elseif product.listPrice?? && product.listPrice gt 0>
-                             <div class="price-text" style="font-size: 2rem; font-weight: 700; color: var(--accent-600);">
+                             <div class="price-text" style="font-size: 2rem; font-weight: 700; color: var(--accent-600);" data-price-amount="${product.listPrice?c}" data-price-currency="${product.priceUomId}">
                                 ${ec.l10n.formatCurrency(product.listPrice, product.priceUomId)}
                             </div>
                         <#else>

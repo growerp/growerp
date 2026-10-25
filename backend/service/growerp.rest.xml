@@ -94,6 +94,23 @@ limitations under the License.
             <method type="post">
                 <service name="growerp.100.GeneralServices100.update#SystemSettings" />
             </method>
+            <resource name="googleSignIn"
+                description="Start Google sign in: returns the consent URL for the given services">
+                <method type="post">
+                    <service name="growerp.100.GoogleCalendarServices100.start#GoogleSignIn" />
+                </method>
+            </resource>
+            <resource name="googleDisconnect" description="Disconnect one Google service">
+                <method type="post">
+                    <service name="growerp.100.GoogleCalendarServices100.disconnect#GoogleService" />
+                </method>
+            </resource>
+            <resource name="calendarResync"
+                description="Rebuild the per-user calendars of the tenant in the background">
+                <method type="post">
+                    <service name="growerp.100.CalendarSyncServices100.resync#Calendars" />
+                </method>
+            </resource>
             <resource name="generateWritingStyle">
                 <method type="post">
                     <service name="growerp.100.GeneralServices100.generate#WritingStyle" />
@@ -124,6 +141,12 @@ limitations under the License.
         <resource name="Uoms" require-authentication="anonymous-all">
             <method type="get">
                 <service name="growerp.100.GeneralServices100.get#UomList" />
+            </method>
+        </resource>
+        <!-- central read-only currency exchange rates, refreshed weekly -->
+        <resource name="ExchangeRates">
+            <method type="get">
+                <service name="growerp.100.GeneralServices100.get#ExchangeRates" />
             </method>
         </resource>
         <!-- countries-->
@@ -1126,6 +1149,12 @@ limitations under the License.
         <resource name="Notification">
             <method type="get">
                 <service name="growerp.100.ChatServices100.get#Notification" />
+            </method>
+        </resource>
+        <!-- in-app calendar: calendar events or activities, plus social posts -->
+        <resource name="CalendarItems">
+            <method type="get">
+                <service name="growerp.100.CalendarSyncServices100.get#CalendarItems" />
             </method>
         </resource>
         <!-- chatRoom -->

@@ -91,21 +91,26 @@ class _AdkMcpServerListViewState extends State<AdkMcpServerListView> {
 
   bool get _emailConfigured => (_settings?.smtpHost ?? '').isNotEmpty;
   bool get _githubConfigured => (_settings?.githubToken ?? '') == '****';
-  bool get _googleConfigured => (_settings?.googleRefreshToken ?? '') == '****';
+  bool get _googleConfigured =>
+      (_settings?.googleRefreshToken ?? '') == '****' ||
+      (_settings?.googleGrantedScopes ?? '').isNotEmpty;
 
   Future<void> _configureEmail() async {
-    final ok = await EmailSettingsDialog.show(context);
-    if (ok == true) await _load();
+    await EmailSettingsDialog.show(context);
+    await _load();
   }
 
   Future<void> _configureGithub() async {
-    final ok = await GithubSettingsDialog.show(context);
-    if (ok == true) await _load();
+    await GithubSettingsDialog.show(context);
+    await _load();
   }
 
   Future<void> _configureGoogle() async {
-    final ok = await GoogleWorkspaceSettingsDialog.show(context);
-    if (ok == true) await _load();
+    // Sign in and disconnect are stored on the server right away, also when the
+    // dialog is then closed with its X button (no result): always reload, as
+    // for the other integrations.
+    await GoogleWorkspaceSettingsDialog.show(context);
+    await _load();
   }
 
   Future<void> _create() async {

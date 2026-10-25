@@ -1,0 +1,3 @@
+# Puts the products of published courses (created before courses were sold as
+# products) on their company's website.
+growerp.100.CourseServices100.migrate#CourseProducts

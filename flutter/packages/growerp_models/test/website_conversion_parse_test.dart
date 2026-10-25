@@ -1,4 +1,3 @@
-
 // Parses a real get#WebsiteConversions payload: the backend must send dates as
 // ISO strings, epoch millis throw in DateTimeConverter and used to leave the
 // support screen stuck on its loading spinner.
