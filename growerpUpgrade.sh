@@ -157,18 +157,20 @@ changed_screen_apps() {
 # of that run), so create new ones for the apps when screens changed or it expired
 cmd_prepare() {
     step "Store screenshots when screens changed"
-    local changed last
+    local changed last available=false
     changed=$(changed_screen_apps)
     last=$(last_success screenshots.yml)
+    [[ -n "$last" && "$last" > "$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)" ]] && available=true
     if [[ -n "$changed" ]]; then
-        echo "Apps with changed screens: $(tr ' ' ',' <<<"${changed% }")"
-    elif [[ -n "$last" && "$last" > "$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)" ]]; then
+        echo "Apps with changed screens since the last screenshots: $(tr ' ' ',' <<<"${changed% }")"
+        $available && echo "The screenshots of $last are still available: N skips and uses them."
+    elif $available; then
         echo "Screens unchanged, screenshots of $last still available."
         return
     else
         echo "Screens unchanged, but the screenshots artifact expired (last run: ${last:-none})."
     fi
-    if confirm "Create store screenshots?"; then
+    if confirm "Create new store screenshots?"; then
         ask_apps "${1:-all}"
         run_workflow screenshots.yml -f apps="$REPLY"
     fi
