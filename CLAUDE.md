@@ -207,6 +207,7 @@ Read-only (no create/update/delete) and restricted to the SystemSupport account.
 - **Error display**: `HelperFunctions.showMessage(context, message, Colors.red)` in BLoC listener.
 - **Unit tests**: In `test/` of each package, run by the CI status job (row "Flutter Unit tests" + bloc coverage page). Every bloc has a `test/<entity>/<entity>_bloc_test.dart` (bloc_test + mocktail, `MockRestClient` from `package:growerp_models/testing.dart`); a new or changed bloc gets its tests too. A test reproducing an open bug stays, skipped with the issue URL. Standard: `docs/adr/0001-flutter-unit-test-standard.md`.
 - **Backend tests**: Spock specs in `backend/src/test/groovy/`, one per service file, each on its own tenant via `GrowerpTestSupport.tenant()`; new spec → `include` in `backend/build.gradle`. Open bug → `@PendingFeature(reason = '<issue url>')`. Coverage (services called + code blocks run) on the status page. Standard: `docs/adr/0002-backend-spock-test-standard.md`.
+- **Bug fixes: test first**: (1) extend the existing test (or create one if none) so it reproduces the bug and fails on the current code; (2) then fix the code until it passes; (3) put test + fix back into the pull request (red→green evidence in the description) and leave it open for approval — no merge.
 - **Integration tests**: In `example/integration_test/`. Use `CommonTest` utilities. Test class has `add`, `update`, `delete`, `check` static methods.
 - **Menu**: Configured per app via building block composition — see `docs/GrowERP_Extensibility_Guide.md`.
 
