@@ -120,8 +120,10 @@ void main() {
 
       expect(settings.isEmpty, isTrue); // Original unchanged
       expect(updated.isNotEmpty, isTrue);
-      expect(updated.getForPlatform('linkedin')?.actionType,
-          equals('message_connections'));
+      expect(
+        updated.getForPlatform('linkedin')?.actionType,
+        equals('message_connections'),
+      );
     });
 
     test('should be case insensitive for platform names', () {

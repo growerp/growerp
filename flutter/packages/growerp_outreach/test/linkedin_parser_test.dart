@@ -48,21 +48,23 @@ void main() {
     expect(leads.where((l) => l.company?.name == 'Acme Corp').length, 2);
   });
 
-  test('parseLinkedInConnectionsCsv keeps non-Latin profile urls valid ascii',
-      () {
-    const csv =
-        'First Name,Last Name,URL,Email Address,Company,Position,Connected On\n'
-        'Nok,Thai,https://www.linkedin.com/in/%E0%B8%95%E0%B9%89%E0%B8%99,'
-        'a@b.com,Acme,CEO,01 Jan 2024\n';
-    final leads = parseLinkedInConnectionsCsv(csv);
-    expect(leads.length, 1);
-    final url = leads.first.url!;
-    // non-Latin vanity names stay percent-encoded so the backend WebAddress
-    // URL validation accepts them, and the url fits the 255-char column.
-    expect(url, matches(RegExp(r'^[\x00-\x7F]+$')));
-    expect(url, startsWith('https://www.linkedin.com/in/'));
-    expect(url.length, lessThan(255));
-  });
+  test(
+    'parseLinkedInConnectionsCsv keeps non-Latin profile urls valid ascii',
+    () {
+      const csv =
+          'First Name,Last Name,URL,Email Address,Company,Position,Connected On\n'
+          'Nok,Thai,https://www.linkedin.com/in/%E0%B8%95%E0%B9%89%E0%B8%99,'
+          'a@b.com,Acme,CEO,01 Jan 2024\n';
+      final leads = parseLinkedInConnectionsCsv(csv);
+      expect(leads.length, 1);
+      final url = leads.first.url!;
+      // non-Latin vanity names stay percent-encoded so the backend WebAddress
+      // URL validation accepts them, and the url fits the 255-char column.
+      expect(url, matches(RegExp(r'^[\x00-\x7F]+$')));
+      expect(url, startsWith('https://www.linkedin.com/in/'));
+      expect(url.length, lessThan(255));
+    },
+  );
 
   test('parseLinkedInConnectionsCsv encodes raw unicode profile urls', () {
     const csv =
