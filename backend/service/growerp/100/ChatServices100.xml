@@ -443,6 +443,7 @@ limitations under the License.
                 <field-map field-name="ownerPartyId" from="ownerId" />
                 <field-map field-name="userId" from="ec.user.userAccount.userId" />
             </entity-find-one>
+            <if condition="chatRoom?.ownerPartyId != ownerId"><set field="chatRoom" from="null" /></if>
             <if condition="!chatRoom">
                 <then>
                     <return error="true" message="Room ${chatRoomId} not found" />

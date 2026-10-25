@@ -2505,7 +2505,7 @@ limitations under the License.
                     </entity-delete-by-condition>
                 </if>
                 <!-- create new relationship -->
-                <if condition="user.company.partyId">
+                <if condition="user.company?.partyId">
                     <service-call name="create#mantle.party.PartyRelationship"
                         in-map="[fromPartyId: user.partyId, fromRoleTypeId: 'Employee',
                     relationshipTypeEnumId: 'PrtEmployee', fromDate: ec.user.nowTimestamp,
@@ -2774,6 +2774,7 @@ limitations under the License.
                 <field-map field-name="ownerPartyId" from="ownerPartyId" />
                 <field-map field-name="partyId" from="partyId" />
             </entity-find-one>
+            <if condition="party?.ownerPartyId != ownerPartyId"><set field="party" from="null" /></if>
             <if condition="!party">
                 <return error="true" message="Could not find partyId: $partyId" />
             </if>
@@ -3539,6 +3540,9 @@ limitations under the License.
                 settingValue: false" /-->
 
             <!-- update website settings-->
+            <if condition="!hostName">
+                <set field="hostName" value="localhost" />
+            </if>
             <if condition="hostName == '10.0.2.2' || hostName == '127.0.0.1'">
                 <set field="hostName" value="localhost" />
             </if>

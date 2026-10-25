@@ -274,6 +274,26 @@ straight into `create#UserGroupMember` — an anonymous caller could make themse
 The group is now fixed to `GROWERP_M_OTHER` and the business relationship comes from a `role`
 parameter.
 
+## Tenant checks in services
+
+A service checks that a record belongs to the caller's organization by comparing its
+`ownerPartyId` with the one `get#RelatedCompanyAndOwner` returns. **Do not do this with a
+`field-map` on `entity-find-one`**: when the full primary key is given, Moqui drops every other
+field from the condition, so `ownerPartyId` is silently ignored and another tenant's record is
+returned. Where `ownerPartyId` is not part of the primary key, compare it explicitly:
+
+```xml
+<entity-find-one entity-name="mantle.party.Party" value-field="party">
+    <field-map field-name="partyId" from="partyId" />
+    <field-map field-name="ownerPartyId" from="ownerPartyId" />
+</entity-find-one>
+<if condition="party?.ownerPartyId != ownerPartyId"><set field="party" from="null" /></if>
+<if condition="!party"><return error="true" message="Could not find partyId: $partyId" /></if>
+```
+
+The `field-map` still matters when the find is not by the full key (e.g. by `pseudoId`).
+`<entity-find>` with `<econdition>`s keeps all conditions and needs no extra check.
+
 ## Known gap
 
 The `User` REST resource serves both "my profile" and "list users" on one path, so

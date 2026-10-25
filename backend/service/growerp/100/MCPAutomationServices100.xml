@@ -109,6 +109,7 @@
                 <field-map field-name="marketingCampaignId"/>
                 <field-map field-name="ownerPartyId"/>
             </entity-find-one>
+            <if condition="campaign?.ownerPartyId != ownerPartyId"><set field="campaign" from="null" /></if>
             <if condition="!campaign">
                 <return error="true" message="Campaign not found: ${marketingCampaignId}"/>
             </if>
