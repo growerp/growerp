@@ -102,8 +102,12 @@ jobs:
   # ------------------------------------------------------------------
   # 1a. Backend Spock tests (growerp component)
   #     Boots an embedded Moqui against a freshly loaded H2 database, no
-  #     docker/flutter needed. Covers currency conversion (one-page
-  #     checkout) and tenant subscription renewal.
+  #     docker/flutter needed. Each spec registers its own tenant
+  #     (GrowerpTestSupport) and covers a service area: party, catalog,
+  #     inventory, activity, CRM, orders/invoices/payments, ledger,
+  #     currency/subscriptions, website forms/chat, communications,
+  #     Substack and X. ci/service_coverage.py reports the services called
+  #     and the code blocks run (JaCoCo probes).
   # ------------------------------------------------------------------
   backend-tests:
     needs: check-changes
@@ -182,12 +186,23 @@ jobs:
             echo "No test report generated." >> "$GITHUB_STEP_SUMMARY"
           fi
 
+      - name: Backend service coverage
+        if: always()
+        working-directory: moqui/runtime/component/growerp
+        run: |
+          # json next to the TEST-*.xml so the artifact keeps its flat layout
+          python3 ci/service_coverage.py --json build/test-results/test/service-coverage.json \
+            --markdown /tmp/service-coverage.md
+          { echo "## Backend Service Coverage"; echo; cat /tmp/service-coverage.md; } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload backend test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: backend-test-results
-          path: moqui/runtime/component/growerp/build/test-results/test/TEST-*.xml
+          path: |
+            moqui/runtime/component/growerp/build/test-results/test/TEST-*.xml
+            moqui/runtime/component/growerp/build/test-results/test/service-coverage.json
           if-no-files-found: ignore
           retention-days: 7
 
@@ -2067,6 +2082,15 @@ jobs:
               pass
           bloc_cov = (tests_data or {}).get('bloc_coverage')
 
+          # ── Backend service coverage (backend/ci/service_coverage.py) ────
+          try:
+              with open('backend-test-logs/service-coverage.json') as f:
+                  if tests_data is not None:
+                      tests_data['service_coverage'] = json.load(f)
+          except (OSError, ValueError):
+              pass
+          svc_cov = (tests_data or {}).get('service_coverage')
+
           # ── Failure drill-down page ──────────────────────────────────────
           # The detail travels inside tests-data.json, so a run that skipped the
           # tests rebuilds the same failures page from the carried-over data.
@@ -2140,6 +2164,37 @@ jobs:
                      else '<td class="bad">no tests</td><td></td>')
                   + '</tr>'
                   for b in sorted(bloc_cov['blocs'], key=lambda b: (b['package'], b['file'])))
+
+          if svc_cov:
+              def svc_pct(hit, total):
+                  return f"{100 * hit / total:.1f}%" if total else ''
+              tests_table += (
+                  f'<p>Backend service coverage: <a href="{PAGES_URL}/backend-coverage.html">'
+                  f"{svc_cov['called_services']}/{svc_cov['total_services']} services called, "
+                  f"{svc_cov['code_percent']}% of their code blocks ran</a></p>")
+              svc_rows = ''.join(
+                  f"<tr><td>{esc(f['file'])}</td>"
+                  f"<td>{svc_pct(f['called'], f['services']) or '0.0%'}</td>"
+                  f"<td>{f['called']}/{f['services']}</td>"
+                  f"<td>{svc_pct(f['code_hit'], f['code'])}</td>"
+                  f"<td>{esc(', '.join(n.split('.')[-1] for n in f['uncalled']))}</td></tr>"
+                  for f in sorted(svc_cov['files'], key=lambda f: f['file']))
+
+          def backend_coverage_page():  # css is defined further down
+              return (
+                  '<!DOCTYPE html><html><head><meta charset="utf-8">'
+                  '<title>GrowERP Backend Coverage</title>'
+                  f'<style>\n{css}\n</style></head><body>'
+                  '<h1>GrowERP Backend Service Coverage</h1>'
+                  f'<p>Test run: {esc((tests_data or {}).get("generated", "?"))}</p>'
+                  f'<p><a href="{PAGES_URL}/">Back to status</a></p>'
+                  f"<p>The backend Spock tests called {svc_cov['called_services']} of the "
+                  f"{svc_cov['total_services']} growerp.100 services ({svc_cov['percent']}%) and "
+                  f"ran {svc_cov['code_percent']}% of the code blocks (JaCoCo probes) of the "
+                  f"called services ({svc_cov['code_hit']}/{svc_cov['code']}).</p>"
+                  '<table><tr><th>Service file</th><th>Called</th><th>Services</th>'
+                  '<th>Code</th><th>Not called</th></tr>'
+                  + svc_rows + '</table></body></html>')
 
           def coverage_page():  # css is defined further down
               return (
@@ -2421,6 +2476,9 @@ jobs:
           if bloc_cov:
               with open('/tmp/pages/coverage.html', 'w') as f:
                   f.write(coverage_page())
+          if svc_cov:
+              with open('/tmp/pages/backend-coverage.html', 'w') as f:
+                  f.write(backend_coverage_page())
           with open('/tmp/pages/index.html', 'w') as f:
               f.write(full_html)
           HTML(string=full_html).write_pdf('/tmp/status-report.pdf')

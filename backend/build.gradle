@@ -1,4 +1,5 @@
 apply plugin: 'groovy'
+apply plugin: 'jacoco'
 
 def componentNode = parseComponent(project)
 version = componentNode.'@version'
@@ -35,16 +36,65 @@ test {
     include '**/WebsiteFormServicesTests.class'
     include '**/CommunicationServicesTests.class'
     include '**/SubstackServicesTests.class'
+    include '**/PartyServicesTests.class'
+    include '**/CatalogServicesTests.class'
+    include '**/InventoryServicesTests.class'
+    include '**/ActivityServicesTests.class'
+    include '**/CrmServicesTests.class'
+    include '**/FinDocServicesTests.class'
+    include '**/AccountingServicesTests.class'
 
     systemProperty 'moqui.runtime', moquiDir.absolutePath + '/runtime'
     systemProperty 'moqui.conf', 'conf/MoquiDevConf.xml'
     systemProperty 'moqui.init.static', 'true'
+    // own transaction log, never the one of a dev backend running from the same runtime
+    systemProperty 'bitronix.tm.journal.disk.logPart1Filename', "${buildDir}/txlog/btm1.tlog"
+    systemProperty 'bitronix.tm.journal.disk.logPart2Filename', "${buildDir}/txlog/btm2.tlog"
 
     classpath += files(sourceSets.main.output.classesDirs)
     // filter out classpath entries that don't exist (gradle adds a bunch of these), or ElasticSearch JarHell will blow up
     classpath = classpath.filter { it.exists() }
 
     beforeTest { descriptor -> logger.lifecycle("Running test: ${descriptor}") }
+
+    // coverage of the component's Groovy: compiled src/main plus the classes Moqui compiles
+    // at runtime from service actions and scripts (no code source location, named after the
+    // service or the component:// script location)
+    jacoco {
+        includeNoLocationClasses = true
+        includes = ['growerp.*', 'growerp_*', 'component___growerp_*', 'org.moqui.impl.webapp.ChatEndpoint*']
+    }
+    systemProperty 'growerp.serviceHitsFile', "${buildDir}/service-hits.json"
+    finalizedBy 'jacocoTestReport', 'jacocoProbes'
+}
+
+// lines of src/main
+jacocoTestReport {
+    reports { xml.required = true; html.required = true }
+}
+
+// The runtime compiled scripts carry their code in run(), which Groovy marks @Generated and
+// the JaCoCo report therefore leaves out. Count their probes (executed code blocks) straight
+// from the execution data instead: build/jacoco/probes.json {className: [hit, total]}.
+task jacocoProbes {
+    doLast {
+        File exec = file("${buildDir}/jacoco/test.exec")
+        if (!exec.exists()) return
+        ClassLoader loader = new URLClassLoader(configurations.jacocoAnt.files.collect { it.toURI().toURL() } as URL[],
+                getClass().classLoader)
+        def execLoader = loader.loadClass('org.jacoco.core.tools.ExecFileLoader').getDeclaredConstructor().newInstance()
+        execLoader.load(exec)
+        Map probes = new TreeMap()
+        execLoader.executionDataStore.contents.each { data ->
+            if (!data.name.startsWith('growerp_') && !data.name.startsWith('component___growerp_')) return
+            boolean[] hits = data.probes
+            List old = probes[data.name] ?: [0, 0]
+            int hit = 0
+            for (boolean h in hits) if (h) hit++
+            probes[data.name] = [old[0] + hit, old[1] + hits.length]
+        }
+        file("${buildDir}/jacoco/probes.json").text = groovy.json.JsonOutput.toJson(probes)
+    }
 }
 
 task cleanLib(type: Delete) { delete fileTree(dir: projectDir.absolutePath+'/lib', include: '*') }

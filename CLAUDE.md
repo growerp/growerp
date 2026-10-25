@@ -173,6 +173,13 @@ java -jar moqui.war load types=seed,seed-initial,install no-run-es
 # Start backend (admin at http://localhost:8080/vapps, user: SystemSupport, pass: moqui)
 java -jar moqui.war no-run-es
 
+# Backend Spock tests (backend/src/test/groovy) + coverage report
+./gradlew :runtime:component:growerp:test
+(cd runtime/component/growerp && python3 ci/service_coverage.py)
+# beside a running dev backend: own H2 db (load it once with the same env var);
+# never a second `java -jar moqui.war` from moqui/, it deletes the shared execwartmp
+entity_ds_database=growerptest ./gradlew :runtime:component:growerp:test
+
 # Sync upstream moqui changes into growerp forks, then update growerp root
 bash sync-upstream.sh    # merges upstream → each growerp fork (runs from repo root)
 bash sync-submodules.sh  # updates growerp root submodule pointers + commits
@@ -199,6 +206,7 @@ Read-only (no create/update/delete) and restricted to the SystemSupport account.
 - **BLoC events**: Standard set: `Fetch`, `Update`, `Delete`. Status enum: `initial`, `loading`, `success`, `failure`.
 - **Error display**: `HelperFunctions.showMessage(context, message, Colors.red)` in BLoC listener.
 - **Unit tests**: In `test/` of each package, run by the CI status job (row "Flutter Unit tests" + bloc coverage page). Every bloc has a `test/<entity>/<entity>_bloc_test.dart` (bloc_test + mocktail, `MockRestClient` from `package:growerp_models/testing.dart`); a new or changed bloc gets its tests too. A test reproducing an open bug stays, skipped with the issue URL. Standard: `docs/adr/0001-flutter-unit-test-standard.md`.
+- **Backend tests**: Spock specs in `backend/src/test/groovy/`, one per service file, each on its own tenant via `GrowerpTestSupport.tenant()`; new spec → `include` in `backend/build.gradle`. Open bug → `@PendingFeature(reason = '<issue url>')`. Coverage (services called + code blocks run) on the status page. Standard: `docs/adr/0002-backend-spock-test-standard.md`.
 - **Integration tests**: In `example/integration_test/`. Use `CommonTest` utilities. Test class has `add`, `update`, `delete`, `check` static methods.
 - **Menu**: Configured per app via building block composition — see `docs/GrowERP_Extensibility_Guide.md`.
 
