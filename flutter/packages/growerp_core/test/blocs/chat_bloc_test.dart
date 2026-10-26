@@ -62,7 +62,7 @@ void main() {
     blocTest<ChatRoomBloc, ChatRoomState>(
       'ChatRoomFetch_initial_listensToWsAndEmitsRooms',
       setUp: () => when(
-        () => restClient.getChatRooms(searchString: ''),
+        () => restClient.getChatRooms(searchString: '', start: 0, limit: 20),
       ).thenAnswer((_) async => ChatRooms(chatRooms: [room1, room2])),
       build: () => ChatRoomBloc(restClient, wsClient, authBloc),
       act: (bloc) => bloc.add(const ChatRoomFetch()),
@@ -79,7 +79,7 @@ void main() {
     blocTest<ChatRoomBloc, ChatRoomState>(
       'ChatRoomFetch_restThrowsDio_emitsFailure',
       setUp: () => when(
-        () => restClient.getChatRooms(searchString: ''),
+        () => restClient.getChatRooms(searchString: '', start: 0, limit: 20),
       ).thenThrow(dioError('Chat down')),
       build: () => ChatRoomBloc(restClient, wsClient, authBloc),
       act: (bloc) => bloc.add(const ChatRoomFetch()),
@@ -96,7 +96,7 @@ void main() {
     blocTest<ChatRoomBloc, ChatRoomState>(
       'ChatRoomFetch_wsMessageForKnownRoom_marksRoomUnread',
       setUp: () => when(
-        () => restClient.getChatRooms(searchString: ''),
+        () => restClient.getChatRooms(searchString: '', start: 0, limit: 20),
       ).thenAnswer((_) async => ChatRooms(chatRooms: [room1])),
       build: () => ChatRoomBloc(restClient, wsClient, authBloc),
       act: (bloc) async {
@@ -319,7 +319,12 @@ void main() {
     blocTest<ChatMessageBloc, ChatMessageState>(
       'ChatMessageFetch_room_loadsMessagesAndMarksRoomRead',
       setUp: () => when(
-        () => restClient.getChatMessages(chatRoomId: 'R1', searchString: ''),
+        () => restClient.getChatMessages(
+          chatRoomId: 'R1',
+          searchString: '',
+          start: 0,
+          limit: 20,
+        ),
       ).thenAnswer((_) async => ChatMessages(chatMessages: [msg1, msg2])),
       build: build,
       act: (bloc) =>
@@ -340,7 +345,12 @@ void main() {
     blocTest<ChatMessageBloc, ChatMessageState>(
       'ChatMessageFetch_restThrowsDio_emitsFailure',
       setUp: () => when(
-        () => restClient.getChatMessages(chatRoomId: 'R1', searchString: ''),
+        () => restClient.getChatMessages(
+          chatRoomId: 'R1',
+          searchString: '',
+          start: 0,
+          limit: 20,
+        ),
       ).thenThrow(dioError('Chat down')),
       build: build,
       act: (bloc) =>
@@ -386,7 +396,7 @@ void main() {
     blocTest<ChatMessageBloc, ChatMessageState>(
       'ChatMessageReceiveWs_messageForOpenRoom_appendsIt',
       build: build,
-      seed: () => ChatMessageState(chatMessages: [msg1]),
+      seed: () => ChatMessageState(chatMessages: [msg1], chatRoomId: 'R1'),
       act: (bloc) => bloc.add(
         ChatMessageReceiveWs(
           ChatMessage(chatRoom: room1, fromUserId: 'other', content: 'new'),
@@ -406,7 +416,12 @@ void main() {
       blocTest<ChatMessageBloc, ChatMessageState>(
         'ChatMessageReceiveWs_messageForOtherRoom_doesNotAppend',
         setUp: () => when(
-          () => restClient.getChatMessages(chatRoomId: 'R1', searchString: ''),
+          () => restClient.getChatMessages(
+            chatRoomId: 'R1',
+            searchString: '',
+            start: 0,
+            limit: 20,
+          ),
         ).thenAnswer((_) async => ChatMessages(chatMessages: [msg1])),
         build: build,
         act: (bloc) async {

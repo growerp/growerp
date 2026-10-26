@@ -24,6 +24,7 @@ class ChatMessageState extends Equatable {
     this.hasReachedMax = false,
     this.searchString = '',
     this.search = false,
+    this.chatRoomId,
   });
 
   final ChatMessageStatus status;
@@ -32,6 +33,7 @@ class ChatMessageState extends Equatable {
   final bool hasReachedMax;
   final String searchString;
   final bool search;
+  final String? chatRoomId; // the room the messages belong to
 
   ChatMessageState copyWith({
     ChatMessageStatus? status,
@@ -41,6 +43,7 @@ class ChatMessageState extends Equatable {
     bool? hasReachedMax,
     String? searchString,
     bool? search,
+    String? chatRoomId,
   }) {
     return ChatMessageState(
       status: status ?? this.status,
@@ -49,11 +52,18 @@ class ChatMessageState extends Equatable {
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       searchString: searchString ?? this.searchString,
       search: search ?? this.search,
+      chatRoomId: chatRoomId ?? this.chatRoomId,
     );
   }
 
   @override
-  List<Object?> get props => [chatMessages, hasReachedMax, search, message];
+  List<Object?> get props => [
+    chatMessages,
+    hasReachedMax,
+    search,
+    message,
+    chatRoomId,
+  ];
 
   @override
   String toString() =>
