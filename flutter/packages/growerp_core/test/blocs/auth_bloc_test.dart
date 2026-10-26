@@ -447,35 +447,31 @@ void main() {
       ],
     );
 
-    group(
-      'forced password change',
-      skip: 'https://github.com/growerp/growerp/issues/43',
-      () {
-        // login#User answers a required change with this sentinel session
-        final passwordChange = Authenticate(
-          apiKey: 'passwordChange',
-          loginStatus: 'passwordChange',
-          applicationId: appId,
-          user: User(loginName: 'me@x.com'),
-        );
+    // https://github.com/growerp/growerp/issues/43
+    group('forced password change', () {
+      // login#User answers a required change with this sentinel session
+      final passwordChange = Authenticate(
+        apiKey: 'passwordChange',
+        loginStatus: 'passwordChange',
+        applicationId: appId,
+        user: User(loginName: 'me@x.com'),
+      );
 
-        blocTest<AuthBloc, AuthState>(
-          'AuthChangePassword_afterForcedChange_connectsSocketsWithNewKey',
-          setUp: () =>
-              stubUpdate((_) async => loggedIn.copyWith(apiKey: 'key2')),
-          build: build,
-          seed: () => AuthState(
-            status: AuthStatus.unAuthenticated,
-            authenticate: passwordChange,
-          ),
-          act: (bloc) =>
-              bloc.add(const AuthChangePassword('me@x.com', 'old', 'new')),
-          verify: (_) {
-            verify(() => chat.connect('key2', 'U1')).called(1);
-            verify(() => notification.connect('key2', 'U1')).called(1);
-          },
-        );
-      },
-    );
+      blocTest<AuthBloc, AuthState>(
+        'AuthChangePassword_afterForcedChange_connectsSocketsWithNewKey',
+        setUp: () => stubUpdate((_) async => loggedIn.copyWith(apiKey: 'key2')),
+        build: build,
+        seed: () => AuthState(
+          status: AuthStatus.unAuthenticated,
+          authenticate: passwordChange,
+        ),
+        act: (bloc) =>
+            bloc.add(const AuthChangePassword('me@x.com', 'old', 'new')),
+        verify: (_) {
+          verify(() => chat.connect('key2', 'U1')).called(1);
+          verify(() => notification.connect('key2', 'U1')).called(1);
+        },
+      );
+    });
   });
 }
