@@ -273,13 +273,17 @@ simply run the import there; the file is complete on its own.
 
 Every company already on GrowERP has the same tools under **Website → Convert &
 Translate** (admin, freelance, hotel, rental and marketing apps; in the agents app under
-Organization). The tab is for administrators.
+Organization). The tab is for administrators. A company has a single website, so the
+tab shows no lists: one card with the status of the latest conversion and one with the
+status of the latest translation, each with a button to start a new one (disabled while
+one is running). Progress refreshes by itself, and a message pops up when a run finishes.
 
 **Convert** replaces the company's GrowERP website with a conversion of its existing
 website:
 
-1. Press **+**, enter the address of the existing website and the maximum number of pages.
-2. Press **Start conversion**. The list shows the progress; it takes a few minutes.
+1. Press **Convert website**, enter the address of the existing website and the maximum
+   number of pages.
+2. Press **Start conversion**. The card shows the progress; it takes a few minutes.
 3. When it is COMPLETED the new pages are live on the company's own hostnames.
 
 What it changes, and what it leaves alone:

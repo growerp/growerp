@@ -19,9 +19,9 @@ App-specific:
   support's own session has no tenant of its own)
 - `WebsiteToolsView` — "Website Tools": two tabs combining the former separate Website
   Generator (`WebsiteConversionList`) and Website Translation (`WebsiteTranslationList`) screens.
-  These live in `growerp_website`, where tenants get the same view under Website → Convert &
-  Translate, limited to their own website; support converts into new owners and translates
-  any owner's website
+  These live in `growerp_website`; support converts into new owners and translates any
+  owner's website. Tenants get the view under Website → Convert & Translate as a status page
+  (`WebsiteToolsStatus`) for their single website: latest conversion and translation, no lists
 - `RestStatisticsView` — REST API call statistics
 - `AboutForm`
 

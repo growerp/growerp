@@ -790,5 +790,41 @@
   "removingClearsRowTenant": "Removing only clears this row, your website stays.",
   "@removingClearsRowTenant": {
     "description": "Note that removing a conversion row keeps the website"
+  },
+  "websiteConversionTitle": "Website conversion",
+  "@websiteConversionTitle": {
+    "description": "Title of the tenant website conversion status card"
+  },
+  "websiteTranslationTitle": "Website translation",
+  "@websiteTranslationTitle": {
+    "description": "Title of the tenant website translation status card"
+  },
+  "noConversionTenant": "Your website has not been converted yet. Converting reads your existing website, rewrites its pages and colours for the GrowERP template, and replaces your current website with the result.",
+  "@noConversionTenant": {
+    "description": "Tenant status card when its website was never converted"
+  },
+  "noTranslationTenant": "Your website has not been translated yet. Translating rewrites every page with AI into the languages the apps support and publishes it next to the original, reachable at /th/, /de/ and so on.",
+  "@noTranslationTenant": {
+    "description": "Tenant status card when its website was never translated"
+  },
+  "convertWebsite": "Convert website",
+  "@convertWebsite": {
+    "description": "Button that starts a new conversion of the tenant website"
+  },
+  "translateWebsite": "Translate website",
+  "@translateWebsite": {
+    "description": "Button that starts a new translation of the tenant website"
+  },
+  "pagesImagesLabel": "Pages / images",
+  "@pagesImagesLabel": {
+    "description": "Label for the page and image counts of a conversion"
+  },
+  "languagesLabel": "Languages",
+  "@languagesLabel": {
+    "description": "Label for the target languages of a translation"
+  },
+  "pagesLabel": "Pages",
+  "@pagesLabel": {
+    "description": "Label for the translated page count"
   }
 }

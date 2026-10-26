@@ -189,5 +189,14 @@
   "websiteReadAITenant": "Ihre bestehende Website wird gelesen, ihre Seiten und Farben werden mit KI für die GrowERP-Vorlage neu geschrieben, und das Ergebnis ersetzt Ihre aktuelle GrowERP-Website. Das dauert einige Minuten und verwendet den KI-Schlüssel Ihres Unternehmens (Systemeinrichtung).",
   "websiteReplaceWarning": "Die Seiten und Bilder Ihrer aktuellen Website werden gelöscht und können nicht wiederhergestellt werden.",
   "noWebsitesConvertedTenant": "Noch keine Websites konvertiert.\n\nDrücken Sie +, um Ihre bestehende Website in Ihre GrowERP-Website umzuwandeln: Die Website wird gelesen, ihre Seiten und Farben werden für die GrowERP-Vorlage neu geschrieben, und das Ergebnis ersetzt Ihre aktuelle Website.",
-  "removingClearsRowTenant": "Das Entfernen löscht nur diese Zeile, Ihre Website bleibt erhalten."
+  "removingClearsRowTenant": "Das Entfernen löscht nur diese Zeile, Ihre Website bleibt erhalten.",
+  "websiteConversionTitle": "Website-Konvertierung",
+  "websiteTranslationTitle": "Website-Übersetzung",
+  "noConversionTenant": "Ihre Website wurde noch nicht konvertiert. Beim Konvertieren wird Ihre bestehende Website gelesen, ihre Seiten und Farben werden für die GrowERP-Vorlage neu geschrieben, und das Ergebnis ersetzt Ihre aktuelle Website.",
+  "noTranslationTenant": "Ihre Website wurde noch nicht übersetzt. Beim Übersetzen wird jede Seite mit KI in die von den Apps unterstützten Sprachen umgeschrieben und neben dem Original veröffentlicht, erreichbar unter /th/, /de/ usw.",
+  "convertWebsite": "Website konvertieren",
+  "translateWebsite": "Website übersetzen",
+  "pagesImagesLabel": "Seiten / Bilder",
+  "languagesLabel": "Sprachen",
+  "pagesLabel": "Seiten"
 }

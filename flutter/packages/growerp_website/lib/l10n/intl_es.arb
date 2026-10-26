@@ -189,5 +189,14 @@
   "websiteReadAITenant": "Se lee su sitio web existente, sus páginas y colores se reescriben con IA para la plantilla de GrowERP y el resultado reemplaza su sitio web actual de GrowERP. Tarda unos minutos y usa la clave de IA de su empresa (Configuración del sistema).",
   "websiteReplaceWarning": "Las páginas e imágenes de su sitio web actual se eliminan y no se pueden recuperar.",
   "noWebsitesConvertedTenant": "Aún no se ha convertido ningún sitio web.\n\nPulse + para convertir su sitio web existente en su sitio web de GrowERP: se lee el sitio, sus páginas y colores se reescriben para la plantilla de GrowERP y el resultado reemplaza su sitio web actual.",
-  "removingClearsRowTenant": "Eliminar solo borra esta fila, su sitio web se mantiene."
+  "removingClearsRowTenant": "Eliminar solo borra esta fila, su sitio web se mantiene.",
+  "websiteConversionTitle": "Conversión del sitio web",
+  "websiteTranslationTitle": "Traducción del sitio web",
+  "noConversionTenant": "Su sitio web aún no se ha convertido. La conversión lee su sitio web existente, reescribe sus páginas y colores para la plantilla de GrowERP y reemplaza su sitio web actual con el resultado.",
+  "noTranslationTenant": "Su sitio web aún no se ha traducido. La traducción reescribe cada página con IA en los idiomas que admiten las aplicaciones y la publica junto al original, accesible en /th/, /de/, etc.",
+  "convertWebsite": "Convertir sitio web",
+  "translateWebsite": "Traducir sitio web",
+  "pagesImagesLabel": "Páginas / imágenes",
+  "languagesLabel": "Idiomas",
+  "pagesLabel": "Páginas"
 }

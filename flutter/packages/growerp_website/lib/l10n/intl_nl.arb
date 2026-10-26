@@ -189,5 +189,14 @@
   "websiteReadAITenant": "Uw bestaande website wordt gelezen, de pagina's en kleuren worden met AI herschreven voor het GrowERP-sjabloon en het resultaat vervangt uw huidige GrowERP-website. Dit duurt enkele minuten en gebruikt de AI-sleutel van uw bedrijf (Systeeminstellingen).",
   "websiteReplaceWarning": "De pagina's en afbeeldingen van uw huidige website worden verwijderd en kunnen niet worden hersteld.",
   "noWebsitesConvertedTenant": "Nog geen websites geconverteerd.\n\nDruk op + om uw bestaande website om te zetten naar uw GrowERP-website: de site wordt gelezen, de pagina's en kleuren worden herschreven voor het GrowERP-sjabloon en het resultaat vervangt uw huidige website.",
-  "removingClearsRowTenant": "Verwijderen wist alleen deze regel, uw website blijft bestaan."
+  "removingClearsRowTenant": "Verwijderen wist alleen deze regel, uw website blijft bestaan.",
+  "websiteConversionTitle": "Websiteconversie",
+  "websiteTranslationTitle": "Websitevertaling",
+  "noConversionTenant": "Uw website is nog niet geconverteerd. Bij het converteren wordt uw bestaande website gelezen, worden de pagina's en kleuren herschreven voor het GrowERP-sjabloon en vervangt het resultaat uw huidige website.",
+  "noTranslationTenant": "Uw website is nog niet vertaald. Bij het vertalen wordt elke pagina met AI herschreven in de talen die de apps ondersteunen en naast het origineel gepubliceerd, bereikbaar via /th/, /de/ enzovoort.",
+  "convertWebsite": "Website converteren",
+  "translateWebsite": "Website vertalen",
+  "pagesImagesLabel": "Pagina's / afbeeldingen",
+  "languagesLabel": "Talen",
+  "pagesLabel": "Pagina's"
 }
