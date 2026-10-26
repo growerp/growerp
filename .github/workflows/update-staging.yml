@@ -462,7 +462,7 @@ jobs:
 
       - name: Run migrations on staging
         env:
-          MOQUI_PASSWORD: ${{ secrets.STAGING_MOQUI_PASSWORD }}
+          MOQUI_PASSWORD: ${{ secrets.TEST_SYSTEMSUPPORT_PASSWORD }}
         run: |
           version=$(grep -o 'name="growerp" version="[^"+]*' backend/component.xml | sed 's/.*version="//')
           migration/deploy.sh "$version" https://backend.growerp.org

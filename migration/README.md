@@ -37,9 +37,9 @@ The workflows do this themselves with `deploy.sh <version> <url>`, which runs th
 minor version directory of that version and retries while the new backend starts:
 
 - **Update Staging**, job `migrate-staging`, after a new backend version is
-  deployed: secret `STAGING_MOQUI_PASSWORD` (SystemSupport on backend.growerp.org).
+  deployed: secret `TEST_SYSTEMSUPPORT_PASSWORD` (SystemSupport on backend.growerp.org).
 - **Update Production**, when moqui is synced: the version production runs, its
-  list taken from that version's tag. Secret `PROD_MOQUI_PASSWORD` (SystemSupport
+  list taken from that version's tag. Secret `PROD_SYSTEMSUPPORT_PASSWORD` (SystemSupport
   on backend.growerp.com).
 
 The store review backend is a copy of the staging database, so it is migrated
