@@ -154,34 +154,29 @@ void main() {
     );
   });
 
-  group(
-    'CartDeleteItem total',
-    skip: 'https://github.com/growerp/growerp/issues/38',
-    () {
-      blocTest<CartBloc, CartState>(
-        'CartDeleteItem_twoItemsLeft_recalculatesTotal',
-        build: build,
-        seed: () => CartState(
-          status: CartStatus.inProcess,
-          finDoc: emptyCart.copyWith(
-            items: [
-              item('a', '1', '1'),
-              item('b', '10', '2'),
-              item('c', '5', '3'),
-            ],
-          ),
+  // https://github.com/growerp/growerp/issues/38
+  group('CartDeleteItem total', () {
+    blocTest<CartBloc, CartState>(
+      'CartDeleteItem_twoItemsLeft_recalculatesTotal',
+      build: build,
+      seed: () => CartState(
+        status: CartStatus.inProcess,
+        finDoc: emptyCart.copyWith(
+          items: [
+            item('a', '1', '1'),
+            item('b', '10', '2'),
+            item('c', '5', '3'),
+          ],
         ),
-        act: (bloc) => bloc.add(const CartDeleteItem(0)),
-        expect: () => [
-          cartState(CartStatus.inProcess).having(
-            (s) => s.finDoc.grandTotal,
-            'grandTotal',
-            Decimal.parse('35'),
-          ),
-        ],
-      );
-    },
-  );
+      ),
+      act: (bloc) => bloc.add(const CartDeleteItem(0)),
+      expect: () => [
+        cartState(
+          CartStatus.inProcess,
+        ).having((s) => s.finDoc.grandTotal, 'grandTotal', Decimal.parse('35')),
+      ],
+    );
+  });
 
   group('CartHeader', () {
     blocTest<CartBloc, CartState>(
