@@ -1,5 +1,1 @@
 # Migrations for the version not yet released, see ../README.md
-# Organization menus cloned by the security grid (#75): screen access becomes
-# MenuItemAccess overrides of the seed menu, the copies are removed. Needs a
-# backend restart first (new entity).
-growerp.100.MenuServices100.migrate#OwnerMenuOverrides
