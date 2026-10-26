@@ -712,5 +712,83 @@
   "tableHdrHookType": "Hook Type",
   "@tableHdrHookType": {
     "description": "Table column header"
+  },
+  "giveThisToCustomer": "Give this to the customer with the admin login: it cannot be shown again once this conversion is removed.",
+  "@giveThisToCustomer": {
+    "description": "Instruction regarding customer login."
+  },
+  "passwordArg": "Password: {password}",
+  "@passwordArg": {
+    "description": "Displays the generated password.",
+    "placeholders": {
+      "password": {
+        "type": "String",
+        "description": "The password."
+      }
+    }
+  },
+  "removeFromList": "Remove from list",
+  "@removeFromList": {
+    "description": "Button text to remove item from list."
+  },
+  "removingClearsRow": "Removing only clears this row, the created owner and its website stay.",
+  "@removingClearsRow": {
+    "description": "Warning message when removing an item."
+  },
+  "startConversion": "Start conversion",
+  "@startConversion": {
+    "description": "Button text to start conversion."
+  },
+  "tableHdrCompany": "Company",
+  "@tableHdrCompany": {
+    "description": "Table column header"
+  },
+  "tableHdrLanguages": "Languages",
+  "@tableHdrLanguages": {
+    "description": "Table column header"
+  },
+  "tableHdrOwner": "Owner",
+  "@tableHdrOwner": {
+    "description": "Table column header"
+  },
+  "tableHdrPages": "Pages",
+  "@tableHdrPages": {
+    "description": "Table column header"
+  },
+  "tableHdrWebsite": "Website",
+  "@tableHdrWebsite": {
+    "description": "Table column header"
+  },
+  "websiteReadAI": "The website is read, its pages and colours are rewritten with AI for the GrowERP template, and the result is installed as a new owner. This takes a few minutes and uses AI credits.",
+  "@websiteReadAI": {
+    "description": "Dialog text explaining AI website rewrite."
+  },
+  "searchHintWebsiteTranslation": "Search owner, store or status...",
+  "@searchHintWebsiteTranslation": {
+    "description": "Search field hint"
+  },
+  "searchHintWebsiteConversion": "Search website, company or status...",
+  "@searchHintWebsiteConversion": {
+    "description": "Search field hint"
+  },
+  "noWebsitesConverted": "No websites converted yet.\n\nPress + to convert an existing company website into a new GrowERP owner: the site is read, its pages and colours are rewritten for the GrowERP template, and the result is installed as a new tenant.",
+  "@noWebsitesConverted": {
+    "description": "Message when no websites have been converted."
+  },
+  "websiteReadAITenant": "Your existing website is read, its pages and colours are rewritten with AI for the GrowERP template, and the result replaces your current GrowERP website. This takes a few minutes and uses the AI key of your company (System Setup).",
+  "@websiteReadAITenant": {
+    "description": "Explanation on the dialog where a tenant converts its existing website"
+  },
+  "websiteReplaceWarning": "Your current website pages and images are deleted and cannot be restored.",
+  "@websiteReplaceWarning": {
+    "description": "Warning that converting deletes the current website"
+  },
+  "noWebsitesConvertedTenant": "No websites converted yet.\n\nPress + to convert your existing website into your GrowERP website: the site is read, its pages and colours are rewritten for the GrowERP template, and the result replaces your current website.",
+  "@noWebsitesConvertedTenant": {
+    "description": "Empty conversion list for a tenant"
+  },
+  "removingClearsRowTenant": "Removing only clears this row, your website stays.",
+  "@removingClearsRowTenant": {
+    "description": "Note that removing a conversion row keeps the website"
   }
 }

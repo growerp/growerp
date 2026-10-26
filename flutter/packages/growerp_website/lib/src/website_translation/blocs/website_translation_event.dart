@@ -41,13 +41,14 @@ class WebsiteTranslationFetch extends WebsiteTranslationEvent {
 
 class WebsiteTranslationCreate extends WebsiteTranslationEvent {
   const WebsiteTranslationCreate({
-    required this.ownerPartyId,
+    this.ownerPartyId = '',
     required this.targetLocales,
     this.sourceLocale = 'en',
     this.translateEntityNames = false,
     this.overwriteExisting = false,
   });
 
+  /// the company whose website is translated; empty for a tenant: its own
   final String ownerPartyId;
 
   /// comma separated, eg 'th,nl'

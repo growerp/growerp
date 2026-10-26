@@ -143,7 +143,7 @@ class WebsiteTranslationBloc
     try {
       emit(state.copyWith(status: WebsiteTranslationStatus.loading));
       final created = await restClient.createWebsiteTranslation(
-        ownerPartyId: event.ownerPartyId,
+        ownerPartyId: event.ownerPartyId.isEmpty ? null : event.ownerPartyId,
         sourceLocale: event.sourceLocale,
         targetLocales: event.targetLocales,
         translateEntityNames: event.translateEntityNames ? 'Y' : 'N',

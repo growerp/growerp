@@ -17,9 +17,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import '../../common/system_support.dart';
 import '../website_translation.dart';
 
 /// New translation: the form. Existing translation: progress and result.
+/// System support picks the owner, a tenant translates its own website.
 class WebsiteTranslationDialog extends StatefulWidget {
   final WebsiteTranslation? translation;
   const WebsiteTranslationDialog(this.translation, {super.key});
@@ -41,10 +43,12 @@ class WebsiteTranslationDialogState extends State<WebsiteTranslationDialog> {
   bool _overwriteExisting = false;
 
   bool get _isNew => widget.translation == null;
+  late bool _isSupport;
 
   @override
   void initState() {
     super.initState();
+    _isSupport = isSystemSupport(context);
     _bloc = context.read<WebsiteTranslationBloc>();
     _restClient = context.read<RestClient>();
   }
@@ -82,7 +86,9 @@ class WebsiteTranslationDialogState extends State<WebsiteTranslationDialog> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: popUp(
             context: context,
-            title: _isNew ? 'Translate a website' : 'Website translation',
+            title: _isNew
+                ? (_isSupport ? 'Translate a website' : 'Translate your website')
+                : 'Website translation',
             height: 620,
             width: 450,
             child: _isNew ? _newForm(state) : _detail(_current(state)),
@@ -113,25 +119,26 @@ class WebsiteTranslationDialogState extends State<WebsiteTranslationDialog> {
               'and so on. This takes a few minutes and uses AI credits.',
             ),
             const SizedBox(height: 16),
-            AutocompleteLabel<Company>(
-              key: const Key('ownerPartyId'),
-              label: 'Owner',
-              hintText: 'the owner whose website is translated',
-              optionsBuilder: (TextEditingValue value) async {
-                final result = await _restClient.getCompanies(
-                  mainCompanies: true,
-                  searchString: value.text.isEmpty ? null : value.text,
-                  limit: 20,
-                );
-                return result.companies;
-              },
-              displayStringForOption: (Company company) =>
-                  company.name ?? company.partyId ?? '',
-              onSelected: (Company? company) =>
-                  setState(() => _owner = company),
-              validator: (Company? company) =>
-                  company == null ? 'Select the owner' : null,
-            ),
+            if (_isSupport)
+              AutocompleteLabel<Company>(
+                key: const Key('ownerPartyId'),
+                label: 'Owner',
+                hintText: 'the owner whose website is translated',
+                optionsBuilder: (TextEditingValue value) async {
+                  final result = await _restClient.getCompanies(
+                    mainCompanies: true,
+                    searchString: value.text.isEmpty ? null : value.text,
+                    limit: 20,
+                  );
+                  return result.companies;
+                },
+                displayStringForOption: (Company company) =>
+                    company.name ?? company.partyId ?? '',
+                onSelected: (Company? company) =>
+                    setState(() => _owner = company),
+                validator: (Company? company) =>
+                    company == null ? 'Select the owner' : null,
+              ),
             const SizedBox(height: 10),
             DropdownButtonFormField<String>(
               key: const Key('sourceLocale'),
@@ -215,7 +222,8 @@ class WebsiteTranslationDialogState extends State<WebsiteTranslationDialog> {
                   }
                   _bloc.add(
                     WebsiteTranslationCreate(
-                      ownerPartyId: _owner!.partyId!,
+                      // a tenant always translates its own website
+                      ownerPartyId: _isSupport ? _owner!.partyId! : '',
                       sourceLocale: _sourceLocale,
                       targetLocales: _targetLocales.join(','),
                       translateEntityNames: _translateEntityNames,
@@ -241,8 +249,10 @@ class WebsiteTranslationDialogState extends State<WebsiteTranslationDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 20),
-          _row('Owner', t.ownerName.isEmpty ? t.ownerPartyId : t.ownerName),
-          _row('Store', t.productStoreId),
+          if (_isSupport) ...[
+            _row('Owner', t.ownerName.isEmpty ? t.ownerPartyId : t.ownerName),
+            _row('Store', t.productStoreId),
+          ],
           _row(
             'Written in',
             WebsiteTranslation.localeNames[t.sourceLocale] ?? t.sourceLocale,

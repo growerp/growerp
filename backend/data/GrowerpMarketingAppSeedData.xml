@@ -144,5 +144,8 @@ limitations under the License.
         title="Assessments" iconName="quiz" widgetName="AssessmentList" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_WEB_FORMS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_WEBSITE"
         title="Web Forms" iconName="dynamic_form" widgetName="WebsiteFormList" sequenceNum="40"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_WEB_TOOLS" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_WEBSITE"
+        title="Convert &amp; Translate" iconName="translate" widgetName="WebsiteToolsView"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="50"/>
 
 </entity-facade-xml>

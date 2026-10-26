@@ -15,15 +15,17 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import '../../../l10n/generated/support_localizations.dart';
+import '../../../l10n/generated/website_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import '../../common/system_support.dart';
 import '../website_conversion.dart';
 
-/// Website generator: convert an existing company website into a new owner.
+/// Website generator: convert an existing company website into a new owner
+/// (system support), or for a tenant into its own website.
 /// Each row is one conversion; the ones still running refresh themselves.
 class WebsiteConversionList extends StatefulWidget {
   const WebsiteConversionList({super.key});
@@ -124,20 +126,21 @@ class WebsiteConversionListState extends State<WebsiteConversionList> {
           return const Center(child: LoadingIndicator());
         }
         _conversions = state.conversions;
+        final isSupport = isSystemSupport(context);
         return Scaffold(
           // the route is the form key the route walking tests look for
           key: const Key('/websiteGenerator'),
           floatingActionButton: FloatingActionButton(
             key: const Key('addNewWebsiteConversion'),
             onPressed: () => _openDialog(null),
-            tooltip: 'Convert a website',
+            tooltip: isSupport ? 'Convert a website' : 'Convert your website',
             child: const Icon(Icons.add),
           ),
           body: Column(
             children: [
               ListFilterBar(
                 key: const Key('websiteConversionSearch'),
-                searchHint: SupportLocalizations.of(
+                searchHint: WebsiteLocalizations.of(
                   context,
                 )!.searchHintWebsiteConversion,
                 searchValue: state.searchString,
@@ -145,12 +148,13 @@ class WebsiteConversionListState extends State<WebsiteConversionList> {
                   WebsiteConversionFetch(searchString: value, refresh: true),
                 ),
                 actions: [
-                  IconButton(
-                    key: const Key('importWebsiteFile'),
-                    icon: const Icon(Icons.upload_file),
-                    tooltip: 'Install a website from an export file',
-                    onPressed: _pickAndImport,
-                  ),
+                  if (isSupport)
+                    IconButton(
+                      key: const Key('importWebsiteFile'),
+                      icon: const Icon(Icons.upload_file),
+                      tooltip: 'Install a website from an export file',
+                      onPressed: _pickAndImport,
+                    ),
                 ],
               ),
               Expanded(
@@ -159,9 +163,13 @@ class WebsiteConversionListState extends State<WebsiteConversionList> {
                         child: Padding(
                           padding: const EdgeInsets.all(24),
                           child: Text(
-                            SupportLocalizations.of(
-                              context,
-                            )!.noWebsitesConverted,
+                            isSupport
+                                ? WebsiteLocalizations.of(
+                                    context,
+                                  )!.noWebsitesConverted
+                                : WebsiteLocalizations.of(
+                                    context,
+                                  )!.noWebsitesConvertedTenant,
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -174,8 +182,10 @@ class WebsiteConversionListState extends State<WebsiteConversionList> {
                                 context: context,
                                 conversion: conversion,
                                 index: _conversions.indexOf(conversion),
-                                onExport: (c) =>
-                                    _bloc.add(WebsiteConversionExport(c)),
+                                // exporting is system support only
+                                onExport: isSupport
+                                    ? (c) => _bloc.add(WebsiteConversionExport(c))
+                                    : null,
                               ),
                             )
                             .toList(),
