@@ -14,7 +14,6 @@
 
 import org.moqui.Moqui
 import org.moqui.context.ExecutionContext
-import spock.lang.PendingFeature
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -107,7 +106,7 @@ class AccountingServicesTests extends Specification {
         glAccounts([search: "Cash box ${run}"])*.glAccountId == [account.glAccountId]
     }
 
-    @PendingFeature(reason = 'https://github.com/growerp/growerp/issues/55')
+    // https://github.com/growerp/growerp/issues/55
     def "update a gl account without an account type"() {
         given:
         Map root = glAccounts().find { it.accountCode == '10000' }
