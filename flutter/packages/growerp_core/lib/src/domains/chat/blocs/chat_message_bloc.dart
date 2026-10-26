@@ -95,6 +95,8 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
       ChatMessages compResult = await restClient.getChatMessages(
         chatRoomId: event.chatRoomId,
         searchString: event.searchString,
+        start: start,
+        limit: event.limit,
       );
       // Mark chat room as read (hasRead: true)
       chatRoomBloc.add(
@@ -110,6 +112,7 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
               ? true
               : false,
           searchString: '',
+          chatRoomId: event.chatRoomId,
         ),
       );
     } on DioException catch (e) {
@@ -127,16 +130,18 @@ class ChatMessageBloc extends Bloc<ChatMessageEvent, ChatMessageState> {
     ChatMessageReceiveWs event,
     Emitter<ChatMessageState> emit,
   ) async {
+    chatRoomBloc.add(
+      ChatRoomUpdateLocal(
+        addNotReadChatRoomId: event.chatMessage.chatRoom!.chatRoomId,
+      ),
+    );
+    // other rooms only get the unread badge
+    if (event.chatMessage.chatRoom!.chatRoomId != state.chatRoomId) return;
     List<ChatMessage> chatMessages = List.from(state.chatMessages);
     chatMessages.add(
       ChatMessage(
         fromUserId: event.chatMessage.fromUserId,
         content: event.chatMessage.content,
-      ),
-    );
-    chatRoomBloc.add(
-      ChatRoomUpdateLocal(
-        addNotReadChatRoomId: event.chatMessage.chatRoom!.chatRoomId,
       ),
     );
     emit(state.copyWith(chatMessages: chatMessages));

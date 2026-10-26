@@ -130,6 +130,8 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
       ChatRooms compResult = await restClient.getChatRooms(
         searchString: event.searchString,
         namePrefix: event.namePrefix,
+        start: start,
+        limit: _chatRoomLimit,
       );
       return emit(
         state.copyWith(
@@ -232,7 +234,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
             ),
           );
           ChatRoom compResult = await restClient.createChatRoom(
-              chatRoom: event.chatRoom.copyWith(members: members),
+            chatRoom: event.chatRoom.copyWith(members: members),
           );
           chatRooms.insert(0, compResult);
           return emit(
