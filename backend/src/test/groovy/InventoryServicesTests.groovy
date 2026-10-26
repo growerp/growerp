@@ -14,7 +14,6 @@
 
 import org.moqui.Moqui
 import org.moqui.context.ExecutionContext
-import spock.lang.PendingFeature
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -134,7 +133,7 @@ class InventoryServicesTests extends Specification {
         updated.quantityOnHand as BigDecimal == 7
     }
 
-    @PendingFeature(reason = 'https://github.com/growerp/growerp/issues/53')
+    // https://github.com/growerp/growerp/issues/53
     def "update an asset without an acquire cost"() {
         given:
         Map product = ec.service.sync().name('growerp.100.CatalogServices100.create#Product')
@@ -153,6 +152,28 @@ class InventoryServicesTests extends Specification {
 
         then:
         !ec.message.hasError()
+    }
+
+    def "update an asset without a quantity on hand keeps the quantity"() {
+        given:
+        Map product = ec.service.sync().name('growerp.100.CatalogServices100.create#Product')
+                .parameters([product: [productName: "Noqty ${run}", productTypeId: 'Physical Good',
+                        useWarehouse: true]]).call().product
+        Map asset = ec.service.sync().name("${service}.create#Asset")
+                .parameters([asset: [assetName: "Noqty stock ${run}", statusId: 'Available',
+                        quantityOnHand: 3, availableToPromise: 3, acquireCost: 5,
+                        product: [productId: product.productId]]]).call().asset
+
+        when:
+        ec.service.sync().name("${service}.update#Asset")
+                .parameters([asset: [assetId: asset.assetId, assetName: "Noqty stock ${run} b",
+                        statusId: 'Available', quantityOnHand: '', availableToPromise: 3,
+                        acquireCost: 5, product: [productId: product.productId]]]).call()
+
+        then:
+        !ec.message.hasError()
+        ec.entity.find('mantle.product.asset.Asset').condition('assetId', asset.assetId)
+                .useCache(false).one().quantityOnHandTotal == 3
     }
 
     def "another tenant does not see the locations"() {
