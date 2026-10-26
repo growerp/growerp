@@ -112,80 +112,74 @@ void main() {
     });
   });
 
-  group(
-    'broken round trips',
-    skip: 'https://github.com/growerp/growerp/issues/47',
-    () {
-      test('ProductCsv_twoCategories_keepsBoth', () {
-        final p = csvToProducts(
-          csvFromProducts([
-            Product(
-              pseudoId: 'p1',
-              productName: 'Apple',
-              categories: [
-                Category(categoryName: 'Fruit'),
-                Category(categoryName: 'Fresh'),
-              ],
-            ),
-          ]),
-          Logger(),
-        ).single;
-        expect(
-          p.categories.map((c) => c.categoryName).where((n) => n.isNotEmpty),
-          ['Fruit', 'Fresh'],
-        );
-      });
-
-      test('ProductCsv_header_labelsTheColumnBelowIt', () {
-        final lines = csvFromProducts([
-          Product(pseudoId: 'p1', useWarehouse: true),
-        ]).split('\r\n');
-        final header = lines[0].split(',').map((h) => h.trim()).toList();
-        final row = lines[1].split(',');
-        expect(row[header.indexOf('Use Warehouse')], '"true"');
-      });
-
-      test('CategoryCsv_image_importsBackTheSameBytes', () {
-        final c = csvToCategories(
-          csvFromCategories([
-            Category(
-              categoryName: 'Fruit',
-              image: Uint8List.fromList([1, 2, 3]),
-            ),
-          ]),
-        ).single;
-        expect(c.image, [1, 2, 3]);
-      });
-
-      test('GlAccountCsv_noAccountType_exportsWithoutCrash', () {
-        final csv = csvFromGlAccounts([
-          GlAccount(
-            accountCode: '1000',
-            accountName: 'Cash',
-            accountClass: const AccountClass(description: 'Asset'),
+  // https://github.com/growerp/growerp/issues/47
+  group('broken round trips', () {
+    test('ProductCsv_twoCategories_keepsBoth', () {
+      final p = csvToProducts(
+        csvFromProducts([
+          Product(
+            pseudoId: 'p1',
+            productName: 'Apple',
+            categories: [
+              Category(categoryName: 'Fruit'),
+              Category(categoryName: 'Fresh'),
+            ],
           ),
-        ]);
-        expect(csvToGlAccounts(csv).single.accountType, isNull);
-      });
+        ]),
+        Logger(),
+      ).single;
+      expect(
+        p.categories.map((c) => c.categoryName).where((n) => n.isNotEmpty),
+        ['Fruit', 'Fresh'],
+      );
+    });
 
-      test('CompanyCsv_exportedCompany_importsBackUnchanged', () {
-        final c = csvToCompanies(
-          csvFromCompanies([
-            Company(
-              pseudoId: 'c1',
-              role: Role.supplier,
-              name: 'Acme',
-              email: 'info@acme.com',
-              telephoneNr: '+66 2',
-              currency: Currency(currencyId: 'THB'),
-              address: Address(city: 'Bangkok', country: 'Thailand'),
-            ),
-          ]),
-        ).single;
-        expect(c.telephoneNr, '+66 2');
-        expect(c.currency?.currencyId, 'THB');
-        expect(c.address?.city, 'Bangkok');
-      });
-    },
-  );
+    test('ProductCsv_header_labelsTheColumnBelowIt', () {
+      final lines = csvFromProducts([
+        Product(pseudoId: 'p1', useWarehouse: true),
+      ]).split('\r\n');
+      final header = lines[0].split(',').map((h) => h.trim()).toList();
+      final row = lines[1].split(',');
+      expect(row[header.indexOf('Use Warehouse')], '"true"');
+    });
+
+    test('CategoryCsv_image_importsBackTheSameBytes', () {
+      final c = csvToCategories(
+        csvFromCategories([
+          Category(categoryName: 'Fruit', image: Uint8List.fromList([1, 2, 3])),
+        ]),
+      ).single;
+      expect(c.image, [1, 2, 3]);
+    });
+
+    test('GlAccountCsv_noAccountType_exportsWithoutCrash', () {
+      final csv = csvFromGlAccounts([
+        GlAccount(
+          accountCode: '1000',
+          accountName: 'Cash',
+          accountClass: const AccountClass(description: 'Asset'),
+        ),
+      ]);
+      expect(csvToGlAccounts(csv).single.accountType, isNull);
+    });
+
+    test('CompanyCsv_exportedCompany_importsBackUnchanged', () {
+      final c = csvToCompanies(
+        csvFromCompanies([
+          Company(
+            pseudoId: 'c1',
+            role: Role.supplier,
+            name: 'Acme',
+            email: 'info@acme.com',
+            telephoneNr: '+66 2',
+            currency: Currency(currencyId: 'THB'),
+            address: Address(city: 'Bangkok', country: 'Thailand'),
+          ),
+        ]),
+      ).single;
+      expect(c.telephoneNr, '+66 2');
+      expect(c.currency?.currencyId, 'THB');
+      expect(c.address?.city, 'Bangkok');
+    });
+  });
 }
