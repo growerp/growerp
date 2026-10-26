@@ -442,3 +442,27 @@ jobs:
           username: ${{ secrets.PROD_SSH_USER }}
           key: ${{ secrets.PROD_SSH_KEY }}
           script: server/swarm/check-updates.sh --apply
+
+  # One-time data migrations of the new backend version (migration/README.md),
+  # once staging runs it. release.sh filed them under the version's minor
+  # directory in the version commit, so check out the branch after that commit.
+  migrate-staging:
+    needs: [prepare, commit, deploy-staging]
+    if: always() && needs.prepare.outputs.include_moqui == 'true' && needs.commit.result == 'success' && needs.deploy-staging.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          sparse-checkout: |
+            /migration/
+            /backend/component.xml
+          sparse-checkout-cone-mode: false
+
+      - name: Run migrations on staging
+        env:
+          MOQUI_PASSWORD: ${{ secrets.STAGING_MOQUI_PASSWORD }}
+        run: |
+          version=$(grep -o 'name="growerp" version="[^"+]*' backend/component.xml | sed 's/.*version="//')
+          migration/deploy.sh "$version" https://backend.growerp.org

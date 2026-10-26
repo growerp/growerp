@@ -15,6 +15,7 @@ records which ones belong to which version and runs them.
 migration/
 ├── README.md
 ├── run.sh              runs the services of one minor version
+├── deploy.sh           runs those of a deployed version, used by the workflows
 ├── release.sh          moves next/ to the minor version of a new release
 ├── 1.16/services.txt   migrations of all 1.16.x versions
 ├── ...
@@ -31,6 +32,18 @@ Migrations are grouped per minor version: `1.21/` holds those of every 1.21.x.
 After deploying a version, run its minor version directory. When a server skips
 minor versions, run every directory in between, oldest first. All services are
 idempotent, so running a directory again (after the next patch) changes nothing.
+
+The workflows do this themselves with `deploy.sh <version> <url>`, which runs the
+minor version directory of that version and retries while the new backend starts:
+
+- **Update Staging**, job `migrate-staging`, after a new backend version is
+  deployed: secret `STAGING_MOQUI_PASSWORD` (SystemSupport on backend.growerp.org).
+- **Update Production**, when moqui is synced: the version production runs, its
+  list taken from that version's tag. Secret `PROD_MOQUI_PASSWORD` (SystemSupport
+  on backend.growerp.com).
+
+The store review backend is a copy of the staging database, so it is migrated
+already. By hand:
 
 ```bash
 MOQUI_PASSWORD=... migration/run.sh next https://backend.growerp.org

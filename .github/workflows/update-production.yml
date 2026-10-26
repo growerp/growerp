@@ -81,3 +81,61 @@ jobs:
               server/swarm/sync-to-prod.sh "$svc" --from ${{ inputs.source == 'review' && 'review' || 'test' }} --apply || rc=1
             done
             exit $rc
+
+      # One-time data migrations of the backend version now on production
+      # (migration/README.md). Only when moqui was part of the sync; the services
+      # are idempotent, so a moqui that was already in sync changes nothing.
+      - name: Production backend version
+        id: prodversion
+        if: steps.services.outputs.services == 'all' || contains(format(' {0} ', steps.services.outputs.services), ' moqui ')
+        uses: appleboy/ssh-action@v1
+        with:
+          host: growerp.com
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          capture_stdout: true
+          script: docker service inspect growerp_moqui-prod --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}'
+
+      - name: Resolve backend version
+        id: backend
+        if: steps.prodversion.outcome == 'success'
+        env:
+          IMAGE: ${{ steps.prodversion.outputs.stdout }}
+        run: |
+          # ghcr.io/growerp/growerp-moqui:1.22.0@sha256:... -> 1.22.0
+          image=$(echo "$IMAGE" | tr -d '[:space:]')
+          image="${image%%@*}"
+          version="${image##*:}"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::cannot read the backend version from image '$IMAGE'"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      # The scripts from this workflow's branch, the list of migrations from the
+      # tag of the version production runs: that is the list release.sh filed
+      # for it, also when the branch has moved on.
+      - name: Checkout migration scripts
+        if: steps.backend.outcome == 'success'
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: migration
+
+      - name: Checkout migrations of ${{ steps.backend.outputs.version }}
+        if: steps.backend.outcome == 'success'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.backend.outputs.version }}
+          path: released
+          sparse-checkout: migration
+
+      - name: Run migrations on production
+        if: steps.backend.outcome == 'success'
+        env:
+          MOQUI_PASSWORD: ${{ secrets.PROD_MOQUI_PASSWORD }}
+          VERSION: ${{ steps.backend.outputs.version }}
+        run: |
+          minor="${VERSION%.*}"
+          rm -rf "migration/$minor"
+          [ -d "released/migration/$minor" ] && cp -r "released/migration/$minor" migration/
+          migration/deploy.sh "$VERSION" https://backend.growerp.com
