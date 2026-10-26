@@ -187,14 +187,42 @@ void main() {
     );
   });
 
+  // https://github.com/growerp/growerp/issues/35
   group('CompanyDelete', () {
-    // Delete is not implemented: the handler is empty.
     blocTest<CompanyBloc, CompanyState>(
-      'CompanyDelete_any_emitsNothingAndCallsNoRest',
+      'CompanyDelete_existing_removesItFromTheList',
+      setUp: () => when(
+        () => restClient.deleteCompany(partyId: company1.partyId!),
+      ).thenAnswer((_) async => company1),
       build: () => CompanyBloc(restClient, Role.supplier),
+      seed: () => CompanyState(
+        status: CompanyStatus.success,
+        companies: [company1, company2],
+      ),
       act: (bloc) => bloc.add(CompanyDelete(company1)),
-      expect: () => <CompanyState>[],
-      verify: (_) => verifyZeroInteractions(restClient),
+      expect: () => [
+        companyState(CompanyStatus.loading),
+        companyState(
+          CompanyStatus.success,
+          companies: [company2],
+          message: 'companyDeleteSuccess',
+        ),
+      ],
+    );
+
+    blocTest<CompanyBloc, CompanyState>(
+      'CompanyDelete_restThrowsDio_emitsFailure',
+      setUp: () => when(
+        () => restClient.deleteCompany(partyId: company1.partyId!),
+      ).thenThrow(dioError('Not allowed')),
+      build: () => CompanyBloc(restClient, Role.supplier),
+      seed: () =>
+          CompanyState(status: CompanyStatus.success, companies: [company1]),
+      act: (bloc) => bloc.add(CompanyDelete(company1)),
+      expect: () => [
+        companyState(CompanyStatus.loading),
+        companyState(CompanyStatus.failure, message: 'Not allowed'),
+      ],
     );
   });
 }
