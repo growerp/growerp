@@ -119,6 +119,34 @@ void main() {
     );
 
     blocTest<AuthBloc, AuthState>(
+      'AuthLoad_savedKey403_clearsKeyAndUnauthenticated',
+      setUp: () async {
+        await PersistFunctions.persistAuthenticate(loggedIn);
+        when(
+          () => restClient.getCompanies(searchString: 'C1', limit: 1),
+        ).thenAnswer((_) async => Companies(companies: [company]));
+        when(() => restClient.getAuthenticate(applicationId: appId)).thenThrow(
+          DioException(
+            requestOptions: RequestOptions(),
+            type: DioExceptionType.badResponse,
+            response: Response(
+              requestOptions: RequestOptions(),
+              statusCode: 403,
+            ),
+          ),
+        );
+      },
+      build: build,
+      act: (bloc) => bloc.add(AuthLoad()),
+      expect: () => [
+        authState(AuthStatus.loading),
+        authState(AuthStatus.unAuthenticated),
+      ],
+      verify: (_) async =>
+          expect((await PersistFunctions.getAuthenticate())?.apiKey, isNull),
+    );
+
+    blocTest<AuthBloc, AuthState>(
       'AuthLoad_savedCompanyGone_unauthenticated',
       setUp: () async {
         await PersistFunctions.persistAuthenticate(loggedIn);
