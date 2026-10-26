@@ -42,6 +42,8 @@ class DateTimeConverter implements JsonConverter<DateTime?, String?> {
     try {
       // Parse the timestamp and ensure it's treated as UTC from server
       DateTime? parsed = DateTime.tryParse(json);
+      // a calendar date (yyyy-MM-dd) has no time zone: keep it as a local date
+      if (parsed != null && json.length == 10) return parsed;
       if (parsed != null) {
         // If the parsed datetime doesn't have timezone info, treat it as UTC
         if (!json.contains('Z') &&
