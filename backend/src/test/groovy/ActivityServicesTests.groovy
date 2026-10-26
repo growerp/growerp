@@ -14,7 +14,6 @@
 
 import org.moqui.Moqui
 import org.moqui.context.ExecutionContext
-import spock.lang.PendingFeature
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -93,7 +92,7 @@ class ActivityServicesTests extends Specification {
         open*.activityId == [todo.activityId]
     }
 
-    @PendingFeature(reason = 'https://github.com/growerp/growerp/issues/54')
+    // https://github.com/growerp/growerp/issues/54
     def "create an event with a contact"() {
         given:
         Map contact = ec.service.sync().name('growerp.100.PartyServices100.create#User')
