@@ -133,6 +133,9 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
       FinDocFetch(
         refresh: true,
         searchString: event.searchString,
+        sales: event.sales,
+        docType: event.docType,
+        journalId: event.journalId,
         my: event.my,
         status: event.status,
         limit: event.limit,
@@ -181,7 +184,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
             : (event.sales ?? sales),
         docType: event.docType ?? docType,
         searchString: event.searchString,
-        journalId: event.journalId,
+        journalId: event.journalId ?? (journalId.isEmpty ? null : journalId),
         my: event.my,
         status: event.status,
       );
