@@ -272,27 +272,24 @@ void main() {
       ],
     );
 
-    group(
-      'AssetFetch paging',
-      skip: 'https://github.com/growerp/growerp/issues/45',
-      () {
-        blocTest<AssetBloc, AssetState>(
-          'AssetFetch_nextPage_requestsFromCurrentLength',
-          setUp: () => when(
-            () => restClient.getAsset(
-              searchString: '',
-              assetClassId: '',
-              start: 1,
-              limit: 20,
-            ),
-          ).thenAnswer((_) async => Assets(assets: [room2])),
-          build: build,
-          seed: () => AssetState(status: AssetStatus.success, assets: [room1]),
-          act: (bloc) => bloc.add(const AssetFetch()),
-          wait: fetchWait,
-          verify: (bloc) => expect(bloc.state.assets, [room1, room2]),
-        );
-      },
-    );
+    // https://github.com/growerp/growerp/issues/45
+    group('AssetFetch paging', () {
+      blocTest<AssetBloc, AssetState>(
+        'AssetFetch_nextPage_requestsFromCurrentLength',
+        setUp: () => when(
+          () => restClient.getAsset(
+            searchString: '',
+            assetClassId: '',
+            start: 1,
+            limit: 20,
+          ),
+        ).thenAnswer((_) async => Assets(assets: [room2])),
+        build: build,
+        seed: () => AssetState(status: AssetStatus.success, assets: [room1]),
+        act: (bloc) => bloc.add(const AssetFetch()),
+        wait: fetchWait,
+        verify: (bloc) => expect(bloc.state.assets, [room1, room2]),
+      );
+    });
   });
 }
