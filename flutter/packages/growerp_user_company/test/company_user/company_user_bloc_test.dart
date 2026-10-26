@@ -382,8 +382,8 @@ void main() {
       act: (bloc) => bloc.add(
         const CompanyUserUpload(
           'title\n'
-          'id,type,name,role,email,url,tel,a1,a2,zip,city,prov,country,cid,comp\n'
-          'p1,company,Acme,customer,a@b.c,,,Main 1,,1000,Town,,Thailand,THA,Acme\n'
+          'id,type,name,role,email,url,tel,a1,a2,zip,city,prov,country,cid,compId,comp\n'
+          'p1,company,Acme,customer,a@b.c,,,Main 1,,1000,Town,,Thailand,THA,,Acme\n'
           'too,short\n',
         ),
       ),
