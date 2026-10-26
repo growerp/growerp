@@ -283,6 +283,9 @@ limitations under the License.
             <method type="post">
                 <service name="growerp.100.PartyServices100.create#Company" />
             </method>
+            <method type="delete">
+                <service name="growerp.100.PartyServices100.delete#Company" />
+            </method>
         </resource>
         <resource name="User">
             <method type="get">

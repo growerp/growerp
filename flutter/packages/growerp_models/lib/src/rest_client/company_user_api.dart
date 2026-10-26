@@ -42,6 +42,9 @@ mixin CompanyUserApi {
   @PATCH("rest/s1/growerp/100/Company")
   Future<Company> updateCompany({@Field() required Company company});
 
+  @DELETE("rest/s1/growerp/100/Company")
+  Future<Company> deleteCompany({@Field() required String partyId});
+
   // party to replace company and user
   @GET("rest/s1/growerp/100/CompanyUser")
   Future<CompaniesUsers> getCompanyUser({
