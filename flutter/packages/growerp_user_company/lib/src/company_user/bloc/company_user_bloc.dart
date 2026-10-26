@@ -290,7 +290,8 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
       int line = 0;
       // import csv into companyUsers
       for (final row in result) {
-        if (line++ < 2 || row.length < 12) continue;
+        // columns as written by get#ExportCompanyUsers
+        if (line++ < 2 || row.length < 16) continue;
         companyUsers.add(
           CompanyUser(
             pseudoId: row[0],
@@ -309,7 +310,7 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
               country: row[12],
               countryId: row[13],
             ),
-            company: Company(pseudoId: row[13], name: row[14]),
+            company: Company(pseudoId: row[14], name: row[15]),
           ),
         );
       }
