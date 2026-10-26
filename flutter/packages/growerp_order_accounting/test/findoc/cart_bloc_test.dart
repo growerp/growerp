@@ -69,32 +69,29 @@ void main() {
     );
   });
 
-  group(
-    'CartFetch saved cart',
-    skip: 'https://github.com/growerp/growerp/issues/39',
-    () {
-      blocTest<CartBloc, CartState>(
-        'CartFetch_savedCart_restoresIt',
-        setUp: () async {
-          when(
-            () => restClient.getItemTypes(sales: true),
-          ).thenAnswer((_) async => ItemTypes());
-          await PersistFunctions.persistFinDoc(
-            emptyCart.copyWith(description: 'saved cart'),
-          );
-        },
-        build: build,
-        act: (bloc) => bloc.add(CartFetch(emptyCart)),
-        expect: () => [
-          isA<CartState>().having(
-            (s) => s.finDoc.description,
-            'description',
-            'saved cart',
-          ),
-        ],
-      );
-    },
-  );
+  // https://github.com/growerp/growerp/issues/39
+  group('CartFetch saved cart', () {
+    blocTest<CartBloc, CartState>(
+      'CartFetch_savedCart_restoresIt',
+      setUp: () async {
+        when(
+          () => restClient.getItemTypes(sales: true),
+        ).thenAnswer((_) async => ItemTypes());
+        await PersistFunctions.persistFinDoc(
+          emptyCart.copyWith(description: 'saved cart'),
+        );
+      },
+      build: build,
+      act: (bloc) => bloc.add(CartFetch(emptyCart)),
+      expect: () => [
+        isA<CartState>().having(
+          (s) => s.finDoc.description,
+          'description',
+          'saved cart',
+        ),
+      ],
+    );
+  });
 
   group('CartAdd', () {
     blocTest<CartBloc, CartState>(
