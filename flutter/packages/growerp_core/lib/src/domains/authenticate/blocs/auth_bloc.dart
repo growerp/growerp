@@ -171,6 +171,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         );
       }
     } on DioException catch (e) {
+      // saved apiKey rejected: drop it and show login instead of a failure
+      final code = e.response?.statusCode;
+      if (code == 401 || code == 403) {
+        final noKey = defaultAuthenticate.copyWith(apiKey: null);
+        await PersistFunctions.persistAuthenticate(noKey);
+        if (_applyStartupCredentials(noKey, emit)) return;
+        return emit(
+          state.copyWith(
+            status: AuthStatus.unAuthenticated,
+            authenticate: noKey,
+          ),
+        );
+      }
       // if connection error, don't wipe session
       if (e.type != DioExceptionType.connectionError &&
           e.type != DioExceptionType.connectionTimeout &&
