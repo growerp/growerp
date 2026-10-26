@@ -48,10 +48,10 @@ Service definitions for menu configuration and menu item management
       <service-call out-map="context"
         name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
 
-      <!-- Three tiers, most specific first:
+      <!-- Two tiers, most specific first:
            1. this user's own copy   (userId set, ownerPartyId set)
-           2. this organization's    (userId null, ownerPartyId set)  <- the security grid edits this
-           3. shipped seed data      (userId null, ownerPartyId null) -->
+           2. shipped seed data      (userId null, ownerPartyId null), with this organization's
+              screen access (MenuItemAccess, set by the security grid) applied per item -->
 
       <!-- When userVersion=true, look for user+owner specific config first -->
       <if condition="userVersion">
@@ -59,16 +59,6 @@ Service definitions for menu configuration and menu item management
           <field-map field-name="menuConfigurationId" from="menuConfigurationId" ignore-if-empty="true"/>
           <econdition field-name="appId" from="appId" ignore-if-empty="true"/>
           <econdition field-name="userId" from="ec.user.userId"/>
-          <econdition field-name="ownerPartyId" from="ownerPartyId"/>
-        </entity-find>
-      </if>
-
-      <!-- Then this organization's own configuration -->
-      <if condition="!userConfigs &amp;&amp; ownerPartyId">
-        <entity-find entity-name="growerp.menu.MenuConfiguration" list="userConfigs">
-          <field-map field-name="menuConfigurationId" from="menuConfigurationId" ignore-if-empty="true"/>
-          <econdition field-name="appId" from="appId" ignore-if-empty="true"/>
-          <econdition field-name="userId" operator="is-null"/>
           <econdition field-name="ownerPartyId" from="ownerPartyId"/>
         </entity-find>
       </if>
@@ -95,6 +85,15 @@ Service definitions for menu configuration and menu item management
       </if>
 
       <set field="config" from="userConfigs[0]" />
+
+      <!-- The organization's screen access, for the seed items only: a user's own copy
+           already carries the groups it was cloned with. -->
+      <set field="accessOverrides" from="[]" />
+      <if condition="ownerPartyId &amp;&amp; !config.ownerPartyId &amp;&amp; !config.userId">
+        <entity-find entity-name="growerp.menu.MenuItemAccess" list="accessOverrides">
+          <econdition field-name="ownerPartyId" from="ownerPartyId" />
+        </entity-find>
+      </if>
 
       <!-- Screens the user switched off; a user preference so it applies in
            every app, not just the app of this configuration. -->
@@ -143,6 +142,19 @@ Service definitions for menu configuration and menu item management
           hiddenWidgets.add(pref.preferenceKey.toString().substring(hiddenPrefix.length()))
         }
 
+        // The organization's override replaces both group lists of an item; an item
+        // without one keeps its shipped groups.
+        Map overrides = [:]
+        accessOverrides?.each { overrides[it.menuItemId] = it }
+        def viewGroupsJson = { item ->
+          def o = overrides[item.menuItemId]
+          return o != null ? o.userGroupsJson : item.userGroupsJson
+        }
+        def writeGroupsJson = { item ->
+          def o = overrides[item.menuItemId]
+          return o != null ? o.updateGroupsJson : item.updateGroupsJson
+        }
+
         // Parse userGroupsJson string into a proper list for Flutter model
         def parseUserGroups = { jsonStr ->
             if (!jsonStr) return null
@@ -178,7 +190,7 @@ Service definitions for menu configuration and menu item management
 
           List children = []
           childItems.each { child ->
-            if (hasAccess(child.userGroupsJson)) children.add(buildMenuItem(child))
+            if (hasAccess(viewGroupsJson(child))) children.add(buildMenuItem(child))
           }
           // Sort children by sequence
           children.sort { a, b -> ((a.sequenceNum ?: 0) as Integer).compareTo((b.sequenceNum ?: 0) as Integer) }
@@ -200,8 +212,8 @@ Service definitions for menu configuration and menu item management
             widgetName: item.widgetName,
             image: item.image,
             selectedImage: item.selectedImage,
-            userGroups: parseUserGroups(item.userGroupsJson),
-            updateGroups: parseUserGroups(item.updateGroupsJson),
+            userGroups: parseUserGroups(viewGroupsJson(item)),
+            updateGroups: parseUserGroups(writeGroupsJson(item)),
             artifactGroupId: item.artifactGroupId,
             sequenceNum: item.sequenceNum,
             isActive: item.isActive == 'Y' &amp;&amp; !hiddenWidgets.contains(item.widgetName),
@@ -224,7 +236,7 @@ Service definitions for menu configuration and menu item management
         // Build list of top-level menu items with their children
         List menuItems = []
         topLevelItems.each { item ->
-          if (hasAccess(item.userGroupsJson)) menuItems.add(buildMenuItem(item))
+          if (hasAccess(viewGroupsJson(item))) menuItems.add(buildMenuItem(item))
         }
         
         // Sort by sequenceNum
@@ -512,70 +524,12 @@ Service definitions for menu configuration and menu item management
     </actions>
   </service>
 
-  <!-- ensureOwnerMenuConfiguration: the organization's own copy, edited by the security grid.
-       Sits between the user's copy and the shipped seed data. -->
-  <service verb="ensure" noun="OwnerMenuConfiguration" authenticate="true">
-    <description>Ensure this organization has its own menu configuration. If the given config is
-      seed data, clone it for the organization (userId null, ownerPartyId set).</description>
-    <in-parameters>
-      <parameter name="menuConfigurationId" required="true" />
-    </in-parameters>
-    <out-parameters>
-      <parameter name="ownerMenuConfigurationId" />
-      <parameter name="wasCloned" type="Boolean" />
-    </out-parameters>
-    <actions>
-      <service-call out-map="context"
-        name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-
-      <if condition="!ownerPartyId">
-        <return error="true" message="No organization for the current user" />
-      </if>
-
-      <entity-find-one entity-name="growerp.menu.MenuConfiguration" value-field="config">
-        <field-map field-name="menuConfigurationId" from="menuConfigurationId" />
-      </entity-find-one>
-      <if condition="!config">
-        <return error="true" message="Menu configuration not found: ${menuConfigurationId}" />
-      </if>
-
-      <!-- already the organization's own copy -->
-      <if condition="config.userId == null &amp;&amp; config.ownerPartyId == ownerPartyId">
-        <set field="ownerMenuConfigurationId" from="menuConfigurationId" />
-        <set field="wasCloned" from="false" type="Boolean" />
-        <return />
-      </if>
-
-      <entity-find entity-name="growerp.menu.MenuConfiguration" list="existingOwnerConfigs" limit="1">
-        <econdition field-name="appId" from="config.appId" />
-        <econdition field-name="userId" operator="is-null" />
-        <econdition field-name="ownerPartyId" from="ownerPartyId" />
-      </entity-find>
-      <if condition="existingOwnerConfigs">
-        <set field="ownerMenuConfigurationId"
-          from="existingOwnerConfigs[0].menuConfigurationId" />
-        <set field="wasCloned" from="false" type="Boolean" />
-        <return />
-      </if>
-
-      <service-call name="growerp.100.MenuServices100.clone#MenuConfiguration"
-        out-map="cloneOut"
-        in-map="[sourceMenuConfigurationId: menuConfigurationId, ownerLevel: true,
-                name: config.name + ' (Organization)']" />
-      <set field="ownerMenuConfigurationId" from="cloneOut.menuConfigurationId" />
-      <set field="wasCloned" from="true" type="Boolean" />
-    </actions>
-  </service>
-
   <!-- cloneMenuConfiguration: Clone configuration for user customization -->
   <service verb="clone" noun="MenuConfiguration" authenticate="true">
     <description>Clone an existing menu configuration for user customization.</description>
     <in-parameters>
       <parameter name="sourceMenuConfigurationId" required="true" />
       <parameter name="name" />
-      <parameter name="ownerLevel" type="Boolean" default-value="false">
-        <description>Clone for the whole organization (userId null) instead of for this user</description>
-      </parameter>
     </in-parameters>
     <out-parameters>
       <parameter name="menuConfigurationId" />
@@ -586,7 +540,7 @@ Service definitions for menu configuration and menu item management
     <actions>
       <service-call out-map="context"
         name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-      <set field="currentUserId" from="ownerLevel ? null : ec.user.userId" />
+      <set field="currentUserId" from="ec.user.userId" />
 
       <entity-find-one entity-name="growerp.menu.MenuConfiguration" value-field="sourceConfig">
         <field-map field-name="menuConfigurationId" from="sourceMenuConfigurationId" />
@@ -615,12 +569,23 @@ Service definitions for menu configuration and menu item management
         <order-by field-name="sequenceNum" />
       </entity-find>
 
+      <!-- A copy of the seed starts with this organization's screen access -->
+      <set field="accessOverrides" from="[]" />
+      <if condition="ownerPartyId &amp;&amp; !sourceConfig.ownerPartyId &amp;&amp; !sourceConfig.userId">
+        <entity-find entity-name="growerp.menu.MenuItemAccess" list="accessOverrides">
+          <econdition field-name="ownerPartyId" from="ownerPartyId" />
+        </entity-find>
+      </if>
+
       <!-- Build a map of old ID -> new ID for parent references -->
       <script>
         Map idMapping = [:]
+        Map overrides = [:]
+        accessOverrides.each { overrides[it.menuItemId] = it }
         
         // First pass: create all items without parent references
         sourceItems.each { item ->
+          def access = overrides[item.menuItemId]
           def createResult = ec.service.sync().name("create#growerp.menu.MenuItem")
             .parameters([
               menuConfigurationId: newMenuConfigurationId,
@@ -631,8 +596,8 @@ Service definitions for menu configuration and menu item management
               widgetName: item.widgetName,
               image: item.image,
               selectedImage: item.selectedImage,
-              userGroupsJson: item.userGroupsJson,
-              updateGroupsJson: item.updateGroupsJson,
+              userGroupsJson: access != null ? access.userGroupsJson : item.userGroupsJson,
+              updateGroupsJson: access != null ? access.updateGroupsJson : item.updateGroupsJson,
               artifactGroupId: item.artifactGroupId,
               sequenceNum: item.sequenceNum,
               isActive: item.isActive
@@ -1088,6 +1053,96 @@ Service definitions for menu configuration and menu item management
     </actions>
   </service>
 
+  <!-- migrateOwnerMenuOverrides: one-time update for organizations whose security grid
+       cloned the whole menu (issue #75) -->
+  <service verb="migrate" noun="OwnerMenuOverrides" authenticate="true">
+    <description>One-time idempotent migration: turn every organization menu copy (userId null,
+      ownerPartyId set) into MenuItemAccess overrides of the seed items whose groups differ, then
+      delete the copy, so menu items shipped later reach the organization. Copy items without a
+      seed item are dropped and logged. Run from /apps/tools/Service/ServiceRun/runJson.</description>
+    <out-parameters>
+      <parameter name="migratedCount" type="Integer" />
+      <parameter name="overrideCount" type="Integer" />
+    </out-parameters>
+    <actions>
+      <if condition="!ec.user.isInGroup('GROWERP_M_SYSTEM')">
+        <return error="true" message="Only a system user can migrate organization menus" />
+      </if>
+      <set field="migratedCount" from="0" type="Integer" />
+      <set field="overrideCount" from="0" type="Integer" />
+      <entity-find entity-name="growerp.menu.MenuConfiguration" list="ownerConfigs">
+        <econdition field-name="userId" operator="is-null" />
+        <econdition field-name="ownerPartyId" operator="is-not-null" />
+      </entity-find>
+      <iterate list="ownerConfigs" entry="ownerConfig">
+        <set field="ownerOverrideCount" from="0" type="Integer" />
+        <entity-find entity-name="growerp.menu.MenuItem" list="copyItems">
+          <econdition field-name="menuConfigurationId" from="ownerConfig.menuConfigurationId" />
+        </entity-find>
+        <entity-find entity-name="growerp.menu.MenuConfiguration" list="seedConfigs" limit="1">
+          <econdition field-name="appId" from="ownerConfig.appId" />
+          <econdition field-name="userId" operator="is-null" />
+          <econdition field-name="ownerPartyId" operator="is-null" />
+        </entity-find>
+        <set field="seedItems" from="[]" />
+        <if condition="seedConfigs">
+          <entity-find entity-name="growerp.menu.MenuItem" list="seedItems">
+            <econdition field-name="menuConfigurationId" from="seedConfigs[0].menuConfigurationId" />
+          </entity-find>
+        </if>
+
+        <!-- a copy item is the seed item with the same title, screen and key -->
+        <iterate list="copyItems" entry="copyItem">
+          <set field="seedItem" from="seedItems.find { (it.title == copyItem.title
+              &amp;&amp; it.widgetName == copyItem.widgetName
+              &amp;&amp; it.itemKey == copyItem.itemKey) as Boolean }" />
+          <if condition="!seedItem">
+            <log level="warn" message="migrate#OwnerMenuOverrides: ${ownerConfig.ownerPartyId} item ${copyItem.title} (${copyItem.widgetName}) has no seed item, dropped" />
+            <continue />
+          </if>
+          <if condition="(copyItem.userGroupsJson ?: null) != (seedItem.userGroupsJson ?: null)
+              || (copyItem.updateGroupsJson ?: null) != (seedItem.updateGroupsJson ?: null)">
+            <service-call name="store#growerp.menu.MenuItemAccess"
+              in-map="[ownerPartyId: ownerConfig.ownerPartyId, menuItemId: seedItem.menuItemId,
+                userGroupsJson: copyItem.userGroupsJson ?: '',
+                updateGroupsJson: copyItem.updateGroupsJson ?: '']" />
+            <set field="ownerOverrideCount" from="ownerOverrideCount + 1" />
+          </if>
+        </iterate>
+
+        <!-- REST access counts the apps an organization has overrides in: keep an app it
+             had a copy of but did not change, unless it is the app it registered for -->
+        <entity-find-one entity-name="growerp.general.TenantSetup" value-field="tenantSetup">
+          <field-map field-name="ownerPartyId" from="ownerConfig.ownerPartyId" />
+        </entity-find-one>
+        <set field="registeredAppId" from="tenantSetup?.applicationId?.replaceFirst('^App', '')?.toLowerCase()" />
+        <set field="markerItem" from="seedItems.find { (it.parentMenuItemId == null) as Boolean }" />
+        <if condition="ownerOverrideCount == 0 &amp;&amp; markerItem
+            &amp;&amp; ownerConfig.appId != registeredAppId">
+          <service-call name="store#growerp.menu.MenuItemAccess"
+            in-map="[ownerPartyId: ownerConfig.ownerPartyId, menuItemId: markerItem.menuItemId,
+              userGroupsJson: markerItem.userGroupsJson ?: '',
+              updateGroupsJson: markerItem.updateGroupsJson ?: '']" />
+          <set field="ownerOverrideCount" from="1" />
+        </if>
+
+        <!-- children first, the parent foreign key -->
+        <entity-delete-by-condition entity-name="growerp.menu.MenuItem">
+          <econdition field-name="menuConfigurationId" from="ownerConfig.menuConfigurationId" />
+          <econdition field-name="parentMenuItemId" operator="is-not-null" />
+        </entity-delete-by-condition>
+        <entity-delete-by-condition entity-name="growerp.menu.MenuItem">
+          <econdition field-name="menuConfigurationId" from="ownerConfig.menuConfigurationId" />
+        </entity-delete-by-condition>
+        <entity-delete value-field="ownerConfig" />
+        <set field="overrideCount" from="overrideCount + ownerOverrideCount" />
+        <set field="migratedCount" from="migratedCount + 1" />
+      </iterate>
+      <service-call name="growerp.100.SecurityServices100.clear#OwnerDomainAccessCache" />
+      <log message="migrate#OwnerMenuOverrides migrated ${migratedCount} organization menu(s) into ${overrideCount} override(s)" />
+    </actions>
+  </service>
+
   <!-- reorderMenuItems: Update sequence numbers for multiple items -->
   <service verb="reorder" noun="MenuItems" authenticate="true">
     <description>Update sequence numbers for multiple menu items in one operation (for drag-and-drop reordering).</description>
@@ -1193,8 +1248,9 @@ Service definitions for menu configuration and menu item management
     </actions>
   </service>
 
-  <!-- setMenuItemGroups: the Organization -> Security grid writes here. Edits land on the
-       organization's own menu configuration, never on the shipped seed data. -->
+  <!-- setMenuItemGroups: the Organization -> Security grid writes here. Edits are stored as
+       this organization's override (MenuItemAccess) of the seed item, never on the shipped
+       seed data and never as a copy of the menu: menu items shipped later still arrive. -->
   <service verb="set" noun="MenuItemGroups" authenticate="true">
     <description>Set which user groups may see and write through one menu item, for this
       organization. Admins may grant Admin/Employee/Other; only a system user may grant
@@ -1249,36 +1305,50 @@ Service definitions for menu configuration and menu item management
         </if>
       </iterate>
 
+      <service-call out-map="context"
+        name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+      <if condition="!ownerPartyId">
+        <return error="true" message="No organization for the current user" />
+      </if>
+
       <entity-find-one entity-name="growerp.menu.MenuItem" value-field="sourceItem">
         <field-map field-name="menuItemId" from="menuItemId" />
       </entity-find-one>
       <if condition="!sourceItem">
         <return error="true" message="Menu item not found: ${menuItemId}" />
       </if>
+      <entity-find-one entity-name="growerp.menu.MenuConfiguration" value-field="sourceConfig">
+        <field-map field-name="menuConfigurationId" from="sourceItem.menuConfigurationId" />
+      </entity-find-one>
 
-      <!-- move to the organization's own configuration before writing -->
-      <service-call name="growerp.100.MenuServices100.ensure#OwnerMenuConfiguration"
-        in-map="[menuConfigurationId: sourceItem.menuConfigurationId]" out-map="ensureOut" />
-      <set field="menuConfigurationId" from="ensureOut.ownerMenuConfigurationId" />
-
-      <!-- after a clone the item ids differ, so find the copy by its itemKey -->
+      <!-- The override is keyed on the seed item. An item of a copy (a user's own menu)
+           has an id of its own, so find the seed item it was cloned from. -->
+      <set field="menuConfigurationId" from="sourceItem.menuConfigurationId" />
       <set field="targetMenuItemId" from="menuItemId" />
-      <if condition="menuConfigurationId != sourceItem.menuConfigurationId">
-        <entity-find entity-name="growerp.menu.MenuItem" list="ownerItems" limit="1">
-          <econdition field-name="menuConfigurationId" from="menuConfigurationId" />
-          <econdition field-name="itemKey" from="sourceItem.itemKey" ignore-if-empty="true" />
-          <econdition field-name="title" from="sourceItem.title" />
+      <if condition="sourceConfig?.ownerPartyId || sourceConfig?.userId">
+        <entity-find entity-name="growerp.menu.MenuConfiguration" list="seedConfigs" limit="1">
+          <econdition field-name="appId" from="sourceConfig.appId" />
+          <econdition field-name="userId" operator="is-null" />
+          <econdition field-name="ownerPartyId" operator="is-null" />
         </entity-find>
-        <if condition="!ownerItems">
-          <return error="true"
-            message="Menu item ${sourceItem.title} not found in the organization configuration" />
+        <if condition="seedConfigs">
+          <entity-find entity-name="growerp.menu.MenuItem" list="seedItems" limit="1">
+            <econdition field-name="menuConfigurationId" from="seedConfigs[0].menuConfigurationId" />
+            <econdition field-name="itemKey" from="sourceItem.itemKey" ignore-if-empty="true" />
+            <econdition field-name="title" from="sourceItem.title" />
+          </entity-find>
         </if>
-        <set field="targetMenuItemId" from="ownerItems[0].menuItemId" />
+        <if condition="!seedItems">
+          <return error="true"
+            message="Menu item ${sourceItem.title} is not a shipped menu item" />
+        </if>
+        <set field="menuConfigurationId" from="seedConfigs[0].menuConfigurationId" />
+        <set field="targetMenuItemId" from="seedItems[0].menuItemId" />
       </if>
 
       <script>
         import groovy.json.JsonOutput
-        // Empty string, not null: entity-auto update skips null parameters, so a null
+        // Empty string, not null: entity-auto store skips null parameters, so a null
         // here would silently keep the old restriction instead of clearing it.
         context.userGroupsJson = userGroups ? JsonOutput.toJson(userGroups) : ''
         // '[]' rather than '': for the write list, absent means "write follows view"
@@ -1288,8 +1358,9 @@ Service definitions for menu configuration and menu item management
         context.updateGroupsJson = updateGroups ? JsonOutput.toJson(updateGroups) : '[]'
       </script>
 
-      <service-call name="update#growerp.menu.MenuItem"
+      <service-call name="store#growerp.menu.MenuItemAccess"
         in-map="[
+        ownerPartyId: ownerPartyId,
         menuItemId: targetMenuItemId,
         userGroupsJson: userGroupsJson,
         updateGroupsJson: updateGroupsJson

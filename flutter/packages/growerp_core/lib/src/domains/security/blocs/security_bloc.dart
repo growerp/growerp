@@ -44,9 +44,10 @@ class SecurityBloc extends Bloc<SecurityEvent, SecurityState> {
   ) async {
     emit(state.copyWith(status: SecurityStatus.loading));
     try {
+      // The organization level menu (shipped items with the organization's
+      // access), never the admin's own copy: access is set per shipped item.
       final config = await restClient.getMenuConfiguration(
         appId: appId,
-        userVersion: true,
         includeAllGroups: true,
       );
       emit(
@@ -79,12 +80,11 @@ class SecurityBloc extends Bloc<SecurityEvent, SecurityState> {
         userGroups: event.userGroups.map((g) => g.value).toList(),
         updateGroups: event.updateGroups.map((g) => g.value).toList(),
       );
-      // The first save clones the seed menu for the organization, so item ids
-      // change; re-read rather than patching the list in place.
+      // Re-read rather than patching the list in place: the server decides
+      // the stored groups (write implies view, an empty list clears).
       await clearRestCache();
       final config = await restClient.getMenuConfiguration(
         appId: appId,
-        userVersion: true,
         includeAllGroups: true,
       );
       emit(

@@ -88,7 +88,6 @@ void main() {
     void stubConfig() => when(
       () => restClient.getMenuConfiguration(
         appId: 'AppAdmin',
-        userVersion: true,
         includeAllGroups: true,
       ),
     ).thenAnswer((_) async => config);
@@ -134,7 +133,6 @@ void main() {
       setUp: () => when(
         () => restClient.getMenuConfiguration(
           appId: 'AppAdmin',
-          userVersion: true,
           includeAllGroups: true,
         ),
       ).thenThrow(dioError('No access')),

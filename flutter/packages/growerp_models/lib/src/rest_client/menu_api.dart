@@ -137,7 +137,7 @@ mixin MenuApi {
   });
 
   /// Set which user groups may see and write through one screen, for this
-  /// organization. Writes land on the organization's own menu configuration.
+  /// organization. Stored as the organization's override of the shipped item.
   /// Returns only the ids and the two group lists, not a whole MenuItem, so the
   /// response is deliberately not deserialized into one.
   @PATCH("rest/s1/growerp/100/MenuItem/groups")

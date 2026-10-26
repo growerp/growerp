@@ -116,6 +116,32 @@ limitations under the License.
         </index>
     </entity>
 
+    <!-- An organization's screen access for one shipped (seed) menu item, set in the
+         Organization -> Security grid. Overrides the item's own groups for that organization
+         only; items without a row keep their shipped groups, so a menu item added to the seed
+         reaches every organization without a migration. Read by get#MenuConfiguration and
+         check#RestAccess. -->
+    <entity entity-name="MenuItemAccess" package="growerp.menu">
+        <field name="ownerPartyId" type="id" is-pk="true"/>
+        <field name="menuItemId" type="id" is-pk="true">
+            <description>The seed menu item (configuration with no owner and no user)</description>
+        </field>
+        <field name="userGroupsJson" type="text-long">
+            <description>Same as MenuItem.userGroupsJson, for this organization</description>
+        </field>
+        <field name="updateGroupsJson" type="text-long">
+            <description>Same as MenuItem.updateGroupsJson, for this organization: absent means
+                write follows view, '[]' means nobody writes.</description>
+        </field>
+
+        <relationship type="one" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+        <relationship type="one" related="growerp.menu.MenuItem">
+            <key-map field-name="menuItemId"/>
+        </relationship>
+    </entity>
+
     <!-- Which REST security domain a screen drives. Keyed on widgetName because the
          same widget is the same screen in every app menu; MenuItem.artifactGroupId
          overrides it for one placement. Read by check#RestAccess. -->

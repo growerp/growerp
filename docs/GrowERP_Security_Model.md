@@ -121,17 +121,38 @@ These rules are implemented three times and **must agree**:
 
 If they disagree, the grid lies about what it just saved.
 
-## Three configuration tiers
+## Configuration tiers
 
 `get#MenuConfiguration` resolves in this order:
 
 1. **the user's own copy** — `userId` set, `ownerPartyId` set (personal customisation)
-2. **the organization's copy** — `userId` null, `ownerPartyId` set (what Security edits)
-3. **the shipped seed** — `userId` null, `ownerPartyId` null
+2. **the shipped seed** — `userId` null, `ownerPartyId` null — with the **organization's
+   overrides** applied per item
 
-`ensure#OwnerMenuConfiguration` creates tier 2 by cloning the seed on the first security edit.
-The seed lookup filters `ownerPartyId is null` — without that condition it would happily serve
-another tenant's configuration once tier 2 rows exist.
+What Organization → Security edits is not a copy of the menu. `set#MenuItemGroups` stores one
+`growerp.menu.MenuItemAccess` row per changed seed item (`ownerPartyId` + seed `menuItemId` →
+`userGroupsJson`, `updateGroupsJson`, same semantics as on `MenuItem`). An item without a row
+keeps its shipped groups, so a menu item added to the seed reaches every organization with its
+default groups and no migration. Organizations that still have a copy from before (issue #75)
+are converted by `migrate#OwnerMenuOverrides`.
+
+A user's own copy is cloned from the seed with the organization's overrides applied, and from
+then on keeps the groups it was cloned with in the menu it serves; REST access is always
+decided at the organization level. "Back to default" (`reset#MenuConfiguration`) deletes the
+copy, which picks up new items and the current access again.
+
+The seed lookup filters `ownerPartyId is null` — without that condition it would serve another
+tenant's configuration (organization copies from before the migration, user copies).
+
+### Changing the shipped menu
+
+- **Add** an item or tab: add it to the seed data. The seed load creates it; every organization
+  sees it with its default groups, users with their own copy after "back to default".
+- **Remove** an item or tab: a seed load never deletes rows, so write an idempotent migration
+  that deletes the item's `MenuItemAccess` rows, then the seed item (children first), then the
+  matching items in user copies by `widgetName` (as `migrate#RestAuthz` does for
+  `CourseViewer`). An item left in a user copy only shows in that user's menu; its screen still
+  gets a 403 unless another screen grants the domain.
 
 Filtering happens **server-side**, for children as well as top-level items: a screen hidden
 from a group must not remain reachable as a tab. The Flutter check in `display_menu_option.dart`
@@ -208,7 +229,7 @@ runs for every REST leaf:
    *write*.
 
 **Which menus count for an organization.** A REST call carries no `appId`, so the app set is
-the `appId`s of the organization's own configurations plus the one it registered for
+the `appId`s of the seed menus the organization has overrides in, plus the one it registered for
 (`TenantSetup.applicationId`, `AppAdmin` → `admin`). Without this scoping every shipped menu
 would count and a hotel tenant would inherit manufacturing access.
 
@@ -250,8 +271,8 @@ silently:
 `growerp.security.restPatterns`, `growerp.security.ownerDomain`.
 
 [`Menu.eecas.xml`](../backend/entity/Menu.eecas.xml) clears them on any create, update or
-delete of `MenuItem` or `MenuConfiguration`. It is hung on the **entities**, not on the eleven
-menu services, so a new write path cannot forget to invalidate.
+delete of `MenuItem`, `MenuItemAccess` or `MenuConfiguration`. It is hung on the **entities**,
+not on the menu services, so a new write path cannot forget to invalidate.
 
 ## Privilege-escalation guards
 
