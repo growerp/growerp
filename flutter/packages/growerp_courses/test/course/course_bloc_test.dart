@@ -96,6 +96,20 @@ void main() {
       expect: () => <CourseState>[],
     );
 
+    // https://github.com/growerp/growerp/issues/44
+    blocTest<CourseBloc, CourseState>(
+      'CourseFetch_restThrowsDio_showsBackendMessage',
+      setUp: () => when(
+        () => restClient.listCourses(start: 0, limit: 20),
+      ).thenThrow(dioError('No access')),
+      build: build,
+      act: (bloc) => bloc.add(const CourseFetch(refresh: true)),
+      expect: () => [
+        courseState(CourseBlocStatus.loading),
+        courseState(CourseBlocStatus.failure, message: 'No access'),
+      ],
+    );
+
     blocTest<CourseBloc, CourseState>(
       'CourseFetch_restThrowsDio_emitsFailure',
       setUp: () => when(
