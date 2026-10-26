@@ -13,15 +13,17 @@
  */
 
 import 'package:flutter/material.dart';
-import '../../../l10n/generated/support_localizations.dart';
+import '../../../l10n/generated/website_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import '../../common/system_support.dart';
 import '../website_conversion.dart';
 
 /// New conversion: the form. Existing conversion: progress and result.
+/// System support creates a new owner, a tenant replaces its own website.
 class WebsiteConversionDialog extends StatefulWidget {
   final WebsiteConversion? conversion;
   const WebsiteConversionDialog(this.conversion, {super.key});
@@ -48,10 +50,12 @@ class WebsiteConversionDialogState extends State<WebsiteConversionDialog> {
   bool _passwordRequested = false;
 
   bool get _isNew => widget.conversion == null;
+  late bool _isSupport;
 
   @override
   void initState() {
     super.initState();
+    _isSupport = isSystemSupport(context);
     _bloc = context.read<WebsiteConversionBloc>();
     if (!_isNew) {
       // the list payload has no password, ask for the single row
@@ -111,10 +115,14 @@ class WebsiteConversionDialogState extends State<WebsiteConversionDialog> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: popUp(
             context: context,
-            title: _isNew ? 'Convert a website' : 'Website conversion',
-            height: 620,
+            title: _isNew
+                ? (_isSupport ? 'Convert a website' : 'Convert your website')
+                : 'Website conversion',
+            height: _isNew && !_isSupport ? 480 : 620,
             width: 450,
-            child: _isNew ? _newForm(state) : _detail(_current(state)),
+            child: _isNew
+                ? (_isSupport ? _newForm(state) : _newTenantForm(state))
+                : _detail(_current(state)),
           ),
         );
       },
@@ -136,7 +144,7 @@ class WebsiteConversionDialogState extends State<WebsiteConversionDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 20),
-            Text(SupportLocalizations.of(context)!.websiteReadAI),
+            Text(WebsiteLocalizations.of(context)!.websiteReadAI),
             const SizedBox(height: 16),
             TextFormField(
               key: const Key('sourceUrl'),
@@ -238,7 +246,7 @@ class WebsiteConversionDialogState extends State<WebsiteConversionDialog> {
             Center(
               child: OutlinedButton(
                 key: const Key('startConversion'),
-                child: Text(SupportLocalizations.of(context)!.startConversion),
+                child: Text(WebsiteLocalizations.of(context)!.startConversion),
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     _bloc.add(
@@ -257,6 +265,74 @@ class WebsiteConversionDialogState extends State<WebsiteConversionDialog> {
                         hostNames: _hostNamesController.text.isEmpty
                             ? null
                             : _hostNamesController.text,
+                        maxPages: _maxPages,
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// a tenant converts into its own website: only the address and the size
+  Widget _newTenantForm(WebsiteConversionState state) {
+    if (state.status == WebsiteConversionStatus.loading) {
+      return const LoadingIndicator();
+    }
+    final localizations = WebsiteLocalizations.of(context)!;
+    return SingleChildScrollView(
+      key: const Key('listView'),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 20),
+            Text(localizations.websiteReadAITenant),
+            const SizedBox(height: 16),
+            TextFormField(
+              key: const Key('sourceUrl'),
+              decoration: const InputDecoration(
+                labelText: 'Website address',
+                hintText: 'www.example.com',
+              ),
+              controller: _urlController,
+              validator: (value) =>
+                  value == null || value.isEmpty ? 'Enter a website address' : null,
+            ),
+            DropdownButtonFormField<int>(
+              key: const Key('maxPages'),
+              decoration: const InputDecoration(labelText: 'Max pages'),
+              initialValue: _maxPages,
+              items: const [6, 12, 20]
+                  .map((n) => DropdownMenuItem<int>(value: n, child: Text('$n')))
+                  .toList(),
+              onChanged: (value) => setState(() => _maxPages = value ?? 12),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              localizations.websiteReplaceWarning,
+              key: const Key('replaceWarning'),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Center(
+              child: OutlinedButton(
+                key: const Key('startConversion'),
+                child: Text(localizations.startConversion),
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    _bloc.add(
+                      WebsiteConversionCreate(
+                        sourceUrl: _urlController.text,
+                        targetStore: true,
                         maxPages: _maxPages,
                       ),
                     );
@@ -330,7 +406,7 @@ class WebsiteConversionDialogState extends State<WebsiteConversionDialog> {
             _row('Pages / images', '${c.pageCount ?? 0} / ${c.imageCount ?? 0}'),
             _row('Owner', c.createdOwnerPartyId),
             _row('Company id', c.createdCompanyPartyId),
-            _row('Store', c.productStoreId),
+            if (!c.isTargetStore) _row('Store', c.productStoreId),
             if (c.hostNameList.isNotEmpty)
               _row('Open at', 'http://${c.hostNameList.first}/'),
             if (c.generatedPassword.isNotEmpty) ...[
@@ -339,7 +415,7 @@ class WebsiteConversionDialogState extends State<WebsiteConversionDialog> {
                 children: [
                   Expanded(
                     child: SelectableText(
-                      SupportLocalizations.of(context)!.passwordArg(c.generatedPassword),
+                      WebsiteLocalizations.of(context)!.passwordArg(c.generatedPassword),
                       key: const Key('generatedPassword'),
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
@@ -361,14 +437,14 @@ class WebsiteConversionDialogState extends State<WebsiteConversionDialog> {
                   ),
                 ],
               ),
-              Text(SupportLocalizations.of(context)!.giveThisToCustomer, style: const TextStyle(fontSize: 12)),
+              Text(WebsiteLocalizations.of(context)!.giveThisToCustomer, style: const TextStyle(fontSize: 12)),
             ],
           ],
           const SizedBox(height: 20),
           Center(
             child: OutlinedButton(
               key: const Key('deleteConversion'),
-              child: Text(SupportLocalizations.of(context)!.removeFromList),
+              child: Text(WebsiteLocalizations.of(context)!.removeFromList),
               onPressed: () {
                 _bloc.add(WebsiteConversionDelete(c));
                 Navigator.of(context).pop();
@@ -378,7 +454,12 @@ class WebsiteConversionDialogState extends State<WebsiteConversionDialog> {
           if (c.isCompleted)
             Padding(
               padding: const EdgeInsets.only(top: 8),
-              child: Text(SupportLocalizations.of(context)!.removingClearsRow, style: const TextStyle(fontSize: 12)),
+              child: Text(
+                c.isTargetStore
+                    ? WebsiteLocalizations.of(context)!.removingClearsRowTenant
+                    : WebsiteLocalizations.of(context)!.removingClearsRow,
+                style: const TextStyle(fontSize: 12),
+              ),
             ),
         ],
       ),

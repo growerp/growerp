@@ -17,8 +17,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
+import '../../common/system_support.dart';
 import '../website_translation.dart';
-import '../../../l10n/generated/support_localizations.dart';
+import '../../../l10n/generated/website_localizations.dart';
 
 /// Website translation: translate an owner's website into the languages the
 /// apps support. Each row is one run; the ones still running refresh themselves.
@@ -94,7 +95,7 @@ class WebsiteTranslationListState extends State<WebsiteTranslationList> {
             children: [
               ListFilterBar(
                 key: const Key('websiteTranslationSearch'),
-                searchHint: SupportLocalizations.of(
+                searchHint: WebsiteLocalizations.of(
                   context,
                 )!.searchHintWebsiteTranslation,
                 searchValue: state.searchString,
@@ -104,12 +105,13 @@ class WebsiteTranslationListState extends State<WebsiteTranslationList> {
               ),
               Expanded(
                 child: _translations.isEmpty && !_isLoading
-                    ? const Center(
+                    ? Center(
                         child: Padding(
-                          padding: EdgeInsets.all(24),
+                          padding: const EdgeInsets.all(24),
                           child: Text(
                             'No websites translated yet.\n\n'
-                            'Press + to translate the website of an owner into '
+                            'Press + to translate '
+                            '${isSystemSupport(context) ? 'the website of an owner' : 'your website'} into '
                             'the languages the apps support: every page is '
                             'rewritten with AI and published next to the '
                             'original, reachable at /th/, /de/ and so on.',

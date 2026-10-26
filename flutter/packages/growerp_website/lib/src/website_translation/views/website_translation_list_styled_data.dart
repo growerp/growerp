@@ -15,47 +15,51 @@
 import 'package:flutter/material.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:support/l10n/generated/support_localizations.dart';
+import '../../../l10n/generated/website_localizations.dart';
 
-List<StyledColumn> getWebsiteConversionListColumns(BuildContext context) {
-  final localizations = SupportLocalizations.of(context)!;
+List<StyledColumn> getWebsiteTranslationListColumns(BuildContext context) {
+  final localizations = WebsiteLocalizations.of(context)!;
   final isPhone = isAPhone(context);
   return [
-    StyledColumn(header: localizations.tableHdrWebsite, flex: isPhone ? 3 : 2),
-    if (!isPhone) StyledColumn(header: localizations.tableHdrCompany, flex: 2),
+    StyledColumn(header: localizations.tableHdrOwner, flex: isPhone ? 3 : 2),
+    if (!isPhone)
+      StyledColumn(header: localizations.tableHdrLanguages, flex: 2),
     StyledColumn(header: localizations.tableHdrStatus, flex: 2),
     if (!isPhone) StyledColumn(header: localizations.tableHdrPages, flex: 1),
     const StyledColumn(header: '', flex: 1),
   ];
 }
 
-Color _statusColor(BuildContext context, WebsiteConversion conversion) {
+Color _statusColor(BuildContext context, WebsiteTranslation translation) {
   final scheme = Theme.of(context).colorScheme;
-  if (conversion.isFailed) return scheme.error;
-  if (conversion.isCompleted) return Colors.green;
+  if (translation.isFailed) return scheme.error;
+  if (translation.isCompleted) return Colors.green;
   return scheme.onSurfaceVariant;
 }
 
-List<Widget> getWebsiteConversionListRow({
+List<Widget> getWebsiteTranslationListRow({
   required BuildContext context,
-  required WebsiteConversion conversion,
+  required WebsiteTranslation translation,
   required int index,
-  required void Function(WebsiteConversion) onExport,
+  required void Function(WebsiteTranslation) onDelete,
 }) {
   final isPhone = isAPhone(context);
+  final owner = translation.ownerName.isEmpty
+      ? translation.ownerPartyId
+      : translation.ownerName;
   return [
     Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          conversion.sourceUrl.replaceFirst(RegExp(r'^https?://'), ''),
-          key: Key('sourceUrl$index'),
+          owner,
+          key: Key('ownerName$index'),
           overflow: TextOverflow.ellipsis,
         ),
         if (isPhone)
           Text(
-            conversion.companyName,
+            translation.targetLanguageNames,
             style: Theme.of(context).textTheme.bodySmall,
             overflow: TextOverflow.ellipsis,
           ),
@@ -63,13 +67,13 @@ List<Widget> getWebsiteConversionListRow({
     ),
     if (!isPhone)
       Text(
-        conversion.companyName,
-        key: Key('companyName$index'),
+        translation.targetLanguageNames,
+        key: Key('targetLocales$index'),
         overflow: TextOverflow.ellipsis,
       ),
     Row(
       children: [
-        if (conversion.inProgress)
+        if (translation.inProgress)
           const Padding(
             padding: EdgeInsets.only(right: 8),
             child: SizedBox(
@@ -80,9 +84,9 @@ List<Widget> getWebsiteConversionListRow({
           ),
         Flexible(
           child: Text(
-            conversion.status,
+            translation.status,
             key: Key('status$index'),
-            style: TextStyle(color: _statusColor(context, conversion)),
+            style: TextStyle(color: _statusColor(context, translation)),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -90,20 +94,20 @@ List<Widget> getWebsiteConversionListRow({
     ),
     if (!isPhone)
       Text(
-        conversion.pageCount == null
+        translation.pageCount == null
             ? ''
-            : '${conversion.pageCount}/${conversion.imageCount ?? 0}',
+            : '${translation.translatedCount ?? 0}/${translation.pageCount}',
         key: Key('pageCount$index'),
       ),
-    // only a finished website has something to export
-    conversion.isCompleted
-        ? IconButton(
-            key: Key('export$index'),
+    // a running translation must not have its row pulled away underneath it
+    translation.inProgress
+        ? const SizedBox.shrink()
+        : IconButton(
+            key: Key('delete$index'),
             padding: EdgeInsets.zero,
-            icon: const Icon(Icons.download),
-            tooltip: 'Save as an import file for another installation',
-            onPressed: () => onExport(conversion),
-          )
-        : const SizedBox.shrink(),
+            icon: const Icon(Icons.delete_forever),
+            tooltip: 'Remove this row, the translated pages stay',
+            onPressed: () => onDelete(translation),
+          ),
   ];
 }

@@ -43,6 +43,9 @@ test {
     include '**/CrmServicesTests.class'
     include '**/FinDocServicesTests.class'
     include '**/AccountingServicesTests.class'
+    include '**/ImportExportServicesTests.class'
+    include '**/WebsiteGeneratorServicesTests.class'
+    include '**/WebsiteTranslationServicesTests.class'
 
     systemProperty 'moqui.runtime', moquiDir.absolutePath + '/runtime'
     systemProperty 'moqui.conf', 'conf/MoquiDevConf.xml'

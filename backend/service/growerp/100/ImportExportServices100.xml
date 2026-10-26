@@ -2364,6 +2364,83 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="install" noun="WebsiteIntoStore">
+        <description>
+            Point a store at a website loaded from an owner-import data file: its wiki space,
+            the 'modern' template, the content location, the company logo and the page images.
+            Used by import#WebsiteOwner for a new owner and by
+            WebsiteGeneratorServices100.replace#StoreWebsite when a tenant converts a website
+            into its own store. Hostnames and contact details are left to the caller.
+        </description>
+        <in-parameters>
+            <parameter name="productStoreId" required="true" />
+            <parameter name="siteId" required="true">
+                <description>id prefix used in the data file, eg ACCUGEO</description>
+            </parameter>
+            <parameter name="storeName">
+                <description>left empty the store keeps its name</description>
+            </parameter>
+            <parameter name="companyPartyId">
+                <description>company that gets the logo of the file; left empty the logo is not
+                    changed</description>
+            </parameter>
+            <parameter name="logoPath">
+                <description>logo path in the file, relative to the root, eg images/logo.png</description>
+            </parameter>
+        </in-parameters>
+        <actions>
+            <set field="rootLocation" value="dbresource://${siteId}_ROOT" />
+            <!-- point the store at the loaded website -->
+            <service-call name="update#mantle.product.store.ProductStore"
+                in-map="[productStoreId: productStoreId, wikiSpaceId: siteId + '_WS'] +
+                        (storeName ? [storeName: storeName] : [:])" />
+
+            <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                list="templateSettings">
+                <econdition field-name="productStoreId" from="productStoreId" />
+                <econdition field-name="settingTypeEnumId" value="PsstTemplateId" />
+            </entity-find>
+            <if condition="templateSettings">
+                <service-call name="update#mantle.product.store.ProductStoreSetting"
+                    in-map="templateSettings[0] + [settingValue: 'modern']" />
+                <else>
+                    <service-call name="create#mantle.product.store.ProductStoreSetting"
+                        in-map="[productStoreId: productStoreId,
+                                settingTypeEnumId: 'PsstTemplateId', settingValue: 'modern']" />
+                </else>
+            </if>
+
+            <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                list="contentSettings">
+                <econdition field-name="productStoreId" from="productStoreId" />
+                <econdition field-name="settingTypeEnumId" value="PsstContentLocation" />
+            </entity-find>
+            <iterate list="contentSettings" entry="contentSetting">
+                <service-call name="update#mantle.product.store.ProductStoreSetting"
+                    in-map="contentSetting + [settingValue: rootLocation]" />
+            </iterate>
+
+            <!-- company logo, served by the /getLogo transition of the store -->
+            <if condition="logoPath &amp;&amp; companyPartyId">
+                <service-call name="create#mantle.party.PartyContent"
+                    in-map="[partyId: companyPartyId, partyContentTypeEnumId: 'PcntLogoImage',
+                            contentLocation: rootLocation + '/' + logoPath]" />
+            </if>
+
+            <!-- page images, served by /getImage/images/{filename} -->
+            <entity-find entity-name="moqui.resource.DbResource" list="imageResources">
+                <econdition field-name="parentResourceId" value="${siteId}_IMAGES" />
+                <econdition field-name="isFile" value="Y" />
+            </entity-find>
+            <iterate list="imageResources" entry="imageResource">
+                <service-call name="create#growerp.store.ProductStoreContent"
+                    in-map="[productStoreId: productStoreId, contentTypeEnumId: 'PrstImageLarge',
+                            description: 'images/' + imageResource.filename,
+                            contentLocation: rootLocation + '/images/' + imageResource.filename]" />
+            </iterate>
+        </actions>
+    </service>
+
     <service verb="import" noun="WebsiteOwner" transaction-timeout="600">
         <description>
             Create a complete new owner (tenant) from a website owner-import data file, as
@@ -2475,36 +2552,6 @@ limitations under the License.
             </if>
             <set field="productStoreId" from="stores[0].productStoreId" />
 
-            <!-- repoint the new store at the imported website -->
-            <service-call name="update#mantle.product.store.ProductStore"
-                in-map="[productStoreId: productStoreId, storeName: spec.companyName,
-                        wikiSpaceId: siteId + '_WS']" />
-
-            <entity-find entity-name="mantle.product.store.ProductStoreSetting"
-                list="templateSettings">
-                <econdition field-name="productStoreId" from="productStoreId" />
-                <econdition field-name="settingTypeEnumId" value="PsstTemplateId" />
-            </entity-find>
-            <if condition="templateSettings">
-                <service-call name="update#mantle.product.store.ProductStoreSetting"
-                    in-map="templateSettings[0] + [settingValue: 'modern']" />
-                <else>
-                    <service-call name="create#mantle.product.store.ProductStoreSetting"
-                        in-map="[productStoreId: productStoreId,
-                                settingTypeEnumId: 'PsstTemplateId', settingValue: 'modern']" />
-                </else>
-            </if>
-
-            <entity-find entity-name="mantle.product.store.ProductStoreSetting"
-                list="contentSettings">
-                <econdition field-name="productStoreId" from="productStoreId" />
-                <econdition field-name="settingTypeEnumId" value="PsstContentLocation" />
-            </entity-find>
-            <iterate list="contentSettings" entry="contentSetting">
-                <service-call name="update#mantle.product.store.ProductStoreSetting"
-                    in-map="contentSetting + [settingValue: rootLocation]" />
-            </iterate>
-
             <!-- The file carries the domains of the installation it came from. Add a name on
                  the host THIS backend is reached at, otherwise a site imported on a staging or
                  production server is only reachable on the original domains, which do not point
@@ -2540,24 +2587,10 @@ limitations under the License.
                 <set field="hostSeq" from="hostSeq + 1" />
             </iterate>
 
-            <!-- company logo, served by the /getLogo transition of the store -->
-            <if condition="spec.logoPath">
-                <service-call name="create#mantle.party.PartyContent"
-                    in-map="[partyId: companyPartyId, partyContentTypeEnumId: 'PcntLogoImage',
-                            contentLocation: rootLocation + '/' + spec.logoPath]" />
-            </if>
-
-            <!-- page images, served by /getImage/images/{filename} -->
-            <entity-find entity-name="moqui.resource.DbResource" list="imageResources">
-                <econdition field-name="parentResourceId" value="${siteId}_IMAGES" />
-                <econdition field-name="isFile" value="Y" />
-            </entity-find>
-            <iterate list="imageResources" entry="imageResource">
-                <service-call name="create#growerp.store.ProductStoreContent"
-                    in-map="[productStoreId: productStoreId, contentTypeEnumId: 'PrstImageLarge',
-                            description: 'images/' + imageResource.filename,
-                            contentLocation: rootLocation + '/images/' + imageResource.filename]" />
-            </iterate>
+            <service-call name="growerp.100.ImportExportServices100.install#WebsiteIntoStore"
+                in-map="[productStoreId: productStoreId, siteId: siteId,
+                        storeName: spec.companyName, companyPartyId: companyPartyId,
+                        logoPath: spec.logoPath]" />
 
             <!-- company contact details found on the original website, shown in the footer -->
             <if condition="spec.contact?.email">

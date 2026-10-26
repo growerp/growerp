@@ -13,15 +13,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <!--
-Website generator: convert an existing company website into a new GrowERP owner.
+Website generator: convert an existing company website into a new GrowERP owner (system
+support only), or into the store of the tenant that asks for it (targetStore).
 
     create#WebsiteConversion   validate + queue, returns immediately
     process#WebsiteConversion  background worker: scrape -> generate -> import
-    get#WebsiteConversions     list/single row for the support app page
+    replace#StoreWebsite       install generated content in an existing store, delete the old site
+    get#WebsiteConversions     list/single row for the support app and the tenant's website tab
     delete#WebsiteConversion   remove a row (never the created owner)
 
 The generated content has the same shape as the files the /convert-website Claude skill
-produces, and is installed by the same growerp.100.ImportExportServices100.import#WebsiteOwner.
+produces, and is installed by the same growerp.100.ImportExportServices100.import#WebsiteOwner,
+or for a tenant by replace#StoreWebsite.
 -->
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
@@ -41,7 +44,6 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
             </parameter>
         </out-parameters>
         <actions>
-            <service-call name="growerp.100.GeneralServices100.check#SupportUser" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if condition="search != null">
@@ -75,6 +77,7 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
                     currencyId: conversion.currencyId, applicationId: conversion.applicationId,
                     fiscalYearStartMonth: conversion.fiscalYearStartMonth,
                     hostNames: conversion.hostNames, maxPages: conversion.maxPages,
+                    targetStore: conversion.targetStore,
                     status: conversion.status, statusMessage: conversion.statusMessage,
                     pageCount: conversion.pageCount, imageCount: conversion.imageCount,
                     createdOwnerPartyId: conversion.createdOwnerPartyId,
@@ -135,14 +138,27 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
     <service verb="create" noun="WebsiteConversion">
         <description>Validate the request and queue the conversion. All the checks that
             import#WebsiteOwner does at the end are done here first, so a conversion that cannot
-            be installed never spends any LLM tokens.</description>
+            be installed never spends any LLM tokens.
+
+            A tenant can only convert into its own store (targetStore): only the source url and
+            the page count are used then, the company and its hostnames stay as they are.</description>
         <in-parameters>
             <parameter name="sourceUrl" required="true" />
-            <parameter name="companyName" required="true" />
-            <parameter name="adminEmail" required="true" />
+            <parameter name="targetStore" type="Boolean" default="false">
+                <description>replace the website of the caller's own store instead of creating a new
+                    owner; always true for anyone but system support</description>
+            </parameter>
+            <parameter name="companyName">
+                <description>required for a new owner</description>
+            </parameter>
+            <parameter name="adminEmail">
+                <description>required for a new owner</description>
+            </parameter>
             <parameter name="adminFirstName" default-value="Site" />
             <parameter name="adminLastName" default-value="Administrator" />
-            <parameter name="currencyId" required="true" />
+            <parameter name="currencyId">
+                <description>required for a new owner</description>
+            </parameter>
             <parameter name="fiscalYearStartMonth" type="Integer" default-value="1">
                 <description>month the accounting year starts in: any month 1..12</description>
             </parameter>
@@ -157,7 +173,11 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
             <parameter name="websiteConversion" type="Map" />
         </out-parameters>
         <actions>
-            <service-call name="growerp.100.GeneralServices100.check#SupportUser" />
+            <set field="isSystem" from="ec.user.isInGroup('GROWERP_M_SYSTEM')" />
+            <!-- a tenant never creates a new owner, it converts into its own store -->
+            <if condition="!isSystem">
+                <set field="targetStore" from="true" />
+            </if>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
 
@@ -167,72 +187,101 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
                 <set field="sourceUrl" value="https://${sourceUrl}" />
             </if>
 
-            <if condition="fiscalYearStartMonth &lt; 1 || fiscalYearStartMonth &gt; 12">
-                <return error="true"
-                    message="Fiscal year start month: ${fiscalYearStartMonth} should be a month 1..12" />
-            </if>
-
-            <!-- the admin email becomes a login, it may not exist yet -->
-            <entity-find entity-name="moqui.security.UserAccount" list="existingUsers">
-                <econdition field-name="username" from="adminEmail" />
-            </entity-find>
-            <if condition="existingUsers">
-                <return error="true"
-                    message="Email ${adminEmail} is already registered, use another address" />
-            </if>
-
-            <!-- hostnames: derived from the source url when not given, always plus a name on
-                 the host this backend is reached at so the result can be opened right away -->
-            <script><![CDATA[
-                def names = []
-                String sourceHost = null
-                try {
-                    sourceHost = new URL(sourceUrl).host
-                } catch (Exception e) {
-                    ec.message.addError("Cannot read the host name from ${sourceUrl}: ${e.message}")
-                }
-                if (hostNames) {
-                    names = hostNames.split(',').collect { it.trim() }.findAll { it }
-                } else if (sourceHost) {
-                    names.add(sourceHost)
-                    names.add(sourceHost.startsWith('www.') ? sourceHost.substring(4) : "www.${sourceHost}")
-                }
-                context.sourceHost = sourceHost
-                context.hostNameList = names.unique()
-            ]]></script>
-            <!-- plus a name on the host this backend is reached at, so the result can be
-                 opened right away on this installation -->
-            <if condition="sourceHost">
-                <service-call name="growerp.100.WebsiteGeneratorServices100.get#WebsiteHostName"
-                    in-map="[sourceHostName: sourceHost]" out-map="derived" />
-                <if condition="derived.hostName &amp;&amp; !hostNameList.contains(derived.hostName)">
-                    <script>hostNameList.add(derived.hostName)</script>
-                </if>
-            </if>
-            <check-errors />
-            <iterate list="hostNameList" entry="specHostName">
-                <entity-find entity-name="mantle.product.store.ProductStoreSetting"
-                    list="hostSettings">
-                    <econdition field-name="settingTypeEnumId" value="PsstHostname" />
-                    <econdition field-name="settingValue" from="specHostName" />
-                </entity-find>
-                <if condition="hostSettings">
+            <if condition="targetStore">
+                <if condition="!isSystem &amp;&amp; !ec.user.isInGroup('GROWERP_M_ADMIN')">
                     <return error="true"
-                        message="Hostname ${specHostName} is already used by store ${hostSettings[0].productStoreId}" />
+                        message="Only an administrator can replace the website of the company" />
                 </if>
-            </iterate>
+                <entity-find entity-name="mantle.product.store.ProductStore" list="stores">
+                    <econdition field-name="organizationPartyId" from="companyPartyId" />
+                </entity-find>
+                <if condition="!stores">
+                    <return error="true"
+                        message="Your company has no website store to convert the website into" />
+                </if>
+                <set field="productStoreId" from="stores[0].productStoreId" />
+                <entity-find-one entity-name="mantle.party.Organization" value-field="company">
+                    <field-map field-name="partyId" from="companyPartyId" />
+                </entity-find-one>
+                <set field="companyName" from="company?.organizationName ?: stores[0].storeName" />
+                <set field="currencyId" from="stores[0].defaultCurrencyUomId" />
+                <set field="adminEmail" from="null" />
+                <set field="hostNameList" from="[]" />
+                <else>
+                    <service-call name="growerp.100.GeneralServices100.check#SupportUser" />
+                    <if condition="!companyName || !adminEmail || !currencyId">
+                        <return error="true"
+                            message="Company name, admin email and currency are required for a new owner" />
+                    </if>
 
-            <!-- an AI key has to be available or the worker would die silently -->
-            <entity-find-one entity-name="growerp.general.SystemSettings" value-field="settings">
-                <field-map field-name="ownerPartyId" from="ownerPartyId" />
-            </entity-find-one>
-            <script><![CDATA[
-                context.apiKey = settings?.geminiApiKey ?: ec.user.getPreference("GEMINI_API_KEY") ?:
-                    System.getenv("GEMINI_API_KEY") ?: System.getenv("GOOGLE_API_KEY")
-            ]]></script>
-            <if condition="!apiKey">
+                    <if condition="fiscalYearStartMonth &lt; 1 || fiscalYearStartMonth &gt; 12">
+                        <return error="true"
+                            message="Fiscal year start month: ${fiscalYearStartMonth} should be a month 1..12" />
+                    </if>
+
+                    <!-- the admin email becomes a login, it may not exist yet -->
+                    <entity-find entity-name="moqui.security.UserAccount" list="existingUsers">
+                        <econdition field-name="username" from="adminEmail" />
+                    </entity-find>
+                    <if condition="existingUsers">
+                        <return error="true"
+                            message="Email ${adminEmail} is already registered, use another address" />
+                    </if>
+
+                    <!-- hostnames: derived from the source url when not given, always plus a name on
+                         the host this backend is reached at so the result can be opened right away -->
+                    <script><![CDATA[
+                        def names = []
+                        String sourceHost = null
+                        try {
+                            sourceHost = new URL(sourceUrl).host
+                        } catch (Exception e) {
+                            ec.message.addError("Cannot read the host name from ${sourceUrl}: ${e.message}")
+                        }
+                        if (hostNames) {
+                            names = hostNames.split(',').collect { it.trim() }.findAll { it }
+                        } else if (sourceHost) {
+                            names.add(sourceHost)
+                            names.add(sourceHost.startsWith('www.') ? sourceHost.substring(4) : "www.${sourceHost}")
+                        }
+                        context.sourceHost = sourceHost
+                        context.hostNameList = names.unique()
+                    ]]></script>
+                    <!-- plus a name on the host this backend is reached at, so the result can be
+                         opened right away on this installation -->
+                    <if condition="sourceHost">
+                        <service-call name="growerp.100.WebsiteGeneratorServices100.get#WebsiteHostName"
+                            in-map="[sourceHostName: sourceHost]" out-map="derived" />
+                        <if condition="derived.hostName &amp;&amp; !hostNameList.contains(derived.hostName)">
+                            <script>hostNameList.add(derived.hostName)</script>
+                        </if>
+                    </if>
+                    <check-errors />
+                    <iterate list="hostNameList" entry="specHostName">
+                        <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                            list="hostSettings">
+                            <econdition field-name="settingTypeEnumId" value="PsstHostname" />
+                            <econdition field-name="settingValue" from="specHostName" />
+                        </entity-find>
+                        <if condition="hostSettings">
+                            <return error="true"
+                                message="Hostname ${specHostName} is already used by store ${hostSettings[0].productStoreId}" />
+                        </if>
+                    </iterate>
+                </else>
+            </if>
+
+            <!-- an AI key has to be available or the worker would die silently; a tenant
+                 needs its own, only system support falls back to the environment -->
+            <service-call name="growerp.100.WebsiteTranslationServices100.get#TranslationApiKey"
+                in-map="[ownerPartyId: ownerPartyId]" out-map="keyOut" />
+            <if condition="!keyOut.apiKey">
+                <if condition="isSystem">
+                    <return error="true"
+                        message="No Gemini API key configured: set it in System Setup or in the GEMINI_API_KEY environment variable" />
+                </if>
                 <return error="true"
-                    message="No Gemini API key configured: set it in System Setup or in the GEMINI_API_KEY environment variable" />
+                    message="No Gemini API key configured for your company: set it in System Setup" />
             </if>
 
             <!-- NOTE the source site is deliberately NOT fetched here: reading someone
@@ -272,6 +321,8 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
                                  currencyId: currencyId, applicationId: applicationId,
                                  fiscalYearStartMonth: fiscalYearStartMonth,
                                  hostNames: hostNameList.join(','), maxPages: maxPages,
+                                 targetStore: targetStore ? 'Y' : 'N',
+                                 productStoreId: targetStore ? productStoreId : null,
                                  status: 'QUEUED', statusMessage: 'Waiting to start',
                                  createdDate: ec.user.nowTimestamp])
                     .requireNewTransaction(true).call()
@@ -387,10 +438,10 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
                 }
 
                 // the api key of the owner that started the conversion
-                def settings = ec.entity.find("growerp.general.SystemSettings")
-                    .condition("ownerPartyId", conversion.ownerPartyId).disableAuthz().one()
-                String apiKey = settings?.geminiApiKey ?: ec.user.getPreference("GEMINI_API_KEY") ?:
-                    System.getenv("GEMINI_API_KEY") ?: System.getenv("GOOGLE_API_KEY")
+                String apiKey = ec.service.sync()
+                    .name('growerp.100.WebsiteTranslationServices100.get#TranslationApiKey')
+                    .parameters([ownerPartyId: conversion.ownerPartyId]).call()?.apiKey
+                boolean targetStore = conversion.targetStore == 'Y'
 
                 try {
                     // ---- scrape -------------------------------------------------------------
@@ -425,6 +476,28 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
                         .call()
 
                     // ---- install ------------------------------------------------------------
+                    if (targetStore) {
+                        progress('IMPORTING', "Replacing the website with ${generated.pageCount} pages")
+                        ec.service.sync().name('growerp.100.WebsiteGeneratorServices100.replace#StoreWebsite')
+                            .parameters([productStoreId: conversion.productStoreId,
+                                         xmlText: generated.xmlText, siteId: conversion.siteId])
+                            .call()
+                        if (ec.message.hasError()) throw new Exception(ec.message.getErrorsString())
+                        ec.service.sync()
+                            .name('growerp.100.WebsiteGeneratorServices100.update#WebsiteConversionStatus')
+                            .parameters([conversionId: conversionId, status: 'COMPLETED',
+                                         statusMessage: "Website replaced with ${generated.pageCount} pages",
+                                         completedDate: ec.user.nowTimestamp])
+                            .call()
+                        ec.logger.info("process#WebsiteConversion ${conversionId} completed, replaced store ${conversion.productStoreId}")
+                        if (notifyUserId) {
+                            ec.makeNotificationMessage().topic('websiteConversion')
+                                .userId(notifyUserId as String).title('Website ready')
+                                .message([conversionId: conversionId, status: 'COMPLETED',
+                                    message: "Your website was converted from ${conversion.sourceUrl}"]).send()
+                        }
+                        return
+                    }
                     progress('IMPORTING', "Creating the owner and installing ${generated.pageCount} pages")
                     def imported = ec.service.sync().name('growerp.100.ImportExportServices100.import#WebsiteOwner')
                         .parameters([xmlText: generated.xmlText, siteId: conversion.siteId])
@@ -462,6 +535,147 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
         </actions>
     </service>
 
+    <service verb="replace" noun="StoreWebsite" transaction-timeout="600">
+        <description>Install a generated website (owner-import XML) in an existing store and
+            delete the website the store showed before: its wiki space and pages, its content
+            tree and its page images. The store keeps its hostnames, the company its name, logo
+            and contact details.
+
+            The old content is only deleted when this store is the only one using it: the shared
+            DEFAULT and GROWERP sites, and any tree another store points at, stay.</description>
+        <in-parameters>
+            <parameter name="productStoreId" required="true" />
+            <parameter name="xmlText" required="true" allow-html="any" />
+            <parameter name="siteId" required="true">
+                <description>id prefix used in the data file, the root resource is SITEID_ROOT</description>
+            </parameter>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.product.store.ProductStore" value-field="store" />
+            <if condition="!ec.user.isInGroup('GROWERP_M_SYSTEM')">
+                <!-- a tenant only replaces the website of its own store -->
+                <service-call out-map="related"
+                    name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+                <if condition="store?.organizationPartyId != related.companyPartyId">
+                    <set field="store" from="null" />
+                </if>
+            </if>
+            <if condition="!store">
+                <return error="true" message="Store ${productStoreId} not found" />
+            </if>
+
+            <!-- what the store shows now -->
+            <set field="oldWikiSpaceId" from="store.wikiSpaceId" />
+            <entity-find entity-name="mantle.product.store.ProductStoreSetting"
+                list="oldContentSettings" limit="1">
+                <econdition field-name="productStoreId" from="productStoreId" />
+                <econdition field-name="settingTypeEnumId" value="PsstContentLocation" />
+                <date-filter />
+                <order-by field-name="-fromDate" />
+            </entity-find>
+            <set field="oldRootLocation"
+                from="oldContentSettings ? oldContentSettings[0].settingValue : null" />
+
+            <!-- load and switch over to the new website -->
+            <script>ec.entity.makeDataLoader().xmlText(xmlText).load()</script>
+            <check-errors />
+            <service-call name="growerp.100.ImportExportServices100.install#WebsiteIntoStore"
+                in-map="[productStoreId: productStoreId, siteId: siteId]" />
+
+            <!-- the old website, unless something else still uses it -->
+            <set field="sharedWikiSpaceIds" from="['DEFAULT_WS', 'GROWERP_WS', siteId + '_WS']" />
+            <if condition="oldWikiSpaceId &amp;&amp; !sharedWikiSpaceIds.contains(oldWikiSpaceId)">
+                <entity-find entity-name="mantle.product.store.ProductStore" list="spaceUsers">
+                    <econdition field-name="wikiSpaceId" from="oldWikiSpaceId" />
+                </entity-find>
+                <if condition="!spaceUsers">
+                    <entity-find entity-name="moqui.resource.wiki.WikiPage" list="oldPages">
+                        <econdition field-name="wikiSpaceId" from="oldWikiSpaceId" />
+                    </entity-find>
+                    <set field="oldPageIds" from="oldPages*.wikiPageId" />
+                    <if condition="oldPageIds">
+                        <entity-find entity-name="moqui.resource.wiki.WikiBlog" list="oldBlogs">
+                            <econdition field-name="wikiPageId" operator="in" from="oldPageIds" />
+                        </entity-find>
+                        <if condition="oldBlogs">
+                            <entity-delete-by-condition entity-name="moqui.resource.wiki.WikiBlogCategory">
+                                <econdition field-name="wikiBlogId" operator="in" from="oldBlogs*.wikiBlogId" />
+                            </entity-delete-by-condition>
+                            <entity-delete-by-condition entity-name="moqui.resource.wiki.WikiBlog">
+                                <econdition field-name="wikiPageId" operator="in" from="oldPageIds" />
+                            </entity-delete-by-condition>
+                        </if>
+                        <entity-delete-by-condition entity-name="moqui.resource.wiki.WikiPageHistory">
+                            <econdition field-name="wikiPageId" operator="in" from="oldPageIds" />
+                        </entity-delete-by-condition>
+                        <entity-delete-by-condition entity-name="moqui.resource.wiki.WikiPageUser">
+                            <econdition field-name="wikiPageId" operator="in" from="oldPageIds" />
+                        </entity-delete-by-condition>
+                        <entity-delete-by-condition entity-name="moqui.resource.wiki.WikiPageCategoryMember">
+                            <econdition field-name="wikiPageId" operator="in" from="oldPageIds" />
+                        </entity-delete-by-condition>
+                    </if>
+                    <entity-delete-by-condition entity-name="moqui.resource.wiki.WikiPageAlias">
+                        <econdition field-name="wikiSpaceId" from="oldWikiSpaceId" />
+                    </entity-delete-by-condition>
+                    <entity-delete-by-condition entity-name="moqui.resource.wiki.WikiPage">
+                        <econdition field-name="wikiSpaceId" from="oldWikiSpaceId" />
+                    </entity-delete-by-condition>
+                    <entity-delete-by-condition entity-name="moqui.resource.wiki.WikiSpaceUser">
+                        <econdition field-name="wikiSpaceId" from="oldWikiSpaceId" />
+                    </entity-delete-by-condition>
+                    <entity-delete-by-condition entity-name="moqui.resource.wiki.WikiSpace">
+                        <econdition field-name="wikiSpaceId" from="oldWikiSpaceId" />
+                    </entity-delete-by-condition>
+                </if>
+            </if>
+
+            <set field="newRootLocation" value="dbresource://${siteId}_ROOT" />
+            <if condition="oldRootLocation?.startsWith('dbresource://') &amp;&amp;
+                    !['dbresource://DEFAULT_ROOT', 'dbresource://GROWERP_ROOT', newRootLocation]
+                        .contains(oldRootLocation)">
+                <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="rootUsers">
+                    <econdition field-name="settingTypeEnumId" value="PsstContentLocation" />
+                    <econdition field-name="settingValue" from="oldRootLocation" />
+                </entity-find>
+                <if condition="!rootUsers">
+                    <!-- the page images and logo rows of the store pointing into the old tree -->
+                    <entity-delete-by-condition entity-name="growerp.store.ProductStoreContent">
+                        <econdition field-name="productStoreId" from="productStoreId" />
+                        <econdition field-name="contentLocation" operator="like"
+                            value="${oldRootLocation}/%" />
+                    </entity-delete-by-condition>
+                    <!-- the whole resource tree, children before their parents -->
+                    <script><![CDATA[
+                        List treeIds = []
+                        List level = [oldRootLocation.substring('dbresource://'.length())]
+                        while (level) {
+                            treeIds.addAll(level)
+                            level = ec.entity.find('moqui.resource.DbResource')
+                                .condition('parentResourceId', 'in', level)
+                                .disableAuthz().list()*.resourceId
+                        }
+                        context.oldResourceIds = treeIds.reverse()
+                    ]]></script>
+                    <iterate list="oldResourceIds.collate(500)" entry="resourceIds">
+                        <entity-delete-by-condition entity-name="moqui.resource.DbResourceFileHistory">
+                            <econdition field-name="resourceId" operator="in" from="resourceIds" />
+                        </entity-delete-by-condition>
+                        <entity-delete-by-condition entity-name="moqui.resource.DbResourceFile">
+                            <econdition field-name="resourceId" operator="in" from="resourceIds" />
+                        </entity-delete-by-condition>
+                    </iterate>
+                    <iterate list="oldResourceIds" entry="resourceId">
+                        <entity-delete-by-condition entity-name="moqui.resource.DbResource">
+                            <econdition field-name="resourceId" from="resourceId" />
+                        </entity-delete-by-condition>
+                    </iterate>
+                </if>
+            </if>
+            <log message="replace#StoreWebsite: store ${productStoreId} now shows ${siteId}, removed ${oldWikiSpaceId} / ${oldRootLocation}" />
+        </actions>
+    </service>
+
     <service verb="scrape" noun="WebsiteContent">
         <description>Read a public website with Jsoup; input for generate#WebsiteContent.</description>
         <in-parameters>
@@ -482,7 +696,7 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
             <parameter name="siteData" type="Map" required="true" allow-html="any" />
             <parameter name="siteId" required="true" />
             <parameter name="companyName" required="true" />
-            <parameter name="adminEmail" required="true" />
+            <parameter name="adminEmail"><description>empty when converting into an existing store</description></parameter>
             <parameter name="adminFirstName" />
             <parameter name="adminLastName" />
             <parameter name="currencyId" required="true" />
@@ -646,7 +860,6 @@ produces, and is installed by the same growerp.100.ImportExportServices100.impor
             <parameter name="conversionId" />
         </out-parameters>
         <actions>
-            <service-call name="growerp.100.GeneralServices100.check#SupportUser" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <entity-find-one entity-name="growerp.website.WebsiteConversion"

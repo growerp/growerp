@@ -11,6 +11,9 @@ app — no files, no redeploy.
 > **Audience:** whoever performs the conversion (a GrowERP consultant or support user).
 > You need a running GrowERP backend and Claude Code in the `growerp` repository.
 > The company itself needs nothing beyond a browser and their admin login.
+>
+> An existing GrowERP company can also convert and translate **its own** website itself,
+> from the Website menu of its app: see §11.
 
 ---
 
@@ -263,6 +266,38 @@ simply run the import there; the file is complete on its own.
 | Logo missing, GrowERP logo shown instead | the logo record did not load, or the browser cached the old one | reload with cache disabled; check `/getLogo` returns an image |
 | An image is broken on one page only | filename in the page does not match the uploaded image | compare with the names listed under Website → Images |
 | Site answers on the test name but not the real domain | DNS not pointed at the server yet | check DNS first, then that the hostname is listed for the store |
+
+---
+
+## 11. Converting and translating your own website (tenants)
+
+Every company already on GrowERP has the same tools under **Website → Convert &
+Translate** (admin, freelance, hotel, rental and marketing apps; in the agents app under
+Organization). The tab is for administrators.
+
+**Convert** replaces the company's GrowERP website with a conversion of its existing
+website:
+
+1. Press **+**, enter the address of the existing website and the maximum number of pages.
+2. Press **Start conversion**. The list shows the progress; it takes a few minutes.
+3. When it is COMPLETED the new pages are live on the company's own hostnames.
+
+What it changes, and what it leaves alone:
+
+- The website pages, images and colours are replaced by the converted ones. **The previous
+  pages and images are deleted** and cannot be restored.
+- The hostnames, the company name, its logo and contact details stay as they are.
+- No new company or login is created — that is only what system support does with the
+  support app (§1–§8).
+
+**Translation** translates the company's website into the languages the apps support
+(English, Thai, Chinese, German, French and Dutch). Each translated page is published next
+to the original under its language, for example `/th/content/about`. A company can only
+translate its own website.
+
+Both use AI with the company's **own Gemini key**: set it first in **System Setup → AI**.
+Without a key the request is refused with *"No Gemini API key configured for your
+company"*. Only system support falls back to the key of the GrowERP installation.
 
 ---
 

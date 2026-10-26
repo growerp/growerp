@@ -141,6 +141,13 @@ const agentsMenuConfig = MenuConfiguration(
           widgetName: 'WebsiteDialog',
           sequenceNum: 30,
         ),
+        MenuItem(
+          menuItemId: 'AGENTS_ORG_WEB_TOOLS',
+          title: 'Convert & Translate',
+          iconName: 'translate',
+          widgetName: 'WebsiteToolsView',
+          sequenceNum: 35,
+        ),
       ],
     ),
     MenuItem(

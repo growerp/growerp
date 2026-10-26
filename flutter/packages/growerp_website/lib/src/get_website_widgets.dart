@@ -22,6 +22,7 @@ Map<String, GrowerpWidgetBuilder> getWebsiteWidgets() {
     'WebsiteFormList': (args) => WebsiteFormList(key: getKeyFromArgs(args)),
     'LandingPageList': (args) => const LandingPageList(),
     'AssessmentList': (args) => const AssessmentList(),
+    'WebsiteToolsView': (args) => const WebsiteToolsView(),
   };
 }
 
@@ -56,6 +57,14 @@ List<WidgetMetadata> getWebsiteWidgetsWithMetadata() {
       iconName: 'quiz',
       keywords: ['assessment', 'quiz', 'survey', 'evaluation'],
       builder: (args) => const AssessmentList(),
+    ),
+    WidgetMetadata(
+      widgetName: 'WebsiteToolsView',
+      description: 'Convert an existing website into your GrowERP website '
+          'and translate it into other languages with AI',
+      iconName: 'translate',
+      keywords: ['convert', 'translate', 'translation', 'import website'],
+      builder: (args) => const WebsiteToolsView(),
     ),
   ];
 }

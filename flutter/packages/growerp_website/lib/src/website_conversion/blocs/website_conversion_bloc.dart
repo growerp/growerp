@@ -189,11 +189,12 @@ class WebsiteConversionBloc
       emit(state.copyWith(status: WebsiteConversionStatus.loading));
       final created = await restClient.createWebsiteConversion(
         sourceUrl: event.sourceUrl,
-        companyName: event.companyName,
-        adminEmail: event.adminEmail,
+        targetStore: event.targetStore ? true : null,
+        companyName: event.companyName.isEmpty ? null : event.companyName,
+        adminEmail: event.adminEmail.isEmpty ? null : event.adminEmail,
         adminFirstName: event.adminFirstName,
         adminLastName: event.adminLastName,
-        currencyId: event.currencyId,
+        currencyId: event.currencyId.isEmpty ? null : event.currencyId,
         fiscalYearStartMonth: event.fiscalYearStartMonth,
         applicationId: event.applicationId,
         hostNames: event.hostNames,

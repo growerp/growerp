@@ -28,6 +28,12 @@ List<BlocProvider> getWebsiteBlocProviders(RestClient restClient,
     BlocProvider<QuestionBloc>(
       create: (context) => QuestionBloc(restClient: restClient),
     ),
+    BlocProvider<WebsiteConversionBloc>(
+      create: (context) => WebsiteConversionBloc(restClient),
+    ),
+    BlocProvider<WebsiteTranslationBloc>(
+      create: (context) => WebsiteTranslationBloc(restClient),
+    ),
   ];
   return blocProviders;
 }

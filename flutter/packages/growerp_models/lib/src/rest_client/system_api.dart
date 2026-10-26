@@ -3,7 +3,8 @@ import 'package:retrofit/retrofit.dart';
 import '../models/models.dart';
 
 mixin SystemApi {
-  // website generator: convert an existing website into a new owner
+  // website generator: convert an existing website into a new owner, or for a
+  // tenant into its own store (targetStore)
   @GET("rest/s1/growerp/100/WebsiteConversion")
   Future<WebsiteConversions> getWebsiteConversion({
     @Query('conversionId') String? conversionId,
@@ -15,11 +16,12 @@ mixin SystemApi {
   @POST("rest/s1/growerp/100/WebsiteConversion")
   Future<WebsiteConversion> createWebsiteConversion({
     @Field() required String sourceUrl,
-    @Field() required String companyName,
-    @Field() required String adminEmail,
+    @Field() bool? targetStore,
+    @Field() String? companyName,
+    @Field() String? adminEmail,
     @Field() String? adminFirstName,
     @Field() String? adminLastName,
-    @Field() required String currencyId,
+    @Field() String? currencyId,
     @Field() int? fiscalYearStartMonth,
     @Field() String? applicationId,
     @Field() String? hostNames,
@@ -58,7 +60,8 @@ mixin SystemApi {
 
   @POST("rest/s1/growerp/100/WebsiteTranslation")
   Future<WebsiteTranslation> createWebsiteTranslation({
-    @Field() required String ownerPartyId,
+    // empty for a tenant: its own website
+    @Field() String? ownerPartyId,
     @Field() String? sourceLocale,
     @Field() required String targetLocales,
     @Field() String? translateEntityNames,

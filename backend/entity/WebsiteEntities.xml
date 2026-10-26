@@ -64,9 +64,10 @@
     <!--  Website generator: convert an external site to an owner  -->
     <!-- ========================================================= -->
     <entity entity-name="WebsiteConversion" package="growerp.website">
-        <description>One attempt to convert an existing website into a new GrowERP owner: scrape the
-            source site, generate the pages and theme with AI, and install them with
-            import#WebsiteOwner. Runs as a background job; this row carries the progress.</description>
+        <description>One attempt to convert an existing website into a new GrowERP owner, or into
+            the store of the tenant that started it: scrape the source site, generate the pages
+            and theme with AI, and install them with import#WebsiteOwner or
+            replace#StoreWebsite. Runs as a background job; this row carries the progress.</description>
         <field name="conversionId" type="id" is-pk="true" />
         <field name="ownerPartyId" type="id" /><!-- who started the conversion -->
         <field name="sourceUrl" type="text-medium" />
@@ -80,6 +81,9 @@
         <field name="applicationId" type="id" />
         <field name="hostNames" type="text-medium" /><!-- comma separated -->
         <field name="maxPages" type="number-integer" />
+        <!-- Y: replace the website of the store of the tenant that started it (productStoreId)
+             instead of creating a new owner -->
+        <field name="targetStore" type="text-indicator" />
         <!-- QUEUED, SCRAPING, GENERATING, IMPORTING, COMPLETED, FAILED -->
         <field name="status" type="text-short" />
         <field name="statusMessage" type="text-medium" />

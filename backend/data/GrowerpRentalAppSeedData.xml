@@ -90,6 +90,9 @@ limitations under the License.
         title="Assessments" iconName="quiz" widgetName="AssessmentList" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="RENTAL_WEB_FORMS" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_WEBSITE"
         title="Web Forms" iconName="dynamic_form" widgetName="WebsiteFormList" sequenceNum="40"/>
+    <growerp.menu.MenuItem menuItemId="RENTAL_WEB_TOOLS" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_WEBSITE"
+        title="Convert &amp; Translate" iconName="translate" widgetName="WebsiteToolsView"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="50"/>
 
     <!-- ====================== Marketing children ====================== -->
     <growerp.menu.MenuItem menuItemId="RENTAL_MKTG_GUIDE" menuConfigurationId="RENTAL_DEFAULT" parentMenuItemId="RENTAL_MARKETING"
