@@ -1377,5 +1377,22 @@
   "calendarNewActivity": "Neue Aktivität",
   "calendarNewPost": "Neuer Beitrag",
   "calendarResync": "Benutzerkalender neu synchronisieren",
-  "calendarResyncStarted": "Die Benutzerkalender werden im Hintergrund aktualisiert"
+  "calendarResyncStarted": "Die Benutzerkalender werden im Hintergrund aktualisiert",
+  "settingUpYourCompany": "Ihr Unternehmen wird eingerichtet",
+  "demoDataLoading": "Ihre Demodaten werden erstellt. Das dauert etwa eine Minute, Sie können dieses Fenster geöffnet lassen.",
+  "demoDataFailed": "Die Demodaten konnten nicht erstellt werden. Ihr Unternehmen ist eingerichtet und Sie können ohne sie fortfahren.",
+  "demoDataTakingLong": "Das dauert länger als erwartet. Sie können weiter warten oder jetzt fortfahren, die Daten erscheinen, sobald sie erstellt sind.",
+  "guides": "Anleitungen",
+  "noGuidesAvailable": "Keine Anleitungen in dieser App verfügbar.",
+  "screenAccess": "Bildschirmzugriff",
+  "screen": "Bildschirm",
+  "adminGroup": "Administrator",
+  "employeeGroup": "Angestellter",
+  "otherGroup": "Andere",
+  "accessNone": "keiner",
+  "accessView": "ansehen",
+  "accessWrite": "schreiben",
+  "searchScreens": "Bildschirme suchen...",
+  "restDomain": "REST-Domäne",
+  "writeImpliesView": "Schreibzugriff gewährt auch Lesezugriff"
 }

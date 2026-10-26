@@ -1377,5 +1377,22 @@
   "calendarNewActivity": "新活动",
   "calendarNewPost": "新帖子",
   "calendarResync": "重新同步用户日历",
-  "calendarResyncStarted": "用户日历正在后台更新"
+  "calendarResyncStarted": "用户日历正在后台更新",
+  "settingUpYourCompany": "正在设置您的公司",
+  "demoDataLoading": "正在创建您的演示数据。这大约需要一分钟，您可以保持此窗口打开。",
+  "demoDataFailed": "无法创建演示数据。您的公司已设置完成，您可以在没有演示数据的情况下继续。",
+  "demoDataTakingLong": "所需时间比预期长。您可以继续等待或立即继续，数据将在创建后显示。",
+  "guides": "指南",
+  "noGuidesAvailable": "此应用中没有可用的指南。",
+  "screenAccess": "屏幕访问权限",
+  "screen": "屏幕",
+  "adminGroup": "管理员",
+  "employeeGroup": "员工",
+  "otherGroup": "其他",
+  "accessNone": "无",
+  "accessView": "查看",
+  "accessWrite": "编辑",
+  "searchScreens": "搜索屏幕...",
+  "restDomain": "REST 域",
+  "writeImpliesView": "编辑权限同时包含查看权限"
 }
