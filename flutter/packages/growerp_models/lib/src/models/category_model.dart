@@ -12,6 +12,7 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -62,7 +63,7 @@ List<Category> csvToCategories(String csvFile) {
         categoryId: row[0],
         categoryName: row[1],
         description: row[2],
-        image: row[3].isNotEmpty ? Uint8List.fromList(row[3].codeUnits) : null,
+        image: row[3].isNotEmpty ? base64.decode(row[3]) : null,
       ),
     );
   }
@@ -78,7 +79,7 @@ String csvFromCategories(List<Category> categories) {
         category.categoryId,
         category.categoryName,
         category.description,
-        category.image != null ? category.image!.toList().toString() : '',
+        category.image != null ? base64.encode(category.image!) : '',
       ], categoryCsvLength),
     );
   }

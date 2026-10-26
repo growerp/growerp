@@ -83,8 +83,8 @@ String csvFromGlAccounts(List<GlAccount> glAccounts) {
         glAccount.accountCode ?? '',
         glAccount.accountName ?? '',
         glAccount.isDebit == null ? '' : glAccount.isDebit.toString(),
-        glAccount.accountClass!.description ?? '',
-        glAccount.accountType!.description ?? '',
+        glAccount.accountClass?.description ?? '',
+        glAccount.accountType?.description ?? '',
         glAccount.postedBalance == null
             ? ''
             : glAccount.postedBalance.toString(),
