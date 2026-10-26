@@ -273,13 +273,25 @@ axis; the business relationship lives on the party Role and never grants access.
             return writeGroups.contains(userGroupId)
         }
 
-        // The apps this organization actually has: the ones it customised, plus the
-        // one it registered for. A REST call carries no appId, so without this every
-        // seed menu would count and a hotel tenant would inherit manufacturing.
+        // The organization's screen access per seed item (MenuItemAccess), set in the
+        // security grid; an item without one keeps its shipped groups.
+        Map overrides = [:]
+        ec.entity.find('growerp.menu.MenuItemAccess').condition('ownerPartyId', ownerPartyId)
+            .list().each { overrides[it.menuItemId?.toString()] = it }
+
+        // The apps this organization actually has: the ones it changed screen access in,
+        // plus the one it registered for. A REST call carries no appId, so without this
+        // every seed menu would count and a hotel tenant would inherit manufacturing.
         Set appIds = new HashSet()
-        ec.entity.find('growerp.menu.MenuConfiguration')
-            .condition('ownerPartyId', ownerPartyId).condition('userId', null)
-            .list().each { appIds.add(it.appId?.toString()) }
+        if (overrides) {
+            Set configIds = new HashSet()
+            ec.entity.find('growerp.menu.MenuItem').condition('menuItemId', 'in', overrides.keySet())
+                .list().each { configIds.add(it.menuConfigurationId?.toString()) }
+            configIds.remove(null)
+            if (configIds) ec.entity.find('growerp.menu.MenuConfiguration')
+                .condition('menuConfigurationId', 'in', configIds)
+                .list().each { appIds.add(it.appId?.toString()) }
+        }
         def tenantSetup = ec.entity.find('growerp.general.TenantSetup')
             .condition('ownerPartyId', ownerPartyId).one()
         if (tenantSetup?.applicationId) {
@@ -300,15 +312,10 @@ axis; the business relationship lives on the party Role and never grants access.
 
         Map access = [:]
         appIds.each { appId ->
-            // the organization's own configuration for this app, else the seed
+            // the shipped menu of this app, with the organization's overrides
             def configs = ec.entity.find('growerp.menu.MenuConfiguration')
                 .condition('appId', appId).condition('userId', null)
-                .condition('ownerPartyId', ownerPartyId).list()
-            if (!configs) {
-                configs = ec.entity.find('growerp.menu.MenuConfiguration')
-                    .condition('appId', appId).condition('userId', null)
-                    .condition('ownerPartyId', null).list()
-            }
+                .condition('ownerPartyId', null).list()
             if (!configs) return
 
             def items = ec.entity.find('growerp.menu.MenuItem')
@@ -316,10 +323,19 @@ axis; the business relationship lives on the party Role and never grants access.
             Map byId = [:]
             items.each { byId[it.menuItemId?.toString()] = it }
 
+            def viewGroups = { item ->
+                def o = overrides[item.menuItemId?.toString()]
+                return parseGroups(o != null ? o.userGroupsJson : item.userGroupsJson)
+            }
+            def writeGroups = { item ->
+                def o = overrides[item.menuItemId?.toString()]
+                return parseGroups(o != null ? o.updateGroupsJson : item.updateGroupsJson)
+            }
+
             // a child is only reachable when its parent is
             def visible
             visible = { item ->
-                if (!allows(parseGroups(item.userGroupsJson))) return false
+                if (!allows(viewGroups(item))) return false
                 def parentId = item.parentMenuItemId?.toString()
                 if (!parentId) return true
                 def parent = byId[parentId]
@@ -332,7 +348,7 @@ axis; the business relationship lives on the party Role and never grants access.
                 String domain = item.artifactGroupId?.toString()
                 if (!domain) domain = widgetDomains[item.widgetName?.toString()]
                 if (!domain) return
-                if (allowsWrite(parseGroups(item.updateGroupsJson))) access[domain] = 'WRITE'
+                if (allowsWrite(writeGroups(item))) access[domain] = 'WRITE'
                 else if (access[domain] == null) access[domain] = 'SEE'
             }
         }
