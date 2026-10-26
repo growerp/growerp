@@ -111,26 +111,23 @@ void main() {
     );
   });
 
-  group(
-    'ChatRoomFetch paging',
-    skip: 'https://github.com/growerp/growerp/issues/42',
-    () {
-      blocTest<ChatRoomBloc, ChatRoomState>(
-        'ChatRoomFetch_nextPage_requestsFromCurrentLength',
-        setUp: () => when(
-          () => restClient.getChatRooms(searchString: '', start: 1, limit: 20),
-        ).thenAnswer((_) async => ChatRooms(chatRooms: [room2])),
-        build: () => ChatRoomBloc(restClient, wsClient, authBloc),
-        seed: () =>
-            ChatRoomState(status: ChatRoomStatus.success, chatRooms: [room1]),
-        act: (bloc) => bloc.add(const ChatRoomFetch()),
-        wait: fetchWait,
-        expect: () => [
-          roomState(rooms: [room1, room2]),
-        ],
-      );
-    },
-  );
+  // https://github.com/growerp/growerp/issues/42
+  group('ChatRoomFetch paging', () {
+    blocTest<ChatRoomBloc, ChatRoomState>(
+      'ChatRoomFetch_nextPage_requestsFromCurrentLength',
+      setUp: () => when(
+        () => restClient.getChatRooms(searchString: '', start: 1, limit: 20),
+      ).thenAnswer((_) async => ChatRooms(chatRooms: [room2])),
+      build: () => ChatRoomBloc(restClient, wsClient, authBloc),
+      seed: () =>
+          ChatRoomState(status: ChatRoomStatus.success, chatRooms: [room1]),
+      act: (bloc) => bloc.add(const ChatRoomFetch()),
+      wait: fetchWait,
+      expect: () => [
+        roomState(rooms: [room1, room2]),
+      ],
+    );
+  });
 
   group('ChatRoomUpdateLocal', () {
     blocTest<ChatRoomBloc, ChatRoomState>(
@@ -404,26 +401,22 @@ void main() {
       ],
     );
 
-    group(
-      'other rooms',
-      skip: 'https://github.com/growerp/growerp/issues/42',
-      () {
-        blocTest<ChatMessageBloc, ChatMessageState>(
-          'ChatMessageReceiveWs_messageForOtherRoom_doesNotAppend',
-          setUp: () => when(
-            () =>
-                restClient.getChatMessages(chatRoomId: 'R1', searchString: ''),
-          ).thenAnswer((_) async => ChatMessages(chatMessages: [msg1])),
-          build: build,
-          act: (bloc) async {
-            bloc.add(ChatMessageFetch(chatRoomId: 'R1', chatRoomName: 'Sales'));
-            await Future<void>.delayed(fetchWait);
-            bloc.add(ChatMessageReceiveWs(ChatMessage(chatRoom: room2)));
-          },
-          wait: fetchWait,
-          verify: (bloc) => expect(bloc.state.chatMessages, [msg1]),
-        );
-      },
-    );
+    // https://github.com/growerp/growerp/issues/42
+    group('other rooms', () {
+      blocTest<ChatMessageBloc, ChatMessageState>(
+        'ChatMessageReceiveWs_messageForOtherRoom_doesNotAppend',
+        setUp: () => when(
+          () => restClient.getChatMessages(chatRoomId: 'R1', searchString: ''),
+        ).thenAnswer((_) async => ChatMessages(chatMessages: [msg1])),
+        build: build,
+        act: (bloc) async {
+          bloc.add(ChatMessageFetch(chatRoomId: 'R1', chatRoomName: 'Sales'));
+          await Future<void>.delayed(fetchWait);
+          bloc.add(ChatMessageReceiveWs(ChatMessage(chatRoom: room2)));
+        },
+        wait: fetchWait,
+        verify: (bloc) => expect(bloc.state.chatMessages, [msg1]),
+      );
+    });
   });
 }
