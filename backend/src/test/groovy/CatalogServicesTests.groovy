@@ -14,7 +14,6 @@
 
 import org.moqui.Moqui
 import org.moqui.context.ExecutionContext
-import spock.lang.PendingFeature
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -157,7 +156,7 @@ class CatalogServicesTests extends Specification {
         found*.productName.sort() == (1..3).collect { "Finder${run} ${it}".toString() }
     }
 
-    @PendingFeature(reason = 'https://github.com/growerp/growerp/issues/51')
+    // https://github.com/growerp/growerp/issues/51
     def "a page holds at most limit products"() {
         given:
         (1..3).each { createProduct([productName: "Pager${run} ${it}", price: it]) }
@@ -168,6 +167,20 @@ class CatalogServicesTests extends Specification {
 
         then:
         page.size() == 2
+    }
+
+    def "the next page starts after the products of the first"() {
+        given:
+        (1..3).each { createProduct([productName: "Next${run} ${it}", price: it]) }
+
+        when:
+        List first = ec.service.sync().name("${service}.get#Product")
+                .parameters([search: "Next${run}", start: 0, limit: 2]).call().products
+        List second = ec.service.sync().name("${service}.get#Product")
+                .parameters([search: "Next${run}", start: 2, limit: 2]).call().products
+
+        then:
+        (first + second)*.productName == (1..3).collect { "Next${run} ${it}".toString() }
     }
 
     def "a service product without a warehouse"() {
