@@ -16,6 +16,7 @@ import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:stream_transform/stream_transform.dart';
 
@@ -114,7 +115,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       );
     } catch (e) {
       emit(
-        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+        state.copyWith(
+          status: CourseBlocStatus.failure,
+          message: await getDioError(e),
+        ),
       );
     }
   }
@@ -150,7 +154,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       );
     } catch (e) {
       emit(
-        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+        state.copyWith(
+          status: CourseBlocStatus.failure,
+          message: await getDioError(e),
+        ),
       );
     }
   }
@@ -182,7 +189,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       );
     } catch (e) {
       emit(
-        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+        state.copyWith(
+          status: CourseBlocStatus.failure,
+          message: await getDioError(e),
+        ),
       );
     }
   }
@@ -210,7 +220,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       );
     } catch (e) {
       emit(
-        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+        state.copyWith(
+          status: CourseBlocStatus.failure,
+          message: await getDioError(e),
+        ),
       );
     }
   }
@@ -237,7 +250,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       );
     } catch (e) {
       emit(
-        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+        state.copyWith(
+          status: CourseBlocStatus.failure,
+          message: await getDioError(e),
+        ),
       );
     }
   }
@@ -257,7 +273,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       add(CourseGetDetail(event.courseId));
     } catch (e) {
       emit(
-        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+        state.copyWith(
+          status: CourseBlocStatus.failure,
+          message: await getDioError(e),
+        ),
       );
     }
   }
@@ -276,7 +295,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       }
     } catch (e) {
       emit(
-        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+        state.copyWith(
+          status: CourseBlocStatus.failure,
+          message: await getDioError(e),
+        ),
       );
     }
   }
@@ -295,7 +317,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       }
     } catch (e) {
       emit(
-        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+        state.copyWith(
+          status: CourseBlocStatus.failure,
+          message: await getDioError(e),
+        ),
       );
     }
   }
@@ -316,7 +341,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       }
     } catch (e) {
       emit(
-        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+        state.copyWith(
+          status: CourseBlocStatus.failure,
+          message: await getDioError(e),
+        ),
       );
     }
   }
@@ -338,7 +366,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       }
     } catch (e) {
       emit(
-        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+        state.copyWith(
+          status: CourseBlocStatus.failure,
+          message: await getDioError(e),
+        ),
       );
     }
   }
@@ -360,7 +391,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       }
     } catch (e) {
       emit(
-        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+        state.copyWith(
+          status: CourseBlocStatus.failure,
+          message: await getDioError(e),
+        ),
       );
     }
   }
@@ -377,7 +411,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       }
     } catch (e) {
       emit(
-        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+        state.copyWith(
+          status: CourseBlocStatus.failure,
+          message: await getDioError(e),
+        ),
       );
     }
   }
@@ -400,7 +437,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       }
     } catch (e) {
       emit(
-        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+        state.copyWith(
+          status: CourseBlocStatus.failure,
+          message: await getDioError(e),
+        ),
       );
     }
   }
@@ -417,7 +457,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       }
     } catch (e) {
       emit(
-        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+        state.copyWith(
+          status: CourseBlocStatus.failure,
+          message: await getDioError(e),
+        ),
       );
     }
   }
@@ -436,7 +479,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       }
     } catch (e) {
       emit(
-        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+        state.copyWith(
+          status: CourseBlocStatus.failure,
+          message: await getDioError(e),
+        ),
       );
     }
   }
@@ -455,7 +501,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       }
     } catch (e) {
       emit(
-        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+        state.copyWith(
+          status: CourseBlocStatus.failure,
+          message: await getDioError(e),
+        ),
       );
     }
   }
@@ -479,7 +528,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       );
     } catch (e) {
       emit(
-        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+        state.copyWith(
+          status: CourseBlocStatus.failure,
+          message: await getDioError(e),
+        ),
       );
     }
   }
@@ -510,7 +562,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       );
     } catch (e) {
       emit(
-        state.copyWith(status: CourseBlocStatus.failure, message: e.toString()),
+        state.copyWith(
+          status: CourseBlocStatus.failure,
+          message: await getDioError(e),
+        ),
       );
     }
   }

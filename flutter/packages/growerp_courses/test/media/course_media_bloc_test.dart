@@ -92,31 +92,43 @@ void main() {
     ],
   );
 
-  group(
-    'generated media body',
-    skip: 'https://github.com/growerp/growerp/issues/44',
-    () {
-      // the Dio client uses ResponseType.plain: dynamic bodies are strings
-      blocTest<CourseMediaBloc, CourseMediaState>(
-        'MediaGenerate_jsonStringBody_addsGeneratedMedia',
-        setUp: () =>
-            when(
-              () => restClient.generateCourseMedia(data: any(named: 'data')),
-            ).thenAnswer(
-              (_) async =>
-                  jsonEncode({'mediaId': 'MD2', 'generatedContent': 'Hi all'}),
-            ),
-        build: build,
-        act: (bloc) => bloc.add(
-          const MediaGenerate(courseId: 'C1', platform: MediaPlatform.email),
-        ),
-        expect: () => [
-          mediaState(MediaBlocStatus.generating),
-          mediaState(
-            MediaBlocStatus.success,
-          ).having((s) => s.generatedMedia?.mediaId, 'mediaId', 'MD2'),
-        ],
-      );
-    },
+  // https://github.com/growerp/growerp/issues/44
+  blocTest<CourseMediaBloc, CourseMediaState>(
+    'MediaGenerate_restThrowsDio_showsBackendMessage',
+    setUp: () => when(
+      () => restClient.generateCourseMedia(data: any(named: 'data')),
+    ).thenThrow(dioError('AI unavailable')),
+    build: build,
+    act: (bloc) => bloc.add(
+      const MediaGenerate(courseId: 'C1', platform: MediaPlatform.email),
+    ),
+    verify: (bloc) => expect(
+      bloc.state.message,
+      'Failed to generate content: AI unavailable',
+    ),
   );
+
+  group('generated media body', () {
+    // the Dio client uses ResponseType.plain: dynamic bodies are strings
+    blocTest<CourseMediaBloc, CourseMediaState>(
+      'MediaGenerate_jsonStringBody_addsGeneratedMedia',
+      setUp: () =>
+          when(
+            () => restClient.generateCourseMedia(data: any(named: 'data')),
+          ).thenAnswer(
+            (_) async =>
+                jsonEncode({'mediaId': 'MD2', 'generatedContent': 'Hi all'}),
+          ),
+      build: build,
+      act: (bloc) => bloc.add(
+        const MediaGenerate(courseId: 'C1', platform: MediaPlatform.email),
+      ),
+      expect: () => [
+        mediaState(MediaBlocStatus.generating),
+        mediaState(
+          MediaBlocStatus.success,
+        ).having((s) => s.generatedMedia?.mediaId, 'mediaId', 'MD2'),
+      ],
+    );
+  });
 }

@@ -15,6 +15,7 @@
 import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 part 'course_viewer_event.dart';
@@ -119,7 +120,12 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
         emit(state.copyWith(recommendation: recommendation));
       }
     } catch (e) {
-      emit(state.copyWith(status: ViewerStatus.failure, message: e.toString()));
+      emit(
+        state.copyWith(
+          status: ViewerStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
     }
   }
 
@@ -219,7 +225,7 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
       emit(
         state.copyWith(
           status: ViewerStatus.failure,
-          message: 'Failed to update progress: ${e.toString()}',
+          message: 'Failed to update progress: ${await getDioError(e)}',
         ),
       );
     }
@@ -299,7 +305,7 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
       emit(
         state.copyWith(
           status: ViewerStatus.failure,
-          message: 'Failed to load courses: ${e.toString()}',
+          message: 'Failed to load courses: ${await getDioError(e)}',
         ),
       );
     }
@@ -312,20 +318,10 @@ class CourseViewerBloc extends Bloc<CourseViewerEvent, CourseViewerState> {
     if (state.course?.courseId == null) return;
 
     try {
-      dynamic response = await restClient.listCourseMedia(
+      final response = await restClient.listCourseMedia(
         courseId: state.course!.courseId!,
       );
-
-      if (response is String) {
-        response = jsonDecode(response);
-      }
-
-      final mediaListJson = response['mediaList'] as List<dynamic>? ?? [];
-      final mediaList = mediaListJson
-          .map((json) => CourseMedia.fromJson(json as Map<String, dynamic>))
-          .toList();
-
-      emit(state.copyWith(mediaList: mediaList));
+      emit(state.copyWith(mediaList: response.mediaList));
     } catch (e) {
       // Silently fail - media is optional
       emit(state.copyWith(mediaList: []));
