@@ -216,35 +216,35 @@ limitations under the License.
             <set field="activities" from="[]" />
             <if condition="activityType == 'event'">
                 <then>
-                    <if condition="!userPseudoId &amp;&amp; !companyPseudoId">
-                        <!-- get usergroups -->
-                        <entity-find entity-name="moqui.security.UserGroupMember" list="groups">
-                            <econdition field-name="userId" from="ec.user.userAccount.userId" />
-                            <select-field field-name="userGroupId" />
-                        </entity-find>
-                        <set field="userGroups" from="[]" />
-                        <if condition="groups.userGroupId.contains('GROWERP_M_OTHER')">
-                            <then>
-                                <set field="userGroups" from="['GROWERP_M_EMPLOYEE']" />
-                            </then>
-                            <else-if condition="groups.userGroupId.contains('GROWERP_M_EMPLOYEE')">
-                                <set field="userGroups"
-                                    from="['GROWERP_M_EMPLOYEE','GROWERP_M_OTHER']" />
-                            </else-if>
-                            <else-if condition="groups.userGroupId.contains('GROWERP_M_ADMIN')">
-                                <set field="userGroups"
-                                    from="['GROWERP_M_ADMIN','GROWERP_M_EMPLOYEE','GROWERP_M_OTHER']" />
-                            </else-if>
-                            <else-if condition="groups.userGroupId.contains('GROWERP_M_SYSTEM')">
-                                <set field="userGroups"
-                                    from="['GROWERP_M_SYSTEM']" />
-                            </else-if>
-                        </if>
+                    <!-- the events the viewer's user groups may see, also for a contact or company -->
+                    <entity-find entity-name="moqui.security.UserGroupMember" list="groups">
+                        <econdition field-name="userId" from="ec.user.userAccount.userId" />
+                        <select-field field-name="userGroupId" />
+                    </entity-find>
+                    <set field="userGroups" from="[]" />
+                    <if condition="groups.userGroupId.contains('GROWERP_M_OTHER')">
+                        <then>
+                            <set field="userGroups" from="['GROWERP_M_EMPLOYEE']" />
+                        </then>
+                        <else-if condition="groups.userGroupId.contains('GROWERP_M_EMPLOYEE')">
+                            <set field="userGroups"
+                                from="['GROWERP_M_EMPLOYEE','GROWERP_M_OTHER']" />
+                        </else-if>
+                        <else-if condition="groups.userGroupId.contains('GROWERP_M_ADMIN')">
+                            <set field="userGroups"
+                                from="['GROWERP_M_ADMIN','GROWERP_M_EMPLOYEE','GROWERP_M_OTHER']" />
+                        </else-if>
+                        <else-if condition="groups.userGroupId.contains('GROWERP_M_SYSTEM')">
+                            <set field="userGroups"
+                                from="['GROWERP_M_SYSTEM']" />
+                        </else-if>
                     </if>
                     <entity-find list="eventList"
                         entity-name="growerp.workEffort.WorkEffortOpportunityAndParty">
                         <econdition field-name="workEffortTypeEnumId" value="WetEvent" />
                         <econdition field-name="ownerPartyId" from="ownerPartyId"
+                            ignore-if-empty="true" />
+                        <econdition field-name="workEffortId" from="activityId"
                             ignore-if-empty="true" />
                         <econdition field-name="userGroupId" operator="in" from="userGroups" />
                         <econditions combine="or">
@@ -624,6 +624,7 @@ limitations under the License.
                     estimatedCompletionDate: activity.estimatedEndDate ?
                         ec.l10n.parseTimestamp(activity.estimatedEndDate.substring(0,10), 'yyyy-MM-dd') : null,
                     routing: activity.routing,
+                    visibilityEnumId: activity.activityType == 'event' ? 'GROWERP_M_EMPLOYEE' : null,
                  ]"
                 out-map="context" />
             <!-- originator -->
