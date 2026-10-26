@@ -388,6 +388,7 @@ date-filtered Subscription in the GROWERP tenant with
 
 | Condition | `hasActiveSubscription` | `subscriptionStatus` | `daysRemaining` |
 |---|---|---|---|
+| `email` ends `@example.com` and host ends `.org` (staging) or `.net` (review) | true | `active` | −1 (unlimited) |
 | `thruDate - now >= 0` | true | `active` | whole days, floored at 0 |
 | `thruDate` passed | false | `expired` | 0 |
 | no `thruDate` | true | `active` | −1 (unlimited) |

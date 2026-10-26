@@ -227,6 +227,27 @@ class CurrencyAndSubscriptionTests extends Specification {
         expired.subscriptionStatus in ['expired', 'none']
     }
 
+    def "lapsed trial of #email on #hostName is active: #active"() {
+        // still 15 days ahead from the previous test: store reviewers' example.com
+        // accounts never expire on staging (.org) and review (.net), only there
+        when:
+        Map out = ec.service.sync().name('growerp.100.TenantServices100.check#TenantSubscription')
+                .parameters([ownerPartyId: tenantId, email: email, hostName: hostName])
+                .disableAuthz().call()
+
+        then:
+        out.hasActiveSubscription == active
+        !active || out.daysRemaining == -1
+
+        where:
+        email               | hostName              || active
+        'test1@example.com' | 'backend.growerp.org' || true
+        'Test1@Example.com' | 'backend.growerp.net' || true
+        'test1@example.com' | 'backend.growerp.com' || false
+        'test1@example.com' | null                  || false
+        'real@acme.com'     | 'backend.growerp.org' || false
+    }
+
     def "renew charges converted plan price and extends subscription one month"() {
         setup:
         BigDecimal expectedAmount = growerpBaseCurrency == 'USD' ? 499.00 : 998.00
