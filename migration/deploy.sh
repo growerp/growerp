@@ -2,13 +2,13 @@
 # Run the migrations of a just deployed backend version, see README.md.
 # Usage: deploy.sh <backend version> <backend url>
 #   1.22.0 runs 1.22/; a version without a directory has nothing to migrate.
-#   MOQUI_PASSWORD (SystemSupport) must be set. Retries while the new backend
+#   SYSTEMSUPPORT_PASSWORD (SystemSupport) must be set. Retries while the new backend
 #   starts: until it runs, a new migration service is unknown (500). Every
 #   service is idempotent, so running one again is safe.
 set -euo pipefail
 version="${1:?usage: deploy.sh <backend version> <backend url>}"
 url="${2:?usage: deploy.sh <backend version> <backend url>}"
-: "${MOQUI_PASSWORD:?set MOQUI_PASSWORD (SystemSupport password of $url)}"
+: "${SYSTEMSUPPORT_PASSWORD:?set SYSTEMSUPPORT_PASSWORD (SystemSupport password of $url)}"
 cd "$(dirname "$0")"
 minor="${version%.*}"
 

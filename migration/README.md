@@ -46,8 +46,8 @@ The store review backend is a copy of the staging database, so it is migrated
 already. By hand:
 
 ```bash
-MOQUI_PASSWORD=... migration/run.sh next https://backend.growerp.org
-MOQUI_PASSWORD=... migration/run.sh 1.21            # default http://localhost:8080
+SYSTEMSUPPORT_PASSWORD=... migration/run.sh next https://backend.growerp.org
+SYSTEMSUPPORT_PASSWORD=... migration/run.sh 1.21            # default http://localhost:8080
 ```
 
 `run.sh` posts each service to `/apps/tools/Service/ServiceRun/runJson` with basic

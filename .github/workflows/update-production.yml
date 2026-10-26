@@ -132,7 +132,7 @@ jobs:
       - name: Run migrations on production
         if: steps.backend.outcome == 'success'
         env:
-          MOQUI_PASSWORD: ${{ secrets.PROD_SYSTEMSUPPORT_PASSWORD }}
+          SYSTEMSUPPORT_PASSWORD: ${{ secrets.PROD_SYSTEMSUPPORT_PASSWORD }}
           VERSION: ${{ steps.backend.outputs.version }}
         run: |
           minor="${VERSION%.*}"
