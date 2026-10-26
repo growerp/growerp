@@ -60,7 +60,8 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
               ? subscriptions.subscriptions
               : (List.of(state.subscriptions)
                   ..addAll(subscriptions.subscriptions)),
-          hasReachedMax: subscriptions.subscriptions.length < 20,
+          hasReachedMax:
+              subscriptions.subscriptions.length < (event.limit ?? 20),
           searchString: event.searchString,
         ),
       );
