@@ -650,10 +650,14 @@ limitations under the License.
                             assetOld.locationSeqId != asset.location.locationId">
                 <set field="assetOld.assetPseudoId" from="asset.pseudoId" />
                 <set field="assetOld.assetName" from="asset.assetName" />
-                <set field="assetOld.quantityOnHandTotal"
-                    from="new BigDecimal(asset.quantityOnHand)" />
+                <!-- both are optional in the app: no quantity keeps the stock, no cost clears it -->
+                <if condition="asset.quantityOnHand != null &amp;&amp; asset.quantityOnHand != ''">
+                    <set field="assetOld.quantityOnHandTotal"
+                        from="new BigDecimal(asset.quantityOnHand)" />
+                </if>
                 <set field="assetOld.acquireCost"
-                    from="new BigDecimal(asset.acquireCost)" />
+                    from="asset.acquireCost != null &amp;&amp; asset.acquireCost != ''
+                        ? new BigDecimal(asset.acquireCost) : null" />
                 <set field="assetOld.statusId" from="status.convertedStatusId" />
                 <set field="assetOld.classEnumId" from="assetClass.convertedStatusId" />
                 <set field="assetOld.productId" from="asset.product?.productId" />
