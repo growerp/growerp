@@ -108,9 +108,11 @@ limitations under the License.
                 <econdition field-name="ownerPartyId" from="ownerPartyId" />
                 <econdition field-name="productCategoryTypeEnumId" value="PctRoot" />
             </entity-find>
-            <entity-find offset="start" limit="limit*4"
+            <!-- the view has a row per category and price: page on the products,
+                then get the rows of just those products -->
+            <entity-find offset="start" limit="limit" distinct="true"
                 entity-name="growerp.mobile.product.ProductAndCategoryAndPrices"
-                list="productList">
+                list="pageList">
                 <econdition field-name="ownerPartyId" from="ownerPartyId" ignore-if-empty="true" />
                 <econdition field-name="productTypeEnumId"
                     from="productType.convertedStatusId" ignore-if-empty="true" />
@@ -136,8 +138,43 @@ limitations under the License.
                     thru-field-name="listPriceThruDate" />
                 <date-filter from-field-name="priceFromDate"
                     thru-field-name="priceThruDate" />
-                <order-by field-name="productName" />
+                <select-field field-name="productId,productName" />
+                <order-by field-name="productName,productId" />
             </entity-find>
+            <set field="productList" from="[]" />
+            <if condition="pageList">
+                <entity-find entity-name="growerp.mobile.product.ProductAndCategoryAndPrices"
+                    list="productList">
+                    <econdition field-name="productId" operator="in"
+                        from="pageList*.productId" />
+                    <econdition field-name="ownerPartyId" from="ownerPartyId" ignore-if-empty="true" />
+                    <econdition field-name="productTypeEnumId"
+                        from="productType.convertedStatusId" ignore-if-empty="true" />
+                    <econdition field-name="assetClassEnumId"
+                        from="assetClass.convertedStatusId" ignore-if-empty="true" />
+                    <econdition field-name="categoryId" ignore-if-empty="true" />
+                    <econdition field-name="productId" ignore-if-empty="true" />
+                    <econdition field-name="pseudoId" ignore-if-empty="true" />
+                    <econditions combine="or">
+                        <econdition field-name="productId" ignore-case="true"
+                            operator="like" from="search" ignore-if-empty="true" />
+                        <econdition field-name="pseudoId" ignore-case="true"
+                            operator="like" from="search" ignore-if-empty="true" />
+                        <econdition field-name="productName" ignore-case="true"
+                            operator="like" from="search" ignore-if-empty="true" />
+                        <econdition field-name="description" ignore-case="true"
+                            operator="like" from="search" ignore-if-empty="true" />
+                    </econditions>
+                    <date-filter from-field-name="productFromDate"
+                        thru-field-name="productThruDate" />
+                    <date-filter /><!-- product from/thrudate on category-->
+                    <date-filter from-field-name="listPriceFromDate"
+                        thru-field-name="listPriceThruDate" />
+                    <date-filter from-field-name="priceFromDate"
+                        thru-field-name="priceThruDate" />
+                    <order-by field-name="productName,productId" />
+                </entity-find>
+            </if>
             <!-- create product list -->
             <set field="products" from="[]" />
             <set field="categories" from="[]" />
