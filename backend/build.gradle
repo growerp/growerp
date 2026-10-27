@@ -47,6 +47,7 @@ test {
     include '**/WebsiteGeneratorServicesTests.class'
     include '**/WebsiteTranslationServicesTests.class'
     include '**/MenuServicesTests.class'
+    include '**/GeneralServicesTests.class'
 
     systemProperty 'moqui.runtime', moquiDir.absolutePath + '/runtime'
     systemProperty 'moqui.conf', 'conf/MoquiDevConf.xml'
