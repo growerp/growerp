@@ -125,7 +125,8 @@ other schedules on here when you want them to work; in production they keep the 
   agent here without deleting its schedule; clear a stale lock if a run crashed mid-way.
 * **Marketing → Master Content** — after the Monday run, *Content and Social* posts a chat
   message listing the pieces it authored. Open each one and tap **Approve**; every platform
-  variant adapted from it then auto-publishes at its own scheduled time (Mon/Wed/Fri), as long
+  variant adapted from it then auto-publishes at its own scheduled time (Mon/Wed/Fri, varied
+  around 10:00 UTC per piece and platform so it does not look automated), as long
   as that platform is enabled and under its daily limit. Tap **Revoke** to stop future
   auto-publishes for a piece (already-published variants are unaffected). You can also approve
   inline from **Marketing → Content Plans** → a plan's Content section.
