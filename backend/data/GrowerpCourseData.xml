@@ -466,7 +466,7 @@ Go to **Outreach** → **Platform Configuration** and add a record for each plat
 - **API Key** — paste your OAuth 2.0 access token
   - Obtain one from the LinkedIn Developer Portal under your app's Auth tab, or use the OAuth token exchange flow
 - **Username** — your LinkedIn person URN, e.g. `urn:li:person:AbCdEfGhIj`
-  - Find your URN: call `https://api.linkedin.com/v2/me` with your token; the `id` field gives the last part
+  - Find your URN: call `https://api.linkedin.com/v2/userinfo` with your token; the `sub` field gives the last part (needs the `openid` and `profile` scopes; `/v2/me` answers 403 for new apps)
 - Toggle **Active** to ON
 
 #### Step 2 — Write and finalise your post
@@ -550,9 +550,9 @@ Publishing a Social Post to LinkedIn uses the official LinkedIn API v2 — no br
 1. Tap **+** → select **Platform Type: LINKEDIN** (create a second record, or reuse the existing one if you add the API token to it)
 2. Fill in:
    - **API Key** — your LinkedIn OAuth 2.0 access token
-     - Get one from the LinkedIn Developer Portal → your app → Auth → OAuth 2.0 tools → Generate token (scopes needed: `w_member_social`)
+     - Get one from the LinkedIn Developer Portal → your app → Auth → OAuth 2.0 tools → Generate token (scopes needed: `openid`, `profile`, `w_member_social`; add the products "Share on LinkedIn" and "Sign In with LinkedIn using OpenID Connect" first)
    - **Username** — your LinkedIn person URN, format: `urn:li:person:AbCdEfGhIj`
-     - To find your URN: call `https://api.linkedin.com/v2/me` with your access token; the `id` field is the last segment of the URN
+     - To find your URN: call `https://api.linkedin.com/v2/userinfo` with your access token; the `sub` field is the last segment of the URN (`/v2/me` answers 403 for new apps)
 3. Toggle **Active** to ON
 
 ---
