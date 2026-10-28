@@ -59,13 +59,10 @@ String _getCurrentPlatform() {
 /// (growerp.net) while they wait for store approval, so staging web must not
 /// follow that answer.
 const _stagingBackendUrl = 'backend.growerp.org';
-const _stagingWebHosts = ['erp.accugeo.com'];
 
 /// Returns the staging backend for a staging web host, otherwise null
 String? stagingWebBackend(String host) =>
-    host == 'growerp.org' ||
-        host.endsWith('.growerp.org') ||
-        _stagingWebHosts.contains(host)
+    host == 'growerp.org' || host.endsWith('.growerp.org')
     ? _stagingBackendUrl
     : null;
 

@@ -58,7 +58,7 @@ void main() {
     expect(stagingWebBackend('admin.growerp.org'), 'backend.growerp.org');
     expect(stagingWebBackend('www.growerp.org'), 'backend.growerp.org');
     expect(stagingWebBackend('growerp.org'), 'backend.growerp.org');
-    expect(stagingWebBackend('erp.accugeo.com'), 'backend.growerp.org');
+    expect(stagingWebBackend('erp.accugeo.com'), isNull);
     expect(stagingWebBackend('admin.growerp.com'), isNull);
     expect(stagingWebBackend('backend.growerp.net'), isNull);
     expect(stagingWebBackend('evilgrowerp.org'), isNull);
