@@ -17,9 +17,11 @@ import 'package:growerp_wiki/l10n/generated/wiki_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
+import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 
 /// View / edit one wiki page: markdown preview with an edit mode.
+/// Html pages (website generator/converter) get an html preview and source editor.
 /// Pass [pagePath] null for a new page (path becomes editable).
 /// Pops with `true` when the page was saved.
 class WikiPageDialog extends StatefulWidget {
@@ -38,6 +40,8 @@ class WikiPageDialogState extends State<WikiPageDialog> {
   // yaml frontmatter is kept apart: the visual markdown editor would mangle it
   final TextEditingController _frontmatterController = TextEditingController();
   bool get _isNew => widget.pagePath == null;
+  // html.ftl website pages: the markdown editor would mangle them
+  bool _isHtml = false;
   bool _editing = false;
   bool _loading = true;
   String? _error;
@@ -72,6 +76,7 @@ class WikiPageDialogState extends State<WikiPageDialog> {
         final text = page.pageText ?? '';
         final match = RegExp(r'^---\r?\n[\s\S]*?\r?\n---\r?\n').firstMatch(text);
         setState(() {
+          _isHtml = (page.wikiType ?? '').startsWith('html');
           _frontmatterController.text = match?[0] ?? '';
           _textController.text = text.substring(match?.end ?? 0);
         });
@@ -160,7 +165,7 @@ class WikiPageDialogState extends State<WikiPageDialog> {
           child: _editing
               ? Column(
                   children: [
-                    if (_frontmatterController.text.isNotEmpty)
+                    if (!_isHtml && _frontmatterController.text.isNotEmpty)
                       TextFormField(
                         key: const Key('pageFrontmatter'),
                         controller: _frontmatterController,
@@ -172,12 +177,23 @@ class WikiPageDialogState extends State<WikiPageDialog> {
                         ),
                       ),
                     Expanded(
-                      child: MarkdownEditor(
-                        controller: _textController,
-                        inputKey: const Key('pageText'),
-                      ),
+                      child: _isHtml
+                          ? HtmlSourceEditor(
+                              controller: _textController,
+                              isPhone: isAPhone(context),
+                              inputKey: const Key('pageText'),
+                            )
+                          : MarkdownEditor(
+                              controller: _textController,
+                              inputKey: const Key('pageText'),
+                            ),
                     ),
                   ],
+                )
+              : _isHtml
+              ? SingleChildScrollView(
+                  key: const Key('pagePreview'),
+                  child: HtmlWidget(_textController.text),
                 )
               : MarkdownWidget(
                   key: const Key('pagePreview'),

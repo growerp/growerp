@@ -95,9 +95,13 @@ limitations under the License.
         <actions>
             <service-call name="org.moqui.impl.WikiServices.get#PublishedWikiPageText"
                 in-map="[wikiSpaceId: wikiSpaceId, pagePath: pagePath]" out-map="pageOut"/>
+            <!-- file type after the first dot (md, md.ftl, html.ftl): the client picks
+                 the markdown or the html editor from it -->
+            <set field="pageFileName" from="pageOut.pageReference?.fileName"/>
+            <set field="wikiType" from="pageFileName?.contains('.') ? pageFileName.substring(pageFileName.indexOf('.') + 1) : null"/>
             <set field="wikiPage" from="[wikiPageId: pageOut.wikiPageId, wikiSpaceId: wikiSpaceId,
                 pagePath: pagePath, publishedVersionName: pageOut.publishedVersionName,
-                pageText: pageOut.pageText]"/>
+                pageText: pageOut.pageText, wikiType: wikiType]"/>
         </actions>
     </service>
 

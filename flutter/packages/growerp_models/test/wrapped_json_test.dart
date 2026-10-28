@@ -185,6 +185,12 @@ void main() {
       'applicationId',
       (j) => Application.fromJson(j).toJson(),
     ),
+    (
+      'WikiPage',
+      'wikiPage',
+      'wikiPageId',
+      (j) => WikiPage.fromJson(j).toJson(),
+    ),
   ];
 
   for (final (model, key, idField, parse) in cases) {
@@ -209,6 +215,16 @@ void main() {
         'website': {'id': 'W1', 'hostName': 'acme.growerp.com'},
       }).hostName,
       'acme.growerp.com',
+    );
+  });
+
+  // the client picks the markdown or the html editor from wikiType
+  test('WikiPageFromJson_wrapped_readsTheWikiType', () {
+    expect(
+      WikiPage.fromJson({
+        'wikiPage': {'pagePath': 'pricing', 'wikiType': 'html.ftl'},
+      }).wikiType,
+      'html.ftl',
     );
   });
 }

@@ -58,6 +58,8 @@ class WikiPage {
   final String? pagePath;
   final String? publishedVersionName;
   final String? pageText;
+  // file type of the page: md, md.ftl or html.ftl
+  final String? wikiType;
 
   const WikiPage({
     this.wikiPageId,
@@ -65,6 +67,7 @@ class WikiPage {
     this.pagePath,
     this.publishedVersionName,
     this.pageText,
+    this.wikiType,
   });
 
   factory WikiPage.fromJson(Map<String, dynamic> json) =>

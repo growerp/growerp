@@ -10,6 +10,11 @@ Screens:
 
 - `WikiList` — page tree list + page view/edit dialog (`WikiPageDialog`)
 
+Pages are markdown (`.md`, `.md.ftl`) or html (`.html.ftl`, the designed pages of the
+website generator). The dialog picks the editor from the page's `wikiType`: markdown
+pages get the markdown editor and preview, html pages a formatted preview and an html
+source editor. New pages are markdown.
+
 ## integrated test
 An integrated test is available in the example component.
 It uses a local backend system, set in: example/assets/cfg/app_settings.json
