@@ -479,12 +479,18 @@ list_review_apps() {
 
 # preparing is fine while the previous review waits for approvals, the freeze is not
 cmd_review() {
-    local default=1 frozen published
+    local default=1 frozen published listed
     frozen=$(last_success freeze-review.yml)
     published=$(last_success publish-binary.yml)
-    [[ -n "$frozen" && "$frozen" > "${published:-}" ]] && default=5
+    listed=$(last_success publish-metadata.yml)
+    if [[ -n "$frozen" && "$frozen" > "${published:-}" ]]; then
+        default=5
+    elif [[ -n "$frozen" && "$published" > "$frozen" && "$published" > "${listed:-}" ]]; then
+        default=6
+    fi
     start_at "$default" "Update staging" "Reviewer login" "GitHub release" \
-        "Freeze for review, review branch" "Submit for review"
+        "Freeze for review, review branch" "Publish binary (submit for review)" \
+        "Publish metadata (store listing, screenshots)"
     if ((START <= 4)); then
         [[ -n "$REVIEW_OPEN" ]] || show_versions >/dev/null
         if $REVIEW_OPEN; then
@@ -523,28 +529,39 @@ cmd_review() {
     # The binary creates the new store version, metadata writes into it (the Windows
     # binary submission carries its listing itself); both use the screenshots. They
     # run on the review branch: master has moved on since the freeze
-    step "5. Submit for review"
     local apps=all stores=all branch="${REVIEW_BRANCH:-}"
     if [[ -z "$branch" ]]; then
         git -C "$SCRIPT_DIR" fetch -q origin
         branch=$(review_branch)
     fi
     [[ -n "$branch" ]] || die "no review branch: freeze for review first (step 4)"
-    echo "From review branch $branch"
-    if confirm "Publish binary to stores (N: already published, go to metadata)?"; then
-        ask_apps
-        apps="$REPLY"
-        ask_stores
-        stores="$REPLY"
-        cmd_prepare "$apps" "$branch"
-        ask_list "Track (stable = submit for review, beta = TestFlight only)" stable stable beta
-        run_workflow publish-binary.yml --ref "$branch" -f apps="$apps" -f stores="$stores" \
-            -f track="$REPLY" -f android_release_status=auto
+    if ((START <= 5)); then
+        step "5. Publish binary (submit for review)"
+        echo "From review branch $branch"
+        if confirm "Publish binary to stores?"; then
+            ask_apps
+            apps="$REPLY"
+            ask_stores
+            stores="$REPLY"
+            cmd_prepare "$apps" "$branch"
+            ask_list "Track (stable = submit for review, beta = TestFlight only)" stable stable beta
+            run_workflow publish-binary.yml --ref "$branch" -f apps="$apps" -f stores="$stores" \
+                -f track="$REPLY" -f android_release_status=auto
+        fi
     fi
+    step "6. Publish metadata (store listing, screenshots)"
+    echo "From review branch $branch"
+    echo "The binary created the store versions and took the iOS/macOS texts (not the"
+    echo "screenshots), the Windows binary its whole listing. A version waiting for review"
+    echo "leaves the queue for the iOS/macOS screenshots and is submitted again."
     if confirm "Publish metadata to stores?"; then
         ask_apps "$apps"
         apps="$REPLY"
-        ask_list "Stores" "$stores" "${STORES[@]}"
+        # Windows is left out: its binary submission carries the listing (a listing-only
+        # update without a binary in flight can still select it)
+        [[ "$stores" == all ]] && stores=$(IFS=,; echo "${STORES[*]}")
+        stores=$(tr ',' '\n' <<<"$stores" | grep -vx windows | paste -sd,)
+        ask_list "Stores" "${stores:-ios}" "${STORES[@]}"
         run_workflow publish-metadata.yml --ref "$branch" -f apps="$apps" -f stores="$REPLY"
     fi
 }

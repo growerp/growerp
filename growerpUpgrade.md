@@ -52,8 +52,8 @@ release, in the form of the previous release notes; checked in the editor before
 4. "create store screenshots" (opt), "publish binary to stores": submit for review,
    then "publish metadata to stores" (opt), all on the review branch (master has
    moved on). The binary creates the new store version, metadata can only write
-   into it; the Windows binary submission carries its listing itself. No "update
-   staging" between step 3 and this step: the binaries must be the frozen version.
+   into it; the Windows binary submission carries its listing itself, so metadata
+   leaves Windows out by default. No "update staging" between step 3 and this step: the binaries must be the frozen version.
    Their commits (build numbers, screenshots) stay on the review branch: the next
    publish takes the build numbers from the stores.
 
