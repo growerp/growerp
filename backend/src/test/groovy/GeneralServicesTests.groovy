@@ -20,6 +20,9 @@ import spock.lang.Specification
 /* Tests for GeneralServices100 support statistics:
    - get#SignupStatistics charts every registration per day, but lists only the
      tenants that logged in
+   and migrate#ServiceUserPasswords:
+   - the mcp-user and agent-claude accounts lose their default password 'moqui',
+     so nobody can sign in with it; running it again changes nothing
 
    To run: make sure moqui is in place with a loaded database, backend not running, then:
     "cd moqui && ./gradlew :runtime:component:growerp:test"
@@ -66,5 +69,31 @@ class GeneralServicesTests extends Specification {
         result.dailyCounts.find { it.date == day }?.count == registrations
         !result.signups.any { it.ownerPartyId == tenant.ownerPartyId }
         result.signupCount < registrations
+    }
+
+    def "service users lose their default password and cannot sign in with it"() {
+        given: 'both accounts as an existing database has them, password moqui'
+        ['MCP_USER': 'mcp-user', 'AGENT_CLAUDE': 'agent-claude'].each { userId, username ->
+            ec.entity.makeValue('moqui.security.UserAccount').setAll([userId: userId, username: username,
+                    currentPassword: '16ac58bbfa332c1c55bd98b53e60720bfa90d394', passwordHashType: 'SHA',
+                    passwordSalt: null]).createOrUpdate()
+        }
+
+        when:
+        Map first = ec.service.sync().name('growerp.100.GeneralServices100.migrate#ServiceUserPasswords').call()
+        Map second = ec.service.sync().name('growerp.100.GeneralServices100.migrate#ServiceUserPasswords').call()
+        List accounts = ec.entity.find('moqui.security.UserAccount')
+                .condition('userId', 'in', ['MCP_USER', 'AGENT_CLAUDE']).list()
+        boolean mcpLogin = ec.user.loginUser('mcp-user', 'moqui')
+        boolean agentLogin = ec.user.loginUser('agent-claude', 'moqui')
+        ec.message.clearAll()
+
+        then:
+        first.cleared == 2
+        second.cleared == 0
+        accounts.size() == 2
+        accounts.every { it.currentPassword == null }
+        !mcpLogin
+        !agentLogin
     }
 }

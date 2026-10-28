@@ -9,8 +9,8 @@
     <mantle.party.Person partyId="AGENT_CLAUDE_PARTY" firstName="Claude" lastName="Agent"/>
     <mantle.party.PartyRole partyId="AGENT_CLAUDE_PARTY" roleTypeId="Agent"/>
 
-    <moqui.security.UserAccount userId="AGENT_CLAUDE" username="agent-claude" partyId="AGENT_CLAUDE_PARTY"
-        currentPassword="16ac58bbfa332c1c55bd98b53e60720bfa90d394" passwordHashType="SHA"/>
+    <!-- no password: the agent runner switches to it with internalLoginUser -->
+    <moqui.security.UserAccount userId="AGENT_CLAUDE" username="agent-claude" partyId="AGENT_CLAUDE_PARTY"/>
     <moqui.security.UserGroupMember userGroupId="AgentUsers" userId="AGENT_CLAUDE" fromDate="2026-02-04 00:00:00.000"/>
 
     <!-- Agent users have permission to execute delegation service -->

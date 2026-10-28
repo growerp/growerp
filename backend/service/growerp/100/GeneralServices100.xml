@@ -3029,6 +3029,29 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="migrate" noun="ServiceUserPasswords" authenticate="false">
+        <description>One-time idempotent migration: the service accounts mcp-user (MCP_USER) and
+            agent-claude (AGENT_CLAUDE) were seeded with the public default password 'moqui'.
+            Neither signs in with a password (agents use internalLoginUser or a login key), so the
+            password is removed and nobody can sign in with it. A seed reload no longer sets one.</description>
+        <out-parameters><parameter name="cleared" type="Integer"/></out-parameters>
+        <actions>
+            <set field="cleared" from="0" type="Integer"/>
+            <entity-find entity-name="moqui.security.UserAccount" list="accounts" for-update="true">
+                <econdition field-name="userId" operator="in" from="['MCP_USER', 'AGENT_CLAUDE']"/>
+                <econdition field-name="currentPassword" operator="is-not-null"/>
+            </entity-find>
+            <iterate list="accounts" entry="account">
+                <set field="account.currentPassword" from="null"/>
+                <set field="account.passwordSalt" from="null"/>
+                <set field="account.passwordHashType" from="null"/>
+                <entity-update value-field="account"/>
+                <set field="cleared" from="cleared + 1"/>
+            </iterate>
+            <log message="migrate#ServiceUserPasswords: removed the password of ${cleared} service account(s)"/>
+        </actions>
+    </service>
+
     <service verb="migrate" noun="StaleLlmModelNames">
         <description>One-time idempotent migration for rows still naming a retired Gemini model
             (2.0/2.5/3.5/3.7 flash). Agent rows and tenant settings are cleared so they follow the

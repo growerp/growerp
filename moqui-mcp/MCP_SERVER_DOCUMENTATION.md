@@ -162,8 +162,8 @@ Security uses Moqui's native artifact authorization — agents cannot bypass bus
 
 | Account | Username | Group | Purpose |
 |---------|----------|-------|---------|
-| `MCP_USER` | `mcp-user` | `McpUser` | Default human MCP access account |
-| `AGENT_CLAUDE` | `agent-claude` | `AgentUsers` | Autonomous agent runner; impersonates target users via delegation |
+| `MCP_USER` | `mcp-user` | `McpUser` | Human MCP access account; seeded without a password, set one to use it |
+| `AGENT_CLAUDE` | `agent-claude` | `AgentUsers` | Autonomous agent runner; impersonates target users via delegation. No password: used only through `internalLoginUser` |
 
 `AGENT_CLAUDE_PARTY` (`partyId`) is a Person party used as `fromPartyId` in `CommunicationEvent` records created by the agent.
 
@@ -205,7 +205,7 @@ Connect any MCP-compliant client (Claude Desktop, Claude Code, curl) to `http://
 # Quick health check
 curl -X POST http://localhost:8080/mcp \
   -H "Content-Type: application/json" \
-  -u mcp-user:moqui \
+  -u mcp-user:<password> \
   -d '{"jsonrpc":"2.0","id":1,"method":"ping","params":{}}'
 ```
 

@@ -23,15 +23,15 @@ For the full architecture, see the
 - **Endpoint**: `http://<host>:8080/mcp`
 - **Transport**: HTTP POST (synchronous JSON-RPC 2.0) works with any MCP client. An SSE stream is
   also available at `/mcp/sse` for real-time notifications.
-- **Auth**: sign in as a Moqui user in the `McpUser` group. The default account for human/manual
-  use is `mcp-user` / `moqui`.
+- **Auth**: sign in as a Moqui user in the `McpUser` group. The account `mcp-user` is in that
+  group but has no password: set one (System Setup or the Moqui tools) before you use it.
 
 Quick health check:
 
 ```bash
 curl -X POST http://localhost:8080/mcp \
   -H "Content-Type: application/json" \
-  -u mcp-user:moqui \
+  -u mcp-user:<password> \
   -d '{"jsonrpc":"2.0","id":1,"method":"ping","params":{}}'
 ```
 
@@ -46,14 +46,14 @@ Point the client at the `/mcp` endpoint with basic auth, e.g. in Claude Desktop'
     "growerp": {
       "url": "http://localhost:8080/mcp",
       "headers": {
-        "Authorization": "Basic bWNwLXVzZXI6bW9xdWk="
+        "Authorization": "Basic <base64 of mcp-user:password>"
       }
     }
   }
 }
 ```
 
-(`bWNwLXVzZXI6bW9xdWk=` is `mcp-user:moqui` base64-encoded — use your own account's credentials
+(`echo -n 'mcp-user:<password>' | base64` gives the value; use your own account's credentials
 for anything beyond local testing.)
 
 ## Using GrowERP's built-in chat

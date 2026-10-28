@@ -55,9 +55,8 @@
           authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
 
 
-     <!-- MCP User Accounts -->
-     <moqui.security.UserAccount userId="MCP_USER" username="mcp-user"
-          currentPassword="16ac58bbfa332c1c55bd98b53e60720bfa90d394" passwordHashType="SHA"/>
+     <!-- MCP User Accounts: no password (the default 'moqui' was public), set one to sign in -->
+     <moqui.security.UserAccount userId="MCP_USER" username="mcp-user"/>
 
      <!-- Add MCP users to MCP user groups -->
      <moqui.security.UserGroupMember userGroupId="McpUser" userId="MCP_USER"

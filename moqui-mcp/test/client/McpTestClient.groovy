@@ -37,7 +37,7 @@ class McpTestClient {
     
     McpTestClient(String baseUrl = "http://localhost:8080/mcp", 
                   String username = "mcp-user", 
-                  String password = "moqui") {
+                  String password = System.getenv("MCP_PASSWORD")) {
         this.baseUrl = baseUrl
         this.username = username
         this.password = password
