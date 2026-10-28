@@ -18,15 +18,18 @@ along with this software (see the LICENSE.md file). If not, see
     <!-- ========================================================= -->
     <!--  Owner data backup / transfer                             -->
     <!--  Download all data of an owner as a zip (admin of the     -->
-    <!--  owner), upload such a zip as a new owner (system support -->
-    <!--  only). Both run in the background, GET polls progress.   -->
+    <!--  owner, or system support for any owner), upload such a   -->
+    <!--  zip as a new owner (system support only). Both run in    -->
+    <!--  the background, GET polls progress. Files of any size:   -->
+    <!--  the upload comes in chunks (proxies limit a request),    -->
+    <!--  the download streams from screen/ownerData.xml.          -->
     <!--  The work is done by service/OwnerDataTransfer.groovy.    -->
     <!-- ========================================================= -->
 
     <service verb="create" noun="OwnerDataExport" authenticate="true">
         <description>Start a download of all data of the owner of the logged in admin.
-            System support can name another owner.</description>
-        <in-parameters><parameter name="ownerPartyId"><description>support only</description></parameter></in-parameters>
+            System support can name any owner.</description>
+        <in-parameters><parameter name="ownerPartyId"><description>system support only</description></parameter></in-parameters>
         <out-parameters><parameter name="ownerDataTransfer" type="Map"/></out-parameters>
         <actions>
             <set field="requestedOwner" from="ownerPartyId"/>
@@ -43,31 +46,73 @@ along with this software (see the LICENSE.md file). If not, see
         </actions>
     </service>
 
-    <service verb="create" noun="OwnerDataImport" authenticate="true">
-        <description>Upload a zip made by a download as a new owner, with new ids next to the
-            data already here. System support only.</description>
+    <service verb="upload" noun="OwnerDataChunk" authenticate="true">
+        <description>Upload a downloaded zip as a new owner, next to the data already here, in
+            chunks (multipart, each below the proxy request limit). The first chunk (offset 0,
+            no id) starts the upload, the last one (last=true) starts loading it. System support only.</description>
         <in-parameters>
+            <parameter name="ownerDataTransferId"><description>empty on the first chunk</description></parameter>
             <parameter name="fileName" required="true"/>
-            <parameter name="zip" required="true"><description>base64 zip file</description></parameter>
+            <parameter name="offset" type="Long" default="0"><description>position of this chunk in the file</description></parameter>
+            <parameter name="last" type="Boolean" default="false"/>
+            <parameter name="file" type="Object" required="true"><description>the chunk: a multipart FileItem, or bytes</description></parameter>
         </in-parameters>
         <out-parameters><parameter name="ownerDataTransfer" type="Map"/></out-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.check#SupportUser"/>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
-            <script><![CDATA[
-                try {
-                    zipBytes = Base64.getMimeDecoder().decode(zip as String)
-                    def OwnerDataTransfer = ec.resource.script('component://growerp/service/OwnerDataTransfer.groovy', null)
-                    manifest = OwnerDataTransfer.readZip(zipBytes).manifest
-                } catch (Exception e) {
-                    manifest = null
-                }
-            ]]></script>
-            <if condition="!manifest?.ownerPartyId">
-                <return error="true" message="${fileName} is not a GrowERP company data file"/>
+            <if condition="!ownerDataTransferId">
+                <if condition="offset != 0"><return error="true" message="An upload starts at the beginning of the file"/></if>
+                <service-call name="growerp.100.OwnerDataServices100.start#OwnerDataTransfer" out-map="context"
+                    in-map="[ownerPartyId: ownerPartyId, direction: 'IMPORT', fileName: fileName]"/>
+                <set field="ownerDataTransferId" from="ownerDataTransfer.ownerDataTransferId"/>
             </if>
-            <service-call name="growerp.100.OwnerDataServices100.start#OwnerDataTransfer" out-map="context"
-                in-map="[ownerPartyId: ownerPartyId, direction: 'IMPORT', fileName: fileName, zipBytes: zipBytes]"/>
+            <entity-find-one entity-name="growerp.general.OwnerDataTransfer" value-field="job">
+                <field-map field-name="ownerDataTransferId"/>
+            </entity-find-one>
+            <if condition="!job || job.direction != 'IMPORT' || job.status != 'UPLOADING' || job.username != ec.user.username">
+                <return error="true" message="Upload ${ownerDataTransferId} not found"/>
+            </if>
+            <script><![CDATA[
+                File upload = new File(job.fileLocation as String)
+                long size = upload.exists() ? upload.length() : 0L
+                if (offset != size) {
+                    ec.message.addError("Chunk at ${offset} does not follow the ${size} bytes received, start the upload again")
+                    return
+                }
+                // append the chunk: the file grows on disk, never in memory
+                InputStream chunk = file instanceof byte[] ? new ByteArrayInputStream((byte[]) file) : file.getInputStream()
+                chunk.withCloseable { InputStream is -> new FileOutputStream(upload, true).withCloseable { is.transferTo(it) } }
+                Map fields = [ownerDataTransferId: ownerDataTransferId, fileSize: upload.length(),
+                              progress: "Received ${upload.length()} bytes".toString()]
+                if (last) {
+                    boolean valid = false
+                    try {
+                        new java.util.zip.ZipFile(upload).withCloseable { zip ->
+                            def OwnerDataTransfer = ec.resource.script('component://growerp/service/OwnerDataTransfer.groovy', null)
+                            valid = OwnerDataTransfer.manifest(zip)?.ownerPartyId as boolean
+                        }
+                    } catch (Exception e) {
+                        valid = false
+                    }
+                    if (valid) {
+                        fields.status = 'QUEUED'
+                    } else {
+                        upload.delete()
+                        fields.putAll([status: 'FAILED', fileLocation: null, completedDate: ec.user.nowTimestamp,
+                                errorMessage: "${fileName} is not a GrowERP company data file".toString()])
+                    }
+                }
+                // committed before the worker starts, it runs on another thread
+                ec.service.sync().name('update#growerp.general.OwnerDataTransfer').parameters(fields)
+                    .requireNewTransaction(true).call()
+                if (fields.status == 'QUEUED')
+                    ec.service.async().name('growerp.100.OwnerDataServices100.run#OwnerDataTransfer')
+                        .parameters([ownerDataTransferId: ownerDataTransferId]).call()
+            ]]></script>
+            <check-errors/>
+            <service-call name="growerp.100.OwnerDataServices100.get#OwnerDataTransfer" out-map="context"
+                in-map="[ownerDataTransferId: ownerDataTransferId, ownerPartyId: job.ownerPartyId]"/>
         </actions>
     </service>
 
@@ -76,42 +121,78 @@ along with this software (see the LICENSE.md file). If not, see
             <parameter name="ownerPartyId" required="true"/>
             <parameter name="direction" required="true"/>
             <parameter name="fileName"/>
-            <parameter name="zipBytes" type="Object"/>
         </in-parameters>
         <out-parameters><parameter name="ownerDataTransfer" type="Map"/></out-parameters>
         <actions>
-            <!-- one at a time per owner; a job older than 6 hours is taken as dead (restart) -->
+            <!-- an upload not finished (app closed while sending) is given up by a new one -->
+            <entity-find entity-name="growerp.general.OwnerDataTransfer" list="abandoned">
+                <econdition field-name="ownerPartyId"/>
+                <econdition field-name="direction"/>
+                <econdition field-name="status" value="UPLOADING"/>
+            </entity-find>
+            <iterate list="abandoned" entry="old">
+                <script>if (old.fileLocation) new File(old.fileLocation as String).delete()</script>
+                <service-call name="update#growerp.general.OwnerDataTransfer" require-new-transaction="true"
+                    in-map="[ownerDataTransferId: old.ownerDataTransferId, status: 'FAILED', fileLocation: null,
+                        errorMessage: 'Upload not finished', completedDate: ec.user.nowTimestamp]"/>
+            </iterate>
+            <!-- one at a time per owner; a job older than 12 hours is taken as dead (restart) -->
             <entity-find entity-name="growerp.general.OwnerDataTransfer" list="running" limit="1">
                 <econdition field-name="ownerPartyId"/>
+                <econdition field-name="direction"/>
                 <econdition field-name="status" operator="in" value="QUEUED,RUNNING"/>
                 <econdition field-name="createdDate" operator="greater"
-                    from="new java.sql.Timestamp(ec.user.nowTimestamp.time - 6L * 3600 * 1000)"/>
+                    from="new java.sql.Timestamp(ec.user.nowTimestamp.time - 12L * 3600 * 1000)"/>
                 <select-field field-name="ownerDataTransferId"/>
             </entity-find>
             <if condition="running">
-                <return error="true" message="A company data download or upload is already running, wait until it is finished"/>
+                <return error="true" message="A company data ${direction == 'EXPORT' ? 'download' : 'upload'} is already running, wait until it is finished"/>
             </if>
+            <service-call name="growerp.100.OwnerDataServices100.clean#OwnerDataFiles"/>
             <!-- commit the row before firing the worker, which runs on another thread and
                  would not see an uncommitted row -->
             <script><![CDATA[
+                File dir = new File(ec.factory.runtimePath + '/ownerData')
+                dir.mkdirs()
                 def created = ec.service.sync().name('create#growerp.general.OwnerDataTransfer')
-                    .parameters([ownerPartyId: ownerPartyId, direction: direction, status: 'QUEUED',
+                    .parameters([ownerPartyId: ownerPartyId, direction: direction,
+                                 status: direction == 'IMPORT' ? 'UPLOADING' : 'QUEUED', fileSize: 0,
                                  fileName: fileName, username: ec.user.username, createdDate: ec.user.nowTimestamp])
                     .requireNewTransaction(true).call()
                 ownerDataTransferId = created.ownerDataTransferId
-                if (zipBytes) {
-                    File upload = new File(ec.factory.runtimePath + "/ownerData/${ownerDataTransferId}-upload.zip")
-                    upload.parentFile.mkdirs()
-                    upload.bytes = (byte[]) zipBytes
-                }
+                String suffix = direction == 'IMPORT' ? '-upload.zip' : '.zip'
+                ec.service.sync().name('update#growerp.general.OwnerDataTransfer')
+                    .parameters([ownerDataTransferId: ownerDataTransferId,
+                                 fileLocation: new File(dir, ownerDataTransferId + suffix).path])
+                    .requireNewTransaction(true).call()
             ]]></script>
             <check-errors/>
-            <script>
-                ec.service.async().name('growerp.100.OwnerDataServices100.run#OwnerDataTransfer')
-                    .parameters([ownerDataTransferId: ownerDataTransferId]).call()
-            </script>
+            <if condition="direction == 'EXPORT'">
+                <script>
+                    ec.service.async().name('growerp.100.OwnerDataServices100.run#OwnerDataTransfer')
+                        .parameters([ownerDataTransferId: ownerDataTransferId]).call()
+                </script>
+            </if>
             <service-call name="growerp.100.OwnerDataServices100.get#OwnerDataTransfer" out-map="context"
                 in-map="[ownerDataTransferId: ownerDataTransferId, ownerPartyId: ownerPartyId]"/>
+        </actions>
+    </service>
+
+    <service verb="clean" noun="OwnerDataFiles">
+        <description>Remove the files of downloads and uploads older than a week, they hold all
+            data of an owner.</description>
+        <actions>
+            <entity-find entity-name="growerp.general.OwnerDataTransfer" list="oldJobs">
+                <econdition field-name="createdDate" operator="less"
+                    from="new java.sql.Timestamp(ec.user.nowTimestamp.time - 7L * 24 * 3600 * 1000)"/>
+                <econdition field-name="fileLocation" operator="is-not-null"/>
+            </entity-find>
+            <iterate list="oldJobs" entry="oldJob">
+                <script>new File(oldJob.fileLocation as String).delete()</script>
+                <set field="oldJob.fileLocation" from="null"/>
+                <set field="oldJob.downloadToken" from="null"/>
+                <entity-update value-field="oldJob"/>
+            </iterate>
         </actions>
     </service>
 
@@ -122,6 +203,7 @@ along with this software (see the LICENSE.md file). If not, see
         <actions>
             <script><![CDATA[
                 import groovy.json.JsonOutput
+                import java.util.zip.ZipFile
 
                 ec.artifactExecution.disableAuthz()
                 def job = ec.entity.find('growerp.general.OwnerDataTransfer')
@@ -136,38 +218,41 @@ along with this software (see the LICENSE.md file). If not, see
                 }
                 Closure progress = { String message -> update([progress: message]) }
                 update([status: 'RUNNING', progress: 'Started'])
-                File dir = new File(ec.factory.runtimePath + '/ownerData')
+                File file = new File(job.fileLocation as String)
+                // a big company takes long: hours, not the default minutes
+                int timeout = 12 * 3600
                 try {
                     def OwnerDataTransfer = ec.resource.script('component://growerp/service/OwnerDataTransfer.groovy', null)
                     def transfer = OwnerDataTransfer.newInstance(ec, progress)
                     if (job.direction == 'EXPORT') {
-                        File zipFile = new File(dir, "${ownerDataTransferId}.zip")
-                        Map result = ec.transaction.runUseOrBegin(7200, 'Owner data download failed') {
-                            transfer.export(job.ownerPartyId, zipFile)
+                        Map result = ec.transaction.runUseOrBegin(timeout, 'Owner data download failed') {
+                            transfer.export(job.ownerPartyId, file)
                         }
                         String day = ec.user.nowTimestamp.toLocalDateTime().toLocalDate().toString()
                         update([status: 'DONE', progress: "${result.counts.values().sum() ?: 0} records, ${result.files} files".toString(),
-                                fileLocation: zipFile.path, fileName: "growerp-data-${job.ownerPartyId}-${day}.zip".toString(),
+                                fileName: "growerp-data-${job.ownerPartyId}-${day}.zip".toString(), fileSize: file.length(),
+                                downloadToken: UUID.randomUUID().toString(),
                                 countsJson: JsonOutput.toJson(result.counts), completedDate: ec.user.nowTimestamp])
                     } else {
-                        File upload = new File(dir, "${ownerDataTransferId}-upload.zip")
-                        Map data = OwnerDataTransfer.readZip(upload.bytes)
-                        List conflicts = transfer.conflicts(data)
-                        if (conflicts) throw new IllegalStateException('Not loaded: ' + conflicts.join(', '))
-                        Map result = ec.transaction.runUseOrBegin(7200, 'Owner data upload failed') {
-                            transfer.load(data)
+                        Map result
+                        new ZipFile(file).withCloseable { ZipFile zip ->
+                            List conflicts = transfer.conflicts(zip)
+                            if (conflicts) throw new IllegalStateException('Not loaded: ' + conflicts.join(', '))
+                            result = ec.transaction.runUseOrBegin(timeout, 'Owner data upload failed') {
+                                transfer.load(zip, new File(file.parentFile, "${ownerDataTransferId}-load"))
+                            }
                         }
-                        upload.delete()
-                        update([status: 'DONE', newOwnerPartyId: result.ownerPartyId,
+                        file.delete()
+                        update([status: 'DONE', newOwnerPartyId: result.ownerPartyId, fileLocation: null,
                                 progress: "${result.counts.values().sum() ?: 0} records, ${result.files} files, ${result.skipped.size()} skipped".toString(),
                                 countsJson: JsonOutput.toJson(result.counts), completedDate: ec.user.nowTimestamp])
                     }
                 } catch (Throwable t) {
                     ec.logger.error("Owner data ${job.direction} ${ownerDataTransferId} failed", t)
                     ec.message.clearErrors()
-                    new File(dir, "${ownerDataTransferId}-upload.zip").delete()
+                    file.delete()
                     update([status: 'FAILED', errorMessage: (t.message ?: t.toString()).take(4000),
-                            completedDate: ec.user.nowTimestamp])
+                            fileLocation: null, completedDate: ec.user.nowTimestamp])
                 }
             ]]></script>
         </actions>
@@ -175,11 +260,11 @@ along with this software (see the LICENSE.md file). If not, see
 
     <service verb="get" noun="OwnerDataTransfer" authenticate="true">
         <description>A download or upload with its progress; without id the latest one of the owner
-            (null if none).</description>
+            (null if none). A finished download has a downloadPath, a link valid for 24 hours.</description>
         <in-parameters>
             <parameter name="ownerDataTransferId"/>
             <parameter name="direction"/>
-            <parameter name="ownerPartyId"><description>support only</description></parameter>
+            <parameter name="ownerPartyId"><description>system support only</description></parameter>
         </in-parameters>
         <out-parameters><parameter name="ownerDataTransfer" type="Map"/></out-parameters>
         <actions>
@@ -196,41 +281,17 @@ along with this software (see the LICENSE.md file). If not, see
             </entity-find>
             <if condition="jobs">
                 <set field="job" from="jobs[0]"/>
+                <set field="downloadable" from="job.direction == 'EXPORT' &amp;&amp; job.status == 'DONE'
+                    &amp;&amp; job.downloadToken &amp;&amp; job.completedDate
+                    &amp;&amp; job.completedDate.time > ec.user.nowTimestamp.time - 24L * 3600 * 1000"/>
                 <set field="ownerDataTransfer" from="[ownerDataTransferId: job.ownerDataTransferId,
                     direction: job.direction, status: job.status, progress: job.progress,
-                    errorMessage: job.errorMessage, fileName: job.fileName,
+                    errorMessage: job.errorMessage, fileName: job.fileName, fileSize: job.fileSize,
                     counts: job.countsJson ? new groovy.json.JsonSlurper().parseText(job.countsJson) : [:],
                     newOwnerPartyId: job.newOwnerPartyId, createdDate: job.createdDate,
-                    completedDate: job.completedDate]"/>
+                    completedDate: job.completedDate,
+                    downloadPath: downloadable ? '/ownerData/download?t=' + job.downloadToken : null]"/>
             </if>
-        </actions>
-    </service>
-
-    <service verb="get" noun="OwnerDataExportFile" authenticate="true">
-        <description>The zip of a finished download of the owner.</description>
-        <in-parameters><parameter name="ownerDataTransferId" required="true"/></in-parameters>
-        <out-parameters>
-            <parameter name="zip"><description>base64 zip file</description></parameter>
-            <parameter name="fileName"/>
-        </out-parameters>
-        <actions>
-            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
-            <entity-find-one entity-name="growerp.general.OwnerDataTransfer" value-field="job">
-                <field-map field-name="ownerDataTransferId"/>
-            </entity-find-one>
-            <!-- entity-find-one with the full pk ignores other field-maps: check the owner here -->
-            <if condition="!job || job.direction != 'EXPORT' || job.status != 'DONE'
-                    || (job.ownerPartyId != ownerPartyId &amp;&amp; !ec.user.isInGroup('GROWERP_M_SYSTEM'))">
-                <return error="true" message="Download ${ownerDataTransferId} not found"/>
-            </if>
-            <script><![CDATA[
-                File zipFile = new File(job.fileLocation as String)
-                if (zipFile.exists()) {
-                    zip = Base64.getEncoder().encodeToString(zipFile.bytes)
-                    fileName = job.fileName
-                }
-            ]]></script>
-            <if condition="!zip"><return error="true" message="The file of download ${ownerDataTransferId} is gone, download again"/></if>
         </actions>
     </service>
 </services>

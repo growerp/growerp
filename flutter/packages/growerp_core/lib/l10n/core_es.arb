@@ -494,5 +494,6 @@
   "ownerDataUploadInfo": "Cargar un archivo descargado como una nueva empresa junto a las empresas que ya están en este sistema. Todos los registros reciben nuevos identificadores.",
   "ownerDataUploaded": "Cargado como la nueva empresa {ownerPartyId}",
   "ownerDataDone": "Listo",
-  "ownerDataFailed": "Error"
+  "ownerDataFailed": "Error",
+  "ownerDataSave": "Guardar el archivo"
 }

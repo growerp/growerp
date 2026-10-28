@@ -26,11 +26,18 @@ class OwnerDataTransfer {
   /// EXPORT | IMPORT
   final String? direction;
 
-  /// QUEUED | RUNNING | DONE | FAILED
+  /// UPLOADING | QUEUED | RUNNING | DONE | FAILED
   final String? status;
   final String? progress;
   final String? errorMessage;
   final String? fileName;
+
+  /// Bytes of the zip; while uploading: received so far.
+  final int? fileSize;
+
+  /// A finished download: the path on the backend that streams the zip,
+  /// valid for 24 hours.
+  final String? downloadPath;
 
   /// Records per entity.
   final Map<String, int> counts;
@@ -49,12 +56,16 @@ class OwnerDataTransfer {
     this.progress,
     this.errorMessage,
     this.fileName,
+    this.fileSize,
+    this.downloadPath,
     this.counts = const {},
     this.newOwnerPartyId,
     this.createdDate,
     this.completedDate,
   });
 
+  /// Being made or loaded on the backend. An upload still UPLOADING is not:
+  /// only the app sending it knows, a new upload gives it up.
   bool get isRunning => status == 'QUEUED' || status == 'RUNNING';
 
   /// Accepts the REST wrapper `{ownerDataTransfer: {...}}` or the bare object.

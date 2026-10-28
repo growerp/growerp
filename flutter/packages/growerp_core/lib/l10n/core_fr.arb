@@ -1402,5 +1402,6 @@
   "ownerDataUploadInfo": "Charger un fichier téléchargé comme nouvelle entreprise à côté des entreprises déjà présentes sur ce système. Tous les enregistrements reçoivent de nouveaux identifiants.",
   "ownerDataUploaded": "Chargé comme nouvelle entreprise {ownerPartyId}",
   "ownerDataDone": "Terminé",
-  "ownerDataFailed": "Échec"
+  "ownerDataFailed": "Échec",
+  "ownerDataSave": "Enregistrer le fichier"
 }

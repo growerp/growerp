@@ -20,6 +20,23 @@ void main() {
     expect(job.completedDate, isNull);
   });
 
+  test('a finished download has the link and the size', () {
+    final job = OwnerDataTransfer.fromJson({
+      'direction': 'EXPORT',
+      'status': 'DONE',
+      'fileSize': 5242880,
+      'downloadPath': '/ownerData/download?t=abc',
+    });
+    expect(job.isRunning, isFalse);
+    expect(job.fileSize, 5242880);
+    expect(job.downloadPath, '/ownerData/download?t=abc');
+  });
+
+  test('an upload not finished does not block a new one', () {
+    final job = OwnerDataTransfer.fromJson({'status': 'UPLOADING'});
+    expect(job.isRunning, isFalse);
+  });
+
   test('a finished upload has the new owner and the counts', () {
     final job = OwnerDataTransfer.fromJson({
       'direction': 'IMPORT',

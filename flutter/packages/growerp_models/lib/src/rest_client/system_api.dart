@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart' show MultipartFile;
 import 'package:retrofit/retrofit.dart';
 
 import '../models/models.dart';
@@ -181,29 +182,33 @@ mixin SystemApi {
   Future<ExchangeRates> getExchangeRates();
 
   // owner data backup / transfer ========
-  /// Start a background download of all data of the owner, poll with
-  /// [getOwnerDataTransfer], then fetch it with [getOwnerDataExportFile].
+  /// Start a background download of all data of the owner (system support:
+  /// of [ownerPartyId]); poll with [getOwnerDataTransfer] until it has a
+  /// downloadPath, a link that streams the zip.
   @POST("rest/s1/growerp/100/OwnerData/Export")
-  Future<OwnerDataTransfer> createOwnerDataExport();
+  Future<OwnerDataTransfer> createOwnerDataExport({
+    @Field() String? ownerPartyId,
+  });
 
   /// The latest download or upload of the owner, or the one with the id.
   @GET("rest/s1/growerp/100/OwnerData")
   Future<OwnerDataTransfer> getOwnerDataTransfer({
     @Query('ownerDataTransferId') String? ownerDataTransferId,
     @Query('direction') String? direction,
+    @Query('ownerPartyId') String? ownerPartyId,
   });
 
-  /// The zip of a finished download: {fileName, zip (base64)}.
-  @GET("rest/s1/growerp/100/OwnerData/Export")
-  Future<dynamic> getOwnerDataExportFile({
-    @Query('ownerDataTransferId') required String ownerDataTransferId,
-  });
-
-  /// Upload a download as a new owner (system support only). Sent as a JSON
-  /// body, {fileName, zip (base64)}: Jetty rejects form posts over 200kB.
+  /// Upload a download as a new owner (system support only), a chunk at a
+  /// time: proxies limit the size of a request. The first chunk has no id,
+  /// the last one starts loading.
   @POST("rest/s1/growerp/100/OwnerData/Import")
-  Future<OwnerDataTransfer> createOwnerDataImport({
-    @Body() required Map<String, dynamic> data,
+  @MultiPart()
+  Future<OwnerDataTransfer> uploadOwnerDataChunk({
+    @Part(name: 'ownerDataTransferId') String? ownerDataTransferId,
+    @Part(name: 'fileName') required String fileName,
+    @Part(name: 'offset') required String offset,
+    @Part(name: 'last') required String last,
+    @Part(name: 'file') required MultipartFile file,
   });
 
   // import / export ========

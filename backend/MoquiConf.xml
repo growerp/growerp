@@ -71,6 +71,9 @@
             <!-- course videos (streamed with Range support) and cover images -->
             <subscreens-item name="courseMedia" menu-include="false"
                 location="component://growerp/screen/courseMedia.xml"/>
+            <!-- download of all data of an owner: /ownerData/download?t=token -->
+            <subscreens-item name="ownerData" menu-include="false"
+                location="component://growerp/screen/ownerData.xml"/>
             <!-- Google Sign in redirect target: /googleOAuth/callback -->
             <subscreens-item name="googleOAuth" menu-include="false"
                 location="component://growerp/screen/googleOAuth.xml"/>

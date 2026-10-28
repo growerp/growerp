@@ -1402,5 +1402,6 @@
   "ownerDataUploadInfo": "将下载的文件作为新公司加载到本系统中现有公司旁边。所有记录都会获得新的编号。",
   "ownerDataUploaded": "已作为新公司 {ownerPartyId} 加载",
   "ownerDataDone": "完成",
-  "ownerDataFailed": "失败"
+  "ownerDataFailed": "失败",
+  "ownerDataSave": "保存文件"
 }

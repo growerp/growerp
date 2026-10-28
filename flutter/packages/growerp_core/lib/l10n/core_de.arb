@@ -1402,5 +1402,6 @@
   "ownerDataUploadInfo": "Eine heruntergeladene Datei als neue Firma neben den Firmen auf diesem System laden. Alle Datensätze erhalten neue IDs.",
   "ownerDataUploaded": "Als neue Firma {ownerPartyId} geladen",
   "ownerDataDone": "Fertig",
-  "ownerDataFailed": "Fehlgeschlagen"
+  "ownerDataFailed": "Fehlgeschlagen",
+  "ownerDataSave": "Datei speichern"
 }

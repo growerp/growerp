@@ -20,7 +20,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:growerp_core/growerp_core.dart';
 
 /// System Setup on one page: AI ([SystemSetupAiView]) above the email server
-/// ([SystemSetupEmailView]), each saving its own settings.
+/// ([SystemSetupEmailView]), each saving its own settings, and the download of
+/// the company data ([SystemSetupBackupView]).
 ///
 /// Apps that carry System Setup as a menu item with children show those views
 /// as tabs instead, next to the guides ([GuideList]); this page is what an app
@@ -85,6 +86,8 @@ class SystemSetupDialog extends StatelessWidget {
               SystemSetupAiView(standalone: false, onSaved: pop),
               const SizedBox(height: 24),
               SystemSetupEmailView(standalone: false, onSaved: pop),
+              const SizedBox(height: 24),
+              const SystemSetupBackupView(standalone: false),
               if (inDialog) ...[
                 const SizedBox(height: 24),
                 Center(

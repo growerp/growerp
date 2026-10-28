@@ -82,6 +82,8 @@ class CompanyListState extends State<CompanyList> {
 
   @override
   Widget build(BuildContext context) {
+    // system support: owners can be downloaded and uploaded
+    final isSupport = context.read<String>() == 'AppSupport';
     _localizations = UserCompanyLocalizations.of(context)!;
     isPhone = ResponsiveBreakpoints.of(context).isMobile;
     right = right ?? (isAPhone(context) ? 20 : 50);
@@ -231,6 +233,23 @@ class CompanyListState extends State<CompanyList> {
                               child: const Icon(Icons.add),
                             ),
                             const SizedBox(height: 10),
+                            // system support: load a company data download as a new owner
+                            if (widget.mainOnly && isSupport) ...[
+                              FloatingActionButton(
+                                key: const Key("ownerDataUpload"),
+                                heroTag: "companybtn4",
+                                onPressed: () => showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) =>
+                                      const OwnerDataDialog(),
+                                ),
+                                tooltip: CoreLocalizations.of(
+                                  context,
+                                )!.ownerDataUpload,
+                                child: const Icon(Icons.upload),
+                              ),
+                              const SizedBox(height: 10),
+                            ],
                             if (widget.mainOnly)
                               FloatingActionButton(
                                 key: const Key("refresh"),

@@ -1379,23 +1379,21 @@ limitations under the License.
                 <service name="growerp.100.WebsiteServices100.delete#WebsiteForm" />
             </method>
         </resource>
-        <!-- owner data backup / transfer: background download (any admin) and upload
-             (system support); GET polls the latest one -->
+        <!-- owner data backup / transfer: background download (any admin, support for any
+             owner) and upload (system support, multipart chunks); GET polls the latest one and
+             gives the link of a finished download (screen ownerData.xml streams it) -->
         <resource name="OwnerData">
             <method type="get">
                 <service name="growerp.100.OwnerDataServices100.get#OwnerDataTransfer" />
             </method>
             <resource name="Export">
-                <method type="get">
-                    <service name="growerp.100.OwnerDataServices100.get#OwnerDataExportFile" />
-                </method>
                 <method type="post">
                     <service name="growerp.100.OwnerDataServices100.create#OwnerDataExport" />
                 </method>
             </resource>
             <resource name="Import">
                 <method type="post">
-                    <service name="growerp.100.OwnerDataServices100.create#OwnerDataImport" />
+                    <service name="growerp.100.OwnerDataServices100.upload#OwnerDataChunk" />
                 </method>
             </resource>
         </resource>

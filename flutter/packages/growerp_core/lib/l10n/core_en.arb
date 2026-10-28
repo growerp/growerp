@@ -1916,5 +1916,9 @@
   "ownerDataFailed": "Failed",
   "@ownerDataFailed": {
     "description": "System setup backup tab: status of a failed download or upload"
+  },
+  "ownerDataSave": "Save the file",
+  "@ownerDataSave": {
+    "description": "System setup backup tab: save a finished download (again)"
   }
 }

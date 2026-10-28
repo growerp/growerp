@@ -318,9 +318,11 @@ The `field-map` still matters when the find is not by the full key (e.g. by `pse
 ## Owner data download and upload
 
 `OwnerData/Export` (download all data of an owner) is in the `GROWERP_SETUP` domain and
-`create#OwnerDataExport` also requires `GROWERP_M_ADMIN`; system support may name another
-owner. `OwnerData/Import` creates a whole new owner from a file, so
-`create#OwnerDataImport` calls `check#SupportUser`: only `GROWERP_M_SYSTEM` can upload. The
+`create#OwnerDataExport` also requires `GROWERP_M_ADMIN`; system support may name any
+owner. The file itself is served by the anonymous screen `/ownerData/download?t=<token>`:
+the token is the access, handed out only by `get#OwnerDataTransfer` (the owner's own jobs, or
+support) and valid 24 hours. `OwnerData/Import` creates a whole new owner from a file, so
+`upload#OwnerDataChunk` calls `check#SupportUser`: only `GROWERP_M_SYSTEM` can upload. The
 file holds the owner's secrets (mail server password, AI keys, password hashes). See
 [Owner_Data_Backup_Transfer.md](Owner_Data_Backup_Transfer.md).
 

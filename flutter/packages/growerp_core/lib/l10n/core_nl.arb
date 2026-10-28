@@ -1402,5 +1402,6 @@
   "ownerDataUploadInfo": "Laad een gedownload bestand als nieuw bedrijf naast de bedrijven die al op dit systeem staan. Alle records krijgen nieuwe ids.",
   "ownerDataUploaded": "Geladen als het nieuwe bedrijf {ownerPartyId}",
   "ownerDataDone": "Klaar",
-  "ownerDataFailed": "Mislukt"
+  "ownerDataFailed": "Mislukt",
+  "ownerDataSave": "Bestand opslaan"
 }

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<!-- The zip of an owner data download (OwnerDataServices100): /ownerData/download?t=downloadToken.
+
+     Streamed from disk, any size. The token is the access: get#OwnerDataTransfer only hands it
+     to the owner's admins and system support, it is valid for 24 hours after the download is
+     made. A link, so a browser saves the file the usual way on every platform. -->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+    require-authentication="false" track-artifact-hit="false" default-menu-include="false">
+
+    <transition name="download" read-only="true" begin-transaction="false">
+        <parameter name="t" />
+        <actions>
+            <script><![CDATA[
+                import jakarta.servlet.http.HttpServletResponse
+
+                HttpServletResponse response = ec.web.response
+                def job = t ? ec.entity.find("growerp.general.OwnerDataTransfer").condition("downloadToken", t)
+                    .useCache(false).disableAuthz().one() : null
+                File file = job?.fileLocation ? new File(job.fileLocation as String) : null
+                if (!file?.exists() || job.direction != 'EXPORT' || job.status != 'DONE' || !job.completedDate ||
+                        job.completedDate.time < ec.user.nowTimestamp.time - 24L * 3600 * 1000) {
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND)
+                    return
+                }
+                response.contentType = "application/zip"
+                response.setHeader("Content-Disposition", "attachment; filename=\"${job.fileName}\"")
+                response.setHeader("Cache-Control", "no-store")
+                response.setContentLengthLong(file.length())
+                file.withInputStream { it.transferTo(response.outputStream) }
+            ]]></script>
+        </actions>
+        <default-response type="none" />
+    </transition>
+</screen>

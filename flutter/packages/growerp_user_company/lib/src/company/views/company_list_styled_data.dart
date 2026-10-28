@@ -198,6 +198,20 @@ List<Widget> getCompanyListRow({
     Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        if (applicationId == 'AppSupport') ...[
+          IconButton(
+            key: Key("ownerData$index"),
+            icon: const Icon(Icons.download),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            onPressed: () => showDialog(
+              context: context,
+              builder: (BuildContext context) =>
+                  OwnerDataDialog(company: company),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
         IconButton(
           key: Key("stats$index"),
           icon: const Icon(Icons.bar_chart),

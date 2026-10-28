@@ -1402,5 +1402,6 @@
   "ownerDataUploadInfo": "โหลดไฟล์ที่ดาวน์โหลดไว้เป็นบริษัทใหม่ ข้างบริษัทที่มีอยู่แล้วในระบบนี้ ทุกระเบียนจะได้รหัสใหม่",
   "ownerDataUploaded": "โหลดเป็นบริษัทใหม่ {ownerPartyId} แล้ว",
   "ownerDataDone": "เสร็จสิ้น",
-  "ownerDataFailed": "ล้มเหลว"
+  "ownerDataFailed": "ล้มเหลว",
+  "ownerDataSave": "บันทึกไฟล์"
 }
