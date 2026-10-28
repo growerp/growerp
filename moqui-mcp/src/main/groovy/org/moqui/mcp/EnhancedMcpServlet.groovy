@@ -439,7 +439,10 @@ class EnhancedMcpServlet extends HttpServlet {
             // Instead we loop until the writer signals an error (client disconnected).
             int pingCount = 0
             boolean connectionAlive = true
-            while (connectionAlive && !shuttingDown && pingCount < 360) {  // max ~30 minutes (360 × 5s)
+            // no maximum age: google-adk McpToolset keeps its session for the life of the agent and
+            // does not notice a closed stream, so a capped stream left the next tools/list waiting
+            // 300s for its timeout. A disconnected client ends the loop when a ping write fails.
+            while (connectionAlive && !shuttingDown) {
                 // Sleep 5000ms in increments of 100ms to allow fast shutdown response
                 for (int i = 0; i < 50 && !shuttingDown && transport.isSessionActive(sessionId); i++) {
                     Thread.sleep(100)
