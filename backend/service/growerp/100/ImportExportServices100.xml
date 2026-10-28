@@ -2375,7 +2375,7 @@ limitations under the License.
         <in-parameters>
             <parameter name="productStoreId" required="true" />
             <parameter name="siteId" required="true">
-                <description>id prefix used in the data file, eg ACCUGEO</description>
+                <description>id prefix used in the data file, eg EXAMPLE</description>
             </parameter>
             <parameter name="storeName">
                 <description>left empty the store keeps its name</description>
@@ -2466,7 +2466,7 @@ limitations under the License.
                     a whole XML document</description>
             </parameter>
             <parameter name="siteId" required="true">
-                <description>id prefix used in the data file, eg ACCUGEO</description>
+                <description>id prefix used in the data file, eg EXAMPLE</description>
             </parameter>
             <parameter name="password"
                 default="org.moqui.util.StringUtilities.getRandomString(6) + '9!'" />

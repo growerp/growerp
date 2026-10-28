@@ -33,7 +33,7 @@ flutter/packages/growerp_core/lib/src/domains/common/functions/get_backend_url.d
 **Logic Flow**:
 
 0. **Staging web**: a release web build served on a staging host (`growerp.org`, `*.growerp.org`,
-   `erp.accugeo.com`, see `stagingWebBackend()`) sets databaseUrl/chatUrl to `backend.growerp.org`
+   or a customer staging host listed in `_stagingWebHosts`, see `stagingWebBackend()`) sets databaseUrl/chatUrl to `backend.growerp.org`
    and skips the discovery call. Production would otherwise send it (a newer-than-production
    version) to the store review backend, see [Environments and routing](#environments-and-routing).
 

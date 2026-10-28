@@ -25,7 +25,7 @@ Interview the user for anything missing. **Never use a scraped address as the ad
 that creates a login for a mailbox we do not control. The scraped contact email becomes the
 company email only.
 
-Pick a `<ID>`: uppercase, from the company name (`ACCUGEO`, `ANTWEBSYS`). It prefixes every
+Pick a `<ID>`: uppercase, from the company name (`EXAMPLE`, `ACMEDENTAL`). It prefixes every
 resource id in the file. Check it is free before generating:
 `moqui_rest_call e1/moqui.resource.wiki.WikiSpace/<ID>_WS` must 404, and
 `grep -rl '<ID>_ROOT' backend/data/` must be empty.
@@ -128,14 +128,14 @@ ProductStore or ProductStoreSetting records; those are created at import time.
     <file mimeType="application/json" versionName="01" rootVersionName="01">
         <fileData><![CDATA[{
   "adminEmail": "...", "adminFirstName": "...", "adminLastName": "...",
-  "companyName": "AccuGeo Liner, Inc.", "currencyId": "USD", "applicationId": "AppAdmin",
-  "hostNames": ["www.accugeo.com", "accugeo.com", "accugeo.localhost:8080"],
+  "companyName": "Example Co., Inc.", "currencyId": "USD", "applicationId": "AppAdmin",
+  "hostNames": ["www.example.com", "example.com", "example.localhost:8080"],
   "logoPath": "images/logo.png",
   "contact": {
-    "email": "info@accugeo.com",
-    "telephone": {"countryCode": "1", "areaCode": "661", "contactNumber": "321-0447"},
-    "address": {"address1": "321 Industrial St.", "city": "Bakersfield",
-                "postalCode": "93307", "stateProvinceGeoId": "USA_CA", "countryGeoId": "USA"}
+    "email": "info@example.com",
+    "telephone": {"countryCode": "1", "areaCode": "555", "contactNumber": "010-0000"},
+    "address": {"address1": "1 Main St.", "city": "Springfield",
+                "postalCode": "12345", "stateProvinceGeoId": "USA_CA", "countryGeoId": "USA"}
   }
 }]]></fileData>
         <histories versionName="01" versionDate="1485028800000" isDiff="N"/>
@@ -190,7 +190,7 @@ Website dialog instead.
 ## 7. Verify
 
 ```bash
-H='Host: www.accugeo.com'
+H='Host: www.example.com'
 curl -s -o /dev/null -w '%{http_code}\n' -H "$H" http://localhost:8080/            # 200
 curl -s -o /dev/null -w '%{http_code}\n' -H "$H" http://localhost:8080/content/about
 curl -s -H "$H" http://localhost:8080/ | grep -E '<#|\$\{'                          # empty
