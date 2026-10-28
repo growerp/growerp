@@ -23,6 +23,8 @@ import spock.lang.Specification
    - a tenant translates its own website only, never another owner's
    - a tenant needs its own Gemini key, the system key is for support only
    - a tenant lists and deletes only its own translations
+   - a translated .html.ftl page keeps its '<#-- title: ... -->' line first, even when the
+     model moves, prefixes or drops it (production failure 2026-10-28, Thai, page 9)
 
    To run: make sure moqui is in place with a loaded database, backend not running, then:
     "cd moqui && ./gradlew :runtime:component:growerp:test"
@@ -124,5 +126,34 @@ class WebsiteTranslationServicesTests extends Specification {
 
         cleanup:
         ec.message.clearAll()
+    }
+
+    def "the title line of a translated ftl page is put back first"() {
+        setup:
+        def util = ec.resource.script('component://growerp/service/WebsiteTranslationUtil.groovy', null)
+        String source = '<#-- title: About -->\n<!-- description: Who we are -->\n<main>About us</main>'
+
+        expect:
+        util.normalizeFtlTitle(source, translated) == expected
+
+        where:
+        translated                                                                            || expected
+        // the model put the description comment first
+        '<!-- description: TH who -->\n<#-- title: TH About -->\n<main>TH</main>'             || '<#-- title: TH About -->\n<!-- description: TH who -->\n<main>TH</main>'
+        // a byte order mark or a sentence in front of the file
+        '\uFEFF<#-- title: TH About -->\n<main>TH</main>'                                     || '<#-- title: TH About -->\n<main>TH</main>'
+        'Here is the translation:\n<#-- title: TH About -->\n<main>TH</main>'                 || '<#-- title: TH About -->\n<main>TH</main>'
+        // the model dropped the title: the source title is used untranslated
+        '<!-- description: TH who -->\n<main>TH</main>'                                       || '<#-- title: About -->\n<!-- description: TH who -->\n<main>TH</main>'
+        // already right
+        '<#-- title: TH About -->\n<main>TH</main>'                                           || '<#-- title: TH About -->\n<main>TH</main>'
+    }
+
+    def "a source page without a title line is translated as is"() {
+        setup:
+        def util = ec.resource.script('component://growerp/service/WebsiteTranslationUtil.groovy', null)
+
+        expect:
+        util.normalizeFtlTitle('<main>About us</main>', '<main>TH</main>') == '<main>TH</main>'
     }
 }
