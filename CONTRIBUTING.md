@@ -93,8 +93,8 @@ cd growerp
 ### 2. Create a Feature Branch
 
 ```bash
-# Create a new branch from the development branch
-git checkout development
+# Create a new branch from master, where all development happens
+git checkout master
 git checkout -b my-new-feature
 ```
 
