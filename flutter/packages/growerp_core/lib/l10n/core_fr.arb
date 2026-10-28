@@ -1377,5 +1377,22 @@
   "calendarNewActivity": "Nouvelle activité",
   "calendarNewPost": "Nouvelle publication",
   "calendarResync": "Resynchroniser les calendriers des utilisateurs",
-  "calendarResyncStarted": "Les calendriers des utilisateurs sont mis à jour en arrière-plan"
+  "calendarResyncStarted": "Les calendriers des utilisateurs sont mis à jour en arrière-plan",
+  "settingUpYourCompany": "Configuration de votre entreprise",
+  "demoDataLoading": "Vos données de démonstration sont en cours de création. Cela prend environ une minute, vous pouvez laisser cette fenêtre ouverte.",
+  "demoDataFailed": "Les données de démonstration n'ont pas pu être créées. Votre entreprise est configurée et vous pouvez continuer sans elles.",
+  "demoDataTakingLong": "Cela prend plus de temps que prévu. Vous pouvez continuer à attendre ou poursuivre maintenant, les données apparaîtront au fur et à mesure de leur création.",
+  "guides": "Guides",
+  "noGuidesAvailable": "Aucun guide disponible dans cette application.",
+  "screenAccess": "Accès aux écrans",
+  "screen": "Écran",
+  "adminGroup": "Administrateur",
+  "employeeGroup": "Employé",
+  "otherGroup": "Autre",
+  "accessNone": "aucun",
+  "accessView": "voir",
+  "accessWrite": "écrire",
+  "searchScreens": "Rechercher des écrans...",
+  "restDomain": "Domaine REST",
+  "writeImpliesView": "L'accès en écriture accorde aussi l'accès en lecture"
 }

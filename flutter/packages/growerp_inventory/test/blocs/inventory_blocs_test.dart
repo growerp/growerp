@@ -181,15 +181,19 @@ void main() {
     blocTest<AssetBloc, AssetState>(
       'AssetFetch_refreshForClass_clearsThenLoads',
       setUp: () => when(
-        () => restClient.getAsset(searchString: '', assetClassId: 'Room'),
+        () => restClient.getAsset(
+          searchString: '',
+          assetClassId: 'Room',
+          start: 0,
+          limit: 20,
+        ),
       ).thenAnswer((_) async => Assets(assets: [room1, room2])),
       build: build,
       act: (bloc) =>
           bloc.add(const AssetFetch(refresh: true, assetClassId: 'Room')),
       wait: fetchWait,
       expect: () => [
-        // the emitted empty list is filled in place later (#45): status only
-        assetState(AssetStatus.loading),
+        assetState(AssetStatus.loading, assets: []),
         assetState(
           AssetStatus.success,
           assets: [room1, room2],
@@ -200,7 +204,12 @@ void main() {
     blocTest<AssetBloc, AssetState>(
       'AssetFetch_restThrowsDio_emitsFailure',
       setUp: () => when(
-        () => restClient.getAsset(searchString: '', assetClassId: ''),
+        () => restClient.getAsset(
+          searchString: '',
+          assetClassId: '',
+          start: 0,
+          limit: 20,
+        ),
       ).thenThrow(dioError('No access')),
       build: build,
       act: (bloc) => bloc.add(const AssetFetch(refresh: true)),
@@ -214,14 +223,18 @@ void main() {
     blocTest<AssetBloc, AssetState>(
       'AssetSearchChanged_threeChars_searchesFromStart',
       setUp: () => when(
-        () => restClient.getAsset(searchString: 'Roo', assetClassId: ''),
+        () => restClient.getAsset(
+          searchString: 'Roo',
+          assetClassId: '',
+          start: 0,
+          limit: 20,
+        ),
       ).thenAnswer((_) async => Assets(assets: [room1])),
       build: build,
       act: (bloc) => bloc.add(const AssetSearchChanged(searchString: 'Roo')),
       wait: searchWait,
       expect: () => [
-        // the emitted empty list is filled in place later (#45): status only
-        assetState(AssetStatus.loading),
+        assetState(AssetStatus.loading, assets: []),
         assetState(AssetStatus.success, assets: [room1]),
       ],
     );
@@ -272,27 +285,24 @@ void main() {
       ],
     );
 
-    group(
-      'AssetFetch paging',
-      skip: 'https://github.com/growerp/growerp/issues/45',
-      () {
-        blocTest<AssetBloc, AssetState>(
-          'AssetFetch_nextPage_requestsFromCurrentLength',
-          setUp: () => when(
-            () => restClient.getAsset(
-              searchString: '',
-              assetClassId: '',
-              start: 1,
-              limit: 20,
-            ),
-          ).thenAnswer((_) async => Assets(assets: [room2])),
-          build: build,
-          seed: () => AssetState(status: AssetStatus.success, assets: [room1]),
-          act: (bloc) => bloc.add(const AssetFetch()),
-          wait: fetchWait,
-          verify: (bloc) => expect(bloc.state.assets, [room1, room2]),
-        );
-      },
-    );
+    // https://github.com/growerp/growerp/issues/45
+    group('AssetFetch paging', () {
+      blocTest<AssetBloc, AssetState>(
+        'AssetFetch_nextPage_requestsFromCurrentLength',
+        setUp: () => when(
+          () => restClient.getAsset(
+            searchString: '',
+            assetClassId: '',
+            start: 1,
+            limit: 20,
+          ),
+        ).thenAnswer((_) async => Assets(assets: [room2])),
+        build: build,
+        seed: () => AssetState(status: AssetStatus.success, assets: [room1]),
+        act: (bloc) => bloc.add(const AssetFetch()),
+        wait: fetchWait,
+        verify: (bloc) => expect(bloc.state.assets, [room1, room2]),
+      );
+    });
   });
 }

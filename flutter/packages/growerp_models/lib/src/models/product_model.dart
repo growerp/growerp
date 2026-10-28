@@ -58,7 +58,7 @@ List<String> productTypes = ['Physical Good', 'Service', 'Rental'];
 
 String productCsvFormat =
     'product Id, Type*, Name*, Description*, List Price*, Sales price*, '
-    'Purchase price, Use Warehouse, Category 1, Category 2, Category 3, Image\r\n';
+    'Use Warehouse, Category 1, Category 2, Category 3, Image\r\n';
 List<String> productCsvTitles = productCsvFormat.split(',');
 int productCsvLength = productCsvTitles.length;
 
@@ -117,13 +117,13 @@ String csvFromProducts(List<Product> products) {
         product.listPrice.toString(),
         product.price.toString(),
         product.useWarehouse.toString(),
-        product.categories.length == 1
+        product.categories.isNotEmpty
             ? product.categories[0].categoryName
             : '',
-        product.categories.length == 2
+        product.categories.length > 1
             ? product.categories[1].categoryName
             : '',
-        product.categories.length == 3
+        product.categories.length > 2
             ? product.categories[2].categoryName
             : '',
         product.image != null ? base64.encode(product.image!) : '',

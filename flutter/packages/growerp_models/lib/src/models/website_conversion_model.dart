@@ -19,8 +19,9 @@ part 'website_conversion_model.freezed.dart';
 part 'website_conversion_model.g.dart';
 
 /// One run of the website generator: scrape an existing site, write the pages with
-/// AI and install them as a new owner. Runs in the background, so this record is
-/// polled for progress.
+/// AI and install them as a new owner, or replace the website of the tenant's own
+/// store (targetStore 'Y'). Runs in the background, so this record is polled for
+/// progress.
 @freezed
 abstract class WebsiteConversion with _$WebsiteConversion {
   factory WebsiteConversion({
@@ -36,6 +37,8 @@ abstract class WebsiteConversion with _$WebsiteConversion {
     @Default('') String applicationId,
     @Default('') String hostNames, // comma separated
     int? maxPages,
+    // Y: replaces the website of the store productStoreId, no new owner
+    @Default('') String targetStore,
     // QUEUED, SCRAPING, GENERATING, IMPORTING, COMPLETED, FAILED
     @Default('') String status,
     @Default('') String statusMessage,
@@ -65,6 +68,7 @@ abstract class WebsiteConversion with _$WebsiteConversion {
 
   bool get isCompleted => status == 'COMPLETED';
   bool get isFailed => status == 'FAILED';
+  bool get isTargetStore => targetStore == 'Y';
 
   List<String> get hostNameList => hostNames
       .split(',')

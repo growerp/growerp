@@ -34,10 +34,10 @@ release, in the form of the previous release notes; checked in the editor before
 
 ### B. Prepare a new version for review
 
-1. Prepare the new release in staging: merge the version branch (e.g. 1.21) into
-   master with a pull request, then "update staging" on master: that run is the
-   version to submit. Create the userid/password for the store reviewers on
-   staging (the review backend is a copy: later staging changes do not reach it).
+1. Prepare the new release in staging: "update staging" on master, where all
+   development happens: that run is the version to submit. Create the
+   userid/password for the store reviewers on staging (the review backend is a copy:
+   later staging changes do not reach it).
 2. Wait until review is empty: every version in review is on production (cycle A).
    Step 3 refuses until then. The script lists the apps still in review with their
    store approvals (status workflow, refreshed on request) and lets
@@ -46,12 +46,31 @@ release, in the form of the previous release notes; checked in the editor before
    copies staging to backend.growerp.net, pauses its jobs/agents, records the
    versions in review-versions.conf and, once healthy, routes native apps newer
    than production to it. The review backend stays running between cycles, the
-   next freeze replaces it.
+   next freeze replaces it. The script then creates the review branch (e.g. 1.22)
+   at the frozen version tag: development goes on on master. Review branches are
+   never deleted.
 4. "create store screenshots" (opt), "publish binary to stores": submit for review,
-   then "publish metadata to stores" (opt). The binary creates the new store
-   version, metadata can only write into it; the Windows binary submission carries
-   its listing itself. No "update staging" between step 3 and this step: the
-   binaries must be the frozen version.
+   then "publish metadata to stores" (opt), all on the review branch (master has
+   moved on). The binary creates the new store version, metadata can only write
+   into it; the Windows binary submission carries its listing itself. No "update
+   staging" between step 3 and this step: the binaries must be the frozen version.
+   Their commits (build numbers, screenshots) stay on the review branch: the next
+   publish takes the build numbers from the stores.
+
+The first "update staging" on master after a freeze is a minor bump (1.22 in review →
+master 1.23.0): the patch versions 1.22.N belong to the review branch. The script
+proposes it.
+
+### Fix the version in review
+
+1. Fix on master first (test first), then `git cherry-pick` the fix onto the review
+   branch and push.
+2. `./growerpUpgrade.sh staging` on the review branch: patch bump (1.22.3 → 1.22.4).
+   Staging runs the older version until the next "update staging" on master;
+   migrations of the newer version stay in the staging database.
+3. Freeze again: review is open, so by hand on the server
+   `./review.sh freeze --force --apply` (see the warning below), then
+   `./growerpUpgrade.sh review` from step 5 to publish the fixed binaries.
 
 ### When a store approval takes too long (mostly new apps)
 

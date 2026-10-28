@@ -816,6 +816,27 @@ symbols anywhere in the image; screens and documents show only simple shapes."""
         </actions>
     </service>
 
+    <service verb="get" noun="PostingTime" authenticate="true">
+        <description>The time a social post of a piece goes out: the planned time moved by up to
+            90 minutes either way per piece, plus up to 30 minutes per platform, so posts do not
+            all go out on the same minute and platforms not together (LinkedIn flags posting
+            that looks automated). Seeded by the ids: the same piece and platform always get
+            the same time.</description>
+        <in-parameters>
+            <parameter name="baseTime" type="Long" required="true"><description>planned time, epoch ms</description></parameter>
+            <parameter name="masterContentId" required="true" />
+            <parameter name="platform" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="scheduledDate" type="Long" />
+        </out-parameters>
+        <actions>
+            <set field="pieceMinutes" from="new Random(masterContentId.hashCode()).nextInt(181) - 90" type="Integer" />
+            <set field="platformMinutes" from="new Random((masterContentId + platform).hashCode()).nextInt(31)" type="Integer" />
+            <set field="scheduledDate" from="baseTime + (pieceMinutes + platformMinutes) * 60000L" type="Long" />
+        </actions>
+    </service>
+
     <service verb="adapt" noun="ContentForPlatform" authenticate="true">
         <description>Adapt one MasterContent piece to per-platform children. Default platforms =
             all enabled PlatformConfiguration for the owner. Creates READY SocialPost items for
@@ -893,6 +914,8 @@ symbols anywhere in the image; screens and documents show only simple shapes."""
                     message="No platforms given and no enabled PlatformConfiguration found for owner" />
             </if>
 
+            <!-- a time the caller gives is kept exactly; a defaulted one is varied per post -->
+            <set field="callerScheduled" from="scheduledDate != null" type="Boolean" />
             <!-- No schedule given: hand this piece the next day the owner has nothing
                  scheduled on yet, starting tomorrow. Without it every variant is created
                  with an empty scheduledDate, which publish#ScheduledSocialPosts reads as
@@ -1009,12 +1032,20 @@ symbols anywhere in the image; screens and documents show only simple shapes."""
                     <if condition="existingPost">
                         <set field="skippedCount" from="skippedCount + 1" type="Integer" />
                     <else>
+                        <set field="postTime" from="scheduledDate" />
+                        <if condition="!callerScheduled">
+                            <service-call out-map="timeResult"
+                                name="growerp.100.MasterContentServices100.get#PostingTime"
+                                in-map="[baseTime: scheduledDate, masterContentId: masterContentId,
+                                         platform: platform]" />
+                            <set field="postTime" from="timeResult.scheduledDate" />
+                        </if>
                         <service-call out-map="createResult"
                             name="growerp.100.MarketingServices100.create#SocialPost"
                             in-map="[planId: mc.planId, type: mc.pnpType ?: 'OTHER',
                                      platform: platform, headline: mc.title,
                                      draftContent: mc.callToAction, finalContent: adaptedContent,
-                                     status: 'READY', scheduledDate: scheduledDate]" />
+                                     status: 'READY', scheduledDate: postTime]" />
                         <!-- stamp the source master piece onto the post -->
                         <service-call name="update#growerp.marketing.SocialPost"
                             in-map="[postId: createResult.postId,

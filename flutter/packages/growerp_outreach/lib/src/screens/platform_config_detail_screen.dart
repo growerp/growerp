@@ -373,13 +373,13 @@ class _PlatformConfigDetailScreenState
               icon: Icons.app_registration,
               title: 'Create a LinkedIn developer app',
               body:
-                  'Go to linkedin.com/developers → My Apps → Create app. Request the "Share on LinkedIn" product to unlock the w_member_social scope.',
+                  'Go to linkedin.com/developers → My Apps → Create app. On the Products tab add "Share on LinkedIn" (w_member_social scope, to post) and "Sign In with LinkedIn using OpenID Connect" (openid and profile scopes, to find your Person URN).',
             ),
             _HelpStep(
               icon: Icons.vpn_key,
               title: 'Generate an access token',
               body:
-                  'Inside your app go to Auth → OAuth 2.0 tools → Generate access token. Select the w_member_social scope and authorise with your LinkedIn account.',
+                  'Inside your app go to Auth → OAuth 2.0 tools → Generate access token. Select the scopes openid, profile and w_member_social, and authorise with your LinkedIn account.',
             ),
             _HelpStep(
               icon: Icons.key,
@@ -391,7 +391,7 @@ class _PlatformConfigDetailScreenState
               icon: Icons.person,
               title: 'Find your Person URN',
               body:
-                  'Call https://api.linkedin.com/v2/me with your token (use the OAuth tools page or curl -H "Authorization: Bearer {token}" https://api.linkedin.com/v2/me). The "id" value gives the last segment — your URN is urn:li:person:{id}.',
+                  'Call https://api.linkedin.com/v2/userinfo with your token: curl -H "Authorization: Bearer {token}" https://api.linkedin.com/v2/userinfo. The "sub" value gives the last segment — your URN is urn:li:person:{sub}. (/v2/me answers 403 ACCESS_DENIED for new apps.)',
             ),
           ],
         OutreachPlatform.twitter => const [

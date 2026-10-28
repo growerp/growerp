@@ -461,6 +461,22 @@ arguments to call.
 Documents are chunked, embedded and stored per company; agents retrieve from them with
 `searchKnowledge`. The list shows Title, Type and chunk count.
 
+**Upload a ZIP** to load a whole folder tree: the upload button also takes a `.zip` (max 25 MB).
+It loads in the background (`AdkKnowledgeImport` job, progress bar on the screen, also after
+leaving and coming back). Every txt, md, csv, json, log, pdf and docx file becomes one document
+of type `upload`, titled with its path in the ZIP (`policies/hr/leave`); other files, empty files,
+hidden files and `__MACOSX/` are skipped and listed when the load finishes. Uploading a ZIP with
+the same name again updates the documents of the same path instead of adding new ones
+(`sourceId` = `<zip name>/<path>`). One load at a time per company.
+
+**Statistics** above the list (also on the dashboard tile), from `get#AdkKnowledgeStats`:
+documents, chunks, estimated tokens, added in the last 30 days, last change, documents per type
+and per ZIP folder, and searches in the last 30 days (with how many found nothing — every
+`search#AdkKnowledge` call, from agents, writers and course AI, is logged as a `searchKnowledge`
+row in Agent Actions). Index health warns about documents without chunks and documents embedded
+with another model than the current one (search skips those); **Re-index** rebuilds them in the
+background.
+
 Source types: `note`, `upload`, `product`, `policy`, `chat`, `okf`.
 
 Embedding requires a Gemini key — the company key in System Setup, a tenant `LlmConfig`, or
@@ -680,6 +696,8 @@ Common symptoms:
 | Scheduled agent stopped running | Job locked — clear the lock on Agent Jobs |
 | Coordinator picks the wrong specialist | Member descriptions too vague |
 | Knowledge upload has 0 chunks | No LLM key for embedding |
+| ZIP load stops with "API key" / "allowance" | No embedding key, or the free allowance is used up: add a gemini/openai key |
+| "outdated embedding model" warning | Embedding model changed (key/provider/env): press **Re-index** |
 | `okf_*` tools say "No OKF bundle found" | Export never run — `export#OkfBundle` (§11) |
 | OKF absent from Wiki / Knowledge screens | Export (wiki) and ingest (knowledge) are separate steps |
 | External MCP tools missing | Server disabled, or attached before the agent was saved |

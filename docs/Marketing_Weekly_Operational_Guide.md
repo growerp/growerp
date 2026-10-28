@@ -15,7 +15,7 @@
 | Platforms enabled with daily limits (LinkedIn, X, Substack, …) | **Outreach → Platforms** |
 | At least one active outreach campaign with recipients | **Outreach → Campaigns** |
 | Personas current (Olivia, Henri/Fiona, Ben, Aaron — Sales Plan §3) | **Marketing → Personas** |
-| Knowledge base current (feeds the SDR website-chat agent) | **Agent Control → Knowledge** |
+| Knowledge base current (feeds the SDR website-chat agent and grounds every AI-written plan, piece, article, campaign and landing page) | **Agent Control → Knowledge** |
 | Assessment funnel live end-to-end (landing page → questions → results email) | **Marketing → Landing Pages / Assessments** |
 
 If any of these is missing, fix it before starting the week — the daily routine below assumes the machine is running.
@@ -51,7 +51,7 @@ The *Content and Social* agent ran at 08:00 and posted its output to chat. This 
 
 1. Daily routine (§3).
 2. **Marketing → Content** — open each master piece written this week (3 for Pain / News / Prize, 1 for a single-posting plan). Edit for voice and accuracy — the human "icing" — then tap **Approve**. Approval unlocks auto-publishing of *all* platform variants of that piece at their scheduled Mon/Wed/Fri slots.
-3. Check the piece's *Platform variants* section: Monday's variants should flip to published within 15 minutes. If one stays READY, see §7.
+3. Check the piece's *Platform variants* section: Monday's variants should flip to published by about 12:15 UTC: each piece goes out at a varied time between about 08:30 and 12:00 UTC, and each platform up to 30 minutes after the other, so posting does not look automated. If one stays READY after that, see §7.
 4. **Marketing → Content Plans** — confirm the current plan (theme, persona) matches the quarter's focus vertical; edit the title and brief of next week's *PLANNED* pieces if needed, they are written from it next Monday.
 5. **CRM → Pipeline** — weekly pipeline review (Sales Plan §6): drag opportunities to their true stage, set/refresh `nextStep` on every card, make sure every open opportunity has a due activity. No opportunity older than 14 days without activity.
 6. **Main dashboard** — weekly KPI check against Sales Plan §8: trial signups, assessment completions, messages sent / reply rate, weighted pipeline. Write the 3-line week plan in the team chat room.
@@ -79,7 +79,7 @@ The *Content and Social* agent ran at 08:00 and posted its output to chat. This 
 2. **Marketing → Assessments → Assessment Leads** — review new respondents: expand answers, check scores against thresholds. Warm/hot → create an Opportunity (estAmount, estProbability, nextStep) and a follow-up activity.
 3. **Marketing → Landing Pages** — sanity-check the live page(s): CTA still points at the right assessment, credibility statistics current (stars, tenants, releases). Generate/update the quarter's vertical landing page if the calendar (Sales Plan §9) says so.
 4. **Website chat** — review this week's SDR conversations; every "I don't know" answer is a missing knowledge entry.
-5. **Agent Control → Knowledge** — add what was missing: new release notes, pricing changes, new case study. This is what the SDR quotes to visitors tomorrow.
+5. **Agent Control → Knowledge** — add what was missing: new release notes, pricing changes, new case study. This is what the SDR quotes to visitors tomorrow, and what next Monday's content is written from.
 
 ### Friday — Wrap, audit & reset (~2 h)
 

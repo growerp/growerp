@@ -19,10 +19,12 @@ general agent screens (Jobs, Approvals, Actions, Knowledge).
 | An LLM API key (Gemini by default) | **System Setup → AI / LLM settings** |
 | A chat room to receive agent output | **Chat** — create a room, e.g. "Marketing" |
 | Outreach campaign with recipients | **Marketing → Outreach** (needed by Personalizer, Lead Triage) |
-| Knowledge base entries about your company | **Agent Control → Knowledge** (needed by the SDR agent) |
+| Knowledge base entries about your company | **Agent Control → Knowledge** (needed by the SDR agent; grounds all AI-written content) |
 
 Without an LLM key the agents are created but every run fails. Without knowledge documents
-the SDR agent will honestly answer "I don't know" instead of making things up.
+the SDR agent will honestly answer "I don't know" instead of making things up, and the AI
+writers (content plans, pieces, articles, posts, campaigns, landing pages, personas) have
+only the brief to go on, so they stay generic or guess product details.
 
 ## 2. Enabling the team
 
@@ -125,7 +127,8 @@ other schedules on here when you want them to work; in production they keep the 
   agent here without deleting its schedule; clear a stale lock if a run crashed mid-way.
 * **Marketing → Master Content** — after the Monday run, *Content and Social* posts a chat
   message listing the pieces it authored. Open each one and tap **Approve**; every platform
-  variant adapted from it then auto-publishes at its own scheduled time (Mon/Wed/Fri), as long
+  variant adapted from it then auto-publishes at its own scheduled time (Mon/Wed/Fri, varied
+  around 10:00 UTC per piece and platform so it does not look automated), as long
   as that platform is enabled and under its daily limit. Tap **Revoke** to stop future
   auto-publishes for a piece (already-published variants are unaffected). You can also approve
   inline from **Marketing → Content Plans** → a plan's Content section.
@@ -134,8 +137,12 @@ other schedules on here when you want them to work; in production they keep the 
   default `allow` policy nothing from this agent appears here.
 * **Agent Control → Agent Actions** — the audit trail: every service the agents called, whether
   it was allowed, blocked, pending or rejected, and the result.
-* **Agent Control → Knowledge** — add notes, upload documents, or import your product catalog.
-  This is what the SDR agent quotes to website visitors; keep it current.
+* **Agent Control → Knowledge** — add notes, upload documents (or a ZIP with a whole folder of
+  them), or import your product catalog. The statistics on top show how big it is and how often
+  the agents searched it.
+  This is what the SDR agent quotes to website visitors, and every AI writer pulls the passages
+  that match its brief into its prompt (product claims, prices, customer cases, links), so
+  keep it current: product overview, pricing, verticals, release notes, trial/signup links.
 
 ## 6. Safety model
 

@@ -13,7 +13,6 @@
  */
 
 import 'dart:convert';
-import 'package:universal_io/io.dart';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:decimal/decimal.dart';
@@ -87,10 +86,7 @@ List<Company> csvToCompanies(String csvFile) {
 
     // if image specified get it.
     Uint8List? image;
-    if (row[6].isNotEmpty) {
-      final file = File(row[6]);
-      image = file.readAsBytesSync();
-    }
+    if (row[6].isNotEmpty) image = base64.decode(row[6]);
 
     companies.add(
       Company(
@@ -114,12 +110,13 @@ List<Company> csvToCompanies(String csvFile) {
         ),
         paymentMethod: PaymentMethod(
           ccDescription: row[13],
-          creditCardType: CreditCardType.getByValue(row[14]),
-          expireMonth: row[15],
-          expireYear: row[16],
+          creditCardNumber: row[14],
+          creditCardType: CreditCardType.getByValue(row[15]),
+          expireMonth: row[16],
+          expireYear: row[17],
         ),
-        vatPerc: row[17] != '' ? Decimal.parse(row[17]) : null,
-        salesPerc: row[18] != '' ? Decimal.parse(row[18]) : null,
+        vatPerc: row[18] != '' ? Decimal.parse(row[18]) : null,
+        salesPerc: row[19] != '' ? Decimal.parse(row[19]) : null,
       ),
     );
   }
@@ -136,6 +133,7 @@ String csvFromCompanies(List<Company> companies) {
         company.role.toString(),
         company.name ?? '',
         company.email ?? '',
+        company.telephoneNr ?? '',
         company.currency?.currencyId ?? '',
         company.image != null ? base64.encode(company.image!) : '',
         company.address?.address1 ?? '',
@@ -145,12 +143,12 @@ String csvFromCompanies(List<Company> companies) {
         company.address?.province ?? '',
         company.address?.country ?? '',
         company.paymentMethod?.ccDescription ?? '',
-        company.paymentMethod?.creditCardType!.value ?? '',
         company.paymentMethod?.creditCardNumber ?? '',
+        company.paymentMethod?.creditCardType?.value ?? '',
         company.paymentMethod?.expireMonth ?? '',
         company.paymentMethod?.expireYear ?? '',
-        company.vatPerc.toString(),
-        company.salesPerc.toString(),
+        company.vatPerc?.toString() ?? '',
+        company.salesPerc?.toString() ?? '',
       ], companyCsvLength),
     );
   }

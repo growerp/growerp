@@ -65,6 +65,7 @@ ${campaignGoal}
 TARGET AUDIENCE: ${targetAudience ?: 'Not specified - infer from the campaign goal'}
 
 PLATFORMS: ${selectedPlatforms.join(', ')}
+${GeminiAiUtil.knowledgeFacts(ec, ownerPartyId, [campaignGoal, targetAudience].findAll().join('\n'))}
 
 REQUIREMENTS:
 1. campaignName: short and recognisable (max 50 characters)

@@ -76,8 +76,15 @@ learner with questions and one hint at a time.
                         if (lesson.keyPoints) prompt << "KEY POINTS: ${lesson.keyPoints}\n"
                     }
                     if (extraContext) prompt << "\nCONTEXT:\n${extraContext.take(6000)}\n"
+                    // the knowledge base only when the owner made it a source of this course:
+                    // learners are outsiders, the knowledge base may hold internal documents
+                    if (ec.entity.find("growerp.course.CourseSource").condition("courseId", courseId)
+                            .condition("sourceType", "KB").disableAuthz().count()) {
+                        prompt << GeminiAiUtil.knowledgeFacts(ec, access.ownerPartyId as String,
+                            [lesson?.title, message].findAll().join('\n'))
+                    }
                     prompt << "\nRULES:\n"
-                    prompt << "- Base your answer on the lesson content; use general knowledge only to clarify it.\n"
+                    prompt << "- Base your answer on the lesson content and the company facts; use general knowledge only to clarify it.\n"
                     prompt << "- If the question is not about the course topic, say so briefly and steer back to the course.\n"
                     prompt << "- Answer in the language of the learner's last message. Be concise: at most about 200 words. Use Markdown.\n"
                     if (mode == 'HINTS') {

@@ -133,6 +133,9 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
       FinDocFetch(
         refresh: true,
         searchString: event.searchString,
+        sales: event.sales,
+        docType: event.docType,
+        journalId: event.journalId,
         my: event.my,
         status: event.status,
         limit: event.limit,
@@ -158,12 +161,18 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
     }
     // start from record zero for initial and refresh
     try {
-      ItemTypes itemTypes = ItemTypes();
-      PaymentTypes paymentTypes = PaymentTypes();
-      if (docType == FinDocType.payment && state.paymentTypes.isEmpty) {
-        paymentTypes = await restClient.getPaymentTypes(sales: sales);
+      // Only the types this bloc's docType needs are fetched, and only while
+      // they are missing: an empty (not null) list handed to copyWith would
+      // replace the loaded types on every later fetch (#41).
+      List<ItemType>? itemTypes;
+      List<PaymentType>? paymentTypes;
+      if (docType == FinDocType.payment) {
+        if (state.paymentTypes.isEmpty) {
+          paymentTypes = (await restClient.getPaymentTypes(sales: sales))
+              .paymentTypes;
+        }
       } else if (state.itemTypes.isEmpty) {
-        itemTypes = await restClient.getItemTypes(sales: sales);
+        itemTypes = (await restClient.getItemTypes(sales: sales)).itemTypes;
       }
       FinDocs result = await restClient.getFinDoc(
         finDocId: event.finDocId,
@@ -175,7 +184,7 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
             : (event.sales ?? sales),
         docType: event.docType ?? docType,
         searchString: event.searchString,
-        journalId: event.journalId,
+        journalId: event.journalId ?? (journalId.isEmpty ? null : journalId),
         my: event.my,
         status: event.status,
       );
@@ -184,8 +193,9 @@ class FinDocBloc extends Bloc<FinDocEvent, FinDocState>
         state.copyWith(
           status: FinDocStatus.success,
           finDocs: current..addAll(result.finDocs),
-          itemTypes: itemTypes.itemTypes,
-          paymentTypes: paymentTypes.paymentTypes,
+          // Null keeps the loaded types; only a real fetch replaces them.
+          itemTypes: itemTypes,
+          paymentTypes: paymentTypes,
           hasReachedMax: result.finDocs.length < event.limit,
           searchString: event.searchString,
         ),

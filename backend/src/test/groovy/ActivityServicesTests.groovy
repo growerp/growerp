@@ -14,7 +14,6 @@
 
 import org.moqui.Moqui
 import org.moqui.context.ExecutionContext
-import spock.lang.PendingFeature
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -93,7 +92,7 @@ class ActivityServicesTests extends Specification {
         open*.activityId == [todo.activityId]
     }
 
-    @PendingFeature(reason = 'https://github.com/growerp/growerp/issues/54')
+    // https://github.com/growerp/growerp/issues/54
     def "create an event with a contact"() {
         given:
         Map contact = ec.service.sync().name('growerp.100.PartyServices100.create#User')
@@ -163,6 +162,28 @@ class ActivityServicesTests extends Specification {
         !ec.message.hasError()
         ec.entity.find('mantle.work.time.TimeEntry').condition('timeEntryId', entry.timeEntryId)
                 .useCache(false).one() == null
+    }
+
+    def "approve a time entry sent with its date stores the date as a timestamp"() {
+        given: 'the client always sends the date along with the approval'
+        Map task = createActivity([activityName: "Approvable ${run}"])
+        Map entry = ec.service.sync().name("${service}.create#TimeEntry")
+                .parameters([timeEntry: [activityId: task.activityId, partyId: tenant.adminPartyId,
+                        hours: 4, comments: 'Fixed the website', date: ec.user.nowTimestamp]]).call().timeEntry
+
+        when:
+        Map approved = ec.service.sync().name("${service}.update#TimeEntry")
+                .parameters([timeEntry: [timeEntryId: entry.timeEntryId, activityId: task.activityId,
+                        partyId: tenant.adminPartyId, hours: 4, comments: 'Fixed the website',
+                        date: '2026-10-20 00:00:00.000', status: 'approved']])
+                .call().timeEntry
+
+        then:
+        !ec.message.hasError()
+        approved.status == 'approved'
+        approved.date == '2026-10-20'
+        ec.entity.find('mantle.work.time.TimeEntry').condition('timeEntryId', entry.timeEntryId)
+                .useCache(false).one().fromDate == java.sql.Timestamp.valueOf('2026-10-20 00:00:00')
     }
 
     def "add and read activity notes"() {

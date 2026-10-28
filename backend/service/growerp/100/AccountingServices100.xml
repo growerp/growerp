@@ -1713,7 +1713,7 @@ limitations under the License.
                             accountCode: glAccount.accountCode,
                             accountName: newAccountName,
                             glAccountClassEnumId: classEnumId,
-                            glAccountTypeEnumId: glAccount.accountType.accountTypeId,
+                            glAccountTypeEnumId: glAccount.accountType?.accountTypeId,
                         ]" />
             <service-call name="growerp.100.AccountingServices100.get#GlAccount"
                 in-map="[glAccountId: glAccount.glAccountId]" out-map="context" />

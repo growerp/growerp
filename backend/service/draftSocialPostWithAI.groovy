@@ -83,6 +83,7 @@ Type: ${post.type}
 Headline: ${post.headline}
 Outline: ${post.draftContent}
 Weekly Theme: ${plan.theme}
+${GeminiAiUtil.knowledgeFacts(ec, ownerPartyId, [post.headline, post.draftContent].findAll().join('\n'))}
 
 REQUIREMENTS:
 1. Write a complete post (200-300 words) that:

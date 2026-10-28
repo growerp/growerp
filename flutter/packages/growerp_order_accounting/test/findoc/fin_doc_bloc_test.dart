@@ -145,6 +145,66 @@ void main() {
       ],
     );
 
+    // https://github.com/growerp/growerp/issues/41
+    blocTest<FinDocBloc, FinDocState>(
+      'FinDocFetch_secondPage_keepsItemTypes',
+      setUp: () => stubGetFinDoc(
+        start: 1,
+        answer: (_) async => FinDocs(finDocs: [order2]),
+      ),
+      build: orderBloc,
+      seed: () => FinDocState(
+        status: FinDocStatus.success,
+        finDocs: [order1],
+        itemTypes: [itemType1],
+      ),
+      act: (bloc) => bloc.add(const FinDocFetch()),
+      wait: fetchWait,
+      expect: () => [
+        finDocState(FinDocStatus.loading),
+        finDocState(
+          FinDocStatus.success,
+          finDocs: [order1, order2],
+        ).having((s) => s.itemTypes, 'itemTypes', [itemType1]),
+      ],
+      verify: (_) => verifyNever(
+        () => restClient.getItemTypes(sales: any(named: 'sales')),
+      ),
+    );
+
+    // https://github.com/growerp/growerp/issues/41
+    blocTest<FinDocBloc, FinDocState>(
+      'FinDocFetch_secondPage_keepsPaymentTypes',
+      setUp: () => stubGetFinDoc(
+        docType: FinDocType.payment,
+        sales: false,
+        start: 1,
+        answer: (_) async => FinDocs(finDocs: [payment1]),
+      ),
+      build: () =>
+          FinDocBloc(restClient, false, FinDocType.payment, applicationId),
+      seed: () => FinDocState(
+        status: FinDocStatus.success,
+        finDocs: [payment1],
+        paymentTypes: [paymentType1],
+      ),
+      act: (bloc) => bloc.add(const FinDocFetch()),
+      wait: fetchWait,
+      expect: () => [
+        finDocState(FinDocStatus.loading),
+        finDocState(
+          FinDocStatus.success,
+          finDocs: [payment1, payment1],
+        ).having((s) => s.paymentTypes, 'paymentTypes', [paymentType1]),
+      ],
+      verify: (_) {
+        verifyNever(
+          () => restClient.getPaymentTypes(sales: any(named: 'sales')),
+        );
+        verifyNever(() => restClient.getItemTypes(sales: any(named: 'sales')));
+      },
+    );
+
     blocTest<FinDocBloc, FinDocState>(
       'FinDocFetch_restThrowsDio_emitsFailureAndKeepsList',
       setUp: () => stubGetFinDoc(
@@ -166,6 +226,92 @@ void main() {
           finDocs: [order1],
           message: 'Order service down',
         ),
+      ],
+    );
+  });
+
+  // https://github.com/growerp/growerp/issues/40
+  group('journal transactions', () {
+    FinDocBloc journalBloc() => FinDocBloc(
+      restClient,
+      true,
+      FinDocType.transaction,
+      applicationId,
+      journalId: 'J1',
+    );
+
+    blocTest<FinDocBloc, FinDocState>(
+      'FinDocFetch_journalBloc_sendsItsJournalId',
+      setUp: () {
+        when(
+          () => restClient.getItemTypes(sales: true),
+        ).thenAnswer((_) async => ItemTypes());
+        stubGetFinDoc(
+          docType: FinDocType.transaction,
+          sales: null,
+          journalId: 'J1',
+          answer: (_) async => FinDocs(finDocs: [order1]),
+        );
+      },
+      build: journalBloc,
+      act: (bloc) => bloc.add(const FinDocFetch()),
+      wait: fetchWait,
+      expect: () => [
+        finDocState(FinDocStatus.loading),
+        finDocState(FinDocStatus.success, finDocs: [order1]),
+      ],
+    );
+
+    blocTest<FinDocBloc, FinDocState>(
+      'FinDocSearchChanged_journalBloc_keepsJournalFilter',
+      setUp: () => stubGetFinDoc(
+        docType: FinDocType.transaction,
+        sales: null,
+        searchString: 'abc',
+        journalId: 'J1',
+        answer: (_) async => FinDocs(finDocs: [order1]),
+      ),
+      build: journalBloc,
+      seed: () => FinDocState(
+        status: FinDocStatus.success,
+        finDocs: [order1, order2],
+        itemTypes: [itemType1],
+      ),
+      act: (bloc) => bloc.add(const FinDocSearchChanged(searchString: 'abc')),
+      wait: const Duration(milliseconds: 400),
+      expect: () => [
+        finDocState(FinDocStatus.loading),
+        finDocState(FinDocStatus.success, finDocs: [order1]),
+      ],
+    );
+
+    blocTest<FinDocBloc, FinDocState>(
+      'FinDocSearchChanged_withSalesAndDocType_forwardsThem',
+      setUp: () => stubGetFinDoc(
+        docType: FinDocType.invoice,
+        sales: false,
+        searchString: 'abc',
+        journalId: 'J2',
+        answer: (_) async => FinDocs(finDocs: [order1]),
+      ),
+      build: orderBloc,
+      seed: () => FinDocState(
+        status: FinDocStatus.success,
+        finDocs: [order1, order2],
+        itemTypes: [itemType1],
+      ),
+      act: (bloc) => bloc.add(
+        const FinDocSearchChanged(
+          searchString: 'abc',
+          sales: false,
+          docType: FinDocType.invoice,
+          journalId: 'J2',
+        ),
+      ),
+      wait: const Duration(milliseconds: 400),
+      expect: () => [
+        finDocState(FinDocStatus.loading),
+        finDocState(FinDocStatus.success, finDocs: [order1]),
       ],
     );
   });

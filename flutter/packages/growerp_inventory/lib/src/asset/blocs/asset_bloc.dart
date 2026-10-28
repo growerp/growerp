@@ -62,9 +62,11 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
 
   Future<void> _onAssetFetch(AssetFetch event, Emitter<AssetState> emit) async {
     try {
+      int start = state.assets.length;
       if (state.status == AssetStatus.initial ||
           event.refresh ||
           event.searchString != '') {
+        start = 0;
         emit(
           state.copyWith(
             status: AssetStatus.loading,
@@ -78,11 +80,13 @@ class AssetBloc extends Bloc<AssetEvent, AssetState> {
       Assets compResult = await restClient.getAsset(
         searchString: event.searchString,
         assetClassId: event.assetClassId,
+        start: start,
+        limit: _assetLimit,
       );
       emit(
         state.copyWith(
           status: AssetStatus.success,
-          assets: state.assets..addAll(compResult.assets),
+          assets: [...state.assets, ...compResult.assets],
           hasReachedMax: compResult.assets.length < _assetLimit ? true : false,
           searchString: event.searchString,
         ),

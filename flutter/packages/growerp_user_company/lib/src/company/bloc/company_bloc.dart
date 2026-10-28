@@ -187,5 +187,26 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState>
   Future<void> _onCompanyDelete(
     CompanyDelete event,
     Emitter<CompanyState> emit,
-  ) async {}
+  ) async {
+    try {
+      emit(state.copyWith(status: CompanyStatus.loading));
+      await restClient.deleteCompany(partyId: event.company.partyId!);
+      return emit(
+        state.copyWith(
+          status: CompanyStatus.success,
+          companies: state.companies
+              .where((c) => c.partyId != event.company.partyId)
+              .toList(),
+          message: 'companyDeleteSuccess',
+        ),
+      );
+    } on DioException catch (e) {
+      return emit(
+        state.copyWith(
+          status: CompanyStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
+    }
+  }
 }

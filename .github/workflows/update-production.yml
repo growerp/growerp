@@ -69,6 +69,19 @@ jobs:
           if [[ -z "$SERVICES" ]]; then echo "::error::at least one app is mandatory"; exit 1; fi
           echo "services=$SERVICES" >> "$GITHUB_OUTPUT"
 
+      # The backend version production runs before the sync: the migrations of
+      # every minor version from there up to the new one have to run.
+      - name: Production backend version before
+        id: prodbefore
+        if: steps.services.outputs.services == 'all' || contains(format(' {0} ', steps.services.outputs.services), ' moqui ')
+        uses: appleboy/ssh-action@v1
+        with:
+          host: growerp.com
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          capture_stdout: true
+          script: docker service inspect growerp_moqui-prod --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}'
+
       - name: Sync ${{ inputs.source }} to production on growerp.com
         uses: appleboy/ssh-action@v1
         with:
@@ -81,3 +94,71 @@ jobs:
               server/swarm/sync-to-prod.sh "$svc" --from ${{ inputs.source == 'review' && 'review' || 'test' }} --apply || rc=1
             done
             exit $rc
+
+      # One-time data migrations of the backend version now on production
+      # (migration/README.md). Only when moqui was part of the sync; the services
+      # are idempotent, so a moqui that was already in sync changes nothing.
+      - name: Production backend version after
+        id: prodversion
+        if: steps.prodbefore.outcome == 'success'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: growerp.com
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          capture_stdout: true
+          script: docker service inspect growerp_moqui-prod --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}'
+
+      - name: Resolve backend version
+        id: backend
+        if: steps.prodversion.outcome == 'success'
+        env:
+          BEFORE: ${{ steps.prodbefore.outputs.stdout }}
+          AFTER: ${{ steps.prodversion.outputs.stdout }}
+        run: |
+          # ghcr.io/growerp/growerp-moqui:1.22.0@sha256:... -> 1.22.0
+          tag() {
+            local image
+            image=$(echo "$1" | tr -d '[:space:]')
+            image="${image%%@*}"
+            echo "${image##*:}"
+          }
+          for name in BEFORE AFTER; do
+            version=$(tag "${!name}")
+            if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::cannot read the backend version from image '${!name}'"
+              exit 1
+            fi
+            echo "${name,,}=$version" >> "$GITHUB_OUTPUT"
+          done
+
+      # The scripts from this workflow's branch, the lists of migrations from the
+      # tag of the version production runs: those are the lists release.sh filed
+      # up to that version, also when the branch has moved on.
+      - name: Checkout migration scripts
+        if: steps.backend.outcome == 'success'
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: migration
+
+      - name: Checkout migrations of ${{ steps.backend.outputs.after }}
+        if: steps.backend.outcome == 'success'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.backend.outputs.after }}
+          path: released
+          sparse-checkout: migration
+
+      - name: Run migrations on production
+        if: steps.backend.outcome == 'success'
+        env:
+          SYSTEMSUPPORT_PASSWORD: ${{ secrets.PROD_SYSTEMSUPPORT_PASSWORD }}
+          BEFORE: ${{ steps.backend.outputs.before }}
+          AFTER: ${{ steps.backend.outputs.after }}
+        run: |
+          # tags from before migration/ existed keep this branch's lists
+          if compgen -G 'released/migration/[0-9]*.[0-9]*' >/dev/null; then
+            rm -rf migration/[0-9]*.[0-9]*
+            cp -r released/migration/[0-9]*.[0-9]* migration/
+          fi
+          migration/deploy.sh "$AFTER" https://backend.growerp.com "$BEFORE"

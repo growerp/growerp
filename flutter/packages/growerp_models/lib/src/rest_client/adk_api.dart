@@ -379,4 +379,26 @@ mixin AdkApi {
 
   @POST("rest/s1/growerp/100/AdkKnowledgeImportProducts")
   Future<dynamic> importAdkKnowledgeProducts();
+
+  @GET("rest/s1/growerp/100/AdkKnowledgeStats")
+  Future<AdkKnowledgeStats> getAdkKnowledgeStats();
+
+  /// Load a ZIP (base64) of documents in the background; poll
+  /// [getAdkKnowledgeImport] for progress.
+  @POST("rest/s1/growerp/100/AdkKnowledgeImport")
+  Future<AdkKnowledgeImport> createAdkKnowledgeImport({
+    @Field() required String fileName,
+    @Field() required String zip,
+  });
+
+  /// A knowledge load's progress; without id the company's latest load
+  /// (empty status when there never was one).
+  @GET("rest/s1/growerp/100/AdkKnowledgeImport")
+  Future<AdkKnowledgeImport> getAdkKnowledgeImport({
+    @Query('adkKnowledgeImportId') String? adkKnowledgeImportId,
+  });
+
+  /// Re-embed documents indexed with an outdated embedding model.
+  @POST("rest/s1/growerp/100/AdkKnowledgeReindex")
+  Future<AdkKnowledgeImport> createAdkKnowledgeReindex();
 }

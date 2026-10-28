@@ -75,18 +75,15 @@ void main() {
       expect(converter.toJson(null), isNull);
     });
 
-    test(
-      'DateTimeConverter_dateOnly_keepsCalendarDate',
-      skip: 'https://github.com/growerp/growerp/issues/46',
-      () {
-        // Arrange: e.g. Asset.expectedEndOfLifeDate is sent as yyyy-MM-dd
-        const json = '2026-10-25';
-        // Act
-        final result = converter.fromJson(json);
-        // Assert
-        expect([result?.year, result?.month, result?.day], [2026, 10, 25]);
-      },
-    );
+    // https://github.com/growerp/growerp/issues/46
+    test('DateTimeConverter_dateOnly_keepsCalendarDate', () {
+      // Arrange: e.g. Asset.expectedEndOfLifeDate is sent as yyyy-MM-dd
+      const json = '2026-10-25';
+      // Act
+      final result = converter.fromJson(json);
+      // Assert
+      expect([result?.year, result?.month, result?.day], [2026, 10, 25]);
+    });
   });
 
   group('StringListConverter', () {

@@ -247,6 +247,44 @@
         <index name="ADKKCH_DOC"><index-field name="adkKnowledgeDocId"/></index>
     </entity>
 
+    <!-- Chunk counts/tokens without loading embeddingJson. Moqui groups by every SELECTED
+         non-aggregate field: select e.g. adkKnowledgeDocId + chunkCount for per-doc counts,
+         or embeddingModel + chunkCount for the index-health split. -->
+    <view-entity entity-name="AdkKnowledgeChunkSummary" package="moqui.adk">
+        <member-entity entity-alias="KCH" entity-name="moqui.adk.AdkKnowledgeChunk"/>
+        <alias name="ownerPartyId"      entity-alias="KCH" field="ownerPartyId"/>
+        <alias name="adkKnowledgeDocId" entity-alias="KCH" field="adkKnowledgeDocId"/>
+        <alias name="embeddingModel"    entity-alias="KCH" field="embeddingModel"/>
+        <alias name="chunkCount"        entity-alias="KCH" field="adkKnowledgeChunkId" function="count" type="number-integer"/>
+        <alias name="tokenCount"        entity-alias="KCH" field="tokens" function="sum" type="number-integer"/>
+        <alias name="lastChunkDate"     entity-alias="KCH" field="lastUpdatedStamp" function="max"/>
+    </view-entity>
+
+    <!-- Background knowledge load (ZIP upload or re-index), polled by the app for progress.
+         zipData holds the uploaded file until the worker is done with it. -->
+    <entity entity-name="AdkKnowledgeImport" package="moqui.adk" use="transactional">
+        <field name="adkKnowledgeImportId" type="id" is-pk="true"/>
+        <field name="ownerPartyId"   type="id"/>
+        <!-- jobType: ZIP | REINDEX -->
+        <field name="jobType"        type="text-short"/>
+        <field name="fileName"       type="text-medium"/>
+        <!-- status: QUEUED | RUNNING | DONE | ERROR -->
+        <field name="status"         type="text-short"/>
+        <field name="fileCount"      type="number-integer"/>
+        <field name="processedCount" type="number-integer"/>
+        <field name="createdCount"   type="number-integer"/>
+        <field name="updatedCount"   type="number-integer"/>
+        <field name="skippedCount"   type="number-integer"/>
+        <!-- JSON list of {path, reason} -->
+        <field name="skippedJson"    type="text-very-long"/>
+        <field name="errorMessage"   type="text-very-long"/>
+        <field name="zipData"        type="text-very-long"/>
+        <field name="username"       type="text-medium"/>
+        <field name="createdDate"    type="date-time"/>
+        <field name="completedDate"  type="date-time"/>
+        <index name="ADKKIMP_OWNER"><index-field name="ownerPartyId"/></index>
+    </entity>
+
     <!-- ADK ArtifactService storage: versioned binary artifacts (PDFs, images) kept out
          of the conversation context; the agent loads them on demand (LoadArtifactsTool).
          filename values starting with "user:" are user-scoped (shared across sessions). -->

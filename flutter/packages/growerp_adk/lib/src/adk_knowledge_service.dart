@@ -50,6 +50,26 @@ class AdkKnowledgeService {
   Future<void> delete(String adkKnowledgeDocId) async =>
       _client.deleteAdkKnowledge(adkKnowledgeDocId: adkKnowledgeDocId);
 
+  Future<AdkKnowledgeStats> stats() async => _client.getAdkKnowledgeStats();
+
+  /// Start loading a ZIP of documents in the background.
+  Future<AdkKnowledgeImport> importZip(
+    String fileName,
+    List<int> bytes,
+  ) async => _client.createAdkKnowledgeImport(
+    fileName: fileName,
+    zip: base64Encode(bytes),
+  );
+
+  /// Progress of a load; without id the company's latest one.
+  Future<AdkKnowledgeImport> importStatus([
+    String? adkKnowledgeImportId,
+  ]) async =>
+      _client.getAdkKnowledgeImport(adkKnowledgeImportId: adkKnowledgeImportId);
+
+  Future<AdkKnowledgeImport> reindex() async =>
+      _client.createAdkKnowledgeReindex();
+
   /// Auto-ingest the company's product catalog into the knowledge base.
   /// Returns the number of products processed. The endpoint may hand back the
   /// body as a Map (decoded) or a raw JSON String depending on content-type, so

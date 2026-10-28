@@ -97,8 +97,8 @@ class PersistFunctions {
   static Future<void> persistFinDoc(FinDoc finDoc) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(
-      '${finDoc.sales.toString}${finDoc.docType}',
-      finDoc.toJson().toString(),
+      '${finDoc.sales.toString()}${finDoc.docType}',
+      jsonEncode(finDoc.toJson()),
     );
   }
 
@@ -106,7 +106,7 @@ class PersistFunctions {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     // ignore informaton with a bad format
     try {
-      final String? result = prefs.getString('${sales.toString}$finDocType');
+      final String? result = prefs.getString('${sales.toString()}$finDocType');
       if (result != null) {
         return getJsonObject<FinDoc>(result, (json) => FinDoc.fromJson(json));
       }
@@ -118,7 +118,7 @@ class PersistFunctions {
 
   static Future<void> removeFinDoc(FinDoc finDoc) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('${finDoc.sales.toString}${finDoc.docType}');
+    await prefs.remove('${finDoc.sales.toString()}${finDoc.docType}');
   }
 
   static const String _testName = "savetest";

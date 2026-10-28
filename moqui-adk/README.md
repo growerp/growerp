@@ -364,7 +364,9 @@ ADK Java 1.9.0 ships only `InMemorySessionService` and `VertexAiSessionService`.
 The ADK includes a full Retrieval-Augmented Generation (RAG) and long-term memory system:
 
 ### Knowledge Base
-- **Ingestion**: Upload documents or ingest product catalogs via the REST API (`/adk/knowledge`). 
+- **Ingestion**: Upload documents or ingest product catalogs via the REST API (`/adk/knowledge`). A ZIP of documents (txt/md/csv/json/log/pdf/docx, folder paths kept as titles, re-upload updates in place) loads in the background via `create#AdkKnowledgeImport`; poll `get#AdkKnowledgeImport`.
+- **Statistics**: `get#AdkKnowledgeStats` gives size, recency, per-type/folder counts, index health (chunks of an outdated embedding model, docs without chunks; `create#AdkKnowledgeReindex` fixes the first) and search usage (every search is logged to `AdkActionLog`).
+- **Test mode**: with `GROWERP_TEST_MODE=true` (or system property `growerp.testMode`) embeddings are computed locally (`test-embedding`), no API call.
 - **Embeddings**: Documents are automatically chunked and embedded using `gemini-embedding-001` (configurable).
 - **Search**: The agent's MCP tools include `searchKnowledge` to retrieve relevant chunks via in-database cosine similarity search (no external vector database required).
 - **Tenant Isolation**: All knowledge is strictly scoped to the specific `ownerPartyId`.

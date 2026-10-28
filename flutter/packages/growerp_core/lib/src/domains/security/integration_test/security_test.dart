@@ -18,8 +18,8 @@ import 'package:growerp_core/growerp_core.dart';
 
 /// Test helpers for the Organization -> Security screen.
 ///
-/// The grid is keyed by row index rather than menuItemId on purpose: the first
-/// save clones the seed menu for the organization, which changes every id.
+/// The grid is keyed by row index rather than menuItemId: a test reads rows as
+/// the user sees them, not by the ids of the shipped menu.
 class SecurityTest {
   /// Open Organization -> Security. [route] is the organization menu route of
   /// the app under test ('/companies' in both the admin app and the core

@@ -47,14 +47,18 @@ class WebsiteConversionGetOne extends WebsiteConversionEvent {
   List<Object> get props => [conversionId];
 }
 
+/// a new owner from a website (system support), or with [targetStore] the
+/// website of the tenant's own store replaced: then only the url and page count
+/// are used
 class WebsiteConversionCreate extends WebsiteConversionEvent {
   const WebsiteConversionCreate({
     required this.sourceUrl,
-    required this.companyName,
-    required this.adminEmail,
+    this.targetStore = false,
+    this.companyName = '',
+    this.adminEmail = '',
     this.adminFirstName,
     this.adminLastName,
-    required this.currencyId,
+    this.currencyId = '',
     this.fiscalYearStartMonth,
     this.applicationId,
     this.hostNames,
@@ -62,6 +66,7 @@ class WebsiteConversionCreate extends WebsiteConversionEvent {
   });
 
   final String sourceUrl;
+  final bool targetStore;
   final String companyName;
   final String adminEmail;
   final String? adminFirstName;
@@ -73,7 +78,7 @@ class WebsiteConversionCreate extends WebsiteConversionEvent {
   final int? maxPages;
 
   @override
-  List<Object> get props => [sourceUrl, companyName, adminEmail];
+  List<Object> get props => [sourceUrl, targetStore, companyName, adminEmail];
 }
 
 class WebsiteConversionDelete extends WebsiteConversionEvent {

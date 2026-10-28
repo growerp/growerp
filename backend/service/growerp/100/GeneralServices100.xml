@@ -839,7 +839,7 @@ limitations under the License.
             <!-- subscription status (for expiration warnings) -->
             <if condition="ownerPartyId != 'GROWERP'">
                 <service-call name="growerp.100.TenantServices100.check#TenantSubscription"
-                    in-map="[ownerPartyId: ownerPartyId]"
+                    in-map="[ownerPartyId: ownerPartyId, email: authenticate.user?.email]"
                     out-map="subscriptionInfo"/>
                 <set field="authenticate.subscriptionDaysRemaining"
                     from="subscriptionInfo.daysRemaining"/>
@@ -1372,7 +1372,7 @@ limitations under the License.
                 message="Login subscription check: ownerPartyId=${ownerPartyId}, checking if != 'GROWERP'"/>
             <if condition="ownerPartyId != 'GROWERP'">
                 <service-call name="growerp.100.TenantServices100.check#TenantSubscription"
-                    in-map="[ownerPartyId: ownerPartyId]"
+                    in-map="[ownerPartyId: ownerPartyId, email: username]"
                     out-map="subscriptionStatus"/>
 
                 <if condition="!subscriptionStatus.hasActiveSubscription &amp;&amp; creditCardNumber &amp;&amp; plan">
@@ -1954,7 +1954,8 @@ limitations under the License.
             logged in, the number of external REST calls and the login date range.
             Signup dates come from the 'New tenant &amp; admin created' event written by
             create#Tenant; login and REST figures come from moqui.server.ArtifactHit,
-            which clean#ArtifactData purges after 90 days.</description>
+            which clean#ArtifactData purges after 90 days. dailyCounts counts every
+            registration, also the tenants that never logged in.</description>
         <in-parameters>
             <parameter name="startDateTime" type="Timestamp"/><!-- default: endDateTime - 90 days -->
             <parameter name="endDateTime" type="Timestamp"/><!-- default: now -->
@@ -1984,7 +1985,7 @@ limitations under the License.
                     <parameter name="appsUsed" type="List"/>
                 </parameter>
             </parameter>
-            <!-- signups per day for all matching rows, ignoring search and paging -->
+            <!-- registrations per day, logged in or not, ignoring search and paging -->
             <parameter name="dailyCounts" type="List">
                 <parameter name="dailyCount" type="Map">
                     <parameter name="date"/><!-- yyyy-MM-dd -->
@@ -2124,10 +2125,13 @@ limitations under the License.
                 }
 
                 def rows = []
+                def registrationsPerDay = [:]
                 for (event in signupEvents) {
                     def ownerId = event.ownerPartyId
                     if (ownerId == null || event.actualStartDate == null) continue
                     if (applicationId && appPerOwner[ownerId] != applicationId) continue
+                    def signupDate = ec.l10n.format(event.actualStartDate, 'yyyy-MM-dd')
+                    registrationsPerDay[signupDate] = (registrationsPerDay[signupDate] ?: 0) + 1
                     def owner = perOwner[ownerId]
                     // only signups that logged in successfully at least once
                     if (owner == null || owner.loginDays.isEmpty()) continue
@@ -2137,7 +2141,7 @@ limitations under the License.
                         adminName: admin ? [admin.firstName, admin.lastName].findAll { it }.join(' ') : '',
                         adminEmail: admin?.email ?: '',
                         applicationId: appPerOwner[ownerId] ?: '',
-                        signupDate: ec.l10n.format(event.actualStartDate, 'yyyy-MM-dd'),
+                        signupDate: signupDate,
                         firstLoginDate: ec.l10n.format(owner.firstLogin, 'yyyy-MM-dd'),
                         lastLoginDate: ec.l10n.format(owner.lastLogin, 'yyyy-MM-dd'),
                         daysLoggedIn: owner.loginDays.size(),
@@ -2146,7 +2150,7 @@ limitations under the License.
                         userCount: owner.userIds.size(),
                         appsUsed: (appsPerOwner[ownerId] ?: []) as List])
                 }
-                dailyCounts = rows.countBy { it.signupDate }
+                dailyCounts = registrationsPerDay
                     .collect { date, count -> [date: date, count: count as Integer] }
                     .sort { it.date }
                 if (search) {

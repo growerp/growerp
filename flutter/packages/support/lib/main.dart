@@ -22,17 +22,22 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:growerp_activity/growerp_activity.dart';
 import 'package:growerp_adk/growerp_adk.dart';
+import 'package:growerp_website/growerp_website.dart'
+    show
+        WebsiteConversionBloc,
+        WebsiteConversionList,
+        WebsiteLocalizations,
+        WebsiteToolsView,
+        WebsiteTranslationBloc,
+        WebsiteTranslationList;
 
 import 'src/application/application.dart';
-import 'src/website_conversion/website_conversion.dart';
 import 'src/gl_account_translation/gl_account_translation.dart';
-import 'src/website_translation/website_translation.dart';
 import 'src/system_defaults/system_defaults.dart';
 import 'views/infrastructure_view.dart';
 import 'views/rest_statistics_view.dart';
 import 'views/signup_statistics_view.dart';
 import 'views/support_dashboard_content.dart';
-import 'views/website_tools_view.dart';
 import 'l10n/generated/support_localizations.dart';
 
 Future main(List<String> args) async {
@@ -199,6 +204,7 @@ List<LocalizationsDelegate> delegates = [
   UserCompanyLocalizations.delegate,
   ActivityLocalizations.delegate,
   SupportLocalizations.delegate,
+  WebsiteLocalizations.delegate,
   AdkLocalizations.delegate,
 ];
 

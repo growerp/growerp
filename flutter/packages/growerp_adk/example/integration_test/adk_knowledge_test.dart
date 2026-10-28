@@ -51,6 +51,10 @@ void main() {
     await CommonTest.checkWidgetKey(tester, 'addKnowledge');
     await CommonTest.checkWidgetKey(tester, 'refreshKnowledge');
 
+    // A ZIP load embeds too, but CI runs the backend with GROWERP_TEST_MODE,
+    // which embeds locally without a key.
+    await AdkTest.loadKnowledgeZip(tester);
+
     await CommonTest.logout(tester);
   });
 }

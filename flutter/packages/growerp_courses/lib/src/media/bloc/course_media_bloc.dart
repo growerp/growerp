@@ -12,8 +12,11 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 part 'course_media_event.dart';
@@ -49,7 +52,10 @@ class CourseMediaBloc extends Bloc<CourseMediaEvent, CourseMediaState> {
       );
     } catch (e) {
       emit(
-        state.copyWith(status: MediaBlocStatus.failure, message: e.toString()),
+        state.copyWith(
+          status: MediaBlocStatus.failure,
+          message: await getDioError(e),
+        ),
       );
     }
   }
@@ -61,7 +67,7 @@ class CourseMediaBloc extends Bloc<CourseMediaEvent, CourseMediaState> {
     try {
       emit(state.copyWith(status: MediaBlocStatus.generating));
 
-      final response = await restClient.generateCourseMedia(
+      dynamic response = await restClient.generateCourseMedia(
         data: {
           'courseId': event.courseId,
           'platform': event.platform.name.toUpperCase(),
@@ -70,6 +76,8 @@ class CourseMediaBloc extends Bloc<CourseMediaEvent, CourseMediaState> {
         },
       );
 
+      // the Dio client uses ResponseType.plain: a dynamic body is a string
+      if (response is String) response = jsonDecode(response);
       final generatedMedia = CourseMedia(
         mediaId: response['mediaId'] as String?,
         generatedContent: response['generatedContent'] as String?,
@@ -89,7 +97,7 @@ class CourseMediaBloc extends Bloc<CourseMediaEvent, CourseMediaState> {
       emit(
         state.copyWith(
           status: MediaBlocStatus.failure,
-          message: 'Failed to generate content: ${e.toString()}',
+          message: 'Failed to generate content: ${await getDioError(e)}',
         ),
       );
     }
@@ -117,7 +125,10 @@ class CourseMediaBloc extends Bloc<CourseMediaEvent, CourseMediaState> {
       );
     } catch (e) {
       emit(
-        state.copyWith(status: MediaBlocStatus.failure, message: e.toString()),
+        state.copyWith(
+          status: MediaBlocStatus.failure,
+          message: await getDioError(e),
+        ),
       );
     }
   }

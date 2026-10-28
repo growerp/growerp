@@ -62,7 +62,7 @@ abstract class SignupStatistics with _$SignupStatistics {
     @Default("") String thruDate, // yyyy-MM-dd
     @Default(0) int signupCount, // matching rows before paging
     @Default([]) List<Signup> signups,
-    // per day for all matching rows, ignoring search and paging
+    // registrations per day, logged in or not, ignoring search and paging
     @Default([]) List<SignupDayCount> dailyCounts,
   }) = _SignupStatistics;
 

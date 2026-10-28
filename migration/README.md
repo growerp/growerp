@@ -15,6 +15,7 @@ records which ones belong to which version and runs them.
 migration/
 ├── README.md
 ├── run.sh              runs the services of one minor version
+├── deploy.sh           runs those of a deployed version (and skipped minors), used by the workflows
 ├── release.sh          moves next/ to the minor version of a new release
 ├── 1.16/services.txt   migrations of all 1.16.x versions
 ├── ...
@@ -32,9 +33,22 @@ After deploying a version, run its minor version directory. When a server skips
 minor versions, run every directory in between, oldest first. All services are
 idempotent, so running a directory again (after the next patch) changes nothing.
 
+The workflows do this themselves with `deploy.sh <version> <url>`, which runs the
+minor version directory of that version and retries while the new backend starts:
+
+- **Update Staging**, job `migrate-staging`, after a new backend version is
+  deployed: secret `TEST_SYSTEMSUPPORT_PASSWORD` (SystemSupport on backend.growerp.org).
+- **Update Production**, when moqui is synced: every minor version from the one
+  production ran before the sync up to the one it runs now (1.20 → 1.22 runs
+  1.20/, 1.21/ and 1.22/), the lists taken from the new version's tag. Secret
+  `PROD_SYSTEMSUPPORT_PASSWORD` (SystemSupport on backend.growerp.com).
+
+The store review backend is a copy of the staging database, so it is migrated
+already. By hand:
+
 ```bash
-MOQUI_PASSWORD=... migration/run.sh next https://backend.growerp.org
-MOQUI_PASSWORD=... migration/run.sh 1.21            # default http://localhost:8080
+SYSTEMSUPPORT_PASSWORD=... migration/run.sh next https://backend.growerp.org
+SYSTEMSUPPORT_PASSWORD=... migration/run.sh 1.21            # default http://localhost:8080
 ```
 
 `run.sh` posts each service to `/apps/tools/Service/ServiceRun/runJson` with basic
@@ -61,6 +75,7 @@ service stops the run.
 | 1.19 | `migrate#CourseProducts` |
 | 1.20 | `migrate#StaleLlmModelNames` |
 | 1.21 | `migrate#AccountingSetupMenu` |
+| 1.22 | `migrate#OwnerMenuOverrides` |
 | next |  |
 
 Directories before 1.21 hold the minor version of the first release tag that

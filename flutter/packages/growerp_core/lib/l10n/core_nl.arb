@@ -1377,5 +1377,22 @@
   "calendarNewActivity": "Nieuwe activiteit",
   "calendarNewPost": "Nieuw bericht",
   "calendarResync": "Gebruikersagenda's opnieuw synchroniseren",
-  "calendarResyncStarted": "De gebruikersagenda's worden op de achtergrond bijgewerkt"
+  "calendarResyncStarted": "De gebruikersagenda's worden op de achtergrond bijgewerkt",
+  "settingUpYourCompany": "Uw bedrijf wordt ingericht",
+  "demoDataLoading": "Uw demodata wordt aangemaakt. Dit duurt ongeveer een minuut, u kunt dit openlaten.",
+  "demoDataFailed": "De demodata kon niet worden aangemaakt. Uw bedrijf is ingericht en u kunt zonder doorgaan.",
+  "demoDataTakingLong": "Dit duurt langer dan verwacht. U kunt blijven wachten of nu doorgaan, de data verschijnt zodra deze is aangemaakt.",
+  "guides": "Handleidingen",
+  "noGuidesAvailable": "Geen handleidingen beschikbaar in deze app.",
+  "screenAccess": "Schermtoegang",
+  "screen": "Scherm",
+  "adminGroup": "Beheerder",
+  "employeeGroup": "Medewerker",
+  "otherGroup": "Overig",
+  "accessNone": "geen",
+  "accessView": "bekijken",
+  "accessWrite": "schrijven",
+  "searchScreens": "Schermen zoeken...",
+  "restDomain": "REST-domein",
+  "writeImpliesView": "Schrijftoegang geeft ook leestoegang"
 }

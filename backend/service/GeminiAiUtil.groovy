@@ -72,6 +72,46 @@ class GeminiAiUtil {
         return DEFAULT_HOUSE_VOICE
     }
 
+    /**
+     * Prompt block with knowledge base passages ([title, text] maps), '' when there are none.
+     * Grounds product claims in the company's own material.
+     */
+    static String knowledgeBlock(List results) {
+        if (!results) return ''
+        StringBuilder sb = new StringBuilder("""
+COMPANY FACTS (from the company's own knowledge base; use these for any product claim, feature,
+price, customer case or link, and never invent ones that are not here):
+""")
+        for (Map r in results) {
+            sb.append("--- ${r.title ?: ''} ---\n").append(r.text).append('\n')
+        }
+        return sb.toString()
+    }
+
+    /**
+     * Knowledge base passages most relevant to [query] as a knowledgeBlock. Never fails the
+     * caller: no knowledge base, no embedding key or a failed search give ''.
+     */
+    static String knowledgeFacts(def ec, String ownerPartyId, String query, int limit = 4) {
+        if (!ownerPartyId || !query?.trim()
+                || !ec.service.isServiceDefined('AdkKnowledgeServices.search#AdkKnowledge')) return ''
+        boolean hadError = ec.message.hasError()
+        List results = []
+        try {
+            def found = ec.service.sync().name('AdkKnowledgeServices.search#AdkKnowledge')
+                .parameters([ownerPartyId: ownerPartyId, query: query.take(2000), limit: limit])
+                .disableAuthz().call()
+            if (!ec.message.hasError()) results = found?.results ?: []
+        } catch (Exception e) {
+            ec.logger.warn("Knowledge search for ${ownerPartyId} failed: ${e.message}")
+        }
+        if (!hadError && ec.message.hasError()) {
+            ec.logger.warn("Knowledge search for ${ownerPartyId} skipped: ${ec.message.errorsString}")
+            ec.message.clearErrors()
+        }
+        return knowledgeBlock(results)
+    }
+
     /** Provider serving a model id, for rows stored before aiProvider existed. */
     static String providerForModel(String model) {
         if (!model) return "gemini"
@@ -594,7 +634,7 @@ ORIGINAL MESSAGE:
 ${campaignTemplate}
 
 ACTION TYPE: ${actionType}
-
+${knowledgeFacts(ec, ownerPartyId, campaignTemplate)}
 HOUSE VOICE (how it must sound; wins over platform tone where they disagree):
 ${houseVoice(ec, ownerPartyId)}
 

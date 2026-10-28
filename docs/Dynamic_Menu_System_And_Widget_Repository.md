@@ -124,11 +124,11 @@ class MenuItem {
 children included, before the menu ever reaches the client. An empty `userGroups` means the
 internal groups and never `GROWERP_M_OTHER`; the exact defaults are in the security model doc.
 
-**Three configuration tiers,** resolved most specific first:
+**Two configuration tiers,** resolved most specific first:
 
 1. the user's own copy (`userId` set, `ownerPartyId` set)
-2. the organization's copy (`userId` null, `ownerPartyId` set) — what Organization → Security edits
-3. the shipped seed (`userId` null, `ownerPartyId` null)
+2. the shipped seed (`userId` null, `ownerPartyId` null), with the organization's screen access
+   overrides (`MenuItemAccess`, what Organization → Security edits) applied per item
 
 **Example hierarchy:**
 ```

@@ -656,21 +656,14 @@
                             result = [content: [[type: "text", text: "No company knowledge base is available in this context."]], isError: true]
                             return
                         }
+                        // the search service writes the read audit row (AdkActionLog)
                         def kRes = ec.service.sync().name(kSvc).parameters([
                                 ownerPartyId: owner, query: arguments?.query,
-                                limit: (arguments?.limit ?: 5)]).call()
+                                limit: (arguments?.limit ?: 5), configId: cid,
+                                argsJson: new groovy.json.JsonBuilder(arguments ?: [:]).toString()]).call()
                         def rows = kRes?.results ?: []
                         def txt = rows.isEmpty() ? "No matching company knowledge found." :
                                 rows.collect { "• ${it.title ? (it.title + ': ') : ''}${it.text}" }.join("\n\n")
-                        // Audit (read) — best effort, mirrors the governance log.
-                        try {
-                            if (ec.service.isServiceDefined("create#moqui.adk.AdkActionLog"))
-                                ec.service.sync().name("create#moqui.adk.AdkActionLog").parameters([
-                                    ownerPartyId: owner, configId: cid, toolName: 'searchKnowledge',
-                                    serviceName: kSvc, verbClass: 'read', decision: 'allowed',
-                                    argsJson: new groovy.json.JsonBuilder(arguments ?: [:]).toString(),
-                                    resultSummary: "${rows.size()} passage(s)", actionTime: ec.user.nowTimestamp]).call()
-                        } catch (Exception ignore) {}
                         result = [content: [[type: "text", text: txt]], isError: false]
                         return
                     }

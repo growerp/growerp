@@ -119,6 +119,34 @@ void main() {
     );
 
     blocTest<AuthBloc, AuthState>(
+      'AuthLoad_savedKey403_clearsKeyAndUnauthenticated',
+      setUp: () async {
+        await PersistFunctions.persistAuthenticate(loggedIn);
+        when(
+          () => restClient.getCompanies(searchString: 'C1', limit: 1),
+        ).thenAnswer((_) async => Companies(companies: [company]));
+        when(() => restClient.getAuthenticate(applicationId: appId)).thenThrow(
+          DioException(
+            requestOptions: RequestOptions(),
+            type: DioExceptionType.badResponse,
+            response: Response(
+              requestOptions: RequestOptions(),
+              statusCode: 403,
+            ),
+          ),
+        );
+      },
+      build: build,
+      act: (bloc) => bloc.add(AuthLoad()),
+      expect: () => [
+        authState(AuthStatus.loading),
+        authState(AuthStatus.unAuthenticated),
+      ],
+      verify: (_) async =>
+          expect((await PersistFunctions.getAuthenticate())?.apiKey, isNull),
+    );
+
+    blocTest<AuthBloc, AuthState>(
       'AuthLoad_savedCompanyGone_unauthenticated',
       setUp: () async {
         await PersistFunctions.persistAuthenticate(loggedIn);
@@ -447,35 +475,31 @@ void main() {
       ],
     );
 
-    group(
-      'forced password change',
-      skip: 'https://github.com/growerp/growerp/issues/43',
-      () {
-        // login#User answers a required change with this sentinel session
-        final passwordChange = Authenticate(
-          apiKey: 'passwordChange',
-          loginStatus: 'passwordChange',
-          applicationId: appId,
-          user: User(loginName: 'me@x.com'),
-        );
+    // https://github.com/growerp/growerp/issues/43
+    group('forced password change', () {
+      // login#User answers a required change with this sentinel session
+      final passwordChange = Authenticate(
+        apiKey: 'passwordChange',
+        loginStatus: 'passwordChange',
+        applicationId: appId,
+        user: User(loginName: 'me@x.com'),
+      );
 
-        blocTest<AuthBloc, AuthState>(
-          'AuthChangePassword_afterForcedChange_connectsSocketsWithNewKey',
-          setUp: () =>
-              stubUpdate((_) async => loggedIn.copyWith(apiKey: 'key2')),
-          build: build,
-          seed: () => AuthState(
-            status: AuthStatus.unAuthenticated,
-            authenticate: passwordChange,
-          ),
-          act: (bloc) =>
-              bloc.add(const AuthChangePassword('me@x.com', 'old', 'new')),
-          verify: (_) {
-            verify(() => chat.connect('key2', 'U1')).called(1);
-            verify(() => notification.connect('key2', 'U1')).called(1);
-          },
-        );
-      },
-    );
+      blocTest<AuthBloc, AuthState>(
+        'AuthChangePassword_afterForcedChange_connectsSocketsWithNewKey',
+        setUp: () => stubUpdate((_) async => loggedIn.copyWith(apiKey: 'key2')),
+        build: build,
+        seed: () => AuthState(
+          status: AuthStatus.unAuthenticated,
+          authenticate: passwordChange,
+        ),
+        act: (bloc) =>
+            bloc.add(const AuthChangePassword('me@x.com', 'old', 'new')),
+        verify: (_) {
+          verify(() => chat.connect('key2', 'U1')).called(1);
+          verify(() => notification.connect('key2', 'U1')).called(1);
+        },
+      );
+    });
   });
 }

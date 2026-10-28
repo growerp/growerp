@@ -14,7 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:growerp_order_accounting/src/findoc/views/views.dart';
+import 'package:growerp_order_accounting/src/findoc/findoc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -161,10 +161,21 @@ class LedgerJournalDialogState extends State<LedgerJournalDialog> {
         ),
         if (widget.ledgerJournal.journalId.isNotEmpty)
           Flexible(
-            child: FinDocList(
-              sales: true,
-              docType: FinDocType.transaction,
-              journalId: widget.ledgerJournal.journalId,
+            // own bloc: the journal's transactions, not the main list's
+            child: BlocProvider<TransactionBloc>(
+              create: (context) => FinDocBloc(
+                context.read<RestClient>(),
+                true,
+                FinDocType.transaction,
+                context.read<String>(),
+                journalId: widget.ledgerJournal.journalId,
+                authBloc: context.read<AuthBloc>(),
+              ),
+              child: FinDocList(
+                sales: true,
+                docType: FinDocType.transaction,
+                journalId: widget.ledgerJournal.journalId,
+              ),
             ),
           ),
       ],

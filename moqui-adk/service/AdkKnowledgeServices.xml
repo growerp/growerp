@@ -48,6 +48,28 @@
         </actions>
     </service>
 
+    <!-- Embedding model a provider uses. Test mode (GROWERP_TEST_MODE / growerp.testMode)
+         embeds locally with 'test-embedding', see embed#Text. -->
+    <service verb="get" noun="EmbedModel" authenticate="false">
+        <in-parameters><parameter name="embedProvider"/></in-parameters>
+        <out-parameters>
+            <parameter name="model"/>
+            <parameter name="testMode" type="Boolean"/>
+        </out-parameters>
+        <actions>
+            <set field="testMode" from="'true' == System.getenv('GROWERP_TEST_MODE') || 'true' == System.getProperty('growerp.testMode')"/>
+            <if condition="testMode"><set field="model" value="test-embedding"/><return/></if>
+            <if condition="embedProvider == 'openai'">
+                <set field="model" from="System.getenv('OPENAI_EMBED_MODEL') ?: System.getProperty('OPENAI_EMBED_MODEL') ?: 'text-embedding-3-small'"/>
+                <else>
+                    <!-- gemini-embedding-001 is the current GA model; older text-embedding-004 is
+                         rejected by some keys/API versions. -->
+                    <set field="model" from="System.getenv('GEMINI_EMBED_MODEL') ?: System.getProperty('GEMINI_EMBED_MODEL') ?: 'gemini-embedding-001'"/>
+                </else>
+            </if>
+        </actions>
+    </service>
+
     <!-- Embed one text with the tenant's embedding provider. Returns a List&lt;Double&gt; and
          the model that produced it — chunks are only comparable to a query embedded by the
          SAME model, so the model name is stored with every chunk and matched on search. -->
@@ -63,6 +85,17 @@
             <parameter name="model"/>
         </out-parameters>
         <actions>
+            <service-call name="AdkKnowledgeServices.get#EmbedModel" out-map="modelOut"/>
+            <if condition="modelOut.testMode">
+                <!-- deterministic bag-of-words vector: similar texts score high, no API call -->
+                <script>
+                    double[] v = new double[64]
+                    (text as String).toLowerCase().split(/[^\p{L}\p{N}]+/).each { w -> if (w) v[Math.abs(w.hashCode() % 64)] += 1.0 }
+                    embedding = v.toList()
+                </script>
+                <set field="model" from="modelOut.model"/>
+                <return/>
+            </if>
             <if condition="!apiKey">
                 <service-call name="AdkKnowledgeServices.get#TenantEmbedKey"
                     in-map="[ownerPartyId: ownerPartyId]" out-map="context"/>
@@ -78,20 +111,17 @@
                 </if>
             </if>
             <set field="embedProvider" from="embedProvider ?: 'gemini'"/>
+            <service-call name="AdkKnowledgeServices.get#EmbedModel" in-map="[embedProvider: embedProvider]"
+                out-map="modelOut"/>
+            <set field="model" from="modelOut.model"/>
             <script><![CDATA[
                 import groovy.json.JsonOutput
                 import groovy.json.JsonSlurper
                 String url, body
                 if (embedProvider == 'openai') {
-                    model = System.getenv('OPENAI_EMBED_MODEL') ?: System.getProperty('OPENAI_EMBED_MODEL') ?:
-                        'text-embedding-3-small'
                     url = 'https://api.openai.com/v1/embeddings'
                     body = JsonOutput.toJson([model: model, input: text])
                 } else {
-                    // gemini-embedding-001 is the current GA model; older text-embedding-004 is
-                    // rejected by some keys/API versions.
-                    model = System.getenv('GEMINI_EMBED_MODEL') ?: System.getProperty('GEMINI_EMBED_MODEL') ?:
-                        'gemini-embedding-001'
                     url = "https://generativelanguage.googleapis.com/v1beta/models/${model}:embedContent?key=${apiKey}"
                     body = JsonOutput.toJson([content: [parts: [[text: text]]]])
                 }
@@ -311,12 +341,15 @@
         </actions>
     </service>
 
-    <!-- Semantic search over the owner's chunks. Returns top-K {text,title,sourceType,score}. -->
+    <!-- Semantic search over the owner's chunks. Returns top-K {text,title,sourceType,score}.
+         Every search is logged (toolName searchKnowledge) for the knowledge usage statistics. -->
     <service verb="search" noun="AdkKnowledge" authenticate="false" transaction-timeout="60">
         <in-parameters>
             <parameter name="ownerPartyId" required="true"/>
             <parameter name="query" required="true"/>
             <parameter name="limit" type="Integer" default="5"/>
+            <parameter name="configId"><description>Calling agent, for the usage log</description></parameter>
+            <parameter name="argsJson" allow-html="any"/>
         </in-parameters>
         <out-parameters>
             <parameter name="results" type="List"/>
@@ -368,6 +401,190 @@
                     }
                     [text: c.text, title: title, sourceType: null, score: s.score]
                 }
+            ]]></script>
+            <service-call name="create#moqui.adk.AdkActionLog" transaction="force-new" ignore-error="true"
+                in-map="[ownerPartyId: ownerPartyId, configId: configId, toolName: 'searchKnowledge',
+                         serviceName: 'AdkKnowledgeServices.search#AdkKnowledge', verbClass: 'read',
+                         decision: 'allowed', argsJson: argsJson ?: groovy.json.JsonOutput.toJson([query: query]),
+                         resultSummary: (results?.size() ?: 0) + ' passage(s)', actionTime: ec.user.nowTimestamp]"/>
+        </actions>
+    </service>
+
+    <!-- Write load progress in its own transaction so the app sees it at once and a later
+         failure cannot roll it back. -->
+    <service verb="update" noun="AdkKnowledgeImportStatus" authenticate="false" transaction="force-new">
+        <in-parameters>
+            <parameter name="adkKnowledgeImportId" required="true"/>
+            <parameter name="status"/>
+            <parameter name="fileCount" type="Integer"/>
+            <parameter name="processedCount" type="Integer"/>
+            <parameter name="createdCount" type="Integer"/>
+            <parameter name="updatedCount" type="Integer"/>
+            <parameter name="skippedCount" type="Integer"/>
+            <parameter name="skippedJson" allow-html="any"/>
+            <parameter name="errorMessage" allow-html="any"/>
+            <parameter name="completedDate" type="Timestamp"/>
+            <parameter name="clearZipData" type="Boolean" default="false"/>
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.adk.AdkKnowledgeImport" value-field="job" for-update="true"/>
+            <if condition="!job"><return error="true" message="Knowledge load ${adkKnowledgeImportId} not found"/></if>
+            <set field="job.status" from="status" set-if-empty="false"/>
+            <set field="job.fileCount" from="fileCount" set-if-empty="false"/>
+            <set field="job.processedCount" from="processedCount" set-if-empty="false"/>
+            <set field="job.createdCount" from="createdCount" set-if-empty="false"/>
+            <set field="job.updatedCount" from="updatedCount" set-if-empty="false"/>
+            <set field="job.skippedCount" from="skippedCount" set-if-empty="false"/>
+            <set field="job.skippedJson" from="skippedJson" set-if-empty="false"/>
+            <set field="job.errorMessage" from="errorMessage" set-if-empty="false"/>
+            <set field="job.completedDate" from="completedDate" set-if-empty="false"/>
+            <if condition="clearZipData"><set field="job.zipData" from="null"/></if>
+            <entity-update value-field="job"/>
+        </actions>
+    </service>
+
+    <!-- Background worker of AdkServices100.create#AdkKnowledgeImport / create#AdkKnowledgeReindex.
+         ZIP: one knowledge doc per supported file (sourceType upload, sourceId
+         '<zip name>/<path in zip>'); a file already loaded from the same path is re-indexed
+         in place. REINDEX: rebuild the chunks of docs embedded with another model than the
+         current one (search ignores those). Each document runs in its own transaction, so one
+         bad file is skipped instead of failing the load. -->
+    <service verb="process" noun="AdkKnowledgeImport" authenticate="anonymous" transaction="ignore">
+        <in-parameters>
+            <parameter name="adkKnowledgeImportId" required="true"/>
+            <parameter name="username"/>
+        </in-parameters>
+        <actions>
+            <!-- the async worker has no web session: log in as the submitting user -->
+            <if condition="!ec.user.userId &amp;&amp; username">
+                <script>ec.user.internalLoginUser(username)</script>
+            </if>
+            <entity-find-one entity-name="moqui.adk.AdkKnowledgeImport" value-field="job"/>
+            <if condition="!job"><return error="true" message="Knowledge load ${adkKnowledgeImportId} not found"/></if>
+            <service-call name="AdkKnowledgeServices.update#AdkKnowledgeImportStatus"
+                in-map="[adkKnowledgeImportId: adkKnowledgeImportId, status: 'RUNNING', processedCount: 0]"/>
+            <script><![CDATA[
+                import groovy.json.JsonOutput
+                import java.util.zip.ZipInputStream
+
+                String ownerPartyId = job.ownerPartyId
+                List skipped = []
+                int created = 0, updated = 0, processed = 0
+                String fatal = null
+                def progress = { Map extra ->
+                    ec.service.sync().name('AdkKnowledgeServices.update#AdkKnowledgeImportStatus')
+                        .parameters([adkKnowledgeImportId: adkKnowledgeImportId, processedCount: processed,
+                                     createdCount: created, updatedCount: updated, skippedCount: skipped.size(),
+                                     skippedJson: JsonOutput.toJson(skipped)] + extra).call()
+                }
+                // Run one document service in its own transaction; its error message, or null
+                def runDoc = { String name, Map params ->
+                    ec.service.sync().name(name).parameters(params).requireNewTransaction(true).call()
+                    if (!ec.message.hasError()) return null
+                    String msg = ec.message.errorsString
+                    ec.message.clearErrors()
+                    return msg
+                }
+                // missing key or used-up allowance fails every later file too: stop the load
+                def isFatal = { String msg -> msg.contains('API key') || msg.contains('allowance') || msg.contains('token limit') }
+
+                try {
+                    if (job.jobType == 'REINDEX') {
+                        def modelOut = ec.service.sync().name('AdkKnowledgeServices.get#TenantEmbedKey')
+                            .parameters([ownerPartyId: ownerPartyId]).call()
+                        String currentModel = ec.service.sync().name('AdkKnowledgeServices.get#EmbedModel')
+                            .parameters([embedProvider: modelOut.embedProvider]).call().model
+                        List staleDocIds = ec.entity.find('moqui.adk.AdkKnowledgeChunkSummary')
+                            .condition('ownerPartyId', ownerPartyId)
+                            .selectFields(['adkKnowledgeDocId', 'embeddingModel', 'chunkCount']).list()
+                            .findAll { it.embeddingModel != currentModel }*.adkKnowledgeDocId.unique()
+                        progress([fileCount: staleDocIds.size()])
+                        for (String docId in staleDocIds) {
+                            def doc = ec.entity.find('moqui.adk.AdkKnowledgeDoc').condition('adkKnowledgeDocId', docId).one()
+                            // chunks overlap ~200 characters: drop the repeated start of each next chunk
+                            StringBuilder sb = new StringBuilder()
+                            for (ch in ec.entity.find('moqui.adk.AdkKnowledgeChunk').condition('adkKnowledgeDocId', docId)
+                                    .selectFields(['seq', 'text']).orderBy('seq').list()) {
+                                String t = ch.text ?: ''
+                                int k = Math.min(300, Math.min(t.length(), sb.length()))
+                                while (k >= 20 && !sb.toString().endsWith(t.substring(0, k))) k--
+                                if (k >= 20) sb.append(t.substring(k)) else { if (sb.length()) sb.append('\n'); sb.append(t) }
+                            }
+                            String msg = sb.toString().trim() ? runDoc('AdkKnowledgeServices.index#AdkKnowledgeChunks',
+                                [adkKnowledgeDocId: docId, ownerPartyId: ownerPartyId, text: sb.toString()]) : 'no text'
+                            if (msg && isFatal(msg)) { fatal = msg; break }
+                            if (msg) skipped.add([path: doc?.title ?: docId, reason: msg])
+                            else updated++
+                            processed++
+                            progress([:])
+                        }
+                    } else {
+                        def CourseAiUtil = ec.resource.script('component://growerp/service/course/CourseAiUtil.groovy', null)
+                        Set textExt = ['txt', 'md', 'markdown', 'csv', 'json', 'log', 'text'] as Set
+                        // of the stored text: pdf and docx are stored as their extracted plain text
+                        Map mimeTypes = [md: 'text/markdown', markdown: 'text/markdown', csv: 'text/csv',
+                                         json: 'application/json']
+                        String fileName = job.fileName ?: 'upload.zip'
+                        String zipBase = fileName.replaceAll(/(?i)\.zip$/, '')
+                        List files = []
+                        new ZipInputStream(new ByteArrayInputStream(Base64.getMimeDecoder().decode(job.zipData as String))).withCloseable { zin ->
+                            def entry
+                            while ((entry = zin.getNextEntry()) != null) {
+                                String path = entry.getName().replace('\\', '/')
+                                String base = path.tokenize('/') ? path.tokenize('/').last() : path
+                                if (entry.isDirectory() || path.startsWith('__MACOSX/') || base.startsWith('.')) continue
+                                String ext = base.contains('.') ? base.substring(base.lastIndexOf('.') + 1).toLowerCase() : ''
+                                if (!(ext in textExt) && ext != 'pdf' && ext != 'docx') {
+                                    skipped.add([path: path, reason: 'unsupported file type']); continue
+                                }
+                                files.add([path: path, ext: ext, bytes: zin.readAllBytes()])
+                            }
+                        }
+                        progress([fileCount: files.size()])
+                        for (Map f in files) {
+                            String text = null
+                            String msg = null
+                            try {
+                                text = f.ext in textExt ? new String(f.bytes as byte[], 'UTF-8') :
+                                    CourseAiUtil.extractText(ec, f.path as String, f.bytes as byte[])
+                            } catch (Exception e) { msg = "could not read: ${e.message}" }
+                            if (ec.message.hasError()) { msg = ec.message.errorsString; ec.message.clearErrors() }
+                            if (!msg && !text?.trim()) msg = 'no text'
+                            if (!msg) {
+                                String path = f.path
+                                String title = path.contains('.') ? path.substring(0, path.lastIndexOf('.')) : path
+                                String folder = path.contains('/') ? path.substring(0, path.lastIndexOf('/')) : ''
+                                String sourceId = zipBase + '/' + path
+                                def existing = ec.entity.find('moqui.adk.AdkKnowledgeDoc').condition('ownerPartyId', ownerPartyId)
+                                    .condition('sourceType', 'upload').condition('sourceId', sourceId).one()
+                                if (existing != null) {
+                                    msg = runDoc('AdkKnowledgeServices.update#AdkKnowledge', [adkKnowledgeDocId: existing.adkKnowledgeDocId,
+                                        ownerPartyId: ownerPartyId, title: title, text: text])
+                                    if (!msg) updated++
+                                } else {
+                                    msg = runDoc('AdkKnowledgeServices.ingest#AdkKnowledge', [ownerPartyId: ownerPartyId,
+                                        title: title, text: text, sourceType: 'upload', sourceId: sourceId,
+                                        mimeType: mimeTypes[f.ext] ?: 'text/plain', createdByUserId: ec.user.userId,
+                                        metadataJson: JsonOutput.toJson([zip: fileName, path: path, folder: folder])])
+                                    if (!msg) created++
+                                }
+                            }
+                            if (msg && isFatal(msg)) { fatal = msg; break }
+                            if (msg) skipped.add([path: f.path, reason: msg])
+                            processed++
+                            progress([:])
+                        }
+                    }
+                } catch (Exception e) {
+                    // e.g. a damaged zip: end the job instead of leaving it RUNNING
+                    ec.logger.warn("Knowledge load ${adkKnowledgeImportId} failed", e)
+                    ec.message.clearErrors()
+                    fatal = "Load failed: ${e.message}".toString()
+                }
+                progress([status: fatal ? 'ERROR' : 'DONE', errorMessage: fatal,
+                          completedDate: ec.user.nowTimestamp, clearZipData: true])
+                ec.logger.info("Knowledge load ${adkKnowledgeImportId} (${job.jobType}, owner ${ownerPartyId}): " +
+                    "${created} created, ${updated} updated, ${skipped.size()} skipped${fatal ? ', stopped: ' + fatal : ''}")
             ]]></script>
         </actions>
     </service>

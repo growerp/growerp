@@ -46,6 +46,23 @@ void main() {
 
   CourseViewerBloc build() => CourseViewerBloc(restClient: restClient);
 
+  // https://github.com/growerp/growerp/issues/44
+  group('FetchCourseMedia', () {
+    blocTest<CourseViewerBloc, CourseViewerState>(
+      'FetchCourseMedia_typedList_keepsMedia',
+      setUp: () =>
+          when(() => restClient.listCourseMedia(courseId: 'C1')).thenAnswer(
+            (_) async =>
+                CourseMediaList(mediaList: [CourseMedia(mediaId: 'MD1')]),
+          ),
+      build: build,
+      seed: () => CourseViewerState(course: course),
+      act: (bloc) => bloc.add(const FetchCourseMedia()),
+      verify: (bloc) =>
+          expect(bloc.state.mediaList.map((m) => m.mediaId), ['MD1']),
+    );
+  });
+
   group('LoadCourse', () {
     blocTest<CourseViewerBloc, CourseViewerState>(
       'LoadCourse_firstLessonDone_opensFirstNotCompletedLesson',

@@ -166,7 +166,8 @@ class AdkMcpServersDashboardChartMini extends StatelessWidget {
   }
 }
 
-/// Knowledge-base tile: documents grouped by source type + chunk total.
+/// Knowledge-base tile: documents per source type, chunk total and searches
+/// of the last 30 days (server-side statistics).
 class AdkKnowledgeDashboardChartMini extends StatelessWidget {
   const AdkKnowledgeDashboardChartMini({super.key});
 
@@ -177,25 +178,16 @@ class AdkKnowledgeDashboardChartMini extends StatelessWidget {
       tileKey: const Key('adkKnowledgeDashboardMini'),
       emptyMessage: l.adk_dashNoDocuments,
       load: (rest) async {
-        final docs = (await rest.getAdkKnowledge()).adkKnowledgeDocs;
-        final chunks = docs.fold<int>(0, (s, d) => s + (d.chunkCount ?? 0));
-        final byType = <String, int>{};
-        for (final d in docs) {
-          final t = (d.sourceType?.isNotEmpty ?? false)
-              ? d.sourceType!
-              : 'other';
-          byType[t] = (byType[t] ?? 0) + 1;
-        }
-        final sorted = byType.entries.toList()
-          ..sort((a, b) => b.value.compareTo(a.value));
+        final st = await rest.getAdkKnowledgeStats();
         return (
           bars: <DashboardBar>[
-            for (final e in sorted.take(3))
-              (label: e.key, count: e.value, color: null),
+            for (final t in st.bySourceType.take(3))
+              (label: t.sourceType, count: t.docCount, color: null),
           ],
           counters: <DashboardCounter>[
-            (label: l.adk_dashDocs, value: docs.length),
-            (label: l.adk_dashChunks, value: chunks),
+            (label: l.adk_dashDocs, value: st.docCount),
+            (label: l.adk_dashChunks, value: st.chunkCount),
+            (label: l.adk_dashSearches, value: st.searchCountLast30Days),
           ],
         );
       },

@@ -571,6 +571,8 @@ limitations under the License.
                     <econdition field-name="personDisabled" operator="equals"
                         from="disabled" or-null="true" ignore-if-empty="true" />
                 </econditions>
+                <econdition field-name="companyDisabled" operator="equals"
+                    from="disabled" or-null="true" ignore-if-empty="true" />
                 <order-by field-name="companyName^,lastName^,firstName^" />
             </entity-find>
             <set field="companies" from="[]" />
@@ -1447,6 +1449,37 @@ limitations under the License.
             <if condition="companies">
                 <set field="company" from="companies[0]" />
             </if>
+        </actions>
+    </service>
+
+    <service verb="delete" noun="Company">
+        <description>Disable a company of the owner. The main company cannot be deleted.</description>
+        <in-parameters>
+            <parameter name="partyId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="company" type="Map">
+                <parameter name="partyId" />
+                <parameter name="pseudoId" />
+                <parameter name="name" />
+            </parameter>
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="mantle.party.PartyDetail" value-field="party">
+                <field-map field-name="partyId" from="partyId" />
+            </entity-find-one>
+            <!-- full PK given: the find ignores other fields, check the owner here -->
+            <if condition="party?.ownerPartyId != ownerPartyId
+                    || party?.partyTypeEnumId != 'PtyOrganization'
+                    || partyId == companyPartyId">
+                <return error="true" message="Could not delete company: $partyId" />
+            </if>
+            <service-call name="update#mantle.party.Party"
+                in-map="[partyId: partyId, disabled: 'Y']" />
+            <set field="company"
+                from="[partyId: partyId, pseudoId: party.pseudoId, name: party.organizationName]" />
         </actions>
     </service>
 

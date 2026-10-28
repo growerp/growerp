@@ -223,6 +223,8 @@ layout:
     bind: $SNAP/usr/lib/x86_64-linux-gnu/dri
   /usr/lib/dri:
     bind: $SNAP/usr/lib/dri
+  /usr/lib/x86_64-linux-gnu/pulseaudio:
+    bind: $SNAP/usr/lib/x86_64-linux-gnu/pulseaudio
 
 architectures:
   - build-on: amd64

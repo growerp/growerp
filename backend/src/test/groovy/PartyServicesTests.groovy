@@ -19,7 +19,7 @@ import spock.lang.Specification
 
 /* Tests for users and companies (PartyServices100):
    - create, get, update and delete a user, with and without a company
-   - create, get and update a company
+   - create, get, update and delete a company
    - email and company checks
    - a party of another tenant is never returned
 
@@ -162,6 +162,53 @@ class PartyServicesTests extends Specification {
         then:
         !ec.message.hasError()
         updated.name == "Supplies ${run} Ltd"
+    }
+
+    // https://github.com/growerp/growerp/issues/35
+    def "delete a supplier company"() {
+        given:
+        Map company = ec.service.sync().name("${service}.create#Company")
+                .parameters([company: [name: "Gone ${run}", role: 'Supplier']]).call().company
+
+        when:
+        Map deleted = ec.service.sync().name("${service}.delete#Company")
+                .parameters([partyId: company.partyId]).call().company
+
+        then:
+        !ec.message.hasError()
+        deleted.partyId == company.partyId
+        ec.entity.find('mantle.party.Party').condition('partyId', company.partyId).useCache(false).one().disabled == 'Y'
+
+        when: 'the suppliers are listed'
+        List companies = ec.service.sync().name("${service}.get#Company")
+                .parameters([role: 'Supplier', limit: 1000]).call().companies
+
+        then:
+        !companies*.partyId.contains(company.partyId)
+    }
+
+    def "deleting the main company fails"() {
+        when:
+        ec.service.sync().name("${service}.delete#Company").parameters([partyId: tenant.companyPartyId]).call()
+
+        then:
+        ec.message.hasError()
+        ec.entity.find('mantle.party.Party').condition('partyId', tenant.companyPartyId).useCache(false).one().disabled != 'Y'
+    }
+
+    def "deleting a company of another tenant fails"() {
+        given:
+        ec.user.internalLoginUser(otherTenant.username)
+        Map foreign = ec.service.sync().name("${service}.create#Company")
+                .parameters([company: [name: "Foreign ${run}", role: 'Supplier']]).call().company
+        ec.user.internalLoginUser(tenant.username)
+
+        when:
+        ec.service.sync().name("${service}.delete#Company").parameters([partyId: foreign.partyId]).call()
+
+        then:
+        ec.message.hasError()
+        ec.entity.find('mantle.party.Party').condition('partyId', foreign.partyId).useCache(false).one().disabled != 'Y'
     }
 
     def "the main company has the tenant currency"() {

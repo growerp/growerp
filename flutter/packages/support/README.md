@@ -18,7 +18,10 @@ App-specific:
   "Suggest a function" AI feasibility check, run here on behalf of a named tenant, since
   support's own session has no tenant of its own)
 - `WebsiteToolsView` — "Website Tools": two tabs combining the former separate Website
-  Generator (`WebsiteConversionList`) and Website Translation (`WebsiteTranslationList`) screens
+  Generator (`WebsiteConversionList`) and Website Translation (`WebsiteTranslationList`) screens.
+  These live in `growerp_website`; support converts into new owners and translates any
+  owner's website. Tenants get the view under Website → Convert & Translate as a status page
+  (`WebsiteToolsStatus`) for their single website: latest conversion and translation, no lists
 - `RestStatisticsView` — REST API call statistics
 - `AboutForm`
 

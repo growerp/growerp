@@ -13,17 +13,21 @@
  */
 
 import 'package:flutter/material.dart';
-import '../src/website_conversion/website_conversion.dart';
-import '../src/website_translation/website_translation.dart';
+import 'common/system_support.dart';
+import 'website_conversion/website_conversion.dart';
+import 'website_tools_status.dart';
+import 'website_translation/website_translation.dart';
 
-/// Support App View: "Website Tools" — combines the two previously separate
-/// menu items (Website Generator, Website Translation) behind one entry with
-/// two tabs, since both operate on the same tenant's website.
+/// "Website Tools" — the website generator and the website translation behind
+/// one entry with two tabs, since both operate on the same website. In the
+/// support app they work on any owner; on the Website menu of a tenant, which
+/// has a single website, they show its status only ([WebsiteToolsStatus]).
 class WebsiteToolsView extends StatelessWidget {
   const WebsiteToolsView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    if (!isSystemSupport(context)) return const WebsiteToolsStatus();
     return DefaultTabController(
       length: 2,
       child: Column(
@@ -36,10 +40,7 @@ class WebsiteToolsView extends StatelessWidget {
           ),
           const Expanded(
             child: TabBarView(
-              children: [
-                WebsiteConversionList(),
-                WebsiteTranslationList(),
-              ],
+              children: [WebsiteConversionList(), WebsiteTranslationList()],
             ),
           ),
         ],

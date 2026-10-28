@@ -32,6 +32,7 @@ void main() {
 
   void stubGetProduct({
     String searchString = '',
+    String categoryId = '',
     int start = 0,
     int limit = 20,
     required Future<Products> Function(Invocation) answer,
@@ -39,6 +40,7 @@ void main() {
     () => restClient.getProduct(
       searchString: searchString,
       isForDropDown: false,
+      categoryId: categoryId,
       assetClassId: '',
       start: start,
       limit: limit,
@@ -76,6 +78,24 @@ void main() {
           hasReachedMax: true,
         ),
       ),
+    );
+
+    // https://github.com/growerp/growerp/issues/37
+    blocTest<ProductBloc, ProductState>(
+      'ProductFetch_category_sendsCategoryFilter',
+      setUp: () {
+        stubUoms();
+        stubGetProduct(
+          categoryId: 'CAT1',
+          answer: (_) async => Products(products: [product1]),
+        );
+      },
+      build: () => ProductBloc(restClient, applicationId),
+      seed: () => const ProductState(status: ProductStatus.success),
+      act: (bloc) =>
+          bloc.add(const ProductFetch(categoryId: 'CAT1', refresh: true)),
+      wait: fetchWait,
+      verify: (bloc) => expect(bloc.state.products, [product1]),
     );
 
     blocTest<ProductBloc, ProductState>(

@@ -371,6 +371,8 @@ limitations under the License.
         </description>
         <in-parameters>
             <parameter name="ownerPartyId" required="true"/>
+            <parameter name="email"/><!-- of the user logging in -->
+            <parameter name="hostName" default="ec.web?.getHostName(false)"/>
         </in-parameters>
         <out-parameters>
             <parameter name="hasActiveSubscription" type="Boolean"/>
@@ -380,6 +382,16 @@ limitations under the License.
             <parameter name="subscription" type="Map"/>
         </out-parameters>
         <actions>
+            <!-- example.com accounts (store reviewers, testers) never expire on the
+                 growerp.org staging and growerp.net review backends; production
+                 (growerp.com and custom domains) keeps the normal rules. -->
+            <if condition="email ==~ /(?i)^.+@example\.com$/
+                    &amp;&amp; (hostName?.endsWith('.org') || hostName?.endsWith('.net'))">
+                <set field="hasActiveSubscription" value="true" type="Boolean"/>
+                <set field="subscriptionStatus" value="active"/>
+                <set field="daysRemaining" value="-1" type="Integer"/><!-- -1 = unlimited -->
+                <return/>
+            </if>
             <!-- Query subscriptions in GROWERP tenant where externalId = ownerPartyId -->
             <!-- cache="false" ensures fresh data is read (important for multi-device login scenarios) -->
             <entity-find entity-name="mantle.product.subscription.Subscription" list="subscriptions" cache="false">

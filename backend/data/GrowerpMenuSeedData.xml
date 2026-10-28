@@ -124,6 +124,9 @@ limitations under the License.
         title="Assessments" iconName="quiz" widgetName="AssessmentList" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_ORG_WEBFORMS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_WEBSITE"
         title="Web Forms" iconName="dynamic_form" widgetName="WebsiteFormList" sequenceNum="40"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_WEB_TOOLS" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_WEBSITE"
+        title="Convert &amp; Translate" iconName="translate" widgetName="WebsiteToolsView"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="50"/>
 
     <!-- ADMIN_SYSTEM_SETUP children (tabs) -->
     <growerp.menu.MenuItem menuItemId="ADMIN_SETUP_AI" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_SYSTEM_SETUP"
@@ -372,6 +375,9 @@ limitations under the License.
         title="Assessments" iconName="quiz" widgetName="AssessmentList" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_WEB_FORMS" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_WEBSITE"
         title="Web Forms" iconName="dynamic_form" widgetName="WebsiteFormList" sequenceNum="40"/>
+    <growerp.menu.MenuItem menuItemId="FREELANCE_WEB_TOOLS" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_WEBSITE"
+        title="Convert &amp; Translate" iconName="translate" widgetName="WebsiteToolsView"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="50"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_OUT_GUIDE" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_OUTREACH"
         title="Guide" iconName="checklist" widgetName="OutreachSetupGuideScreen" sequenceNum="5"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_OUT_CAMP" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_OUTREACH"
@@ -468,6 +474,9 @@ limitations under the License.
         title="Assessments" iconName="quiz" widgetName="AssessmentList" sequenceNum="30"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_WEB_FORMS" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_WEBSITE"
         title="Web Forms" iconName="dynamic_form" widgetName="WebsiteFormList" sequenceNum="40"/>
+    <growerp.menu.MenuItem menuItemId="HOTEL_WEB_TOOLS" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_WEBSITE"
+        title="Convert &amp; Translate" iconName="translate" widgetName="WebsiteToolsView"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="50"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_ROOMS_ASSETS" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ROOMS"
         title="Rooms" iconName="king_bed" widgetName="AssetList" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_ROOMS_PROD" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_ROOMS"
@@ -763,6 +772,9 @@ limitations under the License.
         title="employees" iconName="school" widgetName="UserListEmployee" sequenceNum="20"/>
     <growerp.menu.MenuItem menuItemId="AGENTS_ORG_WEB" menuConfigurationId="AGENTS_DEFAULT" parentMenuItemId="AGENTS_ORG"
         title="Web" iconName="webhook" widgetName="WebsiteDialog" sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="AGENTS_ORG_WEB_TOOLS" menuConfigurationId="AGENTS_DEFAULT" parentMenuItemId="AGENTS_ORG"
+        title="Convert &amp; Translate" iconName="translate" widgetName="WebsiteToolsView"
+        userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="35"/>
     <growerp.menu.MenuItem menuItemId="AGENTS_ORG_SECURITY" menuConfigurationId="AGENTS_DEFAULT" parentMenuItemId="AGENTS_ORG"
         title="security" iconName="security" widgetName="SecurityList" artifactGroupId="GROWERP_BASE"
         userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]'

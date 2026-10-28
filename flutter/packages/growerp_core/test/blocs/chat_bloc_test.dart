@@ -62,7 +62,7 @@ void main() {
     blocTest<ChatRoomBloc, ChatRoomState>(
       'ChatRoomFetch_initial_listensToWsAndEmitsRooms',
       setUp: () => when(
-        () => restClient.getChatRooms(searchString: ''),
+        () => restClient.getChatRooms(searchString: '', start: 0, limit: 20),
       ).thenAnswer((_) async => ChatRooms(chatRooms: [room1, room2])),
       build: () => ChatRoomBloc(restClient, wsClient, authBloc),
       act: (bloc) => bloc.add(const ChatRoomFetch()),
@@ -79,7 +79,7 @@ void main() {
     blocTest<ChatRoomBloc, ChatRoomState>(
       'ChatRoomFetch_restThrowsDio_emitsFailure',
       setUp: () => when(
-        () => restClient.getChatRooms(searchString: ''),
+        () => restClient.getChatRooms(searchString: '', start: 0, limit: 20),
       ).thenThrow(dioError('Chat down')),
       build: () => ChatRoomBloc(restClient, wsClient, authBloc),
       act: (bloc) => bloc.add(const ChatRoomFetch()),
@@ -96,7 +96,7 @@ void main() {
     blocTest<ChatRoomBloc, ChatRoomState>(
       'ChatRoomFetch_wsMessageForKnownRoom_marksRoomUnread',
       setUp: () => when(
-        () => restClient.getChatRooms(searchString: ''),
+        () => restClient.getChatRooms(searchString: '', start: 0, limit: 20),
       ).thenAnswer((_) async => ChatRooms(chatRooms: [room1])),
       build: () => ChatRoomBloc(restClient, wsClient, authBloc),
       act: (bloc) async {
@@ -111,26 +111,23 @@ void main() {
     );
   });
 
-  group(
-    'ChatRoomFetch paging',
-    skip: 'https://github.com/growerp/growerp/issues/42',
-    () {
-      blocTest<ChatRoomBloc, ChatRoomState>(
-        'ChatRoomFetch_nextPage_requestsFromCurrentLength',
-        setUp: () => when(
-          () => restClient.getChatRooms(searchString: '', start: 1, limit: 20),
-        ).thenAnswer((_) async => ChatRooms(chatRooms: [room2])),
-        build: () => ChatRoomBloc(restClient, wsClient, authBloc),
-        seed: () =>
-            ChatRoomState(status: ChatRoomStatus.success, chatRooms: [room1]),
-        act: (bloc) => bloc.add(const ChatRoomFetch()),
-        wait: fetchWait,
-        expect: () => [
-          roomState(rooms: [room1, room2]),
-        ],
-      );
-    },
-  );
+  // https://github.com/growerp/growerp/issues/42
+  group('ChatRoomFetch paging', () {
+    blocTest<ChatRoomBloc, ChatRoomState>(
+      'ChatRoomFetch_nextPage_requestsFromCurrentLength',
+      setUp: () => when(
+        () => restClient.getChatRooms(searchString: '', start: 1, limit: 20),
+      ).thenAnswer((_) async => ChatRooms(chatRooms: [room2])),
+      build: () => ChatRoomBloc(restClient, wsClient, authBloc),
+      seed: () =>
+          ChatRoomState(status: ChatRoomStatus.success, chatRooms: [room1]),
+      act: (bloc) => bloc.add(const ChatRoomFetch()),
+      wait: fetchWait,
+      expect: () => [
+        roomState(rooms: [room1, room2]),
+      ],
+    );
+  });
 
   group('ChatRoomUpdateLocal', () {
     blocTest<ChatRoomBloc, ChatRoomState>(
@@ -322,7 +319,12 @@ void main() {
     blocTest<ChatMessageBloc, ChatMessageState>(
       'ChatMessageFetch_room_loadsMessagesAndMarksRoomRead',
       setUp: () => when(
-        () => restClient.getChatMessages(chatRoomId: 'R1', searchString: ''),
+        () => restClient.getChatMessages(
+          chatRoomId: 'R1',
+          searchString: '',
+          start: 0,
+          limit: 20,
+        ),
       ).thenAnswer((_) async => ChatMessages(chatMessages: [msg1, msg2])),
       build: build,
       act: (bloc) =>
@@ -343,7 +345,12 @@ void main() {
     blocTest<ChatMessageBloc, ChatMessageState>(
       'ChatMessageFetch_restThrowsDio_emitsFailure',
       setUp: () => when(
-        () => restClient.getChatMessages(chatRoomId: 'R1', searchString: ''),
+        () => restClient.getChatMessages(
+          chatRoomId: 'R1',
+          searchString: '',
+          start: 0,
+          limit: 20,
+        ),
       ).thenThrow(dioError('Chat down')),
       build: build,
       act: (bloc) =>
@@ -389,7 +396,7 @@ void main() {
     blocTest<ChatMessageBloc, ChatMessageState>(
       'ChatMessageReceiveWs_messageForOpenRoom_appendsIt',
       build: build,
-      seed: () => ChatMessageState(chatMessages: [msg1]),
+      seed: () => ChatMessageState(chatMessages: [msg1], chatRoomId: 'R1'),
       act: (bloc) => bloc.add(
         ChatMessageReceiveWs(
           ChatMessage(chatRoom: room1, fromUserId: 'other', content: 'new'),
@@ -404,26 +411,27 @@ void main() {
       ],
     );
 
-    group(
-      'other rooms',
-      skip: 'https://github.com/growerp/growerp/issues/42',
-      () {
-        blocTest<ChatMessageBloc, ChatMessageState>(
-          'ChatMessageReceiveWs_messageForOtherRoom_doesNotAppend',
-          setUp: () => when(
-            () =>
-                restClient.getChatMessages(chatRoomId: 'R1', searchString: ''),
-          ).thenAnswer((_) async => ChatMessages(chatMessages: [msg1])),
-          build: build,
-          act: (bloc) async {
-            bloc.add(ChatMessageFetch(chatRoomId: 'R1', chatRoomName: 'Sales'));
-            await Future<void>.delayed(fetchWait);
-            bloc.add(ChatMessageReceiveWs(ChatMessage(chatRoom: room2)));
-          },
-          wait: fetchWait,
-          verify: (bloc) => expect(bloc.state.chatMessages, [msg1]),
-        );
-      },
-    );
+    // https://github.com/growerp/growerp/issues/42
+    group('other rooms', () {
+      blocTest<ChatMessageBloc, ChatMessageState>(
+        'ChatMessageReceiveWs_messageForOtherRoom_doesNotAppend',
+        setUp: () => when(
+          () => restClient.getChatMessages(
+            chatRoomId: 'R1',
+            searchString: '',
+            start: 0,
+            limit: 20,
+          ),
+        ).thenAnswer((_) async => ChatMessages(chatMessages: [msg1])),
+        build: build,
+        act: (bloc) async {
+          bloc.add(ChatMessageFetch(chatRoomId: 'R1', chatRoomName: 'Sales'));
+          await Future<void>.delayed(fetchWait);
+          bloc.add(ChatMessageReceiveWs(ChatMessage(chatRoom: room2)));
+        },
+        wait: fetchWait,
+        verify: (bloc) => expect(bloc.state.chatMessages, [msg1]),
+      );
+    });
   });
 }

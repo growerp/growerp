@@ -96,6 +96,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       Products compResult = await restClient.getProduct(
         searchString: event.searchString,
         isForDropDown: event.isForDropDown,
+        categoryId: event.categoryId,
         assetClassId: event.assetClassId,
         start: start,
         limit: event.limit,

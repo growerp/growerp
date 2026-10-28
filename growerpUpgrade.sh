@@ -9,13 +9,15 @@
 #                       update production, release the approved store submissions
 #   production staging  new release of what staging runs now (when no review exists):
 #                       GitHub release, update production
-#   review   new review: merge the version branch into master, update staging from
-#            master, GitHub release, freeze for review (when review is empty),
-#            prepare, publish binary to stores, publish metadata (opt)
+#   review   new review: update staging from master, GitHub release, freeze for
+#            review (when review is empty) and create the review branch (1.22) at the
+#            frozen version, prepare, publish binary to stores and publish metadata
+#            (opt) from that branch, merge it back into master (opt)
 #   prepare  create store screenshots when screens changed since the last screenshots
 #            run or its artifact (used by the Windows binary and publish metadata,
 #            kept 7 days) expired
-#   staging  update staging from a branch (new version: patch, minor or major)
+#   staging  update staging from master, or from the review branch for a fix of the
+#            version in review (new version: patch, minor or major)
 #   release  GitHub release of a version tag: Claude (claude -p) writes title and notes
 #            from the commits in the form of the previous release, checked before publish
 #   status   last run of every release workflow
@@ -41,6 +43,7 @@ NC='\033[0m'
 DIM='\033[2m'
 REVIEW_OPEN="" # true/false once show_versions ran
 REVIEW_APPS="" # "app review-version (production version)" lines still in review
+REVIEW_BRANCH="" # set by cut_review_branch
 
 # the header comment, up to the first line that is not a comment
 show_help() {
@@ -109,7 +112,7 @@ start_at() {
     START=$REPLY
 }
 
-# run_workflow file.yml [-f key=value ...]: dispatch, wait, stop on failure
+# run_workflow file.yml [--ref branch] [-f key=value ...]: dispatch, wait, stop on failure
 run_workflow() {
     local workflow="$1"
     shift
@@ -138,18 +141,19 @@ run_workflow() {
     echo -e "${GREEN}$workflow succeeded${NC}"
 }
 
-# store apps whose screens changed since the last successful screenshots run
+# changed_screen_apps branch: store apps whose screens changed on the branch since the
+# last successful screenshots run
 changed_screen_apps() {
     local base files app block
     base=$(gh run list -R "$REPO" -w screenshots.yml --status success -L1 \
         --json headSha -q '.[0].headSha')
-    git -C "$SCRIPT_DIR" fetch -q origin master
+    git -C "$SCRIPT_DIR" fetch -q origin "$1"
     if [[ -z "$base" ]]; then
         warn "no successful screenshots run yet" >&2
         echo "${STORE_APPS[@]}"
         return
     fi
-    files=$(git -C "$SCRIPT_DIR" diff --name-only "$base" origin/master -- flutter/packages |
+    files=$(git -C "$SCRIPT_DIR" diff --name-only "$base" "origin/$1" -- flutter/packages |
         grep -E '^flutter/packages/[^/]+/lib/.*\.(dart|arb)$' |
         grep -vE '/blocs/|/integration_test/|\.g\.dart$|\.freezed\.dart$' || true)
     echo "Screen files changed since screenshots run ${base:0:8}: $(grep -c . <<<"$files")" >&2
@@ -165,13 +169,13 @@ changed_screen_apps() {
     done
 }
 
-# cmd_prepare [apps]: the Windows binary and publish metadata upload the
+# cmd_prepare [apps] [branch]: the Windows binary and publish metadata upload the
 # framed-screenshots artifact of the last screenshots run (kept 7 days, only the apps
 # of that run), so create new ones for the apps when screens changed or it expired
 cmd_prepare() {
     step "Store screenshots when screens changed"
-    local changed last available=false
-    changed=$(changed_screen_apps)
+    local changed last available=false branch="${2:-master}"
+    changed=$(changed_screen_apps "$branch")
     last=$(last_success screenshots.yml)
     [[ -n "$last" && "$last" > "$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)" ]] && available=true
     if [[ -n "$changed" ]]; then
@@ -185,26 +189,41 @@ cmd_prepare() {
     fi
     if confirm "Create new store screenshots?"; then
         ask_apps "${1:-all}"
-        run_workflow screenshots.yml -f apps="$REPLY"
+        run_workflow screenshots.yml --ref "$branch" -f apps="$REPLY"
     fi
 }
 
-# newest version branch on origin (1.21), where the next version is developed;
-# master when there is none
-version_branch() {
-    local branch
-    branch=$(git -C "$SCRIPT_DIR" branch -r --format='%(refname:lstrip=3)' -l 'origin/[0-9]*' |
-        grep -E '^[0-9]+\.[0-9]+$' | sort -V | tail -1)
-    echo "${branch:-master}"
+# backend version in review (review-versions.conf), set by the freeze
+review_version() {
+    server_file review-versions.conf | grep -o '"moqui:[^"]*"' | tr -d '"' | cut -d: -f2
 }
 
-# cmd_staging [branch]: update-staging runs on and commits to that branch
+# branch of the version in review (1.21), cut from master at the freeze and never
+# deleted; empty when it does not exist
+review_branch() {
+    local version
+    version=$(review_version)
+    [[ -n "$version" ]] || return 0
+    git -C "$SCRIPT_DIR" rev-parse -q --verify "refs/remotes/origin/${version%.*}" >/dev/null &&
+        echo "${version%.*}"
+    return 0
+}
+
+# newest version tag on a branch of origin
+branch_tag() {
+    git -C "$SCRIPT_DIR" tag --merged "origin/$1" -l '[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname |
+        head -1
+}
+
+# cmd_staging [branch]: update-staging runs on and commits to that branch: master, or
+# the review branch for a fix of the version in review (patch only)
 cmd_staging() {
     step "Update staging"
-    local ref="$1"
+    local ref="$1" review
+    git -C "$SCRIPT_DIR" fetch -q --tags origin
+    review=$(review_branch)
     if [[ -z "$ref" ]]; then
-        git -C "$SCRIPT_DIR" fetch -q origin
-        ask "Branch" "$(version_branch)"
+        ask "Branch (master, or review branch $review for a fix)" master
         ref="${REPLY:-master}"
     fi
     local frozen published
@@ -215,7 +234,21 @@ cmd_staging() {
         warn "The binaries must be the frozen version: publish them first."
         confirm "Update staging anyway?" || return
     fi
-    ask_list "Bump" patch patch minor major
+    local current default=patch
+    if [[ "$ref" == master ]]; then
+        # the patch versions of the review minor belong to the review branch
+        current=$(branch_tag master)
+        if [[ -n "$review" && "${current%.*}" == "$review" ]]; then
+            warn "master is on $current, review branch $review has the $review.N versions: bump minor."
+            default=minor
+        fi
+        ask_list "Bump" "$default" patch minor major
+        [[ "$REPLY" == patch && "$default" == minor ]] &&
+            { confirm "Patch collides with the versions of $review. Anyway?" || return; }
+    else
+        echo "Fix of the version in review on $ref: patch bump."
+        REPLY=patch
+    fi
     local bump="$REPLY"
     ask_apps_moqui
     local apps="$REPLY"
@@ -224,46 +257,27 @@ cmd_staging() {
         -f comment="$comment"
 }
 
-# the version branch into master with a pull request, so master has the version to submit
-merge_to_master() {
-    local branch ahead pr
-    git -C "$SCRIPT_DIR" fetch -q origin
-    ask "Version branch" "$(version_branch)"
-    branch="$REPLY"
-    if [[ "$branch" == master ]]; then
-        echo "No version branch: developed on master, nothing to merge."
-        return
-    fi
-    git -C "$SCRIPT_DIR" rev-parse -q --verify "refs/remotes/origin/$branch" >/dev/null ||
-        die "no branch origin/$branch"
-    if git -C "$SCRIPT_DIR" rev-parse -q --verify "refs/heads/$branch" >/dev/null; then
-        ahead=$(git -C "$SCRIPT_DIR" rev-list --count "origin/$branch..$branch")
-        if ((ahead > 0)); then
-            warn "$ahead local commits of $branch are not pushed: they are not part of the merge."
-            confirm "Merge without them?" || return 1
-        fi
-    fi
-    ahead=$(git -C "$SCRIPT_DIR" rev-list --count "origin/master..origin/$branch")
-    if ((ahead == 0)); then
-        echo "master has everything of $branch."
-        return
-    fi
-    git -C "$SCRIPT_DIR" log --oneline --no-merges "origin/master..origin/$branch" | head -20
-    echo "$ahead commits of $branch not in master."
-    confirm "Merge $branch into master (pull request)?" || return 1
+# the review branch (1.21) at the frozen backend version, so the store submissions and
+# fixes of the version in review do not get the development on master; after a
+# re-freeze of a fix the branch has the version already
+cut_review_branch() {
+    local tag branch
+    git -C "$SCRIPT_DIR" fetch -q --tags origin
+    tag=$(review_version)
+    [[ -n "$tag" ]] || die "no moqui version in review-versions.conf"
+    branch="${tag%.*}"
+    # a branch needs the commit, not the annotated tag
+    echo "git push origin $tag^{commit}:refs/heads/$branch"
     if $DRY_RUN; then
-        warn "dry run: pull request $branch -> master not created/merged"
+        warn "dry run: review branch $branch not created"
+        REVIEW_BRANCH="$branch"
         return
     fi
-    pr=$(gh pr list -R "$REPO" --head "$branch" --base master --state open --json number -q '.[0].number')
-    if [[ -z "$pr" ]]; then
-        gh pr create -R "$REPO" --base master --head "$branch" --title "Release $branch" \
-            --body "Merge $branch into master: the version for the next store review."
-        pr=$(gh pr list -R "$REPO" --head "$branch" --base master --state open --json number -q '.[0].number')
-    fi
-    gh pr merge "$pr" -R "$REPO" --merge ||
-        die "merge failed (conflicts or checks?): https://github.com/$REPO/pull/$pr"
-    echo -e "${GREEN}$branch merged into master${NC}"
+    git -C "$SCRIPT_DIR" push origin "$(git -C "$SCRIPT_DIR" rev-parse "$tag^{commit}"):refs/heads/$branch" ||
+        die "review branch $branch does not end in $tag: check origin/$branch"
+    git -C "$SCRIPT_DIR" fetch -q origin "$branch"
+    REVIEW_BRANCH="$branch"
+    echo -e "${GREEN}review branch $branch at $tag${NC}"
 }
 
 cmd_prod_review() {
@@ -468,37 +482,33 @@ cmd_review() {
     local default=1 frozen published
     frozen=$(last_success freeze-review.yml)
     published=$(last_success publish-binary.yml)
-    [[ -n "$frozen" && "$frozen" > "${published:-}" ]] && default=6
-    start_at "$default" "Merge the version branch into master" "Update staging from master" \
-        "Reviewer login" "GitHub release" "Freeze for review" "Submit for review"
-    if ((START <= 5)); then
+    [[ -n "$frozen" && "$frozen" > "${published:-}" ]] && default=5
+    start_at "$default" "Update staging" "Reviewer login" "GitHub release" \
+        "Freeze for review, review branch" "Submit for review"
+    if ((START <= 4)); then
         [[ -n "$REVIEW_OPEN" ]] || show_versions >/dev/null
         if $REVIEW_OPEN; then
             list_review_apps
-            echo "Steps 1-4 can run now, the freeze (5) waits until these are promoted"
+            echo "Steps 1-3 can run now, the freeze (4) waits until these are promoted"
             echo "or dropped (./review.sh drop <app> --apply on the server)."
             confirm "Prepare the new review anyway?" || return
         fi
     fi
     if ((START <= 1)); then
-        step "1. Merge the version branch into master"
-        merge_to_master || echo "Merge skipped."
+        step "1. Update staging"
+        echo "The version to submit: staging built from master (a fix: from the review branch)."
+        confirm "Update staging?" && cmd_staging
     fi
     if ((START <= 2)); then
-        step "2. Update staging from master"
-        echo "The version to submit: staging built from master."
-        confirm "Update staging from master?" && cmd_staging master
-    fi
-    if ((START <= 3)); then
-        step "3. Reviewer login"
+        step "2. Reviewer login"
         pause "Create the userid/password for the store reviewers on staging."
     fi
-    if ((START <= 4)); then
-        step "4. GitHub release"
+    if ((START <= 3)); then
+        step "3. GitHub release"
         confirm "Create a GitHub release for the version to submit?" && cmd_release
     fi
-    if ((START <= 5)); then
-        step "5. Freeze for review"
+    if ((START <= 4)); then
+        step "4. Freeze for review, review branch"
         show_versions >/dev/null
         while $REVIEW_OPEN; do
             list_review_apps
@@ -507,27 +517,35 @@ cmd_review() {
         done
         confirm "Freeze for review?" || return
         run_workflow freeze-review.yml
+        cut_review_branch
         warn "No 'update staging' until the binaries are published: they must be the frozen version."
     fi
     # The binary creates the new store version, metadata writes into it (the Windows
-    # binary submission carries its listing itself); both use the screenshots
-    step "6. Submit for review"
-    local apps=all stores=all
+    # binary submission carries its listing itself); both use the screenshots. They
+    # run on the review branch: master has moved on since the freeze
+    step "5. Submit for review"
+    local apps=all stores=all branch="${REVIEW_BRANCH:-}"
+    if [[ -z "$branch" ]]; then
+        git -C "$SCRIPT_DIR" fetch -q origin
+        branch=$(review_branch)
+    fi
+    [[ -n "$branch" ]] || die "no review branch: freeze for review first (step 4)"
+    echo "From review branch $branch"
     if confirm "Publish binary to stores (N: already published, go to metadata)?"; then
         ask_apps
         apps="$REPLY"
         ask_stores
         stores="$REPLY"
-        cmd_prepare "$apps"
+        cmd_prepare "$apps" "$branch"
         ask_list "Track (stable = submit for review, beta = TestFlight only)" stable stable beta
-        run_workflow publish-binary.yml -f apps="$apps" -f stores="$stores" -f track="$REPLY" \
-            -f android_release_status=auto
+        run_workflow publish-binary.yml --ref "$branch" -f apps="$apps" -f stores="$stores" \
+            -f track="$REPLY" -f android_release_status=auto
     fi
     if confirm "Publish metadata to stores?"; then
         ask_apps "$apps"
         apps="$REPLY"
         ask_list "Stores" "$stores" "${STORES[@]}"
-        run_workflow publish-metadata.yml -f apps="$apps" -f stores="$REPLY"
+        run_workflow publish-metadata.yml --ref "$branch" -f apps="$apps" -f stores="$REPLY"
     fi
 }
 
@@ -614,7 +632,7 @@ menu() {
     if $REVIEW_OPEN; then off="$DIM"; else on="$DIM"; fi
     echo -e "${on}     1a  from review    versions the stores approved     (when a review is open)${NC}"
     echo -e "${off}     1b  from staging   new release of staging now       (when no review is open)${NC}"
-    echo    "  2  New review         merge, staging, freeze, submit   (freeze when no review is open)"
+    echo    "  2  New review         staging, freeze, submit          (freeze when no review is open)"
     echo
     echo "  Other: u update staging   p screenshots   g GitHub release   t status   q quit"
     echo

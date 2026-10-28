@@ -12,11 +12,17 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:archive/archive.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import '../adk_config_service.dart';
+import 'memory_file_picker.dart';
 
 /// Reusable integration-test steps for the growerp_adk building block, built to
 /// the same pattern as `UserTest` (growerp_user_company): data is carried
@@ -365,6 +371,58 @@ class AdkTest {
       await CommonTest.enterText(tester, 'searchField', '');
     }
     await PersistFunctions.persistTest(test.copyWith(adkKnowledgeDocs: []));
+  }
+
+  /// Upload a ZIP with a folder tree through the upload button, wait for the
+  /// background load and check the documents (titled with their path) and
+  /// the statistics. Needs embeddings: GROWERP_TEST_MODE (CI) or a key.
+  static Future<void> loadKnowledgeZip(WidgetTester tester) async {
+    final archive = Archive();
+    final files = {
+      'policies/hr/leave.md': '# Leave\nEmployees get 25 vacation days.',
+      'policies/travel.txt': 'Travel by train under 500 km.',
+      'photo.png': 'not a document',
+    };
+    files.forEach((path, text) {
+      final bytes = utf8.encode(text);
+      archive.addFile(ArchiveFile(path, bytes.length, bytes));
+    });
+    final original = FilePickerPlatform.instance;
+    final picker = MemoryFilePicker()
+      ..fileName = 'handbook.zip'
+      ..bytes = Uint8List.fromList(ZipEncoder().encode(archive)!);
+    FilePickerPlatform.instance = picker;
+    try {
+      await CommonTest.tapByKey(tester, 'uploadKnowledge');
+      await CommonTest.tapByKey(tester, 'confirmZipLoad',
+          seconds: CommonTest.waitTime);
+      // the view polls every 2 seconds and shows the result when done
+      bool done = false;
+      for (int i = 0; i < 60 && !done; i++) {
+        await tester.pump(const Duration(seconds: 1));
+        done = tester.any(find.byKey(const Key('knowledgeImportResult')));
+      }
+      expect(done, isTrue, reason: 'zip load did not finish in 60 seconds');
+      await CommonTest.waitForSnackbarToGo(tester);
+    } finally {
+      FilePickerPlatform.instance = original;
+    }
+    for (final title in ['policies/hr/leave', 'policies/travel']) {
+      await CommonTest.enterText(tester, 'searchField', title);
+      expect(
+        await CommonTest.doesExistKey(tester, 'title0') ||
+            await CommonTest.doesExistKey(tester, 'knowledgeTitle0'),
+        isTrue,
+        reason: 'zip document "$title" should be listed',
+      );
+    }
+    await CommonTest.enterText(tester, 'searchField', '');
+    // phone: the statistics are collapsed
+    if (!tester.any(find.byKey(const Key('knowledgeStatDocs')))) {
+      await CommonTest.tapByKey(tester, 'knowledgeStatsTile');
+    }
+    expect(CommonTest.getTextField('knowledgeStatDocs'), '2');
+    expect(CommonTest.getTextField('knowledgeStatChunks'), '2');
   }
 
   // ── Agent catalog ─────────────────────────────────────────────────────────

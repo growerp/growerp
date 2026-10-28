@@ -55,6 +55,33 @@ void main() {
       ],
     );
 
+    // https://github.com/growerp/growerp/issues/34
+    blocTest<SubscriptionBloc, SubscriptionState>(
+      'SubscriptionFetch_fullPageBelowTwenty_hasNotReachedMax',
+      setUp: () =>
+          when(
+            () => restClient.getSubscription(
+              searchString: '',
+              growerp: false,
+              limit: 2,
+              start: 0,
+            ),
+          ).thenAnswer(
+            (_) async =>
+                Subscriptions(subscriptions: [subscription1, subscription2]),
+          ),
+      build: () => SubscriptionBloc(restClient),
+      act: (bloc) => bloc.add(const SubscriptionFetch(limit: 2)),
+      expect: () => [
+        subscriptionState(SubscriptionStatus.loading),
+        subscriptionState(
+          SubscriptionStatus.success,
+          subscriptions: [subscription1, subscription2],
+          hasReachedMax: false,
+        ),
+      ],
+    );
+
     blocTest<SubscriptionBloc, SubscriptionState>(
       'SubscriptionFetch_growerpNextPage_appendsFromCurrentLength',
       setUp: () => when(
