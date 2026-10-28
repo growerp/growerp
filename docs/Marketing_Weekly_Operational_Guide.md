@@ -15,7 +15,7 @@
 | Platforms enabled with daily limits (LinkedIn, X, Substack, …) | **Outreach → Platforms** |
 | At least one active outreach campaign with recipients | **Outreach → Campaigns** |
 | Personas current (Olivia, Henri/Fiona, Ben, Aaron — Sales Plan §3) | **Marketing → Personas** |
-| Knowledge base current (feeds the SDR website-chat agent) | **Agent Control → Knowledge** |
+| Knowledge base current (feeds the SDR website-chat agent and grounds every AI-written plan, piece, article, campaign and landing page) | **Agent Control → Knowledge** |
 | Assessment funnel live end-to-end (landing page → questions → results email) | **Marketing → Landing Pages / Assessments** |
 
 If any of these is missing, fix it before starting the week — the daily routine below assumes the machine is running.
@@ -79,7 +79,7 @@ The *Content and Social* agent ran at 08:00 and posted its output to chat. This 
 2. **Marketing → Assessments → Assessment Leads** — review new respondents: expand answers, check scores against thresholds. Warm/hot → create an Opportunity (estAmount, estProbability, nextStep) and a follow-up activity.
 3. **Marketing → Landing Pages** — sanity-check the live page(s): CTA still points at the right assessment, credibility statistics current (stars, tenants, releases). Generate/update the quarter's vertical landing page if the calendar (Sales Plan §9) says so.
 4. **Website chat** — review this week's SDR conversations; every "I don't know" answer is a missing knowledge entry.
-5. **Agent Control → Knowledge** — add what was missing: new release notes, pricing changes, new case study. This is what the SDR quotes to visitors tomorrow.
+5. **Agent Control → Knowledge** — add what was missing: new release notes, pricing changes, new case study. This is what the SDR quotes to visitors tomorrow, and what next Monday's content is written from.
 
 ### Friday — Wrap, audit & reset (~2 h)
 

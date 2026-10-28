@@ -129,7 +129,9 @@ Landing Pages and Assessments as your capture-and-warm-up machinery.
 
 A persona (customer avatar) describes your ideal customer: demographics, pain
 points, goals, tone of voice. Everything AI-generated downstream (content plans,
-posts, landing pages) is written *for* the selected persona.
+posts, landing pages) is written *for* the selected persona, and *from* your knowledge
+base (**Agent Control → Knowledge**): each generator adds the passages that match its brief,
+so fill it first with your product overview, pricing, release notes and customer cases.
 
 - **Create with AI:** press **+**, describe your business, and let the generator
   propose the persona; edit and save.

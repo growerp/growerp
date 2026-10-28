@@ -94,6 +94,7 @@ ANGLE (Pain-News-Prize): ${thePnp}
 ${idea.title ? "WORKING TITLE / IDEA: ${idea.title}\n" : ''}
 MATERIAL:
 ${material.join('\n\n')}
+${GeminiAiUtil.knowledgeFacts(ec, ownerPartyId, [idea.title, idea.rawText].findAll().join('\n'))}
 
 HOUSE VOICE (how it must sound):
 ${GeminiAiUtil.houseVoice(ec, ownerPartyId)}
@@ -102,7 +103,7 @@ RULES:
 - Use ALL the material given: when there are notes and an article, combine them; the notes show
   the user's own point of view and win where they disagree with the article.
 - Write it in your own words; never copy sentences from a third-party article.
-${idea.sourceUrl ? "- The material includes an article by someone else: end with one line 'Source: ${idea.sourceUrl}'.\n" : ''}- Only state facts, numbers and names that are in the material; do not invent any.
+${idea.sourceUrl ? "- The material includes an article by someone else: end with one line 'Source: ${idea.sourceUrl}'.\n" : ''}- Only state facts, numbers and names that are in the material or the company facts; do not invent any.
 - Markdown body: short paragraphs, 2-4 '## ' subheadings, no '# ' heading (the title is separate),
   no hashtags, no emojis.
 - End with what the reader can do next.

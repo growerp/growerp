@@ -92,6 +92,7 @@ ${personaBlock}
 
 ANGLE (Pain-News-Prize): ${thePnp} — ${pnpGuide}
 ${title && brief ? "HEADLINE: ${title}\n" : ''}BRIEF / OUTLINE: ${brief ?: title ?: '(none, choose a strong angle for the persona)'}
+${GeminiAiUtil.knowledgeFacts(ec, ownerPartyId, [title, brief].findAll().join('\n'))}
 
 HOUSE VOICE (how it must sound; wins over the persona tone where they disagree):
 ${GeminiAiUtil.houseVoice(ec, ownerPartyId)}

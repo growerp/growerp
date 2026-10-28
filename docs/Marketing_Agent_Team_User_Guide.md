@@ -19,10 +19,12 @@ general agent screens (Jobs, Approvals, Actions, Knowledge).
 | An LLM API key (Gemini by default) | **System Setup → AI / LLM settings** |
 | A chat room to receive agent output | **Chat** — create a room, e.g. "Marketing" |
 | Outreach campaign with recipients | **Marketing → Outreach** (needed by Personalizer, Lead Triage) |
-| Knowledge base entries about your company | **Agent Control → Knowledge** (needed by the SDR agent) |
+| Knowledge base entries about your company | **Agent Control → Knowledge** (needed by the SDR agent; grounds all AI-written content) |
 
 Without an LLM key the agents are created but every run fails. Without knowledge documents
-the SDR agent will honestly answer "I don't know" instead of making things up.
+the SDR agent will honestly answer "I don't know" instead of making things up, and the AI
+writers (content plans, pieces, articles, posts, campaigns, landing pages, personas) have
+only the brief to go on, so they stay generic or guess product details.
 
 ## 2. Enabling the team
 
@@ -136,7 +138,9 @@ other schedules on here when you want them to work; in production they keep the 
 * **Agent Control → Agent Actions** — the audit trail: every service the agents called, whether
   it was allowed, blocked, pending or rejected, and the result.
 * **Agent Control → Knowledge** — add notes, upload documents, or import your product catalog.
-  This is what the SDR agent quotes to website visitors; keep it current.
+  This is what the SDR agent quotes to website visitors, and every AI writer pulls the passages
+  that match its brief into its prompt (product claims, prices, customer cases, links), so
+  keep it current: product overview, pricing, verticals, release notes, trial/signup links.
 
 ## 6. Safety model
 

@@ -44,6 +44,7 @@ BUSINESS DESCRIPTION:
 ${businessDescription}
 
 TARGET MARKET: ${targetMarket ?: 'Not specified - infer from business description'}
+${GeminiAiUtil.knowledgeFacts(ec, ownerPartyId, [businessDescription, targetMarket].findAll().join('\n'), 6)}
 
 REQUIREMENTS:
 1. Create a realistic customer avatar with a name (e.g., "Alex Johnson")

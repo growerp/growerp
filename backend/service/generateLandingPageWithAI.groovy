@@ -134,7 +134,7 @@ TARGET AUDIENCE: ${targetAudience ?: 'Not specified - infer from business descri
 INDUSTRY: ${industry ?: 'Infer from business description'}
 
 TONE: ${tone}
-
+${GeminiAiUtil.knowledgeFacts(ec, ownerPartyId, [businessDescription, targetAudience].findAll().join('\n'), 8)}
 REQUIREMENTS:
 1. Compelling Results Hook (headline) - focus on tangible outcomes
 2. Clear subheading with action guidance

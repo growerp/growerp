@@ -105,7 +105,7 @@ Tone of Voice: ${persona.toneOfVoice}
 FIRST WEEK STARTING: ${weekStart.format(formatter)}
 
 ${directionSection}${formulaSection}
-
+${GeminiAiUtil.knowledgeFacts(ec, ownerPartyId, [userDirection, persona.painPoints, persona.goals].findAll().join('\n'), 8)}
 REQUIREMENTS:
 1. A one-sentence theme for the whole plan${userDirection ? ' that captures the user direction' : ''}.
 2. For each of the ${planWeeks} weeks: a one-sentence week theme, building on the previous

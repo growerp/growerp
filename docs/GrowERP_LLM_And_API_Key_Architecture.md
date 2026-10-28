@@ -64,7 +64,9 @@ comparable, so `AdkKnowledgeChunk.embeddingModel` is stored per chunk and
 switching embedding provider means re-ingesting the documents, and the log says so
 when an index is left stranded. A tenant with only an Anthropic key gets working
 chat and content generation but no knowledge search until a Gemini or OpenAI key
-is added. In `AdkManager.initConfig()`
+is added. The marketing and course writers ground their prompts with
+`GeminiAiUtil.knowledgeFacts` (a `COMPANY FACTS` block from `search#AdkKnowledge`);
+without a knowledge base or embedding key it returns nothing and generation goes on. In `AdkManager.initConfig()`
 (`AdkManager.groovy:200-215`), any non-`gemini` value is stored in a side
 `providerRegistry` map and the function returns without building an agent — the
 log line even says so: *"HTTP routing not yet implemented"*. Setting `llmProvider`
