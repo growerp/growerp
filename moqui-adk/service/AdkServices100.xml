@@ -1156,7 +1156,7 @@
     <service verb="create" noun="AdkKnowledge">
         <in-parameters>
             <parameter name="title" required="true"/>
-            <parameter name="text" required="true"/>
+            <parameter name="text" allow-html="any" required="true"/>
             <parameter name="sourceType" default-value="note"/>
         </in-parameters>
         <out-parameters>
@@ -1175,7 +1175,7 @@
         <in-parameters>
             <parameter name="adkKnowledgeDocId" required="true"/>
             <parameter name="title"/>
-            <parameter name="text"/>
+            <parameter name="text" allow-html="any"/>
         </in-parameters>
         <out-parameters><parameter name="chunkCount" type="Integer"/></out-parameters>
         <actions>

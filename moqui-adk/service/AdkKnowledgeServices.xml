@@ -75,7 +75,7 @@
          SAME model, so the model name is stored with every chunk and matched on search. -->
     <service verb="embed" noun="Text" authenticate="false" transaction-timeout="60">
         <in-parameters>
-            <parameter name="text" required="true"/>
+            <parameter name="text" allow-html="any" required="true"/>
             <parameter name="ownerPartyId"/>
             <parameter name="apiKey"/>
             <parameter name="embedProvider"/>
@@ -158,7 +158,7 @@
         <in-parameters>
             <parameter name="ownerPartyId" required="true"/>
             <parameter name="title" required="true"/>
-            <parameter name="text" required="true"/>
+            <parameter name="text" allow-html="any" required="true"/>
             <parameter name="sourceType" default-value="note"/>
             <parameter name="sourceId"/>
             <parameter name="mimeType" default-value="text/plain"/>
@@ -187,7 +187,7 @@
         <in-parameters>
             <parameter name="adkKnowledgeDocId" required="true"/>
             <parameter name="ownerPartyId" required="true"/>
-            <parameter name="text" required="true"/>
+            <parameter name="text" allow-html="any" required="true"/>
         </in-parameters>
         <out-parameters><parameter name="chunkCount" type="Integer"/></out-parameters>
         <actions>
@@ -237,7 +237,7 @@
             <parameter name="adkKnowledgeDocId" required="true"/>
             <parameter name="ownerPartyId" required="true"/>
             <parameter name="title"/>
-            <parameter name="text"/>
+            <parameter name="text" allow-html="any"/>
         </in-parameters>
         <out-parameters><parameter name="chunkCount" type="Integer"/></out-parameters>
         <actions>
@@ -346,7 +346,7 @@
     <service verb="search" noun="AdkKnowledge" authenticate="false" transaction-timeout="60">
         <in-parameters>
             <parameter name="ownerPartyId" required="true"/>
-            <parameter name="query" required="true"/>
+            <parameter name="query" allow-html="any" required="true"/>
             <parameter name="limit" type="Integer" default="5"/>
             <parameter name="configId"><description>Calling agent, for the usage log</description></parameter>
             <parameter name="argsJson" allow-html="any"/>

@@ -332,4 +332,29 @@ class AdkKnowledgeServicesTests extends Specification {
         st.searchCountLast30Days == 0
         job == null
     }
+
+    def "text with < and > (markdown, code, html) loads and is searchable"() {
+        given:
+        String md = "# Pricing\nUse <b>bold</b> sparingly; plans for teams of < 10 and > 50 users. Ticket <TICKET-1>."
+
+        when: 'one file of a zip'
+        Map job = waitFor(startLoad('markup.zip', zip(['markup/pricing.md': md])).adkKnowledgeImportId as String)
+
+        then:
+        !ec.message.hasError()
+        job.status == 'DONE'
+        job.createdCount == 1
+
+        when: 'a note added by hand, then changed'
+        Map created = ec.service.sync().name('AdkServices100.create#AdkKnowledge')
+                .parameters([title: 'markup note', text: md]).call()
+        ec.service.sync().name('AdkServices100.update#AdkKnowledge')
+                .parameters([adkKnowledgeDocId: created.adkKnowledgeDocId, text: md + ' <i>v2</i>']).call()
+        Map found = ec.service.sync().name('AdkKnowledgeServices.search#AdkKnowledge')
+                .parameters([ownerPartyId: tenant.ownerPartyId, query: 'teams of < 10 users <b>', limit: 1]).call()
+
+        then:
+        !ec.message.hasError()
+        found.results[0].text.contains('<')
+    }
 }
