@@ -1060,8 +1060,8 @@ limitations under the License.
                 <set field="teOld.comments" from="timeEntry.comments" />
             </if>
             <if condition="timeEntry.date">
-                <set field="teOld.fromDate" from="timeEntry.date.substring(0,10)"
-                    type="Timestamp" />
+                <set field="teOld.fromDate"
+                    from="ec.l10n.parseTimestamp(timeEntry.date.substring(0,10), 'yyyy-MM-dd')" />
             </if>
             <entity-update value-field="teOld" />
             <service-call name="growerp.100.ActivityServices100.get#TimeEntry"

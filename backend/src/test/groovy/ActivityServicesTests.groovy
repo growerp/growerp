@@ -183,7 +183,7 @@ class ActivityServicesTests extends Specification {
         approved.status == 'approved'
         approved.date == '2026-10-20'
         ec.entity.find('mantle.work.time.TimeEntry').condition('timeEntryId', entry.timeEntryId)
-                .useCache(false).one().fromDate instanceof java.sql.Timestamp
+                .useCache(false).one().fromDate == java.sql.Timestamp.valueOf('2026-10-20 00:00:00')
     }
 
     def "add and read activity notes"() {
