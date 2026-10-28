@@ -1394,5 +1394,13 @@
   "accessWrite": "schreiben",
   "searchScreens": "Bildschirme suchen...",
   "restDomain": "REST-Domäne",
-  "writeImpliesView": "Schreibzugriff gewährt auch Lesezugriff"
+  "writeImpliesView": "Schreibzugriff gewährt auch Lesezugriff",
+  "ownerDataDownload": "Firmendaten herunterladen",
+  "ownerDataDownloadInfo": "Alle Daten Ihrer Firma (Kunden, Lieferanten, Produkte, Aufträge, Buchhaltung, Website und Dateien) in einer Datei: als Sicherung oder um die Firma auf ein anderes GrowERP-System umzuziehen.",
+  "ownerDataSensitive": "Die Datei enthält alles, auch die Passwörter Ihres Mailservers und Ihre KI-Schlüssel: bewahren Sie sie sicher auf.",
+  "ownerDataUpload": "Firmendaten hochladen",
+  "ownerDataUploadInfo": "Eine heruntergeladene Datei als neue Firma neben den Firmen auf diesem System laden. Alle Datensätze erhalten neue IDs.",
+  "ownerDataUploaded": "Als neue Firma {ownerPartyId} geladen",
+  "ownerDataDone": "Fertig",
+  "ownerDataFailed": "Fehlgeschlagen"
 }

@@ -164,6 +164,11 @@ jobs:
         working-directory: moqui
         run: java -jar moqui.war load types=seed,seed-initial,install no-run-es
 
+      # a new entity used by GrowERP must be classified for the owner data
+      # download/upload (docs/Owner_Data_Backup_Transfer.md)
+      - name: Check owner data entity list
+        run: python3 backend/ci/owner_data_entities.py --check
+
       - name: Run growerp backend tests
         working-directory: moqui
         run: ./gradlew :runtime:component:growerp:test --console=plain

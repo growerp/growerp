@@ -1394,5 +1394,13 @@
   "accessWrite": "编辑",
   "searchScreens": "搜索屏幕...",
   "restDomain": "REST 域",
-  "writeImpliesView": "编辑权限同时包含查看权限"
+  "writeImpliesView": "编辑权限同时包含查看权限",
+  "ownerDataDownload": "下载公司数据",
+  "ownerDataDownloadInfo": "将您公司的全部数据（客户、供应商、产品、订单、会计、网站和文件）保存为一个文件：用于备份，或将公司迁移到另一个 GrowERP 系统。",
+  "ownerDataSensitive": "该文件包含所有内容，包括您的邮件服务器密码和 AI 密钥：请妥善保管。",
+  "ownerDataUpload": "上传公司数据",
+  "ownerDataUploadInfo": "将下载的文件作为新公司加载到本系统中现有公司旁边。所有记录都会获得新的编号。",
+  "ownerDataUploaded": "已作为新公司 {ownerPartyId} 加载",
+  "ownerDataDone": "完成",
+  "ownerDataFailed": "失败"
 }

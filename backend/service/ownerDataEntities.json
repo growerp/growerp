@@ -244,6 +244,7 @@
   ],
   "excluded": [
     "growerp.course.CourseLessonHistory",
+    "growerp.general.OwnerDataTransfer",
     "moqui.adk.AdkActionLog",
     "moqui.adk.AdkKnowledgeChunk",
     "moqui.adk.AdkKnowledgeImport",

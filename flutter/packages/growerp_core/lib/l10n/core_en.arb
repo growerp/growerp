@@ -1879,5 +1879,42 @@
   "calendarResyncStarted": "The user calendars are updated in the background",
   "@calendarResyncStarted": {
     "description": "Message after starting the calendar resync"
+  },
+  "ownerDataDownload": "Download company data",
+  "@ownerDataDownload": {
+    "description": "System setup backup tab: title and button to download all company data"
+  },
+  "ownerDataDownloadInfo": "All data of your company (customers, suppliers, products, orders, accounting, website and files) as one file: a backup, or to move the company to another GrowERP system.",
+  "@ownerDataDownloadInfo": {
+    "description": "System setup backup tab: what the download holds and is for"
+  },
+  "ownerDataSensitive": "The file holds everything, also the passwords of your mail server and your AI keys: keep it in a safe place.",
+  "@ownerDataSensitive": {
+    "description": "System setup backup tab: warning that the file holds secrets"
+  },
+  "ownerDataUpload": "Upload company data",
+  "@ownerDataUpload": {
+    "description": "System setup backup tab: title and button to upload company data (system support)"
+  },
+  "ownerDataUploadInfo": "Load a downloaded file as a new company next to the companies already on this system. All records get new ids.",
+  "@ownerDataUploadInfo": {
+    "description": "System setup backup tab: what an upload does"
+  },
+  "ownerDataUploaded": "Loaded as the new company {ownerPartyId}",
+  "@ownerDataUploaded": {
+    "description": "System setup backup tab: result of an upload",
+    "placeholders": {
+      "ownerPartyId": {
+        "type": "String"
+      }
+    }
+  },
+  "ownerDataDone": "Done",
+  "@ownerDataDone": {
+    "description": "System setup backup tab: status of a finished download or upload"
+  },
+  "ownerDataFailed": "Failed",
+  "@ownerDataFailed": {
+    "description": "System setup backup tab: status of a failed download or upload"
   }
 }

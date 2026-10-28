@@ -49,6 +49,8 @@ limitations under the License.
         title="AI" iconName="psychology" widgetName="SystemSetupAiView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_SETUP_EMAIL" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_SYSTEM_SETUP"
         title="Email" iconName="mail_outline" widgetName="SystemSetupEmailView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="MKTAPP_SETUP_BACKUP" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_SYSTEM_SETUP"
+        title="Backup" iconName="backup" widgetName="SystemSetupBackupView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="25"/>
     <growerp.menu.MenuItem menuItemId="MKTAPP_SETUP_GUIDES" menuConfigurationId="MARKETING_DEFAULT" parentMenuItemId="MKTAPP_SYSTEM_SETUP"
         title="Guides" iconName="checklist" widgetName="GuideList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="30"/>
 

@@ -127,6 +127,8 @@ limitations under the License.
         title="AI" iconName="psychology" widgetName="SystemSetupAiView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="INSURANCE_SETUP_EMAIL" menuConfigurationId="INSURANCE_DEFAULT" parentMenuItemId="INSURANCE_SYSTEM_SETUP"
         title="Email" iconName="mail_outline" widgetName="SystemSetupEmailView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="INSURANCE_SETUP_BACKUP" menuConfigurationId="INSURANCE_DEFAULT" parentMenuItemId="INSURANCE_SYSTEM_SETUP"
+        title="Backup" iconName="backup" widgetName="SystemSetupBackupView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="25"/>
 
     <!-- Policies children -->
     <growerp.menu.MenuItem menuItemId="INSURANCE_POL_ALL" menuConfigurationId="INSURANCE_DEFAULT" parentMenuItemId="INSURANCE_POLICIES"

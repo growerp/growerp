@@ -315,6 +315,15 @@ returned. Where `ownerPartyId` is not part of the primary key, compare it explic
 The `field-map` still matters when the find is not by the full key (e.g. by `pseudoId`).
 `<entity-find>` with `<econdition>`s keeps all conditions and needs no extra check.
 
+## Owner data download and upload
+
+`OwnerData/Export` (download all data of an owner) is in the `GROWERP_SETUP` domain and
+`create#OwnerDataExport` also requires `GROWERP_M_ADMIN`; system support may name another
+owner. `OwnerData/Import` creates a whole new owner from a file, so
+`create#OwnerDataImport` calls `check#SupportUser`: only `GROWERP_M_SYSTEM` can upload. The
+file holds the owner's secrets (mail server password, AI keys, password hashes). See
+[Owner_Data_Backup_Transfer.md](Owner_Data_Backup_Transfer.md).
+
 ## Known gap
 
 The `User` REST resource serves both "my profile" and "list users" on one path, so

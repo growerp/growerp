@@ -85,6 +85,7 @@ final Map<String, Icon> iconRegistry = {
   'outbox': const Icon(Icons.outbox),
   'mark_email_read': const Icon(Icons.mark_email_read),
   'mail_outline': const Icon(Icons.mail_outline),
+  'backup': const Icon(Icons.backup),
   'forum': const Icon(Icons.forum),
   'chat': const Icon(Icons.chat),
   // Support app icons

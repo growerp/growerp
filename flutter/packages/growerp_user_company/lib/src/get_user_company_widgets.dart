@@ -85,6 +85,7 @@ Map<String, GrowerpWidgetBuilder> getUserCompanyWidgets() {
     'SystemSetupDialog': (args) => const SystemSetupDialog(),
     'SystemSetupAiView': (args) => const SystemSetupAiView(),
     'SystemSetupEmailView': (args) => const SystemSetupEmailView(),
+    'SystemSetupBackupView': (args) => const SystemSetupBackupView(),
     'GuideList': (args) => const GuideList(),
 
     // Organization -> Security: screen access per user group. The bloc is
@@ -284,6 +285,13 @@ List<WidgetMetadata> getUserCompanyWidgetsWithMetadata() {
       iconName: 'mail_outline',
       keywords: ['email', 'smtp', 'imap', 'mail server'],
       builder: (args) => const SystemSetupEmailView(),
+    ),
+    WidgetMetadata(
+      widgetName: 'SystemSetupBackupView',
+      description: 'Download all company data as a backup, upload it elsewhere',
+      iconName: 'backup',
+      keywords: ['backup', 'download', 'upload', 'export', 'import', 'transfer'],
+      builder: (args) => const SystemSetupBackupView(),
     ),
     WidgetMetadata(
       widgetName: 'GuideList',

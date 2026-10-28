@@ -180,6 +180,32 @@ mixin SystemApi {
   @GET("rest/s1/growerp/100/ExchangeRates")
   Future<ExchangeRates> getExchangeRates();
 
+  // owner data backup / transfer ========
+  /// Start a background download of all data of the owner, poll with
+  /// [getOwnerDataTransfer], then fetch it with [getOwnerDataExportFile].
+  @POST("rest/s1/growerp/100/OwnerData/Export")
+  Future<OwnerDataTransfer> createOwnerDataExport();
+
+  /// The latest download or upload of the owner, or the one with the id.
+  @GET("rest/s1/growerp/100/OwnerData")
+  Future<OwnerDataTransfer> getOwnerDataTransfer({
+    @Query('ownerDataTransferId') String? ownerDataTransferId,
+    @Query('direction') String? direction,
+  });
+
+  /// The zip of a finished download: {fileName, zip (base64)}.
+  @GET("rest/s1/growerp/100/OwnerData/Export")
+  Future<dynamic> getOwnerDataExportFile({
+    @Query('ownerDataTransferId') required String ownerDataTransferId,
+  });
+
+  /// Upload a download as a new owner (system support only). Sent as a JSON
+  /// body, {fileName, zip (base64)}: Jetty rejects form posts over 200kB.
+  @POST("rest/s1/growerp/100/OwnerData/Import")
+  Future<OwnerDataTransfer> createOwnerDataImport({
+    @Body() required Map<String, dynamic> data,
+  });
+
   // import / export ========
   @POST("rest/s1/growerp/100/ImportExport")
   Future<void> uploadEntities({

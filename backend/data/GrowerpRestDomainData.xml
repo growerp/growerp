@@ -171,6 +171,7 @@ when the organization's menu shows it a screen that drives that domain.
     <!-- GROWERP_SETUP -->
     <growerp.menu.WidgetDomain widgetName="SystemDefaultsDialog" artifactGroupId="GROWERP_SETUP"/>
     <growerp.menu.WidgetDomain widgetName="SystemSetupAiView" artifactGroupId="GROWERP_SETUP"/>
+    <growerp.menu.WidgetDomain widgetName="SystemSetupBackupView" artifactGroupId="GROWERP_SETUP"/>
     <growerp.menu.WidgetDomain widgetName="SystemSetupDialog" artifactGroupId="GROWERP_SETUP"/>
     <growerp.menu.WidgetDomain widgetName="SystemSetupEmailView" artifactGroupId="GROWERP_SETUP"/>
 

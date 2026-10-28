@@ -1394,5 +1394,13 @@
   "accessWrite": "schrijven",
   "searchScreens": "Schermen zoeken...",
   "restDomain": "REST-domein",
-  "writeImpliesView": "Schrijftoegang geeft ook leestoegang"
+  "writeImpliesView": "Schrijftoegang geeft ook leestoegang",
+  "ownerDataDownload": "Bedrijfsgegevens downloaden",
+  "ownerDataDownloadInfo": "Alle gegevens van uw bedrijf (klanten, leveranciers, producten, orders, boekhouding, website en bestanden) in één bestand: een back-up, of om het bedrijf naar een ander GrowERP-systeem te verhuizen.",
+  "ownerDataSensitive": "Het bestand bevat alles, ook de wachtwoorden van uw mailserver en uw AI-sleutels: bewaar het op een veilige plek.",
+  "ownerDataUpload": "Bedrijfsgegevens uploaden",
+  "ownerDataUploadInfo": "Laad een gedownload bestand als nieuw bedrijf naast de bedrijven die al op dit systeem staan. Alle records krijgen nieuwe ids.",
+  "ownerDataUploaded": "Geladen als het nieuwe bedrijf {ownerPartyId}",
+  "ownerDataDone": "Klaar",
+  "ownerDataFailed": "Mislukt"
 }

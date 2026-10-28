@@ -1394,5 +1394,13 @@
   "accessWrite": "écrire",
   "searchScreens": "Rechercher des écrans...",
   "restDomain": "Domaine REST",
-  "writeImpliesView": "L'accès en écriture accorde aussi l'accès en lecture"
+  "writeImpliesView": "L'accès en écriture accorde aussi l'accès en lecture",
+  "ownerDataDownload": "Télécharger les données de l'entreprise",
+  "ownerDataDownloadInfo": "Toutes les données de votre entreprise (clients, fournisseurs, produits, commandes, comptabilité, site web et fichiers) dans un seul fichier : une sauvegarde, ou pour déplacer l'entreprise vers un autre système GrowERP.",
+  "ownerDataSensitive": "Le fichier contient tout, y compris les mots de passe de votre serveur de messagerie et vos clés IA : conservez-le en lieu sûr.",
+  "ownerDataUpload": "Importer les données de l'entreprise",
+  "ownerDataUploadInfo": "Charger un fichier téléchargé comme nouvelle entreprise à côté des entreprises déjà présentes sur ce système. Tous les enregistrements reçoivent de nouveaux identifiants.",
+  "ownerDataUploaded": "Chargé comme nouvelle entreprise {ownerPartyId}",
+  "ownerDataDone": "Terminé",
+  "ownerDataFailed": "Échec"
 }

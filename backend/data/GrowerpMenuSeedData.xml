@@ -133,6 +133,8 @@ limitations under the License.
         title="AI" iconName="psychology" widgetName="SystemSetupAiView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_SETUP_EMAIL" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_SYSTEM_SETUP"
         title="Email" iconName="mail_outline" widgetName="SystemSetupEmailView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="ADMIN_SETUP_BACKUP" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_SYSTEM_SETUP"
+        title="Backup" iconName="backup" widgetName="SystemSetupBackupView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="25"/>
     <growerp.menu.MenuItem menuItemId="ADMIN_SETUP_GUIDES" menuConfigurationId="ADMIN_DEFAULT" parentMenuItemId="ADMIN_SYSTEM_SETUP"
         title="Guides" iconName="checklist" widgetName="GuideList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="30"/>
     <!-- ADMIN_CRM children -->
@@ -426,6 +428,8 @@ limitations under the License.
         title="AI" iconName="psychology" widgetName="SystemSetupAiView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_SETUP_EMAIL" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_SYSTEM_SETUP"
         title="Email" iconName="mail_outline" widgetName="SystemSetupEmailView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="FREELANCE_SETUP_BACKUP" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_SYSTEM_SETUP"
+        title="Backup" iconName="backup" widgetName="SystemSetupBackupView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="25"/>
     <growerp.menu.MenuItem menuItemId="FREELANCE_SETUP_GUIDES" menuConfigurationId="FREELANCE_DEFAULT" parentMenuItemId="FREELANCE_SYSTEM_SETUP"
         title="Guides" iconName="checklist" widgetName="GuideList" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="30"/>
 
@@ -540,6 +544,8 @@ limitations under the License.
         title="AI" iconName="psychology" widgetName="SystemSetupAiView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="HOTEL_SETUP_EMAIL" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_SYSTEM_SETUP"
         title="Email" iconName="mail_outline" widgetName="SystemSetupEmailView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="HOTEL_SETUP_BACKUP" menuConfigurationId="HOTEL_DEFAULT" parentMenuItemId="HOTEL_SYSTEM_SETUP"
+        title="Backup" iconName="backup" widgetName="SystemSetupBackupView" userGroupsJson='["GROWERP_M_ADMIN"]' sequenceNum="25"/>
 
 
     <!-- ====================== HEALTH_DEFAULT ====================== -->
@@ -697,6 +703,8 @@ limitations under the License.
         title="AI" iconName="psychology" widgetName="SystemSetupAiView" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="CORE_EX_SETUP_EMAIL" menuConfigurationId="CORE_EXAMPLE_DEFAULT" parentMenuItemId="CORE_EX_SETUP"
         title="Email" iconName="mail_outline" widgetName="SystemSetupEmailView" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="CORE_EX_SETUP_BACKUP" menuConfigurationId="CORE_EXAMPLE_DEFAULT" parentMenuItemId="CORE_EX_SETUP"
+        title="Backup" iconName="backup" widgetName="SystemSetupBackupView" sequenceNum="25"/>
 
     <growerp.menu.MenuItem menuItemId="CORE_EX_AICHAT" menuConfigurationId="CORE_EXAMPLE_DEFAULT"
         title="AI Chat" route="/chat" iconName="smart_toy" widgetName="AdkChatView" sequenceNum="60"/>
@@ -764,6 +772,8 @@ limitations under the License.
         title="AI" iconName="psychology" widgetName="SystemSetupAiView" sequenceNum="10"/>
     <growerp.menu.MenuItem menuItemId="AGENTS_SETUPT_EMAIL" menuConfigurationId="AGENTS_DEFAULT" parentMenuItemId="AGENTS_SETUP"
         title="Email" iconName="mail_outline" widgetName="SystemSetupEmailView" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="AGENTS_SETUP_BACKUP" menuConfigurationId="AGENTS_DEFAULT" parentMenuItemId="AGENTS_SETUP"
+        title="Backup" iconName="backup" widgetName="SystemSetupBackupView" sequenceNum="25"/>
 
     <!-- AGENTS_ORG children (tabs): company / employees / web -->
     <growerp.menu.MenuItem menuItemId="AGENTS_ORG_COMPANY" menuConfigurationId="AGENTS_DEFAULT" parentMenuItemId="AGENTS_ORG"

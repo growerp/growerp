@@ -9,5 +9,6 @@ export 'fatal_error_form.dart';
 export 'home_form.dart';
 export 'splash_form.dart';
 export 'system_setup_ai_view.dart';
+export 'system_setup_backup_view.dart';
 export 'system_setup_dialog.dart';
 export 'system_setup_email_view.dart';
