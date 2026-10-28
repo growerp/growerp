@@ -266,13 +266,14 @@ cut_review_branch() {
     tag=$(review_version)
     [[ -n "$tag" ]] || die "no moqui version in review-versions.conf"
     branch="${tag%.*}"
-    echo "git push origin refs/tags/$tag:refs/heads/$branch"
+    # a branch needs the commit, not the annotated tag
+    echo "git push origin $tag^{commit}:refs/heads/$branch"
     if $DRY_RUN; then
         warn "dry run: review branch $branch not created"
         REVIEW_BRANCH="$branch"
         return
     fi
-    git -C "$SCRIPT_DIR" push origin "refs/tags/$tag:refs/heads/$branch" ||
+    git -C "$SCRIPT_DIR" push origin "$(git -C "$SCRIPT_DIR" rev-parse "$tag^{commit}"):refs/heads/$branch" ||
         die "review branch $branch does not end in $tag: check origin/$branch"
     git -C "$SCRIPT_DIR" fetch -q origin "$branch"
     REVIEW_BRANCH="$branch"
