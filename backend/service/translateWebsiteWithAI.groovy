@@ -35,6 +35,7 @@ final Map LANGUAGE_NAMES = [en: 'English', th: 'Thai', zh: 'Simplified Chinese',
                             de: 'German', fr: 'French', nl: 'Dutch']
 
 def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
+def WebsiteTranslationUtil = ec.resource.script("component://growerp/service/WebsiteTranslationUtil.groovy", null)
 
 /** models like to wrap their answer in a ``` fence even when told not to */
 def stripFences = { String text ->
@@ -117,9 +118,6 @@ if (text.length() < ((pageText as String).length() / 3)) {
     throw new Exception("The ${targetName} translation came back far shorter than the source page," +
         " it was probably truncated")
 }
-if (!isMd && !text.startsWith('<#--')) {
-    throw new Exception("The ${targetName} translation does not start with the required" +
-        " '<#-- title: ... -->' line")
-}
+if (!isMd) text = WebsiteTranslationUtil.normalizeFtlTitle(pageText as String, text)
 
 translatedText = localizeLinks(text, targetLocale as String)
