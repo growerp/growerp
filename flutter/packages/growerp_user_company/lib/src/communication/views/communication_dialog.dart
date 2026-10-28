@@ -50,10 +50,7 @@ class CommunicationDialogState extends State<CommunicationDialog> {
     _entryDate = (event.entryDate ?? CustomizableDateTime.current).toLocal();
     _readOnly = event.isAuto == true;
     _subjectController.text = event.subject ?? '';
-    // system emails are mostly html: show them as plain text
-    _bodyController.text = _readOnly && event.contentType == 'text/html'
-        ? _htmlToText(event.body ?? '')
-        : event.body ?? '';
+    _bodyController.text = event.body ?? '';
     _noteController.text = event.note ?? '';
   }
 
@@ -64,15 +61,6 @@ class CommunicationDialogState extends State<CommunicationDialog> {
     _noteController.dispose();
     super.dispose();
   }
-
-  String _htmlToText(String html) => html
-      .replaceAll(RegExp(r'<(style|script)[^>]*>.*?</\1>', dotAll: true), '')
-      .replaceAll(RegExp(r'<br\s*/?>|</p>|</div>|</tr>|</h\d>'), '\n')
-      .replaceAll(RegExp(r'<[^>]+>'), '')
-      .replaceAll('&nbsp;', ' ')
-      .replaceAll('&amp;', '&')
-      .replaceAll(RegExp(r'\n\s*\n+'), '\n\n')
-      .trim();
 
   Future<void> _selectDateTime() async {
     final date = await showDatePicker(
@@ -250,17 +238,31 @@ class CommunicationDialogState extends State<CommunicationDialog> {
                   : null,
             ),
             const SizedBox(height: 10),
-            TextFormField(
-              key: const Key('body'),
-              readOnly: _readOnly,
-              controller: _bodyController,
-              minLines: 4,
-              maxLines: 12,
-              decoration: InputDecoration(
-                labelText: _localizations.commBody,
-                alignLabelWithHint: true,
+            // system emails are mostly html: show them rendered
+            if (_readOnly &&
+                widget.communicationEvent.contentType == 'text/html')
+              InputDecorator(
+                decoration: InputDecoration(labelText: _localizations.commBody),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 300),
+                  child: SingleChildScrollView(
+                    key: const Key('body'),
+                    child: HtmlView(_bodyController.text),
+                  ),
+                ),
+              )
+            else
+              TextFormField(
+                key: const Key('body'),
+                readOnly: _readOnly,
+                controller: _bodyController,
+                minLines: 4,
+                maxLines: 12,
+                decoration: InputDecoration(
+                  labelText: _localizations.commBody,
+                  alignLabelWithHint: true,
+                ),
               ),
-            ),
             if (!_readOnly) ...[
               const SizedBox(height: 10),
               TextFormField(

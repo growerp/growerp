@@ -13,7 +13,7 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
+import 'html_view.dart';
 
 /// Raw HTML source editor with a live rendered preview, split side-by-side
 /// on wide screens and stacked on phones. Mirrors the raw-text/preview split
@@ -21,9 +21,9 @@ import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart
 ///
 /// Note: this uses a pure-Dart HTML renderer (no webview), so it keeps
 /// working on every GrowERP target platform including Linux/Windows desktop.
-/// FreeMarker directives (e.g. `<#if>`, `${var}`) are not evaluated - they
-/// either show as literal text or are dropped by the lenient HTML parser -
-/// but surrounding static HTML renders correctly.
+/// FreeMarker is not evaluated: comments and directive tags (e.g. `<#if>`)
+/// are left out of the preview (see [HtmlView]), `${var}` shows as text,
+/// surrounding static HTML renders correctly.
 class HtmlSourceEditor extends StatelessWidget {
   final TextEditingController controller;
   final bool isPhone;
@@ -69,9 +69,7 @@ class HtmlSourceEditor extends StatelessWidget {
           borderRadius: BorderRadius.circular(25.0),
           border: Border.all(style: BorderStyle.solid, width: 0.80),
         ),
-        child: SingleChildScrollView(
-          child: HtmlWidget(controller.text),
-        ),
+        child: SingleChildScrollView(child: HtmlView(controller.text)),
       ),
     );
 

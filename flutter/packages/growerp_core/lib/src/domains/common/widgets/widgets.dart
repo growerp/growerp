@@ -24,5 +24,6 @@ export 'styled_detail_card.dart';
 export 'autocomplete_label.dart';
 export 'fiscal_year_start_dropdown.dart';
 export 'html_source_editor.dart';
+export 'html_view.dart';
 export 'markdown_editor.dart';
 export 'markdown_text.dart';

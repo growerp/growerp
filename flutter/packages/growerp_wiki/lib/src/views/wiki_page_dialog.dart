@@ -17,7 +17,6 @@ import 'package:growerp_wiki/l10n/generated/wiki_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
-import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 
 /// View / edit one wiki page: markdown preview with an edit mode.
@@ -193,7 +192,7 @@ class WikiPageDialogState extends State<WikiPageDialog> {
               : _isHtml
               ? SingleChildScrollView(
                   key: const Key('pagePreview'),
-                  child: HtmlWidget(_textController.text),
+                  child: HtmlView(_textController.text),
                 )
               : MarkdownWidget(
                   key: const Key('pagePreview'),

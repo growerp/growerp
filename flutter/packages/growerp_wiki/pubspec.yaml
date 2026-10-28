@@ -25,8 +25,6 @@ dependencies:
 
   # Markdown rendering (same version as growerp_core)
   markdown_widget: ^2.3.2+8
-  # html page preview (same version as growerp_core)
-  flutter_widget_from_html_core: ^0.17.4
 
   # test helper class in lib/src/integration_test is part of the public API
   flutter_test:
