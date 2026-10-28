@@ -40,6 +40,7 @@ test {
     include '**/CatalogServicesTests.class'
     include '**/InventoryServicesTests.class'
     include '**/ActivityServicesTests.class'
+    include '**/AdkKnowledgeServicesTests.class'
     include '**/CrmServicesTests.class'
     include '**/FinDocServicesTests.class'
     include '**/AccountingServicesTests.class'

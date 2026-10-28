@@ -137,7 +137,9 @@ other schedules on here when you want them to work; in production they keep the 
   default `allow` policy nothing from this agent appears here.
 * **Agent Control → Agent Actions** — the audit trail: every service the agents called, whether
   it was allowed, blocked, pending or rejected, and the result.
-* **Agent Control → Knowledge** — add notes, upload documents, or import your product catalog.
+* **Agent Control → Knowledge** — add notes, upload documents (or a ZIP with a whole folder of
+  them), or import your product catalog. The statistics on top show how big it is and how often
+  the agents searched it.
   This is what the SDR agent quotes to website visitors, and every AI writer pulls the passages
   that match its brief into its prompt (product claims, prices, customer cases, links), so
   keep it current: product overview, pricing, verticals, release notes, trial/signup links.

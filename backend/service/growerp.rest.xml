@@ -2138,6 +2138,25 @@ limitations under the License.
                 </method>
             </id>
         </resource>
+        <resource name="AdkKnowledgeStats">
+            <method type="get">
+                <service name="AdkServices100.get#AdkKnowledgeStats"/>
+            </method>
+        </resource>
+        <!-- Background load of a ZIP of documents, or a re-index; GET polls progress -->
+        <resource name="AdkKnowledgeImport">
+            <method type="get">
+                <service name="AdkServices100.get#AdkKnowledgeImport"/>
+            </method>
+            <method type="post">
+                <service name="AdkServices100.create#AdkKnowledgeImport"/>
+            </method>
+        </resource>
+        <resource name="AdkKnowledgeReindex">
+            <method type="post">
+                <service name="AdkServices100.create#AdkKnowledgeReindex"/>
+            </method>
+        </resource>
         <!-- Import the company's product catalog into the knowledge base -->
         <resource name="AdkKnowledgeImportProducts">
             <method type="post">

@@ -1109,14 +1109,17 @@
                     from="search ? ('%' + search + '%') : null" ignore-if-empty="true"/>
                 <order-by field-name="-createdDate"/>
             </entity-find>
+            <!-- counts only: loading the chunks would load every embedding -->
+            <entity-find entity-name="moqui.adk.AdkKnowledgeChunkSummary" list="chunkRows">
+                <econdition field-name="ownerPartyId" from="ownerPartyId"/>
+                <select-field field-name="adkKnowledgeDocId,chunkCount"/>
+            </entity-find>
+            <set field="chunkCounts" from="chunkRows.collectEntries { [it.adkKnowledgeDocId, it.chunkCount] }"/>
             <set field="adkKnowledgeDocs" from="[]"/>
             <iterate list="docs" entry="d">
-                <entity-find entity-name="moqui.adk.AdkKnowledgeChunk" list="chs">
-                    <econdition field-name="adkKnowledgeDocId" from="d.adkKnowledgeDocId"/>
-                </entity-find>
                 <script>adkKnowledgeDocs.add([
                     adkKnowledgeDocId: d.adkKnowledgeDocId, title: d.title, sourceType: d.sourceType,
-                    mimeType: d.mimeType, chunkCount: chs.size(), createdDate: d.createdDate ])</script>
+                    mimeType: d.mimeType, chunkCount: chunkCounts[d.adkKnowledgeDocId] ?: 0, createdDate: d.createdDate ])</script>
             </iterate>
         </actions>
     </service>
@@ -1190,6 +1193,214 @@
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
             <service-call name="AdkKnowledgeServices.ingest#ProductCatalog" out-map="context"
                 in-map="[ownerPartyId: ownerPartyId]"/>
+        </actions>
+    </service>
+
+    <!-- Knowledge base statistics: size, recency, index health and search usage. -->
+    <service verb="get" noun="AdkKnowledgeStats">
+        <out-parameters>
+            <parameter name="docCount" type="Integer"/>
+            <parameter name="chunkCount" type="Integer"/>
+            <parameter name="tokenCount" type="Integer"/>
+            <parameter name="docsAddedLast30Days" type="Integer"/>
+            <parameter name="lastChangedDate" type="Timestamp"/>
+            <parameter name="bySourceType" type="List"><description>[{sourceType, docCount, chunkCount}]</description></parameter>
+            <parameter name="topFolders" type="List"><description>[{folder, docCount}] of zip loaded docs, top 10</description></parameter>
+            <parameter name="currentEmbeddingModel"/>
+            <parameter name="staleChunkCount" type="Integer"/>
+            <parameter name="staleDocCount" type="Integer"/>
+            <parameter name="emptyDocCount" type="Integer"/>
+            <parameter name="searchCountLast30Days" type="Integer"/>
+            <parameter name="emptySearchCountLast30Days" type="Integer"/>
+            <parameter name="lastSearchDate" type="Timestamp"/>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <if condition="!ownerPartyId">
+                <return error="true" message="Cannot determine your company, please log in again."/>
+            </if>
+            <service-call name="AdkKnowledgeServices.get#TenantEmbedKey" in-map="[ownerPartyId: ownerPartyId]" out-map="keyOut"/>
+            <service-call name="AdkKnowledgeServices.get#EmbedModel" in-map="[embedProvider: keyOut.embedProvider]" out-map="modelOut"/>
+            <!-- without a key nothing can be embedded: no current model -->
+            <set field="currentEmbeddingModel" from="keyOut.embedProvider || modelOut.testMode ? modelOut.model : null"/>
+            <entity-find entity-name="moqui.adk.AdkKnowledgeDoc" list="docs">
+                <econdition field-name="ownerPartyId"/>
+                <select-field field-name="adkKnowledgeDocId,sourceType,sourceId,createdDate,lastUpdatedStamp"/>
+            </entity-find>
+            <entity-find entity-name="moqui.adk.AdkKnowledgeChunkSummary" list="chunkRows">
+                <econdition field-name="ownerPartyId"/>
+                <select-field field-name="adkKnowledgeDocId,embeddingModel,chunkCount,tokenCount,lastChunkDate"/>
+            </entity-find>
+            <set field="since" from="new java.sql.Timestamp(ec.user.nowTimestamp.time - 30L * 24 * 3600 * 1000)"/>
+            <entity-find-count entity-name="moqui.adk.AdkActionLog" count-field="searchCountLast30Days">
+                <econdition field-name="ownerPartyId"/>
+                <econdition field-name="toolName" value="searchKnowledge"/>
+                <econdition field-name="actionTime" operator="greater-equals" from="since"/>
+            </entity-find-count>
+            <entity-find-count entity-name="moqui.adk.AdkActionLog" count-field="emptySearchCountLast30Days">
+                <econdition field-name="ownerPartyId"/>
+                <econdition field-name="toolName" value="searchKnowledge"/>
+                <econdition field-name="actionTime" operator="greater-equals" from="since"/>
+                <econdition field-name="resultSummary" value="0 passage(s)"/>
+            </entity-find-count>
+            <entity-find entity-name="moqui.adk.AdkActionLog" list="lastSearch" limit="1">
+                <econdition field-name="ownerPartyId"/>
+                <econdition field-name="toolName" value="searchKnowledge"/>
+                <select-field field-name="adkActionLogId,actionTime"/>
+                <order-by field-name="-actionTime"/>
+            </entity-find>
+            <set field="lastSearchDate" from="lastSearch ? lastSearch[0].actionTime : null"/>
+            <script><![CDATA[
+                Map chunksByDoc = [:]
+                Set staleDocs = [] as Set
+                chunkCount = 0; tokenCount = 0; staleChunkCount = 0
+                lastChangedDate = null
+                for (r in chunkRows) {
+                    int n = (r.chunkCount ?: 0) as int
+                    chunksByDoc[r.adkKnowledgeDocId] = (chunksByDoc[r.adkKnowledgeDocId] ?: 0) + n
+                    chunkCount += n
+                    tokenCount += (r.tokenCount ?: 0) as int
+                    if (currentEmbeddingModel && r.embeddingModel != currentEmbeddingModel) {
+                        staleChunkCount += n
+                        staleDocs.add(r.adkKnowledgeDocId)
+                    }
+                    if (r.lastChunkDate && (!lastChangedDate || r.lastChunkDate > lastChangedDate)) lastChangedDate = r.lastChunkDate
+                }
+                Map typeRows = [:]
+                Map folderCounts = [:]
+                docsAddedLast30Days = 0
+                for (d in docs) {
+                    String type = d.sourceType ?: 'other'
+                    Map row = typeRows[type] ?: (typeRows[type] = [sourceType: type, docCount: 0, chunkCount: 0])
+                    row.docCount++
+                    row.chunkCount += (chunksByDoc[d.adkKnowledgeDocId] ?: 0)
+                    if (d.createdDate && d.createdDate >= since) docsAddedLast30Days++
+                    if (d.lastUpdatedStamp && (!lastChangedDate || d.lastUpdatedStamp > lastChangedDate)) lastChangedDate = d.lastUpdatedStamp
+                    // zip loaded docs: sourceId is '<zip name>/<path>', the folder is the path minus the file
+                    String sid = d.sourceId ?: ''
+                    if (d.sourceType == 'upload' && sid.contains('/')) {
+                        String folder = sid.substring(0, sid.lastIndexOf('/'))
+                        folderCounts[folder] = (folderCounts[folder] ?: 0) + 1
+                    }
+                }
+                docCount = docs.size()
+                emptyDocCount = docs.count { !chunksByDoc[it.adkKnowledgeDocId] } as int
+                staleDocCount = staleDocs.size()
+                bySourceType = typeRows.values().sort { -it.docCount }
+                topFolders = folderCounts.collect { k, v -> [folder: k, docCount: v] }.sort { -it.docCount }.take(10)
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- Load a ZIP of documents into the knowledge base in the background; the folder
+         structure is kept in the titles. Poll get#AdkKnowledgeImport for progress. -->
+    <service verb="create" noun="AdkKnowledgeImport">
+        <in-parameters>
+            <parameter name="fileName" required="true"/>
+            <parameter name="zip" required="true"><description>base64 zip file</description></parameter>
+        </in-parameters>
+        <out-parameters><parameter name="adkKnowledgeImport" type="Map"/></out-parameters>
+        <actions>
+            <script><![CDATA[
+                import java.util.zip.ZipInputStream
+                try {
+                    zipBytes = Base64.getMimeDecoder().decode(zip as String)
+                } catch (IllegalArgumentException e) {
+                    zipBytes = null
+                }
+                isZip = false
+                if (zipBytes) {
+                    try {
+                        new ZipInputStream(new ByteArrayInputStream(zipBytes)).withCloseable { isZip = it.getNextEntry() != null }
+                    } catch (Exception e) { isZip = false }
+                }
+            ]]></script>
+            <if condition="!isZip"><return error="true" message="${fileName} is not a readable zip file"/></if>
+            <if condition="zipBytes.length &gt; 25 * 1024 * 1024">
+                <return error="true" message="${fileName} is larger than 25 MB, split it in smaller zip files"/>
+            </if>
+            <service-call name="AdkServices100.start#AdkKnowledgeImport" out-map="context"
+                in-map="[jobType: 'ZIP', fileName: fileName, zipData: zip]"/>
+        </actions>
+    </service>
+
+    <!-- Rebuild the index of docs embedded with another model than the current one. -->
+    <service verb="create" noun="AdkKnowledgeReindex">
+        <out-parameters><parameter name="adkKnowledgeImport" type="Map"/></out-parameters>
+        <actions>
+            <service-call name="AdkServices100.start#AdkKnowledgeImport" out-map="context"
+                in-map="[jobType: 'REINDEX']"/>
+        </actions>
+    </service>
+
+    <service verb="start" noun="AdkKnowledgeImport">
+        <in-parameters>
+            <parameter name="jobType" required="true"/>
+            <parameter name="fileName"/>
+            <parameter name="zipData"/>
+        </in-parameters>
+        <out-parameters><parameter name="adkKnowledgeImport" type="Map"/></out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <if condition="!ownerPartyId">
+                <return error="true" message="Cannot determine your company, please log in again."/>
+            </if>
+            <!-- one load at a time per company; a job older than 2 hours is taken as dead (restart) -->
+            <entity-find entity-name="moqui.adk.AdkKnowledgeImport" list="running" limit="1">
+                <econdition field-name="ownerPartyId"/>
+                <econdition field-name="status" operator="in" value="QUEUED,RUNNING"/>
+                <econdition field-name="createdDate" operator="greater"
+                    from="new java.sql.Timestamp(ec.user.nowTimestamp.time - 2L * 3600 * 1000)"/>
+                <select-field field-name="adkKnowledgeImportId"/>
+            </entity-find>
+            <if condition="running">
+                <return error="true" message="A knowledge load is already running, wait until it is finished"/>
+            </if>
+            <!-- commit the row before firing the worker, which runs on another thread and
+                 would not see an uncommitted row -->
+            <script><![CDATA[
+                def created = ec.service.sync().name('create#moqui.adk.AdkKnowledgeImport')
+                    .parameters([ownerPartyId: ownerPartyId, jobType: jobType, fileName: fileName,
+                                 zipData: zipData, status: 'QUEUED', fileCount: 0, processedCount: 0,
+                                 createdCount: 0, updatedCount: 0, skippedCount: 0,
+                                 username: ec.user.username, createdDate: ec.user.nowTimestamp])
+                    .requireNewTransaction(true).call()
+                context.adkKnowledgeImportId = created.adkKnowledgeImportId
+            ]]></script>
+            <check-errors/>
+            <script>
+                ec.service.async().name('AdkKnowledgeServices.process#AdkKnowledgeImport')
+                    .parameters([adkKnowledgeImportId: adkKnowledgeImportId, username: ec.user.username]).call()
+            </script>
+            <service-call name="AdkServices100.get#AdkKnowledgeImport" out-map="context"
+                in-map="[adkKnowledgeImportId: adkKnowledgeImportId]"/>
+        </actions>
+    </service>
+
+    <!-- A knowledge load's progress; without id the company's latest one (null if none). -->
+    <service verb="get" noun="AdkKnowledgeImport">
+        <in-parameters><parameter name="adkKnowledgeImportId"/></in-parameters>
+        <out-parameters><parameter name="adkKnowledgeImport" type="Map"/></out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <entity-find entity-name="moqui.adk.AdkKnowledgeImport" list="jobs" limit="1">
+                <econdition field-name="ownerPartyId"/>
+                <econdition field-name="adkKnowledgeImportId" ignore-if-empty="true"/>
+                <select-field field-name="adkKnowledgeImportId,jobType,fileName,status,fileCount,processedCount"/>
+                <select-field field-name="createdCount,updatedCount,skippedCount,skippedJson,errorMessage"/>
+                <select-field field-name="createdDate,completedDate"/>
+                <order-by field-name="-createdDate"/>
+            </entity-find>
+            <if condition="jobs">
+                <set field="job" from="jobs[0]"/>
+                <set field="adkKnowledgeImport" from="[adkKnowledgeImportId: job.adkKnowledgeImportId,
+                    jobType: job.jobType, fileName: job.fileName, status: job.status, fileCount: job.fileCount,
+                    processedCount: job.processedCount, createdCount: job.createdCount,
+                    updatedCount: job.updatedCount, skippedCount: job.skippedCount,
+                    skipped: job.skippedJson ? new groovy.json.JsonSlurper().parseText(job.skippedJson) : [],
+                    errorMessage: job.errorMessage, createdDate: job.createdDate,
+                    completedDate: job.completedDate]"/>
+            </if>
         </actions>
     </service>
 

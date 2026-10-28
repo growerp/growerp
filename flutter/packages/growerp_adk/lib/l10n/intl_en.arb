@@ -828,5 +828,174 @@
   "adk_guideFullDesc": "Every control in detail: identity, tool access, approvals, cost, scheduling, the task loop, teams, integrations and audit.",
   "@adk_guideFullDesc": {"description": "Agent control guide screen"},
   "adk_loadingSpeechModel": "Downloading speech model…",
-  "@adk_loadingSpeechModel": {"description": "AI chat voice input/output"}
+  "@adk_loadingSpeechModel": {"description": "AI chat voice input/output"},
+  "adk_kStatDocs": "Documents",
+  "@adk_kStatDocs": {
+    "description": "Knowledge statistics label"
+  },
+  "adk_kStatChunks": "Chunks",
+  "@adk_kStatChunks": {
+    "description": "Knowledge statistics label: indexed text pieces"
+  },
+  "adk_kStatTokens": "Tokens (est.)",
+  "@adk_kStatTokens": {
+    "description": "Knowledge statistics label"
+  },
+  "adk_kStatAdded30": "Added last 30 days",
+  "@adk_kStatAdded30": {
+    "description": "Knowledge statistics label"
+  },
+  "adk_kStatLastChange": "Last change",
+  "@adk_kStatLastChange": {
+    "description": "Knowledge statistics label"
+  },
+  "adk_kStatSearches30": "Searches last 30 days",
+  "@adk_kStatSearches30": {
+    "description": "Knowledge statistics label"
+  },
+  "adk_kStatNoHits": "Searches without result",
+  "@adk_kStatNoHits": {
+    "description": "Knowledge statistics label"
+  },
+  "adk_kStatLastSearch": "Last search",
+  "@adk_kStatLastSearch": {
+    "description": "Knowledge statistics label"
+  },
+  "adk_kStatNever": "never",
+  "@adk_kStatNever": {
+    "description": "Knowledge statistics: no date"
+  },
+  "adk_kStatByType": "By type",
+  "@adk_kStatByType": {
+    "description": "Knowledge statistics: documents per source type"
+  },
+  "adk_kStatFolders": "Folders",
+  "@adk_kStatFolders": {
+    "description": "Knowledge statistics: documents per zip folder"
+  },
+  "adk_kStatsTitle": "Statistics",
+  "@adk_kStatsTitle": {
+    "description": "Knowledge statistics panel title"
+  },
+  "adk_kHealthStale": "{n} document(s) are indexed with an outdated embedding model and are not found by search.",
+  "@adk_kHealthStale": {
+    "description": "Knowledge index health warning",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_kHealthEmpty": "{n} document(s) have no indexed text.",
+  "@adk_kHealthEmpty": {
+    "description": "Knowledge index health warning",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_kHealthNoKey": "No embedding key configured: documents cannot be indexed or searched. Add a gemini or openai key in System Setup.",
+  "@adk_kHealthNoKey": {
+    "description": "Knowledge index health warning"
+  },
+  "adk_kReindex": "Re-index",
+  "@adk_kReindex": {
+    "description": "Button: rebuild the knowledge index"
+  },
+  "adk_kUploadTooltip": "Upload a document or a zip file",
+  "@adk_kUploadTooltip": {
+    "description": "Knowledge upload button tooltip"
+  },
+  "adk_kZipConfirmTitle": "Load zip file",
+  "@adk_kZipConfirmTitle": {
+    "description": "Knowledge zip load dialog title"
+  },
+  "adk_kZipConfirm": "Load all documents in {fileName} into the knowledge base? Supported are txt, md, csv, json, log, pdf and docx files; the folder structure is kept in the titles. Documents loaded before from the same path are updated. This runs in the background.",
+  "@adk_kZipConfirm": {
+    "description": "Knowledge zip load dialog text",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_kZipTooLarge": "{fileName} is larger than 25 MB, split it in smaller zip files",
+  "@adk_kZipTooLarge": {
+    "description": "Knowledge zip load error",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_kLoad": "Load",
+  "@adk_kLoad": {
+    "description": "Button: start loading a zip file"
+  },
+  "adk_kImportProgress": "Loading {fileName}: {done} of {total} files",
+  "@adk_kImportProgress": {
+    "description": "Knowledge zip load progress",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      },
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_kReindexProgress": "Re-indexing: {done} of {total} documents",
+  "@adk_kReindexProgress": {
+    "description": "Knowledge re-index progress",
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_kImportDone": "{name}: {created} added, {updated} updated, {skipped} skipped",
+  "@adk_kImportDone": {
+    "description": "Knowledge load finished",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "created": {
+        "type": "String"
+      },
+      "updated": {
+        "type": "String"
+      },
+      "skipped": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_kImportFailed": "{name} stopped: {error}",
+  "@adk_kImportFailed": {
+    "description": "Knowledge load failed",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "adk_kSkippedFiles": "Skipped files",
+  "@adk_kSkippedFiles": {
+    "description": "Knowledge load: list of skipped files"
+  },
+  "adk_dashSearches": "searches",
+  "@adk_dashSearches": {
+    "description": "Dashboard tile counter label"
+  }
 }
