@@ -93,6 +93,7 @@ class AdminDashboardContent extends StatelessWidget {
                   '/acct-ledger',
                   '/manufacturing',
                   '/agent-control',
+                  '/knowledge',
                 },
                 // Provide the revenue/expense mini-chart for the accounting tile.
                 // DashboardGrid auto-upgrades it to full-width 4-row graphic tile.
@@ -137,6 +138,9 @@ class AdminDashboardContent extends StatelessWidget {
                   }
                   if (route == '/agent-control') {
                     return const AgentControlDashboardChartMini();
+                  }
+                  if (route == '/knowledge') {
+                    return const AdkKnowledgeDashboardChartMini();
                   }
                   return null;
                 },
