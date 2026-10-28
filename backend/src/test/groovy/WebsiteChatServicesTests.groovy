@@ -199,6 +199,35 @@ class WebsiteChatServicesTests extends Specification {
         member.hasRead == 'Y'
     }
 
+    def "polling the message thread tells the widget whether an agent will answer"() {
+        setup: 'a room without an agent'
+        Map out = ec.service.sync().name('growerp.100.ChatServices100.submit#WebsiteChat')
+                .parameters([productStoreId: productStoreId, email: 'leadtest7@example.com',
+                        question: 'Is a bot answering?']).disableAuthz().call()
+        Map params = [productStoreId: productStoreId, chatRoomId: out.chatRoomId,
+                visitorToken: out.visitorToken]
+
+        when:
+        Map noAgent = ec.service.sync().name('growerp.100.ChatServices100.get#WebsiteChatMessages')
+                .parameters(params).disableAuthz().call()
+        // flag the room as agent-served directly: a real websiteChat agent would call the LLM
+        ec.service.sync().name('update#growerp.general.ChatRoom')
+                .parameters([chatRoomId: out.chatRoomId, chatAgentConfigId: 'WSCHAT_AGENT',
+                        agentActive: 'Y']).disableAuthz().call()
+        Map withAgent = ec.service.sync().name('growerp.100.ChatServices100.get#WebsiteChatMessages')
+                .parameters(params).disableAuthz().call()
+        // handed off to a human
+        ec.service.sync().name('update#growerp.general.ChatRoom')
+                .parameters([chatRoomId: out.chatRoomId, agentActive: 'N']).disableAuthz().call()
+        Map handedOff = ec.service.sync().name('growerp.100.ChatServices100.get#WebsiteChatMessages')
+                .parameters(params).disableAuthz().call()
+
+        then:
+        noAgent.agentActive == false
+        withAgent.agentActive == true
+        handedOff.agentActive == false
+    }
+
     def "a tenant without its own email server gets no chat notification, and never SYSTEM"() {
         setup:
         String email = 'leadtest6@example.com'

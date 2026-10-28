@@ -364,6 +364,11 @@ visitor who leaves contact details becomes a lead and their messages arrive in t
 app's chat. Each new chat is also added to the lead's **Communications** as
 *Website chat* with the visitor's first question.
 
+Visitors can make the chat window bigger by dragging its top-left corner; the size
+is remembered in their browser. When an *Answer website chat* agent replies, the
+visitor sees a typing indicator until the answer arrives, and the agent's
+formatting (bold, lists, links, code) is shown as formatted text.
+
 ### 5.3 SEO
 
 Each website page can carry its own browser title and meta description (edited in

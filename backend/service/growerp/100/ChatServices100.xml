@@ -993,6 +993,10 @@ limitations under the License.
         </in-parameters>
         <out-parameters>
             <parameter name="visitorUserId" />
+            <parameter name="agentActive" type="Boolean">
+                <description>true while an agent answers in this room, so the widget shows
+                    a typing indicator after the visitor sends</description>
+            </parameter>
             <parameter name="chatMessages" type="List">
                 <parameter name="chatMessage" type="Map">
                     <parameter name="chatMessageId" />
@@ -1013,6 +1017,8 @@ limitations under the License.
             </if>
             <set field="visitorUserId" from="roomOut.visitorUserId" />
             <set field="ownerPartyId" from="roomOut.ownerPartyId" />
+            <set field="agentActive"
+                from="roomOut.room.chatAgentConfigId &amp;&amp; roomOut.room.agentActive == 'Y' ? true : false" />
             <entity-find entity-name="growerp.general.ChatRoomAndMessages" list="messages">
                 <econdition field-name="chatRoomId" from="chatRoomId" />
                 <order-by field-name="lastUpdatedStamp" />

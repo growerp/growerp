@@ -15,7 +15,7 @@
 #growerp-chat-btn .growerp-chat-label{opacity:0;transition:opacity .3s ease .1s}
 #growerp-chat-btn.growerp-expanded{max-width:260px;border-radius:14px}
 #growerp-chat-btn.growerp-expanded .growerp-chat-label{opacity:1}
-#growerp-chat-panel{position:fixed;right:20px;bottom:86px;z-index:2147483000;
+#growerp-chat-panel{position:fixed;box-sizing:border-box;right:20px;bottom:86px;z-index:2147483000;
   width:320px;max-width:calc(100vw - 40px);display:none;flex-direction:column;
   background:#fff;color:#222;border-radius:12px;overflow:hidden;
   box-shadow:0 8px 28px rgba(0,0,0,.3);font-family:Arial,Helvetica,sans-serif}
@@ -70,12 +70,43 @@
 #growerp-chat-msgs .growerp-divider{align-self:center;font-size:11px;color:#888;
   margin:6px 0}
 #growerp-chat-msgs .growerp-optimistic{opacity:.55}
+/* agent replies are markdown, rendered by renderMd() */
+#growerp-chat-msgs .growerp-md{white-space:normal}
+#growerp-chat-msgs .growerp-md p{margin:0 0 6px}
+#growerp-chat-msgs .growerp-md ul,#growerp-chat-msgs .growerp-md ol{margin:0 0 6px;padding-left:18px}
+#growerp-chat-msgs .growerp-md ul{list-style:disc}
+#growerp-chat-msgs .growerp-md ol{list-style:decimal}
+#growerp-chat-msgs .growerp-md code{background:#eef1f6;border-radius:3px;padding:0 3px;
+  font-family:Consolas,monospace;font-size:12px}
+#growerp-chat-msgs .growerp-md pre{background:#eef1f6;border-radius:6px;padding:6px 8px;
+  margin:0 0 6px;overflow-x:auto;white-space:pre}
+#growerp-chat-msgs .growerp-md pre code{background:none;padding:0}
+#growerp-chat-msgs .growerp-md a{color:#2962ff}
+/* agent working: three bouncing dots */
+#growerp-chat-msgs .growerp-typing{display:flex;gap:4px;padding:10px 12px}
+#growerp-chat-msgs .growerp-typing span{width:6px;height:6px;border-radius:50%;
+  background:#999;animation:growerp-bounce 1.2s infinite ease-in-out}
+#growerp-chat-msgs .growerp-typing span:nth-child(2){animation-delay:.2s}
+#growerp-chat-msgs .growerp-typing span:nth-child(3){animation-delay:.4s}
+@keyframes growerp-bounce{0%,60%,100%{transform:translateY(0);opacity:.4}
+  30%{transform:translateY(-4px);opacity:1}}
+/* resize grip, top-left because the panel is anchored bottom-right */
+#growerp-chat-grip{position:absolute;left:4px;top:4px;width:22px;height:22px;cursor:nwse-resize;
+  z-index:1;touch-action:none;opacity:.85;border-radius:4px}
+#growerp-chat-grip svg{width:22px;height:22px;fill:#fff;display:block}
+#growerp-chat-grip:hover{opacity:1;background:rgba(255,255,255,.2)}
+#growerp-chat-panel .growerp-chat-head{padding-left:32px}
+@media (max-width:480px){#growerp-chat-panel .growerp-chat-head{padding-left:14px}}
+@media (max-width:480px){#growerp-chat-grip{display:none}}
 </style>
 <button id="growerp-chat-btn" type="button" aria-label="${l('GrowerpWebsiteChatAsk')}">
   <svg viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-2 9H6V9h12v2zm0-3H6V6h12v2z"/></svg>
   <span class="growerp-chat-label">${l('GrowerpWebsiteChatPrompt')}<br>${l('GrowerpWebsiteChatPromptSub')}</span>
 </button>
 <div id="growerp-chat-panel" role="dialog" aria-label="${l('GrowerpWebsiteChatAsk')}">
+  <div id="growerp-chat-grip" aria-hidden="true" title="Drag to resize">
+    <svg viewBox="0 0 24 24"><path d="M5 5h7v2H8.41l7.59 7.59V11h2v7h-7v-2h3.59L7 8.41V12H5z"/></svg>
+  </div>
   <div class="growerp-chat-head">
     <span id="growerp-chat-title">${l('GrowerpWebsiteChatTitle')}</span>
     <button id="growerp-chat-new" type="button">${l('GrowerpWebsiteChatNewQuestion')}</button>
@@ -121,6 +152,7 @@
   var storeKey  = 'growerp_chat_' + productStoreId;
   var openKey   = 'growerp_chat_open_' + productStoreId;
   var emailKey  = 'growerp_chat_email_' + productStoreId;   // cookie + localStorage name
+  var sizeKey   = 'growerp_chat_size_' + productStoreId;
 
   var btn = document.getElementById('growerp-chat-btn');
   var panel = document.getElementById('growerp-chat-panel');
@@ -134,11 +166,15 @@
   var inputEl = document.getElementById('growerp-chat-input');
   var postBtn = document.getElementById('growerp-chat-post');
   var labelEl = btn.querySelector('.growerp-chat-label');
+  var threadEl = document.getElementById('growerp-chat-thread');
+  var gripEl = document.getElementById('growerp-chat-grip');
   var labelClosed = labelEl.innerHTML;   // "Question?…" prompt while panel is shut
 
   var session = loadSession();   // {chatRoomId, visitorToken, visitorUserId} or null
   var seenIds = {};
   var pollTimer = null;
+  var agentActive = false;   // from the last poll: an agent answers in this room
+  var typingEl = null, typingTimer = null;
 
   // --- persistence helpers (cookie for email so it survives, localStorage for rest) ---
   function setCookie(name, value, days){
@@ -207,17 +243,80 @@
     return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
+  // small markdown subset for agent replies; input is escaped first so no html gets through
+  function inlineMd(s){
+    return s
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+      .replace(/(^|[^*])\*([^*\s][^*]*)\*/g, '$1<i>$2</i>')
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)"]+)\)/g,
+        '<a href="$2" target="_blank" rel="noopener">$1</a>')
+      .replace(/(^|[\s(])(https?:\/\/[^\s<)"]+)/g,
+        '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
+  }
+  function renderMd(text){
+    var parts = escapeHtml(text).split(/```[^\n]*\n?/);
+    var out = '';
+    for (var i = 0; i < parts.length; i++){
+      if (i % 2){ out += '<pre><code>' + parts[i].replace(/\n$/, '') + '</code></pre>'; continue; }
+      var lines = parts[i].split('\n'), list = null, para = [];
+      var flush = function(){
+        if (para.length){ out += '<p>' + para.join('<br>') + '</p>'; para = []; }
+      };
+      var closeList = function(){ if (list){ out += '</' + list + '>'; list = null; } };
+      lines.forEach(function(line){
+        var ul = /^\s*[-*]\s+(.*)/.exec(line), ol = /^\s*\d+[.)]\s+(.*)/.exec(line);
+        var h = /^#+\s+(.*)/.exec(line);
+        if (ul || ol){
+          flush();
+          var tag = ul ? 'ul' : 'ol';
+          if (list !== tag){ closeList(); out += '<' + tag + '>'; list = tag; }
+          out += '<li>' + inlineMd((ul || ol)[1]) + '</li>';
+        } else if (h){
+          flush(); closeList(); out += '<p><b>' + inlineMd(h[1]) + '</b></p>';
+        } else if (!line.trim()){
+          flush(); closeList();
+        } else {
+          closeList(); para.push(inlineMd(line));
+        }
+      });
+      flush(); closeList();
+    }
+    return out;
+  }
+
+  // agent working indicator, shown after the visitor sends until a reply comes in
+  function showTyping(){
+    hideTyping();
+    typingEl = document.createElement('div');
+    typingEl.className = 'growerp-msg growerp-theirs growerp-typing';
+    typingEl.innerHTML = '<span></span><span></span><span></span>';
+    msgsEl.appendChild(typingEl);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+    typingTimer = setTimeout(hideTyping, 90000);   // agent failed or handed off
+    restartPolling(1500);
+  }
+  function hideTyping(){
+    if (typingTimer){ clearTimeout(typingTimer); typingTimer = null; }
+    if (!typingEl) return;
+    typingEl.parentNode && typingEl.parentNode.removeChild(typingEl);
+    typingEl = null;
+    restartPolling(4000);
+  }
+
   function appendMessage(m){
     if (!m || seenIds[m.chatMessageId]) return;
     seenIds[m.chatMessageId] = true;
     var mine = session && String(m.fromUserId) === String(session.visitorUserId);
     var div = document.createElement('div');
-    div.className = 'growerp-msg ' + (mine ? 'growerp-mine' : 'growerp-theirs');
+    div.className = 'growerp-msg ' + (mine ? 'growerp-mine' : 'growerp-theirs growerp-md');
     var who = mine ? 'You' : (m.fromUserFullName || companyName);
-    div.innerHTML = escapeHtml(m.content) +
+    div.innerHTML = (mine ? escapeHtml(m.content) : renderMd(m.content)) +
       '<span class="growerp-msg-meta">' + escapeHtml(who) +
       (m.creationDate ? ' · ' + escapeHtml(m.creationDate) : '') + '</span>';
-    msgsEl.appendChild(div);
+    if (!mine) hideTyping();
+    // keep the dots below the newest message
+    if (typingEl) msgsEl.insertBefore(div, typingEl); else msgsEl.appendChild(div);
     msgsEl.scrollTop = msgsEl.scrollHeight;
   }
   function appendDivider(text){
@@ -233,7 +332,7 @@
     div.className = 'growerp-msg growerp-mine growerp-optimistic';
     div.innerHTML = escapeHtml(content) +
       '<span class="growerp-msg-meta">You · sending…</span>';
-    msgsEl.appendChild(div);
+    if (typingEl) msgsEl.insertBefore(div, typingEl); else msgsEl.appendChild(div);
     msgsEl.scrollTop = msgsEl.scrollHeight;
   }
   function clearOptimistic(){
@@ -242,6 +341,7 @@
   }
 
   function resetToForm(){
+    hideTyping();
     stopPolling();
     saveSession(null);
     try { localStorage.removeItem(storeKey); } catch(e){}
@@ -265,6 +365,8 @@
       })
       .then(function(d){
         if (!d) return;
+        agentActive = !!d.agentActive;
+        if (!agentActive) hideTyping();
         // once the server thread is in, drop any pending optimistic bubbles
         if (d.chatMessages && d.chatMessages.length) clearOptimistic();
         (d.chatMessages || []).forEach(appendMessage);
@@ -273,7 +375,13 @@
   function startPolling(){
     if (pollTimer || !session || !session.chatRoomId) return;
     fetchMessages();
-    pollTimer = setInterval(fetchMessages, 4000);
+    pollTimer = setInterval(fetchMessages, typingEl ? 1500 : 4000);
+  }
+  // change the poll rate, only while polling is on (panel open, room active)
+  function restartPolling(ms){
+    if (!pollTimer) return;
+    clearInterval(pollTimer);
+    pollTimer = setInterval(fetchMessages, ms);
   }
   function stopPolling(){
     if (pollTimer){ clearInterval(pollTimer); pollTimer = null; }
@@ -295,6 +403,7 @@
       showThread();
       sendBtn.disabled = false; postBtn.disabled = false;
       startPolling();   // immediately pulls in the just-sent question (replaces optimistic)
+      if (d.agentActive !== false) showTyping();   // the first poll hides it when no agent
     }).catch(function(){ if (onErr) onErr(); });
   }
 
@@ -341,6 +450,7 @@
         postBtn.disabled = false;
         clearOptimistic();
         if (d.chatMessage) appendMessage(d.chatMessage);
+        if (agentActive) showTyping();
         inputEl.focus();
       }).catch(function(){
         clearOptimistic(); inputEl.value = content; postBtn.disabled = false;
@@ -360,6 +470,7 @@
 
   // ----- "Ask another question": keep old messages, route next send to a NEW room -----
   newBtn.addEventListener('click', function(){
+    hideTyping();
     stopPolling();
     appendDivider(T.newDivider);
     saveSession({ chatRoomId: null });   // keep email cookie; next send starts a new room
@@ -382,6 +493,34 @@
     stopPolling();
     rememberOpen(false);
   }
+
+  // ----- resize by dragging the top-left grip; the size is remembered -----
+  function applySize(w, h){
+    w = Math.max(320, Math.min(w, window.innerWidth - 40));
+    h = Math.max(300, Math.min(h, window.innerHeight - 180));
+    panel.style.width = w + 'px';
+    threadEl.style.height = h + 'px';
+    return { w: w, h: h };
+  }
+  try {
+    var saved = JSON.parse(localStorage.getItem(sizeKey));
+    if (saved && window.innerWidth > 480) applySize(saved.w, saved.h);
+  } catch(e){}
+  gripEl.addEventListener('pointerdown', function(e){
+    e.preventDefault();
+    gripEl.setPointerCapture(e.pointerId);
+    var x0 = e.clientX, y0 = e.clientY;
+    var w0 = panel.offsetWidth, h0 = threadEl.offsetHeight || 340;
+    var size = null;
+    function move(ev){ size = applySize(w0 + x0 - ev.clientX, h0 + y0 - ev.clientY); }
+    function up(){
+      gripEl.removeEventListener('pointermove', move);
+      gripEl.removeEventListener('pointerup', up);
+      if (size) try { localStorage.setItem(sizeKey, JSON.stringify(size)); } catch(err){}
+    }
+    gripEl.addEventListener('pointermove', move);
+    gripEl.addEventListener('pointerup', up);
+  });
 
   // restore on load: active room -> thread; else known email -> thread compose; else form
   if (session && session.chatRoomId) showThread();
