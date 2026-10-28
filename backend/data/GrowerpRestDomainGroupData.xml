@@ -165,7 +165,7 @@ The 28 anonymous-* resources bypass authz entirely and need no domain.
         description="Tenant setup: email, system settings, subscriptions, import/export"/>
     <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_SETUP"
         artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
-        artifactName="/growerp/100/(OwnerTokenLimit|SystemSettings|EmailTemplate|SystemDefault|ImportExport)(/.*)?"/>
+        artifactName="/growerp/100/(OwnerTokenLimit|SystemSettings|EmailTemplate|SystemDefault|ImportExport|OwnerData)(/.*)?"/>
 
     <moqui.security.ArtifactGroup artifactGroupId="GROWERP_SUPPORT"
         description="GrowERP support staff only"/>

@@ -52,6 +52,7 @@ test {
     include '**/MasterContentServicesTests.class'
     include '**/GeminiAiUtilTests.class'
     include '**/WikiServicesTests.class'
+    include '**/OwnerDataServicesTests.class'
 
     systemProperty 'moqui.runtime', moquiDir.absolutePath + '/runtime'
     systemProperty 'moqui.conf', 'conf/MoquiDevConf.xml'

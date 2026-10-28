@@ -454,6 +454,24 @@ limitations under the License.
         </relationship>
     </entity>
 
+    <!-- A download (EXPORT) or upload (IMPORT) of all data of an owner, run in the
+         background by OwnerDataServices100; the zip is kept in runtime/ownerData. -->
+    <entity entity-name="OwnerDataTransfer" package="growerp.general" cache="never">
+        <field name="ownerDataTransferId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" />
+        <field name="direction" type="text-short"><description>EXPORT or IMPORT</description></field>
+        <field name="status" type="text-short"><description>QUEUED, RUNNING, DONE, FAILED</description></field>
+        <field name="progress" type="text-medium" />
+        <field name="errorMessage" type="text-very-long" />
+        <field name="fileName" type="text-medium" />
+        <field name="fileLocation" type="text-medium" />
+        <field name="countsJson" type="text-very-long"><description>records per entity</description></field>
+        <field name="newOwnerPartyId" type="id"><description>IMPORT: the owner created</description></field>
+        <field name="username" type="text-medium" />
+        <field name="createdDate" type="date-time" />
+        <field name="completedDate" type="date-time" />
+    </entity>
+
     <entity entity-name="SystemSettings" package="growerp.general"
             table-name="GROWERP_SYSTEM_SETTINGS">
         <field name="ownerPartyId" type="id" is-pk="true"/>
