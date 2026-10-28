@@ -39,9 +39,8 @@ Two steps, two tools:
 The data file is self-contained and repeatable: keep it in the repository and you can
 install the same website on any GrowERP backend.
 
-Worked examples are shipped in the repository:
-`backend/data/AccuGeoOwnerImportData.xml` (light theme, navbar dropdowns, hidden page)
-and `backend/data/AntWebsysOwnerImportData.xml` (dark theme, single-page-app source).
+Customer conversions are not shipped in this repository: keep each data file in that
+customer's own repository or component and import it from there.
 
 ---
 

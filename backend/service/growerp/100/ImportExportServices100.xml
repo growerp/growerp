@@ -2457,7 +2457,7 @@ limitations under the License.
         </description>
         <in-parameters>
             <parameter name="location">
-                <description>data file, eg component://growerp/data/AccuGeoOwnerImportData.xml;
+                <description>data file, eg component://growerp/data/ExampleOwnerImportData.xml;
                     either this or xmlText is required</description>
             </parameter>
             <parameter name="xmlText" allow-html="any">
