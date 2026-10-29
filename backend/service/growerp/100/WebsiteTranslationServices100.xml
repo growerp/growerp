@@ -363,6 +363,17 @@ its wikiPageId, while this job writes into another owner's store under a path it
                         !SUPPORTED.contains(it.pagePath.split('/')[0])
                     }
                     def existingPaths = pages.collect { it.pagePath } as Set
+                    // when a page file last changed, 0 when there is none
+                    def lastModified = { String root, String path ->
+                        for (String ext in ['.md.ftl', '.html.ftl']) {
+                            def ref = ec.resource.getLocationReference("${root}/content/${path}${ext}")
+                            if (ref?.exists) return ref.getLastModified()
+                        }
+                        return 0L
+                    }
+                    // one failed page does not stop the run: a re-run then only does the pages
+                    // that are still missing or older than their source
+                    List failedPages = []
 
                     int total = sourcePages.size() * locales.size()
                     int done = 0
@@ -374,8 +385,10 @@ its wikiPageId, while this job writes into another owner's store under a path it
                         for (def page in sourcePages) {
                             String targetPath = "${locale}/${page.pagePath}"
                             done++
-                            if (existingPaths.contains(targetPath) &&
-                                    translation.overwriteExisting != 'Y') {
+                            // overwrite redoes a translation only when its source changed after it
+                            if (existingPaths.contains(targetPath) && (translation.overwriteExisting != 'Y' ||
+                                    lastModified(page.rootPageLocation, targetPath) >=
+                                    lastModified(page.rootPageLocation, page.pagePath))) {
                                 progress('TRANSLATING', "${locale}: kept ${page.pagePath} ${done}/${total}", done)
                                 continue
                             }
@@ -389,18 +402,22 @@ its wikiPageId, while this job writes into another owner's store under a path it
                                              targetLocale: locale, apiKey: apiKey,
                                              ownerPartyId: translation.ownerPartyId])
                                 .call()
-                            if (ec.message.hasError()) throw new Exception(ec.message.getErrorsString())
-                            if (!translated?.translatedText) continue
-
-                            ec.service.sync()
-                                .name('growerp.100.WebsiteTranslationServices100.store#TranslatedPage')
-                                .parameters([productStoreId: translation.productStoreId,
-                                             pagePath: targetPath,
-                                             text: translated.translatedText,
-                                             contentType: translated.contentType,
-                                             sequenceNum: page.sequenceNum])
-                                .call()
-                            if (ec.message.hasError()) throw new Exception(ec.message.getErrorsString())
+                            if (!ec.message.hasError() && translated?.translatedText) {
+                                ec.service.sync()
+                                    .name('growerp.100.WebsiteTranslationServices100.store#TranslatedPage')
+                                    .parameters([productStoreId: translation.productStoreId,
+                                                 pagePath: targetPath,
+                                                 text: translated.translatedText,
+                                                 contentType: translated.contentType,
+                                                 sequenceNum: page.sequenceNum])
+                                    .call()
+                            }
+                            if (ec.message.hasError()) {
+                                String error = ec.message.getErrorsString().trim()
+                                ec.logger.warn("process#WebsiteTranslation ${translationId}: ${targetPath} failed: ${error}")
+                                failedPages << "${targetPath}: ${error}"
+                                ec.message.clearErrors()
+                            }
                         }
                     }
 
@@ -419,6 +436,9 @@ its wikiPageId, while this job writes into another owner's store under a path it
                     // sitemap.xml/llms.txt list all pages, so they cannot self invalidate on a
                     // version bump like the per page markdown does
                     ec.cache.getCache('growerp.seo.index').clear()
+
+                    if (failedPages) throw new Exception("${failedPages.size()} of ${total} pages failed," +
+                        " run the translation again to do only those:\n" + failedPages.join('\n'))
 
                     ec.service.sync()
                         .name('growerp.100.WebsiteTranslationServices100.update#WebsiteTranslationStatus')

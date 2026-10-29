@@ -200,7 +200,7 @@ class WebsiteTranslationDialogState extends State<WebsiteTranslationDialog> {
               dense: true,
               contentPadding: EdgeInsets.zero,
               controlAffinity: ListTileControlAffinity.leading,
-              title: const Text('Redo pages already translated'),
+              title: const Text('Redo pages changed since their translation'),
               value: _overwriteExisting,
               onChanged: (checked) =>
                   setState(() => _overwriteExisting = checked == true),

@@ -298,6 +298,12 @@ What it changes, and what it leaves alone:
 to the original under its language, for example `/th/content/about`. A company can only
 translate its own website.
 
+Pages that already have a translation are kept. With **Redo pages changed since their
+translation** checked, a page is translated again only when its original was edited after
+the translation was made. A page that fails (for example on an AI timeout) does not stop the
+run: the others are still translated, and the translation ends as failed with the list of
+pages that failed. Start it again to translate only those.
+
 Both use AI with the company's **own Gemini key**: set it first in **System Setup → AI**.
 Without a key the request is refused with *"No Gemini API key configured for your
 company"*. Only system support falls back to the key of the GrowERP installation.

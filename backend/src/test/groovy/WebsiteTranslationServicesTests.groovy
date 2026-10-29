@@ -25,6 +25,9 @@ import spock.lang.Specification
    - a tenant lists and deletes only its own translations
    - a translated .html.ftl page keeps its '<#-- title: ... -->' line first, even when the
      model moves, prefixes or drops it (production failure 2026-10-28, Thai, page 9)
+   - a page that fails does not stop the run, and overwrite only redoes a page whose source
+     changed after its translation (production run stopped at 24/50 on one Gemini timeout,
+     2026-10-29, and a re-run started again at page 1)
 
    To run: make sure moqui is in place with a loaded database, backend not running, then:
     "cd moqui && ./gradlew :runtime:component:growerp:test"
@@ -155,5 +158,53 @@ class WebsiteTranslationServicesTests extends Specification {
 
         expect:
         util.normalizeFtlTitle('<main>About us</main>', '<main>TH</main>') == '<main>TH</main>'
+    }
+
+    def "a failed page does not stop the run and overwrite redoes only changed pages"() {
+        setup: 'every source page translated into nl, except one missing and one edited since'
+        ec.user.internalLoginUser(tenantWithKey.username)
+        Map store = ec.entity.find('mantle.product.store.ProductStore')
+                .condition('organizationPartyId', tenantWithKey.companyPartyId).useCache(false).one().getMap()
+        List sources = ec.entity.find('growerp.website.ProductStoreAndWebsiteContent')
+                .condition('productStoreId', store.productStoreId).useCache(false).list()
+                .findAll { it.pagePath && !(it.pagePath.split('/')[0] in ['en', 'th', 'zh', 'de', 'fr', 'nl']) }
+        String root = sources[0].rootPageLocation
+        def location = { String path ->
+            def md = ec.resource.getLocationReference("${root}/content/${path}.md.ftl")
+            return md?.exists ? md : ec.resource.getLocationReference("${root}/content/${path}.html.ftl")
+        }
+        String missing = sources[0].pagePath
+        String edited = sources[1].pagePath
+        sources.drop(1).each { page ->
+            ec.service.sync().name('growerp.100.WebsiteTranslationServices100.store#TranslatedPage')
+                    .parameters([productStoreId: store.productStoreId, pagePath: "nl/${page.pagePath}",
+                            text: "NL ${page.pagePath}",
+                            contentType: location(page.pagePath).fileName.endsWith('.md.ftl') ? 'md' : 'ftl'])
+                    .call()
+        }
+        Thread.sleep(20)
+        def editedRef = location(edited)
+        editedRef.putText(editedRef.getText() + '\nedited')
+        String translationId = ec.entity.sequencedIdPrimary('growerp.website.WebsiteTranslation', null, null)
+        ec.entity.makeValue('growerp.website.WebsiteTranslation').setAll([translationId: translationId,
+                ownerPartyId: tenantWithKey.companyPartyId, productStoreId: store.productStoreId,
+                sourceLocale: 'en', targetLocales: 'nl', translateEntityNames: 'N',
+                overwriteExisting: 'Y', status: 'PENDING', createdDate: ec.user.nowTimestamp]).create()
+
+        when: 'the Gemini key is fake, so every page that is translated fails'
+        ec.service.sync().name('growerp.100.WebsiteTranslationServices100.process#WebsiteTranslation')
+                .parameters([translationId: translationId, username: tenantWithKey.username]).call()
+        def translation = ec.entity.find('growerp.website.WebsiteTranslation')
+                .condition('translationId', translationId).useCache(false).one()
+
+        then: 'the run went through every page and tried only the missing and the edited one'
+        translation.status == 'FAILED'
+        translation.translatedCount == sources.size()
+        translation.errorMessage.contains("nl/${missing}")
+        translation.errorMessage.contains("nl/${edited}")
+        sources.drop(2).every { !translation.errorMessage.contains("nl/${it.pagePath}:") }
+
+        cleanup:
+        ec.message.clearAll()
     }
 }
