@@ -30,18 +30,28 @@ Ask only what changes the block set. Map answers to blocks:
 | Do they run outbound campaigns? | `outreach` |
 | Do they sell or capture leads online? | `website` |
 | Do they teach courses / training? | `courses` |
+| Do they manage staff (onboarding, leave)? | `hr` |
+| Are they an insurance agency? | `insurance` |
+| Do they rent out equipment / assets by date? | `rental` (+ `inventory`, `order_accounting`) |
 | Want an AI assistant in the app? (default yes) | `adk` |
+| A core need none of the above covers? | none yet → new block (see Step 2) |
 
 Baseline for any answer: `user_company` + `catalog` + `order_accounting`. See the full
 positioning table in [Vertical_Development_Guide.md](Vertical_Development_Guide.md).
 
-## Step 2 — Decide: extend vs new
+## Step 2 — Decide: extend, new, or new block first
 
 - **Extend an existing vertical** when an app already covers the identity (menu +
   dashboard) and the user just wants more capability. Cheaper — no new package. Follow
   **Recipe A** in the Vertical Development Guide.
 - **Create a new vertical** only when the app needs its own identity: a distinct menu,
   dashboard, app id, and store branding. Follow **Recipe B** below.
+- **Build a block first** when a core need of the business maps to no block in the
+  Step 1 table (e.g. work orders and maintenance plans for facility management). Do not
+  stretch an unrelated block to fake it. Follow **Recipe D** in the Vertical
+  Development Guide: build and register the block, then come back to Step 3. Stop and
+  agree on this with the user first — it is a much larger job (entities, services,
+  models, UI, tests) than a scaffold.
 
 Default to extending if an existing `appId` fits.
 
@@ -61,7 +71,8 @@ Expected output ends with `✅ Vertical "<name>" created successfully!` and a
 numbered next-steps list. The command creates:
 
 - `flutter/packages/<name>/` — full app package (platform folders renamed).
-- `moqui/runtime/component/growerp/data/Growerp<Name>AppSeedData.xml` — the seed.
+- `moqui/runtime/component/growerp/data/Growerp<Name>AppSeedData.xml` — the seed
+  (that path is a symlink to `backend/data/`, where the file is committed).
 - two lines in `flutter/pubspec.yaml` (`workspace:` and `melos: packages:`).
 
 ## Step 4 — Bootstrap, seed, run
@@ -89,6 +100,10 @@ loader fails with `transaction log file btm1.tlog is locked`.
 - [ ] **Seed loaded** — after loading, confirm via the read-only REST API:
   `GET rest/e1/growerp.menu.MenuConfiguration/<UPPER>_DEFAULT` returns the config.
 - [ ] **Compiles** — `dart analyze packages/<name>` is clean.
+
+Before the app ships, the manual steps in "After the scaffold" in the
+[Vertical Development Guide](Vertical_Development_Guide.md) remain: welcome email
+rows, app icon, release/store lists, native config. Tell the user which are open.
 
 ## Troubleshooting
 
