@@ -25,6 +25,8 @@ import spock.lang.Specification
    - passages give a COMPANY FACTS block with each title and text, and the rule not to invent
    - a company without a knowledge base (or embedding key) gets no block and no error,
      so generation never fails on it
+   - userContent: a text prompt stays text; an image goes with it in the format of
+     Gemini, Anthropic and OpenAI
 
    To run: make sure moqui is in place with a loaded database, backend not running, then:
     "cd moqui && ./gradlew :runtime:component:growerp:test"
@@ -79,5 +81,27 @@ class GeminiAiUtilTests extends Specification {
         then:
         block == ''
         !ec.message.hasError()
+    }
+
+    def "a text prompt stays plain text for every provider"() {
+        expect:
+        util.userContent('gemini', 'hello', [:]) == [[text: 'hello']]
+        util.userContent('anthropic', 'hello', [:]) == 'hello'
+        util.userContent('openai', 'hello', [:]) == 'hello'
+    }
+
+    def "an image goes with the prompt in the format of each provider"() {
+        given:
+        Map image = [imageData: 'QUJD', imageMimeType: 'image/png']
+
+        expect:
+        util.userContent('gemini', 'read it', image) ==
+                [[text: 'read it'], [inline_data: [mime_type: 'image/png', data: 'QUJD']]]
+        util.userContent('anthropic', 'read it', image) ==
+                [[type: 'image', source: [type: 'base64', media_type: 'image/png', data: 'QUJD']],
+                 [type: 'text', text: 'read it']]
+        util.userContent('openai', 'read it', image) ==
+                [[type: 'text', text: 'read it'],
+                 [type: 'image_url', image_url: [url: 'data:image/png;base64,QUJD']]]
     }
 }

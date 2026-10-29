@@ -45,17 +45,4 @@ mixin CrmApi {
   Future<Subscription> deleteSubscription({
     @Field() required Subscription subscription,
   });
-
-  @POST("rest/s1/mcp/ProcessInvoiceImage")
-  @FormUrlEncoded()
-  Future<String> processInvoiceImage({
-    @Field() required String imageData,
-    @Field() required String prompt,
-    @Field() required String mimeType,
-  });
-
-  @POST("rest/s1/mcp/CreateInvoiceFromData")
-  Future<String> createInvoiceFromData({
-    @Field() required Map<String, dynamic> invoiceData,
-  });
 }

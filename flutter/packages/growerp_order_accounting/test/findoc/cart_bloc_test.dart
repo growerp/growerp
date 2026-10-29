@@ -91,6 +91,31 @@ void main() {
         ),
       ],
     );
+
+    // a new document that already has items (an invoice read from an image)
+    // is shown as given, not replaced by an older saved cart
+    blocTest<CartBloc, CartState>(
+      'CartFetch_newDocWithItems_keepsItemsOverSavedCart',
+      setUp: () async {
+        when(
+          () => restClient.getItemTypes(sales: true),
+        ).thenAnswer((_) async => ItemTypes());
+        await PersistFunctions.persistFinDoc(
+          emptyCart.copyWith(description: 'saved cart'),
+        );
+      },
+      build: build,
+      act: (bloc) => bloc.add(
+        CartFetch(emptyCart.copyWith(items: [item('Paper', '3.5', '2')])),
+      ),
+      expect: () => [
+        isA<CartState>().having(
+          (s) => s.finDoc.items.map((i) => i.description),
+          'items',
+          ['Paper'],
+        ),
+      ],
+    );
   });
 
   group('CartAdd', () {

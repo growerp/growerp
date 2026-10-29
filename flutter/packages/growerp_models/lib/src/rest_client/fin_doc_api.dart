@@ -38,6 +38,14 @@ mixin FinDocApi {
     @Field() String? toEmail,
   });
 
+  /// Read a supplier invoice image ([imageData] base64) with the company's AI
+  /// model; returns a new purchase invoice to review, not saved yet.
+  @POST("rest/s1/growerp/100/FinDocFromImage")
+  Future<FinDoc> getFinDocFromImage({
+    @Field() required String imageData,
+    @Field() required String mimeType,
+  });
+
   @GET("rest/s1/growerp/100/ItemType")
   Future<ItemTypes> getItemTypes({@Query('sales') bool? sales});
 

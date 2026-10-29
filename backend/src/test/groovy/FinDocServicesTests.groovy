@@ -23,6 +23,8 @@ import spock.lang.Specification
    - a purchase order: approve and receive the incoming shipment into a location
    - a stand-alone invoice and payment
    - another tenant does not see the documents
+   - invoice data read from an image becomes a purchase invoice to review, the
+     supplier matched only among the own suppliers
 
    To run: make sure moqui is in place with a loaded database, backend not running, then:
     "cd moqui && ./gradlew :runtime:component:growerp:test"
@@ -210,5 +212,40 @@ class FinDocServicesTests extends Specification {
         then:
         found == null
         ec.message.errorsString.contains('not found')
+    }
+
+    def "invoice data read from an image becomes a purchase invoice to review"() {
+        when: 'the supplier name differs in case and spaces from the company name'
+        Map finDoc = ec.service.sync().name("${service}.get#InvoiceFromData")
+                .parameters([invoiceData: [supplier: " seller ${run} ", invoiceNumber: 'INV-77',
+                        items: [[description: 'Paper', quantity: 2, unitPrice: 3.5],
+                                [description: 'Delivery', unitPrice: '5']]]]).call()?.finDoc
+
+        then: 'nothing is saved, it is returned as a new purchase invoice'
+        !ec.message.hasError()
+        finDoc.docType == 'invoice'
+        finDoc.sales == false
+        !finDoc.invoiceId
+        finDoc.reference == 'INV-77'
+        finDoc.otherCompany.partyId == supplier.company.partyId
+        finDoc.items.size() == 2
+        finDoc.items[0].description == 'Paper'
+        finDoc.items[0].quantity as BigDecimal == 2
+        finDoc.items[0].price as BigDecimal == 3.5
+        finDoc.items[1].quantity as BigDecimal == 1
+        finDoc.items[1].price as BigDecimal == 5
+    }
+
+    def "a supplier of another tenant is not matched to an invoice image"() {
+        when:
+        ec.user.internalLoginUser(otherTenant.username)
+        Map finDoc = ec.service.sync().name("${service}.get#InvoiceFromData")
+                .parameters([invoiceData: [supplier: "Seller ${run}",
+                        items: [[description: 'Paper', quantity: 1, unitPrice: 1]]]]).call()?.finDoc
+
+        then: 'the company is left for the user to pick, the name read is kept'
+        !ec.message.hasError()
+        !finDoc.otherCompany?.partyId
+        finDoc.description.contains("Seller ${run}")
     }
 }

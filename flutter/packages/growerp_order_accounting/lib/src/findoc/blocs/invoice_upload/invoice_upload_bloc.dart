@@ -12,7 +12,6 @@ part 'invoice_upload_state.dart';
 class InvoiceUploadBloc extends Bloc<InvoiceUploadEvent, InvoiceUploadState> {
   InvoiceUploadBloc(this.restClient) : super(const InvoiceUploadState()) {
     on<InvoiceUploadImage>(_onInvoiceUploadImage);
-    on<InvoiceCreate>(_onInvoiceCreate);
   }
 
   final RestClient restClient;
@@ -24,21 +23,11 @@ class InvoiceUploadBloc extends Bloc<InvoiceUploadEvent, InvoiceUploadState> {
     emit(state.copyWith(status: InvoiceUploadStatus.loading));
     try {
       final imageData = await event.image.readAsBytes();
-      final base64Image = base64Encode(imageData);
-
-      final result = await restClient.processInvoiceImage(
-        imageData: base64Image,
-        prompt: event.prompt,
-        mimeType: event.mimeType,
+      final finDoc = await restClient.getFinDocFromImage(
+        imageData: base64Encode(imageData),
+        mimeType: _mimeType(event.image),
       );
-
-      final decodedResult = jsonDecode(result);
-      emit(
-        state.copyWith(
-          status: InvoiceUploadStatus.success,
-          extractedData: decodedResult as Map<String, dynamic>?,
-        ),
-      );
+      emit(state.copyWith(status: InvoiceUploadStatus.success, finDoc: finDoc));
     } on DioException catch (e) {
       emit(
         state.copyWith(
@@ -56,36 +45,13 @@ class InvoiceUploadBloc extends Bloc<InvoiceUploadEvent, InvoiceUploadState> {
     }
   }
 
-  Future<void> _onInvoiceCreate(
-    InvoiceCreate event,
-    Emitter<InvoiceUploadState> emit,
-  ) async {
-    emit(state.copyWith(status: InvoiceUploadStatus.loading));
-    try {
-      final result = await restClient.createInvoiceFromData(
-        invoiceData: event.invoiceData['extractedData'],
-      );
-      final decodedResult = jsonDecode(result);
-      emit(
-        state.copyWith(
-          status: InvoiceUploadStatus.success,
-          invoice: FinDoc.fromJson(decodedResult),
-        ),
-      );
-    } on DioException catch (e) {
-      emit(
-        state.copyWith(
-          status: InvoiceUploadStatus.failure,
-          message: await getDioError(e),
-        ),
-      );
-    } catch (e) {
-      emit(
-        state.copyWith(
-          status: InvoiceUploadStatus.failure,
-          message: e.toString(),
-        ),
-      );
-    }
+  /// the picked file's own type, else from its name, else jpeg (camera)
+  String _mimeType(XFile image) {
+    if (image.mimeType != null) return image.mimeType!;
+    final name = image.name.toLowerCase();
+    if (name.endsWith('.png')) return 'image/png';
+    if (name.endsWith('.webp')) return 'image/webp';
+    if (name.endsWith('.gif')) return 'image/gif';
+    return 'image/jpeg';
   }
 }

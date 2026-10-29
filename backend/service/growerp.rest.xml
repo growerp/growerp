@@ -388,6 +388,11 @@ limitations under the License.
                 <service name="growerp.100.FinDocServices100.receive#Shipment" />
             </method>
         </resource>
+        <resource name="FinDocFromImage"><!-- read a supplier invoice image into a purchase invoice to review -->
+            <method type="post">
+                <service name="growerp.100.FinDocServices100.get#InvoiceFromImage" />
+            </method>
+        </resource>
         <resource name="FinDocEmail"><!-- email a rendered invoice/order PDF to its counterparty -->
             <method type="post">
                 <service name="growerp.100.FinDocServices100.send#FinDocEmail" />

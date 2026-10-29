@@ -198,7 +198,7 @@ price, customer case or link, and never invent ones that are not here):
      * @param ec ExecutionContext from Moqui
      * @param prompt The text prompt to send
      * @param options Optional map with: apiKey, model, provider, ownerPartyId, temperature,
-     *        topK, topP, maxOutputTokens, jsonMode
+     *        topK, topP, maxOutputTokens, jsonMode, imageData (base64), imageMimeType
      * @return The generated text (markdown code fences stripped)
      * @throws Exception if no API key is configured or the API call fails
      */
@@ -365,9 +365,32 @@ price, customer case or link, and never invent ones that are not here):
         throw new Exception("${label} API still rate limited after ${MAX_RETRIES} retries")
     }
 
+    /**
+     * The user message content in the format of [provider]: the prompt as plain text, or, when
+     * options.imageData (base64) is given, the prompt together with that image
+     * (options.imageMimeType, default image/jpeg).
+     */
+    static def userContent(String provider, String prompt, Map options) {
+        String imageData = options.imageData as String
+        String mimeType = (options.imageMimeType ?: "image/jpeg") as String
+        switch (provider) {
+            case "anthropic":
+                if (!imageData) return prompt
+                return [[type: "image", source: [type: "base64", media_type: mimeType, data: imageData]],
+                        [type: "text", text: prompt]]
+            case "openai":
+                if (!imageData) return prompt
+                return [[type: "text", text: prompt],
+                        [type: "image_url", image_url: [url: "data:${mimeType};base64,${imageData}".toString()]]]
+            default:
+                if (!imageData) return [[text: prompt]]
+                return [[text: prompt], [inline_data: [mime_type: mimeType, data: imageData]]]
+        }
+    }
+
     private static Map callGemini(def ec, String prompt, String model, String apiKey, Map options) {
         def requestMap = [
-            contents: [[parts: [[text: prompt]]]],
+            contents: [[parts: userContent("gemini", prompt, options)]],
             generationConfig: [
                 temperature: options.temperature ?: 0.7,
                 topK: options.topK ?: 40,
@@ -399,7 +422,7 @@ price, customer case or link, and never invent ones that are not here):
         def requestMap = [
             model: model,
             max_tokens: options.maxOutputTokens ?: 4096,
-            messages: [[role: "user", content: prompt]]
+            messages: [[role: "user", content: userContent("anthropic", prompt, options)]]
         ]
         def responseText = postJson(ec, ANTHROPIC_URL,
             ["x-api-key": apiKey, "anthropic-version": ANTHROPIC_VERSION],
@@ -427,7 +450,7 @@ price, customer case or link, and never invent ones that are not here):
     private static Map callOpenAi(def ec, String prompt, String model, String apiKey, Map options) {
         def requestMap = [
             model: model,
-            messages: [[role: "user", content: prompt]],
+            messages: [[role: "user", content: userContent("openai", prompt, options)]],
             temperature: options.temperature ?: 0.7,
             max_tokens: options.maxOutputTokens ?: 4096,
             stream: false

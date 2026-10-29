@@ -378,12 +378,28 @@ class FinDocListState extends State<FinDocList> {
                                 child: FloatingActionButton(
                                   key: const Key("upload"),
                                   heroTag: "btn4",
-                                  onPressed: () async => showDialog(
-                                    barrierDismissible: true,
-                                    context: context,
-                                    builder: (BuildContext context) =>
-                                        const InvoiceUploadView(),
-                                  ),
+                                  onPressed: () async {
+                                    // the invoice read from the image opens
+                                    // in the invoice dialog to review and save
+                                    final invoice = await showDialog<FinDoc>(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) =>
+                                          const InvoiceUploadView(),
+                                    );
+                                    if (invoice == null || !context.mounted) {
+                                      return;
+                                    }
+                                    await showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) =>
+                                          BlocProvider.value(
+                                            value: _finDocBloc,
+                                            child: FinDocDialog(invoice),
+                                          ),
+                                    );
+                                  },
                                   tooltip: 'Upload Invoice',
                                   child: const Icon(Icons.upload_file),
                                 ),

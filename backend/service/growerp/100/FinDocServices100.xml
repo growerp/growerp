@@ -3762,5 +3762,95 @@ limitations under the License.
             </entity-find-count>
         </actions>
     </service>
+
+    <service verb="get" noun="InvoiceFromImage">
+        <description>Read a supplier invoice from an image with the AI model of the company and
+            return it as a new purchase invoice to review: nothing is saved here. Uses the
+            model and API key of System Setup, or the GrowERP system key within its allowance.</description>
+        <in-parameters>
+            <parameter name="imageData" required="true"><description>the image, base64</description></parameter>
+            <parameter name="mimeType" default-value="image/jpeg" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="finDoc" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="!mimeType.startsWith('image/')">
+                <return error="true" message="Only an image of an invoice can be read, not ${mimeType}" />
+            </if>
+            <script><![CDATA[
+                def aiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
+                String prompt = """Read this supplier invoice. Answer with one JSON object only:
+{"supplier": "name of the company that sent the invoice", "invoiceNumber": "...",
+ "invoiceDate": "YYYY-MM-DD",
+ "items": [{"description": "...", "quantity": 1, "unitPrice": 10.00}]}
+Use plain numbers without currency signs. Prices are without tax; put tax, shipping and
+discounts on their own item. Leave a field out when it is not on the invoice."""
+                try {
+                    String answer = aiUtil.callLlmApi(ec, prompt, [ownerPartyId: ownerPartyId,
+                        imageData: imageData, imageMimeType: mimeType, jsonMode: true,
+                        temperature: 0.1, maxOutputTokens: 4096, purpose: 'invoiceImage'])
+                    invoiceData = aiUtil.parseJsonResponse(answer)
+                } catch (Exception e) {
+                    ec.logger.error("Reading an invoice image failed", e)
+                    ec.message.addError("The invoice could not be read: ${e.message}")
+                }
+            ]]></script>
+            <if condition="ec.message.hasError()"><return /></if>
+            <if condition="!(invoiceData instanceof Map) || !invoiceData.items">
+                <return error="true" message="No invoice items found in the image" />
+            </if>
+            <service-call name="growerp.100.FinDocServices100.get#InvoiceFromData"
+                in-map="[invoiceData: invoiceData]" out-map="context" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="InvoiceFromData">
+        <description>Turn invoice data read from an image into a new purchase invoice to review.
+            The supplier is matched by name among the suppliers of the own company only; when
+            not found the name read goes into the description and the user picks the company.</description>
+        <in-parameters>
+            <parameter name="invoiceData" type="Map" required="true">
+                <description>supplier, invoiceNumber, invoiceDate, items: [description, quantity, unitPrice]</description>
+            </parameter>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="finDoc" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="supplierName" from="invoiceData.supplier?.toString()?.trim()" />
+            <if condition="supplierName">
+                <entity-find entity-name="growerp.party.OwnerCompanyDetailAndEmployee" list="suppliers">
+                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                    <econdition field-name="companyRole" value="Supplier" />
+                    <select-field field-name="companyPartyId,companyPseudoId,companyName" />
+                </entity-find>
+                <set field="supplierCompany"
+                    from="suppliers.find { it.companyName?.trim()?.equalsIgnoreCase(supplierName) }" />
+            </if>
+            <set field="notes" from="[]" type="List" />
+            <if condition="supplierName &amp;&amp; !supplierCompany">
+                <script>notes.add("Supplier on the invoice: ${supplierName}".toString())</script>
+            </if>
+            <if condition="invoiceData.invoiceDate">
+                <script>notes.add("Invoice date: ${invoiceData.invoiceDate}".toString())</script>
+            </if>
+            <set field="items" from="[]" type="List" />
+            <iterate list="invoiceData.items" entry="item">
+                <set field="newItem" from="[description: item.description,
+                    quantity: item.quantity ? item.quantity as BigDecimal : 1,
+                    price: (item.unitPrice ?: item.price ?: 0) as BigDecimal]" />
+                <script>items.add(newItem)</script>
+            </iterate>
+            <set field="finDoc" from="[docType: 'invoice', sales: false,
+                reference: invoiceData.invoiceNumber, description: notes.join('; ') ?: null,
+                otherCompany: supplierCompany ? [partyId: supplierCompany.companyPartyId,
+                    pseudoId: supplierCompany.companyPseudoId, name: supplierCompany.companyName] : null,
+                items: items]" />
+        </actions>
+    </service>
 </services>
- 

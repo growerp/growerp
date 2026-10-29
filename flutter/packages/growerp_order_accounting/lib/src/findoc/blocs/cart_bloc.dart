@@ -57,8 +57,8 @@ class CartBloc extends Bloc<CartEvent, CartState>
   Future<void> _onCartFetch(CartFetch event, Emitter<CartState> emit) async {
     if (state.status == CartStatus.initial) {
       FinDoc? resultFinDoc;
-      if (event.finDoc.idIsNull()) {
-        // get saved cart
+      if (event.finDoc.idIsNull() && event.finDoc.items.isEmpty) {
+        // get saved cart, unless the new document comes with its own items
         resultFinDoc = await PersistFunctions.getFinDoc(
           event.finDoc.sales,
           event.finDoc.docType!,

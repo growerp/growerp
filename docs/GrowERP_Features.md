@@ -67,7 +67,8 @@ and API key you choose in System Setup.
 - **Landing pages:** generate a complete landing page for a campaign.
 - **Website:** convert an existing website into GrowERP and translate pages and shop
   product and category names into other languages.
-- **Accounting:** translate ledger account names into other languages.
+- **Accounting:** read a supplier invoice from a photo or scan into a purchase invoice
+  to check and save, and translate ledger account names into other languages.
 - **Courses:** generate course media for LinkedIn, Medium, email, YouTube, X and Substack,
   turn a script into a video, and an AI tutor that answers questions about a lesson.
 - **Meetings:** action items in meeting notes become to-dos linked to the lead.
@@ -107,6 +108,8 @@ and API key you choose in System Setup.
 - From one order, create the invoice, payment and shipment automatically.
 - Rental orders with check-in and check-out.
 - Print or download orders and invoices as PDF.
+- Read a supplier invoice from a photo or scan with AI: it opens as a purchase invoice,
+  supplier and items filled in, to check and save.
 
 ## Inventory
 
