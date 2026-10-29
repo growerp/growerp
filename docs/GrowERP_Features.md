@@ -1,149 +1,219 @@
-# Features
+# GrowERP Features
 
-- **Open Source:** GrowERP is a fully open-source ERP system, allowing for complete customization and community-driven development.
+The complete list of what GrowERP does today. Every application is built from the same
+building blocks, so a module described once here works the same way in every app that
+includes it. The [Features page on growerp.com](https://www.growerp.com/modules) gives the
+short overview and links to the sections below.
 
-- **Multi-Platform:** Built with Flutter, the application offers a consistent user experience across:
-	- Web: Accessible from any modern web browser.
-	- Android: Available on the Google Play Store.
-	- iOS: Available on the Apple App Store.
-	- Linux: Snap Store.
-	- macOS: Available on the Mac App Store.
-	- Windows: Microsoft Store.
-
-- **Multi-Tenancy:**
-	- SAAS: Supports multi-company, multi-currency, and multi-language setups for Software as a Service (SaaS) installations.
-	- Single Company: Can be deployed for a single company with existing Moqui or Apache OFBiz installations.
-
-- **Applications:** GrowERP ships several ready-to-use applications built from reusable domain packages:
-	- **Admin Application:** A comprehensive ERP system for managing all aspects of a business.
-	- **Hotel Application:** A specialized application tailored for the hospitality industry.
-	- **Freelance Application:** A project-based work management application for freelancers and service professionals.
-	- **Marketing Application:** Campaigns, website content, outreach and sales pipeline management.
-	- **Rental Application:** Equipment/asset rental scheduling, availability and billing.
-	- **Agents Application:** AI agent chat, governance and organization setup.
-	- **Support Application:** A support and ticketing system.
-	- **Assessment Application:** A lead-capture and AI-scored assessment platform.
-	- **Website Application:** The growerp.org marketing and documentation website.
-
-- **AI-Powered Features:** Integrated AI capabilities powered by Google Gemini, including invoice scanning, assessment scoring, landing page generation, and AI-assisted content creation.
-
-- **Real-Time Chat:** Built-in WebSocket-based chat and notifications for team collaboration. See [Chat Functionality](./GrowERP_Chat_Functionality.md) for details.
-
-- **Data Exchange:** CSV import and export for bulk data operations across all major entities.
-
-- **PDF Reports:** Generate professional PDF reports and documents directly from the application.
-
-- **Payment Integration:** Stripe integration for processing customer payments.
-
-- **Dark Mode:** Full dark mode support across all applications.
-
-- **Demo Data:** The system can be initialized with demo data, providing a pre-populated environment to explore and test the system's features.
-
-- **Local Installation:**
-	- Easy Install: A streamlined command-line installer (`growerp install`) simplifies the setup process.
-	- Manual Install: Detailed, step-by-step instructions are available for manual installation.
-	- Docker Support: The entire GrowERP system can be run locally using Docker containers for a consistent and isolated development environment.
-
-- **Backend:**
-	- Moqui Framework: Powered by the robust and scalable [Moqui Framework](https://www.moqui.org/), providing a solid foundation for the ERP's business logic.
-
-- **Frontend:**
-	- Flutter: The user interface is built with [Flutter](https://flutter.dev/), ensuring a modern, responsive, and cross-platform experience.
-
-- **Generated Business Website:** GrowERP automatically generates a professional, customer-facing website based on the data within the ERP system.
+- [Platform](#platform)
+- [Users and Companies](#users-and-companies)
+- [CRM and Sales](#crm-and-sales)
+- [Catalog](#catalog)
+- [Orders and Invoicing](#orders-and-invoicing)
+- [Inventory](#inventory)
+- [Manufacturing](#manufacturing)
+- [Accounting](#accounting)
+- [Activities and Time](#activities-and-time)
+- [HR](#hr)
+- [Marketing](#marketing)
+- [Outreach](#outreach)
+- [Website](#website)
+- [AI Agent Control Center](#ai-agent-control-center)
+- [Courses](#courses)
+- [Chat and Notifications](#chat-and-notifications)
+- [System Setup](#system-setup)
+- [Industry Apps](#industry-apps)
+- [Technology and Installation](#technology-and-installation)
 
 ---
 
-## Core Modules (Admin Application)
+## Platform
 
-- **Dashboard:** A centralized and customizable dashboard provides a real-time overview of key business metrics and operations.
+- **Open source:** the full code is public; you own your data and can run it yourself.
+- **Every device:** one Flutter app for Web, Android, iOS, macOS, Linux and Windows, with
+  the same data everywhere.
+- **Multi-company (SaaS):** every company is its own tenant with its own users, data,
+  website and settings.
+- **Multi-currency:** company currency of choice plus currency exchange rates.
+- **Multi-language:** app in several languages; website pages and the chart of accounts
+  can be translated.
+- **CSV import and export:** companies, users, products, categories, assets, ledger
+  accounts, item and payment types, orders and invoices.
+- **PDF documents:** print orders, invoices and other documents as PDF.
+- **Payments:** Stripe for online checkout and subscription payments.
+- **Google Workspace:** connect a Google account for two-way calendar sync.
+- **Dark and light mode** in every app.
+- **Demo data:** start with a pre-filled company to explore the system.
+- **Menus per app:** each app shows only the modules it needs; users can hide menu items.
 
-- **User and Company Management:**
-	- **Contact Persons:** Manage contact information and their relationships with companies.
-	- **Employees:** Manage employee data, including access rights (admin or non-admin).
-	- **Suppliers:** Maintain a database of suppliers and their associated information.
-	- **Customers:** Manage customer data and relationships.
+## Users and Companies
 
-- **Catalog Management:**
-	- **Product Types:** Supports various product types, including:
-		- Services: For intangible products.
-		- Physical: For tangible goods.
-		- Rental: For products that are rented out.
-	- **Product Categories:** Organize products into a hierarchical structure for easy management and browsing.
-	- **Standard and Website Categories:** Maintain separate category structures for internal use and the public-facing website.
+- Company profile: name, address, currency, logo, contact details.
+- Employees with access rights (admin or regular user).
+- Customers, suppliers and leads, each linked to their company.
+- Contact persons and their relationship to a company.
+- Security: user groups and the menus they may use.
+- Communications log: emails sent to and received from a contact are recorded on that
+  contact automatically.
 
-- **Order Management:**
-	- **Purchase and Sales Orders:** Create and manage both purchase orders for suppliers and sales orders for customers.
-	- **Flexible Order Items:** Order items can be products from the catalog, rental items, or ad-hoc items without a specific product ID.
-	- **Automated Document Creation:** Automatically generate invoices, payments, and shipments from sales and purchase orders.
+## CRM and Sales
 
-- **Inventory Management:**
-	- **Location Management:** Manage multiple warehouse and inventory locations.
-	- **Shipments:** Track incoming and outgoing shipments.
-	- **Asset Management:** Manage and track company assets.
+- Activities and to-do list for follow-up.
+- Leads and customers lists.
+- Opportunities with stage, amount and probability.
+- Pipeline: Kanban board by stage with a funnel summary.
+- Convert an opportunity to a quote.
 
-- **Manufacturing:**
-	- **Bill of Materials (BOM):** Define and manage product structures and component requirements.
-	- **Work Orders:** Create, schedule, and track production work orders.
-	- **Production Routing:** Define manufacturing steps and routing sequences.
-	- **Production Scheduling:** Plan and manage production schedules across work centers.
+## Catalog
 
-- **Accounting:**
-	- **Sales and Purchase Management:** Full cycle of sales and purchase accounting.
-	- **Invoicing and Payments:** Create and manage customer invoices and supplier payments.
-	- **Automatic Posting:** Configure automatic posting of financial transactions to the ledger.
-	- **Double-Entry Ledger:** A complete double-entry accounting system.
-	- **Flexible Ledger Organization:** The ledger can be organized to fit any business structure.
-	- **Financial Reports:** Period-based financial reporting and analytics.
+- Product types: services, physical goods and rental items.
+- Prices per product.
+- Hierarchical categories, with separate categories for the public website.
+- Subscriptions: recurring products sold to customers.
+- Assets: the physical items (stock, rooms, equipment) behind a product.
 
-- **Activity and Task Management:**
-	- **Task Management:** Create, assign, and track tasks across the organization.
-	- **Event Scheduling:** Schedule and manage business events and appointments.
-	- **Reminders:** Set reminders and follow-up actions for tasks and activities.
+## Orders and Invoicing
 
-- **Marketing and CRM:**
-	- **Opportunity Management:** Track and manage sales opportunities and leads.
-	- **Lead Management:** Capture, score, and nurture leads through the sales pipeline.
-	- **Outreach Campaigns:** Multi-channel campaign management with scheduling and A/B testing.
+- Sales orders and purchase orders.
+- Order items from the catalog, rental items, or free-text items without a product.
+- From one order, create the invoice, payment and shipment automatically.
+- Rental orders with check-in and check-out.
+- Print or download orders and invoices as PDF.
+- Upload a supplier invoice as an image.
 
-- **Sales:**
-	- **Sales Pipeline:** Visualize and manage the full sales pipeline.
-	- **Quotes:** Create and manage customer quotations.
-	- **Analytics:** Sales performance dashboards and analytics.
+## Inventory
 
-- **Website Management:**
-	- **Content Management:** Manage the content of the automatically generated business website, including pages and content blocks.
+- Multiple warehouse locations.
+- Incoming and outgoing shipments, received or sent against orders.
+- Assets per location, with quantities on hand.
 
----
+## Manufacturing
 
-## Hotel Application Modules
+- Bills of materials: the components a product is made from.
+- Routings: the production steps and their sequence.
+- Work orders that move through planning, approved, in progress and complete.
 
-- **Dashboard:** A specialized dashboard designed for the unique needs of hotel operations, providing a quick overview of key metrics.
+## Accounting
 
-- **Room Management:**
-	- **Room and Bed Management:** Manage hotel rooms and their availability, including different room types and bed configurations.
+- Sales invoices and incoming payments.
+- Purchase invoices and outgoing payments.
+- Double-entry general ledger, organised as a tree to fit any business.
+- Ledger accounts, transactions and ledger journals.
+- Automatic posting of invoices and payments to the ledger.
+- Reports: revenue and expenses, balance sheet, balance summary.
+- Setup: time periods, item types, payment types, currency exchange.
+- Cash book for simple bookkeeping, with profit and loss and a tax summary.
 
-- **Reservation Management:**
-	- **Reservation Creation:** Create, view, and manage room reservations.
-	- **Visual Calendar:** A visual reservation calendar with day and week views for easy management of bookings.
+## Activities and Time
 
-- **Accounting:**
-	- **Integrated Accounting:** Full accounting features tailored for the hotel industry, seamlessly integrated with reservation and billing processes.
+- Tasks and events, assigned to people.
+- Time entries logged against an activity.
+- Time entry report.
+- Invoice unbilled time entries in one step.
+- Two-way sync with Google Calendar.
 
----
+## HR
 
-## Freelance Application Modules
+- My HR: employees see their own profile, leave balances, leave requests and onboarding
+  checklist.
+- Employees with job title, department, manager, hire date and status.
+- Leave requests with approve and reject.
+- Departments and job titles.
+- Onboarding checklist template for new employees.
 
-- **Dashboard:** An overview of active projects, tasks, and billable hours.
+## Marketing
 
-- **Project Management:** Create and manage client projects, milestones, and deliverables.
+- Setup guide for the marketing module.
+- Personas: who you are writing for.
+- Content plans and content ideas.
+- Master content turned into posts per platform.
+- Social posts published, or scheduled, to LinkedIn, X, Facebook, Medium and Substack.
+- Email sequences for lead nurturing.
+- Engagements: comments and reactions collected from published posts.
+- Newsletter sync of new signups to Substack, MailerLite and BirdSend.
 
-- **Task Management:** Assign and track tasks within projects.
+## Outreach
 
-- **Time Tracking:** Log billable and non-billable hours against projects and tasks.
+- Setup guide for outreach.
+- Campaigns with target audience and message templates with variables.
+- Channels: email, LinkedIn and X.
+- Automation runs the campaign, within the rate limits of each platform.
+- Platform configuration per channel.
+- Messages sent and received, and a LinkedIn send queue.
 
-- **Invoicing:** Generate and manage invoices based on logged time and project costs.
+## Website
 
-- **Accounting:** Full accounting cycle including payments and ledger management.
+- A public website generated from your company data: content pages, product catalog and
+  web shop with checkout.
+- Edit pages and content blocks in the app.
+- Landing pages for campaigns.
+- Assessments: questionnaires that score a lead and capture their details.
+- Web forms for contact and signup.
+- Convert an existing website into a GrowERP website, and translate pages to other
+  languages.
+- Chat widget on the website.
+- Your own domain name.
 
+## AI Agent Control Center
 
+- Setup guide for agents.
+- AI agents with their own instructions, input parameters and schedule.
+- Tools and integrations: connect agents to GrowERP and to outside MCP servers.
+- Agent jobs: scheduled and recurring runs.
+- Approvals: changes an agent wants to make wait for a person to approve.
+- Agent actions: a log of everything an agent did.
+- Knowledge base of your own documents that agents can search.
+- Wiki for company knowledge.
+- Agent catalog: ready-made agents to start from.
+
+## Courses
+
+- Courses with modules and lessons.
+- Participants and their progress.
+- Course media: AI-generated content for LinkedIn, Medium, email, YouTube, X and Substack.
+- AI tutor that answers questions about a lesson.
+- Quizzes and exercises.
+- Guides inside the app to learn each module.
+
+## Chat and Notifications
+
+- Real-time chat between users of the same company.
+- Notifications in the app.
+
+## System Setup
+
+- AI: choose the AI model and enter the API key.
+- Email: your company's own outgoing mail server.
+- Backup: download your company data and import it again.
+- Guides: step-by-step guides per module.
+
+## Industry Apps
+
+Ready-to-use apps, each a selection of the modules above plus what that business needs.
+
+- **Admin:** the full ERP with every module.
+- **Hotel:** rooms and room types, seasonal rates, reservation Gantt chart, reservations, check-in and check-out,
+  housekeeping, occupancy and average daily rate reports.
+- **Rental:** equipment and equipment types, rates, rentals with pickup and return, Gantt
+  availability timeline, utilisation statistics.
+- **Freelance:** tasks and assistant hours, CRM, catalog and orders, invoices, cash book
+  bookkeeping with profit and loss and tax summary.
+- **Insurance:** policies per carrier, renewals due, claims, clients, carriers,
+  commissions, and a client portal where clients see their own policies.
+- **Marketing:** marketing, outreach, website and opportunities.
+- **Agents:** the AI Agent Control Center on its own.
+- **Academy:** courses for learners.
+- **Support:** for the platform operator: applications, owners, signups, website tools and
+  translations, ledger translation, AI usage, agent catalog, statistics, infrastructure and
+  system defaults.
+
+## Technology and Installation
+
+- **Backend:** [Moqui Framework](https://www.moqui.org/) with the Mantle business data
+  model.
+- **Frontend:** [Flutter](https://flutter.dev/), built from reusable building-block
+  packages.
+- **REST API** between app and backend; an MCP server lets AI clients use GrowERP.
+- **Hosted:** use our cloud at [growerp.com](https://www.growerp.com).
+- **Self-hosted:** run the whole system with Docker, or install it step by step.
+- **Single company:** can also be used with an existing Moqui installation.
