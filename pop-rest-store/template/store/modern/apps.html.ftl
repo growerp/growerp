@@ -20,7 +20,7 @@
         <div class="l-glass rounded-2xl p-8">
             <h2 class="font-display text-2xl md:text-3xl font-bold text-on-surface tracking-tight mb-2">AI Built In</h2>
             <p class="text-on-surface-variant mb-8">AI works inside every module, with the model and key you choose, and nothing changes without your approval.</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                 <div class="flex items-start gap-3">
                     <span class="material-symbols-outlined icon-fill text-primary shrink-0">forum</span>
                     <div>
@@ -47,6 +47,13 @@
                     <div>
                         <h3 class="font-label text-sm font-semibold text-on-surface mb-1">Landing Pages &amp; Websites</h3>
                         <p class="text-on-surface-variant text-sm">Generate a landing page, or convert your existing website.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined icon-fill text-primary shrink-0">document_scanner</span>
+                    <div>
+                        <h3 class="font-label text-sm font-semibold text-on-surface mb-1">Invoice Reading</h3>
+                        <p class="text-on-surface-variant text-sm">A photo of a supplier invoice becomes a purchase invoice to check.</p>
                     </div>
                 </div>
                 <div class="flex items-start gap-3">
@@ -207,7 +214,7 @@
                     <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span> Auto Invoice, Payment &amp; Shipment
                 </li>
                 <li class="flex items-center gap-3">
-                    <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span> Rental Check-in / Check-out
+                    <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span> AI Invoice Reading
                 </li>
                 <li class="flex items-center gap-3">
                     <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span> PDF Documents
