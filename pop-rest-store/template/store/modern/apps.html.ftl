@@ -641,15 +641,15 @@
             <div class="flex items-start gap-3 p-4">
                 <span class="material-symbols-outlined text-tertiary shrink-0">currency_exchange</span>
                 <div>
-                    <h3 class="font-label text-sm font-semibold text-on-surface mb-1">Multi-Currency</h3>
-                    <p class="text-on-surface-variant text-sm">Your currency plus exchange rates.</p>
+                    <h3 class="font-label text-sm font-semibold text-on-surface mb-1">Multi-Currency &amp; Language</h3>
+                    <p class="text-on-surface-variant text-sm">Exchange rates, and app, website and ledger translations.</p>
                 </div>
             </div>
             <div class="flex items-start gap-3 p-4">
-                <span class="material-symbols-outlined text-tertiary shrink-0">translate</span>
+                <span class="material-symbols-outlined text-tertiary shrink-0">download</span>
                 <div>
-                    <h3 class="font-label text-sm font-semibold text-on-surface mb-1">Multi-Language</h3>
-                    <p class="text-on-surface-variant text-sm">App, website and ledger translations.</p>
+                    <h3 class="font-label text-sm font-semibold text-on-surface mb-1">Download All Your Data</h3>
+                    <p class="text-on-surface-variant text-sm">Everything of your company in one zip file, any time.</p>
                 </div>
             </div>
             <div class="flex items-start gap-3 p-4">

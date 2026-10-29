@@ -31,6 +31,9 @@ short overview and links to the sections below.
 ## Platform
 
 - **Open source:** the full code is public; you own your data and can run it yourself.
+- **Download all your data:** an admin downloads everything of the company as one zip file,
+  any time (System Setup → Backup). No lock-in: support can load that file as a new company,
+  for example on your own server.
 - **Every device:** one Flutter app for Web, Android, iOS, macOS, Linux and Windows, with
   the same data everywhere.
 - **Multi-company (SaaS):** every company is its own tenant with its own users, data,
@@ -208,7 +211,7 @@ and API key you choose in System Setup.
 
 - AI: choose the AI model and enter the API key.
 - Email: your company's own outgoing mail server.
-- Backup: download your company data and import it again.
+- Backup: download all company data as one zip file.
 - Guides: step-by-step guides per module.
 
 ## Industry Apps
