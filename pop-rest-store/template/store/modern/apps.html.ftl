@@ -606,7 +606,7 @@
             <a href="https://github.com/growerp/growerp/blob/master/docs/GrowERP_Features.md#industry-apps" target="_blank" rel="noopener" class="inline-flex items-center gap-1 font-label text-sm font-semibold text-primary hover:underline">
                 All app features <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
             </a>
-            <a href="/verticals" class="inline-flex items-center gap-1 font-label text-sm font-semibold text-primary hover:underline">
+            <a href="/content/verticals" class="inline-flex items-center gap-1 font-label text-sm font-semibold text-primary hover:underline">
                 Download the apps <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
             </a>
         </div>
