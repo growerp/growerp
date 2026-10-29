@@ -1,0 +1,120 @@
+name: Hotfix Production
+
+# Ship a backend fix to production without going through staging or review.
+# Run it on a release branch (e.g. 1.20) that holds the version production runs
+# plus the cherry-picked fix: it builds growerp-moqui from that branch, pushes
+# only the version tag (next patch, e.g. 1.20.1) and never :latest, so the
+# staging swarm (which follows :latest) keeps its version. Then it points
+# moqui-prod on growerp.com at the new image.
+#
+#   gh workflow run hotfix-production.yml --ref 1.20
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: update-production
+  cancel-in-progress: false
+
+permissions:
+  contents: write # push the version tag
+  packages: write # push the image to ghcr.io
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Check the branch is a release branch
+        run: |
+          if [[ ! "${{ github.ref_name }}" =~ ^[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::run this on a release branch like 1.20, not '${{ github.ref_name }}'"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Next patch version
+        id: version
+        run: |
+          minor="${{ github.ref_name }}"
+          last=$(git tag -l "${minor}.*" | grep -E "^${minor//./\\.}\.[0-9]+$" | sort -V | tail -1)
+          if [[ -z "$last" ]]; then
+            echo "::error::no ${minor}.N tag found"
+            exit 1
+          fi
+          version="${minor}.$(( ${last##*.} + 1 ))"
+          if git rev-parse -q --verify "refs/tags/$version" >/dev/null; then
+            echo "::error::tag $version exists already"
+            exit 1
+          fi
+          echo "Hotfix version: $version (after $last)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # The Dockerfile clones the branch from GitHub itself, so it builds what is pushed.
+      - name: Build and push growerp-moqui:${{ steps.version.outputs.version }}
+        env:
+          DOCKER_BUILDKIT: "1"
+          IMAGE: ghcr.io/growerp/growerp-moqui:${{ steps.version.outputs.version }}
+        run: |
+          docker build --build-arg BRANCH=${{ github.ref_name }} \
+            --build-arg DOCKER_TAG=${{ steps.version.outputs.version }} \
+            --label version=${{ steps.version.outputs.version }} \
+            --progress=plain --no-cache -t "$IMAGE" .
+          docker push "$IMAGE"
+
+      - name: Tag ${{ steps.version.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ steps.version.outputs.version }}" -m "hotfix production: growerp-moqui ${{ steps.version.outputs.version }}"
+          git push origin "refs/tags/${{ steps.version.outputs.version }}"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Update moqui-prod on growerp.com
+        uses: appleboy/ssh-action@v1
+        with:
+          host: growerp.com
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          command_timeout: 25m
+          script: |
+            set -e
+            version="${{ needs.build.outputs.version }}"
+            image="ghcr.io/growerp/growerp-moqui:$version"
+            running=$(docker service inspect growerp_moqui-prod --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}')
+            current="${running%%@*}"; current="${current##*:}"
+            echo "Production runs $current, hotfix is $version"
+            # only a later patch of the same minor: never a downgrade or a minor jump
+            if [[ "${current%.*}" != "${version%.*}" || "${current##*.}" -ge "${version##*.}" ]]; then
+              echo "::error::production runs $current, refusing to deploy $version"
+              exit 1
+            fi
+            docker service update --with-registry-auth --image "$image" growerp_moqui-prod
+            # keep the stack file in step, the same edit sync-to-prod.sh makes
+            sed -i "s|image: ghcr.io/growerp/growerp-moqui:.*|image: $image # Hotfix: $(date +%Y-%m-%d)|" server/swarm/apps-prod.yml
+            docker service inspect growerp_moqui-prod --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}'
+
+      - name: Summary
+        run: |
+          {
+            echo "### Hotfix production: growerp-moqui ${{ needs.build.outputs.version }}"
+            echo "moqui-prod on growerp.com now runs ghcr.io/growerp/growerp-moqui:${{ needs.build.outputs.version }}."
+            echo "server/swarm/apps-prod.yml was edited on the server: copy it into the server repo and commit it."
+          } >> "$GITHUB_STEP_SUMMARY"
