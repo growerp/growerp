@@ -6,6 +6,7 @@ includes it. The [Features page on growerp.com](https://www.growerp.com/modules)
 short overview and links to the sections below.
 
 - [Platform](#platform)
+- [AI Features](#ai-features)
 - [Users and Companies](#users-and-companies)
 - [CRM and Sales](#crm-and-sales)
 - [Catalog](#catalog)
@@ -46,6 +47,30 @@ short overview and links to the sections below.
 - **Demo data:** start with a pre-filled company to explore the system.
 - **Menus per app:** each app shows only the modules it needs; users can hide menu items.
 
+## AI Features
+
+AI is built into the modules, not bolted on next to them. Every AI feature uses the model
+and API key you choose in System Setup.
+
+- **Your choice of model:** Google Gemini, Anthropic Claude or OpenAI, with your own key.
+- **AI chat assistant:** ask in plain words in the Admin, Freelance and Agents apps; the
+  assistant looks up your data and opens the right screen.
+- **AI agents:** agents that run on a schedule across every module; changes they want to
+  make wait for your approval, and every action is logged.
+- **Knowledge base:** agents search your own documents and wiki before they answer.
+- **Marketing:** generate personas, your company's writing style, content plans, master
+  content, articles from content ideas and social post drafts.
+- **Outreach:** generate outreach campaigns and the message for each platform.
+- **Landing pages:** generate a complete landing page for a campaign.
+- **Website:** convert an existing website into GrowERP and translate pages and shop
+  product and category names into other languages.
+- **Accounting:** translate ledger account names into other languages.
+- **Courses:** generate course media for LinkedIn, Medium, email, YouTube, X and Substack,
+  turn a script into a video, and an AI tutor that answers questions about a lesson.
+- **Meetings:** action items in meeting notes become to-dos linked to the lead.
+- **Use GrowERP from your own AI:** the built-in MCP server lets AI clients such as Claude
+  work with your GrowERP data.
+
 ## Users and Companies
 
 - Company profile: name, address, currency, logo, contact details.
@@ -79,7 +104,6 @@ short overview and links to the sections below.
 - From one order, create the invoice, payment and shipment automatically.
 - Rental orders with check-in and check-out.
 - Print or download orders and invoices as PDF.
-- Upload a supplier invoice as an image.
 
 ## Inventory
 

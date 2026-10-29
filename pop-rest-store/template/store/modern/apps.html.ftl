@@ -9,10 +9,79 @@
     <!-- Header Section -->
     <section class="max-w-container mx-auto px-4 md:px-12 mb-12">
         <h1 class="font-display text-4xl md:text-5xl font-bold text-on-surface tracking-tight mb-2">Features</h1>
-        <p class="text-lg text-on-surface-variant mb-6">Seamlessly integrated modules, industry apps built from them, and one platform underneath.</p>
+        <p class="text-lg text-on-surface-variant mb-6">AI built in, seamlessly integrated modules, industry apps built from them, and one platform underneath.</p>
         <a href="https://github.com/growerp/growerp/blob/master/docs/GrowERP_Features.md" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/10 hover:bg-white/5 text-on-surface font-label text-sm font-semibold px-6 py-3 rounded-lg transition-colors">
             <span class="material-symbols-outlined text-primary text-[18px]">list_alt</span> See the complete feature list
         </a>
+    </section>
+
+    <!-- AI Built In -->
+    <section class="max-w-container mx-auto px-4 md:px-12 mb-24">
+        <div class="l-glass rounded-2xl p-8">
+            <h2 class="font-display text-2xl md:text-3xl font-bold text-on-surface tracking-tight mb-2">AI Built In</h2>
+            <p class="text-on-surface-variant mb-8">AI works inside every module, with the model and key you choose, and nothing changes without your approval.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined icon-fill text-primary shrink-0">forum</span>
+                    <div>
+                        <h3 class="font-label text-sm font-semibold text-on-surface mb-1">AI Chat Assistant</h3>
+                        <p class="text-on-surface-variant text-sm">Ask in plain words; it finds your data and opens the right screen.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined icon-fill text-primary shrink-0">smart_toy</span>
+                    <div>
+                        <h3 class="font-label text-sm font-semibold text-on-surface mb-1">Scheduled AI Agents</h3>
+                        <p class="text-on-surface-variant text-sm">Agents work on a schedule; their changes wait for your approval.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined icon-fill text-primary shrink-0">edit_note</span>
+                    <div>
+                        <h3 class="font-label text-sm font-semibold text-on-surface mb-1">Marketing Content</h3>
+                        <p class="text-on-surface-variant text-sm">Personas, content plans, articles, social posts and outreach campaigns.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined icon-fill text-primary shrink-0">web</span>
+                    <div>
+                        <h3 class="font-label text-sm font-semibold text-on-surface mb-1">Landing Pages &amp; Websites</h3>
+                        <p class="text-on-surface-variant text-sm">Generate a landing page, or convert your existing website.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined icon-fill text-primary shrink-0">translate</span>
+                    <div>
+                        <h3 class="font-label text-sm font-semibold text-on-surface mb-1">Translation</h3>
+                        <p class="text-on-surface-variant text-sm">Website pages, shop products and ledger accounts in other languages.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined icon-fill text-primary shrink-0">school</span>
+                    <div>
+                        <h3 class="font-label text-sm font-semibold text-on-surface mb-1">Courses &amp; Tutor</h3>
+                        <p class="text-on-surface-variant text-sm">Course media, videos from a script, and an AI tutor per lesson.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined icon-fill text-primary shrink-0">psychology</span>
+                    <div>
+                        <h3 class="font-label text-sm font-semibold text-on-surface mb-1">Your Choice of Model</h3>
+                        <p class="text-on-surface-variant text-sm">Gemini, Claude or OpenAI, with your own API key.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined icon-fill text-primary shrink-0">hub</span>
+                    <div>
+                        <h3 class="font-label text-sm font-semibold text-on-surface mb-1">Works with Your AI</h3>
+                        <p class="text-on-surface-variant text-sm">The built-in MCP server lets AI clients such as Claude use GrowERP.</p>
+                    </div>
+                </div>
+            </div>
+            <a href="https://github.com/growerp/growerp/blob/master/docs/GrowERP_Features.md#ai-features" target="_blank" rel="noopener" class="inline-flex items-center gap-1 font-label text-sm font-semibold text-primary hover:underline">
+                All AI features <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </a>
+        </div>
     </section>
 
     <!-- Modules Grid -->
