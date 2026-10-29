@@ -12,6 +12,7 @@
  * limitations under the License.
  */
 
+import com.sun.net.httpserver.HttpServer
 import org.moqui.Moqui
 import org.moqui.context.ExecutionContext
 import org.slf4j.Logger
@@ -27,6 +28,8 @@ import spock.lang.Specification
      so generation never fails on it
    - userContent: a text prompt stays text; an image goes with it in the format of
      Gemini, Anthropic and OpenAI
+   - postJson retries a read timeout and a 5xx answer, like a 429 (a website translation
+     failed on a Gemini 'Read timed out', 2026-10-29)
 
    To run: make sure moqui is in place with a loaded database, backend not running, then:
     "cd moqui && ./gradlew :runtime:component:growerp:test"
@@ -103,5 +106,41 @@ class GeminiAiUtilTests extends Specification {
         util.userContent('openai', 'read it', image) ==
                 [[type: 'text', text: 'read it'],
                  [type: 'image_url', image_url: [url: 'data:image/png;base64,QUJD']]]
+    }
+
+    /** a local server that answers each request with the next of [answers]: a status code,
+     *  or 'hang' to keep the connection open past the read timeout */
+    private HttpServer fakeLlm(List answers) {
+        HttpServer server = HttpServer.create(new InetSocketAddress('127.0.0.1', 0), 0)
+        int calls = 0
+        server.createContext('/') { exchange ->
+            def answer = answers[Math.min(calls++, answers.size() - 1)]
+            if (answer == 'hang') Thread.sleep(3000)
+            byte[] body = (answer == 200 ? 'ok' : 'busy').bytes
+            exchange.sendResponseHeaders(answer == 'hang' ? 200 : answer as int, body.length)
+            exchange.responseBody.withStream { it.write(body) }
+        }
+        server.start()
+        return server
+    }
+
+    def "a read timeout or a 5xx answer is retried"() {
+        setup:
+        HttpServer server = fakeLlm(answers)
+        int readTimeout = util.readTimeoutMs
+        int retryWait = util.retryWaitSeconds
+        util.readTimeoutMs = 1000
+        util.retryWaitSeconds = 0
+
+        expect:
+        util.postJson(ec, "http://127.0.0.1:${server.address.port}/", [:], '{}', 'Fake') == 'ok'
+
+        cleanup:
+        server.stop(0)
+        util.readTimeoutMs = readTimeout
+        util.retryWaitSeconds = retryWait
+
+        where:
+        answers << [['hang', 200], [503, 200], [500, 502, 200]]
     }
 }

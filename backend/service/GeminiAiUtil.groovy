@@ -40,6 +40,10 @@ class GeminiAiUtil {
     static final String ANTHROPIC_VERSION = "2023-06-01"
     static final String OPENAI_URL = "https://api.openai.com/v1/chat/completions"
     static final int MAX_RETRIES = 3
+    // not final: the Spock spec shortens them against a local fake server
+    // a long page written by a thinking model can take minutes; a hung call is retried
+    static int readTimeoutMs = 300000
+    static int retryWaitSeconds = 10
     // allowance weight of image and speech tokens: output priced ~10x / ~4x a text token
     static final int IMAGE_TOKEN_WEIGHT = 10
     static final int TTS_TOKEN_WEIGHT = 4
@@ -331,7 +335,9 @@ price, customer case or link, and never invent ones that are not here):
 
     /**
      * POST a JSON body and return the response text, throwing with the API's own error message
-     * on a non-200. A 429 (rate limited) is retried up to MAX_RETRIES times with a growing wait.
+     * on a non-200. A 429 (rate limited), a 5xx (provider overloaded) and a read timeout are
+     * retried up to MAX_RETRIES times with a growing wait: all three are passing, and one failed
+     * call can fail a whole multi page job such as a website translation.
      */
     private static String postJson(def ec, String urlText, Map headers, String requestBody, String label) {
         for (int attempt = 0; attempt <= MAX_RETRIES; attempt++) {
@@ -341,20 +347,29 @@ price, customer case or link, and never invent ones that are not here):
             headers.each { key, value -> connection.setRequestProperty(key as String, value as String) }
             connection.setDoOutput(true)
             connection.setConnectTimeout(30000)  // 30 seconds
-            connection.setReadTimeout(120000)    // 2 minutes for complex prompts
+            connection.setReadTimeout(readTimeoutMs)
 
-            connection.outputStream.withWriter("UTF-8") { writer -> writer.write(requestBody) }
-
-            def responseCode = connection.responseCode
-            ec.logger.info("${label} API response code: ${responseCode}")
-            if (responseCode == 200) return connection.inputStream.text
+            int waitSeconds = (attempt + 1) * retryWaitSeconds  // 10s, 20s, 30s
+            def responseCode
+            try {
+                connection.outputStream.withWriter("UTF-8") { writer -> writer.write(requestBody) }
+                responseCode = connection.responseCode
+                ec.logger.info("${label} API response code: ${responseCode}")
+                if (responseCode == 200) return connection.inputStream.text
+            } catch (SocketTimeoutException e) {
+                connection.disconnect()
+                if (attempt >= MAX_RETRIES) throw e
+                ec.logger.warn("${label} API read timed out, waiting ${waitSeconds}s before " +
+                    "retry ${attempt + 1}/${MAX_RETRIES}")
+                Thread.sleep(waitSeconds * 1000L)
+                continue
+            }
 
             def errorStream = connection.errorStream
             def errorText = errorStream ? errorStream.text : "No error details available"
             connection.disconnect()
-            if (responseCode == 429 && attempt < MAX_RETRIES) {
-                int waitSeconds = (attempt + 1) * 10  // 10s, 20s, 30s
-                ec.logger.warn("${label} API rate limited (429), waiting ${waitSeconds}s before " +
+            if ((responseCode == 429 || responseCode >= 500) && attempt < MAX_RETRIES) {
+                ec.logger.warn("${label} API busy (${responseCode}), waiting ${waitSeconds}s before " +
                     "retry ${attempt + 1}/${MAX_RETRIES}")
                 Thread.sleep(waitSeconds * 1000L)
                 continue
@@ -362,7 +377,7 @@ price, customer case or link, and never invent ones that are not here):
             ec.logger.error("${label} API error (${responseCode}): ${errorText}")
             throw new Exception("${label} API error (${responseCode}): ${errorText}")
         }
-        throw new Exception("${label} API still rate limited after ${MAX_RETRIES} retries")
+        throw new Exception("${label} API still failing after ${MAX_RETRIES} retries")
     }
 
     /**
