@@ -7,26 +7,12 @@ abstract class InvoiceUploadEvent extends Equatable {
   List<Object> get props => [];
 }
 
+/// read a supplier invoice image into a purchase invoice to review
 class InvoiceUploadImage extends InvoiceUploadEvent {
-  const InvoiceUploadImage({
-    required this.image,
-    required this.prompt,
-    required this.mimeType,
-  });
+  const InvoiceUploadImage(this.image);
 
   final XFile image;
-  final String prompt;
-  final String mimeType;
 
   @override
-  List<Object> get props => [image, prompt, mimeType];
-}
-
-class InvoiceCreate extends InvoiceUploadEvent {
-  const InvoiceCreate(this.invoiceData);
-
-  final Map<String, dynamic> invoiceData;
-
-  @override
-  List<Object> get props => [invoiceData];
+  List<Object> get props => [image];
 }
