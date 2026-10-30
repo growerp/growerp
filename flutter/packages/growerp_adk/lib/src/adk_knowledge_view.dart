@@ -762,17 +762,21 @@ class _AdkKnowledgeViewState extends State<AdkKnowledgeView> {
     return Padding(
       key: const Key('knowledgeStats'),
       padding: const EdgeInsets.symmetric(horizontal: 8),
+      // own Material: the shell's ColoredBox would hide the tile's ink
       child: isAPhone(context)
-          ? ExpansionTile(
-              key: const Key('knowledgeStatsTile'),
-              title: Text(
-                '${l.adk_kStatsTitle}: ${st.docCount} ${l.adk_kStatDocs.toLowerCase()}',
+          ? Material(
+              type: MaterialType.transparency,
+              child: ExpansionTile(
+                key: const Key('knowledgeStatsTile'),
+                title: Text(
+                  '${l.adk_kStatsTitle}: ${st.docCount} ${l.adk_kStatDocs.toLowerCase()}',
+                ),
+                leading: warnings.isEmpty
+                    ? const Icon(Icons.insights)
+                    : Icon(Icons.warning_amber, color: theme.colorScheme.error),
+                childrenPadding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                children: [body],
               ),
-              leading: warnings.isEmpty
-                  ? const Icon(Icons.insights)
-                  : Icon(Icons.warning_amber, color: theme.colorScheme.error),
-              childrenPadding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-              children: [body],
             )
           : Padding(padding: const EdgeInsets.all(8), child: body),
     );
