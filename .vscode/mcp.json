@@ -1,8 +1,26 @@
 {
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "github_token",
+      "description": "GitHub Personal Access Token",
+      "password": true
+    }
+  ],
   "servers": {
     "jcodemunch-mcp": {
       "type": "stdio",
       "command": "/home/hans/.local/bin/jcodemunch-mcp"
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${input:github_token}"
+      }
     }
   }
 }
