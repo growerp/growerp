@@ -53,15 +53,31 @@ release, in the form of the previous release notes; checked in the editor before
    then "publish metadata to stores" (opt), all on the review branch (master has
    moved on). The binary creates the new store version, metadata can only write
    into it; the Windows binary submission carries its listing itself, so metadata
-   leaves Windows out by default. No "update staging" between step 3 and this step: the binaries must be the frozen version.
+   leaves Windows out by default.
+   "Update staging" on master may run meanwhile: the binaries are built from the
+   review branch.
    Their commits (build numbers, screenshots) stay on the review branch: the next
    publish takes the build numbers from the stores.
 
 The first "update staging" on master after a freeze is a minor bump (1.22 in review →
 master 1.23.0): the patch versions 1.22.N belong to the review branch. The script
-proposes it.
+proposes it, and the workflow turns a patch bump into a minor bump by itself once
+the review branch of master's minor exists (so also the weekly scheduled run).
 
 ### Fix the version in review
+
+A backend fix, like a production hotfix:
+
+1. Fix on master first (test first), then `git cherry-pick` the fix onto the review
+   branch and push.
+2. `gh workflow run hotfix-review.yml --ref 1.22`, only after staging moved on to the
+   next minor (master 1.23.0; it refuses before): builds growerp-moqui 1.22.N+1 from
+   the review branch (version tag only, staging keeps its version), points
+   moqui-review at it and records it in review-versions.conf, so "update production"
+   promotes the fixed backend. Then copy `apps-review.yml` and `review-versions.conf`
+   from the server into the server repo.
+
+A fix that needs new binaries:
 
 1. Fix on master first (test first), then `git cherry-pick` the fix onto the review
    branch and push.

@@ -1,0 +1,118 @@
+name: Hotfix Review
+
+# Ship a backend fix to the store review backend (backend.growerp.net) without
+# going through staging. Run it on the review branch (e.g. 1.22) that holds the
+# version in review plus the cherry-picked fix: it builds growerp-moqui from that
+# branch, pushes only the version tag (next patch, e.g. 1.22.1) and never :latest,
+# so the staging swarm (which follows :latest) keeps its version. Then
+# 'review.sh hotfix' points moqui-review at the new image and records it in
+# review-versions.conf, so Update Production promotes the fixed backend.
+#
+#   gh workflow run hotfix-review.yml --ref 1.22
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: freeze-review
+  cancel-in-progress: false
+
+permissions:
+  contents: write # push the version tag
+  packages: write # push the image to ghcr.io
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Check the branch is a release branch
+        run: |
+          if [[ ! "${{ github.ref_name }}" =~ ^[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::run this on a release branch like 1.20, not '${{ github.ref_name }}'"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # The review's patch versions are free only once staging moved on to the next minor
+      - name: Check staging is past the review version
+        run: |
+          minor="${{ github.ref_name }}"
+          master=$(git show origin/master:flutter/packages/admin/pubspec.yaml \
+            | grep -m1 '^version:' | sed 's/^version:[[:space:]]*//; s/+.*//')
+          if [[ "$(printf '%s\n%s\n' "${master%.*}" "$minor" | sort -V | tail -1)" == "$minor" ]]; then
+            echo "::error::master is $master: run Update Staging (minor bump) on master first"
+            exit 1
+          fi
+
+      - name: Next patch version
+        id: version
+        run: |
+          minor="${{ github.ref_name }}"
+          last=$(git tag -l "${minor}.*" | grep -E "^${minor//./\\.}\.[0-9]+$" | sort -V | tail -1)
+          if [[ -z "$last" ]]; then
+            echo "::error::no ${minor}.N tag found"
+            exit 1
+          fi
+          version="${minor}.$(( ${last##*.} + 1 ))"
+          if git rev-parse -q --verify "refs/tags/$version" >/dev/null; then
+            echo "::error::tag $version exists already"
+            exit 1
+          fi
+          echo "Hotfix version: $version (after $last)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # The Dockerfile clones the branch from GitHub itself, so it builds what is pushed.
+      - name: Build and push growerp-moqui:${{ steps.version.outputs.version }}
+        env:
+          DOCKER_BUILDKIT: "1"
+          IMAGE: ghcr.io/growerp/growerp-moqui:${{ steps.version.outputs.version }}
+        run: |
+          docker build --build-arg BRANCH=${{ github.ref_name }} \
+            --build-arg DOCKER_TAG=${{ steps.version.outputs.version }} \
+            --label version=${{ steps.version.outputs.version }} \
+            --progress=plain --no-cache -t "$IMAGE" .
+          docker push "$IMAGE"
+
+      - name: Tag ${{ steps.version.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ steps.version.outputs.version }}" -m "hotfix review: growerp-moqui ${{ steps.version.outputs.version }}"
+          git push origin "refs/tags/${{ steps.version.outputs.version }}"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Update moqui-review on growerp.com
+        uses: appleboy/ssh-action@v1
+        with:
+          host: growerp.com
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          command_timeout: 25m
+          script: |
+            cd server/swarm && ./review.sh hotfix ${{ needs.build.outputs.version }} --apply && ./review.sh status
+
+      - name: Summary
+        run: |
+          {
+            echo "### Hotfix review: growerp-moqui ${{ needs.build.outputs.version }}"
+            echo "moqui-review (backend.growerp.net) now runs ghcr.io/growerp/growerp-moqui:${{ needs.build.outputs.version }}."
+            echo "server/swarm/apps-review.yml and review-versions.conf were edited on the server: copy them into the server repo and commit them."
+          } >> "$GITHUB_STEP_SUMMARY"

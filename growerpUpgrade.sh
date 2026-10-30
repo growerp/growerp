@@ -524,7 +524,6 @@ cmd_review() {
         confirm "Freeze for review?" || return
         run_workflow freeze-review.yml
         cut_review_branch
-        warn "No 'update staging' until the binaries are published: they must be the frozen version."
     fi
     # The binary creates the new store version, metadata writes into it (the Windows
     # binary submission carries its listing itself); both use the screenshots. They

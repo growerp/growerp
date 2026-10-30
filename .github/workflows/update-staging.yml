@@ -1,12 +1,18 @@
 name: Update Staging
 
-# Manually trigger a staging update from GitHub Actions.
+# Manually trigger a staging update from GitHub Actions, or let the weekly
+# schedule do it (patch bump, all apps) when master changed since the last one.
+# A patch bump becomes a minor bump once the review branch of the current minor
+# exists: its patch versions are for Hotfix Review.
 # No extra secrets needed — GITHUB_TOKEN is used for both git push and ghcr.io.
 # Required repository / organisation settings:
 #   Settings → Actions → General → Workflow permissions → "Read and write permissions"
 #   Settings → Packages → "Inherit access from repository" (so the image is published)
 
 on:
+  # Fridays 06:00 Bangkok time (UTC+7) = Thursdays 23:00 UTC
+  schedule:
+    - cron: "0 23 * * 4"
   workflow_dispatch:
     inputs:
       bump:
@@ -39,10 +45,59 @@ permissions:
 
 jobs:
   # ───────────────────────────────────────────────────────────────────────────
+  # 0. A scheduled run only updates staging when commits landed since the last
+  #    version tag, other than the version bumps the workflows commit themselves.
+  # ───────────────────────────────────────────────────────────────────────────
+  check-changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      changed: ${{ steps.check.outputs.changed }}
+      bump: ${{ steps.bump.outputs.bump }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for changes since the last staging update
+        id: check
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          TAG=$(git describe --tags --abbrev=0 --match '[0-9]*.[0-9]*.[0-9]*' HEAD)
+          COUNT=$(git log --format=%an "$TAG"..HEAD | grep -vc '^GitHub Actions$' || true)
+          echo "Commits since $TAG: $COUNT"
+          if [ "$COUNT" -gt 0 ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "::notice::No changes since $TAG — staging not updated"
+          fi
+
+      # The N.M.x patch versions belong to review branch N.M (Hotfix Review), so
+      # once that branch exists, master moves on to the next minor version.
+      - name: Resolve bump
+        id: bump
+        run: |
+          BUMP="${{ inputs.bump || 'patch' }}"
+          CURRENT=$(grep -m1 '^version:' flutter/packages/admin/pubspec.yaml | sed 's/^version:[[:space:]]*//; s/+.*//')
+          MINOR="${CURRENT%.*}"
+          if [ "$BUMP" = "patch" ] && [ "${{ github.ref_name }}" != "$MINOR" ] \
+            && git ls-remote --exit-code --heads origin "$MINOR" >/dev/null; then
+            echo "::notice::review branch $MINOR exists — minor bump instead of patch"
+            BUMP=minor
+          fi
+          echo "bump=$BUMP" >> $GITHUB_OUTPUT
+
+  # ───────────────────────────────────────────────────────────────────────────
   # 1. Bump version files only — no git commit, no docker build yet.
   #    Bumped pubspecs are uploaded as an artifact for all build-image jobs.
   # ───────────────────────────────────────────────────────────────────────────
   prepare:
+    needs: check-changes
+    if: needs.check-changes.outputs.changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     outputs:
@@ -57,7 +112,7 @@ jobs:
       - name: Resolve app list
         id: resolve-apps
         env:
-          APPS_INPUT: ${{ inputs.apps }}
+          APPS_INPUT: ${{ inputs.apps || 'all' }}
         run: |
           # apps / stores inputs: "all" or a comma list (e.g. admin,hotel), case and spaces ignored.
           # Sets the ALL_*/APP_*/STORE_* flags the selection below works with.
@@ -125,7 +180,7 @@ jobs:
 
       - name: Bump version files
         working-directory: flutter
-        run: dart release/release_tool.dart --ci --bump=${{ inputs.bump }} --workspace=local --no-push-docker --no-push-github --no-build-docker
+        run: dart release/release_tool.dart --ci --bump=${{ needs.check-changes.outputs.bump }} --workspace=local --no-push-docker --no-push-github --no-build-docker
 
       - name: Upload bumped pubspecs
         uses: actions/upload-artifact@v4
@@ -272,7 +327,7 @@ jobs:
   # 5. Single git commit covering all successful image pushes
   # ───────────────────────────────────────────────────────────────────────────
   commit:
-    needs: [prepare, build-image, build-moqui]
+    needs: [check-changes, prepare, build-image, build-moqui]
     runs-on: ubuntu-latest
     if: always() && needs.prepare.result == 'success' && (needs.build-image.result == 'success' || needs.build-image.result == 'skipped') && (needs.build-moqui.result == 'success' || needs.build-moqui.result == 'skipped')
     timeout-minutes: 60
@@ -321,15 +376,15 @@ jobs:
             NEW_VERSION=$(grep -m1 '^version:' flutter/packages/admin/pubspec.yaml 2>/dev/null \
               | sed 's/^version:[[:space:]]*//; s/+.*//')
           fi
-          MSG="chore: update staging — ${{ inputs.bump }} bump"
+          MSG="chore: update staging — ${{ needs.check-changes.outputs.bump }} bump"
           if [ -n "$NEW_VERSION" ]; then
             MSG="$MSG — new version: $NEW_VERSION"
           fi
           if [ -n "$SUCCEEDED" ]; then
             MSG="$MSG — images pushed: $SUCCEEDED"
           fi
-          if [ -n "${{ inputs.comment }}" ]; then
-            MSG="$MSG — ${{ inputs.comment }}"
+          if [ -n "${{ inputs.comment || (github.event_name == 'schedule' && 'weekly scheduled update' || '') }}" ]; then
+            MSG="$MSG — ${{ inputs.comment || (github.event_name == 'schedule' && 'weekly scheduled update' || '') }}"
           fi
           # Capture the bumped versions before touching git: the docker images
           # were already built and pushed with these tags, so they are what must

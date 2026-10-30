@@ -247,9 +247,11 @@ The release is run with `./growerpUpgrade.sh`; the full procedure is in
   deleted.
 - **Next version:** the first "update staging" on master after a freeze is a minor
   bump (1.22 in review → master 1.23.0); the 1.22.N patch versions belong to the
-  review branch.
+  review branch. Update Staging turns a patch bump into a minor bump by itself once
+  the review branch of master's minor exists.
 - **Fix of the version in review:** fix on master first, cherry-pick onto the review
-  branch, "update staging" on the review branch (patch bump), freeze again and publish.
+  branch. A backend fix: run Hotfix Review on the review branch. A fix that needs new
+  binaries: "update staging" on the review branch (patch bump), freeze again and publish.
 - **Production** gets exactly the images the stores reviewed, nothing is rebuilt.
 
 For an urgent fix of production only, see the [Hotfix Documentation](../flutter/hotfix/README.md).
@@ -279,6 +281,7 @@ This document describes all GitHub Actions workflows used in the GrowERP reposit
    - [Create Store Screenshots (`screenshots.yml`)](#8-create-store-screenshots-screenshotsyml)
    - [Download Store Metadata (`download-store-metadata.yml`)](#9-download-store-metadata-download-store-metadatayml)
    - [Freeze for Review (`freeze-review.yml`)](#10-freeze-for-review-freeze-reviewyml)
+   - [Hotfix Review (`hotfix-review.yml`)](#11-hotfix-review-hotfix-reviewyml)
 4. [Secrets Reference](#secrets-reference)
    - [Automatic Secrets](#automatic-secrets)
    - [Production Server Secrets](#production-server-secrets)
@@ -301,10 +304,11 @@ GrowERP uses eleven GitHub Actions workflows to automate testing, releasing Dock
 ```
 .github/workflows/
 ├── status.yml                            ##### Integration tests + store status (scheduled + manual)
-├── update-staging.yml                    ##### Docker image build + version bump (manual)
+├── update-staging.yml                    ##### Docker image build + version bump (weekly + manual)
 ├── publish-binary.yml                    ##### Build & submit binaries to stores (manual)
 ├── release-approved.yml                  ##### Release store-approved versions to public (manual)
 ├── freeze-review.yml                     ##### Copy staging to the store review backend before store submission (manual)
+├── hotfix-review.yml                     ##### Backend fix of the version in store review, from the review branch (manual)
 ├── update-production.yml                 ##### Promote the store review versions (or staging) to production (manual)
 ├── revert-last-sync.yml                  ##### Revert last production promotion (manual)
 ├── publish-metadata.yml                  ##### Upload listing text + screenshots to stores (manual)
@@ -320,10 +324,11 @@ GrowERP uses eleven GitHub Actions workflows to automate testing, releasing Dock
 | Workflow | Trigger | Runner | Secrets needed |
 |----------|---------|--------|----------------|
 | status | Schedule (daily) + manual | `ubuntu-latest` | Store API secrets (see [Secrets Reference](#secrets-reference)) for the store-status jobs; `PROD_SSH_USER`, `PROD_SSH_KEY` for the swarm status; tests need none |
-| Update Staging | Manual | `ubuntu-latest` | `GITHUB_TOKEN` |
+| Update Staging | Schedule (weekly) + manual | `ubuntu-latest` | `GITHUB_TOKEN` |
 | Publish to Stores | Manual | macOS / Ubuntu / Windows | See [Secrets Reference](#secrets-reference) |
 | Release Approved Submissions | Manual | macOS / Ubuntu / Windows | See [Secrets Reference](#secrets-reference) |
 | Freeze for Review | Manual | `ubuntu-latest` | `PROD_SSH_USER`, `PROD_SSH_KEY` |
+| Hotfix Review | Manual | `ubuntu-latest` | `PROD_SSH_USER`, `PROD_SSH_KEY` |
 | Update Production | Manual | `ubuntu-latest` | `PROD_SSH_USER`, `PROD_SSH_KEY` |
 | Revert Production Update | Manual | `ubuntu-latest` | `PROD_SSH_USER`, `PROD_SSH_KEY` |
 | Publish Metadata to Stores | Manual | macOS / Ubuntu | Store API secrets (see [Secrets Reference](#secrets-reference)) |
@@ -399,7 +404,7 @@ check-changes                       resolve-matrix              swarm-status
 
 **Purpose:** Bumps app versions, builds Docker images, and pushes them to `ghcr.io/growerp`, commits the version bump and pushes a git tag. Every run gets a new version (there is no `none` bump): a version tag is never pushed twice, so the image a store reviewed is exactly the image Update Production deploys, nothing is rebuilt.
 
-**Trigger:** Manual only (`workflow_dispatch`).
+**Trigger:** Manual (`workflow_dispatch`), and every Friday 06:00 Bangkok time (Thursday 23:00 UTC) on `master`. The scheduled run uses the defaults (patch bump, all apps, commit comment "weekly scheduled update") and only goes ahead when commits other than the workflows' own version bumps landed since the last version tag; otherwise it ends after the `check-changes` job.
 
 **Concurrency:** Only one release at a time; running releases are never cancelled.
 
@@ -533,7 +538,7 @@ resolve-matrix ──┬──> bootstrap ──┬──> deploy-ios     ─┐
 
 **Purpose:** Checks each store for versions that have passed review but are held pending a manual developer release action, then releases them to the public. No build step — this workflow only calls store APIs.
 
-**Trigger:** Manual only (`workflow_dispatch`).
+**Trigger:** Manual (`workflow_dispatch`), and every Friday 06:00 Bangkok time (Thursday 23:00 UTC) on `master`. The scheduled run uses the defaults (patch bump, all apps, commit comment "weekly scheduled update") and only goes ahead when commits other than the workflows' own version bumps landed since the last version tag; otherwise it ends after the `check-changes` job.
 
 **Concurrency:** Only one release run at a time; never cancelled.
 
@@ -740,7 +745,7 @@ yet.
 
 ####### 10. Freeze for Review (`freeze-review.yml`)
 
-**Purpose:** Run right before Publish to Stores. SSHs into the production server and runs `swarm/review.sh freeze --apply`: copies the staging database into the store review backend (`backend.growerp.net`), pauses its scheduled jobs and agents, records the version of every staging app in `swarm/review-versions.conf` (what Update Production promotes after approval), deploys it and, once healthy, routes native apps newer than production to it. Staging can then move on to the version after the review version. Don't run Update Staging between this and Publish to Stores: the binaries must be the version that was frozen.
+**Purpose:** Run right before Publish to Stores. SSHs into the production server and runs `swarm/review.sh freeze --apply`: copies the staging database into the store review backend (`backend.growerp.net`), pauses its scheduled jobs and agents, records the version of every staging app in `swarm/review-versions.conf` (what Update Production promotes after approval), deploys it and, once healthy, routes native apps newer than production to it. Staging can then move on to the version after the review version: Update Staging on master may run any time, the binaries are built from the review branch.
 
 **Guard:** refuses while a version of the previous review is not on production yet (its reviewers would lose their backend). Promote with Update Production first; `--force` exists only by hand on the server.
 
@@ -749,6 +754,18 @@ yet.
 **Concurrency:** Only one freeze at a time; never cancelled.
 
 **Secrets required:** Same as Update Production (`PROD_SSH_USER`, `PROD_SSH_KEY`).
+
+---
+
+####### 11. Hotfix Review (`hotfix-review.yml`)
+
+**Purpose:** A backend fix of the version in store review, the review counterpart of Hotfix Production. Run it on the review branch (e.g. `1.22`) after cherry-picking the fix onto it: builds `growerp-moqui` from that branch with the next patch version (e.g. `1.22.1`), pushes only that tag (never `:latest`, so staging keeps its version) and the git tag, then runs `swarm/review.sh hotfix <version> --apply` on the server: points `moqui-review` at the image, pins it in `apps-review.yml` and records it as `moqui:<version>` in `review-versions.conf`, so Update Production promotes the fixed backend. Refuses before staging moved on to the next minor (master still on the review's minor, e.g. 1.22.0: run Update Staging on master first), and anything but a later patch of the minor review runs. Copy the two edited files from the server into the server repo afterwards.
+
+**Trigger:** Manual only (`workflow_dispatch`), no inputs: `gh workflow run hotfix-review.yml --ref 1.22`.
+
+**Concurrency:** Shares the Freeze for Review group: never at the same time as a freeze.
+
+**Secrets required:** `GITHUB_TOKEN` (image + tag), `PROD_SSH_USER`, `PROD_SSH_KEY`.
 
 ---
 
