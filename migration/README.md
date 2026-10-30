@@ -75,7 +75,7 @@ service stops the run.
 | 1.19 | `migrate#CourseProducts` |
 | 1.20 | `migrate#StaleLlmModelNames` |
 | 1.21 | `migrate#AccountingSetupMenu` |
-| 1.22 | `migrate#OwnerMenuOverrides` |
+| 1.22 | `migrate#OwnerMenuOverrides`, `migrate#ServiceUserPasswords` |
 | next |  |
 
 Directories before 1.21 hold the minor version of the first release tag that

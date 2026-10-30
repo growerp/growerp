@@ -1,6 +1,6 @@
 name: academy
 resolution: workspace
-version: 1.22.0+10
+version: 1.22.1+10
 publish_to: none
 
 environment:

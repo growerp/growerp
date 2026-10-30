@@ -2,3 +2,7 @@
 # MenuItemAccess overrides of the seed menu, the copies are removed. Needs a
 # backend restart first (new entity).
 growerp.100.MenuServices100.migrate#OwnerMenuOverrides
+
+# mcp-user and agent-claude were seeded with the public default password 'moqui';
+# nothing signs in with it, so it is removed.
+growerp.100.GeneralServices100.migrate#ServiceUserPasswords
