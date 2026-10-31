@@ -267,6 +267,17 @@
             "toolArgs": [
                 "--dart-define=BACKEND_PORT=8080"
             ]
+        },
+        {
+            "name": "Insurance linux (lib/main.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "flutter/packages/insurance",
+            "program": "lib/main.dart",
+            "deviceId": "linux",
+            "toolArgs": [
+                "--dart-define=BACKEND_PORT=8080"
+            ]
         }
     ]
 }
