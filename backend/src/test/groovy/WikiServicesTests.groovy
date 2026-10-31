@@ -66,6 +66,27 @@ class WikiServicesTests extends Specification {
         result.wikiPage.pageText.contains('# Markdown')
     }
 
+    def "a page created while another thread lists its directory is found"() {
+        given: "the space root directory"
+        String rootPageLocation = ec.entity.find('moqui.resource.wiki.WikiSpace')
+                .condition('wikiSpaceId', wikiSpaceId).one().rootPageLocation
+        String fileName = "spockRace${suffix}.md"
+
+        when: "a reader in its own transaction (like the wiki DataFeed worker) lists the directory before the write commits"
+        boolean began = ec.transaction.begin(null)
+        ec.resource.getLocationReference("${rootPageLocation}/${fileName}").putText('race')
+        Thread reader = Thread.start {
+            ExecutionContext readerEc = Moqui.getExecutionContext()
+            try { readerEc.resource.getLocationReference(rootPageLocation).getDirectoryEntries() }
+            finally { readerEc.destroy() }
+        }
+        reader.join()
+        ec.transaction.commit(began)
+
+        then:
+        ec.resource.getLocationReference(rootPageLocation).getDirectoryEntries()*.fileName.contains(fileName)
+    }
+
     def "an html page reports html.ftl and stays html after an update"() {
         given: "an html page as the website generator writes it"
         Map created = ec.service.sync().name('org.moqui.impl.WikiServices.update#WikiPage')
