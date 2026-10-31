@@ -109,12 +109,12 @@ GOOGLE_OAUTH_CLIENT_ID=<id> GOOGLE_OAUTH_CLIENT_SECRET=<secret> java -jar moqui.
 **Servers (Docker Swarm, `/data/server/swarm`)**
 
 The stacks already pass the variables to Moqui. `GOOGLE_OAUTH_REDIRECT_URI` is set per
-stack to `backend.growerp.com`, `.org` or `.net`. The secret is the Docker secret
+stack to `backend.growerp.com`, `.org` or `.net`; the client id is written in the stack
+files too (there is no `.env`). The secret is the Docker secret
 `google_oauth_client_secret`. Do this on every host:
 
 ```bash
 cd ~/server/swarm && git pull
-echo 'GOOGLE_OAUTH_CLIENT_ID=<id>' >> .env
 ./deploy.sh secrets add google_oauth_client_secret   # paste the secret
 ./deploy.sh deploy
 ```

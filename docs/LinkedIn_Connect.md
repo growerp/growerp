@@ -54,12 +54,11 @@ LINKEDIN_OAUTH_CLIENT_ID=<id> LINKEDIN_OAUTH_CLIENT_SECRET=<secret> java -jar mo
 
 **Servers (Docker Swarm, `/data/server/swarm`)**
 
-The stacks pass the variables to Moqui; the secret is the Docker secret
-`linkedin_oauth_client_secret`. On every host:
+The client id and redirect URL are written in the stack files (`apps-*.yml`, there is
+no `.env`); the secret is the Docker secret `linkedin_oauth_client_secret`. On every host:
 
 ```bash
 cd ~/server/swarm && git pull
-echo 'LINKEDIN_OAUTH_CLIENT_ID=<id>' >> .env
 ./deploy.sh secrets add linkedin_oauth_client_secret   # paste the secret
 ./deploy.sh deploy
 ```
