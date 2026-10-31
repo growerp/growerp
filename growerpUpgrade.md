@@ -92,6 +92,12 @@ A fix that needs new binaries:
 
 Everything is per app, only the next freeze (B3) waits for every app in review.
 
+Promoting never forces an app update: `Application.version` only routes a newer app
+(the one in review) to the review backend, an older app keeps production. Users are
+forced to update only below `Application.minVersion` (major.minor, empty = never).
+Raise it per app in the support app (Applications), only when its new version is
+live in every store and the backend no longer works with the older one.
+
 1. Promote what is approved: "update production" for the approved apps and moqui
    (the backend has no Application row, so it changes no app's routing). The slow
    app stays in review, its reviewers keep backend.growerp.net.
@@ -112,7 +118,8 @@ the review backend and the recorded versions, its reviewers lose their backend.
 2. run ./clearDb.sh prod --apply
 3. run https://backend.growerp.com/vapps change password 'SystemSupport'
 4. write the Application versions + backend url again (the clear reloads the rows
-   from seed data without them, so routing and forced updates stop working):
+   from seed data without them, so routing stops working; minVersion is not written,
+   set it again in the support app if an app needs a forced update):
    on the server `cd ~/server/swarm && ./sync-to-prod.sh --versions-only`
    (writes right away, no --apply: version of each running prod app, backend url
    backend.growerp.org). During a store review run `./review.sh on --apply` after it.

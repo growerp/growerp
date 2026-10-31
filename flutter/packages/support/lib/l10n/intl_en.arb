@@ -88,6 +88,10 @@
   "@tableHdrVersion": {
     "description": "Table column header"
   },
+  "tableHdrMinVersion": "Min version",
+  "@tableHdrMinVersion": {
+    "description": "Column header: lowest app version allowed, older apps must update"
+  },
   "tableHdrLanguage": "Language",
   "@tableHdrLanguage": {
     "description": "Table column header"

@@ -19,6 +19,7 @@
   "tableHdrId": "ID",
   "tableHdrStatus": "状态",
   "tableHdrVersion": "版本",
+  "tableHdrMinVersion": "最低版本",
   "tableHdrLanguage": "语言",
   "tableHdrNames": "名称",
   "searchHintGlAccountTranslation": "搜索语言或状态...",

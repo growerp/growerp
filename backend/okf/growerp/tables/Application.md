@@ -19,7 +19,8 @@ Full entity name: `growerp.Application`
 |--------|------|----|-------------|
 | `applicationId` | id | Y |  |
 | `description` | text-medium |  |  |
-| `version` | text-short |  |  |
+| `version` | text-short |  | Version in review: a newer app goes to backendUrl (the review backend), an older one to production |
+| `minVersion` | text-short |  | Lowest version (major.minor) still allowed: an older app is forced to update. Empty: never forced |
 | `backendUrl` | text-medium |  |  |
 | `assessmentId` | id |  |  |
 | `lastUpdatedStamp` | date-time |  |  |

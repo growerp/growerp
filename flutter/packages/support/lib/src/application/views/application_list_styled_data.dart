@@ -24,6 +24,7 @@ List<StyledColumn> getApplicationListColumns(BuildContext context) {
   return [
     StyledColumn(header: localizations.tableHdrId, flex: isPhone ? 2 : 1),
     StyledColumn(header: localizations.tableHdrVersion, flex: 1),
+    StyledColumn(header: localizations.tableHdrMinVersion, flex: 1),
     StyledColumn(header: localizations.tableHdrBackendUrl, flex: 2),
     StyledColumn(header: localizations.tableHdrAssessmentId, flex: 1),
     const StyledColumn(header: '', flex: 1),
@@ -39,6 +40,7 @@ List<Widget> getApplicationListRow({
   return [
     Text(application.applicationId, key: Key("id$index")),
     Text(application.version ?? '', key: Key("version$index")),
+    Text(application.minVersion ?? '', key: Key("minVersion$index")),
     Text(application.backendUrl ?? '', key: Key("backendUrl$index")),
     Text(application.assessmentId ?? '', key: Key("assessmentId$index")),
     IconButton(

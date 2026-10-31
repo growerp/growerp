@@ -19,6 +19,7 @@
   "tableHdrId": "ID",
   "tableHdrStatus": "Status",
   "tableHdrVersion": "Versie",
+  "tableHdrMinVersion": "Minimale versie",
   "tableHdrLanguage": "Taal",
   "tableHdrNames": "Namen",
   "searchHintGlAccountTranslation": "Zoek taal of status...",

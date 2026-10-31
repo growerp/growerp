@@ -21,7 +21,8 @@ part 'application_model.g.dart';
 abstract class Application with _$Application {
   factory Application({
     @Default("") String applicationId,
-    String? version, // room, table etc
+    String? version, // in review: a newer app goes to backendUrl
+    String? minVersion, // an older app is forced to update
     String? backendUrl, // include room number/name
     String? assessmentId,
   }) = _Application;

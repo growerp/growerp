@@ -19,6 +19,7 @@
   "tableHdrId": "รหัส",
   "tableHdrStatus": "สถานะ",
   "tableHdrVersion": "เวอร์ชัน",
+  "tableHdrMinVersion": "เวอร์ชันขั้นต่ำ",
   "tableHdrLanguage": "ภาษา",
   "tableHdrNames": "ชื่อ",
   "searchHintGlAccountTranslation": "ค้นหาภาษาหรือสถานะ...",

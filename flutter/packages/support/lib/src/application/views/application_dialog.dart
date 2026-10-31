@@ -30,6 +30,7 @@ class ApplicationDialogState extends State<ApplicationDialog> {
   final _applicationDialogFormKey = GlobalKey<FormState>();
   final _idController = TextEditingController();
   final _versionController = TextEditingController();
+  final _minVersionController = TextEditingController();
   final _backendUrlController = TextEditingController();
   bool loading = false;
   late Application updatedApplication;
@@ -42,6 +43,7 @@ class ApplicationDialogState extends State<ApplicationDialog> {
     super.initState();
     _idController.text = widget.application.applicationId;
     _versionController.text = widget.application.version ?? '';
+    _minVersionController.text = widget.application.minVersion ?? '';
     _backendUrlController.text = widget.application.backendUrl ?? '';
     _selectedAssessmentId = widget.application.assessmentId;
     _applicationBloc = context.read<ApplicationBloc>();
@@ -96,7 +98,7 @@ class ApplicationDialogState extends State<ApplicationDialog> {
               child: _showForm(),
               title:
                   'Application #${widget.application.applicationId.isEmpty ? 'New' : widget.application.applicationId}',
-              height: 480,
+              height: 540,
               width: 350,
             ),
           );
@@ -131,6 +133,13 @@ class ApplicationDialogState extends State<ApplicationDialog> {
               validator: (value) {
                 return value!.isEmpty ? 'Please enter a version?' : null;
               },
+            ),
+            TextFormField(
+              key: const Key('minVersion'),
+              decoration: const InputDecoration(
+                labelText: 'Min version (older apps must update)',
+              ),
+              controller: _minVersionController,
             ),
             TextFormField(
               key: const Key('backendUrl'),
@@ -175,6 +184,7 @@ class ApplicationDialogState extends State<ApplicationDialog> {
                       Application(
                         applicationId: _idController.text,
                         version: _versionController.text,
+                        minVersion: _minVersionController.text,
                         backendUrl: _backendUrlController.text,
                         assessmentId: _selectedAssessmentId,
                       ),
