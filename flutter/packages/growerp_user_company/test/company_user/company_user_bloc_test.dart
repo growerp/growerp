@@ -355,6 +355,23 @@ void main() {
     );
 
     blocTest<CompanyUserBloc, CompanyUserState>(
+      'CompanyUserDelete_selfNotInList_deletesWithCompanyWithoutCrash',
+      setUp: () => when(
+        () => restClient.deleteUser(partyId: 'U2', deleteCompanyToo: true),
+      ).thenAnswer((_) async => user2),
+      build: build,
+      act: (bloc) =>
+          bloc.add(CompanyUserDelete(user: user2, deleteCompanyToo: true)),
+      expect: () => [
+        companyUserState(CompanyUserStatus.loading),
+        companyUserState(CompanyUserStatus.success, companiesUsers: []),
+      ],
+      verify: (_) => verify(
+        () => restClient.deleteUser(partyId: 'U2', deleteCompanyToo: true),
+      ).called(1),
+    );
+
+    blocTest<CompanyUserBloc, CompanyUserState>(
       'CompanyUserDelete_restThrowsDio_emitsFailure',
       setUp: () => when(
         () => restClient.deleteUser(partyId: 'U2', deleteCompanyToo: false),

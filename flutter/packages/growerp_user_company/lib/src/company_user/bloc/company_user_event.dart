@@ -56,7 +56,12 @@ class CompanyUserUpdate extends CompanyUserEvent {
 class CompanyUserDelete extends CompanyUserEvent {
   final Company? company;
   final User? user;
-  const CompanyUserDelete({this.company, this.user});
+  final bool deleteCompanyToo;
+  const CompanyUserDelete({
+    this.company,
+    this.user,
+    this.deleteCompanyToo = false,
+  });
   @override
   String toString() => "Update Company/User: $company $user";
 }
