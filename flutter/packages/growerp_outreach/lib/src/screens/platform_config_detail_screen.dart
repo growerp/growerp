@@ -12,6 +12,8 @@
  * limitations under the License.
  */
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -46,6 +48,9 @@ class _PlatformConfigDetailScreenState
   late TextEditingController _passwordController;
   late bool _isEnabled;
   bool _isClosing = false;
+  // polls while the LinkedIn sign in runs in the browser
+  Timer? _linkedInPoll;
+  DateTime? _linkedInWaitUntil;
 
   @override
   void initState() {
@@ -70,6 +75,7 @@ class _PlatformConfigDetailScreenState
 
   @override
   void dispose() {
+    _linkedInPoll?.cancel();
     _dailyLimitController.dispose();
     _apiKeyController.dispose();
     _apiSecretController.dispose();
@@ -110,6 +116,17 @@ class _PlatformConfigDetailScreenState
                     _configIn(state)?.lastCheckError == null
                         ? Colors.green
                         : Colors.red,
+                  );
+                }
+                if (state.status == PlatformConfigStatus.linkedInWaiting) {
+                  _openLinkedInSignIn(state.authUrl!);
+                }
+                if (state.status == PlatformConfigStatus.linkedInConnected) {
+                  _stopLinkedInPoll();
+                  HelperFunctions.showMessage(
+                    context,
+                    state.message ?? '',
+                    Colors.green,
                   );
                 }
                 if (state.status == PlatformConfigStatus.failure) {
@@ -218,6 +235,8 @@ class _PlatformConfigDetailScreenState
                   ],
                 ),
               )
+            else if (widget.platform == OutreachPlatform.linkedIn)
+              _buildLinkedInConnection()
             else
               GroupingDecorator(
               labelText: 'Authentication Credentials',
@@ -284,15 +303,12 @@ class _PlatformConfigDetailScreenState
 
   String get _apiKeyLabel => switch (widget.platform) {
         OutreachPlatform.substack => 'Session Cookie (substack.sid)',
-        OutreachPlatform.linkedIn => 'OAuth 2.0 Access Token',
         OutreachPlatform.twitter => 'Consumer Key (API Key)',
         _ => 'API Key',
       };
 
   String get _apiKeyHint => switch (widget.platform) {
         OutreachPlatform.substack => 'Paste value of substack.sid cookie',
-        OutreachPlatform.linkedIn =>
-          'Bearer token from LinkedIn developer portal',
         OutreachPlatform.twitter =>
           'From "OAuth 1.0 Keys" on your X app\'s Keys & Tokens tab',
         _ => 'Platform API key',
@@ -310,14 +326,12 @@ class _PlatformConfigDetailScreenState
 
   String get _usernameLabel => switch (widget.platform) {
         OutreachPlatform.substack => 'Publication URL',
-        OutreachPlatform.linkedIn => 'Person URN',
         OutreachPlatform.twitter => 'Access Token',
         _ => 'Username',
       };
 
   String get _usernameHint => switch (widget.platform) {
         OutreachPlatform.substack => 'https://yourname.substack.com',
-        OutreachPlatform.linkedIn => 'urn:li:person:AbCdEfGhIj',
         OutreachPlatform.twitter =>
           'OAuth 1.0 access token — must say "Read and Write", not "Read"',
         _ => 'Platform username',
@@ -366,32 +380,6 @@ class _PlatformConfigDetailScreenState
               title: 'Cookie expires on logout',
               body:
                   'The substack.sid cookie is invalidated when you log out. If publishing fails with an auth error, repeat these steps to get a fresh cookie.',
-            ),
-          ],
-        OutreachPlatform.linkedIn => const [
-            _HelpStep(
-              icon: Icons.app_registration,
-              title: 'Create a LinkedIn developer app',
-              body:
-                  'Go to linkedin.com/developers → My Apps → Create app. On the Products tab add "Share on LinkedIn" (w_member_social scope, to post) and "Sign In with LinkedIn using OpenID Connect" (openid and profile scopes, to find your Person URN).',
-            ),
-            _HelpStep(
-              icon: Icons.vpn_key,
-              title: 'Generate an access token',
-              body:
-                  'Inside your app go to Auth → OAuth 2.0 tools → Generate access token. Select the scopes openid, profile and w_member_social, and authorise with your LinkedIn account.',
-            ),
-            _HelpStep(
-              icon: Icons.key,
-              title: 'Paste the token',
-              body:
-                  'Copy the generated access token and paste it into the OAuth 2.0 Access Token field above. Tokens typically expire after 60 days.',
-            ),
-            _HelpStep(
-              icon: Icons.person,
-              title: 'Find your Person URN',
-              body:
-                  'Call https://api.linkedin.com/v2/userinfo with your token: curl -H "Authorization: Bearer {token}" https://api.linkedin.com/v2/userinfo. The "sub" value gives the last segment — your URN is urn:li:person:{sub}. (/v2/me answers 403 ACCESS_DENIED for new apps.)',
             ),
           ],
         OutreachPlatform.twitter => const [
@@ -492,26 +480,126 @@ class _PlatformConfigDetailScreenState
   }
 
   PlatformConfiguration _configFromForm() {
-    // email sends via the company SMTP server, no credentials here
-    final isEmail = widget.platform == OutreachPlatform.email;
+    // email sends via the company SMTP server, LinkedIn credentials come from
+    // the LinkedIn connect: none from the form, a stale one would overwrite them
+    final noFormCredentials = widget.platform == OutreachPlatform.email ||
+        widget.platform == OutreachPlatform.linkedIn;
     return PlatformConfiguration(
       configId: widget.config?.configId,
       platform: widget.platform.name,
       isEnabled: _isEnabled,
       dailyLimit: int.parse(_dailyLimitController.text),
-      apiKey: isEmail || _apiKeyController.text.isEmpty
+      apiKey: noFormCredentials || _apiKeyController.text.isEmpty
           ? null
           : _apiKeyController.text,
-      apiSecret: isEmail || _apiSecretController.text.isEmpty
+      apiSecret: noFormCredentials || _apiSecretController.text.isEmpty
           ? null
           : _apiSecretController.text,
-      username: isEmail || _usernameController.text.isEmpty
+      username: noFormCredentials || _usernameController.text.isEmpty
           ? null
           : _usernameController.text,
-      password: isEmail || _passwordController.text.isEmpty
+      password: noFormCredentials || _passwordController.text.isEmpty
           ? null
           : _passwordController.text,
     );
+  }
+
+  // ── LinkedIn connect ────────────────────────────────────────────────────
+
+  Widget _buildLinkedInConnection() {
+    final l10n = OutreachLocalizations.of(context)!;
+    return BlocBuilder<PlatformConfigBloc, PlatformConfigState>(
+      builder: (context, state) {
+        final config = _configIn(state) ??
+            state.configs
+                .where((c) => c.platform.toUpperCase() == 'LINKEDIN')
+                .firstOrNull ??
+            widget.config;
+        final expire = config?.apiKeyExpireDate?.toLocal();
+        final connected = config?.username != null && config?.apiKey != null;
+        final expired = expire != null && expire.isBefore(DateTime.now());
+        final waiting = _linkedInPoll != null;
+        final String status;
+        final Color? color;
+        if (waiting) {
+          status = l10n.linkedInWaiting;
+          color = null;
+        } else if (!connected) {
+          status = l10n.linkedInNotConnected;
+          color = null;
+        } else if (expired) {
+          status = l10n.linkedInExpired(_date(expire));
+          color = Colors.red[700];
+        } else {
+          status = expire == null
+              ? l10n.linkedInConnected(config!.username!)
+              : l10n.linkedInConnectedUntil(config!.username!, _date(expire));
+          color = Colors.green[700];
+        }
+        return GroupingDecorator(
+          labelText: l10n.linkedInConnection,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                status,
+                key: const Key('linkedInStatus'),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: color),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                key: const Key('linkedInConnect'),
+                icon: const Icon(Icons.link),
+                label: Text(connected
+                    ? l10n.linkedInReconnect
+                    : l10n.linkedInConnect),
+                onPressed: waiting ||
+                        state.status == PlatformConfigStatus.loading
+                    ? null
+                    : () => context
+                        .read<PlatformConfigBloc>()
+                        .add(const PlatformConfigLinkedInConnect()),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  String _date(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  Future<void> _openLinkedInSignIn(String authUrl) async {
+    if (!await openExternalUrl(Uri.parse(authUrl))) {
+      if (mounted) {
+        HelperFunctions.showMessage(
+            context, 'Could not open the browser', Colors.red);
+      }
+      return;
+    }
+    if (!mounted) return;
+    setState(() {
+      _linkedInWaitUntil = DateTime.now().add(const Duration(minutes: 3));
+      _linkedInPoll?.cancel();
+      _linkedInPoll = Timer.periodic(const Duration(seconds: 2), (_) {
+        if (DateTime.now().isAfter(_linkedInWaitUntil!)) {
+          _stopLinkedInPoll();
+          return;
+        }
+        context
+            .read<PlatformConfigBloc>()
+            .add(const PlatformConfigLinkedInCheck());
+      });
+    });
+  }
+
+  void _stopLinkedInPoll() {
+    _linkedInPoll?.cancel();
+    if (mounted) setState(() => _linkedInPoll = null);
   }
 
   Widget _buildTestConnection() {

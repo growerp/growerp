@@ -463,11 +463,8 @@ Go to **Outreach** → **Platform Configuration** and add a record for each plat
 
 **For LinkedIn:**
 - **Platform** — select LINKEDIN
-- **API Key** — paste your OAuth 2.0 access token
-  - Obtain one from the LinkedIn Developer Portal under your app's Auth tab, or use the OAuth token exchange flow
-- **Username** — your LinkedIn person URN, e.g. `urn:li:person:AbCdEfGhIj`
-  - Find your URN: call `https://api.linkedin.com/v2/userinfo` with your token; the `sub` field gives the last part (needs the `openid` and `profile` scopes; `/v2/me` answers 403 for new apps)
-- Toggle **Active** to ON
+- Press **Connect with LinkedIn**, sign in to LinkedIn in the browser window that opens and allow GrowERP to post on your behalf
+- The dialog then shows **Connected** with the date the connection is valid until (60 days); after that press **Reconnect LinkedIn**
 
 #### Step 2 — Write and finalise your post
 
@@ -499,7 +496,7 @@ If the publish fails (expired token, wrong URL etc.) the error is shown in red u
     <growerp.course.CourseLesson lessonId="MarketLess0301" moduleId="MarketMod03"
         courseId="CourseMarketingSales"
         title="Platform Configuration"
-        keyPoints="[&quot;Configure one platform before sending any messages or publishing posts&quot;, &quot;Email requires SMTP host, port, username, and password&quot;, &quot;LinkedIn outreach uses the MCP browser extension; LinkedIn publishing uses an OAuth token&quot;, &quot;Substack publishing uses your substack.sid session cookie and publication URL&quot;, &quot;Each platform config has an Active/Inactive toggle&quot;]"
+        keyPoints="[&quot;Configure one platform before sending any messages or publishing posts&quot;, &quot;Email requires SMTP host, port, username, and password&quot;, &quot;LinkedIn outreach uses the MCP browser extension; LinkedIn publishing uses the Connect with LinkedIn button&quot;, &quot;Substack publishing uses your substack.sid session cookie and publication URL&quot;, &quot;Each platform config has an Active/Inactive toggle&quot;]"
         sequenceNum="1">
         <content><![CDATA[## Configuring Your Platforms
 
@@ -547,13 +544,9 @@ Schedule LinkedIn campaigns during business hours when your computer is on.
 #### B) LinkedIn Publishing (direct post to your feed from Social Posts)
 Publishing a Social Post to LinkedIn uses the official LinkedIn API v2 — no browser extension needed.
 
-1. Tap **+** → select **Platform Type: LINKEDIN** (create a second record, or reuse the existing one if you add the API token to it)
-2. Fill in:
-   - **API Key** — your LinkedIn OAuth 2.0 access token
-     - Get one from the LinkedIn Developer Portal → your app → Auth → OAuth 2.0 tools → Generate token (scopes needed: `openid`, `profile`, `w_member_social`; add the products "Share on LinkedIn" and "Sign In with LinkedIn using OpenID Connect" first)
-   - **Username** — your LinkedIn person URN, format: `urn:li:person:AbCdEfGhIj`
-     - To find your URN: call `https://api.linkedin.com/v2/userinfo` with your access token; the `sub` field is the last segment of the URN (`/v2/me` answers 403 for new apps)
-3. Toggle **Active** to ON
+1. Open the **LINKEDIN** platform row
+2. Press **Connect with LinkedIn**, sign in to LinkedIn in the browser window that opens and allow GrowERP to post on your behalf — no developer app or token needed, GrowERP connects through its own LinkedIn app
+3. The dialog shows **Connected** with the date the connection is valid until; LinkedIn connections last 60 days, after that press **Reconnect LinkedIn**
 
 ---
 

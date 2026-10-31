@@ -1373,6 +1373,7 @@
             <parameter name="password" />
             <parameter name="lastCheckDate" />
             <parameter name="lastCheckError" />
+            <parameter name="apiKeyExpireDate" />
             <parameter name="createdDate" />
             <parameter name="lastModifiedDate" />
         </out-parameters>
@@ -1399,6 +1400,8 @@
             <set field="lastCheckDate"
                 from="conf.lastCheckDate ? ec.l10n.format(conf.lastCheckDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
             <set field="lastCheckError" from="conf.lastCheckError" />
+            <set field="apiKeyExpireDate"
+                from="conf.apiKeyExpireDate ? ec.l10n.format(conf.apiKeyExpireDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
             <set field="createdDate"
                 from="conf.createdDate ? ec.l10n.format(conf.createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
             <set field="lastModifiedDate"
@@ -1429,6 +1432,7 @@
             <parameter name="password" />
             <parameter name="lastCheckDate" />
             <parameter name="lastCheckError" />
+            <parameter name="apiKeyExpireDate" />
             <parameter name="createdDate" />
             <parameter name="lastModifiedDate" />
         </out-parameters>
@@ -1499,6 +1503,7 @@
             <parameter name="password" />
             <parameter name="lastCheckDate" />
             <parameter name="lastCheckError" />
+            <parameter name="apiKeyExpireDate" />
             <parameter name="createdDate" />
             <parameter name="lastModifiedDate" />
         </out-parameters>
@@ -1531,6 +1536,8 @@
             <set field="lastCheckDate"
                 from="conf.lastCheckDate ? ec.l10n.format(conf.lastCheckDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
             <set field="lastCheckError" from="conf.lastCheckError" />
+            <set field="apiKeyExpireDate"
+                from="conf.apiKeyExpireDate ? ec.l10n.format(conf.apiKeyExpireDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
             <set field="createdDate"
                 from="conf.createdDate ? ec.l10n.format(conf.createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null" />
             <set field="lastModifiedDate"
@@ -1693,6 +1700,7 @@
                 <parameter name="password" />
                 <parameter name="lastCheckDate" />
                 <parameter name="lastCheckError" />
+                <parameter name="apiKeyExpireDate" />
                 <parameter name="createdDate" />
                 <parameter name="lastModifiedDate" />
             </parameter>
@@ -1721,10 +1729,140 @@
                     password: conf.password,
                     lastCheckDate: conf.lastCheckDate ? ec.l10n.format(conf.lastCheckDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
                     lastCheckError: conf.lastCheckError,
+                    apiKeyExpireDate: conf.apiKeyExpireDate ? ec.l10n.format(conf.apiKeyExpireDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
                     createdDate: conf.createdDate ? ec.l10n.format(conf.createdDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
                     lastModifiedDate: conf.lastModifiedDate ? ec.l10n.format(conf.lastModifiedDate, 'yyyy-MM-dd HH:mm:ssZ') : null
                 ])</script>
             </iterate>
+        </actions>
+    </service>
+
+    <!-- ========================================================= -->
+    <!--  LinkedIn connect                                         -->
+    <!-- ========================================================= -->
+    <!-- Every tenant posts on LinkedIn through the one GrowERP LinkedIn app (env
+         LINKEDIN_OAUTH_CLIENT_ID/LINKEDIN_OAUTH_CLIENT_SECRET): start#LinkedInSignIn
+         returns the LinkedIn consent URL, LinkedIn redirects to /linkedinOAuth/callback
+         (screen/linkedinOAuth.xml) which calls complete#LinkedInSignIn. That stores the
+         member's access token (apiKey) and person URN (username) on the tenant's LINKEDIN
+         PlatformConfiguration, where publish#SocialPostToLinkedIn reads them. LinkedIn
+         gives no refresh token: the tenant reconnects when apiKeyExpireDate passes. -->
+
+    <service verb="start" noun="LinkedInSignIn">
+        <description>LinkedIn consent URL for the current tenant, asking to post on the
+            member's behalf (scopes openid profile w_member_social).</description>
+        <out-parameters>
+            <parameter name="authUrl"/>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="relInfo"/>
+            <if condition="!relInfo.ownerPartyId">
+                <return error="true" message="ownerPartyId not found for current user"/></if>
+            <set field="clientId" from="System.getenv('LINKEDIN_OAUTH_CLIENT_ID') ?: System.getProperty('linkedin_oauth_client_id')"/>
+            <set field="clientSecret" from="System.getenv('LINKEDIN_OAUTH_CLIENT_SECRET') ?: System.getProperty('linkedin_oauth_client_secret')"/>
+            <if condition="!clientId || !clientSecret">
+                <return error="true" message="LinkedIn connect not available: the GrowERP LinkedIn app is not configured on this server"/></if>
+            <!-- behind a proxy the request scheme/host may not be the public one -->
+            <set field="redirectUri" from="System.getenv('LINKEDIN_OAUTH_REDIRECT_URI') ?:
+                System.getProperty('linkedin_oauth_redirect_uri') ?:
+                ec.web.getWebappRootUrl(true, null) + '/linkedinOAuth/callback'"/>
+            <set field="state" from="UUID.randomUUID().toString()"/>
+            <script>ec.cache.getCache('growerp.linkedin.oauthState').put(state,
+                [ownerPartyId: relInfo.ownerPartyId, username: ec.user.username, redirectUri: redirectUri])</script>
+            <set field="authUrl" from="'https://www.linkedin.com/oauth/v2/authorization?response_type=code' +
+                '&amp;client_id=' + URLEncoder.encode(clientId, 'UTF-8') +
+                '&amp;redirect_uri=' + URLEncoder.encode(redirectUri, 'UTF-8') +
+                '&amp;scope=' + URLEncoder.encode('openid profile w_member_social', 'UTF-8') +
+                '&amp;state=' + URLEncoder.encode(state, 'UTF-8')"/>
+        </actions>
+    </service>
+
+    <service verb="complete" noun="LinkedInSignIn" authenticate="anonymous-all" allow-remote="false">
+        <description>Called by the /linkedinOAuth/callback screen: exchange the code for the
+            member's access token, look up the person URN and store both, enabled, on the
+            LINKEDIN PlatformConfiguration of the tenant that started the sign in.</description>
+        <in-parameters>
+            <parameter name="state" required="true"/>
+            <parameter name="code" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="personUrn"/>
+            <parameter name="name"/>
+        </out-parameters>
+        <actions>
+            <script><![CDATA[
+                import groovy.json.JsonSlurper
+                import java.net.http.HttpClient
+                import java.net.http.HttpRequest
+                import java.net.http.HttpResponse
+                import java.time.Duration
+
+                def stateCache = ec.cache.getCache('growerp.linkedin.oauthState')
+                st = stateCache.get(state)
+                if (st == null) { ec.message.addError('LinkedIn connect expired, please try again'); return }
+                stateCache.remove(state)
+                String clientId = System.getenv('LINKEDIN_OAUTH_CLIENT_ID') ?: System.getProperty('linkedin_oauth_client_id')
+                String clientSecret = System.getenv('LINKEDIN_OAUTH_CLIENT_SECRET') ?: System.getProperty('linkedin_oauth_client_secret')
+                // overridable so tests can point them at a stub
+                String authBase = System.getProperty('growerp.linkedin.authBaseUrl') ?: 'https://www.linkedin.com'
+                String apiBase = System.getProperty('growerp.linkedin.apiBaseUrl') ?: 'https://api.linkedin.com'
+                def enc = { String v -> URLEncoder.encode(v ?: '', 'UTF-8') }
+                def http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(30)).build()
+
+                def tokenResponse = http.send(HttpRequest.newBuilder()
+                        .uri(URI.create(authBase + '/oauth/v2/accessToken'))
+                        .header('Content-Type', 'application/x-www-form-urlencoded')
+                        .timeout(Duration.ofSeconds(30))
+                        .POST(HttpRequest.BodyPublishers.ofString('grant_type=authorization_code' +
+                            '&code=' + enc(code) + '&client_id=' + enc(clientId) +
+                            '&client_secret=' + enc(clientSecret) + '&redirect_uri=' + enc(st.redirectUri)))
+                        .build(), HttpResponse.BodyHandlers.ofString())
+                if (tokenResponse.statusCode() != 200) {
+                    ec.message.addError("LinkedIn token exchange failed ${tokenResponse.statusCode()}: ${tokenResponse.body()?.take(300)}")
+                    return
+                }
+                def tokens = new JsonSlurper().parseText(tokenResponse.body())
+                accessToken = tokens.access_token
+                // 60 days when LinkedIn leaves it out
+                expireDate = new java.sql.Timestamp(System.currentTimeMillis() +
+                    ((tokens.expires_in ?: 5184000) as long) * 1000L)
+
+                // /v2/me answers 403 for new apps, the OpenID userinfo gives the member id
+                def infoResponse = http.send(HttpRequest.newBuilder()
+                        .uri(URI.create(apiBase + '/v2/userinfo'))
+                        .header('Authorization', "Bearer ${accessToken}")
+                        .timeout(Duration.ofSeconds(30))
+                        .GET().build(), HttpResponse.BodyHandlers.ofString())
+                def info = infoResponse.statusCode() == 200 ? new JsonSlurper().parseText(infoResponse.body()) : null
+                if (!info?.sub) {
+                    ec.message.addError("LinkedIn profile lookup failed ${infoResponse.statusCode()}: ${infoResponse.body()?.take(300)}")
+                    return
+                }
+                personUrn = 'urn:li:person:' + info.sub
+                name = info.name
+            ]]></script>
+            <if condition="ec.message.hasError()"><return/></if>
+            <entity-find-one entity-name="growerp.marketing.PlatformConfiguration"
+                value-field="conf" for-update="true">
+                <field-map field-name="ownerPartyId" from="st.ownerPartyId"/>
+                <field-map field-name="platform" value="LINKEDIN"/>
+            </entity-find-one>
+            <if condition="conf">
+                <set field="conf.isEnabled" value="Y"/>
+                <set field="conf.apiKey" from="accessToken"/>
+                <set field="conf.username" from="personUrn"/>
+                <set field="conf.apiKeyExpireDate" from="expireDate"/>
+                <set field="conf.lastCheckError" from="null"/>
+                <set field="conf.lastModifiedDate" from="ec.user.nowTimestamp"/>
+                <entity-update value-field="conf"/>
+                <else>
+                    <service-call name="create#growerp.marketing.PlatformConfiguration"
+                        in-map="[ownerPartyId: st.ownerPartyId, platform: 'LINKEDIN', isEnabled: 'Y',
+                                 apiKey: accessToken, username: personUrn, apiKeyExpireDate: expireDate,
+                                 createdDate: ec.user.nowTimestamp, lastModifiedDate: ec.user.nowTimestamp]"/>
+                </else>
+            </if>
         </actions>
     </service>
 

@@ -56,6 +56,9 @@
         <!-- Google Sign in: state token -> [ownerPartyId, username, services, redirectUri] -->
         <cache name="growerp.google.oauthState" max-elements="1000"
             expire-time-live="600" eviction-strategy="least-recently-used"/>
+        <!-- LinkedIn connect: state token -> [ownerPartyId, username, redirectUri] -->
+        <cache name="growerp.linkedin.oauthState" max-elements="1000"
+            expire-time-live="600" eviction-strategy="least-recently-used"/>
         <cache name="growerp.security.restDomain" max-elements="2000"
             expire-time-idle="3600" eviction-strategy="least-recently-used"/>
         <cache name="growerp.security.restPatterns" max-elements="10"
@@ -77,6 +80,9 @@
             <!-- Google Sign in redirect target: /googleOAuth/callback -->
             <subscreens-item name="googleOAuth" menu-include="false"
                 location="component://growerp/screen/googleOAuth.xml"/>
+            <!-- LinkedIn connect redirect target: /linkedinOAuth/callback -->
+            <subscreens-item name="linkedinOAuth" menu-include="false"
+                location="component://growerp/screen/linkedinOAuth.xml"/>
         </screen>
     </screen-facade>
 

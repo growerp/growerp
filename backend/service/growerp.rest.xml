@@ -931,6 +931,12 @@ limitations under the License.
                     <service name="growerp.100.OutreachServices100.verify#PlatformConfiguration" />
                 </method>
             </resource>
+            <resource name="linkedinSignIn"
+                description="Start the LinkedIn connect: returns the LinkedIn consent URL">
+                <method type="post">
+                    <service name="growerp.100.OutreachServices100.start#LinkedInSignIn" />
+                </method>
+            </resource>
         </resource>
 
         <!-- MCP Testing & Manual Automation -->

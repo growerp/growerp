@@ -125,6 +125,10 @@
         <field name="lastCheckError" type="text-medium">
             <description>Why the last verification failed; empty when they were valid</description>
         </field>
+        <field name="apiKeyExpireDate" type="date-time">
+            <description>When apiKey stops working; set by the LinkedIn connect, which gets a
+                token without refresh token (60 days)</description>
+        </field>
 
         <field name="createdDate" type="date-time" />
         <field name="lastModifiedDate" type="date-time" />

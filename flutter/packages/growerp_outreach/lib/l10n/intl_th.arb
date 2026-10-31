@@ -129,5 +129,13 @@
   "guideStatusMessages": "ส่งแล้ว {sent} ตอบกลับ {responded}",
   "guideStatusNoMessages": "ยังไม่ได้ส่งข้อความ",
   "guideStatusOpened": "ทำเครื่องหมายว่าเสร็จแล้ว",
-  "guideStatusNotOpened": "ยังไม่ได้เปิด"
+  "guideStatusNotOpened": "ยังไม่ได้เปิด",
+  "linkedInConnection": "การเชื่อมต่อ LinkedIn",
+  "linkedInConnect": "เชื่อมต่อกับ LinkedIn",
+  "linkedInReconnect": "เชื่อมต่อ LinkedIn อีกครั้ง",
+  "linkedInWaiting": "กำลังรอการลงชื่อเข้าใช้ LinkedIn ในเบราว์เซอร์…",
+  "linkedInNotConnected": "ยังไม่ได้เชื่อมต่อ กด เชื่อมต่อกับ LinkedIn แล้วลงชื่อเข้าใช้เพื่อให้ GrowERP โพสต์แทนคุณ",
+  "linkedInExpired": "การเชื่อมต่อหมดอายุเมื่อ {date} กด เชื่อมต่อ LinkedIn อีกครั้ง",
+  "linkedInConnected": "เชื่อมต่อแล้ว ({urn})",
+  "linkedInConnectedUntil": "เชื่อมต่อแล้ว ({urn}) ใช้ได้ถึง {date}"
 }

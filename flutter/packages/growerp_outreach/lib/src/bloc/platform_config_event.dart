@@ -50,3 +50,16 @@ class PlatformConfigDelete extends PlatformConfigEvent {
   @override
   List<Object> get props => [configId];
 }
+
+/// Start the LinkedIn connect: emits [PlatformConfigStatus.linkedInWaiting]
+/// with the consent URL for the screen to open in the browser.
+class PlatformConfigLinkedInConnect extends PlatformConfigEvent {
+  const PlatformConfigLinkedInConnect();
+}
+
+/// Poll while the LinkedIn sign in runs in the browser: emits
+/// [PlatformConfigStatus.linkedInConnected] once the LINKEDIN configuration
+/// carries a new token, nothing otherwise.
+class PlatformConfigLinkedInCheck extends PlatformConfigEvent {
+  const PlatformConfigLinkedInCheck();
+}

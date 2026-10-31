@@ -129,5 +129,13 @@
   "guideStatusMessages": "已发送 {sent} 条，已回复 {responded} 条",
   "guideStatusNoMessages": "尚未发送消息",
   "guideStatusOpened": "已标记为完成",
-  "guideStatusNotOpened": "尚未打开"
+  "guideStatusNotOpened": "尚未打开",
+  "linkedInConnection": "LinkedIn 连接",
+  "linkedInConnect": "使用 LinkedIn 连接",
+  "linkedInReconnect": "重新连接 LinkedIn",
+  "linkedInWaiting": "正在等待浏览器中的 LinkedIn 登录…",
+  "linkedInNotConnected": "未连接。点击“使用 LinkedIn 连接”并登录，让 GrowERP 代表您发帖。",
+  "linkedInExpired": "连接已于 {date} 过期。请点击“重新连接 LinkedIn”。",
+  "linkedInConnected": "已连接（{urn}）",
+  "linkedInConnectedUntil": "已连接（{urn}），有效期至 {date}"
 }

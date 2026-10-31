@@ -17,6 +17,19 @@ class PlatformConfigBloc
     on<PlatformConfigCreate>(_onPlatformConfigCreate);
     on<PlatformConfigVerify>(_onPlatformConfigVerify);
     on<PlatformConfigDelete>(_onPlatformConfigDelete);
+    on<PlatformConfigLinkedInConnect>(_onLinkedInConnect);
+    on<PlatformConfigLinkedInCheck>(_onLinkedInCheck);
+  }
+
+  /// Token expiry of the LINKEDIN row when the connect started: a different
+  /// one means the backend stored a new token.
+  DateTime? _linkedInExpireBefore;
+
+  PlatformConfiguration? _linkedIn(List<PlatformConfiguration> configs) {
+    for (final config in configs) {
+      if (config.platform.toUpperCase() == 'LINKEDIN') return config;
+    }
+    return null;
   }
 
   Future<void> _onPlatformConfigFetch(
@@ -163,6 +176,51 @@ class PlatformConfigBloc
         status: PlatformConfigStatus.failure,
         message: e.toString(),
       ));
+    }
+  }
+
+  Future<void> _onLinkedInConnect(
+    PlatformConfigLinkedInConnect event,
+    Emitter<PlatformConfigState> emit,
+  ) async {
+    try {
+      _linkedInExpireBefore = _linkedIn(state.configs)?.apiKeyExpireDate;
+      dynamic result = await restClient.startLinkedInSignIn();
+      // dio can hand back the body as a raw JSON string
+      if (result is String) result = jsonDecode(result);
+      final authUrl = result['authUrl']?.toString() ?? '';
+      if (authUrl.isEmpty) throw 'no LinkedIn sign in url';
+      emit(state.copyWith(
+        status: PlatformConfigStatus.linkedInWaiting,
+        authUrl: authUrl,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        status: PlatformConfigStatus.failure,
+        message: e.toString(),
+      ));
+    }
+  }
+
+  /// Emits nothing until the LINKEDIN row carries a new token expiry.
+  Future<void> _onLinkedInCheck(
+    PlatformConfigLinkedInCheck event,
+    Emitter<PlatformConfigState> emit,
+  ) async {
+    try {
+      final response = await restClient.listPlatformConfigurations();
+      final linkedIn = _linkedIn(response.configs);
+      if (linkedIn?.apiKeyExpireDate == null ||
+          linkedIn!.apiKeyExpireDate == _linkedInExpireBefore) {
+        return;
+      }
+      emit(PlatformConfigState(
+        status: PlatformConfigStatus.linkedInConnected,
+        configs: response.configs,
+        message: 'LinkedIn connected',
+      ));
+    } catch (_) {
+      // try again on the next poll
     }
   }
 }

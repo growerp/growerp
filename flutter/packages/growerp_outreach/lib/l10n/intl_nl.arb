@@ -129,5 +129,13 @@
   "guideStatusMessages": "{sent} verzonden, {responded} beantwoord",
   "guideStatusNoMessages": "Nog geen bericht verzonden",
   "guideStatusOpened": "Gemarkeerd als gereed",
-  "guideStatusNotOpened": "Nog niet geopend"
+  "guideStatusNotOpened": "Nog niet geopend",
+  "linkedInConnection": "LinkedIn-verbinding",
+  "linkedInConnect": "Verbinden met LinkedIn",
+  "linkedInReconnect": "LinkedIn opnieuw verbinden",
+  "linkedInWaiting": "Wachten op de LinkedIn-aanmelding in je browser…",
+  "linkedInNotConnected": "Niet verbonden. Druk op Verbinden met LinkedIn en meld je aan zodat GrowERP namens jou kan posten.",
+  "linkedInExpired": "Verbinding verlopen op {date}. Druk op LinkedIn opnieuw verbinden.",
+  "linkedInConnected": "Verbonden ({urn})",
+  "linkedInConnectedUntil": "Verbonden ({urn}), geldig tot {date}"
 }

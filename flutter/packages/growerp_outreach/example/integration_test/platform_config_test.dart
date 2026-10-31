@@ -48,17 +48,35 @@ void main() {
     await CommonTest.selectOption(
         tester, '/platforms', 'PlatformConfigListScreen');
 
-    // Tap the linkedIn platform row (index 1 in OutreachPlatform.values) to
-    // open the detail dialog: email (index 0) shows no credential fields,
-    // it sends through the company SMTP server.
+    // LinkedIn (index 1 in OutreachPlatform.values) has no credential fields:
+    // the token and person URN come from the Connect with LinkedIn button
     await CommonTest.tapByKey(tester, 'platform1');
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
-
-    // Verify detail dialog opened
     expect(
       find.byKey(const Key('PlatformConfigDetail_linkedIn')),
       findsOneWidget,
       reason: 'Platform config detail dialog for linkedIn should be open',
+    );
+    expect(find.byKey(const Key('linkedInConnect')), findsOneWidget);
+    expect(find.byKey(const Key('linkedInStatus')), findsOneWidget);
+    expect(find.byKey(const Key('API Key')), findsNothing,
+        reason: 'LinkedIn credentials are not typed in');
+    await tester.ensureVisible(find.byKey(const Key('Create')));
+    await CommonTest.tapByKey(tester, 'Create');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+    await CommonTest.checkWidgetKey(tester, 'PlatformConfigListScreen');
+
+    // Tap the medium platform row (index 3 in OutreachPlatform.values) to
+    // open the detail dialog: email (index 0) shows no credential fields,
+    // it sends through the company SMTP server.
+    await CommonTest.tapByKey(tester, 'platform3');
+    await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
+
+    // Verify detail dialog opened
+    expect(
+      find.byKey(const Key('PlatformConfigDetail_medium')),
+      findsOneWidget,
+      reason: 'Platform config detail dialog for medium should be open',
     );
 
     // Fill form fields
@@ -77,8 +95,8 @@ void main() {
     // Verify we're back on the list screen
     await CommonTest.checkWidgetKey(tester, 'PlatformConfigListScreen');
 
-    // Re-open the linkedIn config to verify and update
-    await CommonTest.tapByKey(tester, 'platform1');
+    // Re-open the medium config to verify and update
+    await CommonTest.tapByKey(tester, 'platform3');
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
 
     // Verify the saved values
@@ -100,8 +118,8 @@ void main() {
     // Verify we're back on the list screen
     await CommonTest.checkWidgetKey(tester, 'PlatformConfigListScreen');
 
-    // Verify the update by re-opening the linkedIn config
-    await CommonTest.tapByKey(tester, 'platform1');
+    // Verify the update by re-opening the medium config
+    await CommonTest.tapByKey(tester, 'platform3');
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
 
     expect(
@@ -115,14 +133,14 @@ void main() {
     expect(CommonTest.getTextFormField('Username'), equals('test-user'),
         reason: 'username lost on update');
 
-    // Check the credentials: LinkedIn has no probe of its own, so this records a
+    // Check the credentials: Medium has no probe of its own, so this records a
     // successful check without calling out. The point is that it does NOT pop
     // the dialog the way a save does, and that it writes a visible result.
     await tester.ensureVisible(find.byKey(const Key('testConnection')));
     await CommonTest.tapByKey(tester, 'testConnection');
     await tester.pumpAndSettle(const Duration(seconds: CommonTest.waitTime));
     expect(
-      find.byKey(const Key('PlatformConfigDetail_linkedIn')),
+      find.byKey(const Key('PlatformConfigDetail_medium')),
       findsOneWidget,
       reason: 'a credential check must leave the detail dialog open',
     );

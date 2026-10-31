@@ -344,9 +344,15 @@
   "@guideIntro": {
     "description": "Outreach setup guide: guideIntro",
     "placeholders": {
-      "firstName": {"type": "String"},
-      "company": {"type": "String"},
-      "landingPageUrl": {"type": "String"}
+      "firstName": {
+        "type": "String"
+      },
+      "company": {
+        "type": "String"
+      },
+      "landingPageUrl": {
+        "type": "String"
+      }
     }
   },
   "guideStep1Title": "System Setup",
@@ -389,7 +395,9 @@
   "@guideStep4Desc": {
     "description": "Outreach setup guide: guideStep4Desc",
     "placeholders": {
-      "landingPageUrl": {"type": "String"}
+      "landingPageUrl": {
+        "type": "String"
+      }
     }
   },
   "guideStep5Title": "Add Recipients",
@@ -555,5 +563,55 @@
   "guideStatusNotOpened": "Not opened yet",
   "@guideStatusNotOpened": {
     "description": "Outreach setup guide: guideStatusNotOpened"
+  },
+  "linkedInConnection": "LinkedIn connection",
+  "@linkedInConnection": {
+    "description": "Title of the LinkedIn connection group"
+  },
+  "linkedInConnect": "Connect with LinkedIn",
+  "@linkedInConnect": {
+    "description": "Button starting the LinkedIn sign in"
+  },
+  "linkedInReconnect": "Reconnect LinkedIn",
+  "@linkedInReconnect": {
+    "description": "Button renewing the LinkedIn connection"
+  },
+  "linkedInWaiting": "Waiting for the LinkedIn sign in in your browser…",
+  "@linkedInWaiting": {
+    "description": "Shown while the LinkedIn sign in runs in the browser"
+  },
+  "linkedInNotConnected": "Not connected. Press Connect with LinkedIn and sign in to let GrowERP post on your behalf.",
+  "@linkedInNotConnected": {
+    "description": "Shown when LinkedIn is not connected"
+  },
+  "linkedInExpired": "Connection expired on {date}. Press Reconnect LinkedIn.",
+  "@linkedInExpired": {
+    "description": "Shown when the LinkedIn token expired",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "linkedInConnected": "Connected ({urn})",
+  "@linkedInConnected": {
+    "description": "Shown when LinkedIn is connected, without expiry",
+    "placeholders": {
+      "urn": {
+        "type": "String"
+      }
+    }
+  },
+  "linkedInConnectedUntil": "Connected ({urn}), valid until {date}",
+  "@linkedInConnectedUntil": {
+    "description": "Shown when LinkedIn is connected with its expiry date",
+    "placeholders": {
+      "urn": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
   }
 }

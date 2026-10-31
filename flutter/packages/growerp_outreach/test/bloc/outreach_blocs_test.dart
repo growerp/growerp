@@ -790,5 +790,90 @@ void main() {
         configState(PlatformConfigStatus.failure),
       ],
     );
+
+    final connected = PlatformConfiguration(
+      configId: 'P2',
+      platform: 'LINKEDIN',
+      apiKey: 'token',
+      username: 'urn:li:person:AbC',
+      apiKeyExpireDate: DateTime.utc(2027, 1, 1),
+    );
+
+    blocTest<PlatformConfigBloc, PlatformConfigState>(
+      'PlatformConfigLinkedInConnect_any_emitsWaitingWithAuthUrl',
+      setUp: () => when(() => restClient.startLinkedInSignIn()).thenAnswer(
+        (_) async => jsonEncode({'authUrl': 'https://www.linkedin.com/x'}),
+      ),
+      build: build,
+      act: (bloc) => bloc.add(const PlatformConfigLinkedInConnect()),
+      expect: () => [
+        configState(
+          PlatformConfigStatus.linkedInWaiting,
+        ).having((s) => s.authUrl, 'authUrl', 'https://www.linkedin.com/x'),
+      ],
+    );
+
+    blocTest<PlatformConfigBloc, PlatformConfigState>(
+      'PlatformConfigLinkedInConnect_notConfigured_emitsFailure',
+      setUp: () => when(
+        () => restClient.startLinkedInSignIn(),
+      ).thenThrow(Exception('LinkedIn connect not available')),
+      build: build,
+      act: (bloc) => bloc.add(const PlatformConfigLinkedInConnect()),
+      expect: () => [
+        configState(PlatformConfigStatus.failure).having(
+          (s) => s.message,
+          'message',
+          contains('LinkedIn connect not available'),
+        ),
+      ],
+    );
+
+    blocTest<PlatformConfigBloc, PlatformConfigState>(
+      'PlatformConfigLinkedInCheck_tokenUnchanged_emitsNothing',
+      setUp: () {
+        when(
+          () => restClient.startLinkedInSignIn(),
+        ).thenAnswer((_) async => {'authUrl': 'https://www.linkedin.com/x'});
+        when(() => restClient.listPlatformConfigurations()).thenAnswer(
+          (_) async => PlatformConfigurations(configs: [email, connected]),
+        );
+      },
+      build: build,
+      seed: () => PlatformConfigState(configs: [email, connected]),
+      act: (bloc) async {
+        bloc.add(const PlatformConfigLinkedInConnect());
+        await Future<void>.delayed(Duration.zero);
+        bloc.add(const PlatformConfigLinkedInCheck());
+      },
+      expect: () => [configState(PlatformConfigStatus.linkedInWaiting)],
+    );
+
+    blocTest<PlatformConfigBloc, PlatformConfigState>(
+      'PlatformConfigLinkedInCheck_newToken_emitsConnected',
+      setUp: () {
+        when(
+          () => restClient.startLinkedInSignIn(),
+        ).thenAnswer((_) async => {'authUrl': 'https://www.linkedin.com/x'});
+        when(() => restClient.listPlatformConfigurations()).thenAnswer(
+          (_) async => PlatformConfigurations(configs: [email, connected]),
+        );
+      },
+      build: build,
+      seed: () => const PlatformConfigState(configs: [email, linkedin]),
+      act: (bloc) async {
+        bloc.add(const PlatformConfigLinkedInConnect());
+        await Future<void>.delayed(Duration.zero);
+        bloc.add(const PlatformConfigLinkedInCheck());
+      },
+      expect: () => [
+        configState(PlatformConfigStatus.linkedInWaiting),
+        configState(
+          PlatformConfigStatus.linkedInConnected,
+          configs: [email, connected],
+          message: 'LinkedIn connected',
+        ),
+      ],
+    );
   });
 }

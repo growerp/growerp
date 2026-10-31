@@ -210,6 +210,11 @@ mixin OutreachApi {
     @Field() required String configId,
   });
 
+  /// Start the LinkedIn connect through the GrowERP LinkedIn app: returns
+  /// {authUrl}, the LinkedIn consent page to open in the browser.
+  @POST("rest/s1/growerp/100/PlatformConfiguration/linkedinSignIn")
+  Future<dynamic> startLinkedInSignIn();
+
   // Send outreach email
   @POST("rest/s1/growerp/100/OutreachEmail")
   Future<OutreachMessage> sendOutreachEmail({

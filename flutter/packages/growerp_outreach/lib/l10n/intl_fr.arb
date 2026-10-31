@@ -129,5 +129,13 @@
   "guideStatusMessages": "{sent} envoyé(s), {responded} répondu(s)",
   "guideStatusNoMessages": "Aucun message envoyé",
   "guideStatusOpened": "Marqué comme terminé",
-  "guideStatusNotOpened": "Pas encore ouvert"
+  "guideStatusNotOpened": "Pas encore ouvert",
+  "linkedInConnection": "Connexion LinkedIn",
+  "linkedInConnect": "Se connecter avec LinkedIn",
+  "linkedInReconnect": "Reconnecter LinkedIn",
+  "linkedInWaiting": "En attente de la connexion LinkedIn dans votre navigateur…",
+  "linkedInNotConnected": "Non connecté. Cliquez sur Se connecter avec LinkedIn et connectez-vous pour que GrowERP publie en votre nom.",
+  "linkedInExpired": "Connexion expirée le {date}. Cliquez sur Reconnecter LinkedIn.",
+  "linkedInConnected": "Connecté ({urn})",
+  "linkedInConnectedUntil": "Connecté ({urn}), valable jusqu'au {date}"
 }

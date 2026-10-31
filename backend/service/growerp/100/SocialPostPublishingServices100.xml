@@ -493,11 +493,11 @@
                     def personUrn   = platformConfig.username
 
                     if (!accessToken) {
-                        errorMessage = "LinkedIn access token (apiKey) not configured"
+                        errorMessage = "LinkedIn not connected — press Connect with LinkedIn in the LinkedIn platform configuration"
                         return
                     }
                     if (!personUrn) {
-                        errorMessage = "LinkedIn person URN (username) not configured — expected format: urn:li:person:XXXXX"
+                        errorMessage = "LinkedIn person URN (username) missing — press Connect with LinkedIn in the LinkedIn platform configuration"
                         return
                     }
 
@@ -541,6 +541,10 @@
                             .header("X-Restli-Protocol-Version", "2.0.0")
                             .POST(HttpRequest.BodyPublishers.ofString(JsonOutput.toJson(register)))
                             .timeout(Duration.ofSeconds(30)).build(), HttpResponse.BodyHandlers.ofString())
+                        if (regResponse.statusCode() == 401) {
+                            errorMessage = "LinkedIn connection expired — press Connect with LinkedIn in the LinkedIn platform configuration"
+                            return
+                        }
                         if (regResponse.statusCode() != 200) {
                             errorMessage = "LinkedIn image register error ${regResponse.statusCode()}: ${regResponse.body()?.take(300)}"
                             return
@@ -592,6 +596,9 @@
                             publishedUrl = "https://www.linkedin.com/feed/"
                         }
                         success = true
+                    } else if (response.statusCode() == 401) {
+                        // the token lasts 60 days and has no refresh token
+                        errorMessage = "LinkedIn connection expired — press Connect with LinkedIn in the LinkedIn platform configuration"
                     } else {
                         errorMessage = "LinkedIn API error ${response.statusCode()}: ${responseBody?.take(300)}"
                     }

@@ -41,6 +41,9 @@ class PlatformConfiguration {
   /// Why the last verification failed; empty when the credentials were valid
   final String? lastCheckError;
 
+  /// When apiKey stops working; set by the LinkedIn connect (60 days, no refresh)
+  final DateTime? apiKeyExpireDate;
+
   const PlatformConfiguration({
     this.configId,
     this.ownerPartyId,
@@ -54,6 +57,7 @@ class PlatformConfiguration {
     this.lastUsedDate,
     this.lastCheckDate,
     this.lastCheckError,
+    this.apiKeyExpireDate,
   });
 
   factory PlatformConfiguration.fromJson(Map<String, dynamic> json) =>
