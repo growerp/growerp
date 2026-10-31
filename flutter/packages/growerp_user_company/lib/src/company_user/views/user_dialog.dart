@@ -812,7 +812,12 @@ class UserDialogState extends State<UserDialog> {
                   if (!mounted) return;
                   // delete company too?
                   if (widget.user.partyId == currentUser.partyId!) {
-                    _companyUserBloc.add(CompanyUserDelete(user: widget.user));
+                    _companyUserBloc.add(
+                      CompanyUserDelete(
+                        user: widget.user,
+                        deleteCompanyToo: result,
+                      ),
+                    );
                     Navigator.of(context).pop(updatedUser);
                     context.read<AuthBloc>().add(const AuthLoggedOut());
                   }

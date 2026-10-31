@@ -51,7 +51,8 @@ class UserUpdate extends UserEvent {
 
 class UserDelete extends UserEvent {
   final User user;
-  const UserDelete(this.user);
+  final bool deleteCompanyToo;
+  const UserDelete(this.user, {this.deleteCompanyToo = false});
 }
 
 class UserSearchChanged extends UserEvent {

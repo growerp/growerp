@@ -988,7 +988,10 @@ class UserDialogState extends State<UserDialogStateFull> {
                     // delete company too?
                     if (widget.user.partyId == currentUser.partyId!) {
                       _userBloc.add(
-                        UserDelete(widget.user.copyWith(image: null)),
+                        UserDelete(
+                          widget.user.copyWith(image: null),
+                          deleteCompanyToo: result,
+                        ),
                       );
                       Navigator.of(context).pop(updatedUser);
                       context.read<AuthBloc>().add(const AuthLoggedOut());

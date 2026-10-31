@@ -365,12 +365,11 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
       List<CompanyUser> companiesUsers = List.from(state.companiesUsers);
       await restClient.deleteUser(
         partyId: event.user!.partyId!,
-        deleteCompanyToo: false,
+        deleteCompanyToo: event.deleteCompanyToo,
       );
-      int index = companiesUsers.indexWhere(
+      companiesUsers.removeWhere(
         (element) => element.partyId == event.user!.partyId,
       );
-      companiesUsers.removeAt(index);
       return emit(
         state.copyWith(
           searchString: '',

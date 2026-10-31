@@ -180,12 +180,9 @@ class UserBloc extends Bloc<UserEvent, UserState>
       List<User> users = List.from(state.users);
       await restClient.deleteUser(
         partyId: event.user.partyId!,
-        deleteCompanyToo: false,
+        deleteCompanyToo: event.deleteCompanyToo,
       );
-      int index = users.indexWhere(
-        (element) => element.partyId == event.user.partyId,
-      );
-      users.removeAt(index);
+      users.removeWhere((element) => element.partyId == event.user.partyId);
       return emit(
         state.copyWith(
           searchString: '',
