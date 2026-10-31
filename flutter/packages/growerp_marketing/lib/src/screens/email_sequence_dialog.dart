@@ -34,7 +34,7 @@ class EmailSequenceDialog extends StatefulWidget {
 class _StepRow {
   final TextEditingController delayDays = TextEditingController(text: '0');
   final TextEditingController subject = TextEditingController();
-  final TextEditingController bodyHtml = TextEditingController();
+  final TextEditingController body = TextEditingController();
 }
 
 class EmailSequenceDialogState extends State<EmailSequenceDialog> {
@@ -54,7 +54,7 @@ class EmailSequenceDialogState extends State<EmailSequenceDialog> {
       final row = _StepRow();
       row.delayDays.text = '${step.delayDays}';
       row.subject.text = step.subject;
-      row.bodyHtml.text = step.bodyHtml;
+      row.body.text = step.body;
       _stepRows.add(row);
     }
     if (_stepRows.isEmpty) _stepRows.add(_StepRow());
@@ -165,15 +165,13 @@ class EmailSequenceDialogState extends State<EmailSequenceDialog> {
                         controller: row.subject,
                         decoration: const InputDecoration(labelText: 'Subject'),
                       ),
-                      SizedBox(
+                      MarkdownEditor(
+                        controller: row.body,
+                        inputKey: Key('stepBody$index'),
+                        label: 'Body',
                         height: 220,
-                        child: HtmlSourceEditor(
-                          controller: row.bodyHtml,
-                          isPhone: isPhone,
-                          inputKey: Key('stepBody$index'),
-                          inputLabel: 'Body (HTML allowed)',
-                          monospace: false,
-                        ),
+                        helper: '{name} = first name, '
+                            '[text]({track:https://...}) = tracked link',
                       ),
                     ],
                   ),
@@ -214,7 +212,7 @@ class EmailSequenceDialogState extends State<EmailSequenceDialog> {
                                       delayDays:
                                           int.tryParse(row.delayDays.text) ?? 0,
                                       subject: row.subject.text,
-                                      bodyHtml: row.bodyHtml.text,
+                                      body: row.body.text,
                                     ),
                                   )
                                   .toList(),

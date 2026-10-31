@@ -114,7 +114,7 @@ class EmailSequenceTest {
       if (sequence.steps.isNotEmpty) {
         final step = sequence.steps.first;
         await CommonTest.enterText(tester, 'stepSubject0', step.subject);
-        await CommonTest.enterText(tester, 'stepBody0', step.bodyHtml);
+        await CommonTest.enterText(tester, 'stepBody0', step.body);
       }
 
       await CommonTest.tapByKey(

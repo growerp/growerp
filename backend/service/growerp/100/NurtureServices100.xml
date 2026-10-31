@@ -106,7 +106,7 @@ limitations under the License.
                 <set field="steps" from="[]" />
                 <iterate list="stepList" entry="step">
                     <script>steps.add([stepSeq: step.stepSeq, delayDays: step.delayDays,
-                        subject: step.subject, bodyHtml: step.bodyHtml])</script>
+                        subject: step.subject, body: step.body])</script>
                 </iterate>
                 <script>emailSequences.add([emailSequenceId: sequence.emailSequenceId,
                     pseudoId: sequence.pseudoId, sequenceName: sequence.sequenceName,
@@ -131,7 +131,8 @@ limitations under the License.
                         <parameter name="stepSeq" />
                         <parameter name="delayDays" />
                         <parameter name="subject" />
-                        <parameter name="bodyHtml" allow-html="safe" />
+                        <!-- markdown; raw html is escaped when the step is sent -->
+                        <parameter name="body" allow-html="any" />
                     </parameter>
                 </parameter>
             </parameter>
@@ -160,7 +161,7 @@ limitations under the License.
                     in-map="[emailSequenceId: emailSequenceId,
                         stepSeq: step.stepSeq ?: (emailSequence.steps.indexOf(step) + 1),
                         delayDays: step.delayDays ?: 0,
-                        subject: step.subject, bodyHtml: step.bodyHtml]" />
+                        subject: step.subject, body: step.body]" />
             </iterate>
             <service-call name="growerp.100.NurtureServices100.get#EmailSequence"
                 in-map="[emailSequenceId: emailSequenceId]" out-map="context" />
@@ -182,7 +183,8 @@ limitations under the License.
                         <parameter name="stepSeq" />
                         <parameter name="delayDays" />
                         <parameter name="subject" />
-                        <parameter name="bodyHtml" allow-html="safe" />
+                        <!-- markdown; raw html is escaped when the step is sent -->
+                        <parameter name="body" allow-html="any" />
                     </parameter>
                 </parameter>
             </parameter>
@@ -215,7 +217,7 @@ limitations under the License.
                     in-map="[emailSequenceId: emailSequence.emailSequenceId,
                         stepSeq: step.stepSeq ?: (emailSequence.steps.indexOf(step) + 1),
                         delayDays: step.delayDays ?: 0,
-                        subject: step.subject, bodyHtml: step.bodyHtml]" />
+                        subject: step.subject, body: step.body]" />
             </iterate>
             <service-call name="growerp.100.NurtureServices100.get#EmailSequence"
                 in-map="[emailSequenceId: emailSequence.emailSequenceId]" out-map="context" />
@@ -536,6 +538,10 @@ limitations under the License.
         <in-parameters>
             <parameter name="enrollmentId" required="true" />
         </in-parameters>
+        <out-parameters>
+            <!-- the html built from the step, also when no email server is configured -->
+            <parameter name="emailBody" allow-html="any" />
+        </out-parameters>
         <actions>
             <entity-find entity-name="growerp.marketing.EmailSequenceEnrollment"
                 list="enrollments" for-update="true" limit="1">
@@ -581,7 +587,8 @@ limitations under the License.
                 in-map="[ownerPartyId: enrollment.ownerPartyId]" out-map="context" />
 
             <script><![CDATA[
-                String body = step.bodyHtml ?: ''
+                // body is markdown: placeholders are filled in before it is rendered
+                String body = step.body ?: ''
                 String subject = step.subject ?: ''
                 String name = enrollment.firstName ?: 'there'
                 body = body.replace('{name}', name)
@@ -592,13 +599,16 @@ limitations under the License.
                     baseUrl + '/nurture/click?id=' + trk +
                         '&url=' + java.net.URLEncoder.encode(url, 'UTF-8')
                 }
-                body += '<img src="' + baseUrl + '/nurture/open?id=' + trk +
-                    '" width="1" height="1" alt=""/>' +
-                    '<p style="font-size:12px;color:#666;"><a href="' + baseUrl +
-                    '/nurture/unsubscribe?id=' + trk + '">Unsubscribe</a></p>'
-                context.emailBody = body
+                context.emailMarkdown = body
                 context.emailSubject = subject
+                context.unsubscribeUrl = baseUrl + '/nurture/unsubscribe?id=' + trk
+                context.openPixel = '<img src="' + baseUrl + '/nurture/open?id=' +
+                    trk.replace('&', '&amp;') + '" width="1" height="1" alt=""/>'
             ]]></script>
+            <service-call name="growerp.100.OutreachServices100.render#OutreachEmailBody"
+                in-map="[bodyText: emailMarkdown, unsubscribeUrl: unsubscribeUrl]"
+                out-map="renderOut" />
+            <set field="emailBody" from="renderOut.bodyHtml + openPixel" />
 
             <!-- send only when an email server is configured; state advances anyway -->
             <service-call name="growerp.100.GeneralServices100.get#ActiveEmailServer"
@@ -641,6 +651,51 @@ limitations under the License.
                 </else>
             </if>
             <entity-update value-field="enrollment" />
+        </actions>
+    </service>
+
+    <service verb="migrate" noun="EmailSequenceStepBody" authenticate="false">
+        <description>One-time idempotent migration: sequence step bodies moved from html
+            (bodyHtml) to markdown (body). Steps of GROWERP-owned sequences with an empty body
+            get their html converted to markdown and bodyHtml cleared; steps of other owners
+            are left untouched. Run from /apps/tools/Service/ServiceRun/runJson.</description>
+        <out-parameters><parameter name="converted" type="Integer"/></out-parameters>
+        <actions>
+            <set field="converted" from="0" type="Integer"/>
+            <entity-find entity-name="growerp.marketing.EmailSequence" list="sequences">
+                <econdition field-name="ownerPartyId" value="GROWERP"/>
+            </entity-find>
+            <if condition="!sequences"><return/></if>
+            <entity-find entity-name="growerp.marketing.EmailSequenceStep" list="steps"
+                    for-update="true">
+                <econdition field-name="emailSequenceId" operator="in"
+                    from="sequences*.emailSequenceId"/>
+                <econdition field-name="bodyHtml" operator="is-not-null"/>
+            </entity-find>
+            <script><![CDATA[
+                // enough for hand-written mail html: paragraphs, lists, bold, italic,
+                // links and line breaks; any other tag is dropped, its text kept
+                htmlToMarkdown = { String html ->
+                    String md = html.replaceAll(/\s+/, ' ')
+                    md = md.replaceAll(/(?i)<(b|strong)>(.*?)<\/\1>/, '**$2**')
+                    md = md.replaceAll(/(?i)<(i|em)>(.*?)<\/\1>/, '_$2_')
+                    md = md.replaceAll(/(?i)<a\s[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/, '[$2]($1)')
+                    md = md.replaceAll(/(?i)\s*<br\s*\/?>\s*/, '\n')
+                    md = md.replaceAll(/(?i)\s*<li[^>]*>\s*/, '\n- ')
+                    md = md.replaceAll(/(?i)\s*<\/(p|ul|ol|div|h[1-6])>\s*/, '\n\n')
+                    md = md.replaceAll(/<[^>]+>/, '')
+                    md = org.jsoup.parser.Parser.unescapeEntities(md, false)
+                    md.readLines()*.trim().join('\n').replaceAll(/\n{3,}/, '\n\n').trim()
+                }
+            ]]></script>
+            <iterate list="steps" entry="step">
+                <if condition="step.body || !step.bodyHtml"><continue/></if>
+                <set field="step.body" from="htmlToMarkdown(step.bodyHtml)"/>
+                <set field="step.bodyHtml" from="null"/>
+                <entity-update value-field="step"/>
+                <set field="converted" from="converted + 1"/>
+            </iterate>
+            <log message="migrate#EmailSequenceStepBody: converted ${converted} step(s) to markdown"/>
         </actions>
     </service>
 </services>

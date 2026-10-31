@@ -1,1 +1,5 @@
 # Migrations for the version not yet released, see ../README.md
+
+# Email sequence step bodies are markdown now (field body, was html in bodyHtml):
+# converts the GROWERP sequences, other owners are left untouched.
+growerp.100.NurtureServices100.migrate#EmailSequenceStepBody

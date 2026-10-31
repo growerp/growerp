@@ -25,7 +25,7 @@ abstract class EmailSequenceStep with _$EmailSequenceStep {
     int? stepSeq,
     @Default(0) int delayDays,
     @Default("") String subject,
-    @Default("") String bodyHtml,
+    @Default("") String body, // markdown
   }) = _EmailSequenceStep;
 
   factory EmailSequenceStep.fromJson(Map<String, dynamic> json) =>

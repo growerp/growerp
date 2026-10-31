@@ -31,7 +31,14 @@
         <field name="stepSeq" type="number-integer" is-pk="true" />
         <field name="delayDays" type="number-integer" />
         <field name="subject" type="text-medium" />
-        <field name="bodyHtml" type="text-very-long" />
+        <field name="body" type="text-very-long">
+            <description>Markdown, rendered to the html mail layout when sent;
+                {name} and {track:URL} placeholders are filled in first.</description>
+        </field>
+        <field name="bodyHtml" type="text-very-long">
+            <description>Deprecated: html body before markdown, only read by
+                migrate#EmailSequenceStepBody.</description>
+        </field>
 
         <relationship type="one" related="growerp.marketing.EmailSequence">
             <key-map field-name="emailSequenceId" />

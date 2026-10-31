@@ -203,12 +203,13 @@ The content hub: author a piece of content **once**, then adapt it per platform
 ### 3.4 Email Sequences
 
 Automatic nurture e-mails: a series of steps, each with a delay (in days), a
-subject and an HTML/text body. Contacts are enrolled once and then receive the
+subject and a markdown body (bold, lists, links). Contacts are enrolled once and then receive the
 steps automatically.
 
 - **Create:** press **+**, name the sequence, add steps with *delay days*,
   *subject* and *body*. Use `{name}` in subject/body to personalise.
-  Wrap links as `{track:https://your-url}` to count clicks.
+  Use `{track:https://your-url}` as a link address, e.g.
+  `[read more]({track:https://your-url})`, to count clicks.
 - **Activate:** set status *Active*. A background job runs every 15 minutes and
   sends any step that is due.
 - **Enroll people:** link the sequence to a **website form** (§5.1) — every
