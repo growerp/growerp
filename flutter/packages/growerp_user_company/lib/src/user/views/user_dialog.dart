@@ -871,10 +871,6 @@ class UserDialogState extends State<UserDialogStateFull> {
     for (var i = 0; i < widgets.length; i++) {
       column.add(Padding(padding: const EdgeInsets.all(10), child: widgets[i]));
     }
-    if (isPhone) {
-      column.add(updateButton(localizations));
-      column.add(const SizedBox(height: 20));
-    }
 
     List<Widget> rows = [];
     if (!ResponsiveBreakpoints.of(context).isMobile) {
@@ -896,128 +892,154 @@ class UserDialogState extends State<UserDialogStateFull> {
           },
         ),
       );
-      rows.add(updateButton(localizations));
     }
 
+    // the buttons stay below the scrolling fields so they are always visible
     return Form(
       key: _userDialogFormKey,
-      child: SingleChildScrollView(
-        controller: _scrollController,
-        key: const Key('userDialogListView'),
-        child: Column(
-          children: <Widget>[
-            const SizedBox(height: 10),
-            StyledImageUpload(
-              label: 'Profile Photo',
-              subtitle: 'Click to upload. JPG, PNG up to 2MB',
-              image: _imageFile != null
-                  ? (kIsWeb
-                        ? NetworkImage(_imageFile!.path)
-                        : FileImage(File(_imageFile!.path)))
-                  : null,
-              imageBytes: _imageFile == null && !_deleteImage
-                  ? widget.user.image
-                  : null,
-              fallbackText: widget.user.firstName?.substring(0, 1) ?? '',
-              onUploadTap: () async {
-                final pickedFile = await HelperFunctions.pickImage();
-                if (pickedFile != null) {
-                  _image = await HelperFunctions.getResizedImage(
-                    pickedFile.path,
-                  );
-                  setState(() {
-                    _imageFile = pickedFile;
-                  });
-                }
-              },
-              onRemove: (_imageFile != null || widget.user.image != null)
-                  ? () {
-                      setState(() {
-                        _imageFile = null;
-                        _image = null;
-                        _deleteImage = true;
-                      });
-                    }
-                  : null,
+      child: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              key: const Key('userDialogListView'),
+              child: Column(
+                children: <Widget>[
+                  const SizedBox(height: 10),
+                  StyledImageUpload(
+                    label: 'Profile Photo',
+                    subtitle: 'Click to upload. JPG, PNG up to 2MB',
+                    image: _imageFile != null
+                        ? (kIsWeb
+                              ? NetworkImage(_imageFile!.path)
+                              : FileImage(File(_imageFile!.path)))
+                        : null,
+                    imageBytes: _imageFile == null && !_deleteImage
+                        ? widget.user.image
+                        : null,
+                    fallbackText: widget.user.firstName?.substring(0, 1) ?? '',
+                    onUploadTap: () async {
+                      final pickedFile = await HelperFunctions.pickImage();
+                      if (pickedFile != null) {
+                        _image = await HelperFunctions.getResizedImage(
+                          pickedFile.path,
+                        );
+                        setState(() {
+                          _imageFile = pickedFile;
+                        });
+                      }
+                    },
+                    onRemove: (_imageFile != null || widget.user.image != null)
+                        ? () {
+                            setState(() {
+                              _imageFile = null;
+                              _image = null;
+                              _deleteImage = true;
+                            });
+                          }
+                        : null,
+                  ),
+                  Column(children: rows.isNotEmpty ? rows : column),
+                ],
+              ),
             ),
-            Column(children: rows.isNotEmpty ? rows : column),
-          ],
-        ),
+          ),
+          updateButton(localizations),
+        ],
       ),
     );
   }
 
   Widget updateButton(UserCompanyLocalizations localizations) {
+    final List<Widget> otherButtons = [
+      if (widget.user.partyId != null && widget.user.pseudoId != null) ...[
+        OutlinedButton(
+          key: const Key('communications'),
+          onPressed: () => showCommunicationListDialog(
+            context,
+            userPseudoId: widget.user.pseudoId,
+            partyPseudoId: widget.user.pseudoId!,
+            title:
+                '${localizations.communications} '
+                '${widget.user.firstName ?? ''} ${widget.user.lastName ?? ''}',
+          ),
+          child: Text(localizations.communications),
+        ),
+      ],
+      if (widget.user.partyId != null)
+        OutlinedButton(
+          style: ButtonStyle(
+            backgroundColor: WidgetStateProperty.all(Colors.red),
+          ),
+          key: const Key('deleteUser'),
+          child: Text(localizations.deleteUser),
+          onPressed: () async {
+            if (widget.user.partyId != null &&
+                currentUser.partyId == widget.user.partyId) {
+              var result = await confirmDeleteUserComp(
+                context,
+                widget.user.userGroup,
+              );
+              if (result != null) {
+                if (!mounted) return;
+                // delete company too?
+                if (widget.user.partyId == currentUser.partyId!) {
+                  _userBloc.add(
+                    UserDelete(
+                      widget.user.copyWith(image: null),
+                      deleteCompanyToo: result,
+                    ),
+                  );
+                  Navigator.of(context).pop(updatedUser);
+                  context.read<AuthBloc>().add(const AuthLoggedOut());
+                }
+              }
+            } else {
+              _userBloc.add(UserDelete(widget.user.copyWith(image: null)));
+            }
+          },
+        ),
+    ];
+    final Widget mainButton = OutlinedButton(
+      key: const Key("userDialogUpdate"),
+      child: Text(
+        updatedUser.partyId == null
+            ? localizations.create
+            : localizations.update,
+      ),
+      onPressed: () async {
+        update(localizations);
+      },
+    );
     return Padding(
       padding: isPhone
           ? const EdgeInsets.all(10)
           : const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 10),
-      child: Row(
-        children: [
-          if (widget.user.partyId != null && widget.user.pseudoId != null) ...[
-            OutlinedButton(
-              key: const Key('communications'),
-              onPressed: () => showCommunicationListDialog(
-                context,
-                userPseudoId: widget.user.pseudoId,
-                partyPseudoId: widget.user.pseudoId!,
-                title:
-                    '${localizations.communications} '
-                    '${widget.user.firstName ?? ''} ${widget.user.lastName ?? ''}',
-              ),
-              child: Text(localizations.communications),
+      // on a phone the buttons do not fit on one row: update gets its own row
+      child: isPhone
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (otherButtons.isNotEmpty) ...[
+                  Row(
+                    spacing: 10,
+                    children: [
+                      for (final button in otherButtons)
+                        Expanded(child: button),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                ],
+                SizedBox(width: double.infinity, child: mainButton),
+              ],
+            )
+          : Row(
+              spacing: 10,
+              children: [
+                ...otherButtons,
+                Expanded(child: mainButton),
+              ],
             ),
-            const SizedBox(width: 10),
-          ],
-          if (widget.user.partyId != null)
-            OutlinedButton(
-              style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all(Colors.red),
-              ),
-              key: const Key('deleteUser'),
-              child: Text(localizations.deleteUser),
-              onPressed: () async {
-                if (widget.user.partyId != null &&
-                    currentUser.partyId == widget.user.partyId) {
-                  var result = await confirmDeleteUserComp(
-                    context,
-                    widget.user.userGroup,
-                  );
-                  if (result != null) {
-                    if (!mounted) return;
-                    // delete company too?
-                    if (widget.user.partyId == currentUser.partyId!) {
-                      _userBloc.add(
-                        UserDelete(
-                          widget.user.copyWith(image: null),
-                          deleteCompanyToo: result,
-                        ),
-                      );
-                      Navigator.of(context).pop(updatedUser);
-                      context.read<AuthBloc>().add(const AuthLoggedOut());
-                    }
-                  }
-                } else {
-                  _userBloc.add(UserDelete(widget.user.copyWith(image: null)));
-                }
-              },
-            ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: OutlinedButton(
-              key: const Key("userDialogUpdate"),
-              child: Text(
-                updatedUser.partyId == null
-                    ? localizations.create
-                    : localizations.update,
-              ),
-              onPressed: () async {
-                update(localizations);
-              },
-            ),
-          ),
-        ],
-      ),
     );
   }
 

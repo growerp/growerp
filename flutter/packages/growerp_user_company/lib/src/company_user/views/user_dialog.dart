@@ -338,7 +338,9 @@ class UserDialogState extends State<UserDialog> {
                   child: TextFormField(
                     key: const Key('personalTitle'),
                     decoration: InputDecoration(
-                      labelText: UserCompanyLocalizations.of(context)!.jobTitlePosition,
+                      labelText: UserCompanyLocalizations.of(
+                        context,
+                      )!.jobTitlePosition,
                     ),
                     controller: _personalTitleController,
                   ),
@@ -543,7 +545,9 @@ class UserDialogState extends State<UserDialog> {
                         switch (state.status) {
                           case CompanyStatus.failure:
                             return FatalErrorForm(
-                              message: UserCompanyLocalizations.of(context)!.serverConnectionProblem,
+                              message: UserCompanyLocalizations.of(
+                                context,
+                              )!.serverConnectionProblem,
                             );
                           case CompanyStatus.success:
                             return AutocompleteLabel<Company>(
@@ -777,109 +781,130 @@ class UserDialogState extends State<UserDialog> {
         ),
       ),
     ];
-    Widget updateButton = Row(
-      children: [
-        if (widget.user.partyId != null && widget.user.pseudoId != null) ...[
-          OutlinedButton(
-            key: const Key('communications'),
-            onPressed: () => showCommunicationListDialog(
-              context,
-              userPseudoId: widget.user.pseudoId,
-              partyPseudoId: widget.user.pseudoId!,
-              title:
-                  '${_localizations.communications} '
-                  '${widget.user.firstName ?? ''} ${widget.user.lastName ?? ''}',
-            ),
-            child: Text(_localizations.communications),
+    final List<Widget> otherButtons = [
+      if (widget.user.partyId != null && widget.user.pseudoId != null) ...[
+        OutlinedButton(
+          key: const Key('communications'),
+          onPressed: () => showCommunicationListDialog(
+            context,
+            userPseudoId: widget.user.pseudoId,
+            partyPseudoId: widget.user.pseudoId!,
+            title:
+                '${_localizations.communications} '
+                '${widget.user.firstName ?? ''} ${widget.user.lastName ?? ''}',
           ),
-          const SizedBox(width: 10),
-        ],
-        if (widget.user.partyId != null)
-          OutlinedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(Colors.red),
-            ),
-            key: const Key('deleteUser'),
-            child: Text(_localizations.deleteUser),
-            onPressed: () async {
-              if (widget.user.partyId != null &&
-                  currentUser.partyId == widget.user.partyId) {
-                var result = await confirmDeleteUserComp(
-                  context,
-                  widget.user.userGroup!,
-                );
-                if (result != null) {
-                  if (!mounted) return;
-                  // delete company too?
-                  if (widget.user.partyId == currentUser.partyId!) {
-                    _companyUserBloc.add(
-                      CompanyUserDelete(
-                        user: widget.user,
-                        deleteCompanyToo: result,
-                      ),
-                    );
-                    Navigator.of(context).pop(updatedUser);
-                    context.read<AuthBloc>().add(const AuthLoggedOut());
-                  }
-                }
-              } else {
-                _companyUserBloc.add(
-                  CompanyUserDelete(user: widget.user.copyWith(image: null)),
-                );
-              }
-            },
-          ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: OutlinedButton(
-            key: const Key('userDialogUpdate'),
-            child: Text(
-              updatedUser.partyId == null
-                  ? _localizations.create
-                  : _localizations.update,
-            ),
-            onPressed: () async {
-              if (_userDialogFormKey.currentState!.validate()) {
-                updatedUser = updatedUser.copyWith(
-                  firstName: _firstNameController.text,
-                  lastName: _lastNameController.text,
-                  personalTitle: _personalTitleController.text,
-                  email: _emailController.text,
-                  url: _urlController.text,
-                  loginName: _loginNameController.text,
-                  telephoneNr: _telephoneController.text,
-                  address: updatedUser.address,
-                  paymentMethod: updatedUser.paymentMethod,
-                  loginDisabled: _isLoginDisabled,
-                  userGroup: _selectedUserGroup,
-                  role: _selectedRole,
-                  appsUsed: [_applicationId],
-                  //                      language: Localizations.localeOf(context)
-                  //                          .languageCode
-                  //                          .toString(),
-                  company: _selectedCompany.copyWith(role: _selectedRole),
-                  image: _deleteImage && _image == null ? Uint8List(0) : _image,
-                );
-
-                _companyUserBloc.add(
-                  CompanyUserUpdate(CompanyUser.tryParse(updatedUser)),
-                );
-                // if logged-in user update authBloc
-                if (currentUser.partyId == updatedUser.partyId) {
-                  _authBloc.add(AuthLoad());
-                }
-              }
-            },
-          ),
+          child: Text(_localizations.communications),
         ),
       ],
+      if (widget.user.partyId != null)
+        OutlinedButton(
+          style: ButtonStyle(
+            backgroundColor: WidgetStateProperty.all(Colors.red),
+          ),
+          key: const Key('deleteUser'),
+          child: Text(_localizations.deleteUser),
+          onPressed: () async {
+            if (widget.user.partyId != null &&
+                currentUser.partyId == widget.user.partyId) {
+              var result = await confirmDeleteUserComp(
+                context,
+                widget.user.userGroup!,
+              );
+              if (result != null) {
+                if (!mounted) return;
+                // delete company too?
+                if (widget.user.partyId == currentUser.partyId!) {
+                  _companyUserBloc.add(
+                    CompanyUserDelete(
+                      user: widget.user,
+                      deleteCompanyToo: result,
+                    ),
+                  );
+                  Navigator.of(context).pop(updatedUser);
+                  context.read<AuthBloc>().add(const AuthLoggedOut());
+                }
+              }
+            } else {
+              _companyUserBloc.add(
+                CompanyUserDelete(user: widget.user.copyWith(image: null)),
+              );
+            }
+          },
+        ),
+    ];
+    final Widget mainButton = OutlinedButton(
+      key: const Key('userDialogUpdate'),
+      child: Text(
+        updatedUser.partyId == null
+            ? _localizations.create
+            : _localizations.update,
+      ),
+      onPressed: () async {
+        if (_userDialogFormKey.currentState!.validate()) {
+          updatedUser = updatedUser.copyWith(
+            firstName: _firstNameController.text,
+            lastName: _lastNameController.text,
+            personalTitle: _personalTitleController.text,
+            email: _emailController.text,
+            url: _urlController.text,
+            loginName: _loginNameController.text,
+            telephoneNr: _telephoneController.text,
+            address: updatedUser.address,
+            paymentMethod: updatedUser.paymentMethod,
+            loginDisabled: _isLoginDisabled,
+            userGroup: _selectedUserGroup,
+            role: _selectedRole,
+            appsUsed: [_applicationId],
+            //                      language: Localizations.localeOf(context)
+            //                          .languageCode
+            //                          .toString(),
+            company: _selectedCompany.copyWith(role: _selectedRole),
+            image: _deleteImage && _image == null ? Uint8List(0) : _image,
+          );
+
+          _companyUserBloc.add(
+            CompanyUserUpdate(CompanyUser.tryParse(updatedUser)),
+          );
+          // if logged-in user update authBloc
+          if (currentUser.partyId == updatedUser.partyId) {
+            _authBloc.add(AuthLoad());
+          }
+        }
+      },
     );
+    // on a phone the buttons do not fit on one row: update gets its own row
+    Widget updateButton = isPhone
+        ? Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (otherButtons.isNotEmpty) ...[
+                  Row(
+                    spacing: 10,
+                    children: [
+                      for (final button in otherButtons)
+                        Expanded(child: button),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                ],
+                SizedBox(width: double.infinity, child: mainButton),
+              ],
+            ),
+          )
+        : Row(
+            spacing: 10,
+            children: [
+              ...otherButtons,
+              Expanded(child: mainButton),
+            ],
+          );
 
     List<Widget> column = [];
     for (var i = 0; i < widgets.length; i++) {
       column.add(Padding(padding: const EdgeInsets.all(10), child: widgets[i]));
     }
-    column.add(updateButton);
 
     List<Widget> rows = [];
     if (!ResponsiveBreakpoints.of(context).isMobile) {
@@ -901,53 +926,60 @@ class UserDialogState extends State<UserDialog> {
           },
         ),
       );
-      rows.add(updateButton);
     }
 
+    // the buttons stay below the scrolling fields so they are always visible
     return Form(
       key: _userDialogFormKey,
-      child: SingleChildScrollView(
-        controller: _scrollController,
-        key: const Key('userDialogListView'),
-        child: Column(
-          children: <Widget>[
-            const SizedBox(height: 10),
-            StyledImageUpload(
-              label: 'Profile Photo',
-              subtitle: 'Click to upload. JPG, PNG up to 2MB',
-              image: _imageFile != null
-                  ? (kIsWeb
-                        ? NetworkImage(_imageFile!.path)
-                        : FileImage(File(_imageFile!.path)))
-                  : null,
-              imageBytes: _imageFile == null && !_deleteImage
-                  ? widget.user.image
-                  : null,
-              fallbackText: widget.user.firstName?.substring(0, 1) ?? '',
-              onUploadTap: () async {
-                final pickedFile = await HelperFunctions.pickImage();
-                if (pickedFile != null) {
-                  _image = await HelperFunctions.getResizedImage(
-                    pickedFile.path,
-                  );
-                  setState(() {
-                    _imageFile = pickedFile;
-                  });
-                }
-              },
-              onRemove: (_imageFile != null || widget.user.image != null)
-                  ? () {
-                      setState(() {
-                        _imageFile = null;
-                        _image = null;
-                        _deleteImage = true;
-                      });
-                    }
-                  : null,
+      child: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              key: const Key('userDialogListView'),
+              child: Column(
+                children: <Widget>[
+                  const SizedBox(height: 10),
+                  StyledImageUpload(
+                    label: 'Profile Photo',
+                    subtitle: 'Click to upload. JPG, PNG up to 2MB',
+                    image: _imageFile != null
+                        ? (kIsWeb
+                              ? NetworkImage(_imageFile!.path)
+                              : FileImage(File(_imageFile!.path)))
+                        : null,
+                    imageBytes: _imageFile == null && !_deleteImage
+                        ? widget.user.image
+                        : null,
+                    fallbackText: widget.user.firstName?.substring(0, 1) ?? '',
+                    onUploadTap: () async {
+                      final pickedFile = await HelperFunctions.pickImage();
+                      if (pickedFile != null) {
+                        _image = await HelperFunctions.getResizedImage(
+                          pickedFile.path,
+                        );
+                        setState(() {
+                          _imageFile = pickedFile;
+                        });
+                      }
+                    },
+                    onRemove: (_imageFile != null || widget.user.image != null)
+                        ? () {
+                            setState(() {
+                              _imageFile = null;
+                              _image = null;
+                              _deleteImage = true;
+                            });
+                          }
+                        : null,
+                  ),
+                  Column(children: rows.isNotEmpty ? rows : column),
+                ],
+              ),
             ),
-            Column(children: rows.isNotEmpty ? rows : column),
-          ],
-        ),
+          ),
+          updateButton,
+        ],
       ),
     );
   }
