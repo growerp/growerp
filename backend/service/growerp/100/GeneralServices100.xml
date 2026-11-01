@@ -42,6 +42,7 @@ limitations under the License.
                 <parameter name="application" type="Map">
                     <parameter name="applicationId"/>
                     <parameter name="version"/>
+                    <parameter name="minVersion"/>
                     <parameter name="backendUrl"/>
                     <parameter name="companyPartyId"/>
                     <parameter name="assessmentId"/>
@@ -55,6 +56,63 @@ limitations under the License.
             </entity-find>
             <set field="forceUpdate" from="false" type="Boolean"/>
             <if condition="applicationId &amp;&amp; version">
+                <!-- Forced update: only when the app is below minVersion (major.minor, patch
+                     ignored). Raise minVersion per app once its new version is live in the stores,
+                     version only routes newer apps to the review backend -->
+                <if condition="apps &amp;&amp; apps[0].minVersion">
+                    <set field="minVersionParts" from="apps[0].minVersion.split('\\.')"/>
+                    <set field="versionInParts" from="version.split('\\.')"/>
+                    <if condition="minVersionParts.length &gt;= 2 &amp;&amp; versionInParts.length &gt;= 2">
+                        <set field="majorMin" from="minVersionParts[0]" type="Integer"/>
+                        <set field="minorMin" from="minVersionParts[1]" type="Integer"/>
+                        <set field="majorIn" from="versionInParts[0]" type="Integer"/>
+                        <set field="minorIn" from="versionInParts[1]" type="Integer"/>
+                        <if condition="majorIn &lt; majorMin || (majorIn == majorMin &amp;&amp; minorIn &lt; minorMin)">
+                            <set field="forceUpdate" from="true"/>
+                            <set field="minVersion" from="apps[0].minVersion"/>
+                            <!-- Store ids per app, mirrors storeIds in flutter/release/release_config.json.
+                                 Apps without an entry (e.g. AppSupport) fall back to the admin listing. -->
+                            <set field="appName" from="applicationId.substring(3).toLowerCase()"/>
+                            <set field="appleStoreIds"
+                                from="[admin: '1545521755', hotel: '1531267095', rental: '6793362791',
+                                    freelance: '6793362997', marketing: '6793362708', agents: '6793362262']"/>
+                            <set field="windowsStoreIds"
+                                from="[admin: '9nwx6kftjnql', hotel: '9ngphmvmwfj1', rental: '9N4H3Z77CBNW',
+                                    freelance: '9MZBTP3WV3CP', marketing: '9NJH32VW90KX', agents: '9PHK5D4MHV0Q']"/>
+                            <!-- Set update URLs based on platform -->
+                            <if condition="platform == 'android'">
+                                <set field="updateUrl"
+                                    from="'https://play.google.com/store/apps/details?id=org.growerp.' + appName"/>
+                                <else-if condition="platform == 'ios' || platform == 'macos'">
+                                    <set field="appleStoreId"
+                                        from="appleStoreIds.get(appName) ?: appleStoreIds.admin"/>
+                                    <set field="updateUrl"
+                                        from="'https://apps.apple.com/us/app/id' + appleStoreId"/>
+                                </else-if>
+                                <else-if condition="platform == 'linux'">
+                                    <set field="updateUrl" from="'https://snapcraft.io/growerp-' + appName"/>
+                                </else-if>
+                                <else-if condition="platform == 'windows'">
+                                    <set field="windowsStoreId"
+                                        from="windowsStoreIds.get(appName) ?: windowsStoreIds.admin"/>
+                                    <set field="updateUrl"
+                                        from="'https://apps.microsoft.com/detail/' + windowsStoreId"/>
+                                </else-if>
+                                <else>
+                                    <!-- Web platform: instruct user to refresh browser -->
+                                    <set field="updateUrl"
+                                        value="Press Ctrl+F5 to refresh and get the new version"/>
+                                </else>
+                            </if>
+                            <log level="info"
+                                message="Force update required for $applicationId: app version $version is below minimum $minVersion"/>
+                        </if>
+                        <else>
+                            <log level="warn"
+                                message="Invalid version format - minVersion: ${apps[0].minVersion}, version: $version"/>
+                        </else>
+                    </if>
+                </if>
                 <if condition="apps &amp;&amp; apps[0].version">
                     <set field="versionDb" from="apps[0].version"/>
                     <!-- Safely parse version parts with null checks -->
@@ -76,7 +134,7 @@ limitations under the License.
                         Version Comparison Logic (only major.minor are compared; patch is ignored):
                         - incomingVersion > dbVersion: App is newer (test/dev version) -> use override URL from db
                         - incomingVersion == dbVersion: App is current -> use production (no override)  
-                        - incomingVersion < dbVersion: App is outdated -> force upgrade
+                        - incomingVersion < dbVersion: App is older (new one in review) -> use production
                     -->
 
                     <!-- Determine version comparison result -->
@@ -125,47 +183,8 @@ limitations under the License.
                         </if>
                     </if>
 
-                    <!-- CASE 3: Incoming version < DB version - force upgrade required -->
-                    <if condition="incomingVersionIsLess">
-                        <set field="forceUpdate" from="true"/>
-                        <set field="minVersion" from="versionDb"/>
-                        <!-- Store ids per app, mirrors storeIds in flutter/release/release_config.json.
-                             Apps without an entry (e.g. AppSupport) fall back to the admin listing. -->
-                        <set field="appName" from="applicationId.substring(3).toLowerCase()"/>
-                        <set field="appleStoreIds"
-                            from="[admin: '1545521755', hotel: '1531267095', rental: '6793362791',
-                                freelance: '6793362997', marketing: '6793362708', agents: '6793362262']"/>
-                        <set field="windowsStoreIds"
-                            from="[admin: '9nwx6kftjnql', hotel: '9ngphmvmwfj1', rental: '9N4H3Z77CBNW',
-                                freelance: '9MZBTP3WV3CP', marketing: '9NJH32VW90KX', agents: '9PHK5D4MHV0Q']"/>
-                        <!-- Set update URLs based on platform -->
-                        <if condition="platform == 'android'">
-                            <set field="updateUrl"
-                                from="'https://play.google.com/store/apps/details?id=org.growerp.' + appName"/>
-                            <else-if condition="platform == 'ios' || platform == 'macos'">
-                                <set field="appleStoreId"
-                                    from="appleStoreIds.get(appName) ?: appleStoreIds.admin"/>
-                                <set field="updateUrl"
-                                    from="'https://apps.apple.com/us/app/id' + appleStoreId"/>
-                            </else-if>
-                            <else-if condition="platform == 'linux'">
-                                <set field="updateUrl" from="'https://snapcraft.io/growerp-' + appName"/>
-                            </else-if>
-                            <else-if condition="platform == 'windows'">
-                                <set field="windowsStoreId"
-                                    from="windowsStoreIds.get(appName) ?: windowsStoreIds.admin"/>
-                                <set field="updateUrl"
-                                    from="'https://apps.microsoft.com/detail/' + windowsStoreId"/>
-                            </else-if>
-                            <else>
-                                <!-- Web platform: instruct user to refresh browser -->
-                                <set field="updateUrl"
-                                    value="Press Ctrl+F5 to refresh and get the new version"/>
-                            </else>
-                        </if>
-                        <log level="info"
-                            message="Force update required for $applicationId: app version $version is below minimum $versionDb"/>
-                    </if>
+                    <!-- CASE 3: Incoming version < DB version - older app, use production.
+                    A forced update depends on minVersion only, see above -->
                 </if>
                 <else>
                     <set field="applications" from="[]"/>
@@ -174,6 +193,7 @@ limitations under the License.
                             from="[
                             applicationId: app.applicationId.substring(3),
                             version: app.version,
+                            minVersion: app.minVersion,
                             backendUrl: app.backendUrl,
                             assessmentId: app.assessmentId]"/>
                         <script>applications.add(application)</script>
@@ -189,6 +209,7 @@ limitations under the License.
             <parameter name="application" required="true" type="Map">
                 <parameter name="applicationId"/>
                 <parameter name="version"/>
+                <parameter name="minVersion"/>
                 <parameter name="backendUrl"/>
                 <parameter name="assessmentId"/>
             </parameter>
@@ -197,6 +218,7 @@ limitations under the License.
             <parameter name="application" type="Map">
                 <parameter name="applicationId"/>
                 <parameter name="version"/>
+                <parameter name="minVersion"/>
                 <parameter name="backendUrl"/>
                 <parameter name="assessmentId"/>
             </parameter>
@@ -210,6 +232,7 @@ limitations under the License.
             </entity-find>
             <if condition="apps">
                 <set field="apps[0].version" from="application.version"/>
+                <set field="apps[0].minVersion" from="application.minVersion"/>
                 <set field="apps[0].backendUrl" from="application.backendUrl"/>
                 <set field="apps[0].assessmentId" from="application.assessmentId"/>
                 <entity-update value-field="apps[0]"/>
@@ -246,6 +269,7 @@ limitations under the License.
             </entity-find>
             <if condition="apps">
                 <set field="apps[0].version" value=""/>
+                <set field="apps[0].minVersion" value=""/>
                 <set field="apps[0].backendUrl" value=""/>
                 <set field="apps[0].assessmentId" value=""/>
                 <entity-update value-field="apps[0]"/>

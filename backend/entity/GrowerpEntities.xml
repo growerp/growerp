@@ -616,7 +616,11 @@ limitations under the License.
     <entity entity-name="Application" package="growerp">
         <field name="applicationId" type="id" is-pk="true"/>
         <field name="description" type="text-medium"/>
-        <field name="version" type="text-short"/>
+        <field name="version" type="text-short"><description>Version in review: a newer app
+            goes to backendUrl (the review backend), an older one to production</description></field>
+        <field name="minVersion" type="text-short"><description>Lowest version (major.minor) still
+            allowed: an older app is forced to update. Raise only when the new version is live in
+            the stores. Empty: never forced</description></field>
         <field name="backendUrl" type="text-medium"/>
         <field name="assessmentId" type="id"/>
         <relationship type="one" related="growerp.assessment.Assessment">
