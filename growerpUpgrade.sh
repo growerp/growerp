@@ -29,6 +29,7 @@
 set -e
 
 REPO="growerp/growerp"
+STATUS_PAGE="https://growerp.github.io/growerp/"
 PROD_HOST="growerp.com" # the swarm manager, as in update-production.yml
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STORE_APPS=(admin hotel freelance support agents rental marketing academy insurance)
@@ -43,6 +44,7 @@ NC='\033[0m'
 DIM='\033[2m'
 REVIEW_OPEN="" # true/false once show_versions ran
 REVIEW_APPS="" # "app review-version (production version)" lines still in review
+APPROVED_APPS="" # comma list of review apps all stores approved (set by list_review_apps)
 REVIEW_BRANCH="" # set by cut_review_branch
 
 # the header comment, up to the first line that is not a comment
@@ -294,7 +296,9 @@ cmd_prod_review() {
     fi
     if ((START <= 2)); then
         step "2. Update production from review"
-        ask_apps_moqui
+        # default: the approved apps + moqui, step 1 skipped: from the status page
+        ((START <= 1)) || list_review_apps page
+        ask_apps_moqui "${APPROVED_APPS:+$APPROVED_APPS,}moqui"
         apps="$REPLY"
         run_workflow update-production.yml -f source=review -f apps="$apps"
     fi
@@ -460,16 +464,45 @@ PYEOF
     rm -rf "$dir"
 }
 
-# apps whose review version is not on production, with their store approvals
+# store states per app from the Store Status table of the status page, in the
+# STORE_STATES format of store_states: a pending version not "waiting for release"
+# (green) is not approved; snap is left out like in store_states
+status_page_states() {
+    local html
+    html=$(curl -fsSL "$STATUS_PAGE") || { warn "status page $STATUS_PAGE not readable"; return; }
+    STORE_STATES=$(python3 -I -c '
+import re, sys
+html = sys.stdin.read()
+print(re.search(r"Store data queried: [^<]*", html).group(0), file=sys.stderr)
+table = re.search(r"<h2>Store Status</h2>.*?</table>", html, re.S).group(0)
+stores = [s.lower() for s in re.findall(r"<th>([^<]*)</th>", table)[1:]]
+for row in re.findall(r"<tr>\s*<td>(.*?)</tr>", table, re.S):
+    cells = re.split(r"</td>\s*<td>", row)
+    app, states = cells[0].strip(), []
+    for store, cell in zip(stores, cells[1:]):
+        if store == "snap" or "\u23f3" not in cell:
+            continue
+        line = cell[cell.index("\u23f3"):]
+        if "class=\"st-rel\"" not in line:
+            states.append(store + " " + re.sub(r"<[^>]+>|\u23f3", "", line).strip())
+    print(app + "\t" + (", ".join(states) or "approved"))
+' <<<"$html")
+}
+
+# list_review_apps [page]: apps whose review version is not on production, with their
+# store approvals (page: from the status page instead of a status run)
 list_review_apps() {
-    store_states
+    if [[ "${1:-}" == page ]]; then status_page_states; else store_states; fi
     warn "Not on production yet:"
     local name rest state
+    APPROVED_APPS=""
     while read -r name rest; do
         [[ -n "$name" ]] || continue
         state=$(awk -F'\t' -v a="$name" '$1 == a { print $2 }' <<<"$STORE_STATES")
         case "$state" in
-            approved) state="${GREEN}approved, promote with 1a${NC}" ;;
+            approved)
+                APPROVED_APPS+="${APPROVED_APPS:+,}$name"
+                state="${GREEN}approved, promote with 1a${NC}" ;;
             "") state="no store (promote with 1a)" ;;
             *) state="${YELLOW}waiting: $state${NC}" ;;
         esac
