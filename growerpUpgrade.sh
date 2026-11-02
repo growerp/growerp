@@ -59,6 +59,20 @@ step() { echo -e "\n${GREEN}== $1${NC}"; }
 warn() { echo -e "${YELLOW}$1${NC}"; }
 die() { echo -e "${RED}$1${NC}"; exit 1; }
 
+# dots cmd...: run cmd, printing a dot to the terminal every 2s while it runs; the dots
+# are erased when it ends
+dots() {
+    { : >/dev/tty; } 2>/dev/null || { "$@"; return; }
+    local start=$SECONDS printer rc
+    (while sleep 2; do printf . >/dev/tty; done) &
+    printer=$!
+    "$@" && rc=0 || rc=$?
+    kill "$printer" 2>/dev/null || true
+    wait "$printer" 2>/dev/null || true
+    ((SECONDS - start >= 2)) && printf '\r\033[K' >/dev/tty
+    return $rc
+}
+
 confirm() {
     local answer
     read -r -p "$1 [y/N] " answer
@@ -157,7 +171,7 @@ changed_screen_apps() {
         rev=$(git -C "$SCRIPT_DIR" tag -l "$1.*" --sort=-v:refname | head -1)
         warn "dry run: no branch $1 yet, comparing with tag ${rev:-?}" >&2
     else
-        git -C "$SCRIPT_DIR" fetch -q origin "$1"
+        dots git -C "$SCRIPT_DIR" fetch -q origin "$1"
     fi
     if [[ -z "$base" ]]; then
         warn "no successful screenshots run yet" >&2
@@ -231,7 +245,7 @@ branch_tag() {
 cmd_staging() {
     step "Update staging"
     local ref="$1" review
-    git -C "$SCRIPT_DIR" fetch -q --tags origin
+    dots git -C "$SCRIPT_DIR" fetch -q --tags origin
     review=$(review_branch)
     if [[ -z "$ref" ]]; then
         ask "Branch (master, or review branch $review for a fix)" master
@@ -274,7 +288,7 @@ cmd_staging() {
 # has the version already
 cut_review_branch() {
     local tag="${1:-}" branch
-    git -C "$SCRIPT_DIR" fetch -q --tags origin
+    dots git -C "$SCRIPT_DIR" fetch -q --tags origin
     [[ -n "$tag" ]] || tag=$(review_version)
     [[ -n "$tag" ]] || die "no moqui version in review-versions.conf"
     branch="${tag%.*}"
@@ -360,7 +374,7 @@ claude_notes() {
         echo
         echo "COMMITS $1..$2:"
         git -C "$SCRIPT_DIR" log --no-merges --format='- %s' "$1..$2"
-    } | claude -p "Write the GitHub release notes of GrowERP $2 from the commits on stdin, \
+    } | dots claude -p "Write the GitHub release notes of GrowERP $2 from the commits on stdin, \
 in exactly the form and style of the example release. Output: a first line \
 'TITLE: <a few words naming the main themes, without version number>', a blank line, \
 one summary paragraph with the highlights in **bold**, then '### <emoji> <Theme>' \
@@ -373,7 +387,7 @@ No Full Changelog line, nothing before TITLE or after the notes." 2>/dev/null
 
 cmd_release() {
     step "Create GitHub release"
-    git -C "$SCRIPT_DIR" fetch -q --tags origin
+    dots git -C "$SCRIPT_DIR" fetch -q --tags origin
     local previous tag notes
     previous=$(gh release list -R "$REPO" -L1 --exclude-drafts --json tagName -q '.[0].tagName')
     ask "Version to release (the version to submit for review)" \
@@ -450,7 +464,7 @@ store_states() {
         id=$(gh run list -R "$REPO" -w status.yml -s success -L1 --json databaseId -q '.[0].databaseId')
     fi
     dir=$(mktemp -d)
-    gh run download "$id" -R "$REPO" -p 'status-*-*' -D "$dir" >/dev/null 2>&1 || warn "no store states in run $id"
+    dots gh run download "$id" -R "$REPO" -p 'status-*-*' -D "$dir" >/dev/null 2>&1 || warn "no store states in run $id"
     STORE_STATES=$(python3 -I - "$dir" <<'PYEOF'
 import json, sys
 from pathlib import Path
@@ -489,7 +503,7 @@ PYEOF
 # (green) is not approved; snap is left out like in store_states
 status_page_states() {
     local html
-    html=$(curl -fsSL "$STATUS_PAGE") || { warn "status page $STATUS_PAGE not readable"; return; }
+    html=$(dots curl -fsSL "$STATUS_PAGE") || { warn "status page $STATUS_PAGE not readable"; return; }
     STORE_STATES=$(python3 -I -c '
 import re, sys
 html = sys.stdin.read()
@@ -664,7 +678,7 @@ apps_not_in_review() {
 # the review branch (1.22) is cut at the staging tag
 cmd_resubmit() {
     local tag waiting apps
-    git -C "$SCRIPT_DIR" fetch -q --tags origin
+    dots git -C "$SCRIPT_DIR" fetch -q --tags origin
     tag=$(newest_tag)
     waiting=$(review_app_names)
     apps=$(apps_not_in_review)
@@ -716,7 +730,7 @@ newest_tag() {
 # a swarm file as the production server has it (update production and freeze edit
 # it there); without ssh the growerp/server repo copy, committed by hand, may be stale
 server_file() {
-    ssh -n -o BatchMode=yes -o ConnectTimeout=10 "$PROD_HOST" "cat server/swarm/$1" 2>/dev/null && return
+    dots ssh -n -o BatchMode=yes -o ConnectTimeout=10 "$PROD_HOST" "cat server/swarm/$1" 2>/dev/null && return
     warn "  no ssh to $PROD_HOST: $1 from the growerp/server repo, may be stale" >&2
     gh api "repos/growerp/server/contents/swarm/$1" -H 'Accept: application/vnd.github.raw'
 }
@@ -736,7 +750,7 @@ show_versions() {
     local prod review name img rv pv rminors="" pminors="" rall="" pall=""
     REVIEW_OPEN=false
     REVIEW_APPS=""
-    git -C "$SCRIPT_DIR" fetch -q --tags origin
+    dots git -C "$SCRIPT_DIR" fetch -q --tags origin
     prod=$(server_file apps-prod.yml)
     review=$(server_file review-versions.conf)
     for name in moqui "${STORE_APPS[@]}"; do
