@@ -7,12 +7,15 @@
 #
 #   production review   the versions the stores approved (when a review exists):
 #                       update production, release the approved store submissions
-#   production staging  new release of what staging runs now (when no review exists):
-#                       GitHub release, update production
+#   production staging  new release of what staging runs now: GitHub release, update
+#                       production (while a review is open: apps not in review + moqui)
 #   review   new review: update staging from master, GitHub release, freeze for
 #            review (when review is empty) and create the review branch (1.22) at the
 #            frozen version, prepare, publish binary to stores and publish metadata
 #            (opt) from that branch, merge it back into master (opt)
+#   review staging  while apps still wait in review: submit the apps not in review
+#            (promoted from it) again with the version staging runs, their builds use
+#            the staging backend; no freeze, review branch (1.22) at the staging tag
 #   prepare  create store screenshots when screens changed since the last screenshots
 #            run or its artifact (used by the Windows binary and publish metadata,
 #            kept 7 days) expired
@@ -240,13 +243,13 @@ cmd_staging() {
     if [[ "$ref" == master ]]; then
         # the patch versions of the review minor belong to the review branch
         current=$(branch_tag master)
-        if [[ -n "$review" && "${current%.*}" == "$review" ]]; then
-            warn "master is on $current, review branch $review has the $review.N versions: bump minor."
+        if git -C "$SCRIPT_DIR" rev-parse -q --verify "refs/remotes/origin/${current%.*}" >/dev/null; then
+            warn "master is on $current, review branch ${current%.*} has the ${current%.*}.N versions: bump minor."
             default=minor
         fi
         ask_list "Bump" "$default" patch minor major
         [[ "$REPLY" == patch && "$default" == minor ]] &&
-            { confirm "Patch collides with the versions of $review. Anyway?" || return; }
+            { confirm "Patch collides with the versions of ${current%.*}. Anyway?" || return; }
     else
         echo "Fix of the version in review on $ref: patch bump."
         REPLY=patch
@@ -259,13 +262,14 @@ cmd_staging() {
         -f comment="$comment"
 }
 
-# the review branch (1.21) at the frozen backend version, so the store submissions and
-# fixes of the version in review do not get the development on master; after a
-# re-freeze of a fix the branch has the version already
+# cut_review_branch [tag]: the review branch (1.21) at the frozen backend version (or
+# the staging tag of a resubmit), so the store submissions and fixes of the version in
+# review do not get the development on master; after a re-freeze of a fix the branch
+# has the version already
 cut_review_branch() {
-    local tag branch
+    local tag="${1:-}" branch
     git -C "$SCRIPT_DIR" fetch -q --tags origin
-    tag=$(review_version)
+    [[ -n "$tag" ]] || tag=$(review_version)
     [[ -n "$tag" ]] || die "no moqui version in review-versions.conf"
     branch="${tag%.*}"
     # a branch needs the commit, not the annotated tag
@@ -402,13 +406,21 @@ cmd_release() {
 }
 
 # production gets what staging runs now: web apps and backend, no store review
+# while a review is open only the apps not in review (e.g. resubmitted from staging,
+# 2s) and moqui: update production skips an app still in review
 cmd_prod_staging() {
-    require_review false
+    local apps waiting
+    waiting=$(review_app_names)
+    apps=$(apps_not_in_review)
+    if [[ -n "$waiting" ]]; then
+        warn "Still in review, promote them from review (1a), skipped here:"
+        sed 's/^/    /' <<<"$waiting"
+        apps="${apps:+$apps,}moqui"
+    fi
     step "1. GitHub release"
-    echo "Update production refuses source staging while store review routing is on."
     confirm "Create a GitHub release for the version staging runs?" && cmd_release
     step "2. Update production from staging"
-    ask_apps_moqui
+    ask_apps_moqui "$apps"
     run_workflow update-production.yml -f source=staging -f apps="$REPLY"
 }
 
@@ -561,17 +573,41 @@ cmd_review() {
     # The binary creates the new store version, metadata writes into it (the Windows
     # binary submission carries its listing itself); both use the screenshots. They
     # run on the review branch: master has moved on since the freeze
-    local apps=all stores=all branch="${REVIEW_BRANCH:-}"
+    local branch="${REVIEW_BRANCH:-}"
     if [[ -z "$branch" ]]; then
         git -C "$SCRIPT_DIR" fetch -q origin
         branch=$(review_branch)
     fi
     [[ -n "$branch" ]] || die "no review branch: freeze for review first (step 4)"
-    if ((START <= 5)); then
-        step "5. Publish binary (submit for review)"
+    publish_to_stores "$branch" all 5
+}
+
+# ask_apps_except default refused: ask_apps, refusing the apps in the refused lines
+ask_apps_except() {
+    local name bad
+    while true; do
+        ask_apps "$1"
+        [[ -n "$2" ]] || return 0
+        [[ "$REPLY" == all ]] && REPLY=$(IFS=,; echo "${STORE_APPS[*]}")
+        bad=""
+        for name in ${REPLY//,/ }; do
+            if grep -qx "$name" <<<"$2"; then bad+=" $name"; fi
+        done
+        [[ -z "$bad" ]] && return 0
+        echo -e "${RED}in review, would replace its store submission:$bad${NC}"
+    done
+}
+
+# publish_to_stores branch default-apps first-step [refused]: publish binary (submit
+# for review) and metadata from the branch, never the refused apps (lines); START
+# below first-step skips the binary
+publish_to_stores() {
+    local branch="$1" apps="$2" first="$3" refused="${4:-}" stores=all
+    if ((START <= first)); then
+        step "$first. Publish binary (submit for review)"
         echo "From review branch $branch"
         if confirm "Publish binary to stores?"; then
-            ask_apps
+            ask_apps_except "$apps" "$refused"
             apps="$REPLY"
             ask_stores
             stores="$REPLY"
@@ -581,13 +617,13 @@ cmd_review() {
                 -f track="$REPLY" -f android_release_status=auto
         fi
     fi
-    step "6. Publish metadata (store listing, screenshots)"
+    step "$((first + 1)). Publish metadata (store listing, screenshots)"
     echo "From review branch $branch"
     echo "The binary created the store versions and took the iOS/macOS texts (not the"
     echo "screenshots), the Windows binary its whole listing. A version waiting for review"
     echo "leaves the queue for the iOS/macOS screenshots and is submitted again."
     if confirm "Publish metadata to stores?"; then
-        ask_apps "$apps"
+        ask_apps_except "$apps" "$refused"
         apps="$REPLY"
         # Windows is left out: its binary submission carries the listing (a listing-only
         # update without a binary in flight can still select it)
@@ -596,6 +632,63 @@ cmd_review() {
         ask_list "Stores" "${stores:-ios}" "${STORES[@]}"
         run_workflow publish-metadata.yml --ref "$branch" -f apps="$apps" -f stores="$REPLY"
     fi
+}
+
+# store apps whose review version is not on production yet (moqui left out): a new
+# submission would replace their store review, staging would skip their review version
+review_app_names() {
+    [[ -n "$REVIEW_OPEN" ]] || show_versions >/dev/null
+    awk 'NF { print $1 }' <<<"$REVIEW_APPS" | grep -vx moqui || true
+}
+
+# store apps without the ones in review (comma list, all when none is in review)
+apps_not_in_review() {
+    local waiting
+    waiting=$(review_app_names)
+    [[ -n "$waiting" ]] || { echo all; return; }
+    printf '%s\n' "${STORE_APPS[@]}" | grep -vxF "$waiting" | paste -sd,
+}
+
+# resubmit while a review is open: the apps promoted from review go to the stores
+# again with the version staging runs, their new builds use the staging backend
+# (production's Application row of a promoted app points newer versions at
+# backend.growerp.org). The apps still in review keep the review backend. No freeze:
+# the review branch (1.22) is cut at the staging tag
+cmd_resubmit() {
+    local tag waiting apps
+    git -C "$SCRIPT_DIR" fetch -q --tags origin
+    tag=$(newest_tag)
+    waiting=$(review_app_names)
+    apps=$(apps_not_in_review)
+    [[ -n "$apps" ]] || die "every store app is still in review: promote the approved ones from review first (1a)"
+    echo "Staging runs $tag: its builds of the apps below use the staging backend for store review."
+    if [[ -n "$waiting" ]]; then
+        warn "Still in review, kept on the review backend (not resubmitted):"
+        sed 's/^/    /' <<<"$waiting"
+    fi
+    start_at 1 "Reviewer login on staging" "GitHub release" "Review branch at $tag" \
+        "Publish binary (submit for review)" "Publish metadata (store listing, screenshots)"
+    if ((START <= 1)); then
+        step "1. Reviewer login on staging"
+        pause "The store reviewers log in on staging (backend.growerp.org): check their userid/password there."
+    fi
+    if ((START <= 2)); then
+        step "2. GitHub release"
+        confirm "Create a GitHub release for $tag?" && cmd_release
+    fi
+    local branch="${tag%.*}"
+    if ((START <= 3)); then
+        step "3. Review branch at $tag"
+        git -C "$SCRIPT_DIR" fetch -q origin
+        [[ "$branch" != "$(review_branch)" ]] ||
+            die "$branch is the branch of the version in review: staging must be a newer minor"
+        cut_review_branch "$tag"
+    else
+        git -C "$SCRIPT_DIR" fetch -q origin
+        git -C "$SCRIPT_DIR" rev-parse -q --verify "refs/remotes/origin/$branch" >/dev/null ||
+            die "no review branch $branch: run step 3 first"
+    fi
+    publish_to_stores "$branch" "$apps" 4 "$waiting"
 }
 
 cmd_status() {
@@ -677,11 +770,12 @@ menu() {
     show_versions
     echo
     echo "  1  Production"
-    local on="" off=""
-    if $REVIEW_OPEN; then off="$DIM"; else on="$DIM"; fi
+    local on=""
+    $REVIEW_OPEN || on="$DIM"
     echo -e "${on}     1a  from review    versions the stores approved     (when a review is open)${NC}"
-    echo -e "${off}     1b  from staging   new release of staging now       (when no review is open)${NC}"
+    echo -e "     1b  from staging   new release of staging now       (review open: apps not in it)"
     echo    "  2  New review         staging, freeze, submit          (freeze when no review is open)"
+    echo -e "${on}  2s Resubmit approved  staging version, staging backend (apps promoted from an open review)${NC}"
     echo
     echo "  Other: u update staging   p screenshots   g GitHub release   t status   q quit"
     echo
@@ -690,6 +784,7 @@ menu() {
         1a) cmd_prod_review ;;
         1b) cmd_prod_staging ;;
         2) cmd_review ;;
+        2s) cmd_resubmit ;;
         u) cmd_staging ;;
         p) cmd_prepare ;;
         g) cmd_release ;;
@@ -721,7 +816,12 @@ case "${1,,}" in
             staging) cmd_prod_staging ;;
             *) show_help; exit 1 ;;
         esac ;;
-    review) cmd_review ;;
+    review)
+        case "$2" in
+            staging) cmd_resubmit ;;
+            "") cmd_review ;;
+            *) show_help; exit 1 ;;
+        esac ;;
     prepare) cmd_prepare ;;
     staging) cmd_staging ;;
     release) cmd_release ;;

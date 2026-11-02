@@ -27,7 +27,8 @@ release, in the form of the previous release notes; checked in the editor before
 2. "update production" (source: review), for the approved apps or all at once
    promotes the versions the stores reviewed (review-versions.conf), not staging.
    It also points the promoted apps' newer native builds back at
-   backend.growerp.org. Source staging is refused while store review routing is on.
+   backend.growerp.org. Source staging skips (and refuses by name) the apps still in
+   store review; moqui and apps already promoted from review may come from staging.
 3. "release approved store submissions", for the same apps
    releases every app that passed review and is waiting for a manual release
    action (IOS/MACOS/Android/Windows). Snap is off by default.
@@ -111,6 +112,27 @@ live in every store and the backend no longer works with the older one.
 
 Don't use `./review.sh freeze --force` while an app is still in review: it replaces
 the review backend and the recorded versions, its reviewers lose their backend.
+
+### Resubmit approved apps from staging while others are still in review
+
+When some apps still wait for their store approval, the approved ones can go to the
+stores again with the version staging runs, without a freeze
+(`./growerpUpgrade.sh review staging`, menu `2s`):
+
+1. Promote the approved apps from review first (cycle A). The apps still in review are
+   not touched: they keep backend.growerp.net and their review version.
+2. The script lists the apps still in review and refuses to submit them (a new
+   submission would replace their store review). Steps: reviewer login on staging,
+   GitHub release of the staging tag, review branch (e.g. 1.22) at the staging tag,
+   screenshots/publish binary/publish metadata from that branch, as in B4.
+3. The new builds use the staging backend: production's Application row of a
+   promoted app points newer versions at backend.growerp.org. The reviewers log in on
+   staging, which keeps moving with master (the next "update staging" on master is a
+   minor bump, the branch of its minor exists). Don't clear the staging database.
+4. Once approved: `./growerpUpgrade.sh production staging` (1b) for these apps and
+   moqui. Update production takes what staging runs then (newer patch or minor than
+   the submitted build is fine: no forced update below `minVersion`) and skips the
+   apps still in review.
 
 ## when cleardb production
 

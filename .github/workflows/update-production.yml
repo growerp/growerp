@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       source:
-        description: "Promote from: review = the versions the stores reviewed (review-versions.conf), staging = what staging runs now, the version after the review version (refused while store review routing is on)"
+        description: "Promote from: review = the versions the stores reviewed (review-versions.conf), staging = what staging runs now, the version after the review version (apps still in store review are refused)"
         required: true
         default: "review"
         type: choice
