@@ -6,3 +6,7 @@ growerp.100.MenuServices100.migrate#OwnerMenuOverrides
 # mcp-user and agent-claude were seeded with the public default password 'moqui';
 # nothing signs in with it, so it is removed.
 growerp.100.GeneralServices100.migrate#ServiceUserPasswords
+
+# Email sequence step bodies are markdown now (field body, was html in bodyHtml):
+# converts the GROWERP sequences, other owners are left untouched.
+growerp.100.NurtureServices100.migrate#EmailSequenceStepBody
