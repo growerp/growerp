@@ -307,6 +307,8 @@ cmd_prod_review() {
         run_workflow update-production.yml -f source=review -f apps="$apps"
     fi
     step "3. Release approved store submissions"
+    # restarted at 3: the apps promoted already are the ones no longer in review
+    ((START < 3)) || apps=$(apps_not_in_review)
     [[ "$apps" == "all" ]] || apps=$(tr ',' '\n' <<<"$apps" | grep -vx moqui | paste -sd,)
     if [[ -z "$apps" ]]; then
         echo "Only moqui promoted, no store submissions to release."
