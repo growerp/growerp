@@ -228,8 +228,8 @@ class CurrencyAndSubscriptionTests extends Specification {
     }
 
     def "lapsed trial of #email on #hostName is active: #active"() {
-        // still 15 days ahead from the previous test: store reviewers' example.com
-        // accounts never expire on staging (.org) and review (.net), only there
+        // still 15 days ahead from the previous test: subscriptions never expire
+        // on staging (.org) and review (.net), only there
         when:
         Map out = ec.service.sync().name('growerp.100.TenantServices100.check#TenantSubscription')
                 .parameters([ownerPartyId: tenantId, email: email, hostName: hostName])
@@ -245,7 +245,9 @@ class CurrencyAndSubscriptionTests extends Specification {
         'Test1@Example.com' | 'backend.growerp.net' || true
         'test1@example.com' | 'backend.growerp.com' || false
         'test1@example.com' | null                  || false
-        'real@acme.com'     | 'backend.growerp.org' || false
+        'real@acme.com'     | 'backend.growerp.org' || true
+        'real@acme.com'     | 'backend.growerp.net' || true
+        'real@acme.com'     | 'backend.growerp.com' || false
     }
 
     def "renew charges converted plan price and extends subscription one month"() {

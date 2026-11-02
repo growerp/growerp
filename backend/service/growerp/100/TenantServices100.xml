@@ -382,11 +382,10 @@ limitations under the License.
             <parameter name="subscription" type="Map"/>
         </out-parameters>
         <actions>
-            <!-- example.com accounts (store reviewers, testers) never expire on the
-                 growerp.org staging and growerp.net review backends; production
-                 (growerp.com and custom domains) keeps the normal rules. -->
-            <if condition="email ==~ /(?i)^.+@example\.com$/
-                    &amp;&amp; (hostName?.endsWith('.org') || hostName?.endsWith('.net'))">
+            <!-- subscriptions never expire on the growerp.org staging and growerp.net
+                 review backends; production (growerp.com and custom domains) keeps
+                 the normal rules. -->
+            <if condition="hostName?.endsWith('.org') || hostName?.endsWith('.net')">
                 <set field="hasActiveSubscription" value="true" type="Boolean"/>
                 <set field="subscriptionStatus" value="active"/>
                 <set field="daysRemaining" value="-1" type="Integer"/><!-- -1 = unlimited -->
