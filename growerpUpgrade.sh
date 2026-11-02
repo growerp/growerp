@@ -149,16 +149,22 @@ run_workflow() {
 # changed_screen_apps branch: store apps whose screens changed on the branch since the
 # last successful screenshots run
 changed_screen_apps() {
-    local base files app block
+    local base files app block rev="origin/$1"
     base=$(gh run list -R "$REPO" -w screenshots.yml --status success -L1 \
         --json headSha -q '.[0].headSha')
-    git -C "$SCRIPT_DIR" fetch -q origin "$1"
+    if $DRY_RUN && ! git -C "$SCRIPT_DIR" ls-remote -q --exit-code --heads origin "$1" >/dev/null; then
+        # dry run: the review branch is not cut yet, it would start at its minor's newest tag
+        rev=$(git -C "$SCRIPT_DIR" tag -l "$1.*" --sort=-v:refname | head -1)
+        warn "dry run: no branch $1 yet, comparing with tag ${rev:-?}" >&2
+    else
+        git -C "$SCRIPT_DIR" fetch -q origin "$1"
+    fi
     if [[ -z "$base" ]]; then
         warn "no successful screenshots run yet" >&2
         echo "${STORE_APPS[@]}"
         return
     fi
-    files=$(git -C "$SCRIPT_DIR" diff --name-only "$base" "origin/$1" -- flutter/packages |
+    files=$(git -C "$SCRIPT_DIR" diff --name-only "$base" "$rev" -- flutter/packages |
         grep -E '^flutter/packages/[^/]+/lib/.*\.(dart|arb)$' |
         grep -vE '/blocs/|/integration_test/|\.g\.dart$|\.freezed\.dart$' || true)
     echo "Screen files changed since screenshots run ${base:0:8}: $(grep -c . <<<"$files")" >&2
