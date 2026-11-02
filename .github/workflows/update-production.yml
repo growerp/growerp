@@ -116,12 +116,10 @@ jobs:
           BEFORE: ${{ steps.prodbefore.outputs.stdout }}
           AFTER: ${{ steps.prodversion.outputs.stdout }}
         run: |
-          # ghcr.io/growerp/growerp-moqui:1.22.0@sha256:... -> 1.22.0
+          # ghcr.io/growerp/growerp-moqui:1.22.0@sha256:... -> 1.22.0; the captured
+          # stdout also has ssh-action's "Successfully executed commands" banner
           tag() {
-            local image
-            image=$(echo "$1" | tr -d '[:space:]')
-            image="${image%%@*}"
-            echo "${image##*:}"
+            grep -oE 'growerp-moqui:[0-9]+\.[0-9]+\.[0-9]+' <<<"$1" | head -1 | cut -d: -f2 || true
           }
           for name in BEFORE AFTER; do
             version=$(tag "${!name}")
