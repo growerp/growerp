@@ -261,10 +261,11 @@ cmd_staging() {
     fi
     local current default=patch
     if [[ "$ref" == master ]]; then
-        # the patch versions of the review minor belong to the review branch
+        # the patch versions of the minor in review belong to its review branch;
+        # before the freeze the store builds use staging, which stays on that minor
         current=$(branch_tag master)
-        if git -C "$SCRIPT_DIR" rev-parse -q --verify "refs/remotes/origin/${current%.*}" >/dev/null; then
-            warn "master is on $current, review branch ${current%.*} has the ${current%.*}.N versions: bump minor."
+        if [[ "$(review_version | cut -d. -f1,2)" == "${current%.*}" ]]; then
+            warn "master is on $current, ${current%.*} is in review and has the ${current%.*}.N versions: bump minor."
             default=minor
         fi
         ask_list "Bump" "$default" patch minor major

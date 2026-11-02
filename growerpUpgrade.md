@@ -63,7 +63,9 @@ release, in the form of the previous release notes; checked in the editor before
 The first "update staging" on master after a freeze is a minor bump (1.22 in review →
 master 1.23.0): the patch versions 1.22.N belong to the review branch. The script
 proposes it, and the workflow turns a patch bump into a minor bump by itself once
-the review branch of master's minor exists (so also the weekly scheduled run).
+the review backend runs master's minor (so also the weekly scheduled run). Between
+cutting the review branch and the freeze, the store builds use staging, so staging
+stays on patch bumps of that minor.
 
 ### Fix the version in review
 

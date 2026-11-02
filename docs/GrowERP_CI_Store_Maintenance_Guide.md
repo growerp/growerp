@@ -248,7 +248,8 @@ The release is run with `./growerpUpgrade.sh`; the full procedure is in
 - **Next version:** the first "update staging" on master after a freeze is a minor
   bump (1.22 in review → master 1.23.0); the 1.22.N patch versions belong to the
   review branch. Update Staging turns a patch bump into a minor bump by itself once
-  the review branch of master's minor exists.
+  the review backend runs master's minor (Freeze for Review); before the freeze the
+  store builds use staging, which stays on patch bumps of that minor.
 - **Fix of the version in review:** fix on master first, cherry-pick onto the review
   branch. A backend fix: run Hotfix Review on the review branch. A fix that needs new
   binaries: "update staging" on the review branch (patch bump), freeze again and publish.

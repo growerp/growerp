@@ -2,8 +2,8 @@ name: Update Staging
 
 # Manually trigger a staging update from GitHub Actions, or let the weekly
 # schedule do it (patch bump, all apps) when master changed since the last one.
-# A patch bump becomes a minor bump once the review branch of the current minor
-# exists: its patch versions are for Hotfix Review.
+# A patch bump becomes a minor bump once the store review backend runs the current
+# minor (Freeze for Review): its patch versions are then for Hotfix Review.
 # No extra secrets needed — GITHUB_TOKEN is used for both git push and ghcr.io.
 # Required repository / organisation settings:
 #   Settings → Actions → General → Workflow permissions → "Read and write permissions"
@@ -76,17 +76,35 @@ jobs:
             echo "::notice::No changes since $TAG — staging not updated"
           fi
 
-      # The N.M.x patch versions belong to review branch N.M (Hotfix Review), so
-      # once that branch exists, master moves on to the next minor version.
+      # Empty when the review backend is not deployed
+      - name: Review backend image
+        id: review
+        uses: appleboy/ssh-action@v1
+        with:
+          host: growerp.com
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          capture_stdout: true
+          script: docker service inspect growerp_moqui-review --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}' 2>/dev/null || true
+
+      # The N.M.x patch versions belong to Hotfix Review once the review backend
+      # runs N.M (Freeze for Review), so master then moves on to the next minor.
+      # Until then the store builds use staging, which stays on N.M.x patches.
       - name: Resolve bump
         id: bump
+        env:
+          REVIEW_IMAGE: ${{ steps.review.outputs.stdout }}
         run: |
           BUMP="${{ inputs.bump || 'patch' }}"
           CURRENT=$(grep -m1 '^version:' flutter/packages/admin/pubspec.yaml | sed 's/^version:[[:space:]]*//; s/+.*//')
           MINOR="${CURRENT%.*}"
+          # ghcr.io/growerp/growerp-moqui:1.22.0@sha256:... -> 1.22.0; the captured
+          # stdout also has ssh-action's "Successfully executed commands" banner
+          REVIEW=$(grep -oE 'growerp-moqui:[0-9]+\.[0-9]+\.[0-9]+' <<<"$REVIEW_IMAGE" | head -1 | cut -d: -f2 || true)
+          echo "Staging $CURRENT, review backend ${REVIEW:-not deployed}"
           if [ "$BUMP" = "patch" ] && [ "${{ github.ref_name }}" != "$MINOR" ] \
-            && git ls-remote --exit-code --heads origin "$MINOR" >/dev/null; then
-            echo "::notice::review branch $MINOR exists — minor bump instead of patch"
+            && [ "${REVIEW%.*}" = "$MINOR" ]; then
+            echo "::notice::review backend runs $REVIEW — minor bump instead of patch"
             BUMP=minor
           fi
           echo "bump=$BUMP" >> $GITHUB_OUTPUT
