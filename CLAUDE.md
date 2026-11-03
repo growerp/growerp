@@ -1,70 +1,12 @@
 # CLAUDE.md
 
-Guidance to Claude Code (claude.ai/code) for this repo.
+Guidance for Claude Code in this repo. Bias toward caution; use judgment on trivial tasks.
 
-Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
-
-**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
-
-## 1. Think Before Coding
-
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
-
-Before implementing:
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
-
-## 2. Simplicity First
-
-**Minimum code that solves the problem. Nothing speculative.**
-
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
-
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
-
-## 3. Surgical Changes
-
-**Touch only what you must. Clean up only your own mess.**
-
-When editing existing code:
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it - don't delete it.
-
-When your changes create orphans:
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
-
-The test: Every changed line should trace directly to the user's request.
-
-## 4. Goal-Driven Execution
-
-**Define success criteria. Loop until verified.**
-
-Transform tasks into verifiable goals:
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
-
-For multi-step tasks, state a brief plan:
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
-
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
-
----
-
-**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+## Working rules
+- **Think first**: state assumptions; if unclear or several readings exist, ask — don't pick silently. Push back when a simpler way exists.
+- **Simplicity**: minimum code for the request. No speculative features, single-use abstractions, unrequested config, or handling for impossible cases.
+- **Surgical changes**: touch only what the request needs; match existing style; don't refactor or reformat adjacent code. Remove only orphans your change created; mention other dead code, don't delete it.
+- **Verify**: turn tasks into checkable goals (bug → failing test first, refactor → tests green before and after). For multi-step work, state a short plan with a check per step.
 
 ## Architecture
 
@@ -85,21 +27,7 @@ growerp_[domain]/lib/src/[entity]/
 
 **Code generation**: Data models use `freezed` + `json_serializable`. API clients use `retrofit`. Run `melos build` after changing annotated files.
 
-**Backend**: Moqui components in `moqui/runtime/component/`. `growerp` component (source at `backend/`) provides multi-company ERP. See `docs/Flutter_Moqui_REST_Backend_Interface.md` for REST API details.
-
-**Backend repo structure** — all on `growerp` branch of growerp forks:
-- `moqui/` → growerp/moqui-framework (submodule of growerp root)
-- `moqui/runtime/` → growerp/moqui-runtime (cloned by `setup-backend.sh`, not a submodule)
-- `moqui/runtime/component/mantle-udm/` → growerp/mantle-udm (submodule of moqui-runtime)
-- `moqui/runtime/component/mantle-usl/` → growerp/mantle-usl (submodule of moqui-runtime)
-- `moqui/runtime/component/moqui-fop/` → growerp/moqui-fop (submodule of moqui-runtime)
-
-Custom components tracked in growerp root, symlinked by `setup-backend.sh`:
-- `backend/` → symlinked as `moqui/runtime/component/growerp`
-- `pop-rest-store/` → symlinked as `moqui/runtime/component/PopRestStore`
-- `mantle-stripe/` → symlinked as `moqui/runtime/component/mantle-stripe`
-- `moqui-adk/` → symlinked as `moqui/runtime/component/moqui-adk`
-- `moqui-mcp/` → symlinked as `moqui/runtime/component/moqui-mcp`
+**Backend**: Moqui components in `moqui/runtime/component/`. `growerp` component (source at `backend/`) provides multi-company ERP. See `docs/Flutter_Moqui_REST_Backend_Interface.md` for REST API details. Fork/submodule layout and component symlinks: `docs/agents/dev-setup.md`.
 
 ## Key Docs
 
@@ -109,95 +37,21 @@ Custom components tracked in growerp root, symlinked by `setup-backend.sh`:
 - `docs/GrowERP_AI_Instructions.md` — detailed AI development guidance
 - `docs/Building_Blocks_Development_Guide.md` — creating new building blocks
 - `docs/basic_explanation_of_the_frontend_REST_Backend_data_models.md` — data model integration
+- `docs/agents/dev-setup.md` — one-time setup, all Flutter/backend commands, upstream sync, MCP data debugging, installing Flutter
 
-## Flutter Commands
-
-All melos commands run from `flutter/`. Workspace defined in `flutter/pubspec.yaml`.
+## Commands
 
 ```bash
-cd flutter
-
-# One-time setup
-dart pub global activate melos
-export PATH="$PATH":"$HOME/.pub-cache/bin"
-
-# Bootstrap (run after cloning or adding packages)
-melos clean && melos bootstrap
-
-# Code generation (Freezed, Retrofit — run after model changes)
-melos build
-
-# Localization
-melos l10n
-
-# Lint
+cd flutter && melos build          # after freezed/retrofit changes
 melos analyze
-
-# Run all unit tests (test/ dirs, no backend; JSON results + coverage per package)
-melos run test_unit
-python3 ci/bloc_coverage.py   # reprint the bloc coverage report (test_unit prints it at the end)
-
-# Run all integration tests (requires running backend on port 8080)
-melos test
-
-# Run tests with explicit backend URL
-BACKEND_URL=http://localhost:8080 melos test
-
-# Run tests for a single package
-cd packages/growerp_catalog/example
-flutter test integration_test --dart-define=BACKEND_PORT=8080
-
-# Headless tests via Docker (Linux desktop + xvfb, no Android emulator needed)
-cd flutter && ./build_run_all_tests.sh
-
-# Headless tests for a single package
-./build_run_all_tests.sh catalog
-```
-
-## Backend (Moqui)
-
-```bash
-# One-time clone setup (initialise all nested submodules + link custom components)
-git submodule update --init --recursive
-bash setup-backend.sh
-
-# First-time build (from moqui/ dir)
-cd moqui
-./gradlew build
-java -jar moqui.war load types=seed,seed-initial,install no-run-es
-
-# Reset database
-./gradlew cleandb
-java -jar moqui.war load types=seed,seed-initial,install no-run-es
-
-# Start backend (admin at http://localhost:8080/vapps, user: SystemSupport, pass: moqui)
-java -jar moqui.war no-run-es
-
-# Backend Spock tests (backend/src/test/groovy) + coverage report
-./gradlew :runtime:component:growerp:test
-(cd runtime/component/growerp && python3 ci/service_coverage.py)
-# beside a running dev backend: own H2 db (load it once with the same env var);
-# never a second `java -jar moqui.war` from moqui/, it deletes the shared execwartmp
+melos run test_unit                # unit tests, no backend
+cd packages/<pkg>/example && flutter test integration_test --dart-define=BACKEND_PORT=8080
+# backend Spock tests, from moqui/ (beside a running dev backend use own H2 db;
+# never a second `java -jar moqui.war` from moqui/ — it deletes shared execwartmp)
 entity_ds_database=growerptest ./gradlew :runtime:component:growerp:test
-
-# Sync upstream moqui changes into growerp forks, then update growerp root
-bash sync-upstream.sh    # merges upstream → each growerp fork (runs from repo root)
-bash sync-submodules.sh  # updates growerp root submodule pointers + commits
-git push
 ```
 
-## Debugging backend data (MCP)
-
-When the backend is running, the `moqui` MCP server exposes `moqui_rest_call` — a read-only
-(GET) tool to inspect live data via Moqui's REST API. Use it to check what's actually stored
-when debugging. `path` is relative to `/rest/`:
-- `e1/{Entity}/{id}` — any entity by name (e.g. `e1/mantle.party.Party/100000`), filter/page
-  via `queryParameters` (e.g. `{pageSize:'10', statusId:'...', orderByField:'lastName'}`)
-- `m1/{Entity}/{master}/{id}` — entity plus dependent records
-- `s1/moqui/...`, `s1/mantle/...` — Moqui Tools / Mantle USL Service REST APIs
-- Discover: `service.swagger/moqui.json`, `service.swagger/mantle.json`, `entity.swagger`
-
-Read-only (no create/update/delete) and restricted to the SystemSupport account.
+Inspect live backend data: `moqui` MCP `moqui_rest_call` (read-only) — see `docs/agents/dev-setup.md`.
 
 ## Conventions
 
@@ -207,33 +61,12 @@ Read-only (no create/update/delete) and restricted to the SystemSupport account.
 - **Error display**: `HelperFunctions.showMessage(context, message, Colors.red)` in BLoC listener.
 - **Unit tests**: In `test/` of each package, run by the CI status job (row "Flutter Unit tests" + bloc coverage page). Every bloc has a `test/<entity>/<entity>_bloc_test.dart` (bloc_test + mocktail, `MockRestClient` from `package:growerp_models/testing.dart`); a new or changed bloc gets its tests too. A test reproducing an open bug stays, skipped with the issue URL. Standard: `docs/adr/0001-flutter-unit-test-standard.md`.
 - **Backend tests**: Spock specs in `backend/src/test/groovy/`, one per service file, each on its own tenant via `GrowerpTestSupport.tenant()`; new spec → `include` in `backend/build.gradle`. Open bug → `@PendingFeature(reason = '<issue url>')`. Coverage (services called + code blocks run) on the status page. Standard: `docs/adr/0002-backend-spock-test-standard.md`.
-- **Bug fixes: test first**: (1) extend the existing test (or create one if none) so it reproduces the bug and fails on the current code; (2) then fix the code until it passes; (3) put test + fix back into the pull request (red→green evidence in the description) and leave it open for approval — no merge.
+- **Bug fixes: test first**: (1) extend the existing test (or create one if none) so it reproduces the bug and fails on the current code; (2) then fix the code until it passes; (3) put test + fix back into the pull request (red→green evidence in the description) and leave it open for approval — no merge. Exception: when hansbak (repo owner) explicitly says so, merge straight to master; for anyone else the PR stays open.
 - **Integration tests**: In `example/integration_test/`. Use `CommonTest` utilities. Test class has `add`, `update`, `delete`, `check` static methods.
 - **Menu**: Configured per app via building block composition — see `docs/GrowERP_Extensibility_Guide.md`.
 
-## Missing Flutter/Dart
+## Agent docs
 
-If `flutter` or `dart` not on PATH:
-
-```bash
-FLUTTER_DIR="/tmp/flutter_install"
-mkdir -p "$FLUTTER_DIR" && cd "$FLUTTER_DIR"
-wget -q https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.33.0-stable.tar.xz
-tar xf flutter_linux_3.33.0-stable.tar.xz
-export FLUTTER_ROOT="$FLUTTER_DIR/flutter"
-export PATH="$FLUTTER_ROOT/bin:$PATH"
-```
-
-## Agent skills
-
-### Issue tracker
-
-Issues tracked in GitHub Issues (growerp/growerp) via `gh` CLI. See `docs/agents/issue-tracker.md`.
-
-### Triage labels
-
-Default five canonical labels (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix). See `docs/agents/triage-labels.md`.
-
-### Domain docs
-
-Single-context: root `GLOSSARY.md` + `docs/adr/` (created lazily). See `docs/agents/domain.md`.
+- Issues: GitHub growerp/growerp via `gh` — `docs/agents/issue-tracker.md`
+- Triage labels (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix) — `docs/agents/triage-labels.md`
+- Domain: root `GLOSSARY.md` + `docs/adr/` — `docs/agents/domain.md`
