@@ -87,6 +87,34 @@ class WikiServicesTests extends Specification {
         ec.resource.getLocationReference(rootPageLocation).getDirectoryEntries()*.fileName.contains(fileName)
     }
 
+    def "a page published while another thread reads its info is found"() {
+        given: "a saved page that is not published yet"
+        Map created = ec.service.sync().name('org.moqui.impl.WikiServices.update#WikiPage')
+                .parameters([wikiSpaceId: wikiSpaceId, pagePath: "spockPublish${suffix}", pageName: "spockPublish${suffix}",
+                        pageText: '# Published']).call()
+
+        when: "a reader in its own transaction (like the wiki DataFeed worker) reads the page info before the publish commits"
+        boolean began = ec.transaction.begin(null)
+        ec.service.sync().name('org.moqui.impl.WikiServices.set#PublishedVersion')
+                .parameters([wikiPageId: created.wikiPageId, publishedVersionName: created.versionName]).call()
+        Thread reader = Thread.start {
+            ExecutionContext readerEc = Moqui.getExecutionContext()
+            try {
+                readerEc.user.internalLoginUser(tenant.username)
+                readerEc.service.sync().name('org.moqui.impl.WikiServices.get#WikiPageInfo')
+                        .parameters([wikiSpaceId: wikiSpaceId, pagePath: "spockPublish${suffix}"]).disableAuthz().call()
+            } finally { readerEc.destroy() }
+        }
+        reader.join()
+        ec.transaction.commit(began)
+        Map read = ec.service.sync().name('growerp.100.WikiServices100.get#WikiPage')
+                .parameters([wikiSpaceId: wikiSpaceId, pagePath: "spockPublish${suffix}"]).call()
+
+        then:
+        read.wikiPage.publishedVersionName == created.versionName
+        read.wikiPage.pageText == '# Published'
+    }
+
     def "an html page reports html.ftl and stays html after an update"() {
         given: "an html page as the website generator writes it"
         Map created = ec.service.sync().name('org.moqui.impl.WikiServices.update#WikiPage')
