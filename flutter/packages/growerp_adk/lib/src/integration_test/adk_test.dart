@@ -143,6 +143,30 @@ class AdkTest {
     await CommonTest.enterText(tester, 'searchField', '');
   }
 
+  /// Run the first persisted agent, a program agent: no AI call, the program's
+  /// report is the response and its service call is in the trace.
+  static Future<void> runProgramAgent(WidgetTester tester,
+      {required String response}) async {
+    SaveTest test = await PersistFunctions.getTest();
+    final cfg = test.adkAgentConfigs.first;
+    await CommonTest.doNewSearch(tester, searchString: cfg.agentName!);
+    await CommonTest.checkWidgetKey(tester, 'AdkAgentConfigDialog');
+    expect(CommonTest.getTextFormField('programText'), cfg.programText);
+    await CommonTest.tapByKey(tester, 'AdkAgentConfigTest');
+    await CommonTest.checkWidgetKey(tester, 'AdkAgentTestDialog');
+    await CommonTest.tapByKey(tester, 'testRun', seconds: CommonTest.waitTime);
+    await CommonTest.checkWidgetKey(tester, 'testResponse');
+    expect(
+        tester
+            .widget<SelectableText>(find.byKey(const Key('testResponse')))
+            .data,
+        response);
+    await CommonTest.checkWidgetKey(tester, 'testToolCall0');
+    await CommonTest.tapByKey(tester, 'cancel'); // test dialog
+    await CommonTest.tapByKey(tester, 'cancel'); // agent dialog
+    await CommonTest.enterText(tester, 'searchField', '');
+  }
+
   /// Saving an instruction with an unknown {variable} is refused, because the
   /// run would fail: the dialog stays open and nothing is stored.
   static Future<void> saveRejectsUnknownVariable(WidgetTester tester) async {
@@ -241,6 +265,12 @@ class AdkTest {
       await CommonTest.tapByKey(tester, 'scheduleSave', seconds: CommonTest.waitTime);
       if ((a.schedulePrompt ?? '').isNotEmpty) {
         await CommonTest.enterText(tester, 'schedulePrompt', a.schedulePrompt!);
+      }
+      if (a.runMode == 'program') {
+        if (!await CommonTest.doesExistKey(tester, 'programText')) {
+          await CommonTest.tapByKey(tester, 'programMode');
+        }
+        await CommonTest.enterText(tester, 'programText', a.programText!);
       }
     }
   }

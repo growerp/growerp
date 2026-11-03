@@ -70,6 +70,11 @@
              default for runs whose message names none (scheduled runs); fixed Y overrides the
              message. Appended to the instruction by AdkManager.withParameters. -->
         <field name="parameters"         type="text-long"/>
+        <!-- Program mode (AdkProgramServices): runMode program → scheduled and test runs execute
+             programText, an XML-actions program generated once from the instruction, instead of
+             an LLM run. Checked by AdkProgram.validate on every save. null = llm. -->
+        <field name="runMode"            type="text-short"/>
+        <field name="programText"        type="text-very-long"/>
     </entity>
 
     <!-- Phase 4: members of a coordinator/workflow agent's team. A coordinator delegates to

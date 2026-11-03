@@ -106,6 +106,21 @@ list), and its schedule does not run until every fill-in is replaced. Under **Ag
 can pause and resume a schedule; a job whose agent was deleted, unscheduled or made inactive is
 paused automatically within a minute.
 
+### Run as a program (no AI cost)
+For a scheduled agent that does the same fixed work every time (a digest, a report, reminders),
+switch on **Run as a program** in the Scheduled Runs section of a **saved** agent:
+
+1. Tap **Generate program**. The AI writes a small program from the instruction, once. It
+   appears in the **Program** field; problems, if any, are listed in red below it.
+2. **Save**. From now on each scheduled run executes the program: no AI call, no tokens.
+3. Open the agent again and tap **Run** (keep *Simulate writes* on) to see the program's report
+   and the services it called.
+
+The program can only call the services the agent's tool access allows; writes follow the write
+policy and approvals like any agent run. You can edit the program by hand; it is checked again on
+every save. Generate it again after you change the instruction. Agents that chat, work a task
+inbox or need judgement stay normal AI agents.
+
 ---
 
 ## Running an Agent

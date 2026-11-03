@@ -74,7 +74,7 @@
                              webSearch: tmpl.webSearch, maxLlmCalls: tmpl.maxLlmCalls,
                              agentRole: tmpl.agentRole, orchestrationType: tmpl.orchestrationType,
                              loopMaxIterations: tmpl.loopMaxIterations, teamName: tmpl.teamName,
-                             parameters: tmpl.parameters]"/>
+                             parameters: tmpl.parameters, runMode: tmpl.runMode, programText: tmpl.programText]"/>
                 <script>idMap[tmpl.adkAgentConfigId] = cfgOut.adkAgentConfigId</script>
                 <!-- Scheduled agents need a room to report output/errors to. ChatRoom ids are a
                      global PK, so a literal id can't be hardcoded in the _NA_ template (it would
@@ -96,7 +96,7 @@
                                  webSearch: tmpl.webSearch, maxLlmCalls: tmpl.maxLlmCalls,
                                  agentRole: tmpl.agentRole, orchestrationType: tmpl.orchestrationType,
                                  loopMaxIterations: tmpl.loopMaxIterations, teamName: tmpl.teamName,
-                                 parameters: tmpl.parameters]"/>
+                                 parameters: tmpl.parameters, runMode: tmpl.runMode, programText: tmpl.programText]"/>
                 </if>
             </iterate>
 

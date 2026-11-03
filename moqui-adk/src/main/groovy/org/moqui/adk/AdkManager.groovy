@@ -1078,6 +1078,14 @@ CRITICAL tool-use rules — follow exactly:
 
     static Map getTestRun(String testRunId) { testRunId ? testRuns[testRunId] : null }
 
+    /** Keep a finished test run made without an LLM (program mode) so get#AdkAgentTest finds it. */
+    static String putTestRun(String configId, Map result) {
+        String testRunId = UUID.randomUUID().toString()
+        testRuns[testRunId] = Collections.synchronizedMap(new LinkedHashMap(result) +
+                [testRunId: testRunId, configId: configId, startedAt: System.currentTimeMillis()])
+        testRunId
+    }
+
     private static void executeTestRun(Map run, String prompt, boolean dryRun, Map initialState) {
         String configId = run.configId as String
         def testToolset = null

@@ -997,5 +997,19 @@
   "adk_dashSearches": "searches",
   "@adk_dashSearches": {
     "description": "Dashboard tile counter label"
-  }
+  },
+  "adk_programMode": "Run as a program (no AI cost)",
+  "@adk_programMode": {"description": "Agent dialog, program mode"},
+  "adk_programModeHint": "Each run executes a program the AI wrote once from the instruction, instead of an AI run. Generate it, save, then check it with Run.",
+  "@adk_programModeHint": {"description": "Agent dialog, program mode"},
+  "adk_programText": "Program",
+  "@adk_programText": {"description": "Agent dialog, program mode"},
+  "adk_generateProgram": "Generate program",
+  "@adk_generateProgram": {"description": "Agent dialog, program mode"},
+  "adk_saveBeforeGenerate": "Save the agent first, then generate its program.",
+  "@adk_saveBeforeGenerate": {"description": "Agent dialog, program mode"},
+  "adk_programGenerated": "Program written. Save, then check it with Run.",
+  "@adk_programGenerated": {"description": "Agent dialog, program mode"},
+  "adk_programProblems": "Problems in the program:",
+  "@adk_programProblems": {"description": "Agent dialog, program mode"}
 }

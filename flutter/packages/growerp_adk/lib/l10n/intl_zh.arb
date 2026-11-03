@@ -264,5 +264,12 @@
   "adk_kImportDone": "{name}:新增 {created},更新 {updated},跳过 {skipped}",
   "adk_kImportFailed": "{name} 已停止:{error}",
   "adk_kSkippedFiles": "跳过的文件",
-  "adk_dashSearches": "搜索"
+  "adk_dashSearches": "搜索",
+  "adk_programMode": "作为程序运行（无 AI 费用）",
+  "adk_programModeHint": "每次运行执行 AI 根据指令一次性编写的程序，而不是 AI 运行。先生成并保存，再用“运行”检查。",
+  "adk_programText": "程序",
+  "adk_generateProgram": "生成程序",
+  "adk_saveBeforeGenerate": "请先保存助手，再生成它的程序。",
+  "adk_programGenerated": "程序已编写。请保存后用“运行”检查。",
+  "adk_programProblems": "程序中的问题："
 }

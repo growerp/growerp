@@ -264,5 +264,12 @@
   "adk_kImportDone": "{name} : {created} ajoutés, {updated} mis à jour, {skipped} ignorés",
   "adk_kImportFailed": "{name} arrêté : {error}",
   "adk_kSkippedFiles": "Fichiers ignorés",
-  "adk_dashSearches": "recherches"
+  "adk_dashSearches": "recherches",
+  "adk_programMode": "Exécuter comme programme (sans coût IA)",
+  "adk_programModeHint": "Chaque exécution lance un programme que l'IA a écrit une fois à partir de l'instruction, au lieu d'une exécution IA. Générez-le, enregistrez, puis vérifiez-le avec Exécuter.",
+  "adk_programText": "Programme",
+  "adk_generateProgram": "Générer le programme",
+  "adk_saveBeforeGenerate": "Enregistrez d'abord l'agent, puis générez son programme.",
+  "adk_programGenerated": "Programme écrit. Enregistrez, puis vérifiez-le avec Exécuter.",
+  "adk_programProblems": "Problèmes dans le programme :"
 }

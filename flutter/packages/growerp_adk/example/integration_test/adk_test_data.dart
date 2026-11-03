@@ -83,6 +83,23 @@ List<AdkAgentConfig> scheduledAgents = [
   ),
 ];
 
+/// A scheduled agent in program mode: its runs execute the program, no AI call.
+List<AdkAgentConfig> programAgents = [
+  const AdkAgentConfig(
+    agentName: 'Category Report',
+    instruction: 'Report the product categories.',
+    toolMode: 'readOnly',
+    writePolicy: 'block',
+    scheduleEnabled: true,
+    scheduleExpression: '0 0 8 * * ?',
+    runMode: 'program',
+    programText: '<actions>'
+        '<service-call name="growerp.100.CatalogServices100.get#ProductCategory" out-map="found"/>'
+        '<set field="report" from="\'Categories: \' + (found.categories ?: []).size()"/>'
+        '</actions>',
+  ),
+];
+
 /// Knowledge-base documents (pure REST CRUD, no LLM needed to create).
 List<AdkKnowledgeDoc> knowledgeDocs = [
   const AdkKnowledgeDoc(

@@ -264,5 +264,12 @@
   "adk_kImportDone": "{name}: {created} hinzugefügt, {updated} aktualisiert, {skipped} übersprungen",
   "adk_kImportFailed": "{name} abgebrochen: {error}",
   "adk_kSkippedFiles": "Übersprungene Dateien",
-  "adk_dashSearches": "Suchen"
+  "adk_dashSearches": "Suchen",
+  "adk_programMode": "Als Programm ausführen (keine KI-Kosten)",
+  "adk_programModeHint": "Jeder Lauf führt ein Programm aus, das die KI einmal aus der Anweisung geschrieben hat, statt eines KI-Laufs. Erzeugen, speichern, dann mit Ausführen prüfen.",
+  "adk_programText": "Programm",
+  "adk_generateProgram": "Programm erzeugen",
+  "adk_saveBeforeGenerate": "Speichern Sie zuerst den Agenten, dann erzeugen Sie sein Programm.",
+  "adk_programGenerated": "Programm geschrieben. Speichern, dann mit Ausführen prüfen.",
+  "adk_programProblems": "Probleme im Programm:"
 }

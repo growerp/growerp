@@ -134,6 +134,37 @@ See [LLM and API Key Architecture](GrowERP_LLM_And_API_Key_Architecture.md) for 
 
 **Gap.** A service that returns a very large result costs tokens in proportion. For example, `get#Product` with images and long descriptions cost about 0.77 M input tokens for a single "how many products" question. Point such agents at summary services, or keep the LLM-call cap low.
 
+### Program mode: runs without AI cost
+
+**What it does.** A scheduled agent whose work is fixed (query, filter, format, post: digests, reports, reminders) can run as a **program**. The LLM writes the program once from the instruction. After that, every run executes the program and makes no AI call, so it uses no tokens. Chat, task-loop and research agents stay LLM agents.
+
+**Where to set it.** AI Agents → (saved agent) → Enable scheduled runs → **Run as a program**:
+
+1. **Generate program**: one LLM call (up to three tries; each try is checked and its problems go back to the LLM). The program appears in the dialog for review; nothing is saved yet.
+2. **Save**. Scheduled runs now post the program's report to the delivery room.
+3. **Run** (Simulate writes on): the saved program runs right away; the trace shows each service call, the response is the report.
+
+The program is a Moqui XML-actions program. You may edit it by hand; every save checks it again.
+
+**The sandbox.** A company admin may write the program, so it is checked on every save, team upload and run:
+
+| Rule | Detail |
+|---|---|
+| Elements | `actions`, `set`, `if`/`then`/`else-if`/`else`, `iterate`, `break`, `continue`, `service-call`, `order-map-list`/`order-by`, `filter-map-list`/`field-map`, `return`, `check-errors`. No `script`, `entity-*`, `while`, no `location` attributes. |
+| Services | A literal `growerp.*` name that exists and that the agent's tool mode, allow list and write policy permit. |
+| Expressions | Each Groovy attribute is parsed and checked: no `ec`/`context`, classes, `new`, static calls, assignments, `++`, `*`, ranges, loops; method calls only from a fixed list (`findAll`, `collect`, `groupBy`, `sum`, `join`, …). Functions: `daysAgo`, `toTimestamp`, `formatDate`, `formatNumber`, `times`. No backslashes. |
+| Runtime | Own class loader with SecureASTCustomizer, 60 s time limit, isolated variables, a size check after every `set` (1 M characters / 100 000 entries) and a 256 MB allocation watchdog. |
+| Governance | Every `service-call` is rewritten to go through `govern#AgentAction` and runs as the company's AI agent user: tenant pinning, approvals, money-service hold and the action log apply as for an LLM run. The token allowance does not apply. |
+
+**Enforced by.**
+- `org.moqui.adk.AdkProgram` (`moqui-adk/src`): `validate`, `compile`, `run`, `callGoverned`, `generate`.
+- `moqui-adk/service/AdkProgramServices.xml`: `validate#AgentProgram`, `run#AgentProgram`, `call#GovernedService`, `generate#AgentProgram`.
+- `AdkAgentConfig.runMode` (`llm` | `program`) and `programText`; `check#AdkAgentConfig` refuses a program-mode agent without a valid program.
+- `run#ScheduledAgent` and `start#AdkAgentTest` run the program instead of the LLM. A run writes one `AdkActionLog` row (`serviceName` `agentProgram`, `verbClass` `program`, 0 tokens).
+- REST `AdkAgentConfig/GenerateProgram`. Team files, catalog promotion and catalog clone carry `runMode` and `programText`.
+
+**Gap.** The memory guards stop growth step by step; a single expression that builds a very large value from a very large service result is only stopped by the watchdog. A program cannot read free text or make judgement calls: keep those agents in LLM mode.
+
 ---
 
 ## 6. Scheduling
@@ -292,7 +323,7 @@ Section 6 of [Agent Control Center and Moqui MCP](AGENT_CONTROL_CENTER_AND_MCP_G
 
 | Purpose | Tool mode | Write policy | Other |
 |---|---|---|---|
-| Analyst / digest | `readOnly` | (n/a) | schedule + results room |
+| Analyst / digest | `readOnly` | (n/a) | schedule + results room; program mode for no AI cost |
 | Task-loop assistant | `full` or `scoped` | `approve` | task loop on, `maxLlmCalls` ≈ 20, report email |
 | Trusted automation (one job) | `scoped` with a tight allow list | `allow` | money services are still held |
 | Website chat | `readOnly` | (n/a) | knowledge base filled, handoff on |

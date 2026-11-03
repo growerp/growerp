@@ -53,6 +53,10 @@ void main() {
     await AdkTest.updateAgents(tester, agentsUpdate.sublist(0, 2));
     await AdkTest.checkAgents(tester);
     await AdkTest.deleteAgents(tester);
+    // program mode: the run executes the program, no AI call
+    await AdkTest.addAgents(tester, programAgents);
+    await AdkTest.runProgramAgent(tester, response: 'Categories: 0');
+    await AdkTest.deleteAgents(tester);
     await CommonTest.logout(tester);
   });
 }

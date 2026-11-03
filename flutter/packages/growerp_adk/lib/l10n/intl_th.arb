@@ -264,5 +264,12 @@
   "adk_kImportDone": "{name}: เพิ่ม {created} อัปเดต {updated} ข้าม {skipped}",
   "adk_kImportFailed": "{name} หยุดทำงาน: {error}",
   "adk_kSkippedFiles": "ไฟล์ที่ข้าม",
-  "adk_dashSearches": "การค้นหา"
+  "adk_dashSearches": "การค้นหา",
+  "adk_programMode": "ทำงานเป็นโปรแกรม (ไม่มีค่าใช้จ่าย AI)",
+  "adk_programModeHint": "แต่ละรอบจะรันโปรแกรมที่ AI เขียนไว้ครั้งเดียวจากคำสั่ง แทนการรัน AI สร้างโปรแกรม บันทึก แล้วตรวจสอบด้วยปุ่มรัน",
+  "adk_programText": "โปรแกรม",
+  "adk_generateProgram": "สร้างโปรแกรม",
+  "adk_saveBeforeGenerate": "บันทึกเอเจนต์ก่อน แล้วจึงสร้างโปรแกรม",
+  "adk_programGenerated": "เขียนโปรแกรมแล้ว บันทึก แล้วตรวจสอบด้วยปุ่มรัน",
+  "adk_programProblems": "ปัญหาในโปรแกรม:"
 }

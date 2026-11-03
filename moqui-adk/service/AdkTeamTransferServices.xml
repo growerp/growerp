@@ -67,6 +67,8 @@
                     loopMaxIterations : cfg.loopMaxIterations,
                     maxLlmCalls       : cfg.maxLlmCalls,
                     parameters        : cfg.parameters,
+                    runMode           : cfg.runMode ?: 'llm',
+                    programText       : cfg.programText,
                 ])</script>
             </iterate>
             <entity-find entity-name="moqui.adk.AdkAgentTeamMember" list="tmList">
@@ -97,7 +99,8 @@
 
     <service verb="import" noun="AdkAgentTeam">
         <in-parameters>
-            <parameter name="jsonText" required="true"/>
+            <!-- allow-html: a program (programText) is XML; the prose fields are checked below -->
+            <parameter name="jsonText" required="true" allow-html="any"/>
             <!-- support only: import into the shared "_NA_" catalog, unpublished -->
             <parameter name="toCatalog" type="Boolean" default="false"/>
             <parameter name="catalogCategory"/>
@@ -135,10 +138,14 @@
                              serviceAllowlist: a.serviceAllowlist, writePolicy: a.writePolicy,
                              webSearch: a.webSearch ?: false, scheduleEnabled: a.scheduleEnabled ?: false,
                              scheduleExpression: a.scheduleExpression, maxLlmCalls: a.maxLlmCalls,
-                             parameters: a.parameters]"/>
+                             parameters: a.parameters, runMode: a.runMode, programText: a.programText]"/>
                 <iterate list="chk.issues.findAll { it.level == 'error' }" entry="issue">
                     <script>uploadErrors.add("${a.agentName}: ${issue.message}".toString())</script>
                 </iterate>
+                <!-- as on a save in the agent dialog: no markup in the prose fields -->
+                <if condition="[a.instruction, a.schedulePrompt, a.description].any { it &amp;&amp; it =~ /[&lt;&gt;]/ }">
+                    <script>uploadErrors.add("${a.agentName}: the instruction, prompt and description may not contain &lt; or &gt;.".toString())</script>
+                </if>
             </iterate>
             <if condition="uploadErrors">
                 <return error="true" message="${uploadErrors.join(' ')}"/>
@@ -161,7 +168,7 @@
                              webSearch: a.webSearch ? 'Y' : 'N',
                              agentRole: a.agentRole, orchestrationType: a.orchestrationType,
                              loopMaxIterations: a.loopMaxIterations, maxLlmCalls: a.maxLlmCalls, teamName: importedTeamName,
-                             parameters: a.parameters,
+                             parameters: a.parameters, runMode: a.runMode, programText: a.programText,
                              catalogPublished: toCatalog ? 'N' : null,
                              catalogCategory: toCatalog ? catalogCategory : null]"/>
                 <script>idMap[a.adkAgentConfigId as String] = cfgOut.adkAgentConfigId</script>
@@ -182,7 +189,7 @@
                                  webSearch: a.webSearch ? 'Y' : 'N',
                                  agentRole: a.agentRole, orchestrationType: a.orchestrationType,
                                  loopMaxIterations: a.loopMaxIterations, maxLlmCalls: a.maxLlmCalls, teamName: importedTeamName,
-                                 parameters: a.parameters]"/>
+                                 parameters: a.parameters, runMode: a.runMode, programText: a.programText]"/>
                 </if>
             </iterate>
             <!-- 2. Recreate team membership with remapped coordinator/member ids -->

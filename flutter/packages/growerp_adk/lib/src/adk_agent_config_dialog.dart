@@ -72,6 +72,11 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
   // Optional input parameters, appended to the instruction by the backend.
   final List<_ParamRow> _params = [];
   bool _loopEnabled = false; // works the task inbox on its schedule
+  // Program mode: runs execute a program the LLM wrote once, no AI cost.
+  bool _programMode = false;
+  final _programCtrl = TextEditingController();
+  List<AdkAgentCheckIssue> _programIssues = [];
+  bool _generating = false;
   bool _catalogPublished = true;
   bool _deleting = false;
 
@@ -131,6 +136,8 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
       _loopEnabled = e.loopEnabled;
       _loopChatRoomId = e.loopChatRoomId ?? '';
       _loopReportEmailCtrl.text = e.loopReportEmail ?? '';
+      _programMode = e.runMode == 'program';
+      _programCtrl.text = e.programText ?? '';
       _params.addAll(e.parameters.map(_ParamRow.from));
       if (!widget.catalog) {
         if (_agentRole != 'specialist' && e.adkAgentConfigId != null) {
@@ -317,6 +324,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     _teamNameCtrl.dispose();
     _catalogCategoryCtrl.dispose();
     _loopReportEmailCtrl.dispose();
+    _programCtrl.dispose();
     for (final p in _params) {
       p.dispose();
     }
@@ -530,6 +538,10 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
         loopChatRoomId: _loopChatRoomId,
         loopReportEmail: _loopReportEmailCtrl.text.trim(),
         parameters: _params.map((p) => p.toParameter()).toList(),
+        runMode: _scheduleEnabled && !_loopEnabled && _programMode
+            ? 'program'
+            : 'llm',
+        programText: _programCtrl.text.trim(),
       );
       final apiKey = _apiKeyCtrl.text.trim();
       final saved = await svc.save(cfg,
@@ -546,6 +558,105 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+
+  /// Program mode: the LLM writes the program from the dialog's current
+  /// values; it is shown for review and saved with the agent.
+  Future<void> _generateProgram() async {
+    final l = AdkLocalizations.of(context)!;
+    final id = widget.existing?.adkAgentConfigId;
+    if (id == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l.adk_saveBeforeGenerate)));
+      return;
+    }
+    setState(() => _generating = true);
+    try {
+      final svc = await AdkConfigService.create();
+      final program = await svc.generateProgram(AdkAgentConfig(
+        adkAgentConfigId: id,
+        instruction: _instructionCtrl.text.trim(),
+        schedulePrompt: _schedulePromptCtrl.text.trim(),
+        toolMode: _toolMode,
+        serviceAllowlist:
+            _toolMode == 'scoped' ? _allowlistCtrl.text.trim() : null,
+        writePolicy: _writePolicy,
+        parameters: _params.map((p) => p.toParameter()).toList(),
+      ));
+      if (!mounted) return;
+      setState(() {
+        if (program.programText != null) {
+          _programCtrl.text = program.programText!;
+        }
+        _programIssues = program.issues;
+      });
+      if (program.issues.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l.adk_programGenerated)));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(e.toString()), backgroundColor: Colors.red));
+      }
+    } finally {
+      if (mounted) setState(() => _generating = false);
+    }
+  }
+
+  Widget _programSection() {
+    final l = AdkLocalizations.of(context)!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SwitchListTile(
+          key: Key('programMode'),
+          contentPadding: EdgeInsets.zero,
+          title: Text(l.adk_programMode),
+          subtitle: Text(l.adk_programModeHint, style: TextStyle(fontSize: 12)),
+          value: _programMode,
+          onChanged: (v) => setState(() => _programMode = v),
+        ),
+        if (_programMode) ...[
+          Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton.icon(
+              key: Key('generateProgram'),
+              onPressed: _generating ? null : _generateProgram,
+              icon: _generating
+                  ? SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2))
+                  : Icon(Icons.auto_awesome),
+              label: Text(l.adk_generateProgram),
+            ),
+          ),
+          SizedBox(height: 8),
+          TextFormField(
+            key: Key('programText'),
+            controller: _programCtrl,
+            minLines: 6,
+            maxLines: 16,
+            style: TextStyle(fontFamily: 'monospace', fontSize: 12),
+            decoration: InputDecoration(
+              labelText: l.adk_programText,
+              alignLabelWithHint: true,
+              border: OutlineInputBorder(),
+            ),
+          ),
+          if (_programIssues.isNotEmpty) ...[
+            SizedBox(height: 4),
+            Text(l.adk_programProblems,
+                key: Key('programIssues'),
+                style: TextStyle(color: Colors.red, fontSize: 12)),
+            for (final issue in _programIssues)
+              Text('• ${issue.message}',
+                  style: TextStyle(color: Colors.red, fontSize: 12)),
+          ],
+        ],
+      ],
+    );
   }
 
   /// Optional input parameters: name, label, default value and a fixed flag.
@@ -1207,6 +1318,7 @@ class _AdkAgentConfigDialogState extends State<AdkAgentConfigDialog> {
           ),
         ],
         if (!_loopEnabled) ...[
+        _programSection(),
         SizedBox(height: 8),
         TextFormField(
           key: Key('schedulePrompt'),

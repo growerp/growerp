@@ -61,6 +61,8 @@
                     loopChatRoomId    : cfg.loopChatRoomId,
                     loopReportEmail   : cfg.loopReportEmail,
                     parameters        : cfg.parameters,
+                    runMode           : cfg.runMode ?: 'llm',
+                    programText       : cfg.programText,
                     catalogNominated  : cfg.catalogNominated == 'Y',
                     catalogPublished  : cfg.catalogPublished != 'N',
                     catalogCategory   : cfg.catalogCategory,
@@ -99,6 +101,9 @@
             <parameter name="loopReportEmail"/>
             <!-- JSON list of input parameters [name, label, value, fixed] -->
             <parameter name="parameters"/>
+            <!-- program mode: llm | program, and the XML-actions program (AdkProgramServices) -->
+            <parameter name="runMode"/>
+            <parameter name="programText" allow-html="any"/>
         </in-parameters>
         <out-parameters>
             <parameter name="adkAgentConfig" type="Map"/>
@@ -111,7 +116,7 @@
                          toolMode: toolMode, serviceAllowlist: serviceAllowlist, writePolicy: writePolicy,
                          webSearch: webSearch, scheduleEnabled: scheduleEnabled,
                          scheduleExpression: scheduleExpression, maxLlmCalls: maxLlmCalls,
-                         parameters: parameters]"/>
+                         parameters: parameters, runMode: runMode, programText: programText]"/>
             <set field="checkErrors" from="chk.issues.findAll { it.level == 'error' }"/>
             <if condition="checkErrors"><return error="true" message="${checkErrors*.message.join(' ')}"/></if>
             <service-call name="AdkServices.update#AgentConfig" out-map="context"
@@ -129,7 +134,8 @@
                           agentRole: agentRole, orchestrationType: orchestrationType,
                           loopMaxIterations: loopMaxIterations, maxLlmCalls: maxLlmCalls, teamName: teamName,
                           loopEnabled: loopEnabled == null ? null : (loopEnabled ? 'Y' : 'N'), loopChatRoomId: loopChatRoomId,
-                          loopReportEmail: loopReportEmail, parameters: parameters]"/>
+                          loopReportEmail: loopReportEmail, parameters: parameters,
+                          runMode: runMode, programText: programText]"/>
             <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
                 auto-field-map="[adkAgentConfigId: adkAgentConfigId]"/>
             <set field="adkAgentConfig" from="[
@@ -160,6 +166,8 @@
                 loopChatRoomId    : cfg.loopChatRoomId,
                 loopReportEmail   : cfg.loopReportEmail,
                 parameters        : cfg.parameters,
+                runMode           : cfg.runMode ?: 'llm',
+                programText       : cfg.programText,
             ]"/>
         </actions>
     </service>
@@ -194,6 +202,9 @@
             <parameter name="loopReportEmail"/>
             <!-- JSON list of input parameters [name, label, value, fixed] -->
             <parameter name="parameters"/>
+            <!-- program mode: llm | program, and the XML-actions program (AdkProgramServices) -->
+            <parameter name="runMode"/>
+            <parameter name="programText" allow-html="any"/>
             <parameter name="catalog" type="Boolean" default="false"/>
             <parameter name="catalogPublished" type="Boolean"/>
             <parameter name="catalogCategory"/>
@@ -221,7 +232,7 @@
                          toolMode: toolMode, serviceAllowlist: serviceAllowlist, writePolicy: writePolicy,
                          webSearch: webSearch, scheduleEnabled: scheduleEnabled,
                          scheduleExpression: scheduleExpression, maxLlmCalls: maxLlmCalls,
-                         parameters: parameters]"/>
+                         parameters: parameters, runMode: runMode, programText: programText]"/>
             <set field="checkErrors" from="chk.issues.findAll { it.level == 'error' }"/>
             <if condition="checkErrors"><return error="true" message="${checkErrors*.message.join(' ')}"/></if>
             <service-call name="AdkServices.update#AgentConfig" out-map="context"
@@ -244,6 +255,7 @@
                           loopMaxIterations: loopMaxIterations, maxLlmCalls: maxLlmCalls, teamName: teamName,
                           loopEnabled: loopEnabled == null ? null : (loopEnabled ? 'Y' : 'N'), loopChatRoomId: loopChatRoomId,
                           loopReportEmail: loopReportEmail, parameters: parameters,
+                          runMode: runMode, programText: programText,
                           catalogPublished: (catalog &amp;&amp; catalogPublished != null) ? (catalogPublished ? 'Y' : 'N') : null,
                           catalogCategory: catalog ? catalogCategory : null]"/>
             <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
@@ -276,6 +288,8 @@
                 loopChatRoomId    : cfg.loopChatRoomId,
                 loopReportEmail   : cfg.loopReportEmail,
                 parameters        : cfg.parameters,
+                runMode           : cfg.runMode ?: 'llm',
+                programText       : cfg.programText,
                 catalogPublished  : cfg.catalogPublished != 'N',
                 catalogCategory   : cfg.catalogCategory,
             ]"/>
@@ -409,7 +423,7 @@
                     webSearch: src.webSearch,
                     agentRole: src.agentRole, orchestrationType: src.orchestrationType,
                     loopMaxIterations: src.loopMaxIterations, maxLlmCalls: src.maxLlmCalls, teamName: src.teamName,
-                    parameters: src.parameters,
+                    parameters: src.parameters, runMode: src.runMode, programText: src.programText,
                     catalogPublished: already ? null : 'N']"/>
             <!-- explicitly NOT copied: apiKey, agentPartyId, scheduleChatRoomId,
                  approvalChatRoomId, catalogNominated — all tenant-specific or must
@@ -1765,6 +1779,8 @@
             <parameter name="scheduleExpression"/>
             <parameter name="maxLlmCalls" type="Integer"/>
             <parameter name="parameters"/>
+            <parameter name="runMode"/>
+            <parameter name="programText" allow-html="any"/>
         </in-parameters>
         <out-parameters>
             <!-- [level: error|warning, field, message] -->
@@ -1856,7 +1872,49 @@
                     issues << [level: 'error', field: 'maxLlmCalls', message: 'Max AI calls per run must be at least 1.']
                 if (scheduled && !cron.trim())
                     issues << [level: 'error', field: 'scheduleExpression', message: 'Scheduled runs are on but there is no cron expression.']
+                // program mode: the program must pass the sandbox rules for this agent's tool access
+                String run = v('runMode', runMode) ?: 'llm'
+                if (!(run in ['llm', 'program']))
+                    issues << [level: 'error', field: 'runMode', message: 'Run mode must be llm or program.']
+                String program = v('programText', programText) ?: ''
+                if (run == 'program' && !program.trim())
+                    issues << [level: 'error', field: 'programText', message: 'Program mode needs a program: generate one first.']
+                else if (program.trim())
+                    issues.addAll(org.moqui.adk.AdkProgram.validate(ec, program, mode, allow, policy).issues.collect {
+                        run == 'program' ? it : it + [level: 'warning'] })
             ]]></script>
+        </actions>
+    </service>
+
+    <!-- Program mode: the LLM writes the agent's program from its (unsaved) instruction, the
+         only AI cost of a program agent. Returned for review in the agent dialog, not saved. -->
+    <service verb="generate" noun="AdkAgentProgram">
+        <in-parameters>
+            <parameter name="adkAgentConfigId" required="true"/>
+            <parameter name="instruction" allow-html="any"/>
+            <parameter name="schedulePrompt" allow-html="any"/>
+            <parameter name="toolMode"/>
+            <parameter name="serviceAllowlist"/>
+            <parameter name="writePolicy"/>
+            <parameter name="parameters"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="programText"/>
+            <parameter name="issues" type="List"/>
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
+                auto-field-map="[adkAgentConfigId: adkAgentConfigId]"/>
+            <if condition="!cfg || cfg.ownerPartyId != ownerPartyId">
+                <return error="true" message="Agent ${adkAgentConfigId} not found for your company."/>
+            </if>
+            <service-call name="AdkProgramServices.generate#AgentProgram" out-map="gen"
+                in-map="[adkAgentConfigId: adkAgentConfigId, instruction: instruction, schedulePrompt: schedulePrompt,
+                         toolMode: toolMode, serviceAllowlist: serviceAllowlist, writePolicy: writePolicy,
+                         parameters: parameters]"/>
+            <set field="programText" from="gen.programText"/>
+            <set field="issues" from="gen.issues"/>
         </actions>
     </service>
 
@@ -1884,6 +1942,15 @@
                 in-map="[adkAgentConfigId: adkAgentConfigId]"/>
             <set field="issues" from="chk.issues"/>
             <if condition="issues.any { it.level == 'error' }"><return/></if>
+            <!-- program mode: no AI call, the program runs right away; the prompt is not used -->
+            <if condition="cfg.runMode == 'program'">
+                <service-call name="AdkProgramServices.run#AgentProgram" out-map="prog"
+                    in-map="[adkAgentConfigId: adkAgentConfigId, dryRun: dryRun]"/>
+                <set field="testRunId" from="org.moqui.adk.AdkManager.putTestRun(adkAgentConfigId,
+                    [status: prog.status, response: prog.resultText, error: prog.error, toolCalls: prog.toolCalls ?: [],
+                     durationMs: prog.durationMs, dryRun: dryRun, llmCalls: 0, maxLlmCalls: 0, tokensTotal: 0])"/>
+                <return/>
+            </if>
             <set field="runPrompt" from="prompt ?: cfg.schedulePrompt ?: 'Perform your task.'"/>
             <entity-find-one entity-name="mantle.party.PartyDetail" value-field="org" cache="true"
                 auto-field-map="[partyId: companyPartyId]"/>

@@ -264,5 +264,12 @@
   "adk_kImportDone": "{name}: {created} toegevoegd, {updated} bijgewerkt, {skipped} overgeslagen",
   "adk_kImportFailed": "{name} gestopt: {error}",
   "adk_kSkippedFiles": "Overgeslagen bestanden",
-  "adk_dashSearches": "zoekopdr."
+  "adk_dashSearches": "zoekopdr.",
+  "adk_programMode": "Als programma uitvoeren (geen AI-kosten)",
+  "adk_programModeHint": "Elke run voert een programma uit dat de AI één keer uit de instructie schreef, in plaats van een AI-run. Genereer het, sla op en controleer het met Uitvoeren.",
+  "adk_programText": "Programma",
+  "adk_generateProgram": "Programma genereren",
+  "adk_saveBeforeGenerate": "Sla eerst de agent op en genereer dan zijn programma.",
+  "adk_programGenerated": "Programma geschreven. Sla op en controleer het met Uitvoeren.",
+  "adk_programProblems": "Problemen in het programma:"
 }

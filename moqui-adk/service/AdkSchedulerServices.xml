@@ -190,69 +190,77 @@
                     .message([jobName: 'adk_scheduled_' + adkAgentConfigId, status: 'started']).send()</script>
             </if>
 
-            <script><![CDATA[
-                import org.moqui.adk.AdkManager
-
-                if (!AdkManager.isInitialized()) {
-                    AdkManager.lazyInit(ec.factory)
-                }
-                if (!AdkManager.isInitialized()) {
-                    ec.logger.warn("ADK not initialized — skipping scheduled run for ${cfg.agentName}")
-                    return
-                }
-
-                // The agent already carries cfg.instruction as its SYSTEM instruction (set in
-                // initConfig). The scheduled user message must be ONLY the per-run task prompt;
-                // echoing the instruction again here made the model reply with meta-comments
-                // like "I have already provided the output by calling the getCurrentTime tool".
-                String prompt = cfg.schedulePrompt ?: cfg.instruction ?: 'Perform your scheduled task.'
-
-                // runOneOff builds a fresh Runner with InMemorySessionService, avoiding the
-                // DB transaction-isolation issue where a subsequent IO thread cannot read back
-                // the just-created session from MoquiSessionService (uncommitted transaction).
-                // Seed session state with the CONTEXT_PREAMBLE keys (all non-null — ConcurrentHashMap
-                // rejects null values) so the agent instruction's {userId}/{username}/... resolve.
-                Map sessionCtx = [
-                    userId          : 'scheduler',
-                    username        : 'scheduler',
-                    userFullName    : 'Scheduler',
-                    organizationName: '',
-                    companyPseudoId : '',
-                    tenantId        : (cfg.ownerPartyId ?: 'DEFAULT') as String,
-                    timeZone        : 'UTC',
-                    locale          : 'en_US',
-                ]
-                List events = AdkManager.runOneOff(cfg.adkAgentConfigId as String, 'scheduler', prompt, sessionCtx)
-
-                // Primary: non-partial agent events (final responses).
-                // Event author is the AGENT NAME (e.g. 'test'); echoed user prompt has author='scheduler'.
-                StringBuilder sb = new StringBuilder()
-                events.each { e ->
-                    if (e.author != 'scheduler' && e.partial != true) {
-                        e.content?.parts?.each { p -> if (p.text) sb.append(p.text) }
-                    }
-                }
-                String result = sb.toString().trim()
-                // Fallback: some SDK versions emit text only in partial=true streaming events.
-                if (!result) {
-                    sb = new StringBuilder()
-                    events.each { e ->
-                        if (e.author != 'scheduler') {
-                            e.content?.parts?.each { p -> if (p.text) sb.append(p.text) }
+            <!-- Program mode: the agent's program runs, no AI call -->
+            <if condition="cfg.runMode == 'program'">
+                <service-call name="AdkProgramServices.run#AgentProgram" out-map="prog"
+                    in-map="[adkAgentConfigId: adkAgentConfigId]"/>
+                <set field="agentName" from="cfg.agentName ?: 'ADK Agent'"/>
+                <set field="resultText" from="'[' + agentName + '] ' + (prog.status == 'done' ? (prog.resultText ?: '[No output]') :
+                    ('The program failed: ' + prog.error))"/>
+                <else>
+                    <script><![CDATA[
+                        if (!org.moqui.adk.AdkManager.isInitialized()) {
+                            org.moqui.adk.AdkManager.lazyInit(ec.factory)
                         }
-                    }
-                    result = sb.toString().trim()
-                }
-                if (!result) {
-                    ec.logger.warn("AdkScheduler: no text from agent '${cfg.agentName}'. " +
-                        "Events (${events.size()}): " +
-                        events.collect { e -> "author=${e.author}/partial=${e.partial}/parts=${e.content?.parts?.size() ?: 0}" }.join(', '))
-                    result = '[No response]'
-                }
+                        if (!org.moqui.adk.AdkManager.isInitialized()) {
+                            ec.logger.warn("ADK not initialized — skipping scheduled run for ${cfg.agentName}")
+                            return
+                        }
 
-                agentName = cfg.agentName ?: 'ADK Agent'
-                resultText = "[${agentName}] ${result}"
-            ]]></script>
+                        // The agent already carries cfg.instruction as its SYSTEM instruction (set in
+                        // initConfig). The scheduled user message must be ONLY the per-run task prompt;
+                        // echoing the instruction again here made the model reply with meta-comments
+                        // like "I have already provided the output by calling the getCurrentTime tool".
+                        String prompt = cfg.schedulePrompt ?: cfg.instruction ?: 'Perform your scheduled task.'
+
+                        // runOneOff builds a fresh Runner with InMemorySessionService, avoiding the
+                        // DB transaction-isolation issue where a subsequent IO thread cannot read back
+                        // the just-created session from MoquiSessionService (uncommitted transaction).
+                        // Seed session state with the CONTEXT_PREAMBLE keys (all non-null — ConcurrentHashMap
+                        // rejects null values) so the agent instruction's {userId}/{username}/... resolve.
+                        Map sessionCtx = [
+                            userId          : 'scheduler',
+                            username        : 'scheduler',
+                            userFullName    : 'Scheduler',
+                            organizationName: '',
+                            companyPseudoId : '',
+                            tenantId        : (cfg.ownerPartyId ?: 'DEFAULT') as String,
+                            timeZone        : 'UTC',
+                            locale          : 'en_US',
+                        ]
+                        List events = org.moqui.adk.AdkManager.runOneOff(cfg.adkAgentConfigId as String, 'scheduler', prompt, sessionCtx)
+
+                        // Primary: non-partial agent events (final responses).
+                        // Event author is the AGENT NAME (e.g. 'test'); echoed user prompt has author='scheduler'.
+                        StringBuilder sb = new StringBuilder()
+                        events.each { e ->
+                            if (e.author != 'scheduler' && e.partial != true) {
+                                e.content?.parts?.each { p -> if (p.text) sb.append(p.text) }
+                            }
+                        }
+                        String result = sb.toString().trim()
+                        // Fallback: some SDK versions emit text only in partial=true streaming events.
+                        if (!result) {
+                            sb = new StringBuilder()
+                            events.each { e ->
+                                if (e.author != 'scheduler') {
+                                    e.content?.parts?.each { p -> if (p.text) sb.append(p.text) }
+                                }
+                            }
+                            result = sb.toString().trim()
+                        }
+                        if (!result) {
+                            ec.logger.warn("AdkScheduler: no text from agent '${cfg.agentName}'. " +
+                                "Events (${events.size()}): " +
+                                events.collect { e -> "author=${e.author}/partial=${e.partial}/parts=${e.content?.parts?.size() ?: 0}" }.join(', '))
+                            result = '[No response]'
+                        }
+
+                        agentName = cfg.agentName ?: 'ADK Agent'
+                        resultText = "[${agentName}] ${result}"
+                    ]]></script>
+                </else>
+            </if>
 
             <!-- Deliver to the agent's results room; none chosen → one is created and saved -->
             <service-call name="AdkGovernanceServices.ensure#AgentChatRoom" out-map="roomOut"

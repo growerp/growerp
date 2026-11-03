@@ -105,6 +105,12 @@ class AdkAgentConfig {
   )
   final List<AdkAgentParameter> parameters;
 
+  /// Program mode: llm (null) | program. In program mode scheduled and test
+  /// runs execute [programText], an XML-actions program the LLM wrote once,
+  /// instead of an LLM run.
+  final String? runMode;
+  final String? programText;
+
   /// Write-only: sent on create/update, never returned by GET.
   @JsonKey(includeFromJson: false)
   final String? apiKey;
@@ -141,6 +147,8 @@ class AdkAgentConfig {
     this.loopChatRoomId,
     this.loopReportEmail,
     this.parameters = const [],
+    this.runMode,
+    this.programText,
     this.apiKey,
   });
 
@@ -181,6 +189,8 @@ class AdkAgentConfig {
     String? loopChatRoomId,
     String? loopReportEmail,
     List<AdkAgentParameter>? parameters,
+    String? runMode,
+    String? programText,
     String? apiKey,
   }) =>
       AdkAgentConfig(
@@ -215,6 +225,8 @@ class AdkAgentConfig {
         loopChatRoomId: loopChatRoomId ?? this.loopChatRoomId,
         loopReportEmail: loopReportEmail ?? this.loopReportEmail,
         parameters: parameters ?? this.parameters,
+        runMode: runMode ?? this.runMode,
+        programText: programText ?? this.programText,
         apiKey: apiKey ?? this.apiKey,
       );
 
@@ -337,6 +349,21 @@ class AdkAgentCheckResult {
   factory AdkAgentCheckResult.fromJson(Map<String, dynamic> json) =>
       _$AdkAgentCheckResultFromJson(json);
   Map<String, dynamic> toJson() => _$AdkAgentCheckResultToJson(this);
+}
+
+/// A program the LLM wrote for an agent (program mode), with the problems the
+/// sandbox check found; empty [issues] when it can be saved.
+@JsonSerializable(explicitToJson: true)
+class AdkAgentProgram {
+  final String? programText;
+  @JsonKey(defaultValue: [])
+  final List<AdkAgentCheckIssue> issues;
+
+  const AdkAgentProgram({this.programText, this.issues = const []});
+
+  factory AdkAgentProgram.fromJson(Map<String, dynamic> json) =>
+      _$AdkAgentProgramFromJson(json);
+  Map<String, dynamic> toJson() => _$AdkAgentProgramToJson(this);
 }
 
 /// Answer to starting a test run: no [testRunId] when a check error stopped it.

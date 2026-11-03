@@ -2039,6 +2039,12 @@ limitations under the License.
                     <service name="AdkServices100.check#AdkAgentConfig"/>
                 </method>
             </resource>
+            <!-- program mode: the LLM writes the agent's program once, returned for review -->
+            <resource name="GenerateProgram">
+                <method type="post">
+                    <service name="AdkServices100.generate#AdkAgentProgram"/>
+                </method>
+            </resource>
             <method type="get">
                 <service name="AdkServices100.get#AdkAgentConfig"/>
             </method>

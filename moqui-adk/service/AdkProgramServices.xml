@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- Program mode of an agent (AdkAgentConfig.runMode = program): an XML-actions program,
+         generated once by an LLM from the instruction, runs instead of an LLM run, so a run
+         costs no AI tokens. The sandbox and the governed service calls are in
+         org.moqui.adk.AdkProgram (Groovy: compiler and AST APIs). -->
+
+    <service verb="validate" noun="AgentProgram" authenticate="false">
+        <description>Check a program against the sandbox rules and the agent's tool access.</description>
+        <in-parameters>
+            <parameter name="programText" allow-html="any"/>
+            <parameter name="toolMode"/>
+            <parameter name="serviceAllowlist"/>
+            <parameter name="writePolicy"/>
+        </in-parameters>
+        <out-parameters>
+            <!-- [level: error|warning, field, message] -->
+            <parameter name="issues" type="List"/>
+        </out-parameters>
+        <actions>
+            <set field="issues" from="org.moqui.adk.AdkProgram.validate(ec, programText, toolMode, serviceAllowlist, writePolicy).issues"/>
+        </actions>
+    </service>
+
+    <service verb="run" noun="AgentProgram" authenticate="false" transaction-timeout="600">
+        <description>Run an agent's program as the company's AI agent user. dryRun: writes pass
+            the governance gate but are not executed. A real run is logged as one AdkActionLog
+            row with no tokens.</description>
+        <in-parameters>
+            <parameter name="adkAgentConfigId" required="true"/>
+            <parameter name="dryRun" type="Boolean" default="false"/>
+            <!-- input parameter values for this run; a fixed parameter keeps its value -->
+            <parameter name="parameters" type="Map"/>
+        </in-parameters>
+        <out-parameters>
+            <!-- done | failed -->
+            <parameter name="status"/>
+            <parameter name="resultText"/>
+            <parameter name="error"/>
+            <!-- [tool, service, args, result, decision: ok|simulated|approval|blocked] -->
+            <parameter name="toolCalls" type="List"/>
+            <parameter name="durationMs" type="Long"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
+                auto-field-map="[adkAgentConfigId: adkAgentConfigId]"/>
+            <if condition="!cfg"><return error="true" message="Agent ${adkAgentConfigId} not found."/></if>
+            <if condition="!cfg.programText"><return error="true" message="Agent ${cfg.agentName} has no program."/></if>
+            <set field="run" from="org.moqui.adk.AdkProgram.run(ec, cfg.getMap(), dryRun, parameters)"/>
+            <set field="status" from="run.status"/>
+            <set field="resultText" from="run.resultText"/>
+            <set field="error" from="run.error"/>
+            <set field="toolCalls" from="run.toolCalls"/>
+            <set field="durationMs" from="run.durationMs"/>
+            <if condition="!dryRun">
+                <service-call name="create#moqui.adk.AdkActionLog" disable-authz="true"
+                    in-map="[ownerPartyId: cfg.ownerPartyId, configId: adkAgentConfigId, agentPartyId: cfg.agentPartyId,
+                             serviceName: 'agentProgram', verbClass: 'program',
+                             decision: status == 'done' ? 'allowed' : 'blocked', reason: error,
+                             resultSummary: (resultText ?: '').take(2000), actionTime: ec.user.nowTimestamp,
+                             tokensIn: 0, tokensOut: 0, tokensTotal: 0]"/>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="call" noun="GovernedService" authenticate="false" transaction-timeout="600">
+        <description>One service call of a running program (every service-call is rewritten to
+            this): governance gate first, then the service as the AI agent user.</description>
+        <in-parameters>
+            <parameter name="runId" required="true"/>
+            <parameter name="serviceName" required="true"/>
+            <parameter name="inMap" type="Map"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="result" type="Map"/>
+        </out-parameters>
+        <actions>
+            <set field="result" from="org.moqui.adk.AdkProgram.callGoverned(ec, runId, serviceName, inMap)"/>
+        </actions>
+    </service>
+
+    <service verb="generate" noun="AgentProgram" authenticate="false" transaction-timeout="600">
+        <description>Let the LLM write the agent's program: one call per try, at most three, each
+            checked by the sandbox rules. Returns the program for review; it is not saved.</description>
+        <in-parameters>
+            <parameter name="adkAgentConfigId" required="true"/>
+            <!-- the dialog's unsaved values, laid over the stored agent -->
+            <parameter name="instruction" allow-html="any"/>
+            <parameter name="schedulePrompt" allow-html="any"/>
+            <parameter name="toolMode"/>
+            <parameter name="serviceAllowlist"/>
+            <parameter name="writePolicy"/>
+            <parameter name="parameters"/>
+            <!-- growerp.testMode only: the LLM answers, one per try -->
+            <parameter name="testAnswers" type="List" allow-html="any"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="programText"/>
+            <parameter name="issues" type="List"/>
+            <parameter name="attempts" type="Integer"/>
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="moqui.adk.AdkAgentConfig" value-field="cfg"
+                auto-field-map="[adkAgentConfigId: adkAgentConfigId]"/>
+            <if condition="!cfg"><return error="true" message="Agent ${adkAgentConfigId} not found."/></if>
+            <script><![CDATA[
+                Map agent = cfg.getMap()
+                [instruction: instruction, schedulePrompt: schedulePrompt, toolMode: toolMode,
+                 serviceAllowlist: serviceAllowlist, writePolicy: writePolicy, parameters: parameters]
+                        .each { k, v -> if (v != null) agent[k] = v }
+                Closure llm
+                if (System.getProperty('growerp.testMode') == 'true' && testAnswers != null) {
+                    List answers = new ArrayList(testAnswers)
+                    llm = { String prompt -> answers ? answers.remove(0) : '' }
+                } else {
+                    def GeminiAiUtil = ec.resource.script('component://growerp/service/GeminiAiUtil.groovy', null)
+                    llm = { String prompt ->
+                        GeminiAiUtil.callLlmApi(ec, prompt, [ownerPartyId: cfg.ownerPartyId, temperature: 0.2,
+                                maxOutputTokens: 8192, purpose: 'agentProgram'])
+                    }
+                }
+                Map gen = org.moqui.adk.AdkProgram.generate(ec, agent, llm)
+                programText = gen.programText
+                issues = gen.issues
+                attempts = gen.attempts
+            ]]></script>
+        </actions>
+    </service>
+</services>

@@ -47,6 +47,9 @@
             <parameter name="loopReportEmail"/>
             <!-- JSON list of input parameters [name, label, value, fixed]; AdkManager.withParameters -->
             <parameter name="parameters"/>
+            <!-- program mode (AdkProgramServices): llm | program, and the XML-actions program -->
+            <parameter name="runMode"/>
+            <parameter name="programText" allow-html="any"/>
         </in-parameters>
         <out-parameters>
             <parameter name="adkAgentConfigId"/>
@@ -110,6 +113,8 @@
                 <if condition="loopChatRoomId != null"><set field="existing.loopChatRoomId" from="loopChatRoomId ?: null"/></if>
                 <if condition="loopReportEmail != null"><set field="existing.loopReportEmail" from="loopReportEmail ?: null"/></if>
                 <if condition="parameters != null"><set field="existing.parameters" from="parameters ?: null"/></if>
+                <if condition="runMode != null"><set field="existing.runMode" from="runMode ?: null"/></if>
+                <if condition="programText != null"><set field="existing.programText" from="programText ?: null"/></if>
                 <entity-update value-field="existing"/>
                 <set field="adkAgentConfigId" from="existing.adkAgentConfigId"/>
                 <else>
@@ -147,6 +152,8 @@
                     <set field="newCfg.loopChatRoomId"     from="loopChatRoomId ?: null"/>
                     <set field="newCfg.loopReportEmail"    from="loopReportEmail ?: null"/>
                     <set field="newCfg.parameters"         from="parameters ?: null"/>
+                    <set field="newCfg.runMode"            from="runMode ?: null"/>
+                    <set field="newCfg.programText"        from="programText ?: null"/>
                     <entity-sequenced-id-primary value-field="newCfg"/>
                     <entity-create value-field="newCfg"/>
                     <set field="adkAgentConfigId" from="newCfg.adkAgentConfigId"/>

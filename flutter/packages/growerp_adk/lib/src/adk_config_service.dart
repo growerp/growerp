@@ -69,6 +69,8 @@ class AdkConfigService {
         loopChatRoomId: cfg.loopChatRoomId,
         loopReportEmail: cfg.loopReportEmail,
         parameters: AdkAgentParameter.encode(cfg.parameters),
+        runMode: cfg.runMode,
+        programText: cfg.programText,
       );
     }
     return _client.updateAdkAgentConfig(
@@ -98,6 +100,8 @@ class AdkConfigService {
       loopChatRoomId: catalog ? null : cfg.loopChatRoomId,
       loopReportEmail: catalog ? null : cfg.loopReportEmail,
       parameters: AdkAgentParameter.encode(cfg.parameters),
+      runMode: cfg.runMode,
+      programText: cfg.programText,
       catalog: catalog ? true : null,
       catalogPublished: catalog ? cfg.catalogPublished : null,
       catalogCategory: catalog ? cfg.catalogCategory : null,
@@ -124,6 +128,19 @@ class AdkConfigService {
   /// Rule checks on a saved agent (no AI call).
   Future<List<AdkAgentCheckIssue>> check(String configId) async =>
       (await _client.checkAdkAgentConfig(adkAgentConfigId: configId)).issues;
+
+  /// Program mode: let the LLM write the program for [cfg] (a saved agent,
+  /// with the dialog's unsaved values). The only AI cost of a program agent.
+  Future<AdkAgentProgram> generateProgram(AdkAgentConfig cfg) =>
+      _client.generateAdkAgentProgram(
+        adkAgentConfigId: cfg.adkAgentConfigId!,
+        instruction: cfg.instruction,
+        schedulePrompt: cfg.schedulePrompt,
+        toolMode: cfg.toolMode,
+        serviceAllowlist: cfg.serviceAllowlist,
+        writePolicy: cfg.writePolicy,
+        parameters: AdkAgentParameter.encode(cfg.parameters),
+      );
 
   /// Start a test run; without a testRunId a check error stopped it.
   Future<AdkAgentTestStart> startTest(String configId,

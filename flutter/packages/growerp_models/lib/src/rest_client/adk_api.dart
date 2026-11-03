@@ -162,6 +162,8 @@ mixin AdkApi {
     @Field() String? loopChatRoomId,
     @Field() String? loopReportEmail,
     @Field() String? parameters,
+    @Field() String? runMode,
+    @Field() String? programText,
   });
 
   @PATCH("rest/s1/growerp/100/AdkAgentConfig")
@@ -192,6 +194,8 @@ mixin AdkApi {
     @Field() String? loopChatRoomId,
     @Field() String? loopReportEmail,
     @Field() String? parameters,
+    @Field() String? runMode,
+    @Field() String? programText,
     @Field() bool? catalog,
     @Field() bool? catalogPublished,
     @Field() String? catalogCategory,
@@ -212,6 +216,19 @@ mixin AdkApi {
     @Field() bool? scheduleEnabled,
     @Field() String? scheduleExpression,
     @Field() int? maxLlmCalls,
+  });
+
+  /// Program mode: the LLM writes the agent's program from the given
+  /// (unsaved) values; returned for review, not saved.
+  @POST("rest/s1/growerp/100/AdkAgentConfig/GenerateProgram")
+  Future<AdkAgentProgram> generateAdkAgentProgram({
+    @Field() required String adkAgentConfigId,
+    @Field() String? instruction,
+    @Field() String? schedulePrompt,
+    @Field() String? toolMode,
+    @Field() String? serviceAllowlist,
+    @Field() String? writePolicy,
+    @Field() String? parameters,
   });
 
   /// Start a test run in the background; poll [getAdkAgentTest].
