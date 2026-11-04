@@ -19,5 +19,9 @@
   "completeSale": "Verkoop afronden",
   "receipt": "Bon",
   "print": "Afdrukken",
-  "newSale": "Nieuwe verkoop"
+  "newSale": "Nieuwe verkoop",
+  "refund": "Terugbetalen",
+  "receiptNumber": "Bonnummer",
+  "backInStock": "Terug op voorraad",
+  "close": "Sluiten"
 }

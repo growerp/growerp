@@ -19,5 +19,9 @@
   "completeSale": "完成销售",
   "receipt": "收据",
   "print": "打印",
-  "newSale": "新销售"
+  "newSale": "新销售",
+  "refund": "退款",
+  "receiptNumber": "收据编号",
+  "backInStock": "退回库存",
+  "close": "关闭"
 }

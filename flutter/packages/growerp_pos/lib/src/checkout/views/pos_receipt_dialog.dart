@@ -53,6 +53,12 @@ class PosReceiptDialog extends StatelessWidget {
               child: ListView(
                 key: const Key('listView'),
                 children: [
+                  Text(
+                    sale.invoicePseudoId ?? '',
+                    key: const Key('posReceiptNumber'),
+                    textAlign: TextAlign.center,
+                  ),
+                  const Divider(),
                   for (final line in sale.lines)
                     row(
                       '${line.quantity} x ${line.description ?? ''}',

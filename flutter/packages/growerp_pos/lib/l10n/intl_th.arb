@@ -19,5 +19,9 @@
   "completeSale": "ปิดการขาย",
   "receipt": "ใบเสร็จ",
   "print": "พิมพ์",
-  "newSale": "ขายใหม่"
+  "newSale": "ขายใหม่",
+  "refund": "คืนเงิน",
+  "receiptNumber": "เลขที่ใบเสร็จ",
+  "backInStock": "คืนเข้าสต็อก",
+  "close": "ปิด"
 }

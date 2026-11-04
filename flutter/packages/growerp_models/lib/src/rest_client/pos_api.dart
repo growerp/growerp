@@ -22,6 +22,18 @@ mixin PosApi {
     @Field() required List<PosTender> tenders,
   });
 
+  @GET("rest/s1/growerp/100/Pos/SaleLookup")
+  Future<PosSale> getPosSaleLookup({@Query('search') required String search});
+
+  @POST("rest/s1/growerp/100/Pos/Refund")
+  Future<PosRefund> createPosRefund({
+    @Field() required String clientRefundId,
+    @Field() required String clientSaleId,
+    @Field() required List<PosRefundLine> lines,
+    @Field() required bool restock,
+    @Field() String? terminalName,
+  });
+
   @GET("rest/s1/growerp/100/Pos/Receipt")
   Future<PosSale> getPosReceipt({
     @Query('clientSaleId') required String clientSaleId,

@@ -87,11 +87,14 @@ abstract class PosTender with _$PosTender {
 abstract class PosSaleLine with _$PosSaleLine {
   PosSaleLine._();
   factory PosSaleLine({
+    String? orderItemSeqId,
     String? productId,
     String? description,
     Decimal? quantity,
     Decimal? price,
     Decimal? lineTotal,
+    // only from a lookup for a refund
+    Decimal? returnableQuantity,
   }) = _PosSaleLine;
 
   factory PosSaleLine.fromJson(Map<String, dynamic> json) =>
@@ -131,4 +134,38 @@ abstract class PosSale with _$PosSale {
 
   factory PosSale.fromJson(Map<String, dynamic> json) =>
       _$PosSaleFromJson(json['sale'] ?? json);
+}
+
+/// A line given back: sent with the order item, comes back with a description.
+@freezed
+abstract class PosRefundLine with _$PosRefundLine {
+  PosRefundLine._();
+  factory PosRefundLine({
+    String? orderItemSeqId,
+    String? description,
+    Decimal? quantity,
+  }) = _PosRefundLine;
+
+  factory PosRefundLine.fromJson(Map<String, dynamic> json) =>
+      _$PosRefundLineFromJson(json);
+}
+
+/// Money given back for a sale.
+@freezed
+abstract class PosRefund with _$PosRefund {
+  PosRefund._();
+  factory PosRefund({
+    String? clientRefundId,
+    String? clientSaleId,
+    String? paymentId,
+    String? paymentPseudoId,
+    Decimal? amount,
+    String? method,
+    String? currencyId,
+    @Default([]) List<PosRefundLine> lines,
+    @DateTimeConverter() DateTime? refundDate,
+  }) = _PosRefund;
+
+  factory PosRefund.fromJson(Map<String, dynamic> json) =>
+      _$PosRefundFromJson(json['refund'] ?? json);
 }

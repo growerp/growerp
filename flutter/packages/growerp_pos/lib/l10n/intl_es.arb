@@ -19,5 +19,9 @@
   "completeSale": "Completar venta",
   "receipt": "Recibo",
   "print": "Imprimir",
-  "newSale": "Nueva venta"
+  "newSale": "Nueva venta",
+  "refund": "Reembolso",
+  "receiptNumber": "Número de recibo",
+  "backInStock": "De vuelta en stock",
+  "close": "Cerrar"
 }

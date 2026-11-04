@@ -20,4 +20,23 @@
         <relationship type="one" related="mantle.order.OrderHeader" />
         <relationship type="one" related="mantle.account.invoice.Invoice" />
     </entity>
+
+    <entity entity-name="PosRefund" package="growerp.pos" cache="never">
+        <description>Money given back at the till. clientRefundId works like clientSaleId.</description>
+        <field name="ownerPartyId" type="id" is-pk="true" />
+        <field name="clientRefundId" type="id-long" is-pk="true" />
+        <field name="clientSaleId" type="id-long" />
+        <field name="requestHash" type="text-short" />
+        <field name="returnId" type="id" />
+        <field name="paymentId" type="id" />
+        <field name="amount" type="currency-amount" />
+        <field name="terminalName" type="text-short" />
+        <field name="userId" type="id" />
+        <field name="refundDate" type="date-time" />
+        <relationship type="one" title="Owner" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+        <relationship type="one" related="mantle.order.return.ReturnHeader" />
+        <relationship type="one" related="mantle.account.payment.Payment" />
+    </entity>
 </entities>

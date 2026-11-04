@@ -19,6 +19,15 @@
 - **Walk-in customer**: party with pseudoId `WALKIN` per owner, without Customer role, so it stays
   out of the customer lists. Sales to a named customer are not supported yet.
 
+## Refunds
+
+`create#PosRefund` gives money back for lines of a sale, for an admin only, in one transaction:
+mantle return with the tax prorated, credit memo (`InvoiceReturn`), refund payment, stock back when
+`restock` is set. The money goes back by the first tender of the sale unless `method` says otherwise.
+`clientRefundId` works like `clientSaleId`. Lookup by the invoice number on the receipt:
+`get#PosSaleLookup` also gives what can still be returned per line. Restocked goods go back on
+quantity only, the cost of goods is not reversed in the ledger.
+
 ## Frontend
 
 Block `growerp_pos`: `PosCheckoutScreen` (tiles and cart side by side from 700 wide, stacked below),

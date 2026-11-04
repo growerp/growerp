@@ -19,5 +19,9 @@
   "completeSale": "Verkauf abschließen",
   "receipt": "Beleg",
   "print": "Drucken",
-  "newSale": "Neuer Verkauf"
+  "newSale": "Neuer Verkauf",
+  "refund": "Erstattung",
+  "receiptNumber": "Belegnummer",
+  "backInStock": "Zurück ins Lager",
+  "close": "Schließen"
 }

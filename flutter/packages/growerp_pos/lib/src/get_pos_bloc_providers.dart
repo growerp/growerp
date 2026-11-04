@@ -24,5 +24,6 @@ List<BlocProvider> getPosBlocProviders(RestClient restClient) {
     ),
     BlocProvider<PosCartBloc>(create: (context) => PosCartBloc(restClient)),
     BlocProvider<PosSaleBloc>(create: (context) => PosSaleBloc(restClient)),
+    BlocProvider<PosRefundBloc>(create: (context) => PosRefundBloc(restClient)),
   ];
 }

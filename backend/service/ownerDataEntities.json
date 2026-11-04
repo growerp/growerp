@@ -65,6 +65,7 @@
     "growerp.menu.MenuConfiguration",
     "growerp.menu.MenuItem",
     "growerp.menu.MenuItemAccess",
+    "growerp.pos.PosRefund",
     "growerp.pos.PosSale",
     "growerp.product.AssetRental",
     "growerp.product.RentalPrice",
@@ -75,6 +76,9 @@
     "growerp.website.WebsiteFormField",
     "growerp.website.WebsiteFormSubmission",
     "growerp.website.WebsiteTranslation",
+    "mantle.account.financial.FinancialAccount",
+    "mantle.account.financial.FinancialAccountAuth",
+    "mantle.account.financial.FinancialAccountTrans",
     "mantle.account.invoice.Invoice",
     "mantle.account.invoice.InvoiceItem",
     "mantle.account.invoice.InvoiceParty",
@@ -113,6 +117,9 @@
     "mantle.order.OrderPart",
     "mantle.order.OrderPartParty",
     "mantle.order.OrderPromoCode",
+    "mantle.order.return.ReturnHeader",
+    "mantle.order.return.ReturnItem",
+    "mantle.order.return.ReturnItemBilling",
     "mantle.other.tax.TaxAuthority",
     "mantle.other.tax.TaxAuthorityParty",
     "mantle.party.Organization",
@@ -144,7 +151,6 @@
     "mantle.product.asset.Container",
     "mantle.product.asset.Lot",
     "mantle.product.asset.PhysicalInventory",
-    "mantle.product.asset.PhysicalInventoryCount",
     "mantle.product.category.ProductCategory",
     "mantle.product.category.ProductCategoryContent",
     "mantle.product.category.ProductCategoryMember",
@@ -221,6 +227,7 @@
     "growerp.general.Interface",
     "growerp.general.SystemDefault",
     "growerp.menu.WidgetDomain",
+    "mantle.account.financial.FinancialAccountType",
     "mantle.account.invoice.SettlementTerm",
     "mantle.other.tax.TaxGatewayConfig",
     "mantle.party.PartyClassification",
@@ -239,6 +246,7 @@
     "moqui.basic.GeoPoint",
     "moqui.basic.LocalizedEntityField",
     "moqui.basic.LocalizedMessage",
+    "moqui.basic.StatusFlowTransition",
     "moqui.basic.StatusItem",
     "moqui.basic.Uom",
     "moqui.basic.UomConversion",
@@ -358,6 +366,9 @@
     },
     "growerp.menu.MenuItem": {
       "artifactGroupId": "moqui.security.ArtifactGroup"
+    },
+    "growerp.pos.PosRefund": {
+      "userId": "moqui.security.UserAccount"
     },
     "growerp.pos.PosSale": {
       "userId": "moqui.security.UserAccount"

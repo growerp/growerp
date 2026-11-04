@@ -403,8 +403,9 @@ limitations under the License.
                 </entity-find>
                 <set field="onHand" from="assets.sum({ it.quantityOnHandTotal ?: 0.0 }) ?: 0.0" />
                 <if condition="onHand &lt; quantityNeeded">
-                    <service-call name="mantle.product.AssetServices.record#PhysicalInventoryQuantity"
-                        in-map="[productId: neededProductId, facilityId: orderPart.facilityId, quantity: quantityNeeded,
+                    <service-call name="mantle.product.AssetServices.record#PhysicalInventoryChange"
+                        in-map="[productId: neededProductId, facilityId: orderPart.facilityId,
+                            quantityChange: quantityNeeded - onHand,
                             comments: 'POS sale ' + orderId + ' above recorded stock']" />
                 </if>
             </iterate>
@@ -449,7 +450,7 @@ limitations under the License.
                     <continue />
                 </if>
                 <set field="unitPrice" from="orderItem.unitListPrice ?: orderItem.unitAmount" />
-                <script>receiptLines.add([productId: orderItem.productId,
+                <script>receiptLines.add([orderItemSeqId: orderItem.orderItemSeqId, productId: orderItem.productId,
                     description: orderItem.itemDescription, quantity: orderItem.quantity.toString(),
                     price: unitPrice.toString(),
                     lineTotal: (unitPrice * orderItem.quantity).setScale(2, BigDecimal.ROUND_HALF_UP).toString()])</script>
@@ -475,6 +476,205 @@ limitations under the License.
                     lines: receiptLines, taxes: taxes, taxTotal: taxTotal.toString(),
                     grandTotal: orderHeader.grandTotal.setScale(2, BigDecimal.ROUND_HALF_UP).toString(),
                     tenders: receiptTenders, changeAmount: posSale.changeAmount?.toString()]" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="PosSaleLookup">
+        <description>A sale by the invoice number on its receipt, with what can still be
+            given back per line.</description>
+        <in-parameters>
+            <parameter name="search" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="sale" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="mantle.account.invoice.Invoice" list="invoices" limit="1">
+                <econdition field-name="fromPartyId" from="companyPartyId" />
+                <econdition field-name="pseudoId" from="search" />
+            </entity-find>
+            <if condition="invoices">
+                <entity-find entity-name="growerp.pos.PosSale" list="posSales" limit="1">
+                    <econdition field-name="ownerPartyId" />
+                    <econdition field-name="invoiceId" from="invoices[0].invoiceId" />
+                </entity-find>
+            </if>
+            <if condition="!posSales">
+                <return error="true" message="No sale with receipt ${search}" />
+            </if>
+            <service-call name="growerp.100.PosServices100.get#PosReceipt" out-map="context"
+                in-map="[clientSaleId: posSales[0].clientSaleId]" />
+            <iterate list="sale.lines" entry="saleLine">
+                <service-call name="mantle.order.ReturnServices.calculate#OrderItemReturnable"
+                    out-map="returnable"
+                    in-map="[orderId: sale.orderId, orderItemSeqId: saleLine.orderItemSeqId]" />
+                <set field="saleLine.returnableQuantity" from="returnable.returnableQuantity.toString()" />
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="PosRefund">
+        <description>Give money back for lines of a sale, in one transaction: return, credit
+            memo with its tax, refund payment and stock. For an admin only. The money goes
+            back the way it came, the first tender of the sale, unless method says
+            otherwise.</description>
+        <in-parameters>
+            <parameter name="clientRefundId" required="true" />
+            <parameter name="clientSaleId" required="true" />
+            <parameter name="lines" type="List" required="true" />
+            <parameter name="restock" type="Boolean" default="false" />
+            <parameter name="method" />
+            <parameter name="terminalName" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="refund" type="Map" />
+        </out-parameters>
+        <actions>
+            <if condition="!(ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM'))">
+                <return error="true" message="Only an admin can give a refund" />
+            </if>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="requestHash"
+                from="groovy.json.JsonOutput.toJson([clientSaleId, restock, method,
+                    lines.collect { [it.orderItemSeqId, it.quantity as BigDecimal] }]).md5()" />
+            <entity-find-one entity-name="growerp.pos.PosRefund" value-field="existing" for-update="true" />
+            <if condition="existing != null">
+                <if condition="existing.requestHash != requestHash">
+                    <return error="true" message="Refund ${clientRefundId} exists with other content" />
+                </if>
+                <service-call name="growerp.100.PosServices100.get#RefundOut" out-map="context"
+                    in-map="[posRefund: existing]" />
+                <return />
+            </if>
+            <entity-find-one entity-name="growerp.pos.PosSale" value-field="posSale" />
+            <if condition="posSale == null">
+                <return error="true" message="Sale ${clientSaleId} not found" />
+            </if>
+            <entity-find entity-name="mantle.account.payment.Payment" list="salePayments">
+                <econdition field-name="forInvoiceId" from="posSale.invoiceId" />
+                <order-by field-name="paymentId" />
+            </entity-find>
+            <set field="refundMethod" from="method ?: salePayments[0].paymentInstrumentEnumId" />
+
+            <service-call name="mantle.order.ReturnServices.create#ReturnFromOrder" out-map="created"
+                in-map="[orderId: posSale.orderId, orderPartSeqId: '01']" />
+            <iterate list="lines" entry="line">
+                <service-call name="mantle.order.ReturnServices.add#OrderItemToReturn"
+                    in-map="[returnId: created.returnId, orderId: posSale.orderId,
+                        orderItemSeqId: line.orderItemSeqId, returnQuantity: line.quantity as BigDecimal,
+                        returnReasonEnumId: 'RrsnDidNotWant', returnResponseEnumId: 'RrspRefund',
+                        responseImmediate: 'Y']" />
+            </iterate>
+            <service-call name="mantle.order.ReturnServices.approve#Return"
+                in-map="[returnId: created.returnId]" />
+            <service-call name="mantle.order.ReturnServices.receive#ReturnWithoutShipment"
+                in-map="[returnId: created.returnId]" />
+
+            <entity-find entity-name="mantle.order.return.ReturnItem" list="returnItems">
+                <econdition field-name="returnId" from="created.returnId" />
+                <econdition field-name="refundPaymentId" operator="is-not-null" />
+            </entity-find>
+            <if condition="!returnItems">
+                <return error="true" message="Nothing to refund" />
+            </if>
+            <set field="paymentId" from="returnItems[0].refundPaymentId" />
+            <entity-find-one entity-name="mantle.account.payment.Payment" value-field="payment" />
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId" out-map="memoSeq"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'invoice']" />
+            <service-call name="update#mantle.account.invoice.Invoice"
+                in-map="[invoiceId: payment.forInvoiceId, pseudoId: memoSeq.seqNum, statusId: 'InvoiceApproved']" />
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId" out-map="paymentSeq"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']" />
+            <service-call name="update#mantle.account.payment.Payment"
+                in-map="[paymentId: paymentId, pseudoId: paymentSeq.seqNum,
+                    paymentInstrumentEnumId: refundMethod, effectiveDate: ec.user.nowTimestamp]" />
+            <service-call name="update#mantle.account.payment.Payment"
+                in-map="[paymentId: paymentId, statusId: 'PmntDelivered']" />
+
+            <if condition="restock">
+                <service-call name="growerp.100.PosServices100.restock#PosReturn"
+                    in-map="[returnId: created.returnId, orderId: posSale.orderId]" />
+            </if>
+            <service-call name="create#growerp.pos.PosRefund" out-map="ignored"
+                in-map="[ownerPartyId: ownerPartyId, clientRefundId: clientRefundId,
+                    clientSaleId: clientSaleId, requestHash: requestHash, returnId: created.returnId,
+                    paymentId: paymentId, amount: payment.amount, terminalName: terminalName,
+                    userId: ec.user.userId, refundDate: ec.user.nowTimestamp]" />
+            <entity-find-one entity-name="growerp.pos.PosRefund" value-field="stored" />
+            <service-call name="growerp.100.PosServices100.get#RefundOut" out-map="context"
+                in-map="[posRefund: stored]" />
+        </actions>
+    </service>
+
+    <service verb="restock" noun="PosReturn">
+        <description>Internal: returned goods are on the shelf again. Lines without stock tracking
+            are skipped.</description>
+        <in-parameters>
+            <parameter name="returnId" required="true" />
+            <parameter name="orderId" required="true" />
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.order.OrderPart" value-field="orderPart">
+                <field-map field-name="orderId" />
+                <field-map field-name="orderPartSeqId" value="01" />
+            </entity-find-one>
+            <entity-find entity-name="mantle.order.return.ReturnItem" list="returnItems">
+                <econdition field-name="returnId" />
+                <econdition field-name="productId" operator="is-not-null" />
+            </entity-find>
+            <iterate list="returnItems" entry="returnItem">
+                <entity-find-one entity-name="mantle.product.Product" value-field="product">
+                    <field-map field-name="productId" from="returnItem.productId" />
+                </entity-find-one>
+                <if condition="product.requireInventory != 'Y'">
+                    <continue />
+                </if>
+                <entity-find entity-name="mantle.product.asset.Asset" list="assets">
+                    <econdition field-name="productId" from="returnItem.productId" />
+                    <econdition field-name="facilityId" from="orderPart.facilityId" />
+                </entity-find>
+                <if condition="assets">
+                    <service-call name="mantle.product.AssetServices.change#AssetQuantity"
+                        in-map="[assetId: assets[0].assetId, quantityDiff: returnItem.returnQuantity,
+                            returnId: returnId, returnItemSeqId: returnItem.returnItemSeqId]" />
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="get" noun="RefundOut">
+        <description>Internal: a refund the way the frontend reads it.</description>
+        <in-parameters>
+            <parameter name="posRefund" type="Map" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="refund" type="Map" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.account.payment.Payment" value-field="payment">
+                <field-map field-name="paymentId" from="posRefund.paymentId" />
+            </entity-find-one>
+            <entity-find-one entity-name="mantle.order.return.ReturnHeader" value-field="returnHeader">
+                <field-map field-name="returnId" from="posRefund.returnId" />
+            </entity-find-one>
+            <entity-find entity-name="mantle.order.return.ReturnItem" list="returnItems">
+                <econdition field-name="returnId" from="posRefund.returnId" />
+                <econdition field-name="productId" operator="is-not-null" />
+            </entity-find>
+            <set field="refundLines" from="[]" />
+            <iterate list="returnItems" entry="returnItem">
+                <script>refundLines.add([description: returnItem.description,
+                    quantity: returnItem.returnQuantity.toString()])</script>
+            </iterate>
+            <set field="refund"
+                from="[clientRefundId: posRefund.clientRefundId, clientSaleId: posRefund.clientSaleId,
+                    paymentId: posRefund.paymentId, paymentPseudoId: payment.pseudoId,
+                    amount: posRefund.amount.toString(), method: payment.paymentInstrumentEnumId,
+                    currencyId: returnHeader.currencyUomId, lines: refundLines,
+                    refundDate: ec.l10n.format(posRefund.refundDate, 'yyyy-MM-dd HH:mm:ssZ')]" />
         </actions>
     </service>
 </services>

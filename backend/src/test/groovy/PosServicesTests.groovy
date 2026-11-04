@@ -243,6 +243,25 @@ class PosServicesTests extends Specification {
         onHand(rare) == 0
     }
 
+    def "a sale above stock that is partly there corrects only the difference"() {
+        given:
+        Map scarce = createProduct("Scarce ${run}", 'Physical Good', 10)
+        Map location = ec.service.sync().name('growerp.100.InventoryServices100.create#Location')
+                .parameters([location: [locationName: "Back ${run}"]]).call().location
+        ec.service.sync().name('growerp.100.InventoryServices100.create#Asset')
+                .parameters([asset: [assetName: "Scarce stock ${run}", statusId: 'Available',
+                        quantityOnHand: 1, availableToPromise: 1, acquireCost: 2,
+                        product: [productId: scarce.productId],
+                        location: [locationId: location.locationId]]]).call()
+
+        when:
+        sell([line(scarce, 3)], [cash(30)])
+
+        then:
+        !ec.message.hasError()
+        onHand(scarce) == 0
+    }
+
     def "the ledger balances and the receipt has the tax per rate"() {
         given:
         ec.service.sync().name('growerp.100.TaxServices100.create#TaxRate')
@@ -352,6 +371,152 @@ class PosServicesTests extends Specification {
         catalog.items.find { it.productId == service1.productId }.price as BigDecimal == 10
         catalog.pricesIncludeTax == false
         catalog.currencyId == 'USD'
+    }
+
+    Map refund(Map sale, List lines, Map options = [:]) {
+        return ec.service.sync().name("${service}.create#PosRefund")
+                .parameters([clientRefundId: "${run}-r${++saleCount}".toString(), clientSaleId: sale.clientSaleId,
+                        lines: lines] + options).call()?.refund
+    }
+
+    Map refundLine(Map sale, int index, BigDecimal quantity) {
+        return [orderItemSeqId: sale.lines[index].orderItemSeqId, quantity: quantity]
+    }
+
+    def "a part of a sale is refunded in cash with its tax, stock back and the ledger balanced"() {
+        given:
+        ec.service.sync().name('growerp.100.TaxServices100.create#TaxRate')
+                .parameters([taxRate: [taxName: 'VAT', taxPercentage: 10]]).call()
+        Map sale = sell([line(gadget, 3)], [cash(33)])
+        BigDecimal before = onHand(gadget)
+
+        when:
+        Map done = refund(sale, [refundLine(sale, 0, 1)], [restock: true])
+        def payment = ec.entity.find('mantle.account.payment.Payment').condition('paymentId', done.paymentId)
+                .useCache(false).one()
+        def entries = ec.entity.find('mantle.ledger.transaction.AcctgTransAndEntry')
+                .condition('paymentId', done.paymentId).useCache(false).list()
+
+        then:
+        !ec.message.hasError()
+        done.amount as BigDecimal == 11
+        payment.amount as BigDecimal == 11
+        payment.statusId == 'PmntDelivered'
+        payment.paymentInstrumentEnumId == 'PiCash'
+        onHand(gadget) == before + 1
+        entries
+        entries.findAll { it.debitCreditFlag == 'C' }.sum { it.amount as BigDecimal } ==
+                entries.findAll { it.debitCreditFlag == 'D' }.sum { it.amount as BigDecimal }
+
+        when: 'the credit memo is settled by the refund'
+        def memo = ec.entity.find('mantle.account.invoice.Invoice').condition('invoiceId', payment.forInvoiceId)
+                .useCache(false).one()
+
+        then:
+        memo.invoiceTypeEnumId == 'InvoiceReturn'
+        memo.invoiceTotal as BigDecimal == 11
+        ec.entity.find('mantle.account.payment.PaymentApplication').condition('paymentId', done.paymentId)
+                .useCache(false).list().sum { it.amountApplied as BigDecimal } == 11
+    }
+
+    def "without restock the stock stays, a card sale refunds to the card"() {
+        given:
+        Map sale = sell([line(gadget, 1)], [[method: 'PiCreditCard', amount: 10, reference: 'A1']])
+        BigDecimal before = onHand(gadget)
+
+        when:
+        Map done = refund(sale, [refundLine(sale, 0, 1)], [restock: false])
+
+        then:
+        !ec.message.hasError()
+        onHand(gadget) == before
+        ec.entity.find('mantle.account.payment.Payment').condition('paymentId', done.paymentId).useCache(false)
+                .one().paymentInstrumentEnumId == 'PiCreditCard'
+    }
+
+    def "with tax in the price a full refund gives the shelf price back"() {
+        given:
+        ec.service.sync().name('growerp.100.TaxServices100.create#TaxRate')
+                .parameters([taxRate: [taxName: 'VAT', taxPercentage: 21]]).call()
+        ec.service.sync().name('growerp.100.TaxServices100.update#TaxSettings')
+                .parameters([pricesIncludeTax: true]).call()
+        Map sale = sell([line(service1, 3)], [cash(30)])
+
+        when:
+        Map done = refund(sale, [refundLine(sale, 0, 3)])
+
+        then:
+        !ec.message.hasError()
+        done.amount as BigDecimal == 30
+    }
+
+    def "no more can be refunded than was sold"() {
+        given:
+        Map sale = sell([line(service1, 2)], [cash(20)])
+
+        when:
+        refund(sale, [refundLine(sale, 0, 1)])
+        Map found = ec.service.sync().name("${service}.get#PosSaleLookup")
+                .parameters([search: sale.invoicePseudoId]).call().sale
+
+        then:
+        !ec.message.hasError()
+        found.lines[0].returnableQuantity as BigDecimal == 1
+
+        when:
+        refund(sale, [refundLine(sale, 0, 2)])
+
+        then:
+        ec.message.hasError()
+    }
+
+    def "a retry of a refund gives the same refund"() {
+        given:
+        Map sale = sell([line(service1, 2)], [cash(20)])
+        String id = "${run}-rr".toString()
+        Map parameters = [clientRefundId: id, clientSaleId: sale.clientSaleId, lines: [refundLine(sale, 0, 1)]]
+
+        when:
+        Map first = ec.service.sync().name("${service}.create#PosRefund").parameters(parameters).call().refund
+        Map second = ec.service.sync().name("${service}.create#PosRefund").parameters(parameters).call().refund
+
+        then:
+        !ec.message.hasError()
+        second.paymentId == first.paymentId
+        ec.entity.find('mantle.account.payment.Payment').condition('forInvoiceId', sale.invoiceId)
+                .useCache(false).list().size() == 1
+
+        when:
+        ec.service.sync().name("${service}.create#PosRefund")
+                .parameters(parameters + [lines: [refundLine(sale, 0, 2)]]).call()
+
+        then:
+        ec.message.hasError()
+    }
+
+    def "only an admin refunds and a sale of another tenant cannot be found"() {
+        given:
+        Map sale = sell([line(service1, 1)], [cash(10)])
+        String email = "cashier-${run}@spock.example.com".toString()
+        ec.service.sync().name('growerp.100.PartyServices100.create#User')
+                .parameters([user: [firstName: 'Cas', lastName: 'Hier', role: 'OrgInternal',
+                        email: email, loginName: email, userGroup: 'GROWERP_M_EMPLOYEE']]).call()
+
+        when:
+        ec.user.internalLoginUser(email)
+        refund(sale, [refundLine(sale, 0, 1)])
+
+        then:
+        ec.message.hasError()
+        ec.message.errorsString.contains('admin')
+
+        when:
+        ec.message.clearErrors()
+        ec.user.internalLoginUser(otherTenant.username)
+        ec.service.sync().name("${service}.get#PosSaleLookup").parameters([search: sale.invoicePseudoId]).call()
+
+        then:
+        ec.message.hasError()
     }
 
     def "a receipt can be read again, by the own tenant only"() {

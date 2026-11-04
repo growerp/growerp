@@ -119,3 +119,54 @@ Future<Uint8List> buildPosReceipt(
   );
   return document.save();
 }
+
+/// The slip of a refund on an 80mm roll.
+Future<Uint8List> buildPosRefundReceipt(
+  PosRefund refund, {
+  required String companyName,
+  required String title,
+  required PosReceiptLabels labels,
+}) async {
+  final document = pw.Document();
+  document.addPage(
+    pw.Page(
+      pageFormat: PdfPageFormat.roll80.copyWith(
+        marginLeft: 4 * PdfPageFormat.mm,
+        marginRight: 4 * PdfPageFormat.mm,
+        marginTop: 4 * PdfPageFormat.mm,
+        marginBottom: 4 * PdfPageFormat.mm,
+      ),
+      build: (_) => pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+        children: [
+          pw.Text(
+            companyName,
+            textAlign: pw.TextAlign.center,
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14),
+          ),
+          pw.SizedBox(height: 4),
+          pw.Text(
+            '$title ${refund.paymentPseudoId ?? ''}  '
+            '${refund.refundDate?.dateOnly() ?? ''}',
+            textAlign: pw.TextAlign.center,
+          ),
+          pw.Divider(),
+          for (final line in refund.lines)
+            pw.Text('${line.quantity} x ${line.description ?? ''}'),
+          pw.Divider(),
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text(refund.method == 'PiCash' ? labels.cash : labels.card),
+              pw.Text(
+                refund.amount.currency(currencyId: refund.currencyId ?? 'USD'),
+                style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
+  return document.save();
+}

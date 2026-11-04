@@ -1,3 +1,4 @@
+import 'package:bloc_test/bloc_test.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,20 +11,30 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 import '../shared/mocks.dart';
 
+class MockAuthBloc extends MockBloc<AuthEvent, AuthState> implements AuthBloc {}
+
 void main() {
   late MockRestClient restClient;
+  late MockAuthBloc authBloc;
   final beer = PosCatalogItem(
     productId: 'P1',
     productName: 'Beer',
     price: Decimal.fromInt(5),
   );
 
+  AuthState authFor(UserGroup group) => AuthState(
+    authenticate: Authenticate(user: User(userGroup: group)),
+  );
+
   setUpAll(() {
     registerFallbackValue(<PosLine>[]);
     registerFallbackValue(<PosTender>[]);
+    registerFallbackValue(<PosRefundLine>[]);
   });
   setUp(() {
     restClient = MockRestClient();
+    authBloc = MockAuthBloc();
+    when(() => authBloc.state).thenReturn(authFor(UserGroup.employee));
     when(
       () => restClient.getPosCatalog(),
     ).thenAnswer((_) async => PosCatalog(items: [beer], currencyId: 'USD'));
@@ -73,7 +84,10 @@ void main() {
         ],
         home: Scaffold(
           body: MultiBlocProvider(
-            providers: getPosBlocProviders(restClient),
+            providers: [
+              BlocProvider<AuthBloc>.value(value: authBloc),
+              ...getPosBlocProviders(restClient),
+            ],
             child: const PosCheckoutScreen(),
           ),
         ),
@@ -109,6 +123,68 @@ void main() {
       expect(find.byKey(const Key('posCartEmpty')), findsOneWidget);
     });
   }
+
+  testWidgets('a cashier sees no refund button', (tester) async {
+    await pump(tester, const Size(1280, 800));
+    expect(find.byKey(const Key('posRefund')), findsNothing);
+  });
+
+  testWidgets('an admin sees the refund button', (tester) async {
+    when(() => authBloc.state).thenReturn(authFor(UserGroup.admin));
+    await pump(tester, const Size(1280, 800));
+    expect(find.byKey(const Key('posRefund')), findsOneWidget);
+  });
+
+  testWidgets('a refund from receipt number to the amount', (tester) async {
+    when(() => authBloc.state).thenReturn(authFor(UserGroup.admin));
+    when(() => restClient.getPosSaleLookup(search: '100')).thenAnswer(
+      (_) async => PosSale(
+        clientSaleId: 'S1',
+        currencyId: 'USD',
+        lines: [
+          PosSaleLine(
+            orderItemSeqId: '01',
+            description: 'Beer',
+            price: Decimal.fromInt(5),
+            returnableQuantity: Decimal.fromInt(2),
+          ),
+        ],
+      ),
+    );
+    when(
+      () => restClient.createPosRefund(
+        clientRefundId: any(named: 'clientRefundId'),
+        clientSaleId: 'S1',
+        lines: any(named: 'lines'),
+        restock: true,
+      ),
+    ).thenAnswer(
+      (_) async => PosRefund(
+        amount: Decimal.fromInt(5),
+        method: 'PiCash',
+        currencyId: 'USD',
+      ),
+    );
+    await pump(tester, const Size(1280, 800));
+
+    await tester.tap(find.byKey(const Key('posRefund')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('posRefundSearch')), '100');
+    await tester.tap(find.byKey(const Key('posRefundFind')));
+    await tester.pumpAndSettle();
+
+    final confirm = find.byKey(const Key('posRefundConfirm'));
+    expect(tester.widget<ElevatedButton>(confirm).onPressed, isNull);
+    await tester.tap(find.byKey(const Key('posRefundPlus0')));
+    await tester.pumpAndSettle();
+    await tester.tap(confirm);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('posRefundAmount')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('posRefundDone')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('PosRefundDialog')), findsNothing);
+  });
 
   testWidgets('pay stays off without lines', (tester) async {
     await pump(tester, const Size(1280, 800));

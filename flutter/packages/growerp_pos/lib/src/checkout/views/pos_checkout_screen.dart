@@ -22,6 +22,8 @@ import '../../../l10n/generated/pos_localizations.dart';
 import '../blocs/pos_cart_bloc.dart';
 import '../blocs/pos_catalog_bloc.dart';
 import '../blocs/pos_sale_bloc.dart';
+import '../../refund/blocs/pos_refund_bloc.dart';
+import '../../refund/views/pos_refund_dialog.dart';
 import 'pos_receipt_dialog.dart';
 import 'pos_tender_dialog.dart';
 
@@ -101,6 +103,17 @@ class PosCheckoutScreenState extends State<PosCheckoutScreen> {
     saleBloc.add(const PosSaleReset());
     await showDialog(context: context, builder: (_) => PosReceiptDialog(sale));
     _searchFocus.requestFocus();
+  }
+
+  Future<void> _refund() async {
+    final bloc = context.read<PosRefundBloc>()..add(const PosRefundReset());
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) =>
+          BlocProvider.value(value: bloc, child: const PosRefundDialog()),
+    );
+    if (mounted) _searchFocus.requestFocus();
   }
 
   @override
@@ -346,6 +359,17 @@ class PosCheckoutScreenState extends State<PosCheckoutScreen> {
                         ],
                       ),
                       const SizedBox(height: 8),
+                      if (_isAdmin(context)) ...[
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            key: const Key('posRefund'),
+                            onPressed: _refund,
+                            child: Text(localizations.refund),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -368,6 +392,12 @@ class PosCheckoutScreenState extends State<PosCheckoutScreen> {
         );
       },
     );
+  }
+
+  /// The backend decides, this only hides the button from a cashier.
+  bool _isAdmin(BuildContext context) {
+    final group = context.read<AuthBloc>().state.authenticate?.user?.userGroup;
+    return group == UserGroup.admin;
   }
 
   Widget _line(PosCartLine line, int index, String currencyId) {

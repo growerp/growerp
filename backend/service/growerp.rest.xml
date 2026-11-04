@@ -1112,6 +1112,16 @@ limitations under the License.
                     <service name="growerp.100.PosServices100.create#PosSale" />
                 </method>
             </resource>
+            <resource name="SaleLookup">
+                <method type="get">
+                    <service name="growerp.100.PosServices100.get#PosSaleLookup" />
+                </method>
+            </resource>
+            <resource name="Refund">
+                <method type="post">
+                    <service name="growerp.100.PosServices100.create#PosRefund" />
+                </method>
+            </resource>
             <resource name="Receipt">
                 <method type="get">
                     <service name="growerp.100.PosServices100.get#PosReceipt" />

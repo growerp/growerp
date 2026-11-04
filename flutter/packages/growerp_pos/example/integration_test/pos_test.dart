@@ -64,7 +64,7 @@ void main() {
     await CommonTest.tapByKey(tester, 'posPay', seconds: 1);
     await CommonTest.enterText(tester, 'posAmount', '30');
     await CommonTest.tapByKey(tester, 'posCash', seconds: 1);
-    await CommonTest.tapByKey(tester, 'posComplete', seconds: 3);
+    await CommonTest.tapByKey(tester, 'posComplete', seconds: 8);
 
     expect(find.byKey(const Key('PosReceiptDialog')), findsOneWidget);
     expect(
@@ -76,7 +76,22 @@ void main() {
       contains('8'),
     );
 
+    final receiptNumber = tester
+        .widget<Text>(find.byKey(const Key('posReceiptNumber')))
+        .data!;
     await CommonTest.tapByKey(tester, 'posNewSale', seconds: 1);
     expect(find.byKey(const Key('posCartEmpty')), findsOneWidget);
+
+    // one of the two comes back
+    await CommonTest.tapByKey(tester, 'posRefund', seconds: 1);
+    await CommonTest.enterText(tester, 'posRefundSearch', receiptNumber);
+    await CommonTest.tapByKey(tester, 'posRefundFind', seconds: 2);
+    await CommonTest.tapByKey(tester, 'posRefundPlus0', seconds: 1);
+    await CommonTest.tapByKey(tester, 'posRefundConfirm', seconds: 8);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('posRefundAmount'))).data,
+      contains('11'),
+    );
+    await CommonTest.tapByKey(tester, 'posRefundDone', seconds: 1);
   });
 }
