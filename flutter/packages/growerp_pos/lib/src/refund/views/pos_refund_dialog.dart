@@ -27,7 +27,8 @@ import '../blocs/pos_refund_bloc.dart';
 /// Find a sale by the invoice number on its receipt, pick what comes back and
 /// give the money back.
 class PosRefundDialog extends StatefulWidget {
-  const PosRefundDialog({super.key});
+  const PosRefundDialog({super.key, required this.terminalName});
+  final String terminalName;
 
   @override
   PosRefundDialogState createState() => PosRefundDialogState();
@@ -122,7 +123,11 @@ class PosRefundDialogState extends State<PosRefundDialog> {
             onPressed: _lines.isEmpty || busy
                 ? null
                 : () => bloc.add(
-                    PosRefundSubmit(lines: _lines, restock: _restock),
+                    PosRefundSubmit(
+                      lines: _lines,
+                      restock: _restock,
+                      terminalName: widget.terminalName,
+                    ),
                   ),
             child: Text(localizations.refund),
           ),

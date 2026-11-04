@@ -222,7 +222,7 @@ limitations under the License.
             clientSaleId again returns the first sale.</description>
         <in-parameters>
             <parameter name="clientSaleId" required="true" />
-            <parameter name="terminalName" />
+            <parameter name="terminalName" required="true" />
             <parameter name="lines" type="List" required="true" />
             <parameter name="tenders" type="List" required="true" />
         </in-parameters>
@@ -245,6 +245,8 @@ limitations under the License.
                 <return />
             </if>
 
+            <service-call name="growerp.100.PosServices100.get#OpenShift" out-map="till"
+                in-map="[ownerPartyId: ownerPartyId, terminalName: terminalName]" />
             <service-call name="growerp.100.PosServices100.get#PricedLines" out-map="priced"
                 in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId, lines: lines]" />
             <service-call name="growerp.100.PosServices100.check#Tenders" out-map="tendered"
@@ -281,7 +283,7 @@ limitations under the License.
             <service-call name="create#growerp.pos.PosSale"
                 in-map="[ownerPartyId: ownerPartyId, clientSaleId: clientSaleId,
                     requestHash: requestHash, orderId: order.orderId,
-                    invoiceId: finished.invoiceId, terminalName: terminalName,
+                    invoiceId: finished.invoiceId, terminalName: terminalName, shiftId: till.shiftId,
                     userId: ec.user.userId, changeAmount: tendered.changeAmount,
                     saleDate: ec.user.nowTimestamp]" />
             <service-call name="growerp.100.PosServices100.get#PosReceipt" out-map="context"
@@ -526,7 +528,7 @@ limitations under the License.
             <parameter name="lines" type="List" required="true" />
             <parameter name="restock" type="Boolean" default="false" />
             <parameter name="method" />
-            <parameter name="terminalName" />
+            <parameter name="terminalName" required="true" />
         </in-parameters>
         <out-parameters>
             <parameter name="refund" type="Map" />
@@ -549,6 +551,8 @@ limitations under the License.
                     in-map="[posRefund: existing]" />
                 <return />
             </if>
+            <service-call name="growerp.100.PosServices100.get#OpenShift" out-map="till"
+                in-map="[ownerPartyId: ownerPartyId, terminalName: terminalName]" />
             <entity-find-one entity-name="growerp.pos.PosSale" value-field="posSale" />
             <if condition="posSale == null">
                 <return error="true" message="Sale ${clientSaleId} not found" />
@@ -602,7 +606,8 @@ limitations under the License.
                 in-map="[ownerPartyId: ownerPartyId, clientRefundId: clientRefundId,
                     clientSaleId: clientSaleId, requestHash: requestHash, returnId: created.returnId,
                     paymentId: paymentId, amount: payment.amount, terminalName: terminalName,
-                    userId: ec.user.userId, refundDate: ec.user.nowTimestamp]" />
+                    shiftId: till.shiftId, userId: ec.user.userId,
+                    refundDate: ec.user.nowTimestamp]" />
             <entity-find-one entity-name="growerp.pos.PosRefund" value-field="stored" />
             <service-call name="growerp.100.PosServices100.get#RefundOut" out-map="context"
                 in-map="[posRefund: stored]" />
@@ -675,6 +680,287 @@ limitations under the License.
                     amount: posRefund.amount.toString(), method: payment.paymentInstrumentEnumId,
                     currencyId: returnHeader.currencyUomId, lines: refundLines,
                     refundDate: ec.l10n.format(posRefund.refundDate, 'yyyy-MM-dd HH:mm:ssZ')]" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="OpenShift">
+        <description>Internal: the open shift of a till, an error without one.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="terminalName" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="shiftId" />
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="growerp.pos.PosShift" list="shifts" limit="1">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="terminalName" />
+                <econdition field-name="status" value="Open" />
+            </entity-find>
+            <if condition="!shifts">
+                <return error="true" message="Till ${terminalName} has no open shift" />
+            </if>
+            <set field="shiftId" from="shifts[0].shiftId" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="CurrentShift">
+        <description>The open shift of a till, nothing when the till is closed.</description>
+        <in-parameters>
+            <parameter name="terminalName" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="shift" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="growerp.pos.PosShift" list="shifts" limit="1">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="terminalName" />
+                <econdition field-name="status" value="Open" />
+            </entity-find>
+            <if condition="shifts">
+                <service-call name="growerp.100.PosServices100.get#ShiftOut" out-map="context"
+                    in-map="[posShift: shifts[0]]" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="get" noun="ShiftOut">
+        <description>Internal: a shift the way the frontend reads it.</description>
+        <in-parameters>
+            <parameter name="posShift" type="Map" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="shift" type="Map" />
+        </out-parameters>
+        <actions>
+            <set field="shift"
+                from="[shiftId: posShift.shiftId, terminalName: posShift.terminalName,
+                    status: posShift.status, openingFloat: posShift.openingFloat?.toString(),
+                    expectedCash: posShift.expectedCash?.toString(),
+                    countedCash: posShift.countedCash?.toString(),
+                    variance: posShift.countedCash != null
+                        ? (posShift.countedCash - posShift.expectedCash).toString() : null,
+                    openedDate: ec.l10n.format(posShift.openedDate, 'yyyy-MM-dd HH:mm:ssZ'),
+                    closedDate: posShift.closedDate
+                        ? ec.l10n.format(posShift.closedDate, 'yyyy-MM-dd HH:mm:ssZ') : null]" />
+        </actions>
+    </service>
+
+    <service verb="open" noun="Shift">
+        <in-parameters>
+            <parameter name="terminalName" required="true" />
+            <parameter name="openingFloat" type="BigDecimal" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="shift" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="growerp.pos.PosShift" list="shifts" limit="1">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="terminalName" />
+                <econdition field-name="status" value="Open" />
+            </entity-find>
+            <if condition="shifts">
+                <return error="true" message="Till ${terminalName} is already open" />
+            </if>
+            <service-call name="create#growerp.pos.PosShift" out-map="created"
+                in-map="[ownerPartyId: ownerPartyId, terminalName: terminalName, status: 'Open',
+                    openedByUserId: ec.user.userId, openedDate: ec.user.nowTimestamp,
+                    openingFloat: openingFloat]" />
+            <entity-find-one entity-name="growerp.pos.PosShift" value-field="posShift">
+                <field-map field-name="shiftId" from="created.shiftId" />
+            </entity-find-one>
+            <service-call name="growerp.100.PosServices100.get#ShiftOut" out-map="context"
+                in-map="[posShift: posShift]" />
+        </actions>
+    </service>
+
+    <service verb="create" noun="CashMovement">
+        <description>Cash into or out of the drawer that is no sale: positive in, negative out.</description>
+        <in-parameters>
+            <parameter name="shiftId" required="true" />
+            <parameter name="amount" type="BigDecimal" required="true" />
+            <parameter name="reason" />
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="growerp.pos.PosShift" value-field="posShift" />
+            <if condition="posShift == null || posShift.ownerPartyId != ownerPartyId || posShift.status != 'Open'">
+                <return error="true" message="No open shift ${shiftId}" />
+            </if>
+            <service-call name="create#growerp.pos.PosCashMovement" out-map="ignored"
+                in-map="[ownerPartyId: ownerPartyId, shiftId: shiftId, amount: amount, reason: reason,
+                    userId: ec.user.userId, movementDate: ec.user.nowTimestamp]" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="ZReport">
+        <description>What happened in a shift, from what was booked. Works on an open shift too:
+            that is the X report.</description>
+        <in-parameters>
+            <parameter name="shiftId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="report" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="growerp.pos.PosShift" value-field="posShift" />
+            <if condition="posShift == null || posShift.ownerPartyId != ownerPartyId">
+                <return error="true" message="Shift ${shiftId} not found" />
+            </if>
+            <service-call name="growerp.100.PosServices100.get#ShiftTotals" out-map="totals"
+                in-map="[shiftId: shiftId]" />
+            <service-call name="growerp.100.PosServices100.get#ShiftOut" out-map="shiftOut"
+                in-map="[posShift: posShift]" />
+            <set field="expected" from="posShift.expectedCash != null ? posShift.expectedCash
+                : totals.expectedCash" />
+            <set field="report" from="shiftOut.shift + totals.report + [expectedCash: expected.toString()]" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="ShiftTotals">
+        <description>Internal: the sums of a shift, and the cash that should be in the drawer:
+            float + cash sales - cash refunds + movements.</description>
+        <in-parameters>
+            <parameter name="shiftId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="report" type="Map" />
+            <parameter name="expectedCash" type="BigDecimal" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.pos.PosShift" value-field="posShift" />
+            <entity-find entity-name="growerp.pos.PosSale" list="sales">
+                <econdition field-name="shiftId" />
+            </entity-find>
+            <entity-find entity-name="growerp.pos.PosRefund" list="refunds">
+                <econdition field-name="shiftId" />
+            </entity-find>
+            <entity-find entity-name="growerp.pos.PosCashMovement" list="movements">
+                <econdition field-name="shiftId" />
+            </entity-find>
+            <set field="salePayments" from="[]" />
+            <if condition="sales">
+                <entity-find entity-name="mantle.account.payment.Payment" list="salePayments">
+                    <econdition field-name="forInvoiceId" operator="in" from="sales*.invoiceId" />
+                </entity-find>
+            </if>
+            <set field="refundPayments" from="[]" />
+            <set field="refundTaxTotal" from="0.0" />
+            <if condition="refunds">
+                <entity-find entity-name="mantle.account.payment.Payment" list="refundPayments">
+                    <econdition field-name="paymentId" operator="in" from="refunds*.paymentId" />
+                </entity-find>
+                <entity-find entity-name="mantle.order.return.ReturnItem" list="taxReturns">
+                    <econdition field-name="returnId" operator="in" from="refunds*.returnId" />
+                    <econdition field-name="itemTypeEnumId" value="ItemSalesTax" />
+                </entity-find>
+                <set field="refundTaxTotal"
+                    from="taxReturns.sum(0.0, { (it.returnPrice ?: 0.0) * (it.returnQuantity ?: 1.0) })" />
+            </if>
+            <set field="taxItems" from="[]" />
+            <if condition="sales">
+                <entity-find entity-name="mantle.order.OrderItem" list="taxItems">
+                    <econdition field-name="orderId" operator="in" from="sales*.orderId" />
+                    <econdition field-name="itemTypeEnumId" value="ItemSalesTax" />
+                </entity-find>
+            </if>
+            <script><![CDATA[
+                def byMethod = { payments -> payments.groupBy({ it.paymentInstrumentEnumId }).collect { method, list ->
+                    [method: method, amount: list.sum({ it.amount }).toString()] } }
+                def cashOf = { payments -> payments.findAll({ (it.paymentInstrumentEnumId == 'PiCash') as boolean })
+                    .sum(0.0, { it.amount }) }
+                salesTotal = salePayments.sum(0.0, { it.amount })
+                refundTotal = refundPayments.sum(0.0, { it.amount })
+                movementTotal = movements.sum(0.0, { it.amount })
+                expectedCash = (posShift.openingFloat ?: 0.0) + cashOf(salePayments) - cashOf(refundPayments) + movementTotal
+                taxes = taxItems.groupBy({ it.sourcePercentage }).collect { percentage, items ->
+                    [taxPercentage: percentage?.toString(), taxAmount: items.sum({ it.unitAmount * it.quantity })
+                        .setScale(2, BigDecimal.ROUND_HALF_UP).toString()] }
+                report = [saleCount: sales.size(), salesTotal: salesTotal.toString(),
+                    tenders: byMethod(salePayments), refundCount: refunds.size(),
+                    refundTotal: refundTotal.toString(), refundTenders: byMethod(refundPayments),
+                    taxes: taxes, refundTaxTotal: refundTaxTotal.setScale(2, BigDecimal.ROUND_HALF_UP).toString(),
+                    movementTotal: movementTotal.toString()]
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="close" noun="Shift">
+        <description>Count the drawer and end the shift. A difference with what should be there
+            goes to the ledger: short on misc operating expense, over on write off income.</description>
+        <in-parameters>
+            <parameter name="shiftId" required="true" />
+            <parameter name="countedCash" type="BigDecimal" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="report" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="growerp.pos.PosShift" value-field="posShift" for-update="true" />
+            <if condition="posShift == null || posShift.ownerPartyId != ownerPartyId || posShift.status != 'Open'">
+                <return error="true" message="No open shift ${shiftId}" />
+            </if>
+            <service-call name="growerp.100.PosServices100.get#ShiftTotals" out-map="totals"
+                in-map="[shiftId: shiftId]" />
+            <set field="variance" from="countedCash - totals.expectedCash" />
+            <if condition="variance != 0">
+                <entity-find entity-name="growerp.ledger.account.GlAccountAndOrganization" list="accounts" limit="1">
+                    <econdition field-name="organizationPartyId" from="companyPartyId" />
+                    <econdition field-name="accountCode" from="variance &gt; 0 ? '86000' : '789000000'" />
+                </entity-find>
+                <if condition="!accounts">
+                    <return error="true" message="No ledger account for a cash difference" />
+                </if>
+                <service-call name="growerp.100.CashBookServices100.create#CashBookEntry" out-map="ignored"
+                    in-map="[cashBookEntry: [isIncome: variance &gt; 0, amount: variance.abs(),
+                        description: 'POS shift ' + shiftId,
+                        category: [glAccountId: accounts[0].glAccountId]]]" />
+            </if>
+            <set field="posShift.status" value="Closed" />
+            <set field="posShift.closedByUserId" from="ec.user.userId" />
+            <set field="posShift.closedDate" from="ec.user.nowTimestamp" />
+            <set field="posShift.expectedCash" from="totals.expectedCash" />
+            <set field="posShift.countedCash" from="countedCash" />
+            <entity-update value-field="posShift" />
+            <service-call name="growerp.100.PosServices100.get#ZReport" out-map="context"
+                in-map="[shiftId: shiftId]" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="PosShifts">
+        <description>The shifts of the tenant, the last one first.</description>
+        <in-parameters>
+            <parameter name="start" type="Integer" default-value="0" />
+            <parameter name="limit" type="Integer" default-value="20" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="shifts" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="growerp.pos.PosShift" list="posShifts" offset="start" limit="limit">
+                <econdition field-name="ownerPartyId" />
+                <order-by field-name="-openedDate" />
+            </entity-find>
+            <set field="shifts" from="[]" />
+            <iterate list="posShifts" entry="posShift">
+                <service-call name="growerp.100.PosServices100.get#ShiftOut" out-map="shiftOut"
+                    in-map="[posShift: posShift]" />
+                <script>shifts.add(shiftOut.shift)</script>
+            </iterate>
         </actions>
     </service>
 </services>

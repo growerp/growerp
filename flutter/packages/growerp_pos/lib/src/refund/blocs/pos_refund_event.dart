@@ -28,11 +28,16 @@ class PosRefundLookup extends PosRefundEvent {
 }
 
 class PosRefundSubmit extends PosRefundEvent {
-  const PosRefundSubmit({required this.lines, required this.restock});
+  const PosRefundSubmit({
+    required this.lines,
+    required this.restock,
+    required this.terminalName,
+  });
   final List<PosRefundLine> lines;
   final bool restock;
+  final String terminalName;
   @override
-  List<Object?> get props => [lines, restock];
+  List<Object?> get props => [lines, restock, terminalName];
 }
 
 class PosRefundReset extends PosRefundEvent {

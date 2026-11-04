@@ -12,6 +12,7 @@
         <field name="invoiceId" type="id" />
         <field name="terminalName" type="text-short" />
         <field name="userId" type="id" />
+        <field name="shiftId" type="id" />
         <field name="changeAmount" type="currency-amount" />
         <field name="saleDate" type="date-time" />
         <relationship type="one" title="Owner" related="mantle.party.Party">
@@ -29,6 +30,7 @@
         <field name="requestHash" type="text-short" />
         <field name="returnId" type="id" />
         <field name="paymentId" type="id" />
+        <field name="shiftId" type="id" />
         <field name="amount" type="currency-amount" />
         <field name="terminalName" type="text-short" />
         <field name="userId" type="id" />
@@ -38,5 +40,44 @@
         </relationship>
         <relationship type="one" related="mantle.order.return.ReturnHeader" />
         <relationship type="one" related="mantle.account.payment.Payment" />
+    </entity>
+
+    <entity entity-name="PosShift" package="growerp.pos" cache="never">
+        <description>The time a till is open, from the float counted in to the cash counted out.
+            A till has at most one open shift.</description>
+        <field name="shiftId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" not-null="true" />
+        <field name="terminalName" type="text-short" not-null="true" />
+        <field name="status" type="text-short" not-null="true" />
+        <field name="openedByUserId" type="id" />
+        <field name="closedByUserId" type="id" />
+        <field name="openedDate" type="date-time" />
+        <field name="closedDate" type="date-time" />
+        <field name="openingFloat" type="currency-amount" />
+        <field name="expectedCash" type="currency-amount" />
+        <field name="countedCash" type="currency-amount" />
+        <relationship type="one" title="Owner" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+        <index name="POS_SHIFT_TILL">
+            <index-field name="ownerPartyId" />
+            <index-field name="terminalName" />
+        </index>
+    </entity>
+
+    <entity entity-name="PosCashMovement" package="growerp.pos" cache="never">
+        <description>Cash into (positive) or out of (negative) the drawer that is no sale, like
+            to the safe. It stays cash of the company, so it is not posted.</description>
+        <field name="movementId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" not-null="true" />
+        <field name="shiftId" type="id" not-null="true" />
+        <field name="amount" type="currency-amount" not-null="true" />
+        <field name="reason" type="text-medium" />
+        <field name="userId" type="id" />
+        <field name="movementDate" type="date-time" />
+        <relationship type="one" title="Owner" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+        <relationship type="one" related="growerp.pos.PosShift" />
     </entity>
 </entities>

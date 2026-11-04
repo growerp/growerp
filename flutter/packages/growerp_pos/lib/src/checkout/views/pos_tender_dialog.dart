@@ -29,7 +29,9 @@ class PosTenderDialog extends StatefulWidget {
     required this.lines,
     required this.grandTotal,
     required this.currencyId,
+    required this.terminalName,
   });
+  final String terminalName;
   final List<PosLine> lines;
   final Decimal grandTotal;
   final String currencyId;
@@ -192,6 +194,7 @@ class PosTenderDialogState extends State<PosTenderDialog> {
                                 PosSaleSubmit(
                                   lines: widget.lines,
                                   tenders: _tenders,
+                                  terminalName: widget.terminalName,
                                 ),
                               )
                             : null,

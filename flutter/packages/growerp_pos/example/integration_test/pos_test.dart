@@ -44,6 +44,8 @@ void main() {
       taxRate: TaxRate(taxName: 'VAT', taxPercentage: Decimal.parse('10')),
     );
 
+    await CommonTest.enterText(tester, 'posOpeningFloat', '100');
+    await CommonTest.tapByKey(tester, 'posOpenShift', seconds: 3);
     await CommonTest.tapByKey(tester, 'posRefresh', seconds: 2);
     expect(find.byKey(const Key('posItem0')), findsOneWidget);
 
@@ -93,5 +95,20 @@ void main() {
       contains('11'),
     );
     await CommonTest.tapByKey(tester, 'posRefundDone', seconds: 1);
+
+    // float 100 + cash 22 - refund 11 is 111 expected, one short in the drawer
+    await CommonTest.tapByKey(tester, 'posCloseShift', seconds: 1);
+    await CommonTest.enterText(tester, 'posCountedCash', '110');
+    await CommonTest.tapByKey(tester, 'posCloseConfirm', seconds: 5);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('posZExpected'))).data,
+      contains('111'),
+    );
+    expect(
+      tester.widget<Text>(find.byKey(const Key('posZVariance'))).data,
+      contains('1'),
+    );
+    await CommonTest.tapByKey(tester, 'posZDone', seconds: 1);
+    expect(find.byKey(const Key('PosShiftOpenView')), findsOneWidget);
   });
 }

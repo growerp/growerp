@@ -8,6 +8,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_pos/growerp_pos.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../shared/mocks.dart';
 
@@ -35,6 +36,10 @@ void main() {
     restClient = MockRestClient();
     authBloc = MockAuthBloc();
     when(() => authBloc.state).thenReturn(authFor(UserGroup.employee));
+    SharedPreferences.setMockInitialValues({});
+    when(
+      () => restClient.getPosShift(terminalName: 'Till 1'),
+    ).thenAnswer((_) async => PosShift(shiftId: 'S1', terminalName: 'Till 1'));
     when(
       () => restClient.getPosCatalog(),
     ).thenAnswer((_) async => PosCatalog(items: [beer], currencyId: 'USD'));
@@ -157,6 +162,7 @@ void main() {
         clientSaleId: 'S1',
         lines: any(named: 'lines'),
         restock: true,
+        terminalName: 'Till 1',
       ),
     ).thenAnswer(
       (_) async => PosRefund(
@@ -184,6 +190,94 @@ void main() {
     await tester.tap(find.byKey(const Key('posRefundDone')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('PosRefundDialog')), findsNothing);
+  });
+
+  testWidgets('a closed till asks for the float, then opens', (tester) async {
+    when(
+      () => restClient.getPosShift(terminalName: 'Till 1'),
+    ).thenAnswer((_) async => PosShift());
+    when(
+      () => restClient.openPosShift(
+        terminalName: 'Till 2',
+        openingFloat: Decimal.fromInt(50),
+      ),
+    ).thenAnswer((_) async => PosShift(shiftId: 'S2', terminalName: 'Till 2'));
+    await pump(tester, const Size(1280, 800));
+    expect(find.byKey(const Key('PosShiftOpenView')), findsOneWidget);
+    expect(find.byKey(const Key('posPay')), findsNothing);
+
+    await tester.enterText(find.byKey(const Key('posTerminalName')), 'Till 2');
+    await tester.enterText(find.byKey(const Key('posOpeningFloat')), '50');
+    await tester.tap(find.byKey(const Key('posOpenShift')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('posPay')), findsOneWidget);
+    expect(find.text('Till 2'), findsOneWidget);
+    expect(
+      (await SharedPreferences.getInstance()).getString('posTerminal'),
+      'Till 2',
+    );
+  });
+
+  testWidgets('closing the till shows the report and the closed till', (
+    tester,
+  ) async {
+    when(
+      () => restClient.closePosShift(
+        shiftId: 'S1',
+        countedCash: Decimal.fromInt(99),
+      ),
+    ).thenAnswer(
+      (_) async => PosZReport(
+        terminalName: 'Till 1',
+        expectedCash: Decimal.fromInt(100),
+        countedCash: Decimal.fromInt(99),
+        variance: Decimal.fromInt(-1),
+        tenders: [PosTender(method: 'PiCash', amount: Decimal.fromInt(5))],
+      ),
+    );
+    await pump(tester, const Size(1280, 800));
+
+    await tester.tap(find.byKey(const Key('posCloseShift')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('posCountedCash')), '99');
+    await tester.tap(find.byKey(const Key('posCloseConfirm')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('PosZReportDialog')), findsOneWidget);
+    expect(find.byKey(const Key('posZVariance')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('posZDone')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('PosShiftOpenView')), findsOneWidget);
+  });
+
+  testWidgets('cash goes out of the drawer as a negative amount', (
+    tester,
+  ) async {
+    when(
+      () => restClient.createPosCashMovement(
+        shiftId: 'S1',
+        amount: Decimal.fromInt(-20),
+        reason: 'Safe',
+      ),
+    ).thenAnswer((_) async {});
+    await pump(tester, const Size(1280, 800));
+
+    await tester.tap(find.byKey(const Key('posCashMovement')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('posMovementAmount')), '20');
+    await tester.enterText(find.byKey(const Key('posMovementReason')), 'Safe');
+    await tester.tap(find.byKey(const Key('posMovementSave')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('PosCashMovementDialog')), findsNothing);
+    verify(
+      () => restClient.createPosCashMovement(
+        shiftId: 'S1',
+        amount: Decimal.fromInt(-20),
+        reason: 'Safe',
+      ),
+    ).called(1);
   });
 
   testWidgets('pay stays off without lines', (tester) async {

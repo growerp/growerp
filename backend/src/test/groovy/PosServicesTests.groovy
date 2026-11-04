@@ -51,6 +51,7 @@ class PosServicesTests extends Specification {
                         quantityOnHand: 10, availableToPromise: 10, acquireCost: 2,
                         product: [productId: gadget.productId],
                         location: [locationId: location.locationId]]]).call()
+        openShift("Till 1 ${run}".toString(), 100)
     }
 
     def cleanupSpec() {
@@ -74,10 +75,32 @@ class PosServicesTests extends Specification {
                         useWarehouse: type != 'Service']]).call().product
     }
 
-    Map sell(List lines, List tenders, String clientSaleId = null) {
+    Map sell(List lines, List tenders, String clientSaleId = null, String terminalName = "Till 1 ${run}".toString()) {
         return ec.service.sync().name("${service}.create#PosSale")
                 .parameters([clientSaleId: clientSaleId ?: "${run}-${++saleCount}".toString(),
-                        terminalName: 'Till 1', lines: lines, tenders: tenders]).call()?.sale
+                        terminalName: terminalName, lines: lines, tenders: tenders]).call()?.sale
+    }
+
+    Map openShift(String terminalName, BigDecimal openingFloat) {
+        return ec.service.sync().name("${service}.open#Shift")
+                .parameters([terminalName: terminalName, openingFloat: openingFloat]).call()?.shift
+    }
+
+    Map closeShift(Map shift, BigDecimal countedCash) {
+        return ec.service.sync().name("${service}.close#Shift")
+                .parameters([shiftId: shift.shiftId, countedCash: countedCash]).call()?.report
+    }
+
+    List shiftEntries(Map shift) {
+        def trans = ec.entity.find('mantle.ledger.transaction.AcctgTrans')
+                .condition('description', "POS shift ${shift.shiftId}".toString()).useCache(false).list()
+        return trans ? ec.entity.find('mantle.ledger.transaction.AcctgTransEntry')
+                .condition('acctgTransId', trans[0].acctgTransId).useCache(false).list() : []
+    }
+
+    void cashMovement(Map shift, BigDecimal amount, String reason) {
+        ec.service.sync().name("${service}.create#CashMovement")
+                .parameters([shiftId: shift.shiftId, amount: amount, reason: reason]).call()
     }
 
     Map line(Map product, BigDecimal quantity) {
@@ -376,7 +399,7 @@ class PosServicesTests extends Specification {
     Map refund(Map sale, List lines, Map options = [:]) {
         return ec.service.sync().name("${service}.create#PosRefund")
                 .parameters([clientRefundId: "${run}-r${++saleCount}".toString(), clientSaleId: sale.clientSaleId,
-                        lines: lines] + options).call()?.refund
+                        terminalName: "Till 1 ${run}".toString(), lines: lines] + options).call()?.refund
     }
 
     Map refundLine(Map sale, int index, BigDecimal quantity) {
@@ -474,7 +497,8 @@ class PosServicesTests extends Specification {
         given:
         Map sale = sell([line(service1, 2)], [cash(20)])
         String id = "${run}-rr".toString()
-        Map parameters = [clientRefundId: id, clientSaleId: sale.clientSaleId, lines: [refundLine(sale, 0, 1)]]
+        Map parameters = [clientRefundId: id, clientSaleId: sale.clientSaleId, terminalName: "Till 1 ${run}".toString(),
+                lines: [refundLine(sale, 0, 1)]]
 
         when:
         Map first = ec.service.sync().name("${service}.create#PosRefund").parameters(parameters).call().refund
@@ -519,6 +543,151 @@ class PosServicesTests extends Specification {
         ec.message.hasError()
     }
 
+    def "a sale and a refund need an open shift on the till"() {
+        when:
+        Map sale = sell([line(service1, 1)], [cash(10)], null, 'Never opened')
+
+        then:
+        sale == null
+        ec.message.hasError()
+        ec.message.errorsString.contains('no open shift')
+
+        when:
+        ec.message.clearErrors()
+        Map paid = sell([line(service1, 1)], [cash(10)])
+        ec.service.sync().name("${service}.create#PosRefund")
+                .parameters([clientRefundId: "${run}-noshift".toString(), clientSaleId: paid.clientSaleId,
+                        terminalName: 'Never opened', lines: [refundLine(paid, 0, 1)]]).call()
+
+        then:
+        ec.message.hasError()
+    }
+
+    def "a till has one open shift and a closed shift cannot change"() {
+        given:
+        Map shift = openShift("Till 3 ${run}".toString(), 50)
+
+        when: 'opened twice'
+        Map second = openShift("Till 3 ${run}".toString(), 50)
+
+        then:
+        second == null
+        ec.message.errorsString.contains('open')
+
+        when:
+        ec.message.clearErrors()
+        Map report = closeShift(shift, 50)
+
+        then:
+        !ec.message.hasError()
+        report.status == 'Closed'
+
+        when: 'closed again'
+        closeShift(shift, 1)
+
+        then:
+        ec.message.hasError()
+
+        when:
+        ec.message.clearErrors()
+        cashMovement(shift, 5, 'late')
+
+        then:
+        ec.message.hasError()
+
+        when: 'the till opens again with a new shift'
+        ec.message.clearErrors()
+        Map next = openShift("Till 3 ${run}".toString(), 10)
+
+        then:
+        !ec.message.hasError()
+        next.shiftId != shift.shiftId
+        closeShift(next, 10).status == 'Closed'
+    }
+
+    def "the z report adds up the shift and a shortage goes to the ledger"() {
+        given:
+        ec.service.sync().name('growerp.100.TaxServices100.create#TaxRate')
+                .parameters([taxRate: [taxName: 'VAT', taxPercentage: 10]]).call()
+        Map shift = openShift("Till 2 ${run}".toString(), 100)
+        Map cashSale = sell([line(service1, 2)], [cash(50)], null, "Till 2 ${run}".toString())
+        sell([line(service1, 1)], [[method: 'PiCreditCard', amount: 11]], null, "Till 2 ${run}".toString())
+        ec.service.sync().name("${service}.create#PosRefund")
+                .parameters([clientRefundId: "${run}-z".toString(), clientSaleId: cashSale.clientSaleId,
+                        terminalName: "Till 2 ${run}".toString(), lines: [refundLine(cashSale, 0, 1)]]).call()
+        cashMovement(shift, -15, 'To the safe')
+        cashMovement(shift, 5, 'Change float')
+
+        when:
+        Map open = ec.service.sync().name("${service}.get#ZReport").parameters([shiftId: shift.shiftId]).call().report
+
+        then: 'float 100 + cash 22 - refund 11 - 15 + 5'
+        !ec.message.hasError()
+        open.status == 'Open'
+        open.expectedCash as BigDecimal == 101
+        open.saleCount == 2
+        open.salesTotal as BigDecimal == 33
+        open.tenders.find { it.method == 'PiCash' }.amount as BigDecimal == 22
+        open.tenders.find { it.method == 'PiCreditCard' }.amount as BigDecimal == 11
+        open.refundTotal as BigDecimal == 11
+        open.taxes[0].taxAmount as BigDecimal == 3
+        open.refundTaxTotal as BigDecimal == 1
+        open.movementTotal as BigDecimal == -10
+
+        when: 'two short'
+        Map report = closeShift(shift, 99)
+        List entries = shiftEntries(shift)
+
+        then:
+        !ec.message.hasError()
+        report.countedCash as BigDecimal == 99
+        report.variance as BigDecimal == -2
+        entries.size() == 2
+        entries.find { it.debitCreditFlag == 'D' }.amount as BigDecimal == 2
+    }
+
+    def "cash over goes to income, an exact count posts nothing"() {
+        given:
+        Map over = openShift("Till 4 ${run}".toString(), 10)
+        Map exact = openShift("Till 5 ${run}".toString(), 10)
+
+        when:
+        closeShift(over, 11)
+        closeShift(exact, 10)
+        List overEntries = shiftEntries(over)
+        List exactEntries = shiftEntries(exact)
+
+        then:
+        !ec.message.hasError()
+        overEntries.find { it.debitCreditFlag == 'C' }.amount as BigDecimal == 1
+        exactEntries.isEmpty()
+    }
+
+    def "shifts are listed, another tenant sees none of them"() {
+        when:
+        List shifts = ec.service.sync().name("${service}.get#PosShifts").parameters([limit: 50]).call().shifts
+
+        then:
+        !ec.message.hasError()
+        shifts.find { it.terminalName == "Till 1 ${run}".toString() }.status == 'Open'
+        shifts.every { it.openingFloat instanceof String && it.openedDate instanceof String }
+
+        when:
+        String shiftId = shifts[0].shiftId
+        ec.user.internalLoginUser(otherTenant.username)
+        ec.service.sync().name("${service}.get#ZReport").parameters([shiftId: shiftId]).call()
+
+        then:
+        ec.message.hasError()
+
+        when:
+        ec.message.clearErrors()
+        List foreign = ec.service.sync().name("${service}.get#PosShifts").parameters([limit: 50]).call().shifts
+
+        then:
+        foreign.isEmpty()
+    }
+
     def "a receipt can be read again, by the own tenant only"() {
         given:
         String id = "${run}-receipt".toString()
@@ -530,7 +699,7 @@ class PosServicesTests extends Specification {
         then:
         !ec.message.hasError()
         receipt.grandTotal as BigDecimal == 10
-        receipt.terminalName == 'Till 1'
+        receipt.terminalName == "Till 1 ${run}".toString()
 
         when:
         ec.user.internalLoginUser(otherTenant.username)

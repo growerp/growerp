@@ -28,6 +28,16 @@ mantle return with the tax prorated, credit memo (`InvoiceReturn`), refund payme
 `get#PosSaleLookup` also gives what can still be returned per line. Restocked goods go back on
 quantity only, the cost of goods is not reversed in the ledger.
 
+## Shifts
+
+A till sells only with an open shift (`PosShift`, one open per `terminalName`): sales and refunds
+are refused otherwise and carry the `shiftId`. The device keeps its till name in `posTerminal`.
+`close#Shift` takes the counted cash; expected is float + cash sales - cash refunds + movements.
+A difference is posted through the cash book: short on `789000000` Misc Operating Expense, over on
+`86000` Write Off Income. `PosCashMovement` (to the safe, change float) stays cash of the company
+and is not posted. `get#ZReport` also works on an open shift, as an X report. A closed shift is
+fixed. `PosShiftList` shows all shifts to the admin.
+
 ## Frontend
 
 Block `growerp_pos`: `PosCheckoutScreen` (tiles and cart side by side from 700 wide, stacked below),

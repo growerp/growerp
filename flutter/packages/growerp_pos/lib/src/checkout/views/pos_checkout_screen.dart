@@ -24,6 +24,9 @@ import '../blocs/pos_catalog_bloc.dart';
 import '../blocs/pos_sale_bloc.dart';
 import '../../refund/blocs/pos_refund_bloc.dart';
 import '../../refund/views/pos_refund_dialog.dart';
+import '../../shift/blocs/pos_shift_bloc.dart';
+import '../../shift/views/pos_shift_dialogs.dart';
+import '../../shift/views/pos_z_report_dialog.dart';
 import 'pos_receipt_dialog.dart';
 import 'pos_tender_dialog.dart';
 
@@ -44,11 +47,48 @@ class PosCheckoutScreenState extends State<PosCheckoutScreen> {
   final _searchFocus = FocusNode();
   String _search = '';
   String? _categoryId;
+  String _terminalName = 'Till 1';
 
   @override
   void initState() {
     super.initState();
     context.read<PosCatalogBloc>().add(const PosCatalogFetch());
+    _loadShift();
+  }
+
+  /// A device stays the till it was opened as.
+  Future<void> _loadShift() async {
+    final bloc = context.read<PosShiftBloc>();
+    final stored = await PersistFunctions.getKeyValue(posTerminalKey);
+    if (!mounted) return;
+    setState(() => _terminalName = stored ?? _terminalName);
+    bloc.add(PosShiftFetch(_terminalName));
+  }
+
+  Future<void> _cashMovement() async {
+    final bloc = context.read<PosShiftBloc>();
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) =>
+          BlocProvider.value(value: bloc, child: const PosCashMovementDialog()),
+    );
+  }
+
+  Future<void> _closeShift(String currencyId) async {
+    final bloc = context.read<PosShiftBloc>();
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) =>
+          BlocProvider.value(value: bloc, child: const PosShiftCloseDialog()),
+    );
+    final report = bloc.state.report;
+    if (report == null || bloc.state.shift != null || !mounted) return;
+    await showDialog(
+      context: context,
+      builder: (_) => PosZReportDialog(report, currencyId: currencyId),
+    );
   }
 
   /// A scanner types the code and presses enter.
@@ -95,6 +135,7 @@ class PosCheckoutScreenState extends State<PosCheckoutScreen> {
               .toList(),
           grandTotal: cart.grandTotal ?? Decimal.zero,
           currencyId: currencyId,
+          terminalName: _terminalName,
         ),
       ),
     );
@@ -110,8 +151,10 @@ class PosCheckoutScreenState extends State<PosCheckoutScreen> {
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) =>
-          BlocProvider.value(value: bloc, child: const PosRefundDialog()),
+      builder: (_) => BlocProvider.value(
+        value: bloc,
+        child: PosRefundDialog(terminalName: _terminalName),
+      ),
     );
     if (mounted) _searchFocus.requestFocus();
   }
@@ -138,27 +181,51 @@ class PosCheckoutScreenState extends State<PosCheckoutScreen> {
           },
         ),
       ],
-      child: LayoutBuilder(
-        key: const Key('PosCheckoutScreen'),
-        builder: (context, constraints) {
-          if (constraints.maxWidth >= _sideBySideWidth) {
-            return Row(
-              children: [
-                Expanded(child: _catalog()),
-                const VerticalDivider(width: 1),
-                SizedBox(width: 340, child: _cart()),
-              ],
-            );
+      child: BlocConsumer<PosShiftBloc, PosShiftState>(
+        listener: (context, state) {
+          if (state.shift?.terminalName != null &&
+              state.shift!.terminalName != _terminalName) {
+            setState(() => _terminalName = state.shift!.terminalName!);
           }
-          return Column(
-            children: [
-              Expanded(flex: 3, child: _catalog()),
-              const Divider(height: 1),
-              Expanded(flex: 2, child: _cart()),
-            ],
-          );
+          // an open shift fails inside its dialog, which shows the message
+          if (state.status == PosShiftStatus.failure && state.shift == null) {
+            HelperFunctions.showMessage(context, state.message, Colors.red);
+          }
+        },
+        builder: (context, shift) {
+          if (shift.shift == null) {
+            return shift.status == PosShiftStatus.initial ||
+                    shift.status == PosShiftStatus.loading
+                ? const Center(child: LoadingIndicator())
+                : PosShiftOpenView(terminalName: _terminalName);
+          }
+          return _till();
         },
       ),
+    );
+  }
+
+  Widget _till() {
+    return LayoutBuilder(
+      key: const Key('PosCheckoutScreen'),
+      builder: (context, constraints) {
+        if (constraints.maxWidth >= _sideBySideWidth) {
+          return Row(
+            children: [
+              Expanded(child: _catalog()),
+              const VerticalDivider(width: 1),
+              SizedBox(width: 340, child: _cart()),
+            ],
+          );
+        }
+        return Column(
+          children: [
+            Expanded(flex: 3, child: _catalog()),
+            const Divider(height: 1),
+            Expanded(flex: 2, child: _cart()),
+          ],
+        );
+      },
     );
   }
 
@@ -306,6 +373,27 @@ class PosCheckoutScreenState extends State<PosCheckoutScreen> {
           builder: (context, cart) {
             return Column(
               children: [
+                Row(
+                  children: [
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(_terminalName, key: const Key('posTill')),
+                    ),
+                    IconButton(
+                      key: const Key('posCashMovement'),
+                      icon: const Icon(Icons.swap_vert),
+                      tooltip: localizations.cashMovement,
+                      onPressed: _cashMovement,
+                    ),
+                    IconButton(
+                      key: const Key('posCloseShift'),
+                      icon: const Icon(Icons.lock_outline),
+                      tooltip: localizations.closeTill,
+                      onPressed: () => _closeShift(currencyId),
+                    ),
+                  ],
+                ),
+                const Divider(height: 1),
                 Expanded(
                   child: cart.lines.isEmpty
                       ? Center(

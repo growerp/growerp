@@ -18,7 +18,10 @@ import '../growerp_pos.dart';
 
 /// Widget mappings for the point of sale package
 Map<String, GrowerpWidgetBuilder> getPosWidgets() {
-  return {'PosCheckoutScreen': (args) => const PosCheckoutScreen()};
+  return {
+    'PosCheckoutScreen': (args) => const PosCheckoutScreen(),
+    'PosShiftList': (args) => const PosShiftList(),
+  };
 }
 
 /// Widget metadata with icons and keywords for the point of sale package
@@ -32,6 +35,15 @@ List<WidgetMetadata> getPosWidgetsWithMetadata() {
       iconName: 'point_of_sale',
       keywords: ['pos', 'point of sale', 'checkout', 'till', 'cash register'],
       builder: (args) => const PosCheckoutScreen(),
+    ),
+    WidgetMetadata(
+      widgetName: 'PosShiftList',
+      description:
+          'Shifts of the tills: float, cash counted, difference and the '
+          'Z report of each',
+      iconName: 'receipt_long',
+      keywords: ['shift', 'z report', 'till', 'cash count', 'end of day'],
+      builder: (args) => const PosShiftList(),
     ),
   ];
 }

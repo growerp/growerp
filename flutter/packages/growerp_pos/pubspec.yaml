@@ -39,6 +39,7 @@ dependencies:
 
 dev_dependencies:
   bloc_test: ^10.0.0
+  shared_preferences: ^2.5.6
   mocktail: ^1.0.5
   flutter_driver:
     sdk: flutter

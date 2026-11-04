@@ -169,3 +169,61 @@ abstract class PosRefund with _$PosRefund {
   factory PosRefund.fromJson(Map<String, dynamic> json) =>
       _$PosRefundFromJson(json['refund'] ?? json);
 }
+
+/// The time a till is open. variance is counted minus expected cash.
+@freezed
+abstract class PosShift with _$PosShift {
+  PosShift._();
+  factory PosShift({
+    String? shiftId,
+    String? terminalName,
+    String? status,
+    Decimal? openingFloat,
+    Decimal? expectedCash,
+    Decimal? countedCash,
+    Decimal? variance,
+    @DateTimeConverter() DateTime? openedDate,
+    @DateTimeConverter() DateTime? closedDate,
+  }) = _PosShift;
+
+  factory PosShift.fromJson(Map<String, dynamic> json) =>
+      _$PosShiftFromJson(json['shift'] ?? json);
+}
+
+@freezed
+abstract class PosShifts with _$PosShifts {
+  PosShifts._();
+  factory PosShifts({@Default([]) List<PosShift> shifts}) = _PosShifts;
+
+  factory PosShifts.fromJson(Map<String, dynamic> json) =>
+      _$PosShiftsFromJson(json);
+}
+
+/// What happened in a shift.
+@freezed
+abstract class PosZReport with _$PosZReport {
+  PosZReport._();
+  factory PosZReport({
+    String? shiftId,
+    String? terminalName,
+    String? status,
+    Decimal? openingFloat,
+    Decimal? expectedCash,
+    Decimal? countedCash,
+    Decimal? variance,
+    @DateTimeConverter() DateTime? openedDate,
+    @DateTimeConverter() DateTime? closedDate,
+    int? saleCount,
+    Decimal? salesTotal,
+    @Default([]) List<PosTender> tenders,
+    int? refundCount,
+    Decimal? refundTotal,
+    @Default([]) List<PosTender> refundTenders,
+    @Default([]) List<PosSaleTax> taxes,
+    Decimal? refundTaxTotal,
+    Decimal? movementTotal,
+  }) = _PosZReport;
+
+  factory PosZReport.fromJson(Map<String, dynamic> json) =>
+      _$PosZReportFromJson(json['report'] ?? json);
+}

@@ -19,6 +19,7 @@ void main() {
       clientSaleId: any(named: 'clientSaleId'),
       lines: any(named: 'lines'),
       restock: any(named: 'restock'),
+      terminalName: any(named: 'terminalName'),
     ),
   ).thenAnswer((_) => answer());
 
@@ -66,7 +67,9 @@ void main() {
     setUp: () => stubRefund(() async => refund),
     build: () => PosRefundBloc(restClient),
     seed: () => PosRefundState(status: PosRefundStatus.found, sale: sale),
-    act: (bloc) => bloc.add(PosRefundSubmit(lines: lines, restock: true)),
+    act: (bloc) => bloc.add(
+      PosRefundSubmit(lines: lines, restock: true, terminalName: 'T1'),
+    ),
     expect: () => [
       isA<PosRefundState>(),
       isA<PosRefundState>()
@@ -80,9 +83,9 @@ void main() {
     final bloc = PosRefundBloc(restClient);
     bloc.emit(PosRefundState(status: PosRefundStatus.found, sale: sale));
 
-    bloc.add(PosRefundSubmit(lines: lines, restock: true));
+    bloc.add(PosRefundSubmit(lines: lines, restock: true, terminalName: 'T1'));
     await bloc.stream.firstWhere((s) => s.status == PosRefundStatus.failure);
-    bloc.add(PosRefundSubmit(lines: lines, restock: true));
+    bloc.add(PosRefundSubmit(lines: lines, restock: true, terminalName: 'T1'));
     await bloc.stream
         .skip(1)
         .firstWhere((s) => s.status == PosRefundStatus.failure);
@@ -93,6 +96,7 @@ void main() {
         clientSaleId: any(named: 'clientSaleId'),
         lines: any(named: 'lines'),
         restock: any(named: 'restock'),
+        terminalName: any(named: 'terminalName'),
       ),
     ).captured;
     expect(ids.length, 2);

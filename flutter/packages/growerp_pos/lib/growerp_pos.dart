@@ -15,5 +15,6 @@
 export 'package:growerp_pos/l10n/generated/pos_localizations.dart';
 export 'src/checkout/checkout.dart';
 export 'src/refund/refund.dart';
+export 'src/shift/shift.dart';
 export 'src/get_pos_bloc_providers.dart';
 export 'src/get_pos_widgets.dart';

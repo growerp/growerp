@@ -67,6 +67,7 @@ class PosRefundBloc extends Bloc<PosRefundEvent, PosRefundState> {
         clientSaleId: state.sale!.clientSaleId!,
         lines: event.lines,
         restock: event.restock,
+        terminalName: event.terminalName,
       );
       emit(state.copyWith(status: PosRefundStatus.success, refund: refund));
     } on DioException catch (e) {
