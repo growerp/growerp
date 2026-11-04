@@ -139,5 +139,6 @@
   "dashStageGoods": "商品",
   "dashStageServices": "服务",
   "dashStageRental": "租赁",
-  "dashStageDigital": "数字"
+  "dashStageDigital": "数字",
+  "barcode": "条形码"
 }

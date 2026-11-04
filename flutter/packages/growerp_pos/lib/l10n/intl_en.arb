@@ -1,0 +1,23 @@
+{
+  "@@locale": "en",
+  "searchOrScan": "Search or scan",
+  "allProducts": "All",
+  "noProducts": "No products found",
+  "cartEmpty": "No items yet",
+  "tax": "Tax",
+  "includedTax": "Included tax",
+  "total": "Total",
+  "pay": "Pay",
+  "payment": "Payment",
+  "amount": "Amount",
+  "cardReference": "Card reference",
+  "cash": "Cash",
+  "card": "Card",
+  "change": "Change",
+  "remaining": "Remaining",
+  "cancel": "Cancel",
+  "completeSale": "Complete sale",
+  "receipt": "Receipt",
+  "print": "Print",
+  "newSale": "New sale"
+}

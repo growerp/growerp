@@ -1,0 +1,23 @@
+{
+  "@@locale": "nl",
+  "searchOrScan": "Zoeken of scannen",
+  "allProducts": "Alle",
+  "noProducts": "Geen producten gevonden",
+  "cartEmpty": "Nog geen artikelen",
+  "tax": "Belasting",
+  "includedTax": "Inbegrepen belasting",
+  "total": "Totaal",
+  "pay": "Betalen",
+  "payment": "Betaling",
+  "amount": "Bedrag",
+  "cardReference": "Kaartreferentie",
+  "cash": "Contant",
+  "card": "Kaart",
+  "change": "Wisselgeld",
+  "remaining": "Resterend",
+  "cancel": "Annuleren",
+  "completeSale": "Verkoop afronden",
+  "receipt": "Bon",
+  "print": "Afdrukken",
+  "newSale": "Nieuwe verkoop"
+}

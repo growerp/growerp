@@ -16,6 +16,7 @@ import 'rest_client/inventory_api.dart';
 import 'rest_client/manufacturing_api.dart';
 import 'rest_client/hr_api.dart';
 import 'rest_client/insurance_api.dart';
+import 'rest_client/pos_api.dart';
 import 'rest_client/accounting_api.dart';
 import 'rest_client/chat_activity_api.dart';
 import 'rest_client/crm_api.dart';
@@ -44,6 +45,7 @@ abstract class RestClient
         ManufacturingApi,
         HrApi,
         InsuranceApi,
+        PosApi,
         AccountingApi,
         ChatActivityApi,
         CrmApi,

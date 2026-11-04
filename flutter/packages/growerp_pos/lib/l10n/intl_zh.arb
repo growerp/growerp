@@ -1,0 +1,23 @@
+{
+  "@@locale": "zh",
+  "searchOrScan": "搜索或扫描",
+  "allProducts": "全部",
+  "noProducts": "未找到产品",
+  "cartEmpty": "暂无商品",
+  "tax": "税",
+  "includedTax": "已含税",
+  "total": "合计",
+  "pay": "付款",
+  "payment": "支付",
+  "amount": "金额",
+  "cardReference": "卡参考号",
+  "cash": "现金",
+  "card": "银行卡",
+  "change": "找零",
+  "remaining": "剩余",
+  "cancel": "取消",
+  "completeSale": "完成销售",
+  "receipt": "收据",
+  "print": "打印",
+  "newSale": "新销售"
+}

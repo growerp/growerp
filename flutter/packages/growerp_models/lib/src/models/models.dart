@@ -52,6 +52,7 @@ export 'time_period_model.dart';
 export 'ledger_report_model.dart';
 export 'cash_book_entry_model.dart';
 export 'tax_rate_model.dart';
+export 'pos_model.dart';
 export 'profit_loss_model.dart';
 export 'opportunity_stages_model.dart';
 export 'opportunity_model.dart';

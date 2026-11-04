@@ -136,6 +136,9 @@ when the organization's menu shows it a screen that drives that domain.
     <growerp.menu.WidgetDomain widgetName="JobTitleList" artifactGroupId="GROWERP_HR"/>
     <growerp.menu.WidgetDomain widgetName="OnboardingTaskList" artifactGroupId="GROWERP_HR"/>
 
+    <!-- GROWERP_POS -->
+    <growerp.menu.WidgetDomain widgetName="PosCheckoutScreen" artifactGroupId="GROWERP_POS"/>
+
     <!-- GROWERP_INSURANCE -->
     <growerp.menu.WidgetDomain widgetName="PolicyList" artifactGroupId="GROWERP_INSURANCE"/>
     <growerp.menu.WidgetDomain widgetName="PolicyRenewalList" artifactGroupId="GROWERP_INSURANCE"/>

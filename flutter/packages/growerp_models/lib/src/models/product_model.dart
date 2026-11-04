@@ -38,6 +38,7 @@ abstract class Product with _$Product {
     String? description,
     Decimal? listPrice,
     Decimal? price,
+    String? barcode,
     Currency? currency, // currency, like EUR, USD
     Decimal? amount, // quantity included like duration, length, weight
     Uom? amountUom, // like hour, day, month, year, piece

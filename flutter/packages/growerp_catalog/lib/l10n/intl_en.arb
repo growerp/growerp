@@ -710,5 +710,6 @@
   "dashStageDigital": "Digital",
   "@dashStageDigital": {
     "description": "Dashboard tile funnel stage label"
-  }
+  },
+  "barcode": "Barcode"
 }

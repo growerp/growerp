@@ -23,6 +23,8 @@ workspace:
   - packages/growerp_hr/example
   - packages/growerp_insurance
   - packages/growerp_insurance/example
+  - packages/growerp_pos
+  - packages/growerp_pos/example
   - packages/growerp_inventory
   - packages/growerp_inventory/example
   - packages/growerp_manufacturing
@@ -51,6 +53,7 @@ workspace:
   - packages/insurance
   - packages/marketing
   - packages/rental
+  - packages/shop
   - packages/support
   - packages/website
 dev_dependencies:
@@ -92,6 +95,8 @@ melos:
     - packages/growerp_hr/example
     - packages/growerp_insurance
     - packages/growerp_insurance/example
+    - packages/growerp_pos
+    - packages/growerp_pos/example
     - packages/growerp_adk
     - packages/growerp_adk/example
     - packages/growerp_marketing
@@ -112,6 +117,7 @@ melos:
     - packages/marketing
     - packages/academy
     - packages/insurance
+    - packages/shop
 
   command:
     bootstrap:

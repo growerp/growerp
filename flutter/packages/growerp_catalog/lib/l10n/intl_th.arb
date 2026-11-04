@@ -139,5 +139,6 @@
   "dashStageGoods": "สินค้า",
   "dashStageServices": "บริการ",
   "dashStageRental": "ให้เช่า",
-  "dashStageDigital": "ดิจิทัล"
+  "dashStageDigital": "ดิจิทัล",
+  "barcode": "บาร์โค้ด"
 }

@@ -1,0 +1,23 @@
+{
+  "@@locale": "es",
+  "searchOrScan": "Buscar o escanear",
+  "allProducts": "Todo",
+  "noProducts": "No se encontraron productos",
+  "cartEmpty": "Aún sin artículos",
+  "tax": "Impuesto",
+  "includedTax": "Impuesto incluido",
+  "total": "Total",
+  "pay": "Pagar",
+  "payment": "Pago",
+  "amount": "Importe",
+  "cardReference": "Referencia de tarjeta",
+  "cash": "Efectivo",
+  "card": "Tarjeta",
+  "change": "Cambio",
+  "remaining": "Restante",
+  "cancel": "Cancelar",
+  "completeSale": "Completar venta",
+  "receipt": "Recibo",
+  "print": "Imprimir",
+  "newSale": "Nueva venta"
+}

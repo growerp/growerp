@@ -171,6 +171,26 @@ class PosServicesTests extends Specification {
         !(parts[0].customerPartyId in (customers*.partyId + customers*.company*.partyId))
     }
 
+    def "amounts leave as strings, the frontend parses them as Decimal"() {
+        given:
+        ec.service.sync().name('growerp.100.TaxServices100.create#TaxRate')
+                .parameters([taxRate: [taxName: 'VAT', taxPercentage: 10]]).call()
+
+        when:
+        Map sale = sell([line(service1, 1)], [cash(20)])
+        Map quote = ec.service.sync().name("${service}.quote#PosSale")
+                .parameters([lines: [line(service1, 1)]]).call()
+        String rate = ec.service.sync().name('growerp.100.TaxServices100.get#TaxRates').call()
+                .taxRates[0].taxPercentage
+
+        then:
+        !ec.message.hasError()
+        rate as BigDecimal == 10
+        [sale.grandTotal, sale.taxTotal, sale.changeAmount, sale.lines[0].price, sale.lines[0].quantity,
+         sale.lines[0].lineTotal, sale.taxes[0].taxAmount, sale.taxes[0].taxPercentage,
+         sale.tenders[0].amount, sale.saleDate, quote.grandTotal, quote.taxTotal].every { it instanceof String }
+    }
+
     def "a retry of a sale gives the same sale"() {
         given:
         String id = "${run}-retry".toString()

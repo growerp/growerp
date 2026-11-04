@@ -200,6 +200,7 @@ Add blocks by business type:
 | `courses` | Courses, media, participants | Education, training, e-learning |
 | `hr` | Employees, onboarding, departments, job titles, leave requests | Businesses with staff to manage |
 | `insurance` | Policies, coverages, renewals, carrier commission, claims, client portal | Insurance agencies |
+| `pos` | Checkout with product tiles, barcode, cash and card, 80mm receipt | Shops, restaurants |
 | `rental` | Rental timeline (Gantt), seasonal rates, utilisation stats | Equipment/asset hire — add with `inventory` + `order_accounting`; no menu item of its own (Gantt is the dashboard) |
 | `adk` | AI assistant chat (dashboard FAB) | Recommended on every vertical |
 

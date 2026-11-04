@@ -144,6 +144,25 @@ class CatalogServicesTests extends Specification {
                 .parameters([productId: product.productId]).call().products
     }
 
+    def "a product keeps its barcode, an empty one removes it"() {
+        when:
+        Map product = ec.service.sync().name("${service}.create#Product")
+                .parameters([product: [productName: "Scanned ${run}", productTypeId: 'Service',
+                        price: 1, barcode: "8711${run}".toString()]]).call().product
+
+        then:
+        !ec.message.hasError()
+        product.barcode == "8711${run}".toString()
+
+        when:
+        Map cleared = ec.service.sync().name("${service}.update#Product")
+                .parameters([product: [productId: product.productId, barcode: '']]).call().product
+
+        then:
+        !ec.message.hasError()
+        cleared.barcode == null
+    }
+
     def "search products"() {
         given:
         (1..3).each { createProduct([productName: "Finder${run} ${it}", price: it]) }

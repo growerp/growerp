@@ -342,6 +342,15 @@ class TaxServicesTests extends Specification {
         ec.service.sync().name("${service}.delete#TaxRate").parameters([taxRateId: foreign.taxRateId]).call()
     }
 
+    def "dates leave as strings, the frontend parses them"() {
+        when:
+        Map rate = createRate([taxName: 'Dated', taxPercentage: 10, thruDate: new java.sql.Timestamp(1000)])
+
+        then:
+        !ec.message.hasError()
+        rate.thruDate instanceof String
+    }
+
     def "a rate can be changed and needs a percentage"() {
         given:
         Map rate = createRate([taxName: 'VAT', taxPercentage: 10])

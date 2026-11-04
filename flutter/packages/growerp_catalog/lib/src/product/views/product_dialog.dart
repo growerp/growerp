@@ -454,6 +454,12 @@ class ProductDialogState extends State<ProductDialog> {
         ]),
       ),
       FormBuilderTextField(
+        name: 'barcode',
+        key: const Key('barcode'),
+        initialValue: widget.product.barcode ?? '',
+        decoration: InputDecoration(labelText: catalogLocalizations.barcode),
+      ),
+      FormBuilderTextField(
         name: 'description',
         key: const Key('description'),
         initialValue: widget.product.description ?? '',
@@ -721,6 +727,7 @@ class ProductDialogState extends State<ProductDialog> {
                     productId: widget.product.productId,
                     pseudoId: formData['id'] ?? '',
                     productName: formData['name'] ?? '',
+                    barcode: formData['barcode'] ?? '',
                     assetClassId: applicationId == 'AppHotel'
                         ? catalogLocalizations.hotelRoom
                         : catalogLocalizations.inventoryFin, // finished good

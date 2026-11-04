@@ -139,5 +139,6 @@
   "dashStageGoods": "Bienes",
   "dashStageServices": "Servicios",
   "dashStageRental": "Alquiler",
-  "dashStageDigital": "Digital"
+  "dashStageDigital": "Digital",
+  "barcode": "Código de barras"
 }

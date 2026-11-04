@@ -1,0 +1,23 @@
+{
+  "@@locale": "th",
+  "searchOrScan": "ค้นหาหรือสแกน",
+  "allProducts": "ทั้งหมด",
+  "noProducts": "ไม่พบสินค้า",
+  "cartEmpty": "ยังไม่มีรายการ",
+  "tax": "ภาษี",
+  "includedTax": "รวมภาษีแล้ว",
+  "total": "ยอดรวม",
+  "pay": "ชำระเงิน",
+  "payment": "การชำระเงิน",
+  "amount": "จำนวนเงิน",
+  "cardReference": "เลขอ้างอิงบัตร",
+  "cash": "เงินสด",
+  "card": "บัตร",
+  "change": "เงินทอน",
+  "remaining": "คงเหลือ",
+  "cancel": "ยกเลิก",
+  "completeSale": "ปิดการขาย",
+  "receipt": "ใบเสร็จ",
+  "print": "พิมพ์",
+  "newSale": "ขายใหม่"
+}

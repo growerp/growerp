@@ -81,7 +81,7 @@ limitations under the License.
                 in-map="[productId: products[0].productId]" />
             <set field="item"
                 from="[productId: products[0].productId, pseudoId: products[0].pseudoId,
-                    productName: products[0].productName, price: priced.price]" />
+                    productName: products[0].productName, price: priced.price.toString()]" />
         </actions>
     </service>
 
@@ -177,15 +177,16 @@ limitations under the License.
             <parameter name="lines" type="List" required="true" />
         </in-parameters>
         <out-parameters>
-            <parameter name="pricedLines" type="List" />
-            <parameter name="taxTotal" type="BigDecimal" />
-            <parameter name="grandTotal" type="BigDecimal" />
+            <parameter name="taxTotal" />
+            <parameter name="grandTotal" />
         </out-parameters>
         <actions>
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
-            <service-call name="growerp.100.PosServices100.get#PricedLines" out-map="context"
+            <service-call name="growerp.100.PosServices100.get#PricedLines" out-map="priced"
                 in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId, lines: lines]" />
+            <set field="taxTotal" from="priced.taxTotal.toString()" />
+            <set field="grandTotal" from="priced.grandTotal.toString()" />
         </actions>
     </service>
 
@@ -449,31 +450,31 @@ limitations under the License.
                 </if>
                 <set field="unitPrice" from="orderItem.unitListPrice ?: orderItem.unitAmount" />
                 <script>receiptLines.add([productId: orderItem.productId,
-                    description: orderItem.itemDescription, quantity: orderItem.quantity,
-                    price: unitPrice,
-                    lineTotal: (unitPrice * orderItem.quantity).setScale(2, BigDecimal.ROUND_HALF_UP)])</script>
+                    description: orderItem.itemDescription, quantity: orderItem.quantity.toString(),
+                    price: unitPrice.toString(),
+                    lineTotal: (unitPrice * orderItem.quantity).setScale(2, BigDecimal.ROUND_HALF_UP).toString()])</script>
             </iterate>
             <set field="taxes" from="[]" />
             <script>taxItems.groupBy({ it.sourcePercentage }).each { percentage, items ->
-                taxes.add([taxPercentage: percentage, taxAmount: items.sum({
-                    (it.unitAmount * it.quantity) }).setScale(2, BigDecimal.ROUND_HALF_UP)]) }</script>
-            <set field="taxTotal" from="taxes.sum({ it.taxAmount }) ?: 0.0" />
+                taxes.add([taxPercentage: percentage?.toString(), taxAmount: items.sum({
+                    (it.unitAmount * it.quantity) }).setScale(2, BigDecimal.ROUND_HALF_UP).toString()]) }</script>
+            <set field="taxTotal" from="taxes.sum({ it.taxAmount as BigDecimal }) ?: 0.0" />
             <entity-find entity-name="mantle.account.payment.Payment" list="payments">
                 <econdition field-name="forInvoiceId" from="posSale.invoiceId" />
             </entity-find>
             <set field="receiptTenders" from="[]" />
             <iterate list="payments" entry="payment">
                 <script>receiptTenders.add([method: payment.paymentInstrumentEnumId,
-                    amount: payment.amount, reference: payment.paymentRefNum])</script>
+                    amount: payment.amount.toString(), reference: payment.paymentRefNum])</script>
             </iterate>
             <set field="sale"
                 from="[clientSaleId: clientSaleId, orderId: posSale.orderId,
                     invoiceId: posSale.invoiceId, orderPseudoId: orderHeader.pseudoId,
                     invoicePseudoId: invoice.pseudoId, terminalName: posSale.terminalName,
-                    saleDate: posSale.saleDate, currencyId: orderHeader.currencyUomId,
-                    lines: receiptLines, taxes: taxes, taxTotal: taxTotal,
-                    grandTotal: orderHeader.grandTotal.setScale(2, BigDecimal.ROUND_HALF_UP),
-                    tenders: receiptTenders, changeAmount: posSale.changeAmount]" />
+                    saleDate: ec.l10n.format(posSale.saleDate, 'yyyy-MM-dd HH:mm:ssZ'), currencyId: orderHeader.currencyUomId,
+                    lines: receiptLines, taxes: taxes, taxTotal: taxTotal.toString(),
+                    grandTotal: orderHeader.grandTotal.setScale(2, BigDecimal.ROUND_HALF_UP).toString(),
+                    tenders: receiptTenders, changeAmount: posSale.changeAmount?.toString()]" />
         </actions>
     </service>
 </services>

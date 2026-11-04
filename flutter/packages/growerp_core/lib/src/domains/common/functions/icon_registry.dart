@@ -171,6 +171,7 @@ final Map<String, Icon> iconRegistry = {
   'play_circle': const Icon(Icons.play_circle),
   'summarize': const Icon(Icons.summarize),
   'percent': const Icon(Icons.percent),
+  'point_of_sale': const Icon(Icons.point_of_sale),
 };
 
 /// Get an Icon by its name from the registry.

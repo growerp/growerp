@@ -44,6 +44,7 @@ limitations under the License.
                     <parameter name="description" />
                     <parameter name="price" />
                     <parameter name="listPrice" />
+                <parameter name="barcode" />
                     <parameter name="currency" type="Map">
                         <parameter name="currencyId" />
                     </parameter>
@@ -299,6 +300,33 @@ limitations under the License.
                 </if>
                 <script>products.add(productOut)</script>
             </if>
+            <if condition="products &amp;&amp; !isForDropDown">
+                <entity-find entity-name="mantle.product.ProductIdentification" list="barcodes">
+                    <econdition field-name="productId" operator="in" from="products*.productId" />
+                    <econdition field-name="productIdTypeEnumId" value="PidtEan" />
+                </entity-find>
+                <iterate list="barcodes" entry="barcode">
+                    <script>products.find({ it.productId == barcode.productId }).barcode = barcode.idValue</script>
+                </iterate>
+            </if>
+        </actions>
+    </service>
+
+    <service verb="set" noun="ProductBarcode">
+        <description>Internal: the scanned code of a product, empty removes it.</description>
+        <in-parameters>
+            <parameter name="productId" required="true" />
+            <parameter name="barcode" />
+        </in-parameters>
+        <actions>
+            <entity-delete-by-condition entity-name="mantle.product.ProductIdentification">
+                <econdition field-name="productId" />
+                <econdition field-name="productIdTypeEnumId" value="PidtEan" />
+            </entity-delete-by-condition>
+            <if condition="barcode">
+                <service-call name="create#mantle.product.ProductIdentification"
+                    in-map="[productId: productId, productIdTypeEnumId: 'PidtEan', idValue: barcode]" />
+            </if>
         </actions>
     </service>
 
@@ -317,6 +345,7 @@ limitations under the License.
                 <parameter name="description" />
                 <parameter name="price" />
                 <parameter name="listPrice" />
+                <parameter name="barcode" />
                 <parameter name="categories" type="List">
                     <parameter name="category" type="Map">
                         <parameter name="categoryId" />
@@ -343,6 +372,7 @@ limitations under the License.
                 <parameter name="description" />
                 <parameter name="price" />
                 <parameter name="listPrice" />
+                <parameter name="barcode" />
                 <parameter name="currency" type="Map">
                     <parameter name="currencyId" />
                 </parameter>
@@ -461,6 +491,10 @@ limitations under the License.
                     in-map="[type: 'product', id: productId,
                         base64: product.image]" />
             </if>
+            <if condition="product.barcode">
+                <service-call name="growerp.100.CatalogServices100.set#ProductBarcode"
+                    in-map="[productId: productId, barcode: product.barcode]" />
+            </if>
             <!-- return created product -->
             <service-call name="growerp.100.CatalogServices100.get#Product"
                 in-map="[productId: productId]" out-map="context" />
@@ -480,6 +514,7 @@ limitations under the License.
                 <parameter name="description" />
                 <parameter name="price" />
                 <parameter name="listPrice" />
+                <parameter name="barcode" />
                 <parameter name="currency" type="Map">
                     <parameter name="currencyId" />
                 </parameter>
@@ -507,6 +542,7 @@ limitations under the License.
                 <parameter name="description" />
                 <parameter name="price" />
                 <parameter name="listPrice" />
+                <parameter name="barcode" />
                 <parameter name="categories" type="List">
                     <parameter name="category" type="Map">
                         <parameter name="categoryId" />
@@ -679,6 +715,10 @@ limitations under the License.
                             in-map="[type: 'product', id: product.productId]" />
                     </else>
                 </if>
+            </if>
+            <if condition="product.barcode != null">
+                <service-call name="growerp.100.CatalogServices100.set#ProductBarcode"
+                    in-map="[productId: product.productId, barcode: product.barcode]" />
             </if>
             <service-call name="growerp.100.CatalogServices100.get#Product"
                 in-map="[productId: product.productId]" out-map="context" />

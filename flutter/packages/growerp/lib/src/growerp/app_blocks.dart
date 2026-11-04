@@ -340,6 +340,25 @@ const Map<String, AppBlock> appBlocks = {
       widgetName: 'PolicyList',
     ),
   ),
+  'pos': AppBlock(
+    key: 'pos',
+    package: 'growerp_pos',
+    version: '^1.0.0',
+    importUri: 'package:growerp_pos/growerp_pos.dart',
+    description:
+        'Point of sale: checkout with product tiles, barcode scanning, '
+        'cash and card payment and an 80mm receipt.',
+    widgetsFn: 'getPosWidgets',
+    blocProvidersFn: 'getPosBlocProviders',
+    providerTakesAppId: false,
+    localizationsDelegate: 'PosLocalizations.delegate',
+    menuItem: BlockMenuItem(
+      title: 'Checkout',
+      route: '/checkout',
+      iconName: 'point_of_sale',
+      widgetName: 'PosCheckoutScreen',
+    ),
+  ),
   'rental': AppBlock(
     key: 'rental',
     package: 'growerp_rental',

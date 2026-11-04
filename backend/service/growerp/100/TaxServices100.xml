@@ -63,11 +63,12 @@ limitations under the License.
             </if>
             <set field="taxRate"
                 from="[taxRateId: rate.taxRateId, taxAuthorityId: rate.taxAuthorityId,
-                    taxName: rate.taxName, taxPercentage: rate.taxPercentage,
+                    taxName: rate.taxName, taxPercentage: rate.taxPercentage?.toString(),
                     productCategoryId: rate.productCategoryId,
                     categoryName: taxCategory?.categoryName,
                     taxShipping: rate.taxShipping == 'Y',
-                    fromDate: rate.fromDate, thruDate: rate.thruDate]" />
+                    fromDate: rate.fromDate ? ec.l10n.format(rate.fromDate, 'yyyy-MM-dd HH:mm:ssZ') : null,
+                    thruDate: rate.thruDate ? ec.l10n.format(rate.thruDate, 'yyyy-MM-dd HH:mm:ssZ') : null]" />
         </actions>
     </service>
 
