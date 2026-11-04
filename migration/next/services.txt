@@ -1,1 +1,3 @@
 # Migrations for the version not yet released, see ../README.md
+# GROWERP pricing page shows the subscription plan products
+growerp.100.TenantServices100.migrate#PricingFromPlans

@@ -375,6 +375,7 @@
             <input type="hidden" id="currencyId" name="currencyId" value="USD">
             <input type="hidden" id="creditCardType" name="creditCardType" value="${creditCardType!}">
             <input type="hidden" id="amount" name="amount" value="${amount!}">
+            <input type="hidden" id="plan" name="plan" value="${(plan!)?html}">
             <button id="placeOrderBtn" class="place-order-btn">Place Order Now</button>
         </form>
     </div>

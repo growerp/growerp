@@ -48,6 +48,15 @@ along with this software (see the LICENSE.md file). If not, see
         <log message="====$productStoreId  $resultMessage $checkoutResult"/>
         <!-- allow same-origin framing: the pricing page opens this checkout in an overlay iframe -->
         <script>ec.web.response.setHeader('Content-Security-Policy', "frame-ancestors 'self'; form-action 'self';")</script>
+        <!-- a plan shows its product price, whatever amount is in the url -->
+        <if condition="plan">
+            <service-call name="growerp.100.TenantServices100.get#SubscriptionPlans" out-map="planList"/>
+            <set field="planEntry" from="planList.plans.find { it.productId == plan }"/>
+            <if condition="planEntry">
+                <set field="amount" from="planEntry.price"/>
+                <set field="product" from="planEntry.productName"/>
+            </if>
+        </if>
     </actions>
     <widgets>
         <!-- top path name is defined in MoquiConf.xml -->

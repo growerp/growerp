@@ -46,6 +46,7 @@ class CurrencyAndSubscriptionTests extends Specification {
     @Shared String productStoreId = 'CURTEST_STORE'
     @Shared String tenantId = 'CURTEST_TENANT'
     @Shared String planProductId = 'GROWERP_CURTEST_PLAN'
+    @Shared String pricingPage = 'dbresource://GROWERP_ROOT/content/pricing.html.ftl'
     @Shared String subscriberPartyId = 'CURTEST_SUBS'
     @Shared String growerpCompanyId, growerpBaseCurrency
     @Shared String subscriptionId, renewPaymentId
@@ -82,6 +83,11 @@ class CurrencyAndSubscriptionTests extends Specification {
 
     def cleanupSpec() {
         if (ec) ec.destroy()
+    }
+
+    private void setPlanPrice(String productPriceId, BigDecimal price) {
+        ec.service.sync().name('update#mantle.product.ProductPrice').disableAuthz()
+                .parameters([productPriceId: productPriceId, price: price]).call()
     }
 
     def "convert same currency is identity"() {
@@ -287,5 +293,112 @@ class CurrencyAndSubscriptionTests extends Specification {
         and: 'subscription extended one month from the shifted now'
         subscription.thruDate == Timestamp.valueOf(shiftedNow.toLocalDateTime().plusMonths(1))
         renewed.hasActiveSubscription
+    }
+
+    def "one page checkout of a plan charges the product price, not the amount in the request"() {
+        setup: 'back to the real date: a future payment would be the newest in the next test run'
+        ec.user.setEffectiveTime(new Timestamp(effectiveTime))
+
+        when:
+        Map out = ec.service.sync().name('growerp.100.AccountingServices100.checkOut#OnePage')
+                .parameters([productStoreId: productStoreId, email: 'curtest@example.com',
+                        firstName: 'Currency', lastName: 'Test',
+                        creditCardNumber: '4242424242424242', creditCardType: 'Visa',
+                        nameOnCard: 'Currency Test', expireMonth: '12', expireYear: '30',
+                        cVC: '123', amount: 1.0, plan: planProductId])
+                .disableAuthz().call()
+        EntityValue payment = ec.entity.find('mantle.account.payment.Payment')
+                .condition([toPartyId: companyPartyId, memo: 'GrowERP plan: Currency Test Plan'] as Map)
+                .orderBy('-effectiveDate').list().first
+
+        then:
+        out.result.toString() == 'true'
+        out.product == 'Currency Test Plan'
+        payment.originalCurrencyAmount == 499.0
+        payment.amount == 998.00
+    }
+
+    def "one page checkout rejects an unknown plan"() {
+        when:
+        ec.service.sync().name('growerp.100.AccountingServices100.checkOut#OnePage')
+                .parameters([productStoreId: productStoreId, email: 'curtest@example.com',
+                        firstName: 'Currency', lastName: 'Test',
+                        creditCardNumber: '4242424242424242', creditCardType: 'Visa',
+                        nameOnCard: 'Currency Test', expireMonth: '12', expireYear: '30',
+                        cVC: '123', amount: 1.0, plan: 'GROWERP_NO_SUCH_PLAN'])
+                .disableAuthz().call()
+        String errors = ec.message.getErrorsString()
+        ec.message.clearAll()
+
+        then:
+        errors.contains('Invalid subscription plan GROWERP_NO_SUCH_PLAN')
+    }
+
+    def "pricing page shows name, price and features of the plan products"() {
+        setup:
+        ec.entity.makeDataLoader().location('component://growerp/data/GrowerpWebsiteSeedData.xml').load()
+        ec.entity.makeDataLoader().location('component://growerp/data/GrowerpPricingPageData.xml').load()
+        EntityValue price = ec.entity.find('mantle.product.ProductPrice')
+                .condition([productId: 'GROWERP_DIY_PLAN', priceTypeEnumId: 'PptCurrent'] as Map).list().first
+        BigDecimal oldPrice = price.price as BigDecimal
+        ec.service.sync().name('update#mantle.product.Product').disableAuthz().parameters(
+                [productId: 'GROWERP_DIY_PLAN', productName: 'Test Plan Name',
+                 description: 'Test tagline|Test feature one|Test feature two']).call()
+        setPlanPrice(price.productPriceId, 49.00)
+
+        when:
+        String before = ec.resource.template(pricingPage, (String) null)
+        setPlanPrice(price.productPriceId, 59.5)
+        String after = ec.resource.template(pricingPage, (String) null)
+        setPlanPrice(price.productPriceId, oldPrice)
+
+        then:
+        before.contains('Test Plan Name')
+        before.contains('$49<')
+        before.contains('Test tagline')
+        before.contains('Test feature one')
+        before.contains('Test feature two')
+        before.contains('/checkoutOnePage?plan=GROWERP_DIY_PLAN')
+        !before.contains('50 Users')
+        !before.contains(planProductId)
+
+        and: 'a changed product price shows on the page'
+        after.contains('$59.5<')
+    }
+
+    def "pricing migration updates old data once and leaves later edits alone"() {
+        setup:
+        String oldDiy = 'DIY Plan $49 per month|Full functionality, unlimited users!|support charged extra $75/hr'
+        ec.service.sync().name('update#mantle.product.Product').disableAuthz().parameters(
+                [productId: 'GROWERP_DIY_PLAN', productName: 'GrowERP do it yourself plan', description: oldDiy]).call()
+        ['GROWERP_SMALL_PLAN', 'GROWERP_FULL_PLAN'].each { String productId ->
+            ec.service.sync().name('update#mantle.product.Product').disableAuthz().parameters(
+                    [productId: productId, description: 'edited by admin']).call()
+        }
+        ec.transaction.runUseOrBegin(null, null, {
+            ec.resource.getLocationReference(pricingPage).putText('<a href="/checkoutOnePage?amount=49.99">')
+        })
+
+        when:
+        Map first = ec.service.sync().name('growerp.100.TenantServices100.migrate#PricingFromPlans')
+                .disableAuthz().call()
+        EntityValue diy = ec.entity.find('mantle.product.Product').condition('productId', 'GROWERP_DIY_PLAN').one()
+        EntityValue full = ec.entity.find('mantle.product.Product').condition('productId', 'GROWERP_FULL_PLAN').one()
+        String page = ec.resource.getLocationReference(pricingPage).getText()
+        Map second = ec.service.sync().name('growerp.100.TenantServices100.migrate#PricingFromPlans')
+                .disableAuthz().call()
+
+        then:
+        first.plansUpdated == 1
+        first.pageUpdated
+        diy.productName == 'Do It Yourself (DIY)'
+        diy.description.startsWith('You set it up yourself')
+        full.description == 'edited by admin'
+        page.contains('get#SubscriptionPlans')
+        !page.contains('amount=49.99')
+
+        and: 'a second run changes nothing'
+        second.plansUpdated == 0
+        !second.pageUpdated
     }
 }

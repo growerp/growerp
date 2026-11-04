@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- GROWERP website pricing page. Own file so migrate#PricingFromPlans can load this page
+     without touching the other website pages. -->
+<entity-facade-xml type="demo">
+
+    <!-- ================================================================
+         PRICING PAGE
+         ================================================================ -->
+    <moqui.resource.wiki.WikiPage wikiPageId="growerp_pricing" wikiSpaceId="GROWERP_WS" pagePath="pricing"
+        publishedVersionName="01" sequenceNum="7">
+        <histories historySeqId="01" versionName="01" changeDateTime="1485028800000" />
+    </moqui.resource.wiki.WikiPage>
+    <moqui.resource.DbResource filename="pricing.html.ftl" isFile="Y" resourceId="growerp_pricing"
+        parentResourceId="growerp_content_dir">
+        <file mimeType="text/html" versionName="01" rootVersionName="01">
+            <fileData><![CDATA[<#-- title: Pricing -->
+<#-- description: GrowERP pricing: a free two week trial, then a monthly subscription per company, with the source code always freely available. -->
+<!-- Background Ambient Glow -->
+<div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+    <div class="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/5 blur-[120px]"></div>
+    <div class="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] rounded-full bg-tertiary/5 blur-[100px]"></div>
+</div>
+
+<main class="pt-28 pb-16 px-4 md:px-12 max-w-container mx-auto w-full relative">
+    <!-- Header Section -->
+    <div class="text-center max-w-3xl mx-auto mb-16 pt-8">
+        <h1 class="font-display text-4xl md:text-5xl font-bold tracking-tight text-on-surface mb-4">Simple, Transparent Pricing</h1>
+        <p class="text-lg text-on-surface-variant">
+            Pick how much help you want. Every plan starts with two weeks free.
+        </p>
+    </div>
+
+    <!-- Pricing Cards Grid: name, price and features come from the subscription plan products
+         (description = tagline|feature|feature...), the Enterprise card has no product -->
+    <#assign plans = (ec.service.sync().name("growerp.100.TenantServices100.get#SubscriptionPlans").call().plans)![]>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 items-stretch">
+
+        <#list ["GROWERP_DIY_PLAN", "GROWERP_SMALL_PLAN", "GROWERP_FULL_PLAN"] as planId>
+        <#list plans as plan>
+        <#if plan.productId == planId>
+        <#assign popular = planId == "GROWERP_SMALL_PLAN">
+        <#assign segments = (plan.description!"")?split("|")>
+        <div class="l-glass rounded-xl p-8 flex flex-col relative group <#if popular>plan-selected<#else>hover:border-white/20 transition-all duration-300</#if>">
+            <#if popular>
+            <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-on-primary px-3 py-1 rounded-full font-label text-xs font-semibold tracking-wider uppercase">Most Popular</div>
+            </#if>
+            <div class="mb-8 relative z-10">
+                <h3 class="font-display text-xl font-semibold text-on-surface mb-2">${plan.productName?html}</h3>
+                <div class="flex items-baseline gap-1 mb-4">
+                    <span class="font-display text-4xl font-bold <#if popular>text-primary<#else>text-on-surface</#if>">$${plan.price?number?string("0.##")}</span>
+                    <span class="text-sm text-on-surface-variant">/mo</span>
+                </div>
+                <p class="text-sm text-on-surface-variant">${segments[0]?html}</p>
+            </div>
+            <ul class="space-y-4 mb-8 flex-grow relative z-10">
+                <#list segments[1..] as feature>
+                <li class="flex items-start gap-3">
+                    <span class="material-symbols-outlined text-primary text-xl mt-0.5">check_circle</span>
+                    <span class="text-sm text-on-surface">${feature?html}</span>
+                </li>
+                </#list>
+            </ul>
+            <a href="/checkoutOnePage?plan=${planId}" onclick="openCheckout(this.getAttribute('href'), this); return false;" class="w-full py-3 rounded-lg border border-white/20 text-on-surface font-label text-sm font-medium hover:bg-white/5 transition-colors mt-auto relative z-10 text-center">
+                Choose Plan
+            </a>
+        </div>
+        </#if>
+        </#list>
+        </#list>
+
+        <!-- Enterprise Card -->
+        <div class="l-glass rounded-xl p-8 flex flex-col hover:border-white/20 transition-all duration-300 relative group">
+            <div class="mb-8">
+                <h3 class="font-display text-xl font-semibold text-on-surface mb-2">Enterprise</h3>
+                <div class="flex items-baseline gap-1 mb-4 h-[56px]">
+                    <span class="font-display text-4xl font-bold text-on-surface">Custom</span>
+                </div>
+                <p class="text-sm text-on-surface-variant">For larger operations that need their own setup and guarantees.</p>
+            </div>
+            <ul class="space-y-4 mb-8 flex-grow">
+                <li class="flex items-start gap-3">
+                    <span class="material-symbols-outlined text-primary text-xl mt-0.5">check_circle</span>
+                    <span class="text-sm text-on-surface">Unlimited Scalability</span>
+                </li>
+                <li class="flex items-start gap-3">
+                    <span class="material-symbols-outlined text-primary text-xl mt-0.5">check_circle</span>
+                    <span class="text-sm text-on-surface">On-Premise Deployment Options</span>
+                </li>
+                <li class="flex items-start gap-3">
+                    <span class="material-symbols-outlined text-primary text-xl mt-0.5">check_circle</span>
+                    <span class="text-sm text-on-surface">Advanced Security Audits</span>
+                </li>
+                <li class="flex items-start gap-3">
+                    <span class="material-symbols-outlined text-primary text-xl mt-0.5">check_circle</span>
+                    <span class="text-sm text-on-surface">SLA Guarantees</span>
+                </li>
+            </ul>
+            <a href="mailto:support@growerp.com" class="w-full py-3 rounded-lg bg-white/10 text-on-surface font-label text-sm font-medium hover:bg-white/20 transition-colors mt-auto border border-white/10 text-center">
+                Contact Sales
+            </a>
+        </div>
+    </div>
+
+    <p class="text-center text-sm text-on-surface-variant/70">No credit card required &bull; 2 weeks free on all plans</p>
+</main>
+
+<!-- Checkout overlay: shows the checkout with this pricing page in the background -->
+<dialog id="checkoutDialog" class="l-glass p-0 w-[95vw] max-w-2xl">
+    <div class="flex items-center justify-between px-4 py-2 border-b border-white/10">
+        <span class="font-display font-semibold text-on-surface">Checkout</span>
+        <button type="button" onclick="document.getElementById('checkoutDialog').close()" aria-label="Close"
+                class="text-on-surface-variant hover:text-on-surface transition-colors flex items-center">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+    </div>
+    <iframe id="checkoutFrame" src="about:blank" class="w-full h-[80vh] bg-white" title="Checkout"></iframe>
+</dialog>
+<style>
+    /* selected plan pops up like the highlighted DWY card */
+    .plan-selected {
+        border-color: rgb(var(--l-primary)) !important;
+        box-shadow: 0 0 25px rgb(var(--l-primary) / 0.35);
+        transform: translateY(-1rem);
+        transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    /* action button turns green only on the selected card */
+    .plan-selected a[href*="checkoutOnePage"],
+    .plan-selected a[href^="mailto:"] {
+        background: rgb(var(--l-primary)) !important;
+        color: rgb(var(--l-on-primary)) !important;
+        border-color: transparent !important;
+        box-shadow: 0 0 20px rgb(var(--l-primary) / 0.3);
+    }
+</style>
+<script>
+    // only one plan can be selected at a time
+    function selectPlan(card) {
+        document.querySelectorAll('.plan-selected').forEach(function(c) {
+            c.classList.remove('plan-selected');
+        });
+        if (card) card.classList.add('plan-selected');
+    }
+    function openCheckout(url, button) {
+        selectPlan(button ? button.closest('.l-glass') : null);
+        document.getElementById('checkoutFrame').src = url;
+        document.getElementById('checkoutDialog').showModal();
+    }
+    // clicking anywhere inside a plan card border selects that plan
+    document.querySelectorAll('main .l-glass').forEach(function(card) {
+        if (card.querySelector('a[href*="checkoutOnePage"], a[href^="mailto:"]')) {
+            card.style.cursor = 'pointer';
+            card.addEventListener('click', function() { selectPlan(card); });
+        }
+    });
+</script>
+]]></fileData>
+            <histories versionName="01" versionDate="1485028800000" isDiff="N" />
+        </file>
+    </moqui.resource.DbResource>
+
+</entity-facade-xml>
