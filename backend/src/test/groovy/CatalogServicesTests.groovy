@@ -90,6 +90,38 @@ class CatalogServicesTests extends Specification {
                 .parameters([search: "Power tools ${run}"]).call().categories
     }
 
+    def "the list price follows its own value, not the sales price"() {
+        given:
+        Map product = createProduct([productName: "List ${run}", price: 12.5, listPrice: 15])
+        Closure listPriceRows = {
+            ec.entity.find('mantle.product.ProductPrice')
+                    .condition('productId', product.productId)
+                    .condition('priceTypeEnumId', 'PptList').useCache(false).count()
+        }
+        long rowsBefore = listPriceRows()
+
+        when: 'the sales price changes and the list price is sent unchanged'
+        Map updated = ec.service.sync().name("${service}.update#Product")
+                .parameters([product: [productId: product.productId, price: '13', listPrice: '15.00']])
+                .call().product
+
+        then: 'no new list price row'
+        !ec.message.hasError()
+        updated.price as BigDecimal == 13
+        updated.listPrice as BigDecimal == 15
+        listPriceRows() == rowsBefore
+
+        when: 'the sales price becomes the old list price and the list price changes'
+        updated = ec.service.sync().name("${service}.update#Product")
+                .parameters([product: [productId: product.productId, price: '15', listPrice: '20']])
+                .call().product
+
+        then: 'the new list price is stored'
+        !ec.message.hasError()
+        updated.price as BigDecimal == 15
+        updated.listPrice as BigDecimal == 20
+    }
+
     def "an update leaves the fields it does not mention alone"() {
         given:
         Map category = ec.service.sync().name("${service}.create#ProductCategory")
