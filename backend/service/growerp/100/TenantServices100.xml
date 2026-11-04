@@ -272,6 +272,7 @@ limitations under the License.
                     ec.entity.makeDataLoader().location("component://growerp/data/ErpLandingPageData.xml").load()
                     ec.entity.makeDataLoader().location("component://growerp/data/ErpOnboardAssessmentData.xml").load()
                     ec.entity.makeDataLoader().location("component://growerp/data/GrowerpWebsiteSeedData.xml").load()
+                    ec.entity.makeDataLoader().location("component://growerp/data/GrowerpPricingPageData.xml").load()
                     // request / contribute an agent forms on the /content/ai-agents page
                     ec.entity.makeDataLoader().location("component://growerp/data/GrowerpAgentCatalogFormsData.xml").load()
                     // self-marketing sprint content: MarketingCampaign references
@@ -484,6 +485,51 @@ limitations under the License.
                         currencyUomId: planPrices[0].priceUomId ?: 'USD'])</script>
                 </if>
             </iterate>
+        </actions>
+    </service>
+
+    <service verb="migrate" noun="PricingFromPlans" authenticate="true">
+        <description>One-time idempotent migration: the GROWERP pricing page now shows the
+            subscription plan products. Plans still on the old seed description get the new name
+            and description, the page is reloaded while it still has the old hard-coded amounts.
+            Later edits to either are left alone.</description>
+        <out-parameters>
+            <parameter name="plansUpdated" type="Integer" />
+            <parameter name="pageUpdated" type="Boolean" />
+        </out-parameters>
+        <actions>
+            <set field="plansUpdated" from="0" type="Integer" />
+            <set field="pageUpdated" from="false" type="Boolean" />
+            <set field="planChanges" from="[
+                [productId: 'GROWERP_DIY_PLAN',
+                    oldDescription: 'DIY Plan $49 per month|Full functionality, unlimited users!|support charged extra $75/hr',
+                    productName: 'Do It Yourself (DIY)',
+                    description: 'You set it up yourself, we answer your questions.|Unlimited Users|Full Platform Access|Community Support|Standard Documentation|Extra support $75/hr'],
+                [productId: 'GROWERP_SMALL_PLAN',
+                    oldDescription: 'Do it With You plan $499 per month|Full functionality, unlimited users|including support for 20hrs/month',
+                    productName: 'Do It With You (DWY)',
+                    description: 'We set it up with you, step by step.|Everything in DIY|20 Manhours Included|Weekly Strategy Calls|Priority Email Support|Guided Data Migration'],
+                [productId: 'GROWERP_FULL_PLAN',
+                    oldDescription: 'Do it For You Plan $999 per month|Full functionality, unlimited users|including support for 40hrs/month',
+                    productName: 'Do It For You (DFY)',
+                    description: 'We do it all, you just start using it.|Everything in DWY|40 Manhours Included|Dedicated Account Manager|Custom Integrations|24/7 Phone Support']]" />
+            <iterate list="planChanges" entry="planChange">
+                <entity-find-one entity-name="mantle.product.Product" value-field="planProduct" for-update="true">
+                    <field-map field-name="productId" from="planChange.productId" />
+                </entity-find-one>
+                <if condition="planProduct?.description == planChange.oldDescription">
+                    <set field="planProduct.productName" from="planChange.productName" />
+                    <set field="planProduct.description" from="planChange.description" />
+                    <entity-update value-field="planProduct" />
+                    <set field="plansUpdated" from="plansUpdated + 1" />
+                </if>
+            </iterate>
+            <set field="pageRef" from="ec.resource.getLocationReference('dbresource://GROWERP_ROOT/content/pricing.html.ftl')" />
+            <if condition="pageRef.exists &amp;&amp; pageRef.getText()?.contains('amount=49.99')">
+                <script>ec.entity.makeDataLoader().location("component://growerp/data/GrowerpPricingPageData.xml").load()</script>
+                <set field="pageUpdated" from="true" type="Boolean" />
+            </if>
+            <log message="migrate#PricingFromPlans: ${plansUpdated} plan(s) updated, page updated: ${pageUpdated}" />
         </actions>
     </service>
 

@@ -2,3 +2,6 @@
 
 # Sales tax: LOCAL gateway calculates GrowERP tax rates, stores without a gateway get it
 growerp.100.TaxServices100.migrate#TaxGateway
+
+# GROWERP pricing page shows the subscription plan products
+growerp.100.TenantServices100.migrate#PricingFromPlans

@@ -75,6 +75,7 @@ String structureRules = isMd ? """
 - The first line is a FreeMarker comment '<#-- title: Some Title -->'. Keep that exact form
   and translate only the title text inside it.
 - Keep the HTML structure byte for byte: same tags, same nesting, same order.
+- Keep every FreeMarker directive (<#...>, </#...>) and \${...} expression exactly as it is.
 - Do not touch any attribute value. That includes every class="...", id="...", style="...",
   and the data-growerp-form, data-growerp-plans and data-growerp-booking markers, which the
   server replaces with live content at render time.

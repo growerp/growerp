@@ -104,26 +104,27 @@ limitations under the License.
         ownerPartyId="GROWERP" productCategoryTypeEnumId="PctCatalog"
         categoryName="GrowERP Services" description="" />
 
-    <!-- Subscription Plans -->
+    <!-- Subscription Plans: description = tagline|feature|feature..., shown on the website
+         pricing page and in the app plan selection -->
     <mantle.product.Product productId="GROWERP_DIY_PLAN" productTypeEnumId="PtService"
-        ownerPartyId="GROWERP" productName="GrowERP do it yourself plan"
-        description="DIY Plan $49 per month|Full functionality, unlimited users!|support charged extra $75/hr" />
+        ownerPartyId="GROWERP" productName="Do It Yourself (DIY)"
+        description="You set it up yourself, we answer your questions.|Unlimited Users|Full Platform Access|Community Support|Standard Documentation|Extra support $75/hr" />
     <mantle.product.ProductPrice productId="GROWERP_DIY_PLAN" priceTypeEnumId="PptCurrent"
         price="49.00" pricePurposeEnumId="PppPurchase" priceUomId="USD" />
     <mantle.product.category.ProductCategoryMember productCategoryId="GROWERP_SERVICES"
         productId="GROWERP_DIY_PLAN" fromDate="2024-01-01 00:00:00" />
 
     <mantle.product.Product productId="GROWERP_SMALL_PLAN" productTypeEnumId="PtService"
-        ownerPartyId="GROWERP" productName="GrowERP Do it With You (DWY) Plan"
-        description="Do it With You plan $499 per month|Full functionality, unlimited users|including support for 20hrs/month" />
+        ownerPartyId="GROWERP" productName="Do It With You (DWY)"
+        description="We set it up with you, step by step.|Everything in DIY|20 Manhours Included|Weekly Strategy Calls|Priority Email Support|Guided Data Migration" />
     <mantle.product.ProductPrice productId="GROWERP_SMALL_PLAN" priceTypeEnumId="PptCurrent"
         price="499.00" pricePurposeEnumId="PppPurchase" priceUomId="USD" />
     <mantle.product.category.ProductCategoryMember productCategoryId="GROWERP_SERVICES"
         productId="GROWERP_SMALL_PLAN" fromDate="2024-01-01 00:00:00" />
 
     <mantle.product.Product productId="GROWERP_FULL_PLAN" productTypeEnumId="PtService"
-        ownerPartyId="GROWERP" productName="Do it For You (DFY) Plan"
-        description="Do it For You Plan $999 per month|Full functionality, unlimited users|including support for 40hrs/month" />
+        ownerPartyId="GROWERP" productName="Do It For You (DFY)"
+        description="We do it all, you just start using it.|Everything in DWY|40 Manhours Included|Dedicated Account Manager|Custom Integrations|24/7 Phone Support" />
     <mantle.product.ProductPrice productId="GROWERP_FULL_PLAN" priceTypeEnumId="PptCurrent"
         price="999.00" pricePurposeEnumId="PppPurchase" priceUomId="USD" />
     <mantle.product.category.ProductCategoryMember productCategoryId="GROWERP_SERVICES"

@@ -426,6 +426,12 @@ to the receiving GROWERP company's base currency, captures through Stripe when
 Plans are listed publicly by `get#SubscriptionPlans` (GROWERP-owned `PtService` products
 with id `GROWERP_%` and a current purchase price).
 
+The product is the single source for plan names, prices and features. `Product.description`
+is `tagline|feature|feature...`: the website pricing page (`GrowerpPricingPageData.xml`) renders
+it server-side, and the app plan selection uses the same text. Pricing page links pass
+`/checkoutOnePage?plan=<productId>`; `checkOut#OnePage` then charges the current product price,
+ignoring any `amount` in the request.
+
 ### 7.6 Effect of expiry
 
 Login only. Data is untouched; the tenant is not disabled. Every login returns

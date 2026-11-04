@@ -2198,14 +2198,30 @@ limitations under the License.
             <parameter name="product">
                 <description>product/plan name selected on the pricing page</description>
             </parameter>
+            <parameter name="plan">
+                <description>productId of a GROWERP subscription plan: its current price and name
+                    replace amount and product</description>
+            </parameter>
         </in-parameters>
         <out-parameters>
             <parameter name="result" type="Boolean" default-value="false" />
             <parameter name="resultMessage" default-value="Payment failed" />
             <parameter name="productStoreId" />
             <parameter name="amount" />
+            <parameter name="product" />
         </out-parameters>
         <actions>
+            <!-- a plan is charged at its product price, never at the amount in the request -->
+            <if condition="plan">
+                <service-call name="growerp.100.TenantServices100.get#SubscriptionPlans"
+                    out-map="planList" />
+                <set field="planEntry" from="planList.plans.find { it.productId == plan }" />
+                <if condition="!planEntry">
+                    <return error="true" message="Invalid subscription plan ${plan}" />
+                </if>
+                <set field="amount" from="planEntry.price" />
+                <set field="product" from="planEntry.productName" />
+            </if>
             <!-- get productStore and company -->
             <entity-find-one entity-name="mantle.product.store.ProductStore"
                 value-field="productStore" />
