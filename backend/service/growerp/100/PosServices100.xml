@@ -25,6 +25,7 @@ limitations under the License.
             are in, and how prices are to be read.</description>
         <out-parameters>
             <parameter name="items" type="List" />
+            <parameter name="modifierGroups" type="List" />
             <parameter name="pricesIncludeTax" type="Boolean" />
             <parameter name="currencyId" />
         </out-parameters>
@@ -39,6 +40,7 @@ limitations under the License.
                     productName: product.productName, price: product.price, image: product.image,
                     categories: product.categories])</script>
             </iterate>
+            <service-call name="growerp.100.PosRestaurantServices100.get#ModifierGroups" out-map="context" />
             <service-call name="growerp.100.TaxServices100.get#TaxRates" out-map="taxes" />
             <set field="pricesIncludeTax" from="taxes.pricesIncludeTax" />
             <entity-find-one entity-name="mantle.ledger.config.PartyAcctgPreference" value-field="pref">
@@ -247,20 +249,9 @@ limitations under the License.
             <service-call name="growerp.100.PosServices100.check#Tenders" out-map="tendered"
                 in-map="[tenders: tenders, grandTotal: priced.grandTotal]" />
 
-            <service-call name="growerp.100.PosServices100.ensure#WalkInCustomer" out-map="walkIn"
-                in-map="[ownerPartyId: ownerPartyId]" />
-            <entity-find entity-name="mantle.product.store.ProductStore" list="stores" limit="1">
-                <econdition field-name="organizationPartyId" from="companyPartyId" />
-            </entity-find>
-            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId" out-map="orderSeq"
-                in-map="[ownerPartyId: ownerPartyId, seqName: 'order']" />
-            <service-call name="mantle.order.OrderServices.create#Order" out-map="order"
-                in-map="[productStoreId: stores[0].productStoreId, pseudoId: orderSeq.seqNum,
-                    statusId: 'OrderOpen', salesChannelEnumId: 'ScPos',
-                    facilityId: stores[0].inventoryFacilityId, vendorPartyId: companyPartyId,
-                    customerPartyId: walkIn.walkInPartyId, disablePromotions: 'Y',
-                    disableShippingCalc: 'Y', disableTaxCalc: 'Y', carrierPartyId: '_NA_',
-                    shipmentMethodEnumId: 'ShMthPickUp', orderName: terminalName]" />
+            <service-call name="growerp.100.PosServices100.create#PosOrder" out-map="order"
+                in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId,
+                    orderName: terminalName, disableTaxCalc: 'Y']" />
             <iterate list="priced.pricedLines" entry="line">
                 <service-call name="mantle.order.OrderServices.create#OrderItem"
                     in-map="[orderId: order.orderId, orderPartSeqId: order.orderPartSeqId,
@@ -291,6 +282,36 @@ limitations under the License.
                     saleDate: ec.user.nowTimestamp]" />
             <service-call name="growerp.100.PosServices100.get#PosReceipt" out-map="context"
                 in-map="[clientSaleId: clientSaleId]" />
+        </actions>
+    </service>
+
+    <service verb="create" noun="PosOrder">
+        <description>Internal: an open order of the POS channel for the walk-in customer.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="companyPartyId" required="true" />
+            <parameter name="orderName" />
+            <parameter name="disableTaxCalc" default-value="N" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="orderId" />
+            <parameter name="orderPartSeqId" />
+        </out-parameters>
+        <actions>
+            <service-call name="growerp.100.PosServices100.ensure#WalkInCustomer" out-map="walkIn"
+                in-map="[ownerPartyId: ownerPartyId]" />
+            <entity-find entity-name="mantle.product.store.ProductStore" list="stores" limit="1">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find>
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId" out-map="orderSeq"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'order']" />
+            <service-call name="mantle.order.OrderServices.create#Order" out-map="context"
+                in-map="[productStoreId: stores[0].productStoreId, pseudoId: orderSeq.seqNum,
+                    statusId: 'OrderOpen', salesChannelEnumId: 'ScPos',
+                    facilityId: stores[0].inventoryFacilityId, vendorPartyId: companyPartyId,
+                    customerPartyId: walkIn.walkInPartyId, disablePromotions: 'Y',
+                    disableShippingCalc: 'Y', disableTaxCalc: disableTaxCalc, carrierPartyId: '_NA_',
+                    shipmentMethodEnumId: 'ShMthPickUp', orderName: orderName]" />
         </actions>
     </service>
 
@@ -451,7 +472,7 @@ limitations under the License.
             <set field="taxItems" from="orderItems.findAll({ (it.itemTypeEnumId == 'ItemSalesTax') as boolean })" />
             <set field="receiptLines" from="[]" />
             <iterate list="orderItems" entry="orderItem">
-                <if condition="orderItem.itemTypeEnumId != 'ItemProduct'">
+                <if condition="orderItem.itemTypeEnumId != 'ItemProduct' || !orderItem.quantity">
                     <continue />
                 </if>
                 <set field="unitPrice" from="orderItem.unitListPrice ?: orderItem.unitAmount" />
@@ -877,6 +898,13 @@ limitations under the License.
                     <econdition field-name="itemTypeEnumId" value="ItemSalesTax" />
                 </entity-find>
             </if>
+            <set field="voidCount" from="0" />
+            <if condition="sales">
+                <entity-find-count entity-name="growerp.pos.PosLine" count-field="voidCount">
+                    <econdition field-name="orderId" operator="in" from="sales*.orderId" />
+                    <econdition field-name="kitchenStatus" value="Voided" />
+                </entity-find-count>
+            </if>
             <script><![CDATA[
                 def byMethod = { payments -> payments.groupBy({ it.paymentInstrumentEnumId }).collect { method, list ->
                     [method: method, amount: list.sum({ it.amount }).toString()] } }
@@ -889,7 +917,7 @@ limitations under the License.
                 taxes = taxItems.groupBy({ it.sourcePercentage }).collect { percentage, items ->
                     [taxPercentage: percentage?.toString(), taxAmount: items.sum({ it.unitAmount * it.quantity })
                         .setScale(2, BigDecimal.ROUND_HALF_UP).toString()] }
-                report = [saleCount: sales.size(), salesTotal: salesTotal.toString(),
+                report = [saleCount: sales.size(), voidCount: voidCount, salesTotal: salesTotal.toString(),
                     tenders: byMethod(salePayments), refundCount: refunds.size(),
                     refundTotal: refundTotal.toString(), refundTenders: byMethod(refundPayments),
                     taxes: taxes, refundTaxTotal: refundTaxTotal.setScale(2, BigDecimal.ROUND_HALF_UP).toString(),

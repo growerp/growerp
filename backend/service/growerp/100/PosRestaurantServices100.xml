@@ -1,0 +1,954 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!--
+    The restaurant part of the POS. A tab is an order that stays open at a table, its items
+    are added one by one so that an order item keeps its identity: the kitchen state in
+    PosLine hangs on it. Settling goes through finish#PosOrder like a sale at the till.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <!-- ===================== tables ===================== -->
+
+    <service verb="get" noun="FloorPlan">
+        <description>The tables with their place and what goes on there: free, occupied or
+            ready, something from the kitchen waits to be served.</description>
+        <out-parameters>
+            <parameter name="tables" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="growerp.pos.PosTableLayout" list="layouts">
+                <econdition field-name="ownerPartyId" />
+            </entity-find>
+            <entity-find entity-name="growerp.pos.PosTab" list="openTabs">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="status" value="Open" />
+            </entity-find>
+            <set field="readyOrderIds" from="[]" />
+            <if condition="openTabs">
+                <entity-find entity-name="growerp.pos.PosLine" list="readyLines">
+                    <econdition field-name="orderId" operator="in" from="openTabs*.orderId" />
+                    <econdition field-name="kitchenStatus" value="Ready" />
+                </entity-find>
+                <set field="readyOrderIds" from="readyLines*.orderId" />
+            </if>
+            <set field="tables" from="[]" />
+            <iterate list="layouts" entry="layout">
+                <entity-find-one entity-name="mantle.product.asset.Asset" value-field="asset">
+                    <field-map field-name="assetId" from="layout.assetId" />
+                </entity-find-one>
+                <set field="tab" from="openTabs.find({ it.tableAssetId == layout.assetId })" />
+                <set field="tableTotal" from="null" />
+                <if condition="tab">
+                    <entity-find-one entity-name="mantle.order.OrderHeader" value-field="tabOrder">
+                        <field-map field-name="orderId" from="tab.orderId" />
+                    </entity-find-one>
+                    <set field="tableTotal" from="(tabOrder.grandTotal ?: 0.0).setScale(2, BigDecimal.ROUND_HALF_UP).toString()" />
+                </if>
+                <script>tables.add([assetId: layout.assetId, tableName: asset.assetName,
+                    areaName: layout.areaName, x: layout.x, y: layout.y, shape: layout.shape,
+                    seats: layout.seats, tabId: tab?.tabId, guestCount: tab?.guestCount,
+                    grandTotal: tableTotal,
+                    status: !tab ? 'free' : tab.orderId in readyOrderIds ? 'ready' : 'occupied'])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="create" noun="Table">
+        <in-parameters>
+            <parameter name="table" type="Map" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="table" type="Map" />
+        </out-parameters>
+        <actions>
+            <if condition="!table.tableName">
+                <return error="true" message="A table needs a name" />
+            </if>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId" out-map="assetSeq"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'asset']" />
+            <service-call name="create#mantle.product.asset.Asset" out-map="created"
+                in-map="[assetTypeEnumId: 'AstTpFixed', classEnumId: 'AsClsTable', hasQuantity: 'N',
+                    assetName: table.tableName, assetPseudoId: assetSeq.seqNum,
+                    ownerPartyId: companyPartyId, statusId: 'AstAvailable']" />
+            <service-call name="create#growerp.pos.PosTableLayout"
+                in-map="[assetId: created.assetId, ownerPartyId: ownerPartyId, areaName: table.areaName,
+                    x: table.x, y: table.y, shape: table.shape, seats: table.seats]" />
+            <set field="table" from="table + [assetId: created.assetId]" />
+        </actions>
+    </service>
+
+    <service verb="update" noun="Table">
+        <in-parameters>
+            <parameter name="table" type="Map" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="growerp.pos.PosTableLayout" value-field="layout" for-update="true">
+                <field-map field-name="assetId" from="table.assetId" />
+            </entity-find-one>
+            <if condition="layout == null || layout.ownerPartyId != ownerPartyId">
+                <return error="true" message="Table ${table.assetId} not found" />
+            </if>
+            <script>['areaName', 'x', 'y', 'shape', 'seats'].each {
+                if (table.containsKey(it)) layout.set(it, table[it]) }</script>
+            <entity-update value-field="layout" />
+            <if condition="table.tableName">
+                <service-call name="update#mantle.product.asset.Asset"
+                    in-map="[assetId: table.assetId, assetName: table.tableName]" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="delete" noun="Table">
+        <in-parameters>
+            <parameter name="assetId" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="growerp.pos.PosTableLayout" value-field="layout" />
+            <if condition="layout == null || layout.ownerPartyId != ownerPartyId">
+                <return error="true" message="Table ${assetId} not found" />
+            </if>
+            <entity-find-count entity-name="growerp.pos.PosTab" count-field="openCount">
+                <econdition field-name="tableAssetId" from="assetId" />
+                <econdition field-name="status" value="Open" />
+            </entity-find-count>
+            <if condition="openCount">
+                <return error="true" message="This table has an open tab" />
+            </if>
+            <!-- the Asset stays: old tabs still point at it -->
+            <entity-delete value-field="layout" />
+        </actions>
+    </service>
+
+    <!-- ===================== modifiers ===================== -->
+
+    <service verb="get" noun="ModifierGroups">
+        <out-parameters>
+            <parameter name="modifierGroups" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="growerp.pos.PosModifierGroup" list="groups">
+                <econdition field-name="ownerPartyId" />
+                <order-by field-name="groupName" />
+            </entity-find>
+            <set field="modifierGroups" from="[]" />
+            <iterate list="groups" entry="groupValue">
+                <service-call name="growerp.100.PosRestaurantServices100.get#GroupOut" out-map="groupOut"
+                    in-map="[groupValue: groupValue]" />
+                <script>modifierGroups.add(groupOut.group)</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="get" noun="GroupOut">
+        <description>Internal: a modifier group the way the frontend reads it.</description>
+        <in-parameters>
+            <parameter name="groupValue" type="Map" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="group" type="Map" />
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="growerp.pos.PosModifier" list="modifiers">
+                <econdition field-name="groupId" from="groupValue.groupId" />
+                <order-by field-name="modifierName" />
+            </entity-find>
+            <entity-find entity-name="growerp.pos.PosProductModifierGroup" list="links">
+                <econdition field-name="groupId" from="groupValue.groupId" />
+            </entity-find>
+            <set field="group"
+                from="[groupId: groupValue.groupId, groupName: groupValue.groupName,
+                    minSelect: groupValue.minSelect, maxSelect: groupValue.maxSelect,
+                    productIds: links*.productId,
+                    modifiers: modifiers.collect({ [modifierId: it.modifierId,
+                        modifierName: it.modifierName, priceDelta: (it.priceDelta ?: 0.0).toString()] })]" />
+        </actions>
+    </service>
+
+    <service verb="store" noun="ModifierGroup">
+        <description>Create or replace a group with its modifiers and products. A line already on
+            a tab keeps the name and price it was sold with.</description>
+        <in-parameters>
+            <parameter name="group" type="Map" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="group" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="group.groupId">
+                <then>
+                    <entity-find-one entity-name="growerp.pos.PosModifierGroup" value-field="groupValue"
+                        for-update="true">
+                        <field-map field-name="groupId" from="group.groupId" />
+                    </entity-find-one>
+                    <if condition="groupValue == null || groupValue.ownerPartyId != ownerPartyId">
+                        <return error="true" message="Modifier group ${group.groupId} not found" />
+                    </if>
+                    <set field="groupValue.groupName" from="group.groupName" />
+                    <set field="groupValue.minSelect" from="group.minSelect" />
+                    <set field="groupValue.maxSelect" from="group.maxSelect" />
+                    <entity-update value-field="groupValue" />
+                    <set field="groupId" from="group.groupId" />
+                </then>
+                <else>
+                    <service-call name="create#growerp.pos.PosModifierGroup" out-map="created"
+                        in-map="[ownerPartyId: ownerPartyId, groupName: group.groupName,
+                            minSelect: group.minSelect, maxSelect: group.maxSelect]" />
+                    <set field="groupId" from="created.groupId" />
+                </else>
+            </if>
+            <set field="keptIds" from="(group.modifiers ?: [])*.modifierId.findAll({ it })" />
+            <entity-delete-by-condition entity-name="growerp.pos.PosModifier">
+                <econdition field-name="groupId" />
+                <econdition field-name="modifierId" operator="not-in" from="keptIds" ignore="!keptIds" />
+            </entity-delete-by-condition>
+            <iterate list="(group.modifiers ?: [])" entry="modifier">
+                <service-call name="store#growerp.pos.PosModifier"
+                    in-map="[modifierId: modifier.modifierId, groupId: groupId,
+                        modifierName: modifier.modifierName,
+                        priceDelta: (modifier.priceDelta ?: 0) as BigDecimal]" />
+            </iterate>
+            <entity-delete-by-condition entity-name="growerp.pos.PosProductModifierGroup">
+                <econdition field-name="groupId" />
+            </entity-delete-by-condition>
+            <iterate list="(group.productIds ?: [])" entry="linkProductId">
+                <entity-find-one entity-name="mantle.product.Product" value-field="product">
+                    <field-map field-name="productId" from="linkProductId" />
+                </entity-find-one>
+                <if condition="product == null || product.ownerPartyId != ownerPartyId">
+                    <return error="true" message="Product ${linkProductId} not found" />
+                </if>
+                <service-call name="create#growerp.pos.PosProductModifierGroup"
+                    in-map="[productId: linkProductId, groupId: groupId]" />
+            </iterate>
+            <entity-find-one entity-name="growerp.pos.PosModifierGroup" value-field="stored">
+                <field-map field-name="groupId" />
+            </entity-find-one>
+            <service-call name="growerp.100.PosRestaurantServices100.get#GroupOut" out-map="context"
+                in-map="[groupValue: stored]" />
+        </actions>
+    </service>
+
+    <service verb="delete" noun="ModifierGroup">
+        <in-parameters>
+            <parameter name="groupId" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="growerp.pos.PosModifierGroup" value-field="groupValue" />
+            <if condition="groupValue == null || groupValue.ownerPartyId != ownerPartyId">
+                <return error="true" message="Modifier group ${groupId} not found" />
+            </if>
+            <entity-delete-by-condition entity-name="growerp.pos.PosProductModifierGroup">
+                <econdition field-name="groupId" />
+            </entity-delete-by-condition>
+            <entity-delete-by-condition entity-name="growerp.pos.PosModifier">
+                <econdition field-name="groupId" />
+            </entity-delete-by-condition>
+            <entity-delete value-field="groupValue" />
+        </actions>
+    </service>
+
+    <!-- ===================== tabs ===================== -->
+
+    <service verb="get" noun="OwnTab">
+        <description>Internal: a tab of the owner, locked. requireOpen refuses a settled one.</description>
+        <in-parameters>
+            <parameter name="tabId" required="true" />
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="requireOpen" type="Boolean" default="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="posTab" type="Map" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.pos.PosTab" value-field="found" for-update="true" />
+            <if condition="found == null || found.ownerPartyId != ownerPartyId">
+                <return error="true" message="Tab ${tabId} not found" />
+            </if>
+            <if condition="requireOpen &amp;&amp; found.status != 'Open'">
+                <return error="true" message="Tab ${tabId} is closed" />
+            </if>
+            <set field="posTab" from="found.getMap()" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="TabOut">
+        <description>Internal: a tab the way the frontend reads it.</description>
+        <in-parameters>
+            <parameter name="tabId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="tab" type="Map" />
+        </out-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.pos.PosTab" value-field="posTab" />
+            <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader">
+                <field-map field-name="orderId" from="posTab.orderId" />
+            </entity-find-one>
+            <entity-find entity-name="mantle.order.OrderItem" list="orderItems">
+                <econdition field-name="orderId" from="posTab.orderId" />
+                <order-by field-name="orderItemSeqId" />
+            </entity-find>
+            <entity-find entity-name="growerp.pos.PosLine" list="posLines">
+                <econdition field-name="orderId" from="posTab.orderId" />
+            </entity-find>
+            <set field="tabLines" from="[]" />
+            <set field="taxTotal" from="0.0" />
+            <iterate list="orderItems" entry="orderItem">
+                <if condition="orderItem.itemTypeEnumId == 'ItemSalesTax'">
+                    <set field="taxTotal" from="taxTotal + orderItem.unitAmount * (orderItem.quantity ?: 1.0)" />
+                    <continue />
+                </if>
+                <set field="posLine" from="posLines.find({ it.orderItemSeqId == orderItem.orderItemSeqId })" />
+                <if condition="posLine == null">
+                    <continue />
+                </if>
+                <script>tabLines.add([orderId: orderItem.orderId, orderItemSeqId: orderItem.orderItemSeqId,
+                    productId: orderItem.productId, description: orderItem.itemDescription,
+                    quantity: orderItem.quantity.toString(),
+                    price: (orderItem.unitListPrice ?: orderItem.unitAmount).toString(),
+                    note: orderItem.comments, kitchenStatus: posLine.kitchenStatus,
+                    seatNo: posLine.seatNo, splitNo: posLine.splitNo, voidReason: posLine.voidReason])</script>
+            </iterate>
+            <set field="tableName" from="null" />
+            <if condition="posTab.tableAssetId">
+                <entity-find-one entity-name="mantle.product.asset.Asset" value-field="asset">
+                    <field-map field-name="assetId" from="posTab.tableAssetId" />
+                </entity-find-one>
+                <set field="tableName" from="asset?.assetName" />
+            </if>
+            <set field="tab"
+                from="[tabId: posTab.tabId, orderId: posTab.orderId, tableAssetId: posTab.tableAssetId,
+                    tableName: tableName, guestCount: posTab.guestCount, status: posTab.status,
+                    currencyId: orderHeader.currencyUomId, lines: tabLines,
+                    taxTotal: taxTotal.setScale(2, BigDecimal.ROUND_HALF_UP).toString(),
+                    grandTotal: (orderHeader.grandTotal ?: 0.0).setScale(2, BigDecimal.ROUND_HALF_UP).toString()]" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="Tab">
+        <in-parameters>
+            <parameter name="tabId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="tab" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.PosRestaurantServices100.get#OwnTab"
+                in-map="[tabId: tabId, ownerPartyId: ownerPartyId, requireOpen: false]" />
+            <service-call name="growerp.100.PosRestaurantServices100.get#TabOut" out-map="context"
+                in-map="[tabId: tabId]" />
+        </actions>
+    </service>
+
+    <service verb="open" noun="Tab">
+        <description>Start the bill of a table. Without a table it is a tab at the bar.</description>
+        <in-parameters>
+            <parameter name="tableAssetId" />
+            <parameter name="guestCount" type="Integer" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="tab" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="tableAssetId">
+                <service-call name="growerp.100.PosRestaurantServices100.check#FreeTable"
+                    in-map="[assetId: tableAssetId, ownerPartyId: ownerPartyId]" />
+            </if>
+            <service-call name="growerp.100.PosServices100.create#PosOrder" out-map="order"
+                in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId,
+                    orderName: 'Tab']" />
+            <service-call name="create#growerp.pos.PosTab" out-map="created"
+                in-map="[ownerPartyId: ownerPartyId, orderId: order.orderId, status: 'Open',
+                    tableAssetId: tableAssetId, guestCount: guestCount,
+                    serverUserId: ec.user.userId, openedDate: ec.user.nowTimestamp]" />
+            <service-call name="growerp.100.PosRestaurantServices100.get#TabOut" out-map="context"
+                in-map="[tabId: created.tabId]" />
+        </actions>
+    </service>
+
+    <service verb="check" noun="FreeTable">
+        <description>Internal: the table is of the owner and has no open tab.</description>
+        <in-parameters>
+            <parameter name="assetId" required="true" />
+            <parameter name="ownerPartyId" required="true" />
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="growerp.pos.PosTableLayout" value-field="layout" for-update="true" />
+            <if condition="layout == null || layout.ownerPartyId != ownerPartyId">
+                <return error="true" message="Table ${assetId} not found" />
+            </if>
+            <entity-find-count entity-name="growerp.pos.PosTab" count-field="openCount">
+                <econdition field-name="tableAssetId" from="assetId" />
+                <econdition field-name="status" value="Open" />
+            </entity-find-count>
+            <if condition="openCount">
+                <return error="true" message="This table already has an open tab" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="move" noun="Tab">
+        <in-parameters>
+            <parameter name="tabId" required="true" />
+            <parameter name="tableAssetId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="tab" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.PosRestaurantServices100.get#OwnTab"
+                in-map="[tabId: tabId, ownerPartyId: ownerPartyId]" />
+            <service-call name="growerp.100.PosRestaurantServices100.check#FreeTable"
+                in-map="[assetId: tableAssetId, ownerPartyId: ownerPartyId]" />
+            <service-call name="update#growerp.pos.PosTab"
+                in-map="[tabId: tabId, tableAssetId: tableAssetId]" />
+            <service-call name="growerp.100.PosRestaurantServices100.get#TabOut" out-map="context"
+                in-map="[tabId: tabId]" />
+        </actions>
+    </service>
+
+    <service verb="add" noun="TabLine">
+        <description>A product on the tab with its modifiers. Their price goes into the price of
+            the line, so tax, invoice and split need no child lines.</description>
+        <in-parameters>
+            <parameter name="tabId" required="true" />
+            <parameter name="productId" required="true" />
+            <parameter name="quantity" type="BigDecimal" default="1" />
+            <parameter name="modifierIds" type="List" />
+            <parameter name="note" />
+            <parameter name="seatNo" type="Integer" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="tab" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.PosRestaurantServices100.get#OwnTab" out-map="owned"
+                in-map="[tabId: tabId, ownerPartyId: ownerPartyId]" />
+            <if condition="quantity &lt;= 0">
+                <return error="true" message="Quantity must be above zero" />
+            </if>
+            <entity-find-one entity-name="mantle.product.Product" value-field="product" />
+            <if condition="product == null || product.ownerPartyId != ownerPartyId">
+                <return error="true" message="Product ${productId} not found" />
+            </if>
+            <service-call name="growerp.100.PosRestaurantServices100.check#LineModifiers" out-map="chosen"
+                in-map="[productId: productId, modifierIds: modifierIds ?: []]" />
+            <service-call name="growerp.100.PosServices100.get#CurrentPrice" out-map="priced"
+                in-map="[productId: productId]" />
+            <set field="grossUnit" from="priced.price + chosen.priceDelta" />
+            <service-call name="growerp.100.PosRestaurantServices100.get#LineAmounts" out-map="amounts"
+                in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId,
+                    productId: productId, unitPrice: grossUnit, quantity: quantity]" />
+            <set field="description"
+                from="chosen.modifiers ? product.productName + ' (' +
+                    chosen.modifiers*.modifierName.join(', ') + ')' : product.productName" />
+            <service-call name="mantle.order.OrderServices.create#OrderItem" out-map="item"
+                in-map="[orderId: owned.posTab.orderId, orderPartSeqId: '01',
+                    itemTypeEnumId: 'ItemProduct', productId: productId, itemDescription: description,
+                    quantity: quantity, unitAmount: amounts.unitAmount,
+                    unitListPrice: amounts.unitListPrice, comments: note, requireInventory: false]" />
+            <service-call name="create#growerp.pos.PosLine"
+                in-map="[orderId: owned.posTab.orderId, orderItemSeqId: item.orderItemSeqId,
+                    ownerPartyId: ownerPartyId, kitchenStatus: 'New', seatNo: seatNo]" />
+            <iterate list="chosen.modifiers" entry="modifier">
+                <service-call name="create#growerp.pos.PosLineModifier"
+                    in-map="[orderId: owned.posTab.orderId, orderItemSeqId: item.orderItemSeqId,
+                        modifierId: modifier.modifierId, modifierName: modifier.modifierName,
+                        priceDelta: modifier.priceDelta]" />
+            </iterate>
+            <service-call name="growerp.100.PosRestaurantServices100.get#TabOut" out-map="context"
+                in-map="[tabId: tabId]" />
+        </actions>
+    </service>
+
+    <service verb="check" noun="LineModifiers">
+        <description>Internal: the modifiers fit the groups of the product, what they add up to.</description>
+        <in-parameters>
+            <parameter name="productId" required="true" />
+            <parameter name="modifierIds" type="List" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="modifiers" type="List" />
+            <parameter name="priceDelta" type="BigDecimal" />
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="growerp.pos.PosProductModifierGroup" list="links">
+                <econdition field-name="productId" />
+            </entity-find>
+            <set field="modifiers" from="[]" />
+            <set field="priceDelta" from="0.0" />
+            <set field="productGroupIds" from="links*.groupId" />
+            <iterate list="modifierIds" entry="modifierId">
+                <entity-find-one entity-name="growerp.pos.PosModifier" value-field="modifier" />
+                <if condition="modifier == null || !(modifier.groupId in productGroupIds)">
+                    <return error="true" message="Modifier ${modifierId} does not belong to this product" />
+                </if>
+                <script>modifiers.add(modifier.getMap())</script>
+                <set field="priceDelta" from="priceDelta + (modifier.priceDelta ?: 0.0)" />
+            </iterate>
+            <iterate list="links" entry="link">
+                <entity-find-one entity-name="growerp.pos.PosModifierGroup" value-field="groupValue">
+                    <field-map field-name="groupId" from="link.groupId" />
+                </entity-find-one>
+                <set field="selected" from="modifiers.count({ it.groupId == link.groupId })" />
+                <if condition="selected &lt; (groupValue.minSelect ?: 0)">
+                    <return error="true" message="Choose at least ${groupValue.minSelect} of ${groupValue.groupName}" />
+                </if>
+                <if condition="groupValue.maxSelect &amp;&amp; selected &gt; groupValue.maxSelect">
+                    <return error="true" message="Choose at most ${groupValue.maxSelect} of ${groupValue.groupName}" />
+                </if>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="get" noun="LineAmounts">
+        <description>Internal: what goes on the order item for a price as shown to the guest.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="companyPartyId" required="true" />
+            <parameter name="productId" required="true" />
+            <parameter name="unitPrice" type="BigDecimal" required="true" />
+            <parameter name="quantity" type="BigDecimal" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="unitAmount" type="BigDecimal" />
+            <parameter name="unitListPrice" type="BigDecimal" />
+        </out-parameters>
+        <actions>
+            <set field="unitAmount" from="unitPrice" />
+            <entity-find entity-name="mantle.product.store.ProductStore" list="stores" limit="1">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find>
+            <if condition="stores &amp;&amp; stores[0].pricesIncludeTax == 'Y'">
+                <service-call name="growerp.100.TaxServices100.calculate#NetUnitAmount" out-map="net"
+                    in-map="[ownerPartyId: ownerPartyId, productId: productId,
+                        grossUnitAmount: unitPrice, quantity: quantity]" />
+                <set field="unitAmount" from="net.unitAmount" />
+                <set field="unitListPrice" from="unitPrice" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="update" noun="TabLine">
+        <description>Change a line that the kitchen has not seen yet.</description>
+        <in-parameters>
+            <parameter name="tabId" required="true" />
+            <parameter name="orderItemSeqId" required="true" />
+            <parameter name="quantity" type="BigDecimal" />
+            <parameter name="note" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="tab" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.PosRestaurantServices100.get#OwnTab" out-map="owned"
+                in-map="[tabId: tabId, ownerPartyId: ownerPartyId]" />
+            <entity-find-one entity-name="growerp.pos.PosLine" value-field="posLine">
+                <field-map field-name="orderId" from="owned.posTab.orderId" />
+                <field-map field-name="orderItemSeqId" />
+            </entity-find-one>
+            <if condition="posLine == null">
+                <return error="true" message="Line ${orderItemSeqId} not found" />
+            </if>
+            <if condition="posLine.kitchenStatus != 'New'">
+                <return error="true" message="This line went to the kitchen, void it instead" />
+            </if>
+            <entity-find-one entity-name="mantle.order.OrderItem" value-field="orderItem">
+                <field-map field-name="orderId" from="owned.posTab.orderId" />
+                <field-map field-name="orderItemSeqId" />
+            </entity-find-one>
+            <set field="newQuantity" from="quantity ?: orderItem.quantity" />
+            <if condition="newQuantity &lt;= 0">
+                <return error="true" message="Quantity must be above zero" />
+            </if>
+            <service-call name="growerp.100.PosRestaurantServices100.get#LineAmounts" out-map="amounts"
+                in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId,
+                    productId: orderItem.productId, quantity: newQuantity,
+                    unitPrice: orderItem.unitListPrice ?: orderItem.unitAmount]" />
+            <service-call name="mantle.order.OrderServices.update#OrderItem"
+                in-map="[orderId: orderItem.orderId, orderItemSeqId: orderItemSeqId,
+                    quantity: newQuantity, unitAmount: amounts.unitAmount,
+                    comments: note != null ? note : orderItem.comments, requireInventory: false]" />
+            <service-call name="growerp.100.PosRestaurantServices100.get#TabOut" out-map="context"
+                in-map="[tabId: tabId]" />
+        </actions>
+    </service>
+
+    <service verb="void" noun="TabLine">
+        <description>A line the kitchen has not seen is removed. One it has seen stays visible with
+            quantity zero: it is not charged but somebody cooked it.</description>
+        <in-parameters>
+            <parameter name="tabId" required="true" />
+            <parameter name="orderItemSeqId" required="true" />
+            <parameter name="reason" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="tab" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.PosRestaurantServices100.get#OwnTab" out-map="owned"
+                in-map="[tabId: tabId, ownerPartyId: ownerPartyId]" />
+            <entity-find-one entity-name="growerp.pos.PosLine" value-field="posLine" for-update="true">
+                <field-map field-name="orderId" from="owned.posTab.orderId" />
+                <field-map field-name="orderItemSeqId" />
+            </entity-find-one>
+            <if condition="posLine == null">
+                <return error="true" message="Line ${orderItemSeqId} not found" />
+            </if>
+            <if condition="posLine.kitchenStatus == 'New'">
+                <then>
+                    <entity-delete-by-condition entity-name="growerp.pos.PosLineModifier">
+                        <econdition field-name="orderId" from="posLine.orderId" />
+                        <econdition field-name="orderItemSeqId" />
+                    </entity-delete-by-condition>
+                    <entity-delete value-field="posLine" />
+                    <service-call name="mantle.order.OrderServices.delete#OrderItem"
+                        in-map="[orderId: owned.posTab.orderId, orderItemSeqId: orderItemSeqId]" />
+                </then>
+                <else>
+                    <set field="posLine.kitchenStatus" value="Voided" />
+                    <set field="posLine.voidReason" from="reason" />
+                    <entity-update value-field="posLine" />
+                    <service-call name="mantle.order.OrderServices.update#OrderItem"
+                        in-map="[orderId: owned.posTab.orderId, orderItemSeqId: orderItemSeqId,
+                            quantity: 0.0, requireInventory: false]" />
+                    <service-call name="growerp.100.PosRestaurantServices100.check#TicketDone"
+                        in-map="[ticketId: posLine.ticketId]" />
+                    <service-call name="growerp.100.PosRestaurantServices100.notify#Kitchen"
+                        in-map="[ownerPartyId: ownerPartyId]" />
+                </else>
+            </if>
+            <service-call name="growerp.100.PosRestaurantServices100.get#TabOut" out-map="context"
+                in-map="[tabId: tabId]" />
+        </actions>
+    </service>
+
+    <service verb="cancel" noun="Tab">
+        <description>Free the table of a tab with nothing to pay.</description>
+        <in-parameters>
+            <parameter name="tabId" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.PosRestaurantServices100.get#OwnTab" out-map="owned"
+                in-map="[tabId: tabId, ownerPartyId: ownerPartyId]" />
+            <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader">
+                <field-map field-name="orderId" from="owned.posTab.orderId" />
+            </entity-find-one>
+            <if condition="orderHeader.grandTotal">
+                <return error="true" message="This tab still has something to pay" />
+            </if>
+            <service-call name="mantle.order.OrderServices.cancel#Order"
+                in-map="[orderId: owned.posTab.orderId]" />
+            <service-call name="update#growerp.pos.PosTab"
+                in-map="[tabId: tabId, status: 'Cancelled', closedDate: ec.user.nowTimestamp]" />
+        </actions>
+    </service>
+
+    <!-- ===================== kitchen ===================== -->
+
+    <service verb="send" noun="TabToKitchen">
+        <description>The new lines go to the kitchen as one ticket. Nothing new, nothing sent. The
+            lock on the tab keeps two sends from sending the same lines.</description>
+        <in-parameters>
+            <parameter name="tabId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="tab" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.PosRestaurantServices100.get#OwnTab" out-map="owned"
+                in-map="[tabId: tabId, ownerPartyId: ownerPartyId]" />
+            <entity-find entity-name="growerp.pos.PosLine" list="newLines" for-update="true">
+                <econdition field-name="orderId" from="owned.posTab.orderId" />
+                <econdition field-name="kitchenStatus" value="New" />
+            </entity-find>
+            <if condition="newLines">
+                <service-call name="create#growerp.pos.PosKitchenTicket" out-map="ticket"
+                    in-map="[ownerPartyId: ownerPartyId, tabId: tabId, status: 'Open',
+                        sentDate: ec.user.nowTimestamp]" />
+                <iterate list="newLines" entry="posLine">
+                    <set field="posLine.kitchenStatus" value="Sent" />
+                    <set field="posLine.ticketId" from="ticket.ticketId" />
+                    <set field="posLine.sentDate" from="ec.user.nowTimestamp" />
+                    <entity-update value-field="posLine" />
+                </iterate>
+                <service-call name="growerp.100.PosRestaurantServices100.notify#Kitchen"
+                    in-map="[ownerPartyId: ownerPartyId]" />
+            </if>
+            <service-call name="growerp.100.PosRestaurantServices100.get#TabOut" out-map="context"
+                in-map="[tabId: tabId]" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="KitchenTickets">
+        <description>What the kitchen still has to do, the oldest first.</description>
+        <out-parameters>
+            <parameter name="tickets" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="growerp.pos.PosKitchenTicket" list="openTickets">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="status" value="Open" />
+                <order-by field-name="sentDate" />
+            </entity-find>
+            <set field="tickets" from="[]" />
+            <iterate list="openTickets" entry="ticket">
+                <service-call name="growerp.100.PosRestaurantServices100.get#TabOut" out-map="tabOut"
+                    in-map="[tabId: ticket.tabId]" />
+                <entity-find entity-name="growerp.pos.PosLine" list="ticketLines">
+                    <econdition field-name="ticketId" from="ticket.ticketId" />
+                    <econdition field-name="kitchenStatus" operator="in" value="Sent,Ready" />
+                </entity-find>
+                <set field="seqIds" from="ticketLines*.orderItemSeqId" />
+                <script>tickets.add([ticketId: ticket.ticketId, tabId: ticket.tabId,
+                    tableName: tabOut.tab.tableName,
+                    sentDate: ec.l10n.format(ticket.sentDate, 'yyyy-MM-dd HH:mm:ssZ'),
+                    lines: tabOut.tab.lines.findAll({ it.orderItemSeqId in seqIds })])</script>
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="update" noun="KitchenLine">
+        <description>The kitchen moves a line on: Ready, then Served.</description>
+        <in-parameters>
+            <parameter name="orderId" required="true" />
+            <parameter name="orderItemSeqId" required="true" />
+            <parameter name="kitchenStatus" required="true" />
+        </in-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <if condition="!(kitchenStatus in ['Ready', 'Served'])">
+                <return error="true" message="Unknown kitchen status ${kitchenStatus}" />
+            </if>
+            <entity-find-one entity-name="growerp.pos.PosLine" value-field="posLine" for-update="true" />
+            <if condition="posLine == null || posLine.ownerPartyId != ownerPartyId">
+                <return error="true" message="Line ${orderItemSeqId} not found" />
+            </if>
+            <if condition="!(posLine.kitchenStatus in ['Sent', 'Ready'])">
+                <return error="true" message="This line is ${posLine.kitchenStatus}" />
+            </if>
+            <set field="posLine.kitchenStatus" from="kitchenStatus" />
+            <if condition="kitchenStatus == 'Ready'">
+                <set field="posLine.readyDate" from="ec.user.nowTimestamp" />
+            </if>
+            <entity-update value-field="posLine" />
+            <service-call name="growerp.100.PosRestaurantServices100.check#TicketDone"
+                in-map="[ticketId: posLine.ticketId]" />
+            <service-call name="growerp.100.PosRestaurantServices100.notify#Kitchen"
+                in-map="[ownerPartyId: ownerPartyId]" />
+        </actions>
+    </service>
+
+    <service verb="check" noun="TicketDone">
+        <description>Internal: a ticket with nothing left to do leaves the kitchen.</description>
+        <in-parameters>
+            <parameter name="ticketId" />
+        </in-parameters>
+        <actions>
+            <if condition="!ticketId">
+                <return />
+            </if>
+            <entity-find-count entity-name="growerp.pos.PosLine" count-field="openCount">
+                <econdition field-name="ticketId" />
+                <econdition field-name="kitchenStatus" operator="in" value="Sent,Ready" />
+            </entity-find-count>
+            <if condition="!openCount">
+                <service-call name="update#growerp.pos.PosKitchenTicket"
+                    in-map="[ticketId: ticketId, status: 'Done']" />
+            </if>
+        </actions>
+    </service>
+
+    <service verb="notify" noun="Kitchen">
+        <description>Internal: after the commit, or a screen could fetch before the change is there.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+        </in-parameters>
+        <actions>
+            <script>ec.service.special().name('growerp.100.PosRestaurantServices100.send#KitchenSignal')
+                .parameters([ownerPartyId: ownerPartyId]).registerOnCommit()</script>
+        </actions>
+    </service>
+
+    <service verb="send" noun="KitchenSignal" authenticate="false">
+        <description>Internal: tells the screens of the tenant to fetch again, there is nothing
+            else in the message. Runs on a thread without a user. Topics are not per tenant,
+            so it goes to the users of the tenant only.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+        </in-parameters>
+        <actions>
+            <script><![CDATA[
+                ec.artifactExecution.disableAuthz()
+                Set<String> userIds = new HashSet<>()
+                ec.entity.find('mantle.party.Party').condition('ownerPartyId', ownerPartyId)
+                        .selectField('partyId').list().collate(500).each { parties ->
+                    userIds.addAll(ec.entity.find('moqui.security.UserAccount')
+                            .condition('partyId', 'in', parties*.partyId).selectField('userId').list()*.userId)
+                }
+                if (userIds) ec.makeNotificationMessage().topic('posKitchen').userIds(userIds)
+                        .message([changed: true]).send()
+            ]]></script>
+        </actions>
+    </service>
+
+    <!-- ===================== the bill ===================== -->
+
+    <service verb="calculate" noun="TabSplit">
+        <description>The shares of a bill: equal with ways, by item with assignments of lines to
+            shares. What rounding leaves goes to the last share, the shares add up to the
+            total.</description>
+        <in-parameters>
+            <parameter name="tabId" required="true" />
+            <parameter name="ways" type="Integer" />
+            <parameter name="assignments" type="List" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="shares" type="List" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.PosRestaurantServices100.get#OwnTab" out-map="owned"
+                in-map="[tabId: tabId, ownerPartyId: ownerPartyId]" />
+            <set field="orderId" from="owned.posTab.orderId" />
+            <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader" />
+            <set field="total" from="(orderHeader.grandTotal ?: 0.0).setScale(2, BigDecimal.ROUND_HALF_UP)" />
+            <set field="shares" from="[]" />
+            <if condition="ways">
+                <set field="part" from="total.divide(ways as BigDecimal, 2, BigDecimal.ROUND_DOWN)" />
+                <script>(1..ways).each { shares.add([splitNo: it, amount: (it == ways
+                    ? total - part * (ways - 1) : part).toString()]) }</script>
+                <return />
+            </if>
+            <iterate list="(assignments ?: [])" entry="assignment">
+                <service-call name="update#growerp.pos.PosLine"
+                    in-map="[orderId: orderId, orderItemSeqId: assignment.orderItemSeqId,
+                        splitNo: assignment.splitNo as Integer]" />
+            </iterate>
+            <entity-find entity-name="growerp.pos.PosLine" list="posLines">
+                <econdition field-name="orderId" />
+            </entity-find>
+            <entity-find entity-name="mantle.order.OrderItem" list="orderItems">
+                <econdition field-name="orderId" />
+            </entity-find>
+            <script><![CDATA[
+                def lineTotal = { line ->
+                    orderItems.findAll({ (it.orderItemSeqId == line.orderItemSeqId
+                            || it.parentItemSeqId == line.orderItemSeqId) as boolean })
+                        .sum(0.0, { (it.unitAmount ?: 0.0) * (it.quantity ?: 0.0) }) }
+                def byShare = posLines.groupBy({ it.splitNo ?: 1 }).sort()
+                def left = total
+                def numbers = byShare.keySet().toList()
+                numbers.each { number ->
+                    def amount = number == numbers.last() ? left
+                        : byShare[number].sum(0.0, lineTotal).setScale(2, BigDecimal.ROUND_HALF_UP)
+                    left -= amount
+                    shares.add([splitNo: number, amount: amount.toString()])
+                }
+            ]]></script>
+        </actions>
+    </service>
+
+    <service verb="settle" noun="Tab">
+        <description>Pay the tab, all shares in one go. Like a sale it needs an open shift and the
+            same clientSaleId again gives the first sale back.</description>
+        <in-parameters>
+            <parameter name="clientSaleId" required="true" />
+            <parameter name="tabId" required="true" />
+            <parameter name="terminalName" required="true" />
+            <parameter name="tenders" type="List" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="sale" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="requestHash"
+                from="groovy.json.JsonOutput.toJson([tabId,
+                    tenders.collect { [it.method, it.amount as BigDecimal] }]).md5()" />
+            <entity-find-one entity-name="growerp.pos.PosSale" value-field="existing" for-update="true" />
+            <if condition="existing != null">
+                <if condition="existing.requestHash != requestHash">
+                    <return error="true" message="Sale ${clientSaleId} exists with other content" />
+                </if>
+                <service-call name="growerp.100.PosServices100.get#PosReceipt" out-map="context"
+                    in-map="[clientSaleId: clientSaleId]" />
+                <return />
+            </if>
+            <service-call name="growerp.100.PosRestaurantServices100.get#OwnTab" out-map="owned"
+                in-map="[tabId: tabId, ownerPartyId: ownerPartyId]" />
+            <service-call name="growerp.100.PosServices100.get#OpenShift" out-map="till"
+                in-map="[ownerPartyId: ownerPartyId, terminalName: terminalName]" />
+            <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader">
+                <field-map field-name="orderId" from="owned.posTab.orderId" />
+            </entity-find-one>
+            <set field="grandTotal" from="(orderHeader.grandTotal ?: 0.0).setScale(2, BigDecimal.ROUND_HALF_UP)" />
+            <if condition="!grandTotal">
+                <return error="true" message="There is nothing to pay on this tab" />
+            </if>
+            <service-call name="growerp.100.PosServices100.check#Tenders" out-map="tendered"
+                in-map="[tenders: tenders, grandTotal: grandTotal]" />
+            <service-call name="growerp.100.PosServices100.finish#PosOrder" out-map="finished"
+                in-map="[orderId: owned.posTab.orderId, orderPartSeqId: '01',
+                    ownerPartyId: ownerPartyId, tenders: tendered.orderedTenders]" />
+            <service-call name="create#growerp.pos.PosSale"
+                in-map="[ownerPartyId: ownerPartyId, clientSaleId: clientSaleId,
+                    requestHash: requestHash, orderId: owned.posTab.orderId,
+                    invoiceId: finished.invoiceId, terminalName: terminalName, shiftId: till.shiftId,
+                    userId: ec.user.userId, changeAmount: tendered.changeAmount,
+                    saleDate: ec.user.nowTimestamp]" />
+            <service-call name="update#growerp.pos.PosTab"
+                in-map="[tabId: tabId, status: 'Settled', closedDate: ec.user.nowTimestamp]" />
+            <service-call name="growerp.100.PosServices100.get#PosReceipt" out-map="context"
+                in-map="[clientSaleId: clientSaleId]" />
+        </actions>
+    </service>
+</services>

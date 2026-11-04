@@ -80,4 +80,112 @@
         </relationship>
         <relationship type="one" related="growerp.pos.PosShift" />
     </entity>
+
+    <entity entity-name="PosTableLayout" package="growerp.pos" cache="never">
+        <description>A table on the floor plan. The table itself is an Asset of class AsClsTable.</description>
+        <field name="assetId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" not-null="true" />
+        <field name="areaName" type="text-short" />
+        <field name="x" type="number-integer" />
+        <field name="y" type="number-integer" />
+        <field name="shape" type="text-short" />
+        <field name="seats" type="number-integer" />
+        <relationship type="one" related="mantle.product.asset.Asset" />
+        <relationship type="one" title="Owner" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+    </entity>
+
+    <entity entity-name="PosTab" package="growerp.pos" cache="never">
+        <description>The open bill of a table: an order that stays open until it is settled.</description>
+        <field name="tabId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" not-null="true" />
+        <field name="orderId" type="id" not-null="true" />
+        <field name="tableAssetId" type="id" />
+        <field name="guestCount" type="number-integer" />
+        <field name="serverUserId" type="id" />
+        <field name="status" type="text-short" not-null="true" />
+        <field name="openedDate" type="date-time" />
+        <field name="closedDate" type="date-time" />
+        <relationship type="one" related="mantle.order.OrderHeader" />
+        <relationship type="one" title="Owner" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+        <index name="POS_TAB_ORDER">
+            <index-field name="orderId" />
+        </index>
+        <index name="POS_TAB_TABLE">
+            <index-field name="tableAssetId" />
+        </index>
+    </entity>
+
+    <entity entity-name="PosLine" package="growerp.pos" cache="never">
+        <description>What happens to an order item of a tab: its way through the kitchen. Kept apart
+            from the OrderItem so it cannot get lost, status New, Sent, Ready, Served or Voided.</description>
+        <field name="orderId" type="id" is-pk="true" />
+        <field name="orderItemSeqId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" not-null="true" />
+        <field name="ticketId" type="id" />
+        <field name="kitchenStatus" type="text-short" not-null="true" />
+        <field name="seatNo" type="number-integer" />
+        <field name="splitNo" type="number-integer" />
+        <field name="sentDate" type="date-time" />
+        <field name="readyDate" type="date-time" />
+        <field name="voidReason" type="text-medium" />
+        <relationship type="one" related="mantle.order.OrderItem" />
+        <index name="POS_LINE_TICKET">
+            <index-field name="ticketId" />
+        </index>
+    </entity>
+
+    <entity entity-name="PosKitchenTicket" package="growerp.pos" cache="never">
+        <description>What one send of a tab brought to the kitchen, status Open or Done.</description>
+        <field name="ticketId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" not-null="true" />
+        <field name="tabId" type="id" not-null="true" />
+        <field name="status" type="text-short" not-null="true" />
+        <field name="sentDate" type="date-time" />
+        <relationship type="one" related="growerp.pos.PosTab" />
+        <index name="POS_TICKET_OWNER">
+            <index-field name="ownerPartyId" />
+            <index-field name="status" />
+        </index>
+    </entity>
+
+    <entity entity-name="PosModifierGroup" package="growerp.pos" cache="never">
+        <description>A choice on a product, like the sauce: between minSelect and maxSelect of its
+            modifiers. Not ProductFeature: those types are global, a tenant needs its own.</description>
+        <field name="groupId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" not-null="true" />
+        <field name="groupName" type="text-short" not-null="true" />
+        <field name="minSelect" type="number-integer" />
+        <field name="maxSelect" type="number-integer" />
+        <relationship type="one" title="Owner" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+    </entity>
+
+    <entity entity-name="PosModifier" package="growerp.pos" cache="never">
+        <field name="modifierId" type="id" is-pk="true" />
+        <field name="groupId" type="id" not-null="true" />
+        <field name="modifierName" type="text-short" not-null="true" />
+        <field name="priceDelta" type="currency-amount" />
+        <relationship type="one" related="growerp.pos.PosModifierGroup" />
+    </entity>
+
+    <entity entity-name="PosProductModifierGroup" package="growerp.pos" cache="never">
+        <field name="productId" type="id" is-pk="true" />
+        <field name="groupId" type="id" is-pk="true" />
+        <relationship type="one" related="mantle.product.Product" />
+        <relationship type="one" related="growerp.pos.PosModifierGroup" />
+    </entity>
+
+    <entity entity-name="PosLineModifier" package="growerp.pos" cache="never">
+        <description>A modifier as it was chosen: name and price stay when the modifier changes.</description>
+        <field name="orderId" type="id" is-pk="true" />
+        <field name="orderItemSeqId" type="id" is-pk="true" />
+        <field name="modifierId" type="id" is-pk="true" />
+        <field name="modifierName" type="text-short" />
+        <field name="priceDelta" type="currency-amount" />
+    </entity>
 </entities>

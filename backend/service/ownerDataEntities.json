@@ -66,9 +66,17 @@
     "growerp.menu.MenuItem",
     "growerp.menu.MenuItemAccess",
     "growerp.pos.PosCashMovement",
+    "growerp.pos.PosKitchenTicket",
+    "growerp.pos.PosLine",
+    "growerp.pos.PosLineModifier",
+    "growerp.pos.PosModifier",
+    "growerp.pos.PosModifierGroup",
+    "growerp.pos.PosProductModifierGroup",
     "growerp.pos.PosRefund",
     "growerp.pos.PosSale",
     "growerp.pos.PosShift",
+    "growerp.pos.PosTab",
+    "growerp.pos.PosTableLayout",
     "growerp.product.AssetRental",
     "growerp.product.RentalPrice",
     "growerp.store.ProductStoreContent",
@@ -372,6 +380,17 @@
     "growerp.pos.PosCashMovement": {
       "userId": "moqui.security.UserAccount"
     },
+    "growerp.pos.PosKitchenTicket": {
+      "ownerPartyId": "mantle.party.Party"
+    },
+    "growerp.pos.PosLine": {
+      "ownerPartyId": "mantle.party.Party",
+      "ticketId": "growerp.pos.PosKitchenTicket"
+    },
+    "growerp.pos.PosLineModifier": {
+      "orderId": "mantle.order.OrderHeader",
+      "modifierId": "growerp.pos.PosModifier"
+    },
     "growerp.pos.PosRefund": {
       "shiftId": "growerp.pos.PosShift",
       "userId": "moqui.security.UserAccount"
@@ -383,6 +402,9 @@
     "growerp.pos.PosShift": {
       "openedByUserId": "moqui.security.UserAccount",
       "closedByUserId": "moqui.security.UserAccount"
+    },
+    "growerp.pos.PosTab": {
+      "serverUserId": "moqui.security.UserAccount"
     },
     "growerp.product.RentalPrice": {
       "ownerPartyId": "mantle.party.Party"

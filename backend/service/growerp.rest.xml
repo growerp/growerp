@@ -1150,6 +1150,83 @@ limitations under the License.
                     <service name="growerp.100.PosServices100.get#ZReport" />
                 </method>
             </resource>
+            <resource name="FloorPlan">
+                <method type="get">
+                    <service name="growerp.100.PosRestaurantServices100.get#FloorPlan" />
+                </method>
+            </resource>
+            <resource name="Table">
+                <method type="post">
+                    <service name="growerp.100.PosRestaurantServices100.create#Table" />
+                </method>
+                <method type="patch">
+                    <service name="growerp.100.PosRestaurantServices100.update#Table" />
+                </method>
+                <method type="delete">
+                    <service name="growerp.100.PosRestaurantServices100.delete#Table" />
+                </method>
+            </resource>
+            <resource name="Tab">
+                <method type="get">
+                    <service name="growerp.100.PosRestaurantServices100.get#Tab" />
+                </method>
+                <method type="post">
+                    <service name="growerp.100.PosRestaurantServices100.open#Tab" />
+                </method>
+                <method type="delete">
+                    <service name="growerp.100.PosRestaurantServices100.cancel#Tab" />
+                </method>
+            </resource>
+            <resource name="TabMove">
+                <method type="post">
+                    <service name="growerp.100.PosRestaurantServices100.move#Tab" />
+                </method>
+            </resource>
+            <resource name="TabLine">
+                <method type="post">
+                    <service name="growerp.100.PosRestaurantServices100.add#TabLine" />
+                </method>
+                <method type="patch">
+                    <service name="growerp.100.PosRestaurantServices100.update#TabLine" />
+                </method>
+                <method type="delete">
+                    <service name="growerp.100.PosRestaurantServices100.void#TabLine" />
+                </method>
+            </resource>
+            <resource name="TabSend">
+                <method type="post">
+                    <service name="growerp.100.PosRestaurantServices100.send#TabToKitchen" />
+                </method>
+            </resource>
+            <resource name="TabSplit">
+                <method type="post">
+                    <service name="growerp.100.PosRestaurantServices100.calculate#TabSplit" />
+                </method>
+            </resource>
+            <resource name="TabSettle">
+                <method type="post">
+                    <service name="growerp.100.PosRestaurantServices100.settle#Tab" />
+                </method>
+            </resource>
+            <resource name="Kitchen">
+                <method type="get">
+                    <service name="growerp.100.PosRestaurantServices100.get#KitchenTickets" />
+                </method>
+                <method type="patch">
+                    <service name="growerp.100.PosRestaurantServices100.update#KitchenLine" />
+                </method>
+            </resource>
+            <resource name="ModifierGroup">
+                <method type="get">
+                    <service name="growerp.100.PosRestaurantServices100.get#ModifierGroups" />
+                </method>
+                <method type="post">
+                    <service name="growerp.100.PosRestaurantServices100.store#ModifierGroup" />
+                </method>
+                <method type="delete">
+                    <service name="growerp.100.PosRestaurantServices100.delete#ModifierGroup" />
+                </method>
+            </resource>
             <resource name="Receipt">
                 <method type="get">
                     <service name="growerp.100.PosServices100.get#PosReceipt" />

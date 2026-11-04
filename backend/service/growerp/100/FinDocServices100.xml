@@ -2167,6 +2167,13 @@ limitations under the License.
             <parameter name="orderItems" type="List" />
         </in-parameters>
         <actions>
+            <!-- the kitchen state of a restaurant tab hangs on its order items -->
+            <entity-find-count entity-name="growerp.pos.PosTab" count-field="tabCount">
+                <econdition field-name="orderId" />
+            </entity-find-count>
+            <if condition="tabCount">
+                <return error="true" message="Order ${orderId} is a tab of the POS, change it there" />
+            </if>
             <entity-delete-by-condition entity-name="growerp.product.AssetRental">
                 <econdition field-name="orderId" />
             </entity-delete-by-condition>

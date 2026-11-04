@@ -46,6 +46,7 @@ test {
     include '**/FinDocServicesTests.class'
     include '**/TaxServicesTests.class'
     include '**/PosServicesTests.class'
+    include '**/PosRestaurantServicesTests.class'
     include '**/AccountingServicesTests.class'
     include '**/ImportExportServicesTests.class'
     include '**/WebsiteGeneratorServicesTests.class'
