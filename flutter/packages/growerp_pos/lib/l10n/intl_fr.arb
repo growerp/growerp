@@ -72,5 +72,6 @@
   "modifier": "Option",
   "minimum": "Minimum",
   "maximum": "Maximum",
-  "voidedLines": "Lignes annulées"
+  "voidedLines": "Lignes annulées",
+  "noTillAccess": "Pas d'accès à la caisse. Cette société est enregistrée pour une autre application, ou votre administrateur ne vous a pas donné cet écran."
 }

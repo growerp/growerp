@@ -129,6 +129,38 @@ limitations under the License.
   <moqui.basic.LocalizedMessage locale="es" original="GrowerpEmailWelcomeFirstStepRental"
     localized="Agregue un artículo a su catálogo de alquiler y luego consulte su calendario de disponibilidad." />
 
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeIntroShop"
+    localized="Your till is ready: sell from a tablet, phone or computer, with stock, tax and the books kept up to date for you." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeIntroShop"
+    localized="เครื่องคิดเงินของคุณพร้อมแล้ว ขายจากแท็บเล็ต โทรศัพท์ หรือคอมพิวเตอร์ พร้อมอัปเดตสต็อก ภาษี และบัญชีให้คุณโดยอัตโนมัติ" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeIntroShop"
+    localized="Uw kassa staat klaar: verkoop vanaf een tablet, telefoon of computer, terwijl voorraad, belasting en boekhouding voor u worden bijgehouden." />
+  <moqui.basic.LocalizedMessage locale="es" original="GrowerpEmailWelcomeIntroShop"
+    localized="Su caja está lista: venda desde una tableta, teléfono u ordenador, con el stock, los impuestos y la contabilidad al día." />
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeFirstStepShop"
+    localized="Add your first products with a price, open the till and make a sale." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeFirstStepShop"
+    localized="เพิ่มสินค้าแรกพร้อมราคา เปิดเครื่องคิดเงิน แล้วเริ่มขาย" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeFirstStepShop"
+    localized="Voeg uw eerste producten met een prijs toe, open de kassa en doe een verkoop." />
+  <moqui.basic.LocalizedMessage locale="es" original="GrowerpEmailWelcomeFirstStepShop"
+    localized="Añada sus primeros productos con precio, abra la caja y haga una venta." />
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeIntroRestaurant"
+    localized="Your restaurant is ready: tables, kitchen display and the bill in one app, with tax and the books kept up to date for you." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeIntroRestaurant"
+    localized="ร้านอาหารของคุณพร้อมแล้ว โต๊ะ จอครัว และบิลในแอปเดียว พร้อมอัปเดตภาษีและบัญชีให้คุณโดยอัตโนมัติ" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeIntroRestaurant"
+    localized="Uw restaurant staat klaar: tafels, keukenscherm en de rekening in één app, terwijl belasting en boekhouding voor u worden bijgehouden." />
+  <moqui.basic.LocalizedMessage locale="es" original="GrowerpEmailWelcomeIntroRestaurant"
+    localized="Su restaurante está listo: mesas, pantalla de cocina y la cuenta en una sola app, con los impuestos y la contabilidad al día." />
+  <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeFirstStepRestaurant"
+    localized="Add your menu, place your tables on the floor plan and open the till." />
+  <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeFirstStepRestaurant"
+    localized="เพิ่มเมนู จัดโต๊ะบนผังร้าน แล้วเปิดเครื่องคิดเงิน" />
+  <moqui.basic.LocalizedMessage locale="nl" original="GrowerpEmailWelcomeFirstStepRestaurant"
+    localized="Voeg uw menu toe, zet uw tafels op de plattegrond en open de kassa." />
+  <moqui.basic.LocalizedMessage locale="es" original="GrowerpEmailWelcomeFirstStepRestaurant"
+    localized="Añada su menú, coloque las mesas en el plano y abra la caja." />
   <moqui.basic.LocalizedMessage locale="default" original="GrowerpEmailWelcomeIntroInsurance"
     localized="Your agency is ready. Keep every client policy in one place, catch renewals before they lapse, follow claims with the carrier, and track your commissions." />
   <moqui.basic.LocalizedMessage locale="th" original="GrowerpEmailWelcomeIntroInsurance"

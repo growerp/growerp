@@ -4197,6 +4197,10 @@ limitations under the License.
                     <set field="productIdList"
                         from="['COMPACT_CAR', 'SUV_4X4', 'MINI_EXCAVATOR', 'SCISSOR_LIFT']" />
                 </if>
+                <!-- a restaurant gets its own menu, see load#RestaurantDemoData -->
+                <if condition="applicationId == 'AppRestaurant'">
+                    <set field="productIdList" from="['NO_DEMO_PRODUCTS']" />
+                </if>
                 <entity-find entity-name="mantle.product.Product" list="products">
                     <econdition field-name="ownerPartyId" value="_NA_" />
                     <econdition field-name="productId" operator="in" from="productIdList"
@@ -4786,6 +4790,11 @@ limitations under the License.
                     in-map="[ownerPartyId: ownerPartyId]" out-map="teamOut"
                     ignore-error="true" />
                 <log message="Marketing agent team for ${ownerPartyId}: ${teamOut?.enabledCount} agents" />
+            </if>
+            <!-- restaurant: a menu, tables and guests -->
+            <if condition="applicationId == 'AppRestaurant'">
+                <service-call name="growerp.100.PosRestaurantServices100.load#RestaurantDemoData"
+                    in-map="[ownerPartyId: ownerPartyId]" />
             </if>
             <!-- insurance: carriers, policies, commissions and claims of the demo customers -->
             <if condition="applicationId == 'AppInsurance'">

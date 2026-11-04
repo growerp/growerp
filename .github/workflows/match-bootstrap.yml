@@ -19,7 +19,7 @@ on:
   workflow_dispatch:
     inputs:
       apps:
-        description: "Apps: all, or a comma list of admin,hotel,freelance,support,agents,rental,marketing,academy,insurance"
+        description: "Apps: all, or a comma list of admin,hotel,freelance,support,agents,rental,marketing,academy,insurance,shop,restaurant"
         required: true
         default: "all"
         type: string
@@ -74,7 +74,7 @@ jobs:
               else printf -v "${prefix}${name^^}" '%s' false; fi
             done
           }
-          _flags "$(_sel "$APPS_INPUT")" APP_ ALL_APPS admin hotel freelance support agents rental marketing academy insurance
+          _flags "$(_sel "$APPS_INPUT")" APP_ ALL_APPS admin hotel freelance support agents rental marketing academy insurance shop restaurant
 
           apps=()
           if [[ "$ALL_APPS" == "true" ]]; then
@@ -93,6 +93,8 @@ jobs:
             [[ "$APP_MARKETING" == "true" ]] && apps+=(marketing)
             [[ "$APP_ACADEMY"   == "true" ]] && apps+=(academy)
             [[ "$APP_INSURANCE" == "true" ]] && apps+=(insurance)
+            [[ "$APP_SHOP" == "true" ]] && apps+=(shop)
+            [[ "$APP_RESTAURANT" == "true" ]] && apps+=(restaurant)
           fi
 
           if [[ ${#apps[@]} -eq 0 ]]; then

@@ -16,7 +16,7 @@ part of 'pos_shift_bloc.dart';
 
 /// reported has its own value: a report fetched from the list must not close a
 /// dialog that waits for success.
-enum PosShiftStatus { initial, loading, success, reported, failure }
+enum PosShiftStatus { initial, loading, success, reported, noAccess, failure }
 
 class PosShiftState extends Equatable {
   const PosShiftState({

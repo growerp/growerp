@@ -1,1 +1,1 @@
-shop,timetracking,invoicing,billing,hours,consultant,selfemployed,rates,clients
+pos,point of sale,till,cash register,retail,barcode,receipt,checkout,shop,store

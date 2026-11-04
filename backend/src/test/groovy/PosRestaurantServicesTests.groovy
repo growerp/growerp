@@ -537,6 +537,80 @@ class PosRestaurantServicesTests extends Specification {
         !tables.find { it.assetId == free.assetId }
     }
 
+    Map access(Map t, String group) {
+        return ec.service.sync().name('growerp.100.SecurityServices100.get#OwnerDomainAccess')
+                .parameters([ownerPartyId: t.ownerPartyId, userGroupId: group]).call().domainAccess
+    }
+
+    List menu(String appId, String group) {
+        return ec.service.sync().name('growerp.100.MenuServices100.get#MenuConfiguration')
+                .parameters([appId: appId, userVersion: false, includeAllGroups: true]).call()
+                .menuItems.findAll { !it.userGroups || group in it.userGroups }*.widgetName
+    }
+
+    def "an employee works the till, the back office is for the admin"() {
+        given:
+        Map company = GrowerpTestSupport.tenant(ec, tenantKey, 'USD', applicationId)
+
+        expect: 'the till'
+        access(company, 'GROWERP_M_EMPLOYEE')['GROWERP_POS'] == 'WRITE'
+        access(company, 'GROWERP_M_ADMIN')['GROWERP_POS'] == 'WRITE'
+
+        and: 'not the books or the catalog'
+        access(company, 'GROWERP_M_EMPLOYEE')['GROWERP_ACCOUNTING'] == null
+        access(company, 'GROWERP_M_EMPLOYEE')['GROWERP_CATALOG'] == null
+        access(company, 'GROWERP_M_ADMIN')['GROWERP_ACCOUNTING'] == 'WRITE'
+        access(company, 'GROWERP_M_ADMIN')['GROWERP_CATALOG'] == 'WRITE'
+
+        and: 'the menus say the same'
+        menu(appId, 'GROWERP_M_EMPLOYEE').containsAll(employeeScreens)
+        !menu(appId, 'GROWERP_M_EMPLOYEE').any { it in ['ProductList', 'TaxRateList', 'PosShiftList'] }
+        menu(appId, 'GROWERP_M_ADMIN').containsAll(['ProductList', 'TaxRateList', 'PosShiftList'])
+
+        where:
+        applicationId   | appId        | tenantKey         | employeeScreens
+        'AppShop'       | 'shop'       | 'PosAccessShop'   | ['PosCheckoutScreen']
+        'AppRestaurant' | 'restaurant' | 'PosAccessBistro' | ['PosFloorScreen', 'PosKitchenScreen']
+    }
+
+    def "a company of another app has no access to the till"() {
+        given:
+        String userId = ec.entity.find('moqui.security.UserAccount')
+                .condition('username', tenant.username).useCache(false).one().userId
+
+        expect:
+        access(tenant, 'GROWERP_M_ADMIN')['GROWERP_POS'] == null
+        ec.service.sync().name('growerp.100.SecurityServices100.get#RestDomain')
+                .parameters([artifactName: '/growerp/100/PosShift']).call().artifactGroupId == 'GROWERP_POS'
+        ec.service.sync().name('growerp.100.SecurityServices100.check#RestAccess')
+                .parameters([userId: userId, authzActionEnumId: 'AUTHZA_VIEW', artifactTypeEnumId: 'AT_REST_PATH',
+                        artifactName: '/growerp/100/PosShift']).call().authzTypeEnumId == 'AUTHZT_DENY'
+    }
+
+    def "the demo restaurant has a menu, tables and guests, and loads once"() {
+        given:
+        Map company = GrowerpTestSupport.tenant(ec, 'PosDemoBistro', 'USD', 'AppRestaurant')
+        Map parameters = [ownerPartyId: company.ownerPartyId]
+
+        when:
+        ec.service.sync().name("${service}.load#RestaurantDemoData").parameters(parameters).call()
+        ec.service.sync().name("${service}.load#RestaurantDemoData").parameters(parameters).call()
+        List tables = ec.service.sync().name("${service}.get#FloorPlan").call().tables
+        Map catalog = ec.service.sync().name('growerp.100.PosServices100.get#PosCatalog').call()
+
+        then:
+        !ec.message.hasError()
+        tables.size() == 6
+        tables.count { it.status == 'occupied' } == 1
+        tables.count { it.status == 'ready' } == 1
+        tables.find { it.status == 'occupied' }.grandTotal as BigDecimal == 51
+        tickets().size() == 2
+        catalog.items.size() == 14
+        catalog.items.find { it.productName == 'Steak' }.price as BigDecimal == 24
+        catalog.items*.categories.flatten()*.categoryName.unique().size() == 4
+        catalog.modifierGroups*.groupName.containsAll(['Cooked', 'Extras'])
+    }
+
     def "a tab moves to a free table"() {
         given:
         Map from = table()

@@ -72,5 +72,6 @@
   "modifier": "选项",
   "minimum": "最少",
   "maximum": "最多",
-  "voidedLines": "作废行"
+  "voidedLines": "作废行",
+  "noTillAccess": "无权访问收银台。此公司已注册到其他应用，或管理员未向您开放此屏幕。"
 }

@@ -10,6 +10,8 @@ screen/store/assessment/
 screen/store/freelance/
 screen/store/academy/
 screen/store/insurance/
+screen/store/shop/
+screen/store/restaurant/
 
 
 # gradle/build files

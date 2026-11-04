@@ -72,5 +72,6 @@
   "modifier": "Opción",
   "minimum": "Mínimo",
   "maximum": "Máximo",
-  "voidedLines": "Líneas anuladas"
+  "voidedLines": "Líneas anuladas",
+  "noTillAccess": "Sin acceso a la caja. Esta empresa está registrada para otra aplicación, o su administrador no le ha dado esta pantalla."
 }

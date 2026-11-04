@@ -1,7 +1,8 @@
 # Point of sale
 
-`PosServices100` sells to a shared walk-in customer in one transaction. REST: `Pos/Catalog`,
-`Pos/Barcode`, `Pos/Quote`, `Pos/Sale`, `Pos/Receipt` in the `GROWERP_POS` domain.
+`PosServices100` sells to a shared walk-in customer in one transaction. REST: `PosCatalog`,
+`PosBarcode`, `PosQuote`, `PosSale`, `PosReceipt` in the `GROWERP_POS` domain. Resources stay top level: Moqui checks REST authz only on the last
+resource of a path, a nested one (`Pos/Shift`) was never checked.
 
 - **`create#PosSale`**: order on channel `ScPos`, then `finish#PosOrder`: place, invoice, payments,
   approve, stock. `clientSaleId` comes from the terminal: the same id again returns the first sale,

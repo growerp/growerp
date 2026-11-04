@@ -1,18 +1,20 @@
 name: growerp-shop
 base: core22
 version: "1.16.31"
-summary: Track billable time, apply rates and invoice clients from one app
+summary: Sell, take payment and print receipts from any tablet or phone
 description: |
-  Get paid for every hour you work. GrowERP Shop turns tracked time into sent invoices without spreadsheets: log time against a client or project, apply the right rate, and generate the invoice in a couple of taps.
+  Every sale counted, every shift closed. GrowERP Shop turns a tablet, phone or computer into a till that is connected to your stock and your books: tap or scan a product, take the payment, print the receipt.
 
-  - Time entries per client, project and task
-  - Rate cards and billing rate management
-  - Invoices generated from approved time entries
-  - Cash in / cash out book and profit and loss
-  - Clients, quotations, orders and activities
-  - Your own website and portfolio
+  - Product tiles with search, categories and barcode scanning
+  - Cash, card and mixed payments with change
+  - Receipts on 80mm paper
+  - Tax per rate, included in the price or on top
+  - Refunds with stock back on the shelf
+  - Shifts with float, cash count and Z report
+  - Stock goes down with every sale
+  - Invoices and ledger booked automatically
 
-  This snap packages the Linux desktop version of the GrowERP Shop application. Made for independent professionals — consultants, developers, designers, coaches and anyone billing by the hour or by the day. Log time on your phone between jobs, then invoice from your desktop in the evening; it is the same data either way.
+  This snap packages the Linux desktop version of the GrowERP Shop application. Made for shops of any size.
 
 grade: stable
 confinement: strict

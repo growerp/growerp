@@ -12,7 +12,7 @@ on:
           - review
           - staging
       apps:
-        description: "Apps: all, or a comma list of admin,hotel,freelance,support,agents,rental,marketing,academy,insurance,moqui"
+        description: "Apps: all, or a comma list of admin,hotel,freelance,support,agents,rental,marketing,academy,insurance,shop,restaurant,moqui"
         required: true
         default: "all"
         type: string
@@ -47,7 +47,7 @@ jobs:
               else printf -v "${prefix}${name^^}" '%s' false; fi
             done
           }
-          _flags "$(_sel "$APPS_INPUT")" APP_ ALL_APPS admin hotel freelance support agents rental marketing academy insurance moqui
+          _flags "$(_sel "$APPS_INPUT")" APP_ ALL_APPS admin hotel freelance support agents rental marketing academy insurance shop restaurant moqui
 
           # All Apps = one script run with 'all' (the script picks the services).
           if [[ "$ALL_APPS" == "true" ]]; then
@@ -64,6 +64,8 @@ jobs:
             [[ "$APP_MARKETING" == "true" ]] && SERVICES="${SERVICES}marketing "
             [[ "$APP_ACADEMY" == "true" ]] && SERVICES="${SERVICES}academy "
             [[ "$APP_INSURANCE" == "true" ]] && SERVICES="${SERVICES}insurance "
+            [[ "$APP_SHOP" == "true" ]] && SERVICES="${SERVICES}shop "
+            [[ "$APP_RESTAURANT" == "true" ]] && SERVICES="${SERVICES}restaurant "
             SERVICES="${SERVICES% }"
           fi
           if [[ -z "$SERVICES" ]]; then echo "::error::at least one app is mandatory"; exit 1; fi

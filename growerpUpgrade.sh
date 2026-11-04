@@ -35,7 +35,7 @@ REPO="growerp/growerp"
 STATUS_PAGE="https://growerp.github.io/growerp/"
 PROD_HOST="growerp.com" # the swarm manager, as in update-production.yml
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-STORE_APPS=(admin hotel freelance support agents rental marketing academy insurance)
+STORE_APPS=(admin hotel freelance support agents rental marketing academy insurance shop restaurant)
 STORES=(ios macos android windows snap)
 WORKFLOWS=(update-staging.yml screenshots.yml freeze-review.yml publish-metadata.yml
     publish-binary.yml update-production.yml release-approved.yml)

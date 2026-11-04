@@ -1,4 +1,4 @@
-Get paid for every hour you work. GrowERP Restaurant turns tracked time into sent invoices without spreadsheets: log time against a client or project, apply the right rate, and generate the invoice in a couple of taps.
+From the first order to the last receipt. GrowERP Restaurant shows every table on your floor plan, sends orders to the kitchen screen the moment they are taken, and splits the bill the way your guests want it.
 
 Sign in with the demo account supplied in the review information fields. The app connects to the public GrowERP demo backend automatically; no server configuration is required. After signing in, dismiss the onboarding dialog to reach the main dashboard — the menu then gives access to every area described in the listing. All data in the demo company is test data and may be changed freely.
 

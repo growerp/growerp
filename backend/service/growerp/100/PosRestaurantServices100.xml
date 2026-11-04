@@ -140,6 +140,82 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="load" noun="RestaurantDemoData" allow-remote="false">
+        <description>A small restaurant for the demo company, called from load#DemoData for
+            AppRestaurant with the tenant admin logged in: a menu in four categories, choices
+            on the dishes, six tables, one table waiting for the kitchen and one with food
+            ready. Built with the services the app uses. Nothing when it has tables already.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+        </in-parameters>
+        <actions>
+            <entity-find-count entity-name="growerp.pos.PosTableLayout" count-field="tableCount">
+                <econdition field-name="ownerPartyId" />
+            </entity-find-count>
+            <if condition="tableCount">
+                <return />
+            </if>
+            <set field="menu"
+                from="[Starters: [['Soup of the day', 6.5], ['Bruschetta', 7], ['Caesar salad', 9.5]],
+                    Mains: [['Burger', 14.5], ['Steak', 24], ['Fish and chips', 16], ['Pasta primavera', 13.5]],
+                    Desserts: [['Chocolate mousse', 6.5], ['Cheesecake', 7]],
+                    Drinks: [['Mineral water', 3], ['Cola', 3.5], ['Beer', 4.5], ['House wine', 5.5], ['Coffee', 3]]]" />
+            <set field="dishes" from="[:]" />
+            <iterate list="menu" entry="items" key="categoryName">
+                <service-call name="growerp.100.CatalogServices100.create#ProductCategory" out-map="created"
+                    in-map="[category: [categoryName: categoryName, description: categoryName]]" />
+                <iterate list="items" entry="dish">
+                    <service-call name="growerp.100.CatalogServices100.create#Product" out-map="made"
+                        in-map="[product: [productName: dish[0], description: dish[0], productTypeId: 'Service',
+                            price: dish[1].toString(),
+                            categories: [[categoryId: created.category.categoryId]]]]" />
+                    <script>dishes[dish[0]] = made.product.productId</script>
+                </iterate>
+            </iterate>
+            <service-call name="growerp.100.PosRestaurantServices100.store#ModifierGroup"
+                in-map="[group: [groupName: 'Cooked', minSelect: 1, maxSelect: 1,
+                    modifiers: [[modifierName: 'Rare'], [modifierName: 'Medium'], [modifierName: 'Well done']],
+                    productIds: [dishes['Steak'], dishes['Burger']]]]" out-map="cooked" />
+            <service-call name="growerp.100.PosRestaurantServices100.store#ModifierGroup"
+                in-map="[group: [groupName: 'Extras', minSelect: 0, maxSelect: 3,
+                    modifiers: [[modifierName: 'Cheese', priceDelta: 1.5], [modifierName: 'Bacon', priceDelta: 2],
+                        [modifierName: 'Fried egg', priceDelta: 1.5]],
+                    productIds: [dishes['Burger']]]]" />
+            <set field="tableIds" from="[]" />
+            <iterate list="(1..6).toList()" entry="number">
+                <service-call name="growerp.100.PosRestaurantServices100.create#Table" out-map="made"
+                    in-map="[table: [tableName: 'Table ' + number, seats: number % 2 ? 4 : 2,
+                        x: (number - 1) % 3, y: ((number - 1) / 3) as Integer,
+                        shape: number % 2 ? 'square' : 'round']]" />
+                <script>tableIds.add(made.table.assetId)</script>
+            </iterate>
+            <set field="medium" from="cooked.group.modifiers.find({ it.modifierName == 'Medium' }).modifierId" />
+
+            <!-- table 1 waits for the kitchen -->
+            <service-call name="growerp.100.PosRestaurantServices100.open#Tab" out-map="waiting"
+                in-map="[tableAssetId: tableIds[0], guestCount: 2]" />
+            <service-call name="growerp.100.PosRestaurantServices100.add#TabLine"
+                in-map="[tabId: waiting.tab.tabId, productId: dishes['Steak'], modifierIds: [medium]]" />
+            <service-call name="growerp.100.PosRestaurantServices100.add#TabLine"
+                in-map="[tabId: waiting.tab.tabId, productId: dishes['Fish and chips']]" />
+            <service-call name="growerp.100.PosRestaurantServices100.add#TabLine"
+                in-map="[tabId: waiting.tab.tabId, productId: dishes['House wine'], quantity: 2]" />
+            <service-call name="growerp.100.PosRestaurantServices100.send#TabToKitchen"
+                in-map="[tabId: waiting.tab.tabId]" />
+
+            <!-- table 3 has food ready -->
+            <service-call name="growerp.100.PosRestaurantServices100.open#Tab" out-map="served"
+                in-map="[tableAssetId: tableIds[2], guestCount: 3]" />
+            <service-call name="growerp.100.PosRestaurantServices100.add#TabLine"
+                in-map="[tabId: served.tab.tabId, productId: dishes['Pasta primavera'], quantity: 3]" />
+            <service-call name="growerp.100.PosRestaurantServices100.send#TabToKitchen" out-map="sent"
+                in-map="[tabId: served.tab.tabId]" />
+            <service-call name="growerp.100.PosRestaurantServices100.update#KitchenLine"
+                in-map="[orderId: sent.tab.orderId, orderItemSeqId: sent.tab.lines[0].orderItemSeqId,
+                    kitchenStatus: 'Ready']" />
+        </actions>
+    </service>
+
     <!-- ===================== modifiers ===================== -->
 
     <service verb="get" noun="ModifierGroups">

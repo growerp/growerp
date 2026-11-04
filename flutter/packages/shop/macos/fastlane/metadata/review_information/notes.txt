@@ -1,4 +1,4 @@
-Get paid for every hour you work. GrowERP Shop turns tracked time into sent invoices without spreadsheets: log time against a client or project, apply the right rate, and generate the invoice in a couple of taps.
+Every sale counted, every shift closed. GrowERP Shop turns a tablet, phone or computer into a till that is connected to your stock and your books: tap or scan a product, take the payment, print the receipt.
 
 Sign in with the demo account supplied in the review information fields. The app connects to the public GrowERP demo backend automatically; no server configuration is required. After signing in, dismiss the onboarding dialog to reach the main dashboard — the menu then gives access to every area described in the listing. All data in the demo company is test data and may be changed freely.
 

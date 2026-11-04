@@ -39,7 +39,10 @@ class PosShiftBloc extends Bloc<PosShiftEvent, PosShiftState> {
   Future<void> _failed(DioException e, Emitter<PosShiftState> emit) async {
     emit(
       state.copyWith(
-        status: PosShiftStatus.failure,
+        // a company of another app, or the screen taken away from this group
+        status: e.response?.statusCode == 403
+            ? PosShiftStatus.noAccess
+            : PosShiftStatus.failure,
         message: await getDioError(e),
       ),
     );

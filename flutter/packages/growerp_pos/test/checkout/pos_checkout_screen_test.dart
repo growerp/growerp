@@ -192,6 +192,18 @@ void main() {
     expect(find.byKey(const Key('PosRefundDialog')), findsNothing);
   });
 
+  testWidgets('a company without access gets a message, not a till', (
+    tester,
+  ) async {
+    when(
+      () => restClient.getPosShift(terminalName: 'Till 1'),
+    ).thenThrow(dioError('forbidden', statusCode: 403));
+    await pump(tester, const Size(1280, 800));
+
+    expect(find.byKey(const Key('posNoAccess')), findsOneWidget);
+    expect(find.byKey(const Key('PosShiftOpenView')), findsNothing);
+  });
+
   testWidgets('a closed till asks for the float, then opens', (tester) async {
     when(
       () => restClient.getPosShift(terminalName: 'Till 1'),

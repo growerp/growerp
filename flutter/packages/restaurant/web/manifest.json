@@ -5,7 +5,7 @@
     "display": "standalone",
     "background_color": "#030303",
     "theme_color": "#006B5A",
-    "description": "Track billable time, set rates and invoice clients in minutes.",
+    "description": "Tables, kitchen display and split bills in one app for your restaurant.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

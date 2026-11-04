@@ -1,1 +1,1 @@
-restaurant,timetracking,invoicing,billing,hours,consultant,selfemployed,rates,clients
+restaurant,pos,tables,kitchen display,split bill,waiter,cafe,bar,menu,point of sale

@@ -1,1 +1,1 @@
-Track billable time, set rates and invoice clients in minutes.
+Tables, kitchen display and split bills in one app for your restaurant.

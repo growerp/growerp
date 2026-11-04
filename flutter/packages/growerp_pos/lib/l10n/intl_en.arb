@@ -72,5 +72,6 @@
   "modifier": "Modifier",
   "minimum": "Minimum",
   "maximum": "Maximum",
-  "voidedLines": "Voided lines"
+  "voidedLines": "Voided lines",
+  "noTillAccess": "No access to the till. This company is registered for another app, or your administrator has not given you this screen."
 }

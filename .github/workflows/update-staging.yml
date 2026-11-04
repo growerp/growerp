@@ -25,7 +25,7 @@ on:
           - minor
           - major
       apps:
-        description: "Apps: all, or a comma list of admin,hotel,freelance,support,agents,rental,marketing,academy,insurance,moqui"
+        description: "Apps: all, or a comma list of admin,hotel,freelance,support,agents,rental,marketing,academy,insurance,shop,restaurant,moqui"
         required: true
         default: "all"
         type: string
@@ -147,7 +147,7 @@ jobs:
               else printf -v "${prefix}${name^^}" '%s' false; fi
             done
           }
-          _flags "$(_sel "$APPS_INPUT")" APP_ ALL_APPS admin hotel freelance support agents rental marketing academy insurance moqui
+          _flags "$(_sel "$APPS_INPUT")" APP_ ALL_APPS admin hotel freelance support agents rental marketing academy insurance shop restaurant moqui
 
           INPUT=""
           if [[ "$ALL_APPS" != "true" ]]; then
@@ -160,6 +160,8 @@ jobs:
             [[ "$APP_MARKETING" == "true" ]] && INPUT="${INPUT}marketing,"
             [[ "$APP_ACADEMY" == "true" ]] && INPUT="${INPUT}academy,"
             [[ "$APP_INSURANCE" == "true" ]] && INPUT="${INPUT}insurance,"
+            [[ "$APP_SHOP" == "true" ]] && INPUT="${INPUT}shop,"
+            [[ "$APP_RESTAURANT" == "true" ]] && INPUT="${INPUT}restaurant,"
             [[ "$APP_MOQUI" == "true" ]] && INPUT="${INPUT}growerp-moqui,"
             INPUT="${INPUT%,}"
             if [[ -z "$INPUT" ]]; then echo "::error::at least one app is mandatory"; exit 1; fi

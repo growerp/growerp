@@ -72,5 +72,6 @@
   "modifier": "Optie",
   "minimum": "Minimum",
   "maximum": "Maximum",
-  "voidedLines": "Geannuleerde regels"
+  "voidedLines": "Geannuleerde regels",
+  "noTillAccess": "Geen toegang tot de kassa. Dit bedrijf is geregistreerd voor een andere app, of uw beheerder heeft u dit scherm niet gegeven."
 }

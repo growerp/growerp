@@ -46,6 +46,19 @@ void main() {
   );
 
   blocTest<PosShiftBloc, PosShiftState>(
+    'PosShiftFetch_forbidden_noAccess',
+    setUp: () => when(
+      () => restClient.getPosShift(terminalName: 'Till 1'),
+    ).thenThrow(dioError('forbidden', statusCode: 403)),
+    build: () => PosShiftBloc(restClient),
+    act: (bloc) => bloc.add(const PosShiftFetch('Till 1')),
+    expect: () => [
+      status(PosShiftStatus.loading),
+      status(PosShiftStatus.noAccess),
+    ],
+  );
+
+  blocTest<PosShiftBloc, PosShiftState>(
     'PosShiftOpen_success_givesTheShift',
     setUp: () => when(
       () =>

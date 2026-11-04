@@ -28,11 +28,11 @@ class GrowerpTestSupport {
 
     /** Log in as the admin of the tenant named key, creating the tenant on first use.
         Returns [ownerPartyId, companyPartyId, adminPartyId, username]. */
-    static Map tenant(ExecutionContext ec, String key, String currencyId = 'USD') {
+    static Map tenant(ExecutionContext ec, String key, String currencyId = 'USD', String applicationId = 'AppAdmin') {
         ec.artifactExecution.disableAuthz()
         if (!userExists(ec, GROWERP_ADMIN)) register(ec, GROWERP_ADMIN, 'GrowERP', 'USD')
         String email = "${key.toLowerCase()}@spock.example.com"
-        if (!userExists(ec, email)) register(ec, email, "${key} Co", currencyId)
+        if (!userExists(ec, email)) register(ec, email, "${key} Co", currencyId, applicationId)
         ec.user.internalLoginUser(email)
         Map related = ec.service.sync().name('growerp.100.GeneralServices100.get#RelatedCompanyAndOwner').call()
         return [ownerPartyId: related.ownerPartyId, companyPartyId: related.companyPartyId,
@@ -44,15 +44,16 @@ class GrowerpTestSupport {
                 .useCache(false).one() != null
     }
 
-    static void register(ExecutionContext ec, String email, String companyName, String currencyId) {
+    static void register(ExecutionContext ec, String email, String companyName, String currencyId,
+                         String applicationId = 'AppAdmin') {
         Map created = ec.service.sync().name('growerp.100.TenantServices100.create#Tenant')
                 .parameters([adminEmail: email, adminFirstName: 'Admin', adminLastName: companyName,
-                        password: 'qqqqqq9!', applicationId: 'AppAdmin']).call()
+                        password: 'qqqqqq9!', applicationId: applicationId]).call()
         ec.user.internalLoginUser(email)
         ec.service.sync().name('growerp.100.TenantServices100.complete#TenantSetup')
                 .parameters([ownerPartyId: created.ownerPartyId, companyPartyId: created.companyPartyId,
                         companyName: companyName, currencyId: currencyId, demoData: false,
-                        applicationId: 'AppAdmin', userPartyId: created.adminPartyId]).call()
+                        applicationId: applicationId, userPartyId: created.adminPartyId]).call()
         if (ec.message.hasError()) throw new IllegalStateException(
                 "Tenant setup for ${email} failed: ${ec.message.errorsString}")
         ec.user.logoutUser()

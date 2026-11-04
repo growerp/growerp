@@ -1,7 +1,6 @@
 # keyword.strings
-"dashboard" = "OVERVIEW";
-"company" = "COMPANY";
-"catalog" = "SERVICES";
-"sales" = "CLIENTS";
-"accounting" = "ACCOUNTING";
-"ledger" = "LEDGER";
+"floor" = "Floor";
+"kitchen" = "Kitchen";
+"modifiers" = "Modifiers";
+"catalog" = "Catalog";
+"shifts" = "Shifts";

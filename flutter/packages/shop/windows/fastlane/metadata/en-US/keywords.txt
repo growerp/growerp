@@ -1,1 +1,1 @@
-time tracking, shop invoicing, billing, rate cards, self employed, accounting, open source
+pos,point of sale,till,cash register,retail,barcode,receipt,checkout,shop,store

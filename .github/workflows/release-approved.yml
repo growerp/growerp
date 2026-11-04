@@ -26,7 +26,7 @@ on:
   workflow_dispatch:
     inputs:
       apps:
-        description: "Apps: all, or a comma list of admin,hotel,freelance,support,agents,rental,marketing,academy,insurance"
+        description: "Apps: all, or a comma list of admin,hotel,freelance,support,agents,rental,marketing,academy,insurance,shop,restaurant"
         required: true
         default: "all"
         type: string
@@ -87,7 +87,7 @@ jobs:
               else printf -v "${prefix}${name^^}" '%s' false; fi
             done
           }
-          _flags "$(_sel "$APPS_INPUT")" APP_ ALL_APPS admin hotel freelance support agents rental marketing academy insurance
+          _flags "$(_sel "$APPS_INPUT")" APP_ ALL_APPS admin hotel freelance support agents rental marketing academy insurance shop restaurant
           _flags "$(_sel "$STORES_INPUT")" STORE_ ALL_STORES ios macos android windows snap
 
           if [[ "$ALL_APPS" == "true" ]]; then
@@ -103,6 +103,8 @@ jobs:
             [[ "$APP_MARKETING" == "true" ]] && APPS="${APPS}marketing,"
             [[ "$APP_ACADEMY" == "true" ]] && APPS="${APPS}academy,"
             [[ "$APP_INSURANCE" == "true" ]] && APPS="${APPS}insurance,"
+            [[ "$APP_SHOP" == "true" ]] && APPS="${APPS}shop,"
+            [[ "$APP_RESTAURANT" == "true" ]] && APPS="${APPS}restaurant,"
             APPS="${APPS%,}"
           fi
 

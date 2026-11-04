@@ -1,18 +1,20 @@
 name: growerp-restaurant
 base: core22
 version: "1.16.31"
-summary: Track billable time, apply rates and invoice clients from one app
+summary: Tables, kitchen display and split bills in one app for your restaurant
 description: |
-  Get paid for every hour you work. GrowERP Restaurant turns tracked time into sent invoices without spreadsheets: log time against a client or project, apply the right rate, and generate the invoice in a couple of taps.
+  From the first order to the last receipt. GrowERP Restaurant shows every table on your floor plan, sends orders to the kitchen screen the moment they are taken, and splits the bill the way your guests want it.
 
-  - Time entries per client, project and task
-  - Rate cards and billing rate management
-  - Invoices generated from approved time entries
-  - Cash in / cash out book and profit and loss
-  - Clients, quotations, orders and activities
-  - Your own website and portfolio
+  - Floor plan with live table status
+  - Tabs with modifiers, extras and notes
+  - Kitchen display that updates by itself
+  - Split the bill equally or by item
+  - Cash and card payments with receipts
+  - Shifts with float, cash count and Z report
+  - Tax per rate, included in the price or on top
+  - Invoices and ledger booked automatically
 
-  This snap packages the Linux desktop version of the GrowERP Restaurant application. Made for independent professionals — consultants, developers, designers, coaches and anyone billing by the hour or by the day. Log time on your phone between jobs, then invoice from your desktop in the evening; it is the same data either way.
+  This snap packages the Linux desktop version of the GrowERP Restaurant application. Made for restaurants, cafes and bars.
 
 grade: stable
 confinement: strict

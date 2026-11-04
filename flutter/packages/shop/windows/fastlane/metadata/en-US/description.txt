@@ -1,15 +1,13 @@
-Get paid for every hour you work. GrowERP Shop turns tracked time into sent invoices without spreadsheets: log time against a client or project, apply the right rate, and generate the invoice in a couple of taps.
+Every sale counted, every shift closed. GrowERP Shop turns a tablet, phone or computer into a till that is connected to your stock and your books: tap or scan a product, take the payment, print the receipt.
 
 Key Features:
-• Time entries per client, project and task
-• Rate cards, so each client bills at the right price
-• One-tap invoices generated from approved time
-• Cash in / cash out book for everything else
-• Profit and loss, ready for your accountant
-• Clients, contacts and follow-up activities
-• Quotations and orders when a job grows
-• Your own website and portfolio, managed in-app
+• Product tiles with search, categories and barcode scanning
+• Cash, card and mixed payments with change
+• Receipts on 80mm paper
+• Tax per rate, included in the price or on top
+• Refunds with stock back on the shelf
+• Shifts with float, cash count and Z report
+• Stock goes down with every sale
+• Invoices and ledger booked automatically
 
-Made for independent professionals — consultants, developers, designers, coaches and anyone billing by the hour or by the day. Log time on your phone between jobs, then invoice from your desktop in the evening; it is the same data either way. GrowERP is open source and runs on the Moqui and Apache OFBiz business platforms — no licence fees, no lock-in.
-
-Made for Windows, and synchronized in real time with the Linux, macOS, iPhone, iPad, Android and web versions.
+Made for shops of any size. GrowERP is open source: https://github.com/growerp/growerp

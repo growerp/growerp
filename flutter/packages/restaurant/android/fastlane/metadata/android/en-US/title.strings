@@ -1,7 +1,6 @@
 # title.strings
-"dashboard" = "Your business at a glance";
-"company" = "Company Information";
-"catalog" = "Services, rates & categories";
-"sales" = "Clients, orders & invoices";
-"accounting" = "Accounting Dashboard";
-"ledger" = "Ledger tree & transactions";
+"floor" = "Every table at a glance";
+"kitchen" = "Orders straight to the kitchen";
+"modifiers" = "Extras and choices with their price";
+"catalog" = "Your menu and prices";
+"shifts" = "Close the day with a Z report";

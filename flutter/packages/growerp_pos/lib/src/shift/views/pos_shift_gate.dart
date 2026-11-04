@@ -63,6 +63,18 @@ class PosShiftGateState extends State<PosShiftGate> {
         }
       },
       builder: (context, shift) {
+        if (shift.status == PosShiftStatus.noAccess) {
+          return Center(
+            key: const Key('posNoAccess'),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(
+                PosLocalizations.of(context)!.noTillAccess,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
+        }
         if (shift.shift == null) {
           return shift.status == PosShiftStatus.initial ||
                   shift.status == PosShiftStatus.loading

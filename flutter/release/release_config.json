@@ -9,6 +9,8 @@
     "marketing",
     "academy",
     "insurance",
+    "shop",
+    "restaurant",
     "growerp-moqui"
   ],
   "storeApps": {
@@ -20,7 +22,9 @@
     "agents": ["ios", "macos", "android", "windows", "snap"],
     "marketing": ["ios", "macos", "android", "windows", "snap"],
     "academy": ["ios", "macos", "android", "windows", "snap"],
-    "insurance": ["ios", "macos", "android", "windows", "snap"]
+    "insurance": ["ios", "macos", "android", "windows", "snap"],
+    "shop": ["ios", "macos", "android", "windows", "snap"],
+    "restaurant": ["ios", "macos", "android", "windows", "snap"]
   },
   "storeIds": {
     "admin": { "apple": "1545521755", "windows": "9nwx6kftjnql" },

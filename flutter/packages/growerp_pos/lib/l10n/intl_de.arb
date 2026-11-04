@@ -72,5 +72,6 @@
   "modifier": "Option",
   "minimum": "Minimum",
   "maximum": "Maximum",
-  "voidedLines": "Stornierte Zeilen"
+  "voidedLines": "Stornierte Zeilen",
+  "noTillAccess": "Kein Zugriff auf die Kasse. Dieses Unternehmen ist für eine andere App registriert, oder Ihr Administrator hat Ihnen diesen Bildschirm nicht freigegeben."
 }

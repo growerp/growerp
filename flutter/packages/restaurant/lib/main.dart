@@ -166,20 +166,11 @@ class _RestaurantAppState extends State<RestaurantApp> {
             notificationClient: widget.notificationClient,
             title: 'GrowERP Restaurant',
             router: router,
-            extraDelegates: const [
-            UserCompanyLocalizations.delegate,
-            PosLocalizations.delegate,
-            CatalogLocalizations.delegate,
-            InventoryLocalizations.delegate,
-            OrderAccountingLocalizations.delegate,
-            ],
-            extraBlocProviders: [
-              ...getUserCompanyBlocProviders(widget.restClient, widget.applicationId),
-              ...getPosBlocProviders(widget.restClient),
-              ...getCatalogBlocProviders(widget.restClient, widget.applicationId),
-              ...getInventoryBlocProviders(widget.restClient, widget.applicationId),
-              ...getOrderAccountingBlocProviders(widget.restClient, widget.applicationId),
-            ],
+            extraDelegates: delegates,
+            extraBlocProviders: getRestaurantAppBlocProviders(
+              widget.restClient,
+              widget.applicationId,
+            ),
             widgetRegistrations: restaurantWidgetRegistrations,
             forceUpdateInfo: widget.forceUpdateInfo,
           );
@@ -187,6 +178,27 @@ class _RestaurantAppState extends State<RestaurantApp> {
       ),
     );
   }
+}
+
+List<LocalizationsDelegate> delegates = const [
+  UserCompanyLocalizations.delegate,
+  PosLocalizations.delegate,
+  CatalogLocalizations.delegate,
+  InventoryLocalizations.delegate,
+  OrderAccountingLocalizations.delegate,
+];
+
+List<BlocProvider> getRestaurantAppBlocProviders(
+  RestClient restClient,
+  String applicationId,
+) {
+  return [
+    ...getUserCompanyBlocProviders(restClient, applicationId),
+    ...getPosBlocProviders(restClient),
+    ...getCatalogBlocProviders(restClient, applicationId),
+    ...getInventoryBlocProviders(restClient, applicationId),
+    ...getOrderAccountingBlocProviders(restClient, applicationId),
+  ];
 }
 
 /// Widget registrations for all packages used by the Restaurant app.
@@ -197,7 +209,5 @@ List<Map<String, GrowerpWidgetBuilder>> restaurantWidgetRegistrations = [
   getInventoryWidgets(),
   getOrderAccountingWidgets(),
   // App-specific widgets
-  {
-    'AboutForm': (args) => const AboutForm(),
-  },
+  {'AboutForm': (args) => const AboutForm()},
 ];

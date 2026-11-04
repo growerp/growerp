@@ -1,1 +1,1 @@
-time tracking, restaurant invoicing, billing, rate cards, self employed, accounting, open source
+restaurant,pos,tables,kitchen display,split bill,waiter,cafe,bar,menu,point of sale
