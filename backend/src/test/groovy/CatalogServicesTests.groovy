@@ -122,6 +122,37 @@ class CatalogServicesTests extends Specification {
         updated.listPrice as BigDecimal == 20
     }
 
+    def "an unchanged sales price adds no price row"() {
+        given:
+        Map product = createProduct([productName: "Sales ${run}", price: 12.5, listPrice: 15])
+        Closure salesPriceRows = {
+            ec.entity.find('mantle.product.ProductPrice')
+                    .condition('productId', product.productId)
+                    .condition('priceTypeEnumId', 'PptCurrent').useCache(false).count()
+        }
+        long rowsBefore = salesPriceRows()
+
+        when: 'the same sales price is sent'
+        Map updated = ec.service.sync().name("${service}.update#Product")
+                .parameters([product: [productId: product.productId, price: '12.50']])
+                .call().product
+
+        then:
+        !ec.message.hasError()
+        updated.price as BigDecimal == 12.5
+        salesPriceRows() == rowsBefore
+
+        when: 'a new sales price is sent'
+        updated = ec.service.sync().name("${service}.update#Product")
+                .parameters([product: [productId: product.productId, price: '13']])
+                .call().product
+
+        then:
+        !ec.message.hasError()
+        updated.price as BigDecimal == 13
+        salesPriceRows() == rowsBefore + 1
+    }
+
     def "an update leaves the fields it does not mention alone"() {
         given:
         Map category = ec.service.sync().name("${service}.create#ProductCategory")

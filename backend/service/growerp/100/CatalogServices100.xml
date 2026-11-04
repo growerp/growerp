@@ -612,7 +612,7 @@ limitations under the License.
             </entity-find>
             <if
                 condition="product.price != null &amp;&amp; ((!productPrices &amp;&amp; product.price &amp;&amp; !new BigDecimal(product.price).ZERO) 
-                    || (productPrices[0]?.price != product?.price))">
+                    || (productPrices[0]?.price != (product.price ? new BigDecimal(product.price.toString()) : null)))">
                 <set field="productPrice" from="productPrices[0]" />
                 <service-call name="create#mantle.product.ProductPrice" in-map="priceMap" />
                 <!-- delete old record -->
