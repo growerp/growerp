@@ -1091,6 +1091,25 @@ limitations under the License.
                 <service name="growerp.100.AccountingServices100.get#BalanceSummary" />
             </method>
         </resource>
+        <resource name="TaxRate">
+            <method type="get">
+                <service name="growerp.100.TaxServices100.get#TaxRates" />
+            </method>
+            <method type="post">
+                <service name="growerp.100.TaxServices100.create#TaxRate" />
+            </method>
+            <method type="patch">
+                <service name="growerp.100.TaxServices100.update#TaxRate" />
+            </method>
+            <method type="delete">
+                <service name="growerp.100.TaxServices100.delete#TaxRate" />
+            </method>
+        </resource>
+        <resource name="TaxSettings">
+            <method type="patch">
+                <service name="growerp.100.TaxServices100.update#TaxSettings" />
+            </method>
+        </resource>
         <resource name="CashBookEntry">
             <method type="get">
                 <service name="growerp.100.CashBookServices100.get#CashBookEntry" />

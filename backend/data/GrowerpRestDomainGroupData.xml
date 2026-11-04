@@ -84,7 +84,7 @@ The 28 anonymous-* resources bypass authz entirely and need no domain.
     <!-- simplified cash book and the central exchange rates; separate row because artifactName is limited to 255 chars -->
     <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_ACCOUNTING"
         artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
-        artifactName="/growerp/100/(CashBookCategory|CashBookEntry|ExchangeRates|ProfitLoss)(/.*)?"/>
+        artifactName="/growerp/100/(CashBookCategory|CashBookEntry|ExchangeRates|ProfitLoss|TaxRate|TaxSettings)(/.*)?"/>
 
     <moqui.security.ArtifactGroup artifactGroupId="GROWERP_RENTAL"
         description="Rental and hotel occupancy"/>

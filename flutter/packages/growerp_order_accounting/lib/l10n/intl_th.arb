@@ -402,5 +402,17 @@
   "cashBookCategoryUpdateSuccess": "แก้ไขหมวดหมู่แล้ว",
   "exchangeRate": "อัตรา",
   "searchHintExchangeRates": "ค้นหาสกุลเงิน...",
-  "fetchExchangeRatesFail": "ดึงอัตราแลกเปลี่ยนไม่สำเร็จ:"
+  "fetchExchangeRatesFail": "ดึงอัตราแลกเปลี่ยนไม่สำเร็จ:",
+  "taxRate": "อัตราภาษี",
+  "newTaxRate": "อัตราภาษีใหม่",
+  "taxRateName": "ชื่อ",
+  "taxRatePercentage": "เปอร์เซ็นต์",
+  "taxRateCategory": "หมวดหมู่สินค้า",
+  "taxRateDefault": "อัตราเริ่มต้น",
+  "taxRateShipping": "คิดภาษีค่าจัดส่งด้วย",
+  "pricesIncludeTax": "ราคาหน้าร้านรวมภาษีแล้ว",
+  "searchTaxRateHint": "ค้นหาอัตราภาษี",
+  "taxRateAddSuccess": "เพิ่มอัตราภาษีแล้ว",
+  "taxRateUpdateSuccess": "อัปเดตอัตราภาษีแล้ว",
+  "taxRateDeleteSuccess": "ลบอัตราภาษีแล้ว"
 }

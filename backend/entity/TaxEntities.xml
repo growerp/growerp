@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+    <entity entity-name="TaxRate" package="growerp.tax" cache="never">
+        <description>A sales tax rate of a tenant. The rate without a category is the default,
+            a rate with a category beats it for the products in that category. A tenant
+            without rates charges no tax.</description>
+        <field name="taxRateId" type="id" is-pk="true" />
+        <field name="ownerPartyId" type="id" not-null="true" />
+        <field name="taxAuthorityId" type="id" not-null="true" />
+        <field name="productCategoryId" type="id" />
+        <field name="taxName" type="text-short" />
+        <field name="taxPercentage" type="number-decimal" not-null="true" />
+        <field name="taxShipping" type="text-indicator" />
+        <field name="fromDate" type="date-time" />
+        <field name="thruDate" type="date-time" />
+        <relationship type="one" title="Owner" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+        <relationship type="one" related="mantle.other.tax.TaxAuthority" />
+        <relationship type="one" related="mantle.product.category.ProductCategory" />
+        <index name="TAX_RATE_OWNER">
+            <index-field name="ownerPartyId" />
+        </index>
+    </entity>
+
+    <extend-entity entity-name="ProductStore" package="mantle.product.store">
+        <field name="pricesIncludeTax" type="text-indicator">
+            <description>Y: POS prices include tax. Orders outside the POS keep tax on top.</description>
+        </field>
+    </extend-entity>
+</entities>

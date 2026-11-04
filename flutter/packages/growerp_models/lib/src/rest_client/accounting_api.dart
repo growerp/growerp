@@ -102,6 +102,21 @@ mixin AccountingApi {
   @DELETE("rest/s1/growerp/100/CashBookEntry")
   Future<void> deleteCashBookEntry({@Field() required String transactionId});
 
+  @GET("rest/s1/growerp/100/TaxRate")
+  Future<TaxRates> getTaxRates();
+
+  @POST("rest/s1/growerp/100/TaxRate")
+  Future<TaxRate> createTaxRate({@Field() required TaxRate taxRate});
+
+  @PATCH("rest/s1/growerp/100/TaxRate")
+  Future<TaxRate> updateTaxRate({@Field() required TaxRate taxRate});
+
+  @DELETE("rest/s1/growerp/100/TaxRate")
+  Future<void> deleteTaxRate({@Field() required String taxRateId});
+
+  @PATCH("rest/s1/growerp/100/TaxSettings")
+  Future<void> updateTaxSettings({@Field() required bool pricesIncludeTax});
+
   /// income (isIncome=true) or expense ledger accounts used as categories
   @GET("rest/s1/growerp/100/CashBookCategory")
   Future<GlAccounts> getCashBookCategory({

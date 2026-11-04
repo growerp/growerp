@@ -402,5 +402,17 @@
   "cashBookCategoryUpdateSuccess": "Catégorie modifiée",
   "exchangeRate": "Taux",
   "searchHintExchangeRates": "Rechercher une devise...",
-  "fetchExchangeRatesFail": "Échec du chargement des taux de change :"
+  "fetchExchangeRatesFail": "Échec du chargement des taux de change :",
+  "taxRate": "Taux de taxe",
+  "newTaxRate": "Nouveau taux de taxe",
+  "taxRateName": "Nom",
+  "taxRatePercentage": "Pourcentage",
+  "taxRateCategory": "Catégorie de produit",
+  "taxRateDefault": "Taux par défaut",
+  "taxRateShipping": "Taxer aussi la livraison",
+  "pricesIncludeTax": "Les prix de caisse incluent la taxe",
+  "searchTaxRateHint": "Rechercher des taux de taxe",
+  "taxRateAddSuccess": "Taux de taxe ajouté",
+  "taxRateUpdateSuccess": "Taux de taxe mis à jour",
+  "taxRateDeleteSuccess": "Taux de taxe supprimé"
 }

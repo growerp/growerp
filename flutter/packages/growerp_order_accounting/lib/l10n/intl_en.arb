@@ -1664,5 +1664,17 @@
   "fetchExchangeRatesFail": "Failed to fetch exchange rates:",
   "@fetchExchangeRatesFail": {
     "description": "Error prefix when exchange rates cannot be loaded"
-  }
+  },
+  "taxRate": "Tax rate",
+  "newTaxRate": "New tax rate",
+  "taxRateName": "Name",
+  "taxRatePercentage": "Percentage",
+  "taxRateCategory": "Product category",
+  "taxRateDefault": "Default rate",
+  "taxRateShipping": "Also tax shipping",
+  "pricesIncludeTax": "POS prices include tax",
+  "searchTaxRateHint": "Search tax rates",
+  "taxRateAddSuccess": "Tax rate added",
+  "taxRateUpdateSuccess": "Tax rate updated",
+  "taxRateDeleteSuccess": "Tax rate deleted"
 }

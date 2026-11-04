@@ -1,1 +1,4 @@
 # Migrations for the version not yet released, see ../README.md
+
+# Sales tax: LOCAL gateway calculates GrowERP tax rates, stores without a gateway get it
+growerp.100.TaxServices100.migrate#TaxGateway

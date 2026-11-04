@@ -423,6 +423,9 @@ limitations under the License.
     <org.moqui.search.SearchServices.indexDataFeedDocuments dataFeedId="PopCommerceSearch" /-->
 
 
+    <mantle.other.tax.TaxGatewayConfig taxGatewayConfigId="LOCAL"
+        calculateServiceName="growerp.100.TaxServices100.calculate#SalesTaxGrowerp" />
+
     <mantle.product.store.ProductStore productStoreId="POPC_DEFAULT" storeName="Default Store"
         organizationPartyId="_NA_" inventoryFacilityId="DEFAULT_WH"
         reservationOrderEnumId="AsResOrdFifoRec"

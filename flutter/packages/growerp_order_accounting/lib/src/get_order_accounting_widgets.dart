@@ -110,6 +110,7 @@ Map<String, GrowerpWidgetBuilder> getOrderAccountingWidgets() {
     // simplified cash in / cash out bookkeeping
     'CashBookCategoryList': (args) => const CashBookCategoryList(),
     'CashBookList': (args) => const CashBookList(),
+    'TaxRateList': (args) => const TaxRateList(),
     'ProfitLossForm': (args) => const ProfitLossForm(),
     'TaxSummaryForm': (args) => const TaxSummaryForm(),
     'TimePeriodListForm': (args) => const TimePeriodListForm(),
@@ -401,6 +402,15 @@ List<WidgetMetadata> getOrderAccountingWidgetsWithMetadata() {
         'receipt',
       ],
       builder: (args) => const CashBookList(),
+    ),
+    WidgetMetadata(
+      widgetName: 'TaxRateList',
+      description:
+          'Sales tax rates of the company, the default rate and rates '
+          'per product category',
+      iconName: 'percent',
+      keywords: ['tax', 'vat', 'sales tax', 'tax rate'],
+      builder: (args) => const TaxRateList(),
     ),
     WidgetMetadata(
       widgetName: 'CashBookCategoryList',

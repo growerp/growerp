@@ -402,5 +402,17 @@
   "cashBookCategoryUpdateSuccess": "Kategorie geändert",
   "exchangeRate": "Kurs",
   "searchHintExchangeRates": "Währung suchen...",
-  "fetchExchangeRatesFail": "Abrufen der Wechselkurse fehlgeschlagen:"
+  "fetchExchangeRatesFail": "Abrufen der Wechselkurse fehlgeschlagen:",
+  "taxRate": "Steuersatz",
+  "newTaxRate": "Neuer Steuersatz",
+  "taxRateName": "Name",
+  "taxRatePercentage": "Prozentsatz",
+  "taxRateCategory": "Produktkategorie",
+  "taxRateDefault": "Standardsatz",
+  "taxRateShipping": "Versand auch besteuern",
+  "pricesIncludeTax": "Kassenpreise enthalten Steuer",
+  "searchTaxRateHint": "Steuersätze suchen",
+  "taxRateAddSuccess": "Steuersatz hinzugefügt",
+  "taxRateUpdateSuccess": "Steuersatz aktualisiert",
+  "taxRateDeleteSuccess": "Steuersatz gelöscht"
 }

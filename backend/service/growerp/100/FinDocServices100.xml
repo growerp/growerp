@@ -2215,7 +2215,18 @@ limitations under the License.
                     </else>
                 </if>
             </iterate>
-
+            <!-- tax lines of the document just came back in as plain items: calculate again -->
+            <entity-find-one entity-name="mantle.order.OrderHeader" value-field="taxOrder" />
+            <if condition="taxOrder?.productStoreId">
+                <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                    out-map="taxOwner" />
+                <service-call name="growerp.100.TaxServices100.get#ActiveTaxRates" out-map="active"
+                    in-map="[ownerPartyId: taxOwner.ownerPartyId]" />
+                <if condition="active.rates">
+                    <service-call name="mantle.other.TaxServices.calculate#OrderSalesTax"
+                        in-map="[orderId: orderId, orderPartSeqId: orderPartSeqId]" />
+                </if>
+            </if>
         </actions>
     </service>
 
@@ -2239,6 +2250,8 @@ limitations under the License.
                                         amount: item.price]"
                     out-map="context" />
             </iterate>
+            <service-call name="growerp.100.TaxServices100.calculate#InvoiceTax"
+                in-map="[invoiceId: invoiceId]" />
         </actions>
     </service>
 

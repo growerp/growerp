@@ -402,5 +402,17 @@
   "cashBookCategoryUpdateSuccess": "Categoría actualizada",
   "exchangeRate": "Tipo",
   "searchHintExchangeRates": "Buscar moneda...",
-  "fetchExchangeRatesFail": "Error al obtener los tipos de cambio:"
+  "fetchExchangeRatesFail": "Error al obtener los tipos de cambio:",
+  "taxRate": "Tipo impositivo",
+  "newTaxRate": "Nuevo tipo impositivo",
+  "taxRateName": "Nombre",
+  "taxRatePercentage": "Porcentaje",
+  "taxRateCategory": "Categoría de producto",
+  "taxRateDefault": "Tipo predeterminado",
+  "taxRateShipping": "Gravar también el envío",
+  "pricesIncludeTax": "Los precios de caja incluyen impuestos",
+  "searchTaxRateHint": "Buscar tipos impositivos",
+  "taxRateAddSuccess": "Tipo impositivo añadido",
+  "taxRateUpdateSuccess": "Tipo impositivo actualizado",
+  "taxRateDeleteSuccess": "Tipo impositivo eliminado"
 }

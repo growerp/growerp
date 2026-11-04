@@ -173,15 +173,19 @@ class PdfFormats {
   }
 
   static Widget buildTotal(FinDoc finDoc, {String currencyId = 'USD'}) {
-    final netTotal = finDoc.items
-        .map(
-          (item) =>
-              (item.price ?? Decimal.zero) * (item.quantity ?? Decimal.zero),
-        )
-        .reduce((item1, item2) => item1 + item2);
-    //final vatPercent = finDoc.items.first.vat;
-    //final vat = netTotal * vatPercent;
-    final total = netTotal; // + vat;
+    bool isTax(FinDocItem item) => const [
+      'ItemSalesTax',
+      'ItemVatTax',
+    ].contains(item.itemType?.itemTypeId);
+    Decimal sum(Iterable<FinDocItem> items) => items.fold(
+      Decimal.zero,
+      (total, item) =>
+          total +
+          (item.price ?? Decimal.zero) * (item.quantity ?? Decimal.one),
+    );
+    final netTotal = sum(finDoc.items.where((item) => !isTax(item)));
+    final tax = sum(finDoc.items.where(isTax));
+    final total = netTotal + tax;
 
     return Container(
       alignment: Alignment.centerRight,
@@ -198,11 +202,12 @@ class PdfFormats {
                   value: netTotal.currency(currencyId: currencyId),
                   unite: true,
                 ),
-                //                buildText(
-                //                  title: 'Vat ${vatPercent * 100} %',
-                //                  value: vat,
-                //                  unite: true,
-                //                ),
+                if (tax != Decimal.zero)
+                  buildText(
+                    title: 'Tax',
+                    value: tax.currency(currencyId: currencyId),
+                    unite: true,
+                  ),
                 Divider(),
                 buildText(
                   title: 'Total amount due',

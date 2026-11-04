@@ -402,5 +402,17 @@
   "cashBookCategoryUpdateSuccess": "Categorie bijgewerkt",
   "exchangeRate": "Koers",
   "searchHintExchangeRates": "Zoek valuta...",
-  "fetchExchangeRatesFail": "Ophalen wisselkoersen mislukt:"
+  "fetchExchangeRatesFail": "Ophalen wisselkoersen mislukt:",
+  "taxRate": "Belastingtarief",
+  "newTaxRate": "Nieuw belastingtarief",
+  "taxRateName": "Naam",
+  "taxRatePercentage": "Percentage",
+  "taxRateCategory": "Productcategorie",
+  "taxRateDefault": "Standaardtarief",
+  "taxRateShipping": "Ook verzending belasten",
+  "pricesIncludeTax": "Kassaprijzen zijn inclusief belasting",
+  "searchTaxRateHint": "Belastingtarieven zoeken",
+  "taxRateAddSuccess": "Belastingtarief toegevoegd",
+  "taxRateUpdateSuccess": "Belastingtarief bijgewerkt",
+  "taxRateDeleteSuccess": "Belastingtarief verwijderd"
 }

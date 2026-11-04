@@ -402,5 +402,17 @@
   "cashBookCategoryUpdateSuccess": "类别已更新",
   "exchangeRate": "汇率",
   "searchHintExchangeRates": "搜索货币...",
-  "fetchExchangeRatesFail": "获取汇率失败："
+  "fetchExchangeRatesFail": "获取汇率失败：",
+  "taxRate": "税率",
+  "newTaxRate": "新建税率",
+  "taxRateName": "名称",
+  "taxRatePercentage": "百分比",
+  "taxRateCategory": "产品类别",
+  "taxRateDefault": "默认税率",
+  "taxRateShipping": "运费也征税",
+  "pricesIncludeTax": "收银价格含税",
+  "searchTaxRateHint": "搜索税率",
+  "taxRateAddSuccess": "税率已添加",
+  "taxRateUpdateSuccess": "税率已更新",
+  "taxRateDeleteSuccess": "税率已删除"
 }
