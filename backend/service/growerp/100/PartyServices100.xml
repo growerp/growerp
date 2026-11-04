@@ -3521,7 +3521,8 @@ limitations under the License.
                  do not ship stock at all: no inventory reservation on the store -->
             <if
                 condition="applicationId == 'AppAdmin' || applicationId == 'AppHotel'
-                    || applicationId == 'AppRental'">
+                    || applicationId == 'AppRental' || applicationId == 'AppShop'
+                    || applicationId == 'AppRestaurant'">
                 <set field="inMap"
                     from="inMap + [
                     requireInventory: 'N',

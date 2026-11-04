@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!--
+    Point of sale. A sale is one transaction: order, invoice, payments and stock, for the
+    walk-in customer, at the prices of the catalog. finish#PosOrder is the step a restaurant
+    tab shares with a sale at the till.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <service verb="get" noun="PosCatalog">
+        <description>What the till sells: products with price and image, the categories they
+            are in, and how prices are to be read.</description>
+        <out-parameters>
+            <parameter name="items" type="List" />
+            <parameter name="pricesIncludeTax" type="Boolean" />
+            <parameter name="currencyId" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.CatalogServices100.get#Product" out-map="found"
+                in-map="[limit: 500]" />
+            <set field="items" from="[]" />
+            <iterate list="found.products" entry="product">
+                <script>items.add([productId: product.productId, pseudoId: product.pseudoId,
+                    productName: product.productName, price: product.price, image: product.image,
+                    categories: product.categories])</script>
+            </iterate>
+            <service-call name="growerp.100.TaxServices100.get#TaxRates" out-map="taxes" />
+            <set field="pricesIncludeTax" from="taxes.pricesIncludeTax" />
+            <entity-find-one entity-name="mantle.ledger.config.PartyAcctgPreference" value-field="pref">
+                <field-map field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find-one>
+            <set field="currencyId" from="pref.baseCurrencyUomId" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="ProductByBarcode">
+        <description>The product of a scanned code: a ProductIdentification value, else the
+            pseudoId.</description>
+        <in-parameters>
+            <parameter name="barcode" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="item" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find entity-name="mantle.product.ProductIdentification" list="identifications">
+                <econdition field-name="idValue" from="barcode" />
+            </entity-find>
+            <set field="productIds" from="identifications*.productId" />
+            <entity-find entity-name="mantle.product.Product" list="products" limit="1">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="productId" operator="in" from="productIds" />
+            </entity-find>
+            <if condition="!products">
+                <entity-find entity-name="mantle.product.Product" list="products" limit="1">
+                    <econdition field-name="ownerPartyId" />
+                    <econdition field-name="pseudoId" from="barcode" />
+                </entity-find>
+            </if>
+            <if condition="!products">
+                <return error="true" message="No product with code ${barcode}" />
+            </if>
+            <service-call name="growerp.100.PosServices100.get#CurrentPrice" out-map="priced"
+                in-map="[productId: products[0].productId]" />
+            <set field="item"
+                from="[productId: products[0].productId, pseudoId: products[0].pseudoId,
+                    productName: products[0].productName, price: priced.price]" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="CurrentPrice">
+        <description>Internal: the selling price of a product.</description>
+        <in-parameters>
+            <parameter name="productId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="price" type="BigDecimal" />
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.product.ProductPrice" list="prices" limit="1">
+                <date-filter />
+                <econdition field-name="productId" />
+                <econdition field-name="priceTypeEnumId" value="PptCurrent" />
+                <econdition field-name="pricePurposeEnumId" value="PppPurchase" />
+                <order-by field-name="-fromDate" />
+            </entity-find>
+            <if condition="!prices || prices[0].price == null">
+                <return error="true" message="Product ${productId} has no price" />
+            </if>
+            <set field="price" from="prices[0].price" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="PricedLines">
+        <description>Internal: lines at the prices of the catalog with their tax, for the quote
+            as well as for the sale. Anything the client sends besides product and quantity
+            is ignored.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="companyPartyId" required="true" />
+            <parameter name="lines" type="List" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="pricedLines" type="List" />
+            <parameter name="taxTotal" type="BigDecimal" />
+            <parameter name="grandTotal" type="BigDecimal" />
+        </out-parameters>
+        <actions>
+            <if condition="!lines">
+                <return error="true" message="A sale needs at least one line" />
+            </if>
+            <entity-find entity-name="mantle.product.store.ProductStore" list="stores" limit="1">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find>
+            <set field="inclusive" from="stores &amp;&amp; stores[0].pricesIncludeTax == 'Y'" />
+            <set field="pricedLines" from="[]" />
+            <set field="taxTotal" from="0.0" />
+            <set field="grandTotal" from="0.0" />
+            <iterate list="lines" entry="line">
+                <set field="quantity" from="line.quantity as BigDecimal" />
+                <if condition="quantity == null || quantity &lt;= 0">
+                    <return error="true" message="Quantity of a line must be above zero" />
+                </if>
+                <entity-find-one entity-name="mantle.product.Product" value-field="product">
+                    <field-map field-name="productId" from="line.productId" />
+                </entity-find-one>
+                <if condition="product == null || product.ownerPartyId != ownerPartyId">
+                    <return error="true" message="Product ${line.productId} not found" />
+                </if>
+                <service-call name="growerp.100.PosServices100.get#CurrentPrice" out-map="priced"
+                    in-map="[productId: product.productId]" />
+                <service-call name="growerp.100.TaxServices100.calculate#NetUnitAmount" out-map="net"
+                    in-map="[ownerPartyId: ownerPartyId, productId: product.productId,
+                        grossUnitAmount: priced.price, quantity: quantity]" />
+                <if condition="inclusive">
+                    <set field="unitAmount" from="net.unitAmount" />
+                    <set field="lineTotal" from="(priced.price * quantity).setScale(2, BigDecimal.ROUND_HALF_UP)" />
+                    <set field="lineTax" from="lineTotal - (net.unitAmount * quantity).setScale(2, BigDecimal.ROUND_HALF_UP)" />
+                    <else>
+                        <set field="unitAmount" from="priced.price" />
+                        <set field="lineNet" from="(priced.price * quantity).setScale(2, BigDecimal.ROUND_HALF_UP)" />
+                        <set field="lineTax"
+                            from="(lineNet * net.taxPercentage).divide(100.0, 2, BigDecimal.ROUND_HALF_UP)" />
+                        <set field="lineTotal" from="lineNet + lineTax" />
+                    </else>
+                </if>
+                <script>pricedLines.add([productId: product.productId, productName: product.productName,
+                    quantity: quantity, price: priced.price, unitAmount: unitAmount,
+                    unitListPrice: inclusive ? priced.price : null, lineTax: lineTax,
+                    lineTotal: lineTotal, taxPercentage: net.taxPercentage])</script>
+                <set field="taxTotal" from="taxTotal + lineTax" />
+                <set field="grandTotal" from="grandTotal + lineTotal" />
+            </iterate>
+        </actions>
+    </service>
+
+    <service verb="quote" noun="PosSale">
+        <description>What the lines cost, without selling anything.</description>
+        <in-parameters>
+            <parameter name="lines" type="List" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="pricedLines" type="List" />
+            <parameter name="taxTotal" type="BigDecimal" />
+            <parameter name="grandTotal" type="BigDecimal" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <service-call name="growerp.100.PosServices100.get#PricedLines" out-map="context"
+                in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId, lines: lines]" />
+        </actions>
+    </service>
+
+    <service verb="ensure" noun="WalkInCustomer">
+        <description>Internal: the party of anonymous sales of a tenant. It has no Customer role,
+            which keeps it out of the customer lists.</description>
+        <in-parameters>
+            <parameter name="ownerPartyId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="walkInPartyId" />
+        </out-parameters>
+        <actions>
+            <entity-find entity-name="mantle.party.Party" list="parties" limit="1">
+                <econdition field-name="ownerPartyId" />
+                <econdition field-name="pseudoId" value="WALKIN" />
+            </entity-find>
+            <if condition="parties">
+                <set field="walkInPartyId" from="parties[0].partyId" />
+                <return />
+            </if>
+            <service-call name="create#mantle.party.Party" out-map="created"
+                in-map="[partyTypeEnumId: 'PtyOrganization', ownerPartyId: ownerPartyId,
+                    pseudoId: 'WALKIN']" />
+            <service-call name="create#mantle.party.Organization"
+                in-map="[partyId: created.partyId, organizationName: 'Walk-in customer']" />
+            <set field="walkInPartyId" from="created.partyId" />
+        </actions>
+    </service>
+
+    <service verb="create" noun="PosSale">
+        <description>Sell the lines to the walk-in customer in one transaction. The same
+            clientSaleId again returns the first sale.</description>
+        <in-parameters>
+            <parameter name="clientSaleId" required="true" />
+            <parameter name="terminalName" />
+            <parameter name="lines" type="List" required="true" />
+            <parameter name="tenders" type="List" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="sale" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <set field="requestHash"
+                from="groovy.json.JsonOutput.toJson([lines.collect { [it.productId, it.quantity as BigDecimal] },
+                    tenders.collect { [it.method, it.amount as BigDecimal] }]).md5()" />
+            <entity-find-one entity-name="growerp.pos.PosSale" value-field="existing" for-update="true" />
+            <if condition="existing != null">
+                <if condition="existing.requestHash != requestHash">
+                    <return error="true" message="Sale ${clientSaleId} exists with other content" />
+                </if>
+                <service-call name="growerp.100.PosServices100.get#PosReceipt" out-map="context"
+                    in-map="[clientSaleId: clientSaleId]" />
+                <return />
+            </if>
+
+            <service-call name="growerp.100.PosServices100.get#PricedLines" out-map="priced"
+                in-map="[ownerPartyId: ownerPartyId, companyPartyId: companyPartyId, lines: lines]" />
+            <service-call name="growerp.100.PosServices100.check#Tenders" out-map="tendered"
+                in-map="[tenders: tenders, grandTotal: priced.grandTotal]" />
+
+            <service-call name="growerp.100.PosServices100.ensure#WalkInCustomer" out-map="walkIn"
+                in-map="[ownerPartyId: ownerPartyId]" />
+            <entity-find entity-name="mantle.product.store.ProductStore" list="stores" limit="1">
+                <econdition field-name="organizationPartyId" from="companyPartyId" />
+            </entity-find>
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId" out-map="orderSeq"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'order']" />
+            <service-call name="mantle.order.OrderServices.create#Order" out-map="order"
+                in-map="[productStoreId: stores[0].productStoreId, pseudoId: orderSeq.seqNum,
+                    statusId: 'OrderOpen', salesChannelEnumId: 'ScPos',
+                    facilityId: stores[0].inventoryFacilityId, vendorPartyId: companyPartyId,
+                    customerPartyId: walkIn.walkInPartyId, disablePromotions: 'Y',
+                    disableShippingCalc: 'Y', disableTaxCalc: 'Y', carrierPartyId: '_NA_',
+                    shipmentMethodEnumId: 'ShMthPickUp', orderName: terminalName]" />
+            <iterate list="priced.pricedLines" entry="line">
+                <service-call name="mantle.order.OrderServices.create#OrderItem"
+                    in-map="[orderId: order.orderId, orderPartSeqId: order.orderPartSeqId,
+                        itemTypeEnumId: 'ItemProduct', productId: line.productId,
+                        itemDescription: line.productName, quantity: line.quantity,
+                        unitAmount: line.unitAmount, unitListPrice: line.unitListPrice,
+                        requireInventory: false]" />
+            </iterate>
+            <!-- tax was off while adding: once for the order instead of once per line -->
+            <service-call name="update#mantle.order.OrderPart"
+                in-map="[orderId: order.orderId, orderPartSeqId: order.orderPartSeqId, disableTaxCalc: 'N']" />
+            <service-call name="growerp.100.PosServices100.finish#PosOrder" out-map="finished"
+                in-map="[orderId: order.orderId, orderPartSeqId: order.orderPartSeqId,
+                    ownerPartyId: ownerPartyId, tenders: tendered.orderedTenders]" />
+            <service-call name="create#growerp.pos.PosSale"
+                in-map="[ownerPartyId: ownerPartyId, clientSaleId: clientSaleId,
+                    requestHash: requestHash, orderId: order.orderId,
+                    invoiceId: finished.invoiceId, terminalName: terminalName,
+                    userId: ec.user.userId, changeAmount: tendered.changeAmount,
+                    saleDate: ec.user.nowTimestamp]" />
+            <service-call name="growerp.100.PosServices100.get#PosReceipt" out-map="context"
+                in-map="[clientSaleId: clientSaleId]" />
+        </actions>
+    </service>
+
+    <service verb="check" noun="Tenders">
+        <description>Internal: is the sale paid. Only cash can be more than what is left, the
+            rest of it is change. Gives the tenders with cash last.</description>
+        <in-parameters>
+            <parameter name="tenders" type="List" required="true" />
+            <parameter name="grandTotal" type="BigDecimal" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="orderedTenders" type="List" />
+            <parameter name="changeAmount" type="BigDecimal" />
+        </out-parameters>
+        <actions>
+            <set field="orderedTenders"
+                from="tenders.findAll({ it.method != 'PiCash' }) + tenders.findAll({ it.method == 'PiCash' })" />
+            <set field="paid" from="tenders.sum({ it.amount as BigDecimal }) ?: 0.0" />
+            <set field="otherPaid"
+                from="tenders.findAll({ it.method != 'PiCash' }).sum({ it.amount as BigDecimal }) ?: 0.0" />
+            <if condition="paid &lt; grandTotal">
+                <return error="true" message="Paid ${paid} is less than the total ${grandTotal}" />
+            </if>
+            <if condition="otherPaid &gt; grandTotal">
+                <return error="true" message="Only cash can be more than the total ${grandTotal}" />
+            </if>
+            <set field="changeAmount" from="paid - grandTotal" />
+        </actions>
+    </service>
+
+    <service verb="finish" noun="PosOrder">
+        <description>Internal: an open order with its items becomes paid and completed: place,
+            invoice, payments, approve, stock. The tenders are checked already.</description>
+        <in-parameters>
+            <parameter name="orderId" required="true" />
+            <parameter name="orderPartSeqId" required="true" />
+            <parameter name="ownerPartyId" required="true" />
+            <parameter name="tenders" type="List" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="invoiceId" />
+        </out-parameters>
+        <actions>
+            <service-call name="mantle.order.OrderServices.place#Order"
+                in-map="[orderId: orderId, requireInventory: false]" />
+            <service-call name="mantle.account.InvoiceServices.create#EntireOrderPartInvoice"
+                out-map="context" in-map="[orderId: orderId, orderPartSeqId: orderPartSeqId]" />
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId" out-map="invoiceSeq"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'invoice']" />
+            <service-call name="update#mantle.account.invoice.Invoice"
+                in-map="[invoiceId: invoiceId, pseudoId: invoiceSeq.seqNum, statusId: 'InvoiceFinalized']" />
+
+            <service-call name="mantle.account.InvoiceServices.get#InvoiceTotal" out-map="totals"
+                in-map="[invoiceId: invoiceId]" />
+            <set field="remaining" from="totals.unpaidTotal" />
+            <iterate list="tenders" entry="tender">
+                <set field="tenderAmount" from="tender.amount as BigDecimal" />
+                <set field="payAmount" from="tenderAmount &gt; remaining ? remaining : tenderAmount" />
+                <if condition="payAmount &lt;= 0.0">
+                    <continue />
+                </if>
+                <service-call name="growerp.100.GeneralServices100.getNext#PseudoId" out-map="paymentSeq"
+                    in-map="[ownerPartyId: ownerPartyId, seqName: 'payment']" />
+                <service-call name="mantle.account.PaymentServices.create#InvoicePayment"
+                    in-map="[invoiceId: invoiceId, amount: payAmount, pseudoId: paymentSeq.seqNum,
+                        statusId: 'PmntDelivered',
+                        paymentInstrumentEnumId: tender.method, paymentRefNum: tender.reference,
+                        effectiveDate: ec.user.nowTimestamp]" />
+                <set field="remaining" from="remaining - payAmount" />
+            </iterate>
+
+            <service-call name="mantle.order.OrderServices.approve#Order" in-map="[orderId: orderId]" />
+            <service-call name="growerp.100.PosServices100.issue#PosStock"
+                in-map="[orderId: orderId, orderPartSeqId: orderPartSeqId, ownerPartyId: ownerPartyId]" />
+        </actions>
+    </service>
+
+    <service verb="issue" noun="PosStock">
+        <description>Internal: the goods left with the customer. Without goods tracked in stock
+            the order is complete. What was sold is physically gone, so stock below the
+            sold quantity is corrected first; the PhysicalInventory record is the variance
+            log.</description>
+        <in-parameters>
+            <parameter name="orderId" required="true" />
+            <parameter name="orderPartSeqId" required="true" />
+            <parameter name="ownerPartyId" required="true" />
+        </in-parameters>
+        <actions>
+            <entity-find-one entity-name="mantle.order.OrderPart" value-field="orderPart" />
+            <entity-find entity-name="mantle.order.OrderItem" list="orderItems">
+                <econdition field-name="orderId" />
+                <econdition field-name="orderPartSeqId" />
+                <econdition field-name="itemTypeEnumId" value="ItemProduct" />
+                <econdition field-name="productId" operator="is-not-null" />
+            </entity-find>
+            <set field="needed" from="[:]" />
+            <set field="tracked" from="false" />
+            <iterate list="orderItems" entry="orderItem">
+                <entity-find-one entity-name="mantle.product.Product" value-field="product">
+                    <field-map field-name="productId" from="orderItem.productId" />
+                </entity-find-one>
+                <if condition="product.productTypeEnumId in ['PtAsset', 'PtDigitalAsset', 'PtAssetUse', 'PtPickAssembly'] &amp;&amp; orderItem.quantity">
+                    <script>needed[orderItem.productId] = (needed[orderItem.productId] ?: 0.0) + orderItem.quantity</script>
+                    <set field="tracked" from="tracked || product.requireInventory == 'Y'" />
+                </if>
+            </iterate>
+            <if condition="!tracked">
+                <service-call name="mantle.order.OrderServices.complete#Order" in-map="[orderId: orderId]" />
+                <return />
+            </if>
+            <iterate list="needed" entry="quantityNeeded" key="neededProductId">
+                <entity-find entity-name="mantle.product.asset.Asset" list="assets">
+                    <econdition field-name="productId" from="neededProductId" />
+                    <econdition field-name="facilityId" from="orderPart.facilityId" />
+                </entity-find>
+                <set field="onHand" from="assets.sum({ it.quantityOnHandTotal ?: 0.0 }) ?: 0.0" />
+                <if condition="onHand &lt; quantityNeeded">
+                    <service-call name="mantle.product.AssetServices.record#PhysicalInventoryQuantity"
+                        in-map="[productId: neededProductId, facilityId: orderPart.facilityId, quantity: quantityNeeded,
+                            comments: 'POS sale ' + orderId + ' above recorded stock']" />
+                </if>
+            </iterate>
+            <service-call name="mantle.shipment.ShipmentServices.ship#OrderPart" out-map="shipped"
+                in-map="[orderId: orderId, orderPartSeqId: orderPartSeqId]" />
+            <service-call name="growerp.100.GeneralServices100.getNext#PseudoId" out-map="shipmentSeq"
+                in-map="[ownerPartyId: ownerPartyId, seqName: 'shipment']" />
+            <service-call name="update#mantle.shipment.Shipment"
+                in-map="[shipmentId: shipped.shipmentId, pseudoId: shipmentSeq.seqNum]" />
+        </actions>
+    </service>
+
+    <service verb="get" noun="PosReceipt">
+        <description>What the receipt shows, from what was booked.</description>
+        <in-parameters>
+            <parameter name="clientSaleId" required="true" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="sale" type="Map" />
+        </out-parameters>
+        <actions>
+            <service-call out-map="context"
+                name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
+            <entity-find-one entity-name="growerp.pos.PosSale" value-field="posSale" />
+            <if condition="posSale == null">
+                <return error="true" message="Sale ${clientSaleId} not found" />
+            </if>
+            <entity-find-one entity-name="mantle.order.OrderHeader" value-field="orderHeader">
+                <field-map field-name="orderId" from="posSale.orderId" />
+            </entity-find-one>
+            <entity-find-one entity-name="mantle.account.invoice.Invoice" value-field="invoice">
+                <field-map field-name="invoiceId" from="posSale.invoiceId" />
+            </entity-find-one>
+            <entity-find entity-name="mantle.order.OrderItem" list="orderItems">
+                <econdition field-name="orderId" from="posSale.orderId" />
+                <order-by field-name="orderItemSeqId" />
+            </entity-find>
+            <set field="taxItems" from="orderItems.findAll({ (it.itemTypeEnumId == 'ItemSalesTax') as boolean })" />
+            <set field="receiptLines" from="[]" />
+            <iterate list="orderItems" entry="orderItem">
+                <if condition="orderItem.itemTypeEnumId != 'ItemProduct'">
+                    <continue />
+                </if>
+                <set field="unitPrice" from="orderItem.unitListPrice ?: orderItem.unitAmount" />
+                <script>receiptLines.add([productId: orderItem.productId,
+                    description: orderItem.itemDescription, quantity: orderItem.quantity,
+                    price: unitPrice,
+                    lineTotal: (unitPrice * orderItem.quantity).setScale(2, BigDecimal.ROUND_HALF_UP)])</script>
+            </iterate>
+            <set field="taxes" from="[]" />
+            <script>taxItems.groupBy({ it.sourcePercentage }).each { percentage, items ->
+                taxes.add([taxPercentage: percentage, taxAmount: items.sum({
+                    (it.unitAmount * it.quantity) }).setScale(2, BigDecimal.ROUND_HALF_UP)]) }</script>
+            <set field="taxTotal" from="taxes.sum({ it.taxAmount }) ?: 0.0" />
+            <entity-find entity-name="mantle.account.payment.Payment" list="payments">
+                <econdition field-name="forInvoiceId" from="posSale.invoiceId" />
+            </entity-find>
+            <set field="receiptTenders" from="[]" />
+            <iterate list="payments" entry="payment">
+                <script>receiptTenders.add([method: payment.paymentInstrumentEnumId,
+                    amount: payment.amount, reference: payment.paymentRefNum])</script>
+            </iterate>
+            <set field="sale"
+                from="[clientSaleId: clientSaleId, orderId: posSale.orderId,
+                    invoiceId: posSale.invoiceId, orderPseudoId: orderHeader.pseudoId,
+                    invoicePseudoId: invoice.pseudoId, terminalName: posSale.terminalName,
+                    saleDate: posSale.saleDate, currencyId: orderHeader.currencyUomId,
+                    lines: receiptLines, taxes: taxes, taxTotal: taxTotal,
+                    grandTotal: orderHeader.grandTotal.setScale(2, BigDecimal.ROUND_HALF_UP),
+                    tenders: receiptTenders, changeAmount: posSale.changeAmount]" />
+        </actions>
+    </service>
+</services>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-definition-3.xsd">
+
+    <entity entity-name="PosSale" package="growerp.pos" cache="never">
+        <description>A sale at the till. clientSaleId comes from the terminal and makes a retry
+            after a lost connection return the first sale instead of selling twice.</description>
+        <field name="ownerPartyId" type="id" is-pk="true" />
+        <field name="clientSaleId" type="id-long" is-pk="true" />
+        <field name="requestHash" type="text-short" />
+        <field name="orderId" type="id" />
+        <field name="invoiceId" type="id" />
+        <field name="terminalName" type="text-short" />
+        <field name="userId" type="id" />
+        <field name="changeAmount" type="currency-amount" />
+        <field name="saleDate" type="date-time" />
+        <relationship type="one" title="Owner" related="mantle.party.Party">
+            <key-map field-name="ownerPartyId" related="partyId" />
+        </relationship>
+        <relationship type="one" related="mantle.order.OrderHeader" />
+        <relationship type="one" related="mantle.account.invoice.Invoice" />
+    </entity>
+</entities>
