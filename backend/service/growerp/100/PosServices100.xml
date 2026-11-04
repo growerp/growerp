@@ -149,18 +149,13 @@ limitations under the License.
                 <service-call name="growerp.100.TaxServices100.calculate#NetUnitAmount" out-map="net"
                     in-map="[ownerPartyId: ownerPartyId, productId: product.productId,
                         grossUnitAmount: priced.price, quantity: quantity]" />
-                <if condition="inclusive">
-                    <set field="unitAmount" from="net.unitAmount" />
-                    <set field="lineTotal" from="(priced.price * quantity).setScale(2, BigDecimal.ROUND_HALF_UP)" />
-                    <set field="lineTax" from="lineTotal - (net.unitAmount * quantity).setScale(2, BigDecimal.ROUND_HALF_UP)" />
-                    <else>
-                        <set field="unitAmount" from="priced.price" />
-                        <set field="lineNet" from="(priced.price * quantity).setScale(2, BigDecimal.ROUND_HALF_UP)" />
-                        <set field="lineTax"
-                            from="(lineNet * net.taxPercentage).divide(100.0, 2, BigDecimal.ROUND_HALF_UP)" />
-                        <set field="lineTotal" from="lineNet + lineTax" />
-                    </else>
-                </if>
+                <set field="unitAmount" from="inclusive ? net.unitAmount : priced.price" />
+                <set field="lineNet" from="(unitAmount * quantity).setScale(2, BigDecimal.ROUND_HALF_UP)" />
+                <service-call name="growerp.100.TaxServices100.calculate#LineTax" out-map="taxed"
+                    in-map="[netAmount: lineNet, taxPercentage: net.taxPercentage,
+                        grossAmount: inclusive ? priced.price * quantity : null]" />
+                <set field="lineTax" from="taxed.taxAmount" />
+                <set field="lineTotal" from="lineNet + lineTax" />
                 <script>pricedLines.add([productId: product.productId, productName: product.productName,
                     quantity: quantity, price: priced.price, unitAmount: unitAmount,
                     unitListPrice: inclusive ? priced.price : null, lineTax: lineTax,
@@ -277,6 +272,14 @@ limitations under the License.
             <!-- tax was off while adding: once for the order instead of once per line -->
             <service-call name="update#mantle.order.OrderPart"
                 in-map="[orderId: order.orderId, orderPartSeqId: order.orderPartSeqId, disableTaxCalc: 'N']" />
+            <!-- the customer paid what the quote said: never book anything else -->
+            <entity-find-one entity-name="mantle.order.OrderHeader" value-field="booked">
+                <field-map field-name="orderId" from="order.orderId" />
+            </entity-find-one>
+            <if condition="booked.grandTotal.setScale(2, BigDecimal.ROUND_HALF_UP) != priced.grandTotal.setScale(2, BigDecimal.ROUND_HALF_UP)">
+                <return error="true"
+                    message="Booked total ${booked.grandTotal} differs from the quoted ${priced.grandTotal}" />
+            </if>
             <service-call name="growerp.100.PosServices100.finish#PosOrder" out-map="finished"
                 in-map="[orderId: order.orderId, orderPartSeqId: order.orderPartSeqId,
                     ownerPartyId: ownerPartyId, tenders: tendered.orderedTenders]" />

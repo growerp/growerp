@@ -274,6 +274,25 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="calculate" noun="LineTax">
+        <description>The tax of a line, the one calculation for the gateway and the POS quote.
+            With grossAmount the price includes tax and tax is the difference with the net
+            amount, otherwise a percentage on top.</description>
+        <in-parameters>
+            <parameter name="netAmount" type="BigDecimal" required="true" />
+            <parameter name="taxPercentage" type="BigDecimal" required="true" />
+            <parameter name="grossAmount" type="BigDecimal" />
+        </in-parameters>
+        <out-parameters>
+            <parameter name="taxAmount" type="BigDecimal" />
+        </out-parameters>
+        <actions>
+            <set field="taxAmount"
+                from="grossAmount != null ? grossAmount.setScale(2, BigDecimal.ROUND_HALF_UP) - netAmount
+                    : (netAmount * taxPercentage).divide(100.0, 2, BigDecimal.ROUND_HALF_UP)" />
+        </actions>
+    </service>
+
     <service verb="calculate" noun="SalesTaxGrowerp">
         <description>The tax gateway of the LOCAL config. Tax on top of the amount, except
             for an order of the POS channel in a store with tax in the price: there the
@@ -330,19 +349,20 @@ limitations under the License.
                     <continue />
                 </if>
                 <set field="base" from="(item.itemTotal ?: 0.0) + (item.discountTotal ?: 0.0)" />
-                <set field="taxAmount"
-                    from="(base * applied.rate.taxPercentage).divide(100.0, 2, BigDecimal.ROUND_HALF_UP)" />
+                <set field="grossAmount" from="null" />
                 <if condition="inclusiveOrderId">
                     <entity-find-one entity-name="mantle.order.OrderItem" value-field="orderItem">
                         <field-map field-name="orderId" from="inclusiveOrderId" />
                         <field-map field-name="orderItemSeqId" from="item.itemId" />
                     </entity-find-one>
                     <if condition="orderItem?.unitListPrice != null">
-                        <set field="taxAmount"
-                            from="(orderItem.unitListPrice * item.quantity).setScale(2, BigDecimal.ROUND_HALF_UP) - base" />
+                        <set field="grossAmount" from="orderItem.unitListPrice * item.quantity" />
                     </if>
                 </if>
-                <script>taxResults.add([itemId: item.itemId, taxQuantity: 1.0, taxAmount: taxAmount,
+                <service-call name="growerp.100.TaxServices100.calculate#LineTax" out-map="lineTax"
+                    in-map="[netAmount: base, taxPercentage: applied.rate.taxPercentage,
+                        grossAmount: grossAmount]" />
+                <script>taxResults.add([itemId: item.itemId, taxQuantity: 1.0, taxAmount: lineTax.taxAmount,
                     taxRate: applied.rate.taxPercentage / 100.0,
                     taxAuthorityId: applied.rate.taxAuthorityId,
                     taxName: applied.rate.taxName])</script>

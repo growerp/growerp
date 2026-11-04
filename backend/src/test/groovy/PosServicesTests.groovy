@@ -331,6 +331,61 @@ class PosServicesTests extends Specification {
         invoiceOf(sale).statusId == 'InvoicePmtRecvd'
     }
 
+    def "a sale is refused when the booked total differs from the quote"() {
+        given: 'the quote charges tax, the gateway leaves an exempt customer without'
+        Map rate = ec.service.sync().name('growerp.100.TaxServices100.create#TaxRate')
+                .parameters([taxRate: [taxName: 'VAT', taxPercentage: 10]]).call().taxRate
+        String walkIn = ec.service.sync().name("${service}.ensure#WalkInCustomer")
+                .parameters([ownerPartyId: tenant.ownerPartyId]).call().walkInPartyId
+        ec.service.sync().name('create#mantle.other.tax.TaxAuthorityParty')
+                .parameters([partyId: walkIn, taxAuthorityId: rate.taxAuthorityId,
+                        fromDate: ec.user.nowTimestamp, isExempt: 'Y']).call()
+        long before = ec.entity.find('growerp.pos.PosSale').count()
+
+        when:
+        Map sale = sell([line(service1, 1)], [cash(11)])
+
+        then: 'nothing is sold'
+        sale == null
+        ec.message.errorsString.contains('differs')
+        ec.entity.find('growerp.pos.PosSale').count() == before
+
+        cleanup:
+        ec.message.clearErrors()
+        ec.entity.find('mantle.other.tax.TaxAuthorityParty').condition('partyId', walkIn).deleteAll()
+    }
+
+    def "quote and sale agree to the cent on awkward amounts"() {
+        given:
+        ec.service.sync().name('growerp.100.TaxServices100.create#TaxRate')
+                .parameters([taxRate: [taxName: 'VAT', taxPercentage: percentage]]).call()
+        ec.service.sync().name('growerp.100.TaxServices100.update#TaxSettings')
+                .parameters([pricesIncludeTax: inclusive]).call()
+        Map odd = createProduct("Odd ${run} ${price} ${inclusive}", 'Service', price)
+        Map other = createProduct("Other ${run} ${price} ${inclusive}", 'Service', 0.07)
+        List lines = [line(odd, quantity), line(other, 3)]
+
+        when:
+        Map quote = ec.service.sync().name("${service}.quote#PosSale").parameters([lines: lines]).call()
+        Map sale = sell(lines, [cash(quote.grandTotal as BigDecimal)])
+
+        then:
+        !ec.message.hasError()
+        sale.grandTotal as BigDecimal == quote.grandTotal as BigDecimal
+        sale.taxTotal as BigDecimal == quote.taxTotal as BigDecimal
+        sale.changeAmount as BigDecimal == 0
+        invoiceOf(sale).statusId == 'InvoicePmtRecvd'
+
+        where:
+        price | quantity | percentage | inclusive
+        3.33  | 7        | 21         | true
+        3.33  | 7        | 21         | false
+        9.99  | 3        | 7.5        | true
+        9.99  | 3        | 7.5        | false
+        0.01  | 1        | 19         | true
+        19.95 | 13       | 8.25       | true
+    }
+
     def "the price comes from the catalog and a product of another tenant is refused"() {
         when: 'a price sent along is ignored'
         Map sale = sell([[productId: service1.productId, quantity: 1, price: 1]], [cash(10)])

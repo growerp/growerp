@@ -9,6 +9,9 @@
 - **Prices** come from the catalog (`PptCurrent`); the client only sends product and quantity.
 - **Tax** is off on the order part while lines are added and calculated once at the end; per line
   it took 9 seconds for 50 lines. With `pricesIncludeTax` see [Sales_Tax.md](Sales_Tax.md).
+- **Quote and sale** use the same `TaxServices100.calculate#LineTax` as the tax gateway. A sale whose
+  booked total differs from the quote is refused, like one for an exempt customer: the POS does not
+  know exemptions yet.
 - **Tenders**: `PiCash`, `PiCreditCard` and others. Only cash can exceed what is left, the rest is
   `changeAmount`. Only what the sale cost is booked. Card payments are recorded, not processed.
 - **Stock**: `ship#OrderPart` when a line is tracked in stock, else `complete#Order`. A sale above
