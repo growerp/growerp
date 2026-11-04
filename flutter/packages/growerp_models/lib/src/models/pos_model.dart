@@ -45,6 +45,7 @@ abstract class PosCatalog with _$PosCatalog {
   PosCatalog._();
   factory PosCatalog({
     @Default([]) List<PosCatalogItem> items,
+    @Default([]) List<PosModifierGroup> modifierGroups,
     @Default(false) bool pricesIncludeTax,
     String? currencyId,
   }) = _PosCatalog;
@@ -214,6 +215,7 @@ abstract class PosZReport with _$PosZReport {
     @DateTimeConverter() DateTime? openedDate,
     @DateTimeConverter() DateTime? closedDate,
     int? saleCount,
+    int? voidCount,
     Decimal? salesTotal,
     @Default([]) List<PosTender> tenders,
     int? refundCount,
@@ -226,4 +228,174 @@ abstract class PosZReport with _$PosZReport {
 
   factory PosZReport.fromJson(Map<String, dynamic> json) =>
       _$PosZReportFromJson(json['report'] ?? json);
+}
+
+/// A table on the floor plan: status is free, occupied or ready.
+@freezed
+abstract class PosTable with _$PosTable {
+  PosTable._();
+  factory PosTable({
+    String? assetId,
+    String? tableName,
+    String? areaName,
+    int? x,
+    int? y,
+    String? shape,
+    int? seats,
+    String? tabId,
+    int? guestCount,
+    String? status,
+    Decimal? grandTotal,
+  }) = _PosTable;
+
+  factory PosTable.fromJson(Map<String, dynamic> json) =>
+      _$PosTableFromJson(json['table'] ?? json);
+}
+
+@freezed
+abstract class PosTables with _$PosTables {
+  PosTables._();
+  factory PosTables({@Default([]) List<PosTable> tables}) = _PosTables;
+
+  factory PosTables.fromJson(Map<String, dynamic> json) =>
+      _$PosTablesFromJson(json);
+}
+
+/// A line of a tab: kitchenStatus is New, Sent, Ready, Served or Voided.
+@freezed
+abstract class PosTabLine with _$PosTabLine {
+  PosTabLine._();
+  factory PosTabLine({
+    String? orderId,
+    String? orderItemSeqId,
+    String? productId,
+    String? description,
+    Decimal? quantity,
+    Decimal? price,
+    String? note,
+    String? kitchenStatus,
+    int? seatNo,
+    int? splitNo,
+    String? voidReason,
+  }) = _PosTabLine;
+
+  factory PosTabLine.fromJson(Map<String, dynamic> json) =>
+      _$PosTabLineFromJson(json);
+}
+
+/// The open bill of a table.
+@freezed
+abstract class PosTab with _$PosTab {
+  PosTab._();
+  factory PosTab({
+    String? tabId,
+    String? orderId,
+    String? tableAssetId,
+    String? tableName,
+    int? guestCount,
+    String? status,
+    String? currencyId,
+    @Default([]) List<PosTabLine> lines,
+    Decimal? taxTotal,
+    Decimal? grandTotal,
+  }) = _PosTab;
+
+  factory PosTab.fromJson(Map<String, dynamic> json) =>
+      _$PosTabFromJson(json['tab'] ?? json);
+}
+
+@freezed
+abstract class PosModifier with _$PosModifier {
+  PosModifier._();
+  factory PosModifier({
+    String? modifierId,
+    String? modifierName,
+    Decimal? priceDelta,
+  }) = _PosModifier;
+
+  factory PosModifier.fromJson(Map<String, dynamic> json) =>
+      _$PosModifierFromJson(json);
+}
+
+/// A choice on products, like the sauce.
+@freezed
+abstract class PosModifierGroup with _$PosModifierGroup {
+  PosModifierGroup._();
+  factory PosModifierGroup({
+    String? groupId,
+    String? groupName,
+    int? minSelect,
+    int? maxSelect,
+    @Default([]) List<PosModifier> modifiers,
+    @Default([]) List<String> productIds,
+  }) = _PosModifierGroup;
+
+  factory PosModifierGroup.fromJson(Map<String, dynamic> json) =>
+      _$PosModifierGroupFromJson(json['group'] ?? json);
+}
+
+@freezed
+abstract class PosModifierGroups with _$PosModifierGroups {
+  PosModifierGroups._();
+  factory PosModifierGroups({
+    @Default([]) List<PosModifierGroup> modifierGroups,
+  }) = _PosModifierGroups;
+
+  factory PosModifierGroups.fromJson(Map<String, dynamic> json) =>
+      _$PosModifierGroupsFromJson(json);
+}
+
+/// What one send of a tab brought to the kitchen.
+@freezed
+abstract class PosTicket with _$PosTicket {
+  PosTicket._();
+  factory PosTicket({
+    String? ticketId,
+    String? tabId,
+    String? tableName,
+    @DateTimeConverter() DateTime? sentDate,
+    @Default([]) List<PosTabLine> lines,
+  }) = _PosTicket;
+
+  factory PosTicket.fromJson(Map<String, dynamic> json) =>
+      _$PosTicketFromJson(json);
+}
+
+@freezed
+abstract class PosTickets with _$PosTickets {
+  PosTickets._();
+  factory PosTickets({@Default([]) List<PosTicket> tickets}) = _PosTickets;
+
+  factory PosTickets.fromJson(Map<String, dynamic> json) =>
+      _$PosTicketsFromJson(json);
+}
+
+/// A share of a split bill.
+@freezed
+abstract class PosShare with _$PosShare {
+  PosShare._();
+  factory PosShare({int? splitNo, Decimal? amount}) = _PosShare;
+
+  factory PosShare.fromJson(Map<String, dynamic> json) =>
+      _$PosShareFromJson(json);
+}
+
+@freezed
+abstract class PosShares with _$PosShares {
+  PosShares._();
+  factory PosShares({@Default([]) List<PosShare> shares}) = _PosShares;
+
+  factory PosShares.fromJson(Map<String, dynamic> json) =>
+      _$PosSharesFromJson(json);
+}
+
+/// Which share a line goes on.
+@freezed
+abstract class PosSplitAssignment with _$PosSplitAssignment {
+  PosSplitAssignment._();
+  factory PosSplitAssignment({String? orderItemSeqId, int? splitNo}) =
+      _PosSplitAssignment;
+
+  factory PosSplitAssignment.fromJson(Map<String, dynamic> json) =>
+      _$PosSplitAssignmentFromJson(json);
 }

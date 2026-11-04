@@ -43,6 +43,7 @@ class PosCatalogBloc extends Bloc<PosCatalogEvent, PosCatalogState> {
         state.copyWith(
           status: PosCatalogStatus.success,
           items: catalog.items,
+          modifierGroups: catalog.modifierGroups,
           pricesIncludeTax: catalog.pricesIncludeTax,
           currencyId: catalog.currencyId,
         ),

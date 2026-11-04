@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<entity-facade-xml type="seed">
+    <!-- Application record -->
+    <growerp.Application applicationId="AppRestaurant"
+        description="GrowERP Restaurant: tables, kitchen and point of sale" />
+
+    <!-- Menu configuration -->
+    <growerp.menu.MenuConfiguration menuConfigurationId="RESTAURANT_DEFAULT" appId="restaurant"
+        name="Restaurant Menu" description="Default restaurant application menu structure"/>
+
+    <!-- Menu items: floor and kitchen for every employee, the rest for the admin -->
+    <growerp.menu.MenuItem menuItemId="RESTAURANT_MAIN" menuConfigurationId="RESTAURANT_DEFAULT"
+        title="Floor" route="/" iconName="table_restaurant" widgetName="PosFloorScreen" sequenceNum="10"/>
+    <growerp.menu.MenuItem menuItemId="RESTAURANT_KITCHEN" menuConfigurationId="RESTAURANT_DEFAULT"
+        title="Kitchen" route="/kitchen" iconName="soup_kitchen" widgetName="PosKitchenScreen" sequenceNum="20"/>
+    <growerp.menu.MenuItem menuItemId="RESTAURANT_CATALOG" menuConfigurationId="RESTAURANT_DEFAULT"
+        title="Menu" route="/catalog" iconName="category" widgetName="ProductList" userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="30"/>
+    <growerp.menu.MenuItem menuItemId="RESTAURANT_MODIFIERS" menuConfigurationId="RESTAURANT_DEFAULT"
+        title="Modifiers" route="/modifiers" iconName="tune" widgetName="PosModifierGroupList" userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="40"/>
+    <growerp.menu.MenuItem menuItemId="RESTAURANT_SHIFTS" menuConfigurationId="RESTAURANT_DEFAULT"
+        title="Shifts" route="/shifts" iconName="receipt_long" widgetName="PosShiftList" userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="50"/>
+    <growerp.menu.MenuItem menuItemId="RESTAURANT_ORDERS" menuConfigurationId="RESTAURANT_DEFAULT"
+        title="Orders" route="/orders" iconName="shopping_cart" widgetName="SalesOrderList" userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="60"/>
+    <growerp.menu.MenuItem menuItemId="RESTAURANT_TAX" menuConfigurationId="RESTAURANT_DEFAULT"
+        title="Tax Rates" route="/taxRates" iconName="percent" widgetName="TaxRateList" userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="70"/>
+    <growerp.menu.MenuItem menuItemId="RESTAURANT_COMPANY" menuConfigurationId="RESTAURANT_DEFAULT"
+        title="Organization" route="/companies" iconName="business" widgetName="ShowCompanyDialog" userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="80"/>
+    <growerp.menu.MenuItem menuItemId="RESTAURANT_ABOUT" menuConfigurationId="RESTAURANT_DEFAULT"
+        title="About" route="/about" iconName="info" widgetName="AboutForm" sequenceNum="90"/>
+</entity-facade-xml>

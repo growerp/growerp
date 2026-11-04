@@ -171,6 +171,8 @@ final Map<String, Icon> iconRegistry = {
   'play_circle': const Icon(Icons.play_circle),
   'summarize': const Icon(Icons.summarize),
   'percent': const Icon(Icons.percent),
+  'soup_kitchen': const Icon(Icons.soup_kitchen),
+  'table_restaurant': const Icon(Icons.table_restaurant),
   'point_of_sale': const Icon(Icons.point_of_sale),
 };
 

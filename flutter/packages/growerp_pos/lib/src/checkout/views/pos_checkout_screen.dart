@@ -24,9 +24,8 @@ import '../blocs/pos_catalog_bloc.dart';
 import '../blocs/pos_sale_bloc.dart';
 import '../../refund/blocs/pos_refund_bloc.dart';
 import '../../refund/views/pos_refund_dialog.dart';
-import '../../shift/blocs/pos_shift_bloc.dart';
-import '../../shift/views/pos_shift_dialogs.dart';
-import '../../shift/views/pos_z_report_dialog.dart';
+import '../../shift/views/pos_shift_gate.dart';
+import 'pos_catalog_pane.dart';
 import 'pos_receipt_dialog.dart';
 import 'pos_tender_dialog.dart';
 
@@ -43,78 +42,7 @@ class PosCheckoutScreen extends StatefulWidget {
 }
 
 class PosCheckoutScreenState extends State<PosCheckoutScreen> {
-  final _searchController = TextEditingController();
-  final _searchFocus = FocusNode();
-  String _search = '';
-  String? _categoryId;
   String _terminalName = 'Till 1';
-
-  @override
-  void initState() {
-    super.initState();
-    context.read<PosCatalogBloc>().add(const PosCatalogFetch());
-    _loadShift();
-  }
-
-  /// A device stays the till it was opened as.
-  Future<void> _loadShift() async {
-    final bloc = context.read<PosShiftBloc>();
-    final stored = await PersistFunctions.getKeyValue(posTerminalKey);
-    if (!mounted) return;
-    setState(() => _terminalName = stored ?? _terminalName);
-    bloc.add(PosShiftFetch(_terminalName));
-  }
-
-  Future<void> _cashMovement() async {
-    final bloc = context.read<PosShiftBloc>();
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) =>
-          BlocProvider.value(value: bloc, child: const PosCashMovementDialog()),
-    );
-  }
-
-  Future<void> _closeShift(String currencyId) async {
-    final bloc = context.read<PosShiftBloc>();
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) =>
-          BlocProvider.value(value: bloc, child: const PosShiftCloseDialog()),
-    );
-    final report = bloc.state.report;
-    if (report == null || bloc.state.shift != null || !mounted) return;
-    await showDialog(
-      context: context,
-      builder: (_) => PosZReportDialog(report, currencyId: currencyId),
-    );
-  }
-
-  /// A scanner types the code and presses enter.
-  void _onSubmitted(String value) {
-    final code = value.trim();
-    _searchController.clear();
-    setState(() => _search = '');
-    _searchFocus.requestFocus();
-    if (code.isNotEmpty) {
-      context.read<PosCatalogBloc>().add(PosBarcodeScan(code));
-    }
-  }
-
-  List<PosCatalogItem> _visible(PosCatalogState state) {
-    final search = _search.toLowerCase();
-    return state.items
-        .where(
-          (item) =>
-              (_categoryId == null ||
-                  item.categories.any((c) => c.categoryId == _categoryId)) &&
-              (search.isEmpty ||
-                  (item.productName ?? '').toLowerCase().contains(search) ||
-                  (item.pseudoId ?? '').toLowerCase().contains(search)),
-        )
-        .toList();
-  }
 
   Future<void> _pay(PosCartState cart, String currencyId) async {
     final saleBloc = context.read<PosSaleBloc>();
@@ -143,7 +71,6 @@ class PosCheckoutScreenState extends State<PosCheckoutScreen> {
     cartBloc.add(const PosCartClear());
     saleBloc.add(const PosSaleReset());
     await showDialog(context: context, builder: (_) => PosReceiptDialog(sale));
-    _searchFocus.requestFocus();
   }
 
   Future<void> _refund() async {
@@ -156,210 +83,46 @@ class PosCheckoutScreenState extends State<PosCheckoutScreen> {
         child: PosRefundDialog(terminalName: _terminalName),
       ),
     );
-    if (mounted) _searchFocus.requestFocus();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<PosCatalogBloc, PosCatalogState>(
-          listener: (context, state) {
-            if (state.status == PosCatalogStatus.failure) {
-              HelperFunctions.showMessage(context, state.message, Colors.red);
-            }
-            if (state.status == PosCatalogStatus.scanned) {
-              context.read<PosCartBloc>().add(PosCartAdd(state.scanned!));
-            }
-          },
-        ),
-        BlocListener<PosCartBloc, PosCartState>(
+    return PosShiftGate(
+      builder: (context, terminalName) {
+        _terminalName = terminalName;
+        return BlocListener<PosCartBloc, PosCartState>(
           listener: (context, state) {
             if (state.status == PosCartStatus.failure) {
               HelperFunctions.showMessage(context, state.message, Colors.red);
             }
           },
-        ),
-      ],
-      child: BlocConsumer<PosShiftBloc, PosShiftState>(
-        listener: (context, state) {
-          if (state.shift?.terminalName != null &&
-              state.shift!.terminalName != _terminalName) {
-            setState(() => _terminalName = state.shift!.terminalName!);
-          }
-          // an open shift fails inside its dialog, which shows the message
-          if (state.status == PosShiftStatus.failure && state.shift == null) {
-            HelperFunctions.showMessage(context, state.message, Colors.red);
-          }
-        },
-        builder: (context, shift) {
-          if (shift.shift == null) {
-            return shift.status == PosShiftStatus.initial ||
-                    shift.status == PosShiftStatus.loading
-                ? const Center(child: LoadingIndicator())
-                : PosShiftOpenView(terminalName: _terminalName);
-          }
-          return _till();
-        },
-      ),
-    );
-  }
-
-  Widget _till() {
-    return LayoutBuilder(
-      key: const Key('PosCheckoutScreen'),
-      builder: (context, constraints) {
-        if (constraints.maxWidth >= _sideBySideWidth) {
-          return Row(
-            children: [
-              Expanded(child: _catalog()),
-              const VerticalDivider(width: 1),
-              SizedBox(width: 340, child: _cart()),
-            ],
-          );
-        }
-        return Column(
-          children: [
-            Expanded(flex: 3, child: _catalog()),
-            const Divider(height: 1),
-            Expanded(flex: 2, child: _cart()),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _catalog() {
-    final localizations = PosLocalizations.of(context)!;
-    return BlocBuilder<PosCatalogBloc, PosCatalogState>(
-      builder: (context, state) {
-        if (state.status == PosCatalogStatus.initial ||
-            (state.status == PosCatalogStatus.loading && state.items.isEmpty)) {
-          return const Center(child: LoadingIndicator());
-        }
-        final items = _visible(state);
-        final categories = <String, String>{
-          for (final item in state.items)
-            for (final category in item.categories)
-              category.categoryId: category.categoryName,
-        };
-        return Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: TextField(
-                key: const Key('posSearch'),
-                controller: _searchController,
-                focusNode: _searchFocus,
-                autofocus: true,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.qr_code_scanner),
-                  hintText: localizations.searchOrScan,
-                  suffixIcon: IconButton(
-                    key: const Key('posRefresh'),
-                    icon: const Icon(Icons.refresh),
-                    onPressed: () => context.read<PosCatalogBloc>().add(
-                      const PosCatalogFetch(refresh: true),
-                    ),
-                  ),
-                ),
-                onChanged: (value) => setState(() => _search = value),
-                onSubmitted: _onSubmitted,
-              ),
-            ),
-            if (categories.isNotEmpty)
-              SizedBox(
-                height: 48,
-                child: ListView(
-                  key: const Key('posCategories'),
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: LayoutBuilder(
+            key: const Key('PosCheckoutScreen'),
+            builder: (context, constraints) {
+              final catalog = PosCatalogPane(
+                onItem: (item) =>
+                    context.read<PosCartBloc>().add(PosCartAdd(item)),
+              );
+              if (constraints.maxWidth >= _sideBySideWidth) {
+                return Row(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ChoiceChip(
-                        key: const Key('posCategoryAll'),
-                        label: Text(localizations.allProducts),
-                        selected: _categoryId == null,
-                        onSelected: (_) => setState(() => _categoryId = null),
-                      ),
-                    ),
-                    for (final category in categories.entries)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: ChoiceChip(
-                          key: Key('posCategory${category.key}'),
-                          label: Text(category.value),
-                          selected: _categoryId == category.key,
-                          onSelected: (_) =>
-                              setState(() => _categoryId = category.key),
-                        ),
-                      ),
+                    Expanded(child: catalog),
+                    const VerticalDivider(width: 1),
+                    SizedBox(width: 340, child: _cart()),
                   ],
-                ),
-              ),
-            Expanded(
-              child: items.isEmpty
-                  ? Center(
-                      key: const Key('posNoProducts'),
-                      child: Text(localizations.noProducts),
-                    )
-                  : GridView.builder(
-                      key: const Key('posGrid'),
-                      padding: const EdgeInsets.all(8),
-                      gridDelegate:
-                          const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 170,
-                            mainAxisSpacing: 8,
-                            crossAxisSpacing: 8,
-                            childAspectRatio: 1.1,
-                          ),
-                      itemCount: items.length,
-                      itemBuilder: (context, index) =>
-                          _tile(items[index], index, state.currencyId ?? 'USD'),
-                    ),
-            ),
-          ],
+                );
+              }
+              return Column(
+                children: [
+                  Expanded(flex: 3, child: catalog),
+                  const Divider(height: 1),
+                  Expanded(flex: 2, child: _cart()),
+                ],
+              );
+            },
+          ),
         );
       },
-    );
-  }
-
-  Widget _tile(PosCatalogItem item, int index, String currencyId) {
-    return Card(
-      key: Key('posItem$index'),
-      clipBehavior: Clip.antiAlias,
-      margin: EdgeInsets.zero,
-      child: InkWell(
-        onTap: () => context.read<PosCartBloc>().add(PosCartAdd(item)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: item.image != null
-                  ? Image.memory(item.image!, fit: BoxFit.cover)
-                  : const Icon(Icons.inventory_2_outlined, size: 36),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.productName ?? '',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    item.price.currency(currencyId: currencyId),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -373,26 +136,7 @@ class PosCheckoutScreenState extends State<PosCheckoutScreen> {
           builder: (context, cart) {
             return Column(
               children: [
-                Row(
-                  children: [
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(_terminalName, key: const Key('posTill')),
-                    ),
-                    IconButton(
-                      key: const Key('posCashMovement'),
-                      icon: const Icon(Icons.swap_vert),
-                      tooltip: localizations.cashMovement,
-                      onPressed: _cashMovement,
-                    ),
-                    IconButton(
-                      key: const Key('posCloseShift'),
-                      icon: const Icon(Icons.lock_outline),
-                      tooltip: localizations.closeTill,
-                      onPressed: () => _closeShift(currencyId),
-                    ),
-                  ],
-                ),
+                PosTillBar(terminalName: _terminalName, currencyId: currencyId),
                 const Divider(height: 1),
                 Expanded(
                   child: cart.lines.isEmpty
@@ -517,12 +261,5 @@ class PosCheckoutScreenState extends State<PosCheckoutScreen> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    _searchFocus.dispose();
-    super.dispose();
   }
 }

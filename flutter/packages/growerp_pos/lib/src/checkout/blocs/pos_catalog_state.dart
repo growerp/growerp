@@ -20,6 +20,7 @@ class PosCatalogState extends Equatable {
   const PosCatalogState({
     this.status = PosCatalogStatus.initial,
     this.items = const <PosCatalogItem>[],
+    this.modifierGroups = const <PosModifierGroup>[],
     this.pricesIncludeTax = false,
     this.currencyId,
     this.scanned,
@@ -28,6 +29,7 @@ class PosCatalogState extends Equatable {
 
   final PosCatalogStatus status;
   final List<PosCatalogItem> items;
+  final List<PosModifierGroup> modifierGroups;
   final bool pricesIncludeTax;
   final String? currencyId;
 
@@ -38,6 +40,7 @@ class PosCatalogState extends Equatable {
   PosCatalogState copyWith({
     PosCatalogStatus? status,
     List<PosCatalogItem>? items,
+    List<PosModifierGroup>? modifierGroups,
     bool? pricesIncludeTax,
     String? currencyId,
     PosCatalogItem? scanned,
@@ -46,6 +49,7 @@ class PosCatalogState extends Equatable {
     return PosCatalogState(
       status: status ?? this.status,
       items: items ?? this.items,
+      modifierGroups: modifierGroups ?? this.modifierGroups,
       pricesIncludeTax: pricesIncludeTax ?? this.pricesIncludeTax,
       currencyId: currencyId ?? this.currencyId,
       scanned: scanned,
@@ -57,6 +61,7 @@ class PosCatalogState extends Equatable {
   List<Object?> get props => [
     status,
     items,
+    modifierGroups,
     pricesIncludeTax,
     currencyId,
     scanned,

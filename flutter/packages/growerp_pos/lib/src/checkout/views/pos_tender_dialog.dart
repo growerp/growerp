@@ -30,8 +30,12 @@ class PosTenderDialog extends StatefulWidget {
     required this.grandTotal,
     required this.currencyId,
     required this.terminalName,
+    this.tabId,
   });
   final String terminalName;
+
+  /// set when this pays a restaurant tab: then the lines are not needed
+  final String? tabId;
   final List<PosLine> lines;
   final Decimal grandTotal;
   final String currencyId;
@@ -191,11 +195,17 @@ class PosTenderDialogState extends State<PosTenderDialog> {
                         key: const Key('posComplete'),
                         onPressed: _covered && !busy
                             ? () => context.read<PosSaleBloc>().add(
-                                PosSaleSubmit(
-                                  lines: widget.lines,
-                                  tenders: _tenders,
-                                  terminalName: widget.terminalName,
-                                ),
+                                widget.tabId != null
+                                    ? PosSaleSettle(
+                                        tabId: widget.tabId!,
+                                        tenders: _tenders,
+                                        terminalName: widget.terminalName,
+                                      )
+                                    : PosSaleSubmit(
+                                        lines: widget.lines,
+                                        tenders: _tenders,
+                                        terminalName: widget.terminalName,
+                                      ),
                               )
                             : null,
                         child: Text(localizations.completeSale),

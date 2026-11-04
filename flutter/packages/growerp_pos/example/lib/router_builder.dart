@@ -47,6 +47,43 @@ GoRouter createPosExampleRouter() {
   );
 }
 
+/// The same for a restaurant: floor first, kitchen beside it.
+const restaurantMenuConfig = MenuConfiguration(
+  menuConfigurationId: 'RESTAURANT_EXAMPLE',
+  appId: 'restaurant_example',
+  name: 'Restaurant Example Menu',
+  menuItems: [
+    MenuItem(
+      itemKey: 'RESTAURANT_FLOOR',
+      title: 'Floor',
+      route: '/',
+      iconName: 'table_restaurant',
+      sequenceNum: 10,
+      widgetName: 'PosFloorScreen',
+    ),
+    MenuItem(
+      itemKey: 'RESTAURANT_KITCHEN',
+      title: 'Kitchen',
+      route: '/kitchen',
+      iconName: 'soup_kitchen',
+      sequenceNum: 20,
+      widgetName: 'PosKitchenScreen',
+    ),
+  ],
+);
+
+GoRouter createRestaurantExampleRouter() {
+  return createStaticAppRouter(
+    menuConfig: restaurantMenuConfig,
+    appTitle: 'GrowERP Restaurant Example',
+    dashboard: const PosFloorScreen(),
+    widgetBuilder: (route) => switch (route) {
+      '/kitchen' => const PosKitchenScreen(),
+      _ => const PosFloorScreen(),
+    },
+  );
+}
+
 /// BLoC providers for the point of sale example app.
 List<BlocProvider> getExampleBlocProviders(
   RestClient restClient,

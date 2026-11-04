@@ -41,6 +41,25 @@ A difference is posted through the cash book: short on `789000000` Misc Operatin
 and is not posted. `get#ZReport` also works on an open shift, as an X report. A closed shift is
 fixed. `PosShiftList` shows all shifts to the admin.
 
+## Restaurant
+
+`PosRestaurantServices100`, app `restaurant`. A tab (`PosTab`) is an order that stays open at a table
+(an Asset of class `AsClsTable`, placed by `PosTableLayout`). Lines are added one by one through
+mantle so an order item keeps its id: the kitchen state in `PosLine` hangs on it, and a back office
+save of the order is refused.
+
+- **Lines**: `New`, `Sent`, `Ready`, `Served`, `Voided`. A new line can change or go; once sent it is
+  voided: quantity zero, not charged, still visible, counted on the Z report.
+- **Modifiers**: `PosModifierGroup` with `minSelect`/`maxSelect`, on products. The price goes into the
+  price of the line and the name into its description, `PosLineModifier` keeps what was chosen.
+- **Kitchen**: `send#TabToKitchen` makes a ticket of the new lines. After the commit
+  `send#KitchenSignal` sends topic `posKitchen` to the users of the tenant, with no content: screens
+  fetch again (`PosLiveRefresh`) and also poll every 15 seconds, a signal can get lost.
+  `NotificationBloc` keeps the topic out of the bell. The signal reaches the JVM it runs on only.
+- **Paying**: `settle#Tab` shares `finish#PosOrder` with the till and needs an open shift.
+  `calculate#TabSplit` splits equally or by item; the last share takes what rounding leaves and all
+  shares settle at once: one order, one invoice, a payment per share, one receipt.
+
 ## Frontend
 
 Block `growerp_pos`: `PosCheckoutScreen` (tiles and cart side by side from 700 wide, stacked below),

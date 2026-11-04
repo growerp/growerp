@@ -79,6 +79,8 @@ List<PosZRow> posZReportRows(
         money(tender.amount),
       ),
     PosZRow('RefundTax', l.refundedTax, money(report.refundTaxTotal)),
+    if ((report.voidCount ?? 0) > 0)
+      PosZRow('Voids', l.voidedLines, '${report.voidCount}'),
     PosZRow('Float', l.openingFloat, money(report.openingFloat)),
     PosZRow('Movements', l.cashMovement, money(report.movementTotal)),
     PosZRow('Expected', l.expectedCash, money(report.expectedCash)),

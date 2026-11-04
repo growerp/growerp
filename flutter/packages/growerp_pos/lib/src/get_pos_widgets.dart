@@ -21,6 +21,9 @@ Map<String, GrowerpWidgetBuilder> getPosWidgets() {
   return {
     'PosCheckoutScreen': (args) => const PosCheckoutScreen(),
     'PosShiftList': (args) => const PosShiftList(),
+    'PosFloorScreen': (args) => const PosFloorScreen(),
+    'PosKitchenScreen': (args) => const PosKitchenScreen(),
+    'PosModifierGroupList': (args) => const PosModifierGroupList(),
   };
 }
 
@@ -44,6 +47,28 @@ List<WidgetMetadata> getPosWidgetsWithMetadata() {
       iconName: 'receipt_long',
       keywords: ['shift', 'z report', 'till', 'cash count', 'end of day'],
       builder: (args) => const PosShiftList(),
+    ),
+    WidgetMetadata(
+      widgetName: 'PosFloorScreen',
+      description: 'Floor plan of a restaurant: tables and their open tabs',
+      iconName: 'table_restaurant',
+      keywords: ['tables', 'floor plan', 'restaurant', 'tab'],
+      builder: (args) => const PosFloorScreen(),
+    ),
+    WidgetMetadata(
+      widgetName: 'PosKitchenScreen',
+      description: 'Kitchen display: the tickets the kitchen is working on',
+      iconName: 'soup_kitchen',
+      keywords: ['kitchen', 'tickets', 'orders', 'cook'],
+      builder: (args) => const PosKitchenScreen(),
+    ),
+    WidgetMetadata(
+      widgetName: 'PosModifierGroupList',
+      description:
+          'Choices on products, like sauces or extras, with their price',
+      iconName: 'tune',
+      keywords: ['modifiers', 'options', 'extras', 'menu'],
+      builder: (args) => const PosModifierGroupList(),
     ),
   ];
 }

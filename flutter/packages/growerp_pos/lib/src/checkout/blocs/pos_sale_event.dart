@@ -33,6 +33,20 @@ class PosSaleSubmit extends PosSaleEvent {
   List<Object?> get props => [lines, tenders, terminalName];
 }
 
+/// pay a restaurant tab
+class PosSaleSettle extends PosSaleEvent {
+  const PosSaleSettle({
+    required this.tabId,
+    required this.tenders,
+    required this.terminalName,
+  });
+  final String tabId;
+  final List<PosTender> tenders;
+  final String terminalName;
+  @override
+  List<Object?> get props => [tabId, tenders, terminalName];
+}
+
 /// the sale is finished, the next one gets a new id
 class PosSaleReset extends PosSaleEvent {
   const PosSaleReset();

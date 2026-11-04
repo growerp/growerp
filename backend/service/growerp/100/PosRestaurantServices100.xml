@@ -816,7 +816,7 @@ limitations under the License.
         </actions>
     </service>
 
-    <service verb="send" noun="KitchenSignal" authenticate="false">
+    <service verb="send" noun="KitchenSignal" authenticate="anonymous-all">
         <description>Internal: tells the screens of the tenant to fetch again, there is nothing
             else in the message. Runs on a thread without a user. Topics are not per tenant,
             so it goes to the users of the tenant only.</description>

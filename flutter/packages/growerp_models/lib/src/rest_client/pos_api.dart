@@ -69,6 +69,100 @@ mixin PosApi {
   @GET("rest/s1/growerp/100/Pos/ZReport")
   Future<PosZReport> getPosZReport({@Query('shiftId') required String shiftId});
 
+  @GET("rest/s1/growerp/100/Pos/FloorPlan")
+  Future<PosTables> getPosFloorPlan();
+
+  @POST("rest/s1/growerp/100/Pos/Table")
+  Future<PosTable> createPosTable({@Field() required PosTable table});
+
+  @PATCH("rest/s1/growerp/100/Pos/Table")
+  Future<void> updatePosTable({@Field() required PosTable table});
+
+  @DELETE("rest/s1/growerp/100/Pos/Table")
+  Future<void> deletePosTable({@Field() required String assetId});
+
+  @GET("rest/s1/growerp/100/Pos/Tab")
+  Future<PosTab> getPosTab({@Query('tabId') required String tabId});
+
+  @POST("rest/s1/growerp/100/Pos/Tab")
+  Future<PosTab> openPosTab({
+    @Field() String? tableAssetId,
+    @Field() int? guestCount,
+  });
+
+  @DELETE("rest/s1/growerp/100/Pos/Tab")
+  Future<void> cancelPosTab({@Field() required String tabId});
+
+  @POST("rest/s1/growerp/100/Pos/TabMove")
+  Future<PosTab> movePosTab({
+    @Field() required String tabId,
+    @Field() required String tableAssetId,
+  });
+
+  @POST("rest/s1/growerp/100/Pos/TabLine")
+  Future<PosTab> addPosTabLine({
+    @Field() required String tabId,
+    @Field() required String productId,
+    @Field() required Decimal quantity,
+    @Field() List<String>? modifierIds,
+    @Field() String? note,
+    @Field() int? seatNo,
+  });
+
+  @PATCH("rest/s1/growerp/100/Pos/TabLine")
+  Future<PosTab> updatePosTabLine({
+    @Field() required String tabId,
+    @Field() required String orderItemSeqId,
+    @Field() Decimal? quantity,
+    @Field() String? note,
+  });
+
+  @DELETE("rest/s1/growerp/100/Pos/TabLine")
+  Future<PosTab> voidPosTabLine({
+    @Field() required String tabId,
+    @Field() required String orderItemSeqId,
+    @Field() String? reason,
+  });
+
+  @POST("rest/s1/growerp/100/Pos/TabSend")
+  Future<PosTab> sendPosTab({@Field() required String tabId});
+
+  @POST("rest/s1/growerp/100/Pos/TabSplit")
+  Future<PosShares> splitPosTab({
+    @Field() required String tabId,
+    @Field() int? ways,
+    @Field() List<PosSplitAssignment>? assignments,
+  });
+
+  @POST("rest/s1/growerp/100/Pos/TabSettle")
+  Future<PosSale> settlePosTab({
+    @Field() required String clientSaleId,
+    @Field() required String tabId,
+    @Field() required String terminalName,
+    @Field() required List<PosTender> tenders,
+  });
+
+  @GET("rest/s1/growerp/100/Pos/Kitchen")
+  Future<PosTickets> getPosKitchen();
+
+  @PATCH("rest/s1/growerp/100/Pos/Kitchen")
+  Future<void> updatePosKitchenLine({
+    @Field() required String orderId,
+    @Field() required String orderItemSeqId,
+    @Field() required String kitchenStatus,
+  });
+
+  @GET("rest/s1/growerp/100/Pos/ModifierGroup")
+  Future<PosModifierGroups> getPosModifierGroups();
+
+  @POST("rest/s1/growerp/100/Pos/ModifierGroup")
+  Future<PosModifierGroup> storePosModifierGroup({
+    @Field() required PosModifierGroup group,
+  });
+
+  @DELETE("rest/s1/growerp/100/Pos/ModifierGroup")
+  Future<void> deletePosModifierGroup({@Field() required String groupId});
+
   @GET("rest/s1/growerp/100/Pos/Receipt")
   Future<PosSale> getPosReceipt({
     @Query('clientSaleId') required String clientSaleId,

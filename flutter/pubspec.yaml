@@ -53,6 +53,7 @@ workspace:
   - packages/insurance
   - packages/marketing
   - packages/rental
+  - packages/restaurant
   - packages/shop
   - packages/support
   - packages/website
@@ -118,6 +119,7 @@ melos:
     - packages/academy
     - packages/insurance
     - packages/shop
+    - packages/restaurant
 
   command:
     bootstrap:

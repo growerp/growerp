@@ -32,6 +32,7 @@ class PosSaleBloc extends Bloc<PosSaleEvent, PosSaleState> {
 
   PosSaleBloc(this.restClient) : super(const PosSaleState()) {
     on<PosSaleSubmit>(_onSubmit, transformer: droppable());
+    on<PosSaleSettle>(_onSettle, transformer: droppable());
     on<PosSaleReset>((event, emit) => emit(const PosSaleState()));
   }
 
@@ -51,6 +52,32 @@ class PosSaleBloc extends Bloc<PosSaleEvent, PosSaleState> {
         clientSaleId: clientSaleId,
         terminalName: event.terminalName,
         lines: event.lines,
+        tenders: event.tenders,
+      );
+      emit(state.copyWith(status: PosSaleStatus.success, sale: sale));
+    } on DioException catch (e) {
+      emit(
+        state.copyWith(
+          status: PosSaleStatus.failure,
+          message: await getDioError(e),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onSettle(
+    PosSaleSettle event,
+    Emitter<PosSaleState> emit,
+  ) async {
+    final clientSaleId = state.clientSaleId ?? _newId();
+    emit(
+      state.copyWith(status: PosSaleStatus.loading, clientSaleId: clientSaleId),
+    );
+    try {
+      final sale = await restClient.settlePosTab(
+        clientSaleId: clientSaleId,
+        tabId: event.tabId,
+        terminalName: event.terminalName,
         tenders: event.tenders,
       );
       emit(state.copyWith(status: PosSaleStatus.success, sale: sale));

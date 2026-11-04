@@ -133,6 +133,8 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     NotificationReceive event,
     Emitter<NotificationState> emit,
   ) async {
+    // a signal for the kitchen screens, nothing for the user to read
+    if (event.notification.topic == 'posKitchen') return;
     emit(
       state.copyWith(
         notifications: [event.notification],

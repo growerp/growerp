@@ -1,0 +1,74 @@
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+# to be build from the flutter directory
+# with: docker build --build-arg DOCKER_TAG=1.3.0 -f packages/restaurant/Dockerfile -t growerp/restaurant . --progress=plain
+#
+#Stage 1 - Install dependencies and build the app
+FROM debian:trixie-slim AS build-env
+
+ARG BRANCH=development # currently either master or development we need to add existing
+ARG DOCKER_TAG=1.0.0+1
+# Flutter is installed from the official tarball (cirruslabs publishes no image newer
+# than Flutter 3.44, the packages need Dart 3.13) and run as a non-root user, as the
+# flutter tool recommends.
+ARG FLUTTER_VERSION=3.47.6
+ENV FLUTTER_VERSION=${FLUTTER_VERSION}
+# Install linux dependencies
+RUN apt-get update && \
+  apt-get install -y curl git unzip xz-utils zip libstdc++6 \
+  fonts-noto nano sed && \
+  apt-get clean && \
+  useradd -m builder
+
+USER builder
+RUN mkdir /home/builder/sdk
+RUN curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz \
+    | tar -xJ -C /home/builder/sdk
+ENV PATH="/home/builder/sdk/flutter/bin:/home/builder/.pub-cache/bin:$PATH"
+
+# git security
+RUN git config --global --add safe.directory '*' && \
+    flutter precache --web
+
+# activate melos
+RUN dart pub global activate melos
+
+# get growerp repos
+# RUN git clone --depth 1 -b $BRANCH https://github.com/growerp/growerp.git
+COPY --chown=builder:builder . /home/builder/flutter
+WORKDIR /home/builder/flutter
+RUN echo "pwd: $PWD"
+RUN sed -i 's\//webactivate \\' packages/restaurant/lib/main.dart
+RUN flutter --version
+# Clean any existing dart tool caches
+RUN find . -name ".dart_tool" -type d -exec rm -rf {} + 2>/dev/null || true
+RUN melos clean
+RUN melos bootstrap
+# localization
+RUN melos l10n --no-select
+# build
+RUN melos build --no-select
+# build flutter app
+WORKDIR /home/builder/flutter/packages/restaurant
+RUN sed -i 's/version: .*/version: '"${DOCKER_TAG}"'/' pubspec.yaml
+RUN flutter build web --release
+# Drop the engine .symbols maps: offline symboliser input only, never fetched
+# by the browser, ~7MB per image.
+RUN find build/web -name '*.symbols' -delete
+
+# Stage 2 - Create the run-time image
+FROM nginx:alpine
+COPY --from=build-env /home/builder/flutter/packages/restaurant/build/web /usr/share/nginx/html
+EXPOSE 80
