@@ -14,6 +14,7 @@
 
 import org.moqui.Moqui
 import org.moqui.context.ExecutionContext
+import org.moqui.entity.EntityValue
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -87,6 +88,59 @@ class CatalogServicesTests extends Specification {
         !ec.message.hasError()
         !ec.service.sync().name("${service}.get#ProductCategory")
                 .parameters([search: "Power tools ${run}"]).call().categories
+    }
+
+    def "an update leaves the fields it does not mention alone"() {
+        given:
+        Map category = ec.service.sync().name("${service}.create#ProductCategory")
+                .parameters([category: [categoryName: "Partial ${run}"]]).call().category
+        Map product = createProduct([productName: "Partial ${run}", price: 12.5, listPrice: 15,
+                description: 'Kept', useWarehouse: true, amount: 2, amountUom: [uomId: 'TF_hr'],
+                categories: [[categoryId: category.categoryId]]])
+
+        when:
+        Map updated = ec.service.sync().name("${service}.update#Product")
+                .parameters([product: [productId: product.productId, productName: "Renamed ${run}"]])
+                .call().product
+        EntityValue row = ec.entity.find('mantle.product.Product')
+                .condition('productId', product.productId).useCache(false).one()
+
+        then:
+        !ec.message.hasError()
+        updated.productName == "Renamed ${run}"
+        updated.pseudoId == product.pseudoId
+        updated.description == 'Kept'
+        updated.productTypeId == 'Physical Good'
+        updated.useWarehouse
+        updated.price as BigDecimal == 12.5
+        updated.listPrice as BigDecimal == 15
+        updated.categories*.categoryId.contains(category.categoryId)
+        row.amountFixed == 2
+        row.amountUomId == 'TF_hr'
+
+        when: 'a field sent empty is cleared'
+        updated = ec.service.sync().name("${service}.update#Product")
+                .parameters([product: [productId: product.productId, productName: "Cleared ${run}",
+                        description: '']]).call().product
+
+        then:
+        !ec.message.hasError()
+        !updated.description
+    }
+
+    def "a new product skips a sequence number another product of the owner already uses"() {
+        given:
+        Map first = createProduct([productName: "Seq one ${run}", price: 1, listPrice: 1])
+        String taken = (Long.parseLong(first.pseudoId as String) + 1).toString()
+        createProduct([productName: "Seq taken ${run}", price: 1, listPrice: 1, pseudoId: taken])
+
+        when:
+        Map next = createProduct([productName: "Seq next ${run}", price: 1, listPrice: 1])
+
+        then:
+        !ec.message.hasError()
+        next.pseudoId
+        next.pseudoId != taken
     }
 
     def "create, get, update and delete a product in a category"() {

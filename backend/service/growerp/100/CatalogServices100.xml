@@ -379,6 +379,20 @@ limitations under the License.
                 <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
                     in-map="[ownerPartyId: ownerPartyId, seqName: 'product']"
                     out-map="context" />
+                <!-- skip numbers in use: entered by hand, or pseudoId reset to productId -->
+                <entity-find-count entity-name="mantle.product.Product" count-field="pseudoIdUsed">
+                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                    <econdition field-name="pseudoId" from="seqNum" />
+                </entity-find-count>
+                <while condition="pseudoIdUsed">
+                    <service-call name="growerp.100.GeneralServices100.getNext#PseudoId"
+                        in-map="[ownerPartyId: ownerPartyId, seqName: 'product']"
+                        out-map="context" />
+                    <entity-find-count entity-name="mantle.product.Product" count-field="pseudoIdUsed">
+                        <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                        <econdition field-name="pseudoId" from="seqNum" />
+                    </entity-find-count>
+                </while>
                 <set field="product.pseudoId" from="seqNum" />
             </if>
             <!-- create product -->
@@ -553,15 +567,25 @@ limitations under the License.
                     || (product.useWarehouse &amp;&amp; product.requireInventory != requireInventory)
                     || (product.amount &amp;&amp; product.amount != oldProduct.amountFixed)
                     || (product.uom?.uomId &amp;&amp; product.uom?.uomId != oldProduct.amountUomId)">
-                <!-- null would reset it to productId, which later collides with the owner sequence -->
+                <!-- fields not in the request stay as they are; a null pseudoId would reset it
+                     to productId, which later collides with the owner sequence -->
                 <set field="oldProduct.pseudoId" from="product.pseudoId ?: oldProduct.pseudoId" />
-                <set field="oldProduct.productName" from="product.productName" />
-                <set field="oldProduct.description" from="product.description" />
-                <set field="oldProduct.productTypeEnumId" from="prodConvert.convertedStatusId" />
-                <set field="oldProduct.requireInventory" from="requireInventory" />
-                <set field="oldProduct.amountUomId" from="product.amountUom?.uomId" />
-                <set field="oldProduct.amountFixed"
-                    from="product.amount ? new BigDecimal(product.amount.toString()) : null" />
+                <set field="oldProduct.productName" from="product.productName ?: oldProduct.productName" />
+                <if condition="product.containsKey('description')">
+                    <set field="oldProduct.description" from="product.description" />
+                </if>
+                <set field="oldProduct.productTypeEnumId"
+                    from="prodConvert.convertedStatusId ?: oldProduct.productTypeEnumId" />
+                <if condition="product.useWarehouse != null">
+                    <set field="oldProduct.requireInventory" from="requireInventory" />
+                </if>
+                <if condition="product.containsKey('amountUom')">
+                    <set field="oldProduct.amountUomId" from="product.amountUom?.uomId" />
+                </if>
+                <if condition="product.containsKey('amount')">
+                    <set field="oldProduct.amountFixed"
+                        from="product.amount ? new BigDecimal(product.amount.toString()) : null" />
+                </if>
                 <entity-update value-field="oldProduct" />
             </if>
             <!-- prices -->
@@ -587,8 +611,8 @@ limitations under the License.
                 <date-filter />
             </entity-find>
             <if
-                condition="(!productPrices &amp;&amp; product.price &amp;&amp; !new BigDecimal(product.price).ZERO) 
-                    || (productPrices[0]?.price != product?.price)">
+                condition="product.price != null &amp;&amp; ((!productPrices &amp;&amp; product.price &amp;&amp; !new BigDecimal(product.price).ZERO) 
+                    || (productPrices[0]?.price != product?.price))">
                 <set field="productPrice" from="productPrices[0]" />
                 <service-call name="create#mantle.product.ProductPrice" in-map="priceMap" />
                 <!-- delete old record -->
@@ -606,8 +630,8 @@ limitations under the License.
                 <date-filter />
             </entity-find>
             <if
-                condition="(!productPrices &amp;&amp; product.listPrice &amp;&amp; !new BigDecimal(product.listPrice).ZERO) 
-                    || (productPrices[0]?.price != product?.price)">
+                condition="product.listPrice != null &amp;&amp; ((!productPrices &amp;&amp; product.listPrice &amp;&amp; !new BigDecimal(product.listPrice).ZERO) 
+                    || (productPrices[0]?.price != product?.price))">
                 <service-call name="create#mantle.product.ProductPrice"
                     in-map="[priceMap + [priceTypeEnumId: 'PptList',price: product.listPrice]]" />
                 <!-- delete old record -->
@@ -618,35 +642,38 @@ limitations under the License.
                 </if>
             </if>
 
-            <!-- get root catg -->
-            <entity-find entity-name="mantle.product.category.ProductCategory" list="catgs">
-                <econdition field-name="ownerPartyId" from="ownerPartyId" />
-                <econdition field-name="productCategoryTypeEnumId" value="PctRoot" />
-            </entity-find>
-            <!-- related categories  delete all and add all with root category -->
-            <entity-find entity-name="mantle.product.category.ProductCategoryMember"
-                list="categories">
-                <econdition field-name="productId" from="product.productId" />
-            </entity-find>
-            <iterate list="categories" entry="category">
-                <service-call name="delete#mantle.product.category.ProductCategoryMember"
-                    in-map="[   productId: category.productId,
-                                productCategoryId: category.productCategoryId,
-                                fromDate: category.fromDate]" />
-            </iterate>
-            <if condition="product.categories">
-                <script>product.categories.add([categoryId: catgs[0].productCategoryId])</script>
-                <else>
-                    <set field="product.categories"
-                        from="[[categoryId: catgs[0].productCategoryId]]" />
-                </else>
+            <!-- categories are only replaced when the request has them -->
+            <if condition="product.categories != null">
+                <!-- get root catg -->
+                <entity-find entity-name="mantle.product.category.ProductCategory" list="catgs">
+                    <econdition field-name="ownerPartyId" from="ownerPartyId" />
+                    <econdition field-name="productCategoryTypeEnumId" value="PctRoot" />
+                </entity-find>
+                <!-- related categories  delete all and add all with root category -->
+                <entity-find entity-name="mantle.product.category.ProductCategoryMember"
+                    list="categories">
+                    <econdition field-name="productId" from="product.productId" />
+                </entity-find>
+                <iterate list="categories" entry="category">
+                    <service-call name="delete#mantle.product.category.ProductCategoryMember"
+                        in-map="[   productId: category.productId,
+                                    productCategoryId: category.productCategoryId,
+                                    fromDate: category.fromDate]" />
+                </iterate>
+                <if condition="product.categories">
+                    <script>product.categories.add([categoryId: catgs[0].productCategoryId])</script>
+                    <else>
+                        <set field="product.categories"
+                            from="[[categoryId: catgs[0].productCategoryId]]" />
+                    </else>
+                </if>
+                <iterate list="product.categories" entry="category">
+                    <service-call name="create#mantle.product.category.ProductCategoryMember"
+                        in-map="[   productId: product.productId,
+                                    productCategoryId: category.categoryId,
+                                    fromDate: ec.user.nowTimestamp]" />
+                </iterate>
             </if>
-            <iterate list="product.categories" entry="category">
-                <service-call name="create#mantle.product.category.ProductCategoryMember"
-                    in-map="[   productId: product.productId,
-                                productCategoryId: category.categoryId,
-                                fromDate: ec.user.nowTimestamp]" />
-            </iterate>
             <!-- asset count -->
             <entity-find entity-name="mantle.product.asset.Asset" list="assets" for-update="true">
                 <econdition field-name="productId" from="product.productId" />
