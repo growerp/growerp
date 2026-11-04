@@ -132,6 +132,7 @@ class CatalogServicesTests extends Specification {
         then:
         !ec.message.hasError()
         updated.productName == "Sledgehammer ${run}"
+        updated.pseudoId == product.pseudoId
         updated.price as BigDecimal == 20
 
         when:

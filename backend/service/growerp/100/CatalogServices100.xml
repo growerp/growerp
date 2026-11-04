@@ -553,7 +553,8 @@ limitations under the License.
                     || (product.useWarehouse &amp;&amp; product.requireInventory != requireInventory)
                     || (product.amount &amp;&amp; product.amount != oldProduct.amountFixed)
                     || (product.uom?.uomId &amp;&amp; product.uom?.uomId != oldProduct.amountUomId)">
-                <set field="oldProduct.pseudoId" from="product.pseudoId" />
+                <!-- null would reset it to productId, which later collides with the owner sequence -->
+                <set field="oldProduct.pseudoId" from="product.pseudoId ?: oldProduct.pseudoId" />
                 <set field="oldProduct.productName" from="product.productName" />
                 <set field="oldProduct.description" from="product.description" />
                 <set field="oldProduct.productTypeEnumId" from="prodConvert.convertedStatusId" />
