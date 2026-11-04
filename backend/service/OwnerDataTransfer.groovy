@@ -322,7 +322,9 @@ class OwnerDataTransfer {
                     if (bad == null) bad = compositeRefs[entity].find { List ref ->
                         Map<String, String> keyMap = (Map) ref[1]
                         Map key = keyMap.collectEntries { f, rf -> [rf, row[f]] }
-                        key.values().every { it != null } && !rows[(String) ref[0]].containsKey(pkKey((String) ref[0], key)) &&
+                        // not rows[...]: a default map adds the key, in the middle of rows.each
+                        key.values().every { it != null } &&
+                                !(rows.containsKey(ref[0]) && rows.get(ref[0]).containsKey(pkKey((String) ref[0], key))) &&
                                 find((String) ref[0]).condition(key).count() > 0
                     }?.getAt(1)?.keySet()?.join(',')
                     if (bad == null) continue
