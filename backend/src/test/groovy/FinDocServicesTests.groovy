@@ -146,7 +146,10 @@ class FinDocServicesTests extends Specification {
 
         when:
         approveOrder(order.orderId, false)
-        Map shipment = getFinDoc([docType: 'shipment', sales: false, search: order.pseudoId])
+        // search also matches a shipment that has this number as its own pseudoId
+        Map shipment = ec.service.sync().name("${service}.get#FinDoc")
+                .parameters([docType: 'shipment', sales: false, search: order.pseudoId]).call()
+                ?.finDocs?.find { it.orderId == order.orderId }
 
         then:
         !ec.message.hasError()
