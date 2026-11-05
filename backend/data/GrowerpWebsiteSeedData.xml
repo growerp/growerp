@@ -959,7 +959,9 @@ Whether you need help working out your requirements, setting up the system, conn
     </moqui.resource.DbResource>
 
     <!-- ================================================================
-         PRIVACY POLICY PAGE
+         POLICIES PAGE (privacy policy + terms of service)
+         pagePath stays 'privacy': the app store privacy_url.txt files
+         and landing pages link to /content/privacy
          ================================================================ -->
     <moqui.resource.wiki.WikiPage wikiPageId="growerp_privacy" wikiSpaceId="GROWERP_WS" pagePath="privacy"
         publishedVersionName="01" sequenceNum="9">
@@ -968,48 +970,93 @@ Whether you need help working out your requirements, setting up the system, conn
     <moqui.resource.DbResource filename="privacy.md.ftl" isFile="Y" resourceId="growerp_privacy"
         parentResourceId="growerp_content_dir">
         <file mimeType="text/markdown" versionName="01" rootVersionName="01">
-            <fileData><![CDATA[<!-- description: What information the GrowERP apps collect, how it is used and stored, and the rights you have over your own data. -->
-# Privacy Policy
+            <fileData><![CDATA[<!-- description: The GrowERP privacy policy and terms of service: what data the apps collect, how it is used, and the terms for using the GrowERP apps and hosted service. -->
+# Policies
+
+## Privacy Policy
 
 **Effective Date:** October 2024
 
-This Privacy Policy explains how GrowERP, developed by AntWebsystems Co., Ltd, collects, uses, discloses, and safeguards your information when you use any GrowERP application (App) — including GrowERP Admin, GrowERP Hotel, GrowERP Freelance, GrowERP Support, GrowERP Marketing, GrowERP Agents, GrowERP Rental, GrowERP Academy, and GrowERP Insurance. By using our App, you agree to the collection and use of information in accordance with this policy.
+This Privacy Policy explains how GrowERP, developed by AntWebsystems Co., Ltd, collects, uses, discloses, and safeguards your information when you use any GrowERP application (App) — including GrowERP Admin, GrowERP Hotel, GrowERP Freelance, GrowERP Support, GrowERP Marketing, GrowERP Agents, GrowERP Rental, GrowERP Academy, GrowERP Insurance, GrowERP Restaurant, and GrowERP Shop. By using our App, you agree to the collection and use of information in accordance with this policy.
 
-## 1. Information We Collect
-### a. Personal Information
+### 1. Information We Collect
+#### a. Personal Information
 We may collect personal information that you provide directly to us, such as: Name, Email address, Phone number, Payment information when you use the E-Commerce part.
-### b. Usage Data
+#### b. Usage Data
 We may collect information automatically when you use our App, including: Device type and model, IP address, Operating system version, App usage information.
-### c. Data You Enter About Others
+#### c. Data You Enter About Others
 Businesses using the App store data about their own customers in it, for example the course progress of learners in GrowERP Academy, or the insurance policies and claims of clients in GrowERP Insurance. This data is processed on behalf of that business and is only visible to the business and, through their own login, to the customer it concerns.
 
-## 2. How We Use Your Information
+### 2. How We Use Your Information
 - To provide, maintain, and improve the App
 - To personalize your experience
 - To process transactions and send related information
 - To communicate with you about updates, promotions, or news related to the app
 - To analyze usage trends and monitor app performance
 
-## 3. How We Share Your Information
+### 3. How We Share Your Information
 We do not sell or share your personal information with third parties, except as follows: Service Providers and Legal Requirements.
 
-## 4. Data Security
+### 4. Data Security
 We take the security of your data seriously and use safeguards to protect your information.
 
-## 5. Your Rights
+### 5. Your Rights
 You have the right to Access, Correction, Deletion, and Opt-out.
 
-## 6. Third-Party Links
+### 6. Third-Party Links
 We are not responsible for the privacy practices or the content of third-party websites or services linked from our App.
 
-## 7. Children's Privacy
+### 7. Children's Privacy
 Our App is not intended for children under the age of 13.
 
-## 8. Changes to This Privacy Policy
+### 8. Changes to This Privacy Policy
 We may update this Privacy Policy from time to time. 
 
-## 9. Contact Us
+### 9. Contact Us
 If you have any questions about this Privacy Policy, please contact us at: support@growerp.com
+
+## Terms of Service
+
+**Effective Date:** November 2026
+
+These Terms of Service ("Terms") govern your use of the GrowERP applications, the website www.growerp.com and the hosted GrowERP service (together the "Service"), provided by AntWebsystems Co., Ltd ("we", "us"). By creating an account or using the Service you agree to these Terms. If you use the Service on behalf of a company, you confirm that you are authorised to accept these Terms for that company.
+
+### 1. Accounts
+You are responsible for the information you provide when registering, for keeping your login details confidential and for all activity under your account. Tell us immediately at support@growerp.com if you suspect unauthorised use.
+
+### 2. Free Trial and Subscriptions
+New accounts start with a free trial period. After the trial, continued use of the hosted Service requires a paid subscription according to the plan you choose. Fees are charged in advance for each billing period and are not refundable, except where required by law. We may change our prices with at least 30 days notice; the new price applies from your next billing period.
+
+### 3. Acceptable Use
+You agree not to use the Service to:
+- break any law or infringe the rights of others
+- store or send unlawful, harmful or misleading content, spam or malware
+- try to gain unauthorised access to the Service, other accounts or our systems
+- interfere with or overload the Service, or resell it without our written permission
+
+### 4. Your Data
+You keep all rights to the data you enter in the Service. You give us permission to host, process and back up that data only as far as needed to provide the Service. How we handle personal information is described in the Privacy Policy above. You can export your data at any time while your account is active.
+
+### 5. Open Source Software
+The GrowERP software is open source and is licensed under its own open source licence, which you can find at [github.com/growerp](https://github.com/growerp). These Terms cover the hosted Service and do not limit your rights under that licence.
+
+### 6. Availability and Changes
+We work to keep the Service available and secure, but we do not guarantee that it will be uninterrupted or error free. We may change, add or remove features of the Service over time.
+
+### 7. Termination
+You can stop using the Service and cancel your subscription at any time. We may suspend or close your account if you break these Terms or do not pay the fees due. After an account is closed we may delete its data after a reasonable period, so export anything you want to keep first.
+
+### 8. Disclaimer and Limitation of Liability
+The Service is provided "as is". To the extent permitted by law, we are not liable for any indirect or consequential damages, or for loss of profits, revenue or data. Our total liability for any claim is limited to the fees you paid us in the 12 months before the claim.
+
+### 9. Changes to These Terms
+We may update these Terms from time to time. We will post the new version on this page and, for important changes, inform account owners by email. Continuing to use the Service after a change means you accept the new Terms.
+
+### 10. Governing Law
+These Terms are governed by the laws of the Kingdom of Thailand.
+
+### 11. Contact Us
+If you have any questions about these Terms, please contact us at: support@growerp.com
 ]]></fileData>
             <histories versionName="01" versionDate="1485028800000" isDiff="N" />
         </file>
