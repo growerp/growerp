@@ -24,8 +24,15 @@ import 'pos_z_report_dialog.dart';
 /// Shows its child only while the till of this device has an open shift, and
 /// otherwise the way to open it.
 class PosShiftGate extends StatefulWidget {
-  const PosShiftGate({super.key, required this.builder});
+  const PosShiftGate({
+    super.key,
+    required this.builder,
+    this.needsShift = true,
+  });
   final Widget Function(BuildContext context, String terminalName) builder;
+
+  /// A waiter works without a till: only access is checked then.
+  final bool needsShift;
 
   @override
   PosShiftGateState createState() => PosShiftGateState();
@@ -75,7 +82,7 @@ class PosShiftGateState extends State<PosShiftGate> {
             ),
           );
         }
-        if (shift.shift == null) {
+        if (shift.shift == null && widget.needsShift) {
           return shift.status == PosShiftStatus.initial ||
                   shift.status == PosShiftStatus.loading
               ? const Center(child: LoadingIndicator())

@@ -541,6 +541,16 @@ limitations under the License.
         </actions>
     </service>
 
+    <service verb="check" noun="PosAdmin">
+        <description>Stops an employee at what only an admin may do. The screens hide it too, but
+            the REST domain of the POS is open to every employee.</description>
+        <actions>
+            <if condition="!(ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM'))">
+                <return error="true" message="Only an admin can do this" />
+            </if>
+        </actions>
+    </service>
+
     <service verb="create" noun="PosRefund">
         <description>Give money back for lines of a sale, in one transaction: return, credit
             memo with its tax, refund payment and stock. For an admin only. The money goes
@@ -558,9 +568,7 @@ limitations under the License.
             <parameter name="refund" type="Map" />
         </out-parameters>
         <actions>
-            <if condition="!(ec.user.isInGroup('GROWERP_M_ADMIN') || ec.user.isInGroup('GROWERP_M_SYSTEM'))">
-                <return error="true" message="Only an admin can give a refund" />
-            </if>
+            <service-call name="growerp.100.PosServices100.check#PosAdmin" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <set field="requestHash"
@@ -980,6 +988,7 @@ limitations under the License.
             <parameter name="shifts" type="List" />
         </out-parameters>
         <actions>
+            <service-call name="growerp.100.PosServices100.check#PosAdmin" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <entity-find entity-name="growerp.pos.PosShift" list="posShifts" offset="start" limit="limit">

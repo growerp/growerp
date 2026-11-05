@@ -36,6 +36,8 @@ limitations under the License.
         title="Orders" route="/orders" iconName="shopping_cart" widgetName="SalesOrderList" userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="60"/>
     <growerp.menu.MenuItem menuItemId="RESTAURANT_TAX" menuConfigurationId="RESTAURANT_DEFAULT"
         title="Tax Rates" route="/taxRates" iconName="percent" widgetName="TaxRateList" userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="70"/>
+    <growerp.menu.MenuItem menuItemId="RESTAURANT_STAFF" menuConfigurationId="RESTAURANT_DEFAULT"
+        title="Staff" route="/staff" iconName="people" widgetName="UserListEmployee" userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="75"/>
     <growerp.menu.MenuItem menuItemId="RESTAURANT_COMPANY" menuConfigurationId="RESTAURANT_DEFAULT"
         title="Organization" route="/companies" iconName="business" widgetName="ShowCompanyDialog" userGroupsJson='["GROWERP_M_SYSTEM","GROWERP_M_ADMIN"]' sequenceNum="80"/>
     <growerp.menu.MenuItem menuItemId="RESTAURANT_ABOUT" menuConfigurationId="RESTAURANT_DEFAULT"

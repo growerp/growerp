@@ -76,6 +76,7 @@ limitations under the License.
             <parameter name="table" type="Map" />
         </out-parameters>
         <actions>
+            <service-call name="growerp.100.PosServices100.check#PosAdmin" />
             <if condition="!table.tableName">
                 <return error="true" message="A table needs a name" />
             </if>
@@ -99,6 +100,7 @@ limitations under the License.
             <parameter name="table" type="Map" required="true" />
         </in-parameters>
         <actions>
+            <service-call name="growerp.100.PosServices100.check#PosAdmin" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <entity-find-one entity-name="growerp.pos.PosTableLayout" value-field="layout" for-update="true">
@@ -122,6 +124,7 @@ limitations under the License.
             <parameter name="assetId" required="true" />
         </in-parameters>
         <actions>
+            <service-call name="growerp.100.PosServices100.check#PosAdmin" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <entity-find-one entity-name="growerp.pos.PosTableLayout" value-field="layout" />
@@ -273,6 +276,7 @@ limitations under the License.
             <parameter name="group" type="Map" />
         </out-parameters>
         <actions>
+            <service-call name="growerp.100.PosServices100.check#PosAdmin" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <if condition="group.groupId">
@@ -334,6 +338,7 @@ limitations under the License.
             <parameter name="groupId" required="true" />
         </in-parameters>
         <actions>
+            <service-call name="growerp.100.PosServices100.check#PosAdmin" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <entity-find-one entity-name="growerp.pos.PosModifierGroup" value-field="groupValue" />
@@ -721,6 +726,7 @@ limitations under the License.
                         in-map="[orderId: owned.posTab.orderId, orderItemSeqId: orderItemSeqId]" />
                 </then>
                 <else>
+                    <service-call name="growerp.100.PosServices100.check#PosAdmin" />
                     <set field="posLine.kitchenStatus" value="Voided" />
                     <set field="posLine.voidReason" from="reason" />
                     <entity-update value-field="posLine" />
@@ -985,6 +991,7 @@ limitations under the License.
             <parameter name="sale" type="Map" />
         </out-parameters>
         <actions>
+            <service-call name="growerp.100.PosServices100.check#PosAdmin" />
             <service-call out-map="context"
                 name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" />
             <set field="requestHash"

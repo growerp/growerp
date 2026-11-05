@@ -68,5 +68,15 @@ Block `growerp_pos`: `PosCheckoutScreen` (tiles and cart side by side from 700 w
 keyboard: it types into the search field and presses enter. Barcodes are entered in the product
 dialog (`ProductIdentification` of type `PidtEan`).
 
-App `shop` opens on the checkout; the other menu items are for the admin. The `GROWERP_POS` domain
+App `shop` opens on the checkout; the other menu items are for the admin, staff are added under
+Staff. An employee (`GROWERP_M_EMPLOYEE`) is the cashier: sells, opens and closes the till. Refunds
+and the list of shifts are for the admin. The `GROWERP_POS` domain
 is only granted to companies registered in an app with the checkout on its menu.
+
+## Waiter and admin
+
+In `restaurant` an employee is a waiter and works the kitchen display, without a shift: open a
+table, enter the order, take off what the kitchen has not seen, send, move or free the table. The
+admin takes the money (`settle#Tab`, split bill, needs an open shift), voids what the kitchen has
+seen and sets up tables and modifiers. `check#PosAdmin` enforces this in the services: the
+`GROWERP_POS` REST domain is open to every employee, so hiding a button is not enough.

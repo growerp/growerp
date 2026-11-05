@@ -39,6 +39,11 @@ class PosTabScreen extends StatefulWidget {
 }
 
 class PosTabScreenState extends State<PosTabScreen> {
+  /// A waiter enters the order, the money and what the kitchen saw are for the admin.
+  bool get _isAdmin =>
+      context.read<AuthBloc>().state.authenticate?.user?.userGroup ==
+      UserGroup.admin;
+
   Future<void> _add(PosCatalogItem item) async {
     final tabBloc = context.read<PosTabBloc>();
     final catalog = context.read<PosCatalogBloc>().state;
@@ -307,7 +312,7 @@ class PosTabScreenState extends State<PosTabScreen> {
                     child: Text(localizations.freeTable),
                   ),
                 )
-              else
+              else if (_isAdmin)
                 Row(
                   children: [
                     Expanded(
@@ -380,11 +385,12 @@ class PosTabScreenState extends State<PosTabScreen> {
                       ),
                     ),
                   ),
-                IconButton(
-                  key: Key('posTabVoid$index'),
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: () => _void(line),
-                ),
+                if (isNew || _isAdmin)
+                  IconButton(
+                    key: Key('posTabVoid$index'),
+                    icon: const Icon(Icons.delete_outline),
+                    onPressed: () => _void(line),
+                  ),
               ],
             ),
     );

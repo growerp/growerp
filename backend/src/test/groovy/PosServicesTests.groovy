@@ -573,13 +573,36 @@ class PosServicesTests extends Specification {
         ec.message.hasError()
     }
 
+    def "a cashier sells and closes the till, the list of shifts is for the admin"() {
+        given:
+        String email = "seller-${run}@spock.example.com".toString()
+        ec.service.sync().name('growerp.100.PartyServices100.create#User')
+                .parameters([user: [firstName: 'Sel', lastName: 'Ler', role: 'OrgInternal',
+                        email: email, loginName: email, userGroupId: 'GROWERP_M_EMPLOYEE']]).call()
+
+        when:
+        ec.user.internalLoginUser(email)
+        Map sale = sell([line(service1, 1)], [cash(10)])
+
+        then:
+        ec.user.isInGroup('GROWERP_M_EMPLOYEE')
+        !ec.message.hasError()
+        sale.invoiceId
+
+        when:
+        ec.service.sync().name("${service}.get#PosShifts").call()
+
+        then:
+        ec.message.errorsString.contains('admin')
+    }
+
     def "only an admin refunds and a sale of another tenant cannot be found"() {
         given:
         Map sale = sell([line(service1, 1)], [cash(10)])
         String email = "cashier-${run}@spock.example.com".toString()
         ec.service.sync().name('growerp.100.PartyServices100.create#User')
                 .parameters([user: [firstName: 'Cas', lastName: 'Hier', role: 'OrgInternal',
-                        email: email, loginName: email, userGroup: 'GROWERP_M_EMPLOYEE']]).call()
+                        email: email, loginName: email, userGroupId: 'GROWERP_M_EMPLOYEE']]).call()
 
         when:
         ec.user.internalLoginUser(email)

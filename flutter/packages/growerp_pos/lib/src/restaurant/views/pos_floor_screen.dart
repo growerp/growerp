@@ -88,6 +88,7 @@ class PosFloorScreenState extends State<PosFloorScreen> with PosLiveRefresh {
   Widget build(BuildContext context) {
     final localizations = PosLocalizations.of(context)!;
     return PosShiftGate(
+      needsShift: _isAdmin,
       builder: (context, terminalName) =>
           BlocConsumer<PosFloorBloc, PosFloorState>(
             listener: (context, state) {
@@ -110,10 +111,11 @@ class PosFloorScreenState extends State<PosFloorScreen> with PosLiveRefresh {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  PosTillBar(
-                    terminalName: terminalName,
-                    currencyId: _currencyId(context),
-                  ),
+                  if (_isAdmin)
+                    PosTillBar(
+                      terminalName: terminalName,
+                      currencyId: _currencyId(context),
+                    ),
                   if (_isAdmin)
                     Row(
                       children: [

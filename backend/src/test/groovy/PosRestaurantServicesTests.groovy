@@ -31,6 +31,7 @@ import java.util.concurrent.CopyOnWriteArrayList
    - a back office save cannot touch the lines of a tab
    - a bill split equally and by item, settled at once
    - the kitchen hears about it after the commit, the own tenant only
+   - a waiter enters orders, money, sent lines and the setup are for the admin
 
    To run: make sure moqui is in place with a loaded database, backend not running, then:
     "cd moqui && ./gradlew :runtime:component:growerp:test"
@@ -548,6 +549,78 @@ class PosRestaurantServicesTests extends Specification {
                 .menuItems.findAll { !it.userGroups || group in it.userGroups }*.widgetName
     }
 
+    String employee(String name) {
+        String email = "${name}-${run}-${++count}@spock.example.com".toString()
+        ec.service.sync().name('growerp.100.PartyServices100.create#User')
+                .parameters([user: [firstName: name, lastName: 'Staff', role: 'OrgInternal',
+                        email: email, loginName: email, userGroupId: 'GROWERP_M_EMPLOYEE']]).call()
+        return email
+    }
+
+    def "a waiter enters the order, taking the money is for the admin"() {
+        given:
+        Map one = table()
+        String waiter = employee('waiter')
+
+        when: 'the order goes in without a shift, a mistake comes off before the kitchen sees it'
+        ec.user.internalLoginUser(waiter)
+        Map tab = openTab(one)
+        addLine(tab, beer)
+        Map wrong = addLine(tab, burger, 1, [modifierIds: [mayo().modifierId]])
+        ec.service.sync().name("${service}.void#TabLine")
+                .parameters([tabId: tab.tabId, orderItemSeqId: wrong.lines[1].orderItemSeqId]).call()
+        Map sent = send(tab)
+
+        then:
+        ec.user.isInGroup('GROWERP_M_EMPLOYEE')
+        !ec.message.hasError()
+        sent.lines.size() == 1
+        sent.lines[0].kitchenStatus == 'Sent'
+
+        when: 'what the kitchen has seen stays on the bill'
+        ec.service.sync().name("${service}.void#TabLine")
+                .parameters([tabId: tab.tabId, orderItemSeqId: sent.lines[0].orderItemSeqId]).call()
+
+        then:
+        ec.message.errorsString.contains('admin')
+
+        when:
+        ec.message.clearErrors()
+        settle(tab, [cash(5)])
+
+        then:
+        ec.message.errorsString.contains('admin')
+
+        when: 'the admin takes the money'
+        ec.message.clearErrors()
+        ec.user.internalLoginUser(tenant.username)
+        Map sale = settle(tab, [cash(5)])
+
+        then:
+        !ec.message.hasError()
+        sale.invoiceId
+    }
+
+    def "the floor and the modifiers are set up by the admin"() {
+        given:
+        Map one = table()
+        ec.user.internalLoginUser(employee('waiter'))
+
+        when:
+        ec.service.sync().name("${service}.${action}").parameters(parameters(one)).call()
+
+        then:
+        ec.message.errorsString.contains('admin')
+
+        where:
+        action                 | parameters
+        'create#Table'         | { Map t -> [table: [tableName: 'No', seats: 2, x: 0, y: 0]] }
+        'update#Table'         | { Map t -> [table: [assetId: t.assetId, x: 3]] }
+        'delete#Table'         | { Map t -> [assetId: t.assetId] }
+        'store#ModifierGroup'  | { Map t -> [group: [groupName: 'No', minSelect: 0, maxSelect: 1]] }
+        'delete#ModifierGroup' | { Map t -> [groupId: sauce.groupId] }
+    }
+
     def "an employee works the till, the back office is for the admin"() {
         given:
         Map company = GrowerpTestSupport.tenant(ec, tenantKey, 'USD', applicationId)
@@ -564,8 +637,8 @@ class PosRestaurantServicesTests extends Specification {
 
         and: 'the menus say the same'
         menu(appId, 'GROWERP_M_EMPLOYEE').containsAll(employeeScreens)
-        !menu(appId, 'GROWERP_M_EMPLOYEE').any { it in ['ProductList', 'TaxRateList', 'PosShiftList'] }
-        menu(appId, 'GROWERP_M_ADMIN').containsAll(['ProductList', 'TaxRateList', 'PosShiftList'])
+        !menu(appId, 'GROWERP_M_EMPLOYEE').any { it in ['ProductList', 'TaxRateList', 'PosShiftList', 'UserListEmployee'] }
+        menu(appId, 'GROWERP_M_ADMIN').containsAll(['ProductList', 'TaxRateList', 'PosShiftList', 'UserListEmployee'])
 
         where:
         applicationId   | appId        | tenantKey         | employeeScreens

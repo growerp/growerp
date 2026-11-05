@@ -234,6 +234,63 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
+  void asAdmin() => when(() => authBloc.state).thenReturn(
+    AuthState(
+      authenticate: Authenticate(user: User(userGroup: UserGroup.admin)),
+    ),
+  );
+
+  Future<void> openSentTab(WidgetTester tester) async {
+    when(
+      () => restClient.openPosTab(tableAssetId: 'A1'),
+    ).thenAnswer((_) async => tab([line('Sent')]));
+    await pump(tester, const PosFloorScreen());
+    await tester.tap(find.byKey(const Key('posTable0')));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('a waiter enters orders without a shift or the till', (
+    tester,
+  ) async {
+    when(
+      () => restClient.getPosShift(terminalName: 'Till 1'),
+    ).thenAnswer((_) async => PosShift());
+    await pump(tester, const PosFloorScreen());
+    expect(find.byKey(const Key('posTable0')), findsOneWidget);
+    expect(find.byKey(const Key('posTill')), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('a waiter cannot pay, split or void what the kitchen saw', (
+    tester,
+  ) async {
+    await openSentTab(tester);
+    expect(find.byKey(const Key('posTabLine0')), findsOneWidget);
+    expect(find.byKey(const Key('posPay')), findsNothing);
+    expect(find.byKey(const Key('posSplit')), findsNothing);
+    expect(find.byKey(const Key('posTabVoid0')), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('an admin pays, splits and voids', (tester) async {
+    asAdmin();
+    await openSentTab(tester);
+    expect(find.byKey(const Key('posPay')), findsOneWidget);
+    expect(find.byKey(const Key('posSplit')), findsOneWidget);
+    expect(find.byKey(const Key('posTabVoid0')), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('an admin needs an open shift for the floor', (tester) async {
+    asAdmin();
+    when(
+      () => restClient.getPosShift(terminalName: 'Till 1'),
+    ).thenAnswer((_) async => PosShift());
+    await pump(tester, const PosFloorScreen());
+    expect(find.byKey(const Key('posTable0')), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('a cashier cannot edit the floor', (tester) async {
     await pump(tester, const PosFloorScreen());
     expect(find.byKey(const Key('posFloorEdit')), findsNothing);

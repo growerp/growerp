@@ -197,6 +197,9 @@ void main() {
     await _selectOption(tester, route: '/orders', formKey: '/orders');
     await _screenshot(binding, tester, 'orders');
 
+    await _selectOption(tester, route: '/staff', formKey: '/staff');
+    await _screenshot(binding, tester, 'staff');
+
     await _selectOption(tester, route: '/shifts', formKey: '/shifts');
     expect(find.byType(PosShiftList), findsOneWidget);
     await _screenshot(binding, tester, 'shifts');
