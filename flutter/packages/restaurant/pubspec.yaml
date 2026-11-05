@@ -33,6 +33,7 @@ dependencies:
   web: ^1.0.0
 
 dev_dependencies:
+  msix: ^3.18.0
   flutter_launcher_icons: ^0.14.4
   flutter_test:
     sdk: flutter
@@ -70,3 +71,14 @@ flutter_launcher_icons:
     generate: true
     image_path: "assets/icon/icon.png"
     icon_size: 256
+
+msix_config:
+  display_name: GrowERP Restaurant
+  description: "Tables, kitchen display and split bills for your restaurant."
+  publisher: CN=68EEF479-7015-49FC-9C60-33E5A2EB731C
+  publisher_display_name: "AntWebsystems Co.,Ltd"
+  identity_name: AntWebsystemsCo.LTD.GrowERP-Restaurant
+  msix_version: 1.0.0.0
+  logo_path: "assets/icon/icon.png"
+  capabilities: internetClient
+  store: true
