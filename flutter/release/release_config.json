@@ -35,8 +35,8 @@
     "marketing": { "apple": "6793362708", "windows": "9NJH32VW90KX" },
     "academy": { "apple": "6816830945", "windows": "9MZ23R5J6BJF" },
     "insurance": { "apple": "6817623020", "windows": "9PHGTNGX519Z" },
-    "shop": { "windows": "9NZHS5R67J3F" },
-    "restaurant": { "windows": "9MWNVNS91ZDQ" }
+    "shop": { "apple": "6830957583", "windows": "9NZHS5R67J3F" },
+    "restaurant": { "apple": "6830957806", "windows": "9MWNVNS91ZDQ" }
   },
   "bundleIds": {},
   "androidIds": { "agents": "org.growerp.agent" },
