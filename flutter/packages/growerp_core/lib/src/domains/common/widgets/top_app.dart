@@ -311,6 +311,7 @@ class _TopAppState extends State<TopApp> {
                         Locale('fr'),
                         Locale('nl'),
                         Locale('es'),
+                        Locale('ar'),
                       ],
                       scrollBehavior: const MaterialScrollBehavior().copyWith(
                         dragDevices: {
