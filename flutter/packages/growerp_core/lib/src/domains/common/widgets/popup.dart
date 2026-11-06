@@ -100,7 +100,7 @@ Widget popUp({
         ),
       ),
       if (closeButton == true)
-        const Positioned(top: 15, right: 15, child: DialogCloseButton()),
+        const PositionedDirectional(top: 15, end: 15, child: DialogCloseButton()),
     ],
   );
 }

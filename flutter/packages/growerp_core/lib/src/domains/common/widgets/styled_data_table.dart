@@ -178,18 +178,20 @@ class StyledDataTable extends StatelessWidget {
     );
   }
 
-  Alignment _getAlignment(TextAlign textAlign) {
+  AlignmentGeometry _getAlignment(TextAlign textAlign) {
     switch (textAlign) {
       case TextAlign.left:
-      case TextAlign.start:
         return Alignment.centerLeft;
       case TextAlign.right:
-      case TextAlign.end:
         return Alignment.centerRight;
+      case TextAlign.start:
+        return AlignmentDirectional.centerStart;
+      case TextAlign.end:
+        return AlignmentDirectional.centerEnd;
       case TextAlign.center:
         return Alignment.center;
       default:
-        return Alignment.centerLeft;
+        return AlignmentDirectional.centerStart;
     }
   }
 
@@ -252,7 +254,7 @@ class StyledColumn {
   const StyledColumn({
     required this.header,
     this.flex = 1,
-    this.alignment = TextAlign.left,
+    this.alignment = TextAlign.start,
   });
 }
 

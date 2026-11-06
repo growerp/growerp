@@ -1,0 +1,1924 @@
+{
+  "@@locale": "ar",
+  "aboutApp": "حول {appName}",
+  "@aboutApp": {
+    "description": "About app dialog title",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutGrowERP": "حول GrowERP",
+  "@aboutGrowERP": {
+    "description": "About GrowERP menu item"
+  },
+  "accounts": "الحسابات",
+  "@accounts": {
+    "description": "Accounts menu item or section header"
+  },
+  "addNew": "إضافة جديد",
+  "@addNew": {
+    "description": "Add new item button text"
+  },
+  "andAtLeastOne": "وواحد على الأقل ",
+  "@andAtLeastOne": {
+    "description": "Partial validation message indicating minimum requirement"
+  },
+  "balanceSheet": "الميزانية العمومية",
+  "@balanceSheet": {
+    "description": "Balance sheet report menu item"
+  },
+  "balanceSummary": "ملخص الأرصدة",
+  "@balanceSummary": {
+    "description": "Balance summary report menu item"
+  },
+  "businessCompanyName": "اسم الشركة مطلوب!",
+  "@businessCompanyName": {
+    "description": "Business name validation error message"
+  },
+  "businessNameError": "اسم النشاط التجاري مطلوب!",
+  "@businessNameError": {
+    "description": "Business name validation error message"
+  },
+  "cancel": "إلغاء",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "cannotLoadRestRequests": "تعذر تحميل طلبات REST!",
+  "@cannotLoadRestRequests": {
+    "description": "Error message when REST requests fail to load"
+  },
+  "chat": "الدردشة",
+  "@chat": {
+    "description": "Chat menu item"
+  },
+  "completeRegistration": "إكمال التسجيل",
+  "@completeRegistration": {
+    "description": "Complete registration dialog title"
+  },
+  "continueButton": "متابعة",
+  "@continueButton": {
+    "description": "Continue button text"
+  },
+  "contributing": "المساهمة",
+  "@contributing": {
+    "description": "Contributing menu item"
+  },
+  "copyright": "© {year} GrowERP.com",
+  "@copyright": {
+    "description": "Copyright text with year",
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "create": "إنشاء",
+  "@create": {
+    "description": "Create button text"
+  },
+  "createPassword": "إنشاء كلمة مرور",
+  "@createPassword": {
+    "description": "Create password dialog title"
+  },
+  "creditCardDetails": "تفاصيل البطاقة الائتمانية",
+  "@creditCardDetails": {
+    "description": "Credit card details hint text"
+  },
+  "creditCardInfo": "معلومات البطاقة الائتمانية",
+  "@creditCardInfo": {
+    "description": "Credit card info label"
+  },
+  "currency": "العملة",
+  "@currency": {
+    "description": "Currency input label"
+  },
+  "currencyError": "العملة مطلوبة!",
+  "@currencyError": {
+    "description": "Currency validation error message"
+  },
+  "currentPaymentMethod": "طريقة الدفع الحالية: {method}",
+  "@currentPaymentMethod": {
+    "description": "Current payment method display text",
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "customer": "العميل",
+  "@customer": {
+    "description": "Label for customer"
+  },
+  "cvvCode": "CVV",
+  "@cvvCode": {
+    "description": "CVV code input label"
+  },
+  "cvvHint": "123",
+  "@cvvHint": {
+    "description": "CVV code input hint"
+  },
+  "dateTime": "التاريخ/الوقت",
+  "@dateTime": {
+    "description": "Date and time label"
+  },
+  "deleteWarning": "تحذير الحذف",
+  "@deleteWarning": {
+    "description": "Delete warning dialog title"
+  },
+  "deleteYourself": "حذف حسابك",
+  "@deleteYourself": {
+    "description": "Delete yourself button text"
+  },
+  "deleteYourselfAndCompany": "حذف حسابك والشركة",
+  "@deleteYourselfAndCompany": {
+    "description": "Delete yourself and company button text"
+  },
+  "demoData": "بيانات تجريبية",
+  "@demoData": {
+    "description": "Demo data checkbox label"
+  },
+  "email": "البريد الإلكتروني",
+  "@email": {
+    "description": "Email input label"
+  },
+  "emailAddress": "عنوان البريد الإلكتروني",
+  "@emailAddress": {
+    "description": "Email address input label"
+  },
+  "emailAddressError": "عنوان البريد الإلكتروني مطلوب!",
+  "@emailAddressError": {
+    "description": "Email address validation error message"
+  },
+  "emailAddressError2": "صيغة عنوان البريد الإلكتروني غير صحيحة!",
+  "@emailAddressError2": {
+    "description": "Email address format validation error message"
+  },
+  "enterCompanyAndCurrency": "يرجى إدخال اسم شركتك وعملتها",
+  "@enterCompanyAndCurrency": {
+    "description": "Company and currency input instruction"
+  },
+  "enterCompanyName": "أدخل اسم الشركة",
+  "@enterCompanyName": {
+    "description": "Company name input instruction"
+  },
+  "error": "خطأ",
+  "@error": {
+    "description": "Error status text"
+  },
+  "errorMessage": "رسالة الخطأ",
+  "@errorMessage": {
+    "description": "Error message label"
+  },
+  "expiryDate": "MM/YY",
+  "@expiryDate": {
+    "description": "Expiry date input label"
+  },
+  "expiryDateHint": "12/25",
+  "@expiryDateHint": {
+    "description": "Expiry date input hint"
+  },
+  "fieldRequired": "هذا الحقل مطلوب!",
+  "@fieldRequired": {
+    "description": "Field required validation error message"
+  },
+  "firstName": "الاسم الأول",
+  "@firstName": {
+    "description": "First name input label"
+  },
+  "firstNameError": "الاسم الأول مطلوب!",
+  "@firstNameError": {
+    "description": "First name validation error message"
+  },
+  "forgotPassword": "هل نسيت كلمة المرور؟",
+  "@forgotPassword": {
+    "description": "Forgot password link text"
+  },
+  "generateDemoData": "هل تريد إنشاء بيانات تجريبية؟",
+  "@generateDemoData": {
+    "description": "Generate demo data checkbox text"
+  },
+  "goHome": "الانتقال إلى الرئيسية",
+  "@goHome": {
+    "description": "Go home button tooltip"
+  },
+  "invoice": "الفاتورة",
+  "@invoice": {
+    "description": "Label for invoice"
+  },
+  "itemIsRequired": "العنصر مطلوب",
+  "@itemIsRequired": {
+    "description": "Validation message indicating a required item"
+  },
+  "itemTypes": "أنواع العناصر",
+  "@itemTypes": {
+    "description": "Item types menu item or section header"
+  },
+  "journal": "دفتر اليومية",
+  "@journal": {
+    "description": "Journal menu item or section header"
+  },
+  "lastName": "اسم العائلة",
+  "@lastName": {
+    "description": "Last name input label"
+  },
+  "lastNameError": "اسم العائلة مطلوب!",
+  "@lastNameError": {
+    "description": "Last name validation error message"
+  },
+  "login": "تسجيل الدخول",
+  "@login": {
+    "description": "Login button text"
+  },
+  "loginName": "اسم تسجيل الدخول",
+  "@loginName": {
+    "description": "Login name label"
+  },
+  "loginWithExistingUserName": "تسجيل الدخول باسم مستخدم موجود",
+  "@loginWithExistingUserName": {
+    "description": "Login form header text for existing users"
+  },
+  "logout": "تسجيل الخروج",
+  "@logout": {
+    "description": "Logout button text"
+  },
+  "main": "الرئيسية",
+  "@main": {
+    "description": "Main menu item"
+  },
+  "mainDashboard": "لوحة المعلومات الرئيسية",
+  "@mainDashboard": {
+    "description": "Main dashboard menu item or navigation link"
+  },
+  "ms": "مللي ثانية",
+  "@ms": {
+    "description": "Milliseconds abbreviation"
+  },
+  "nameOnCard": "الاسم على البطاقة",
+  "@nameOnCard": {
+    "description": "Name on card input label"
+  },
+  "no": "لا",
+  "@no": {
+    "description": "No answer text"
+  },
+  "noAccess": "لا تملك صلاحية الوصول إلى هذه الصفحة!",
+  "@noAccess": {
+    "description": "No access error message"
+  },
+  "noAccessHere": "لا تملك صلاحية الوصول هنا!",
+  "@noAccessHere": {
+    "description": "No access here error message"
+  },
+  "noRestRequests": "لم يتم العثور على طلبات REST...",
+  "@noRestRequests": {
+    "description": "No REST requests message"
+  },
+  "notAvailable": "غير متاح",
+  "@notAvailable": {
+    "description": "Not available placeholder text"
+  },
+  "number": "الرقم",
+  "@number": {
+    "description": "Number input label"
+  },
+  "numberHint": "1234 5678 9012 3456",
+  "@numberHint": {
+    "description": "Card number input hint"
+  },
+  "ok": "موافق",
+  "@ok": {
+    "description": "OK button text"
+  },
+  "onlyUserDelete": "حذف المستخدم فقط، دون الشركة",
+  "@onlyUserDelete": {
+    "description": "Only delete user option text"
+  },
+  "openInvoices": "الفواتير المفتوحة:",
+  "@openInvoices": {
+    "description": "Label for open invoices dashboard item"
+  },
+  "openSourceLicenses": "تراخيص المصادر المفتوحة",
+  "@openSourceLicenses": {
+    "description": "Open source licenses menu item"
+  },
+  "order": "الطلب",
+  "@order": {
+    "description": "Label for order"
+  },
+  "parameters": "المعلمات",
+  "@parameters": {
+    "description": "Parameters label"
+  },
+  "password": "كلمة المرور",
+  "@password": {
+    "description": "Password input label"
+  },
+  "passwordError": "كلمة المرور مطلوبة!",
+  "@passwordError": {
+    "description": "Password validation error message"
+  },
+  "passwordError2": "كلمة المرور مطلوبة!",
+  "@passwordError2": {
+    "description": "Password validation error message variant"
+  },
+  "passwordHelper": "5 أحرف على الأقل",
+  "@passwordHelper": {
+    "description": "Password helper text"
+  },
+  "passwordMismatch": "كلمتا المرور غير متطابقتين!",
+  "@passwordMismatch": {
+    "description": "Password mismatch validation error"
+  },
+  "passwordValidationError": "يجب ألا تقل كلمة المرور عن 5 أحرف",
+  "@passwordValidationError": {
+    "description": "Password validation error message"
+  },
+  "payment": "الدفعة",
+  "@payment": {
+    "description": "Label for payment"
+  },
+  "paymentPlan": "خطة الدفع",
+  "@paymentPlan": {
+    "description": "Payment plan input label"
+  },
+  "paymentTypes": "أنواع الدفع",
+  "@paymentTypes": {
+    "description": "Payment types menu item or section header"
+  },
+  "privacyCodeOfConduct": "الخصوصية/مدونة السلوك",
+  "@privacyCodeOfConduct": {
+    "description": "Privacy and code of conduct menu item"
+  },
+  "referrerUrl": "رابط الإحالة",
+  "@referrerUrl": {
+    "description": "Referrer URL label"
+  },
+  "refresh": "تحديث",
+  "@refresh": {
+    "description": "Refresh button text"
+  },
+  "register": "تسجيل",
+  "@register": {
+    "description": "Register button text"
+  },
+  "payNow": "الدفع الآن",
+  "@payNow": {
+    "description": "Pay now button text"
+  },
+  "subscriptionExpired": "انتهى اشتراكك. يرجى التجديد للمتابعة.",
+  "@subscriptionExpired": {
+    "description": "Message shown when subscription has expired"
+  },
+  "registerNewCompanyAndAdmin": "تسجيل شركة ومسؤول جديدين",
+  "@registerNewCompanyAndAdmin": {
+    "description": "Register new company link text"
+  },
+  "registerNewUserOfCompany": "التسجيل كمستخدم جديد لدى {companyName}",
+  "@registerNewUserOfCompany": {
+    "description": "Register link text when the app was started for a single company",
+    "placeholders": {
+      "companyName": {
+        "type": "String"
+      }
+    }
+  },
+  "registration": "التسجيل",
+  "@registration": {
+    "description": "Registration dialog title"
+  },
+  "requestName": "اسم الطلب",
+  "@requestName": {
+    "description": "Request name label"
+  },
+  "requestUrl": "رابط الطلب",
+  "@requestUrl": {
+    "description": "Request URL label"
+  },
+  "restart": "إعادة التشغيل",
+  "@restart": {
+    "description": "Restart button text"
+  },
+  "restRequestDetails": "تفاصيل طلب REST",
+  "@restRequestDetails": {
+    "description": "REST request details title"
+  },
+  "revenueExpense": "الإيرادات/المصروفات",
+  "@revenueExpense": {
+    "description": "Revenue and expense report menu item"
+  },
+  "runningTime": "مدة التشغيل",
+  "@runningTime": {
+    "description": "Running time label"
+  },
+  "selectLanguage": "اختر اللغة",
+  "@selectLanguage": {
+    "description": "Select language instruction"
+  },
+  "selectPlanError": "يرجى اختيار خطة!",
+  "@selectPlanError": {
+    "description": "Select plan validation error message"
+  },
+  "sendNewPassword": "إرسال كلمة مرور جديدة",
+  "@sendNewPassword": {
+    "description": "Send new password dialog title"
+  },
+  "serverHost": "مضيف الخادم",
+  "@serverHost": {
+    "description": "Server host label"
+  },
+  "serverIp": "عنوان IP للخادم",
+  "@serverIp": {
+    "description": "Server IP label"
+  },
+  "shipment": "الشحنة",
+  "@shipment": {
+    "description": "Label for shipment"
+  },
+  "slowHit": "طلب بطيء",
+  "@slowHit": {
+    "description": "Slow hit label"
+  },
+  "status": "الحالة",
+  "@status": {
+    "description": "Status label"
+  },
+  "submitNewPassword": "إرسال كلمة المرور الجديدة",
+  "@submitNewPassword": {
+    "description": "Submit new password button text"
+  },
+  "subscription": "الاشتراك",
+  "@subscription": {
+    "description": "Subscription dialog title"
+  },
+  "success": "نجاح",
+  "@success": {
+    "description": "Success status text"
+  },
+  "supplier": "المورد",
+  "@supplier": {
+    "description": "Label for supplier"
+  },
+  "tempPassword": "ستُرسل كلمة مرور مؤقتة عبر البريد الإلكتروني",
+  "@tempPassword": {
+    "description": "Temporary password information text"
+  },
+  "test": "اختبار",
+  "@test": {
+    "description": "Test menu item"
+  },
+  "testSystem": "نظام اختباري",
+  "@testSystem": {
+    "description": "Test system text"
+  },
+  "theme": "المظهر",
+  "@theme": {
+    "description": "Theme menu item"
+  },
+  "colorScheme": "نظام الألوان",
+  "@colorScheme": {
+    "description": "Color scheme picker dialog title"
+  },
+  "currencyExchange": "صرف العملات",
+  "@currencyExchange": {
+    "description": "Currency exchange rates menu item"
+  },
+  "timePeriods": "الفترات الزمنية",
+  "@timePeriods": {
+    "description": "Time periods menu item or section header"
+  },
+  "transaction": "المعاملة",
+  "@transaction": {
+    "description": "Label for transaction"
+  },
+  "transactions": "المعاملات",
+  "@transactions": {
+    "description": "Transactions menu item or section header"
+  },
+  "trialPeriod": "الفترة التجريبية",
+  "@trialPeriod": {
+    "description": "Trial period text"
+  },
+  "unknown": "غير معروف",
+  "@unknown": {
+    "description": "Placeholder text for unknown values"
+  },
+  "update": "تحديث",
+  "@update": {
+    "description": "Update button text"
+  },
+  "user": "المستخدم",
+  "@user": {
+    "description": "User label"
+  },
+  "userAndCompanyDelete": "حذف المستخدم والشركة",
+  "@userAndCompanyDelete": {
+    "description": "Delete user and company option text"
+  },
+  "username": "اسم المستخدم: {username}",
+  "@username": {
+    "description": "Username display text",
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "usernameEmail": "اسم المستخدم/البريد الإلكتروني",
+  "@usernameEmail": {
+    "description": "Username or email input label"
+  },
+  "usernameEmailError": "اسم المستخدم أو البريد الإلكتروني مطلوب!",
+  "@usernameEmailError": {
+    "description": "Username/email validation error message"
+  },
+  "verifyPassword": "تأكيد كلمة المرور",
+  "@verifyPassword": {
+    "description": "Verify password input label"
+  },
+  "verifyPasswordError": "تأكيد كلمة المرور مطلوب!",
+  "@verifyPasswordError": {
+    "description": "Verify password validation error message"
+  },
+  "verifyPasswordHelper": "أعد إدخال كلمة المرور",
+  "@verifyPasswordHelper": {
+    "description": "Verify password helper text"
+  },
+  "version": "الإصدار: {version} البناء: {build}",
+  "@version": {
+    "description": "Version display text",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "build": {
+        "type": "String"
+      }
+    }
+  },
+  "viewLicense": "عرض الترخيص",
+  "@viewLicense": {
+    "description": "View license menu item"
+  },
+  "viewReadme": "عرض ملف التعليمات",
+  "@viewReadme": {
+    "description": "View readme menu item"
+  },
+  "welcome": "مرحبًا!",
+  "@welcome": {
+    "description": "Welcome message"
+  },
+  "welcomeToGrowERPBusinessSystem": "مرحبًا بك في نظام GrowERP للأعمال!",
+  "@welcomeToGrowERPBusinessSystem": {
+    "description": "Welcome message on home page"
+  },
+  "yes": "نعم",
+  "@yes": {
+    "description": "Yes answer text"
+  },
+  "about": "حول",
+  "@about": {
+    "description": "About menu item"
+  },
+  "accounting": "المحاسبة",
+  "@accounting": {
+    "description": "Accounting menu item"
+  },
+  "accountingDashboard": "لوحة معلومات المحاسبة",
+  "@accountingDashboard": {
+    "description": "Accounting dashboard menu item"
+  },
+  "accountingLedger": "دفتر الأستاذ المحاسبي",
+  "@accountingLedger": {
+    "description": "Accounting ledger menu item"
+  },
+  "accountingPurch": "محاسبة المشتريات",
+  "@accountingPurch": {
+    "description": "Accounting purchase menu item"
+  },
+  "accountingSales": "محاسبة المبيعات",
+  "@accountingSales": {
+    "description": "Accounting sales menu item"
+  },
+  "administrators": "المسؤولون",
+  "@administrators": {
+    "description": "Administrators label"
+  },
+  "allOpportunities": "جميع الفرص",
+  "@allOpportunities": {
+    "description": "All opportunities label"
+  },
+  "assets": "الأصول",
+  "@assets": {
+    "description": "Assets menu item"
+  },
+  "catalog": "الكتالوج",
+  "@catalog": {
+    "description": "Catalog menu item"
+  },
+  "categories": "الفئات",
+  "@categories": {
+    "description": "Categories menu item"
+  },
+  "company": "الشركة",
+  "@company": {
+    "description": "Company menu item"
+  },
+  "crm": "إدارة علاقات العملاء",
+  "@crm": {
+    "description": "CRM menu item"
+  },
+  "customers": "العملاء",
+  "@customers": {
+    "description": "Customers menu item"
+  },
+  "employees": "الموظفون",
+  "@employees": {
+    "description": "Employees menu item"
+  },
+  "incomingInvoices": "الفواتير الواردة",
+  "@incomingInvoices": {
+    "description": "Incoming invoices menu item"
+  },
+  "incomingPayments": "الدفعات الواردة",
+  "@incomingPayments": {
+    "description": "Incoming payments menu item"
+  },
+  "incomingShipments": "الشحنات الواردة",
+  "@incomingShipments": {
+    "description": "Incoming shipments menu item"
+  },
+  "inventory": "المخزون",
+  "@inventory": {
+    "description": "Inventory menu item"
+  },
+  "leads": "العملاء المحتملون",
+  "@leads": {
+    "description": "Leads menu item"
+  },
+  "ledgerAccnt": "حساب دفتر الأستاذ",
+  "@ledgerAccnt": {
+    "description": "Ledger account menu item"
+  },
+  "ledgerJournals": "يوميات دفتر الأستاذ",
+  "@ledgerJournals": {
+    "description": "Ledger journals menu item"
+  },
+  "ledgerTransaction": "معاملة دفتر الأستاذ",
+  "@ledgerTransaction": {
+    "description": "Ledger transaction menu item"
+  },
+  "ledgerTree": "شجرة الحسابات",
+  "@ledgerTree": {
+    "description": "Ledger tree menu item"
+  },
+  "myTodoTasks": "مهامي المطلوب إنجازها",
+  "@myTodoTasks": {
+    "description": "My todo tasks menu item"
+  },
+  "opportunities": "الفرص",
+  "@opportunities": {
+    "description": "Opportunities menu item"
+  },
+  "orders": "الطلبات",
+  "@orders": {
+    "description": "Orders menu item"
+  },
+  "organization": "المؤسسة",
+  "@organization": {
+    "description": "Organization menu item"
+  },
+  "otherEmployees": "الموظفون الآخرون",
+  "@otherEmployees": {
+    "description": "Other employees label"
+  },
+  "outgoingInvoices": "الفواتير الصادرة",
+  "@outgoingInvoices": {
+    "description": "Outgoing invoices menu item"
+  },
+  "outgoingPayments": "الدفعات الصادرة",
+  "@outgoingPayments": {
+    "description": "Outgoing payments menu item"
+  },
+  "outgoingShipments": "الشحنات الصادرة",
+  "@outgoingShipments": {
+    "description": "Outgoing shipments menu item"
+  },
+  "paymtTypes": "أنواع الدفع",
+  "@paymtTypes": {
+    "description": "Payment types menu item"
+  },
+  "products": "المنتجات",
+  "@products": {
+    "description": "Products menu item"
+  },
+  "purchaseOrders": "أوامر الشراء",
+  "@purchaseOrders": {
+    "description": "Purchase orders menu item"
+  },
+  "purchaseUnpaidInvoices": "فواتير المشتريات غير المدفوعة",
+  "@purchaseUnpaidInvoices": {
+    "description": "Purchase unpaid invoices label"
+  },
+  "reports": "التقارير",
+  "@reports": {
+    "description": "Reports menu item"
+  },
+  "requests": "الطلبات",
+  "@requests": {
+    "description": "Requests menu item"
+  },
+  "salesOpenInvoices": "فواتير المبيعات المفتوحة",
+  "@salesOpenInvoices": {
+    "description": "Sales open invoices label"
+  },
+  "salesOrders": "أوامر البيع",
+  "@salesOrders": {
+    "description": "Sales orders menu item"
+  },
+  "setUp": "الإعداد",
+  "@setUp": {
+    "description": "Set up menu item"
+  },
+  "subscriptions": "الاشتراكات",
+  "@subscriptions": {
+    "description": "Subscriptions menu item"
+  },
+  "suppliers": "الموردون",
+  "@suppliers": {
+    "description": "Suppliers menu item"
+  },
+  "website": "الموقع الإلكتروني",
+  "@website": {
+    "description": "Website menu item"
+  },
+  "whLocations": "مواقع المستودعات",
+  "@whLocations": {
+    "description": "Warehouse locations menu item"
+  },
+  "checkIn": "تسجيل الوصول",
+  "@checkIn": {
+    "description": "Check in menu item"
+  },
+  "checkOut": "تسجيل المغادرة",
+  "@checkOut": {
+    "description": "Check out menu item"
+  },
+  "inOut": "وارد/صادر",
+  "@inOut": {
+    "description": "In/out menu item"
+  },
+  "myHotel": "فندقي",
+  "@myHotel": {
+    "description": "My hotel menu item"
+  },
+  "reservations": "الحجوزات",
+  "@reservations": {
+    "description": "Reservations menu item"
+  },
+  "rooms": "الغرف",
+  "@rooms": {
+    "description": "Rooms menu item"
+  },
+  "roomTypes": "أنواع الغرف",
+  "@roomTypes": {
+    "description": "Room types menu item"
+  },
+  "tasks": "المهام",
+  "@tasks": {
+    "description": "Tasks menu item"
+  },
+  "myOpportunities": "فرصي",
+  "@myOpportunities": {
+    "description": "My opportunities menu item"
+  },
+  "clients": "العملاء",
+  "@clients": {
+    "description": "Clients menu item"
+  },
+  "staff": "طاقم العمل",
+  "@staff": {
+    "description": "Staff menu item"
+  },
+  "applications": "التطبيقات",
+  "@applications": {
+    "description": "Applications menu item"
+  },
+  "restRequests": "طلبات REST",
+  "@restRequests": {
+    "description": "REST requests menu item"
+  },
+  "userRequestStatus": "حالة\nطلب\nالمستخدم",
+  "@userRequestStatus": {
+    "description": "REST request list column header for user/request/status"
+  },
+  "authLoginSuccess": "تم تسجيل الدخول بنجاح",
+  "@authLoginSuccess": {
+    "description": "BLoC message: Login successful"
+  },
+  "authLoginFailure": "فشل تسجيل الدخول",
+  "@authLoginFailure": {
+    "description": "BLoC message: Login failed"
+  },
+  "authLogoutSuccess": "تم تسجيل الخروج بنجاح",
+  "@authLogoutSuccess": {
+    "description": "BLoC message: Logout successful"
+  },
+  "authRegisterSuccess": "تم التسجيل بنجاح. يمكنك الآن تسجيل الدخول بكلمة المرور المرسلة عبر البريد الإلكتروني",
+  "@authRegisterSuccess": {
+    "description": "BLoC message: Registration successful. You can now login with the password sent by email"
+  },
+  "authRegisterFailure": "فشل التسجيل",
+  "@authRegisterFailure": {
+    "description": "BLoC message: Registration failed"
+  },
+  "authPasswordResetSuccess": "تمت إعادة تعيين كلمة المرور بنجاح",
+  "@authPasswordResetSuccess": {
+    "description": "BLoC message: Password reset successful"
+  },
+  "authPasswordResetFailure": "فشلت إعادة تعيين كلمة المرور",
+  "@authPasswordResetFailure": {
+    "description": "BLoC message: Password reset failed"
+  },
+  "authUpdateSuccess": "تم تحديث بيانات المصادقة بنجاح",
+  "@authUpdateSuccess": {
+    "description": "BLoC message: Authentication updated successfully"
+  },
+  "authUpdateFailure": "فشل تحديث بيانات المصادقة",
+  "@authUpdateFailure": {
+    "description": "BLoC message: Failed to update authentication"
+  },
+  "notificationFetchSuccess": "تم جلب الإشعارات بنجاح",
+  "@notificationFetchSuccess": {
+    "description": "BLoC message: Notifications fetched successfully"
+  },
+  "notificationFetchFailure": "فشل جلب الإشعارات",
+  "@notificationFetchFailure": {
+    "description": "BLoC message: Failed to fetch notifications"
+  },
+  "notificationMarkReadSuccess": "تم وضع علامة مقروء على الإشعار",
+  "@notificationMarkReadSuccess": {
+    "description": "BLoC message: Notification marked as read"
+  },
+  "notificationMarkReadFailure": "فشل وضع علامة مقروء على الإشعار",
+  "@notificationMarkReadFailure": {
+    "description": "BLoC message: Failed to mark notification as read"
+  },
+  "passwordChangeSuccess": "تم تغيير كلمة المرور بنجاح للمستخدم: {username}",
+  "@passwordChangeSuccess": {
+    "description": "BLoC message: Password changed successfully",
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "welcomeTitle": "مرحبًا بك في GrowERP!",
+  "@welcomeTitle": {
+    "description": "Welcome page title for evaluation period"
+  },
+  "welcomeMessage": "مرحبًا، {name}!",
+  "@welcomeMessage": {
+    "description": "Personalized welcome message",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "evaluationPeriodMessage": "لديك فترة تقييم مجانية لمدة {days} يومًا لاستكشاف جميع الميزات.",
+  "@evaluationPeriodMessage": {
+    "description": "Evaluation period information message",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "evaluationPeriodDetails": "لا يلزم تقديم بطاقة ائتمانية خلال فترة التقييم. بعد انتهائها، يمكنك اختيار خطة لمواصلة استخدام GrowERP.",
+  "@evaluationPeriodDetails": {
+    "description": "Detailed evaluation period explanation"
+  },
+  "startEvaluation": "بدء التقييم",
+  "@startEvaluation": {
+    "description": "Button to start evaluation period"
+  },
+  "chatNotActive": "الدردشة غير نشطة!",
+  "@chatNotActive": {
+    "description": "Error message when chat is not active"
+  },
+  "messageText": "نص الرسالة..",
+  "@messageText": {
+    "description": "Placeholder text for message input field"
+  },
+  "send": "إرسال",
+  "@send": {
+    "description": "Send button text"
+  },
+  "addPartner": "إضافة مشارك",
+  "@addPartner": {
+    "description": "Button text to add chat partner"
+  },
+  "chatRoomHeader": "الدردشة رقم",
+  "@chatRoomHeader": {
+    "description": "Chat header with number symbol"
+  },
+  "newChat": "جديد",
+  "@newChat": {
+    "description": "Button text for creating new chat"
+  },
+  "selectChatPartner": "اختر مشاركًا للدردشة",
+  "@selectChatPartner": {
+    "description": "Instruction to select a chat partner"
+  },
+  "chatPartner": "مشارك الدردشة",
+  "@chatPartner": {
+    "description": "Label for chat partner field"
+  },
+  "chatFieldRequired": "هذا الحقل مطلوب",
+  "@chatFieldRequired": {
+    "description": "Generic required field error message"
+  },
+  "chatCreate": "إنشاء",
+  "@chatCreate": {
+    "description": "Create button text"
+  },
+  "chatUpdate": "تحديث",
+  "@chatUpdate": {
+    "description": "Update button text"
+  },
+  "room": "غرفة",
+  "@room": {
+    "description": "Label for room"
+  },
+  "chatRoom": "غرفة الدردشة",
+  "@chatRoom": {
+    "description": "Chat room label or header"
+  },
+  "chatUsersAndGroups": "مستخدمو الدردشة ومجموعاتها",
+  "@chatUsersAndGroups": {
+    "description": "Section header for chat users and groups"
+  },
+  "chatAddNew": "إضافة جديد",
+  "@chatAddNew": {
+    "description": "Add new item button text"
+  },
+  "chatNo": "لا توجد ",
+  "@chatNo": {
+    "description": "Partial text for 'no items found' messages"
+  },
+  "sFound": " مطابقة!",
+  "@sFound": {
+    "description": "Partial text for 'items found' messages"
+  },
+  "searchInName": "البحث في الاسم..",
+  "@searchInName": {
+    "description": "Placeholder text for name search field"
+  },
+  "search": "بحث",
+  "@search": {
+    "description": "Search button text"
+  },
+  "name": "الاسم",
+  "@name": {
+    "description": "Name field label"
+  },
+  "pvt": "خاص",
+  "@pvt": {
+    "description": "Abbreviation for Private"
+  },
+  "nroMembers": "عدد الأعضاء",
+  "@nroMembers": {
+    "description": "Abbreviation for number of members"
+  },
+  "allMessagesRead": "جميع الرسائل مقروءة",
+  "@allMessagesRead": {
+    "description": "Status message when all messages are read"
+  },
+  "unreadMessages": "رسائل غير مقروءة",
+  "@unreadMessages": {
+    "description": "Label for unread messages count"
+  },
+  "chatRoomUpdateSuccess": "تم تحديث غرفة الدردشة بنجاح",
+  "@chatRoomUpdateSuccess": {
+    "description": "BLoC message: Chat room updated successfully"
+  },
+  "chatRoomUpdateFailure": "فشل تحديث غرفة الدردشة",
+  "@chatRoomUpdateFailure": {
+    "description": "BLoC message: Failed to update chat room"
+  },
+  "chatRoomDeleteSuccess": "تم حذف غرفة الدردشة بنجاح",
+  "@chatRoomDeleteSuccess": {
+    "description": "BLoC message: Chat room deleted successfully"
+  },
+  "chatRoomDeleteFailure": "فشل حذف غرفة الدردشة",
+  "@chatRoomDeleteFailure": {
+    "description": "BLoC message: Failed to delete chat room"
+  },
+  "chatRoomAddSuccess": "تمت إضافة غرفة الدردشة بنجاح",
+  "@chatRoomAddSuccess": {
+    "description": "BLoC message: Chat room added successfully"
+  },
+  "chatRoomAddFailure": "فشلت إضافة غرفة الدردشة",
+  "@chatRoomAddFailure": {
+    "description": "BLoC message: Failed to add chat room"
+  },
+  "chatRoomFetchFailure": "فشل جلب غرف الدردشة",
+  "@chatRoomFetchFailure": {
+    "description": "BLoC message: Failed to fetch chat rooms"
+  },
+  "chatMessageSendSuccess": "تم إرسال الرسالة بنجاح",
+  "@chatMessageSendSuccess": {
+    "description": "BLoC message: Message sent successfully"
+  },
+  "chatMessageSendFailure": "فشل إرسال الرسالة",
+  "@chatMessageSendFailure": {
+    "description": "BLoC message: Failed to send message"
+  },
+  "chatMessageDeleteSuccess": "تم حذف الرسالة بنجاح",
+  "@chatMessageDeleteSuccess": {
+    "description": "BLoC message: Message deleted successfully"
+  },
+  "chatMessageDeleteFailure": "فشل حذف الرسالة",
+  "@chatMessageDeleteFailure": {
+    "description": "BLoC message: Failed to delete message"
+  },
+  "chatMessageFetchFailure": "فشل جلب الرسائل",
+  "@chatMessageFetchFailure": {
+    "description": "BLoC message: Failed to fetch messages"
+  },
+  "routeNotFoundPath": "لم يتم العثور على المسار: {path}",
+  "@routeNotFoundPath": {
+    "description": "Route not found: {path} text",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "restoreDefaultMenu": "استعادة القائمة الافتراضية",
+  "@restoreDefaultMenu": {
+    "description": "Restore default menu text"
+  },
+  "restore": "استعادة",
+  "@restore": {
+    "description": "Restore text"
+  },
+  "retry": "إعادة المحاولة",
+  "@retry": {
+    "description": "Retry text"
+  },
+  "close": "إغلاق",
+  "@close": {
+    "description": "Close text"
+  },
+  "remindMeLater": "تذكيري لاحقًا",
+  "@remindMeLater": {
+    "description": "Remind Me Later text"
+  },
+  "subscribeNow": "اشترك الآن",
+  "@subscribeNow": {
+    "description": "Subscribe Now text"
+  },
+  "save": "حفظ",
+  "@save": {
+    "description": "Save text"
+  },
+  "none": "بدون",
+  "@none": {
+    "description": "None text"
+  },
+  "starttls": "STARTTLS",
+  "@starttls": {
+    "description": "STARTTLS text"
+  },
+  "ssltls": "SSL/TLS",
+  "@ssltls": {
+    "description": "SSL/TLS text"
+  },
+  "imapsSecure": "IMAPS (آمن)",
+  "@imapsSecure": {
+    "description": "IMAPS (secure) text"
+  },
+  "imap": "IMAP",
+  "@imap": {
+    "description": "IMAP text"
+  },
+  "pop3": "POP3",
+  "@pop3": {
+    "description": "POP3 text"
+  },
+  "systemDefault": "الإعداد الافتراضي للنظام",
+  "@systemDefault": {
+    "description": "System default text"
+  },
+  "monthlyTokenLimit": "الحد الشهري للرموز",
+  "@monthlyTokenLimit": {
+    "description": "Monthly token limit field label"
+  },
+  "ownTokenLimitHelp": "حدك الشهري الخاص لاستخدام مفتاح API الخاص بك. تركه فارغًا أو ضبطه على 0 يعني بلا حد. استُخدم {used} رمزًا هذا الشهر.",
+  "@ownTokenLimitHelp": {
+    "description": "Helper text for the tenant's own monthly token cap",
+    "placeholders": {
+      "used": {
+        "type": "int"
+      }
+    }
+  },
+  "systemTokenLimitHelp": "الرموز المجانية شهريًا باستخدام مفتاح نظام GrowERP: استُخدم {used} من {limit}. يحددها دعم GrowERP.",
+  "@systemTokenLimitHelp": {
+    "description": "Helper text for the free system token allowance",
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "enterAPositiveNumberOrLeaveEmpty": "أدخل رقمًا موجبًا أو اترك الحقل فارغًا",
+  "@enterAPositiveNumberOrLeaveEmpty": {
+    "description": "Validation message for an optional positive number field"
+  },
+  "addProvider": "إضافة مزود",
+  "@addProvider": {
+    "description": "Add Provider text"
+  },
+  "updateNow": "التحديث الآن",
+  "@updateNow": {
+    "description": "Update Now text"
+  },
+  "reloadNow": "إعادة التحميل الآن",
+  "@reloadNow": {
+    "description": "Reload Now text"
+  },
+  "skip": "تخطي",
+  "@skip": {
+    "description": "Skip text"
+  },
+  "seeResult": "عرض النتيجة",
+  "@seeResult": {
+    "description": "See result text"
+  },
+  "getStarted": "ابدأ الآن",
+  "@getStarted": {
+    "description": "Get Started text"
+  },
+  "noPlansAvailable": "لا توجد خطط متاحة",
+  "@noPlansAvailable": {
+    "description": "No plans available text"
+  },
+  "completeSetup": "إكمال الإعداد",
+  "@completeSetup": {
+    "description": "Complete Setup text"
+  },
+  "continueAction": "متابعة",
+  "@continueAction": {
+    "description": "Continue text"
+  },
+  "subscriptionExpiringSoon": "ينتهي الاشتراك قريبًا",
+  "@subscriptionExpiringSoon": {
+    "description": "Subscription Expiring Soon text"
+  },
+  "yourSubscriptionWillExpire": "سينتهي اشتراكك بعد {daysRemaining} يومًا...",
+  "@yourSubscriptionWillExpire": {
+    "description": "Your subscription will expire in {daysRemaining} days... text",
+    "placeholders": {
+      "daysRemaining": {
+        "type": "String"
+      }
+    }
+  },
+  "thisWipesAllYourMenuChanges": "سيؤدي هذا إلى مسح جميع تغييراتك على القائمة وإعادة تحميل القائمة الافتراضية. هل تريد المتابعة؟",
+  "@thisWipesAllYourMenuChanges": {
+    "description": "This wipes all your menu changes and reloads the default. Continue? text"
+  },
+  "updateRequired": "التحديث مطلوب",
+  "@updateRequired": {
+    "description": "Update Required text"
+  },
+  "aNewVersionIsAvailable": "يتوفر إصدار جديد من التطبيق.",
+  "@aNewVersionIsAvailable": {
+    "description": "A new version of the app is available. text"
+  },
+  "systemSetup": "إعداد النظام",
+  "@systemSetup": {
+    "description": "System Setup text"
+  },
+  "configureLlmProviderApiKeys": "إعداد مفاتيح API لمزودي النماذج اللغوية الكبيرة لمؤسستك",
+  "@configureLlmProviderApiKeys": {
+    "description": "Configure LLM provider API keys for your organisation text"
+  },
+  "companyDetails": "تفاصيل الشركة",
+  "@companyDetails": {
+    "description": "Company Details text"
+  },
+  "pleaseUpdateToContinue": "يرجى التحديث لمواصلة استخدام التطبيق.",
+  "@pleaseUpdateToContinue": {
+    "description": "Please update to continue using the app. text"
+  },
+  "pressCtrlF5ToUpdate": "اضغط على CTRL-F5 للتحديث\nأو اضغط على الزر أدناه.",
+  "@pressCtrlF5ToUpdate": {
+    "description": "Press CTRL-F5 to update\nor tap the button below. text"
+  },
+  "configureLlmProviderApiKeysGeminiOpenaiA": "إعداد مفاتيح API لمزودي النماذج اللغوية الكبيرة (gemini، openai، anthropic، …).",
+  "@configureLlmProviderApiKeysGeminiOpenaiA": {
+    "description": "Configure LLM provider API keys (gemini, openai, anthropic, …). text"
+  },
+  "loadDemoData": "تحميل بيانات تجريبية",
+  "@loadDemoData": {
+    "description": "Load Demo Data text"
+  },
+  "loadingMenuConfiguration": "جارٍ تحميل إعدادات القائمة...",
+  "@loadingMenuConfiguration": {
+    "description": "Loading Menu Configuration... text"
+  },
+  "welcomeToGrowerp": "مرحبًا بك في GrowERP!",
+  "@welcomeToGrowerp": {
+    "description": "Welcome to GrowERP! text"
+  },
+  "allYourDataWillBePreservedn": "• سيتم الاحتفاظ بجميع بياناتك\\n",
+  "@allYourDataWillBePreservedn": {
+    "description": "• All your data will be preserved\\n text"
+  },
+  "nothingFoundAddSome": "لم يتم العثور على بيانات، هل تريد إضافة بعضها؟",
+  "@nothingFoundAddSome": {
+    "description": "nothing found, add some? text"
+  },
+  "thanksYourAnswersAreSaved": "شكرًا، تم حفظ إجاباتك",
+  "@thanksYourAnswersAreSaved": {
+    "description": "Thanks — your answers are saved text"
+  },
+  "shouldNeverShowBecauseThisFormIsOnlyUsed": "يجب ألا يظهر هذا مطلقًا لأن هذا النموذج يُستخدم فقط للمستخدمين غير المصادق عليهم",
+  "@shouldNeverShowBecauseThisFormIsOnlyUsed": {
+    "description": "should never show because this form is only used for non authenticated text"
+  },
+  "incomingImapPop3": "الوارد (IMAP / POP3)",
+  "@incomingImapPop3": {
+    "description": "Incoming (IMAP / POP3) text"
+  },
+  "toContinueUsingGrowerpWithoutInterruptio": "لمواصلة استخدام GrowERP دون انقطاع، ",
+  "@toContinueUsingGrowerpWithoutInterruptio": {
+    "description": "To continue using GrowERP without interruption,  text"
+  },
+  "failedToLoadMenuConfiguration": "فشل تحميل إعدادات القائمة",
+  "@failedToLoadMenuConfiguration": {
+    "description": "Failed to load menu configuration text"
+  },
+  "growerp": "GrowERP ",
+  "@growerp": {
+    "description": "GrowERP  text"
+  },
+  "githubPersonalAccessTokenGithubtokenAnd": "رمز الوصول الشخصي إلى GitHub ‏(GITHUB_TOKEN) و",
+  "@githubPersonalAccessTokenGithubtokenAnd": {
+    "description": "GitHub personal access token (GITHUB_TOKEN) and  text"
+  },
+  "fullAccessToAllFeatures": "وصول كامل إلى جميع الميزات:",
+  "@fullAccessToAllFeatures": {
+    "description": "Full access to all features: text"
+  },
+  "outgoingSmtp": "الصادر (SMTP)",
+  "@outgoingSmtp": {
+    "description": "Outgoing (SMTP) text"
+  },
+  "recent": "الأحدث",
+  "@recent": {
+    "description": "Recent text"
+  },
+  "yourSubscriptionIsAboutToExpire": "اشتراكك على وشك الانتهاء",
+  "@yourSubscriptionIsAboutToExpire": {
+    "description": "Your subscription is about to expire text"
+  },
+  "noDataFound": "لم يتم العثور على بيانات",
+  "@noDataFound": {
+    "description": "No data found text"
+  },
+  "pleaseProvideYourCompanyInformationToCom": "يرجى تقديم معلومات شركتك لإكمال الإعداد",
+  "@pleaseProvideYourCompanyInformationToCom": {
+    "description": "Please provide your company information to complete setup text"
+  },
+  "settingUpYourCompany": "جارٍ إعداد شركتك",
+  "@settingUpYourCompany": {
+    "description": "Title of the dialog shown while demo data loads in the background"
+  },
+  "demoDataLoading": "جارٍ إنشاء بياناتك التجريبية. يستغرق ذلك نحو دقيقة، ويمكنك إبقاء هذه الصفحة مفتوحة.",
+  "@demoDataLoading": {
+    "description": "Explanation shown while the background demo data load runs"
+  },
+  "demoDataFailed": "تعذر إنشاء البيانات التجريبية. تم إعداد شركتك ويمكنك المتابعة بدونها.",
+  "@demoDataFailed": {
+    "description": "Shown when the background demo data load reported a failure"
+  },
+  "demoDataTakingLong": "يستغرق هذا وقتًا أطول من المتوقع. يمكنك مواصلة الانتظار أو المتابعة الآن، وستظهر البيانات بمجرد إنشائها.",
+  "@demoDataTakingLong": {
+    "description": "Shown when the demo data load has not reported back within the expected time"
+  },
+  "selectAPlan": "اختر خطة",
+  "@selectAPlan": {
+    "description": "Select a Plan text"
+  },
+  "growerp1": "GrowERP",
+  "@growerp1": {
+    "description": "GrowERP text"
+  },
+  "menuConfigurationNotAvailable": "إعدادات القائمة غير متاحة",
+  "@menuConfigurationNotAvailable": {
+    "description": "Menu configuration not available text"
+  },
+  "oauthCredentialsScopesCalendarreadonly": "بيانات اعتماد OAuth (النطاقات: calendar.readonly، ",
+  "@oauthCredentialsScopesCalendarreadonly": {
+    "description": "OAuth credentials (scopes: calendar.readonly,  text"
+  },
+  "paymentInformation": "معلومات الدفع",
+  "@paymentInformation": {
+    "description": "Payment Information text"
+  },
+  "subscriptionExpiring": "الاشتراك على وشك الانتهاء!",
+  "@subscriptionExpiring": {
+    "description": "Subscription Expiring! text"
+  },
+  "remove": "إزالة",
+  "@remove": {
+    "description": "Remove text"
+  },
+  "credentials": "بيانات الاعتماد",
+  "@credentials": {
+    "description": "Credentials text"
+  },
+  "populateYourSystemWithSampleDataForTesti": "تعبئة نظامك ببيانات نموذجية للاختبار",
+  "@populateYourSystemWithSampleDataForTesti": {
+    "description": "Populate your system with sample data for testing text"
+  },
+  "aiSettings": "إعدادات الذكاء الاصطناعي",
+  "@aiSettings": {
+    "description": "AI Settings text"
+  },
+  "we": "نحن\\",
+  "@we": {
+    "description": "We\\ text"
+  },
+  "aiNavigation": "التنقل بالذكاء الاصطناعي",
+  "@aiNavigation": {
+    "description": "AI Navigation text"
+  },
+  "customizeYourExperience": "خصّص تجربتك",
+  "@customizeYourExperience": {
+    "description": "Customize your experience text"
+  },
+  "manageProductsAndInventoryn": "✓ إدارة المنتجات والمخزون\\n",
+  "@manageProductsAndInventoryn": {
+    "description": "✓ Manage products and inventory\\n text"
+  },
+  "noCreditCardRequiredDuringTrial": "لا يلزم تقديم بطاقة ائتمانية خلال الفترة التجريبية.",
+  "@noCreditCardRequiredDuringTrial": {
+    "description": "No credit card required during trial. text"
+  },
+  "couldNotLoadTheAssessment": "تعذر تحميل التقييم.",
+  "@couldNotLoadTheAssessment": {
+    "description": "Could not load the assessment. text"
+  },
+  "wellTailorYourMenuToMatchHowYourBusiness": "سنخصص قائمتك بما يتناسب مع طريقة عمل شركتك، لتظهر لك فقط الخيارات التي تحتاج إليها.",
+  "@wellTailorYourMenuToMatchHowYourBusiness": {
+    "description": "We'll tailor your menu to match how your business works, so you only see what you need. text"
+  },
+  "mailServer": "خادم البريد",
+  "@mailServer": {
+    "description": "Mail Server text"
+  },
+  "yourTrialExpiresInDaysremainingDays": "تنتهي فترتك التجريبية بعد {daysRemaining} يومًا",
+  "@yourTrialExpiresInDaysremainingDays": {
+    "placeholders": {
+      "daysRemaining": {
+        "type": "String"
+      }
+    }
+  },
+  "yourTrialHasExpired": "انتهت فترتك التجريبية",
+  "@yourTrialHasExpired": {
+    "description": "Your trial has expired text"
+  },
+  "acctLedger": "دفتر الأستاذ المحاسبي",
+  "@acctLedger": {
+    "description": "Menu item title: Acct Ledger"
+  },
+  "acctPurchase": "محاسبة المشتريات",
+  "@acctPurchase": {
+    "description": "Menu item title: Acct Purchase"
+  },
+  "acctReports": "التقارير المحاسبية",
+  "@acctReports": {
+    "description": "Menu item title: Acct Reports"
+  },
+  "acctSales": "محاسبة المبيعات",
+  "@acctSales": {
+    "description": "Menu item title: Acct Sales"
+  },
+  "acctSetup": "إعداد المحاسبة",
+  "@acctSetup": {
+    "description": "Menu item title: Acct Setup"
+  },
+  "agentActions": "إجراءات الوكيل",
+  "@agentActions": {
+    "description": "Menu item title: Agent Actions"
+  },
+  "agentControl": "التحكم بالوكيل",
+  "@agentControl": {
+    "description": "Menu item title: Agent Control"
+  },
+  "agentJobs": "مهام الوكيل",
+  "@agentJobs": {
+    "description": "Menu item title: Agent Jobs"
+  },
+  "aiAgents": "وكلاء الذكاء الاصطناعي",
+  "@aiAgents": {
+    "description": "Menu item title: AI Agents"
+  },
+  "aiChat": "دردشة الذكاء الاصطناعي",
+  "@aiChat": {
+    "description": "Menu item title: AI Chat"
+  },
+  "approvals": "الموافقات",
+  "@approvals": {
+    "description": "Menu item title: Approvals"
+  },
+  "assessments": "التقييمات",
+  "@assessments": {
+    "description": "Menu item title: Assessments"
+  },
+  "assistantHours": "ساعات المساعد",
+  "@assistantHours": {
+    "description": "Menu item title: Assistant Hours"
+  },
+  "automation": "الأتمتة",
+  "@automation": {
+    "description": "Menu item title: Automation"
+  },
+  "billOfMaterials": "قائمة المواد",
+  "@billOfMaterials": {
+    "description": "Menu item title: Bill of Materials"
+  },
+  "campaigns": "الحملات",
+  "@campaigns": {
+    "description": "Menu item title: Campaigns"
+  },
+  "content": "المحتوى",
+  "@content": {
+    "description": "Menu item title: Content"
+  },
+  "contentPlans": "خطط المحتوى",
+  "@contentPlans": {
+    "description": "Menu item title: Content Plans"
+  },
+  "courseList": "قائمة الدورات",
+  "@courseList": {
+    "description": "Menu item title: Course List"
+  },
+  "courseMedia": "وسائط الدورات",
+  "@courseMedia": {
+    "description": "Menu item title: Course Media"
+  },
+  "courses": "الدورات",
+  "@courses": {
+    "description": "Menu item title: Courses"
+  },
+  "courseViewer": "عارض الدورات",
+  "@courseViewer": {
+    "description": "Menu item title: Course Viewer"
+  },
+  "emailSequences": "سلاسل البريد الإلكتروني",
+  "@emailSequences": {
+    "description": "Menu item title: Email Sequences"
+  },
+  "engagements": "التفاعلات",
+  "@engagements": {
+    "description": "Menu item title: Engagements"
+  },
+  "equipment": "المعدات",
+  "@equipment": {
+    "description": "Menu item title: Equipment"
+  },
+  "equipmentTypes": "أنواع المعدات",
+  "@equipmentTypes": {
+    "description": "Menu item title: Equipment Types"
+  },
+  "housekeeping": "التدبير الفندقي",
+  "@housekeeping": {
+    "description": "Menu item title: Housekeeping"
+  },
+  "knowledge": "المعرفة",
+  "@knowledge": {
+    "description": "Menu item title: Knowledge"
+  },
+  "landingPages": "صفحات الهبوط",
+  "@landingPages": {
+    "description": "Menu item title: Landing Pages"
+  },
+  "ledger": "دفتر الأستاذ",
+  "@ledger": {
+    "description": "Menu item title: Ledger"
+  },
+  "ledgerAccounts": "حسابات دفتر الأستاذ",
+  "@ledgerAccounts": {
+    "description": "Menu item title: Ledger Accounts"
+  },
+  "llmUsage": "استخدام النماذج اللغوية الكبيرة",
+  "@llmUsage": {
+    "description": "Menu item title: LLM Usage"
+  },
+  "manufacturing": "التصنيع",
+  "@manufacturing": {
+    "description": "Menu item title: Manufacturing"
+  },
+  "marketing": "التسويق",
+  "@marketing": {
+    "description": "Menu item title: Marketing"
+  },
+  "messages": "الرسائل",
+  "@messages": {
+    "description": "Menu item title: Messages"
+  },
+  "myCompany": "شركتي",
+  "@myCompany": {
+    "description": "Menu item title: My Company"
+  },
+  "occupancyAdr": "الإشغال/متوسط السعر اليومي",
+  "@occupancyAdr": {
+    "description": "Menu item title: Occupancy/ADR"
+  },
+  "outreach": "التواصل الاستباقي",
+  "@outreach": {
+    "description": "Menu item title: Outreach"
+  },
+  "owners": "المالكون",
+  "@owners": {
+    "description": "Menu item title: Owners"
+  },
+  "personas": "شخصيات العملاء",
+  "@personas": {
+    "description": "Menu item title: Personas"
+  },
+  "pickup": "الاستلام",
+  "@pickup": {
+    "description": "Menu item title: Pickup"
+  },
+  "pickupReturn": "الاستلام/الإرجاع",
+  "@pickupReturn": {
+    "description": "Menu item title: Pickup/Return"
+  },
+  "pipeline": "مسار المبيعات",
+  "@pipeline": {
+    "description": "Menu item title: Pipeline"
+  },
+  "platforms": "المنصات",
+  "@platforms": {
+    "description": "Menu item title: Platforms"
+  },
+  "purchaseInvoices": "فواتير المشتريات",
+  "@purchaseInvoices": {
+    "description": "Menu item title: Purchase Invoices"
+  },
+  "rates": "الأسعار",
+  "@rates": {
+    "description": "Menu item title: Rates"
+  },
+  "rentals": "التأجير",
+  "@rentals": {
+    "description": "Menu item title: Rentals"
+  },
+  "returnLabel": "الإرجاع",
+  "@returnLabel": {
+    "description": "Menu item title: Return"
+  },
+  "routings": "مسارات التصنيع",
+  "@routings": {
+    "description": "Menu item title: Routings"
+  },
+  "sales": "المبيعات",
+  "@sales": {
+    "description": "Menu item title: Sales"
+  },
+  "salesInvoices": "فواتير المبيعات",
+  "@salesInvoices": {
+    "description": "Menu item title: Sales Invoices"
+  },
+  "sendQueue": "قائمة انتظار الإرسال",
+  "@sendQueue": {
+    "description": "Menu item title: Send Queue"
+  },
+  "statistics": "الإحصاءات",
+  "@statistics": {
+    "description": "Menu item title: Statistics"
+  },
+  "takeACourse": "الالتحاق بدورة",
+  "@takeACourse": {
+    "description": "Menu item title: Take a Course"
+  },
+  "toolsIntegrations": "الأدوات والتكاملات",
+  "@toolsIntegrations": {
+    "description": "Menu item title: Tools & Integrations"
+  },
+  "users": "المستخدمون",
+  "@users": {
+    "description": "Menu item title: Users"
+  },
+  "utilisation": "معدل الاستخدام",
+  "@utilisation": {
+    "description": "Menu item title: Utilisation"
+  },
+  "web": "الويب",
+  "@web": {
+    "description": "Menu item title: Web"
+  },
+  "webForms": "نماذج الويب",
+  "@webForms": {
+    "description": "Menu item title: Web Forms"
+  },
+  "websiteGenerator": "مولّد المواقع الإلكترونية",
+  "@websiteGenerator": {
+    "description": "Menu item title: Website Generator"
+  },
+  "websiteTranslation": "ترجمة الموقع الإلكتروني",
+  "@websiteTranslation": {
+    "description": "Menu item title: Website Translation"
+  },
+  "wiki": "ويكي",
+  "@wiki": {
+    "description": "Menu item title: Wiki"
+  },
+  "workOrders": "أوامر العمل",
+  "@workOrders": {
+    "description": "Menu item title: Work Orders"
+  },
+  "searchHintDefault": "بحث...",
+  "@searchHintDefault": {
+    "description": "Default search field hint"
+  },
+  "greetingMorning": "صباح الخير",
+  "@greetingMorning": {
+    "description": "Dashboard greeting before noon"
+  },
+  "greetingAfternoon": "طاب يومك",
+  "@greetingAfternoon": {
+    "description": "Dashboard greeting in the afternoon"
+  },
+  "greetingEvening": "مساء الخير",
+  "@greetingEvening": {
+    "description": "Dashboard greeting in the evening"
+  },
+  "purchase": "المشتريات",
+  "@purchase": {
+    "description": "Dashboard tile statistic label"
+  },
+  "incoming": "الوارد",
+  "@incoming": {
+    "description": "Dashboard tile statistic label for incoming shipments"
+  },
+  "outgoing": "الصادر",
+  "@outgoing": {
+    "description": "Dashboard tile statistic label for outgoing shipments"
+  },
+  "admins": "المسؤولون",
+  "@admins": {
+    "description": "Dashboard tile statistic label for administrators"
+  },
+  "hours": "الساعات",
+  "@hours": {
+    "description": "Dashboard tile statistic label for hours"
+  },
+  "toDo": "المهام المطلوبة",
+  "@toDo": {
+    "description": "Dashboard tile statistic label for to-do activities"
+  },
+  "events": "الأحداث",
+  "@events": {
+    "description": "Dashboard tile statistic label for event activities"
+  },
+  "open": "مفتوح",
+  "@open": {
+    "description": "Dashboard tile statistic label for open documents"
+  },
+  "accountingYearStarts": "بداية السنة المحاسبية",
+  "@accountingYearStarts": {
+    "description": "Label of the month the accounting year starts"
+  },
+  "acctPeriodLocked": "لا يمكن التغيير: تم ترحيل المعاملات",
+  "@acctPeriodLocked": {
+    "description": "Currency and accounting year can no longer be changed"
+  },
+  "guides": "الأدلة",
+  "@guides": {
+    "description": "System setup: title of the guides tab"
+  },
+  "noGuidesAvailable": "لا توجد أدلة متاحة في هذا التطبيق.",
+  "@noGuidesAvailable": {
+    "description": "System setup: shown when the app registered no guide screens"
+  },
+  "showOutreachGuide": "عرض دليل إعداد التواصل الاستباقي",
+  "@showOutreachGuide": {
+    "description": "System setup: switch the outreach setup guide on or off"
+  },
+  "showOutreachGuideHelp": "يضيف علامة تبويب الدليل إلى قائمة التواصل الاستباقي لك وحدك.",
+  "@showOutreachGuideHelp": {
+    "description": "System setup: help text for the outreach setup guide switch"
+  },
+  "screenAccess": "صلاحيات الوصول إلى الشاشات",
+  "@screenAccess": {
+    "description": "Title of the organization security grid"
+  },
+  "screen": "الشاشة",
+  "@screen": {
+    "description": "Column header naming a menu screen"
+  },
+  "adminGroup": "مسؤول",
+  "@adminGroup": {
+    "description": "Short label for the GROWERP_M_ADMIN user group"
+  },
+  "employeeGroup": "موظف",
+  "@employeeGroup": {
+    "description": "Short label for the GROWERP_M_EMPLOYEE user group"
+  },
+  "otherGroup": "آخر",
+  "@otherGroup": {
+    "description": "Short label for the GROWERP_M_OTHER user group"
+  },
+  "accessNone": "بدون صلاحيات",
+  "@accessNone": {
+    "description": "Cell value: the group cannot reach this screen"
+  },
+  "accessView": "عرض",
+  "@accessView": {
+    "description": "Cell value: the group can read this screen"
+  },
+  "accessWrite": "تعديل",
+  "@accessWrite": {
+    "description": "Cell value: the group can change data on this screen"
+  },
+  "searchScreens": "البحث عن الشاشات...",
+  "@searchScreens": {
+    "description": "Search hint on the security grid"
+  },
+  "restDomain": "نطاق REST",
+  "@restDomain": {
+    "description": "Field label for the artifact group behind a screen"
+  },
+  "writeImpliesView": "صلاحية التعديل تمنح أيضًا صلاحية العرض",
+  "@writeImpliesView": {
+    "description": "Explains the subset rule in the security dialog"
+  },
+  "onboarding": "تهيئة الموظفين الجدد",
+  "leaveRequests": "طلبات الإجازات",
+  "@onboarding": {
+    "description": "Employees still being onboarded, HR dashboard tile"
+  },
+  "@leaveRequests": {
+    "description": "Number of leave requests waiting for approval"
+  },
+  "myCourses": "دوراتي",
+  "@myCourses": {
+    "description": "Menu item title: My Courses"
+  },
+  "chooseAnotherSchool": "اختر مدرسة أخرى",
+  "@chooseAnotherSchool": {
+    "description": "Academy login screen: go back to the list of schools"
+  },
+  "coursesPublished": "منشور",
+  "courseLearners": "المتعلمون",
+  "courseCompletions": "مكتمل",
+  "courseToReview": "بانتظار المراجعة",
+  "insActivePolicies": "ساري",
+  "insRenewalsDue": "تجديدات مستحقة",
+  "insOpenClaims": "مطالبات مفتوحة",
+  "@insActivePolicies": {
+    "description": "Active policies, insurance dashboard tile"
+  },
+  "@insRenewalsDue": {
+    "description": "Policies due for renewal, insurance dashboard tile"
+  },
+  "@insOpenClaims": {
+    "description": "Claims not paid, denied or closed, insurance dashboard tile"
+  },
+  "@coursesPublished": {
+    "description": "Published courses, courses dashboard tile"
+  },
+  "@courseLearners": {
+    "description": "Learners still busy with a course, courses dashboard tile"
+  },
+  "@courseCompletions": {
+    "description": "Finished course enrolments, courses dashboard tile"
+  },
+  "@courseToReview": {
+    "description": "Exercise submissions waiting for instructor review, courses dashboard tile"
+  },
+  "mailUseOauth": "تسجيل الدخول باستخدام Google OAuth2",
+  "@mailUseOauth": {
+    "description": "Email settings switch to sign in to the mail server with OAuth2"
+  },
+  "mailUseOauthHelp": "يستخدم بيانات اعتماد Google Workspace؛ يحتاج رمز التحديث إلى النطاق https://mail.google.com/",
+  "@mailUseOauthHelp": {
+    "description": "Help text under the OAuth2 email switch"
+  },
+  "calendar": "التقويم",
+  "@calendar": {
+    "description": "Title of the in-app calendar and tooltip of its app bar button"
+  },
+  "calendarToday": "اليوم",
+  "@calendarToday": {
+    "description": "Button returning the calendar to the current period"
+  },
+  "calendarMonth": "الشهر",
+  "@calendarMonth": {
+    "description": "Calendar period option: a whole month"
+  },
+  "calendarWeek": "الأسبوع",
+  "@calendarWeek": {
+    "description": "Calendar period option: a single week"
+  },
+  "calendarEmpty": "لا يوجد شيء في هذه الفترة",
+  "@calendarEmpty": {
+    "description": "Shown when nothing falls inside the shown calendar period"
+  },
+  "calendarBacklog": "{count, plural, =0{لا توجد منشورات بلا تاريخ} =1{منشور واحد بلا تاريخ} =2{منشوران بلا تاريخ} few{{count} منشورات بلا تاريخ} many{{count} منشورًا بلا تاريخ} other{{count} منشور بلا تاريخ}}",
+  "@calendarBacklog": {
+    "description": "Heading of the strip holding posts that have no scheduled or published date",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "calendarSourceCalendar": "التقويم",
+  "@calendarSourceCalendar": {
+    "description": "Filter chip: events of the connected calendar"
+  },
+  "calendarSourceActivities": "الأنشطة",
+  "@calendarSourceActivities": {
+    "description": "Filter chip: todos and events of GrowERP"
+  },
+  "calendarSourcePosts": "المنشورات",
+  "@calendarSourcePosts": {
+    "description": "Filter chip: scheduled social posts"
+  },
+  "calendarConnectHint": "ربط تقويم Google",
+  "@calendarConnectHint": {
+    "description": "Button opening the Google Workspace connect dialog from the calendar"
+  },
+  "calendarNewActivity": "نشاط جديد",
+  "@calendarNewActivity": {
+    "description": "Option adding a new activity from the calendar"
+  },
+  "calendarNewPost": "منشور جديد",
+  "@calendarNewPost": {
+    "description": "Option adding a new social post from the calendar"
+  },
+  "calendarResync": "إعادة مزامنة تقاويم المستخدمين",
+  "@calendarResync": {
+    "description": "Calendar button (admins): rebuild the per-user calendars in the connected calendar account"
+  },
+  "calendarResyncStarted": "يجري تحديث تقاويم المستخدمين في الخلفية",
+  "@calendarResyncStarted": {
+    "description": "Message after starting the calendar resync"
+  },
+  "ownerDataDownload": "تنزيل بيانات الشركة",
+  "@ownerDataDownload": {
+    "description": "System setup backup tab: title and button to download all company data"
+  },
+  "ownerDataDownloadInfo": "جميع بيانات شركتك (العملاء والموردون والمنتجات والطلبات والمحاسبة والموقع الإلكتروني والملفات) في ملف واحد: للاحتفاظ بنسخة احتياطية أو لنقل الشركة إلى نظام GrowERP آخر.",
+  "@ownerDataDownloadInfo": {
+    "description": "System setup backup tab: what the download holds and is for"
+  },
+  "ownerDataSensitive": "يحتوي الملف على كل شيء، بما في ذلك كلمات مرور خادم البريد ومفاتيح الذكاء الاصطناعي: احتفظ به في مكان آمن.",
+  "@ownerDataSensitive": {
+    "description": "System setup backup tab: warning that the file holds secrets"
+  },
+  "ownerDataUpload": "رفع بيانات الشركة",
+  "@ownerDataUpload": {
+    "description": "System setup backup tab: title and button to upload company data (system support)"
+  },
+  "ownerDataUploadInfo": "تحميل ملف سبق تنزيله كشركة جديدة إلى جانب الشركات الموجودة على هذا النظام. ستحصل جميع السجلات على معرّفات جديدة.",
+  "@ownerDataUploadInfo": {
+    "description": "System setup backup tab: what an upload does"
+  },
+  "ownerDataUploaded": "تم التحميل كشركة جديدة: {ownerPartyId}",
+  "@ownerDataUploaded": {
+    "description": "System setup backup tab: result of an upload",
+    "placeholders": {
+      "ownerPartyId": {
+        "type": "String"
+      }
+    }
+  },
+  "ownerDataDone": "اكتمل",
+  "@ownerDataDone": {
+    "description": "System setup backup tab: status of a finished download or upload"
+  },
+  "ownerDataFailed": "فشل",
+  "@ownerDataFailed": {
+    "description": "System setup backup tab: status of a failed download or upload"
+  },
+  "ownerDataSave": "حفظ الملف",
+  "@ownerDataSave": {
+    "description": "System setup backup tab: save a finished download (again)"
+  }
+}

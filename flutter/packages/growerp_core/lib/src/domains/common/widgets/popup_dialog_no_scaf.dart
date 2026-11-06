@@ -86,7 +86,7 @@ Widget popUpDialogNoScaffold({
             ],
           ),
         ),
-        const Positioned(top: 10, right: 10, child: DialogCloseButton()),
+        const PositionedDirectional(top: 10, end: 10, child: DialogCloseButton()),
       ],
     ),
   );
